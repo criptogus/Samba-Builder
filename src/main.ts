@@ -676,6 +676,10 @@ async function promptMoveToApplicationsFolder(): Promise<void> {
   // There's no way to stub this dialog in time, so we just skip it
   // in e2e testing mode.
   if (IS_TEST_BUILD) return;
+  // Samba Builder: never prompt in dev — the dialog has no default guard and
+  // `moveToApplicationsFolder()` relocates the unpackaged Electron binary out of
+  // node_modules (broke the dev loop). Auto-update already aborts in dev.
+  if (process.env.NODE_ENV === "development") return;
   if (process.platform !== "darwin") return;
   if (app.isInApplicationsFolder()) return;
   logger.log("Prompting user to move to applications folder");
