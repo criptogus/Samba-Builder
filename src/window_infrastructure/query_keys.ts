@@ -32,6 +32,12 @@ export function queryKeysForInvalidationScope(
           ? queryKeys.coolify.all
           : queryKeys.coolify.status({ appId: scope.appId }),
       ];
+    case "app-files":
+      return [
+        scope.appId === undefined
+          ? queryKeys.appFiles.all
+          : queryKeys.appFiles.byApp({ appId: scope.appId }),
+      ];
     case "versions":
       return [
         scope.appId === undefined

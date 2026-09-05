@@ -177,6 +177,10 @@ export const QueryInvalidationScopeSchema = z.discriminatedUnion("family", [
     appId: z.number().int().positive(),
   }),
   z.object({
+    family: z.literal("app-files"),
+    appId: z.number().int().positive().optional(),
+  }),
+  z.object({
     family: z.literal("versions"),
     appId: z.number().int().positive().optional(),
   }),
@@ -266,6 +270,7 @@ export function queryInvalidationScopeKey(
 ): string {
   switch (scope.family) {
     case "app":
+    case "app-files":
     case "versions":
     case "branches":
     case "problems":

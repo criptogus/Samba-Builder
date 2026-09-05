@@ -1,3 +1,4 @@
+import { nativeAgentContracts } from "../types/native_agents";
 import { meetingsContracts } from "../types/meetings";
 import { awsContracts } from "../types/aws";
 /**
@@ -121,6 +122,7 @@ export const VALID_INVOKE_CHANNELS = [
   ...getInvokeChannels(mcpContracts),
   ...getInvokeChannels(awsContracts),
   ...getInvokeChannels(meetingsContracts),
+  ...getInvokeChannels(nativeAgentContracts),
   ...getInvokeChannels(vercelContracts),
   ...getInvokeChannels(coolifyContracts),
   ...getInvokeChannels(coolifySetupContracts),

@@ -1,3 +1,4 @@
+import { nativeAgentContracts } from "../types/native_agents";
 import { meetingsContracts } from "../types/meetings";
 import { awsContracts } from "../types/aws";
 import { vercelContracts } from "../types/vercel";
@@ -93,4 +94,9 @@ it("exposes the project template workflow channels", () => {
       "templates:sync-team",
     ]),
   );
+});
+
+it("allows native agent lifecycle contracts", () => {
+  for (const contract of Object.values(nativeAgentContracts))
+    expect(VALID_INVOKE_CHANNELS).toContain(contract.channel);
 });

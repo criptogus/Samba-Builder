@@ -1,3 +1,4 @@
+import { registerNativeAgentHandlers } from "./handlers/native_agent_handlers";
 import { registerMeetingsHandlers } from "./handlers/meetings_handlers";
 import { registerAwsHandlers } from "./handlers/aws_handlers";
 import { registerAppHandlers } from "./handlers/app_handlers";
@@ -77,6 +78,7 @@ export function registerIpcHandlers() {
   registerGithubBranchHandlers();
   registerAwsHandlers();
   registerMeetingsHandlers();
+  registerNativeAgentHandlers();
   registerVercelHandlers();
   registerNodeHandlers();
   registerProblemsHandlers();

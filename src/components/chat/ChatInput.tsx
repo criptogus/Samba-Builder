@@ -1,3 +1,4 @@
+import { NativeAgentsButton } from "@/components/NativeAgentsButton";
 import { appendMeetingBriefing } from "@/shared/meeting_briefing";
 import { MeetingBriefingButton } from "@/components/MeetingBriefingButton";
 import {
@@ -1010,7 +1011,8 @@ export function ChatInput({ chatId }: { chatId?: number }) {
             isStreaming={isStreaming}
           />
 
-          <div className="px-3 py-1">
+          <div className="flex flex-wrap gap-2 px-3 py-1">
+            {appId && <NativeAgentsButton appId={appId} />}
             <MeetingBriefingButton
               onPrepared={(prompt) =>
                 setInputValue(appendMeetingBriefing(inputValue, prompt))

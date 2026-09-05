@@ -82,6 +82,7 @@
     "@ai-sdk/openai-compatible": "^2.0.26",
     "@ai-sdk/provider-utils": "^4.0.13",
     "@ai-sdk/xai": "^3.0.46",
+    "@anthropic-ai/claude-agent-sdk": "0.2.63",
     "@babel/parser": "^7.28.5",
     "@base-ui/react": "^1.2.0",
     "@biomejs/biome": "^1.9.4",
@@ -165,8 +166,8 @@
     "update-electron-app": "^3.1.2",
     "use-sync-external-store": "^1.6.0",
     "uuid": "^11.1.0",
-    "yaml": "^2.8.1",
     "ws": "^8.19.0",
+    "yaml": "^2.8.1",
     "zod": "^4.3.6"
   },
   "optionalDependencies": {

@@ -15,6 +15,10 @@
  */
 
 export const queryKeys = {
+  nativeAgents: {
+    status: ["native-agents", "status"] as const,
+    run: (id?: string) => ["native-agents", "run", id] as const,
+  },
   subagents: {
     all: ["subagents"] as const,
     byChat: ({ chatId }: { chatId: number }) => ["subagents", chatId] as const,
@@ -197,6 +201,8 @@ export const queryKeys = {
   // App Files
   // ─────────────────────────────────────────────────────────────────────────────
   appFiles: {
+    byApp: ({ appId }: { appId: number }) =>
+      ["app-files", "content", appId] as const,
     all: ["app-files"] as const,
     content: ({
       appId,

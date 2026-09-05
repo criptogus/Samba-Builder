@@ -31,3 +31,17 @@ it("invalidates the shared template catalog in all windows", () => {
     queryKeys.templates.all,
   ]);
 });
+
+it("invalidates file content changed by native agents in the correct project", () => {
+  expect(
+    queryKeysForInvalidationScope({ family: "app-files", appId: 7 }),
+  ).toEqual([queryKeys.appFiles.byApp({ appId: 7 })]);
+  expect(queryKeysForInvalidationScope({ family: "app-files" })).toEqual([
+    queryKeys.appFiles.all,
+  ]);
+  expect(
+    queryKeys.appFiles
+      .content({ appId: 7, filePath: "index.html" })
+      .slice(0, 3),
+  ).toEqual(queryKeys.appFiles.byApp({ appId: 7 }));
+});

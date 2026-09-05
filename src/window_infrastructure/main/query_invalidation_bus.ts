@@ -138,6 +138,7 @@ export class QueryInvalidationBus {
         return { family: "apps" };
       case "chat":
         return { family: "chats" };
+      case "app-files":
       case "versions":
       case "branches":
       case "problems":

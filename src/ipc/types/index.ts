@@ -1,3 +1,5 @@
+import { nativeAgentClient } from "./native_agents";
+export * from "./native_agents";
 export { meetingsContracts, meetingsClient } from "./meetings";
 import { meetingsClient } from "./meetings";
 export { awsContracts, awsClient } from "./aws";
@@ -643,6 +645,7 @@ export const ipc = {
   freeModelQuota: freeModelQuotaClient,
   audio: audioClient,
   meetings: meetingsClient,
+  nativeAgents: nativeAgentClient,
   media: mediaClient,
   appBlueprint: appBlueprintClient,
   appCollection: appCollectionClient,
