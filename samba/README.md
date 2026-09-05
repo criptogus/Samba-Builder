@@ -62,6 +62,12 @@ Córtex no agente (Settings → MCP → Add server → stdio):
 - Command: `/usr/bin/python3`
 - Args: `/Users/gustavocaetano/Projects/Samba-Builder/samba/cortex-mcp/server.py`
 
+Composio (integrado via `npm run samba:seed-mcp`):
+- Registra o MCP server remoto `https://connect.composio.dev/mcp` (transport http)
+  com a Connect Key do Hermes (`~/.hermes/config.yaml → mcp_servers.composio`) —
+  chave gravada no formato `plain:` que o secret_storage do app decodifica;
+  nunca versionada/impressa. Ajuste/edição pela UI (Settings → MCP).
+
 Testar sem o app:
 ```bash
 python3 samba/cortex-mcp/server.py --test
@@ -97,7 +103,8 @@ python3 samba/learn/learn.py --project ~/Projetos/landing-x \
 - [x] App rodando em dev (fix: skip move-to-Applications em dev)
 - [x] Rebrand v1: nome "Samba Builder", logo oficial Samba (icns/png/TitleBar), pt-BR default e 100% coberto
 - [x] Anti-Dyad v1: trial/upsell removidos do fluxo principal (SetupBanner → DeepSeek, badge Pro, ModelPicker, strings visíveis)
-- [x] Providers pré-configurados: `npm run samba:seed` cria DeepSeek (gateway :8642) + OpenCode (proxy :11435)
+- [x] Providers pré-configurados: `npm run samba:seed` cria DeepSeek (gateway :8642) + OpenCode Go (:zen/go/v1)
+- [x] Composio conectado nativamente: `npm run samba:seed-mcp` registra MCP http (connect.composio.dev/mcp) com a Connect Key do Hermes
 - [ ] Colar a chave do gateway na UI e fazer o primeiro build com design system do Córtex
 - [ ] MCP do Córtex conectado e tools chamáveis no chat
 - [ ] Anti-Dyad fase 2: remover fluxo cloud restante (provider auto/Enable Dyad Pro na settings, SubscriptionStatusBanner, ProBanner/ImageGenerator cloud), scheme `dyad://`
