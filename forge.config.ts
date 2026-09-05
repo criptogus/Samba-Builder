@@ -147,6 +147,8 @@ const ignore = (file: string) => {
 };
 
 const isEndToEndTestBuild = process.env.E2E_TEST_BUILD === "true";
+const isLocalDesktopBuild =
+  process.env.SAMBA_LOCAL_DESKTOP_BUILD === "true" && !isEndToEndTestBuild;
 const isWindowsSigningEnabled = process.env.WINDOWS_SIGN === "true";
 const shouldSkipNativeRebuild = process.env.DYAD_SKIP_NATIVE_REBUILD === "true";
 const nativeRebuildModules = [
@@ -164,6 +166,7 @@ if (isWindowsSigningEnabled && !process.env.AZURE_CODE_SIGNING_DLIB) {
 }
 
 const config: ForgeConfig = {
+  outDir: isLocalDesktopBuild ? "out/desktop" : undefined,
   packagerConfig: {
     // E2E test builds install local file: dependencies as links on Windows.
     // Dereference them so packaging does not require symlink privileges in the temp app.
@@ -197,24 +200,26 @@ const config: ForgeConfig = {
     ],
     icon: "./assets/icon/logo",
 
-    osxSign: isEndToEndTestBuild
-      ? undefined
-      : ({
-          identity: process.env.APPLE_TEAM_ID,
-          // Surface the actual signing error instead of silently continuing
-          // (@electron/packager defaults continueOnError to true, which masks failures)
-          continueOnError: false,
-          // Skip provisioning profile search (not needed for Developer ID distribution,
-          // and the cwd scan crashes on broken symlinks like CLAUDE.md)
-          preEmbedProvisioningProfile: false,
-        } as Record<string, unknown>),
-    osxNotarize: isEndToEndTestBuild
-      ? undefined
-      : {
-          appleId: process.env.APPLE_ID!,
-          appleIdPassword: process.env.APPLE_PASSWORD!,
-          teamId: process.env.APPLE_TEAM_ID!,
-        },
+    osxSign:
+      isEndToEndTestBuild || isLocalDesktopBuild
+        ? undefined
+        : ({
+            identity: process.env.APPLE_TEAM_ID,
+            // Surface the actual signing error instead of silently continuing
+            // (@electron/packager defaults continueOnError to true, which masks failures)
+            continueOnError: false,
+            // Skip provisioning profile search (not needed for Developer ID distribution,
+            // and the cwd scan crashes on broken symlinks like CLAUDE.md)
+            preEmbedProvisioningProfile: false,
+          } as Record<string, unknown>),
+    osxNotarize:
+      isEndToEndTestBuild || isLocalDesktopBuild
+        ? undefined
+        : {
+            appleId: process.env.APPLE_ID!,
+            appleIdPassword: process.env.APPLE_PASSWORD!,
+            teamId: process.env.APPLE_TEAM_ID!,
+          },
     asar: {
       // Native modules and node-pty helper binaries must be loadable from disk.
       unpackDir:

@@ -1,5 +1,5 @@
 import type { editor } from "monaco-editor";
-import { loader } from "@monaco-editor/react";
+import type { BeforeMount } from "@monaco-editor/react";
 
 export const customLight: editor.IStandaloneThemeData = {
   base: "vs",
@@ -142,27 +142,18 @@ export const customDark: editor.IStandaloneThemeData = {
   },
 };
 
-// Skip Monaco's eager global init under vitest. This module is imported
-// transitively by the chat message tree (DyadWrite -> FileEditor), so the hybrid
-// harness pulls it in even though it never renders an editor. `loader.init()`
-// starts an async (CDN) load that gets canceled on test teardown, surfacing as a
-// "Canceled" unhandled rejection that fails the run. Production, dev, and E2E
-// builds don't set VITEST, so they init normally. (Mirrors the
-// DYAD_SKIP_MANAGED_PNPM_INSTALL harness touchpoint.)
-const IS_VITEST =
-  typeof process !== "undefined" && process.env.VITEST === "true";
-
-if (!IS_VITEST) {
-  loader.init().then((monaco) => {
-    monaco.editor.defineTheme("dyad-light", customLight);
-    monaco.editor.defineTheme("dyad-dark", customDark);
-
-    monaco.languages.typescript.typescriptDefaults.setCompilerOptions({
-      jsx: monaco.languages.typescript.JsxEmit.React, // Enable JSX
-    });
-    monaco.languages.typescript.typescriptDefaults.setDiagnosticsOptions({
-      // Too noisy because we don't have the full TS environment.
-      noSemanticValidation: true,
-    });
+// Configure Monaco only when an editor actually mounts. Importing chat or the
+// preview shell must not download and initialize the editor in the background.
+const configuredInstances = new WeakSet<object>();
+export const configureMonaco: BeforeMount = (monaco) => {
+  if (configuredInstances.has(monaco)) return;
+  configuredInstances.add(monaco);
+  monaco.editor.defineTheme("dyad-light", customLight);
+  monaco.editor.defineTheme("dyad-dark", customDark);
+  monaco.languages.typescript.typescriptDefaults.setCompilerOptions({
+    jsx: monaco.languages.typescript.JsxEmit.React,
   });
-}
+  monaco.languages.typescript.typescriptDefaults.setDiagnosticsOptions({
+    noSemanticValidation: true,
+  });
+};

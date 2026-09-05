@@ -1,5 +1,7 @@
 import type { TypeScriptUtilityProcessKind } from "@/lib/schemas";
 
+export const RESIDENT_PROCESS_IDLE_TIMEOUT_MS = 60_000;
+
 const RESIDENT_PROCESS_STOP_TIMEOUT_MS = 30_000;
 
 interface QueuedOperation {
@@ -38,6 +40,7 @@ export class TypeScriptUtilityProcessScheduler {
   private operationActive = false;
   private activeKind: TypeScriptUtilityProcessKind | null = null;
   private resident: ResidentProcess | null = null;
+  private idleTimer: ReturnType<typeof setTimeout> | undefined;
 
   // The kind of operation currently running, or null when idle. Used by the
   // performance monitor to record activity alongside memory snapshots.
@@ -89,6 +92,7 @@ export class TypeScriptUtilityProcessScheduler {
       clear: () => {
         if (this.resident === entry) {
           this.resident = null;
+          this.clearIdleTimer();
         }
       },
       stop: () => this.stopResidentProcess(entry),
@@ -101,8 +105,10 @@ export class TypeScriptUtilityProcessScheduler {
     }
     const queued = this.queue.shift();
     if (!queued) {
+      this.scheduleIdleRelease();
       return;
     }
+    this.clearIdleTimer();
 
     this.operationActive = true;
     this.activeKind = queued.kind;
@@ -129,6 +135,28 @@ export class TypeScriptUtilityProcessScheduler {
       this.activeKind = null;
       this.startNext();
     }
+  }
+
+  private clearIdleTimer(): void {
+    clearTimeout(this.idleTimer);
+    this.idleTimer = undefined;
+  }
+
+  private scheduleIdleRelease(): void {
+    this.clearIdleTimer();
+    const resident = this.resident;
+    if (!resident || resident.stopPromise) return;
+    this.idleTimer = setTimeout(() => {
+      this.idleTimer = undefined;
+      if (this.operationActive || this.resident !== resident) return;
+      // Install stopPromise synchronously: a request arriving during shutdown
+      // must await exit, even if it wants to reuse the same kind of process.
+      void this.stopResidentProcess(resident).catch(() => {
+        // Retain failed/stopping residents. Future requests retry the stop
+        // through the existing scheduler rather than forking a second index.
+      });
+    }, RESIDENT_PROCESS_IDLE_TIMEOUT_MS);
+    this.idleTimer.unref?.();
   }
 
   private stopResidentProcess(entry: ResidentProcess): Promise<void> {
