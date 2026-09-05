@@ -1,3 +1,4 @@
+import { VercelDeployButton } from "./VercelDeployButton";
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
@@ -87,6 +88,7 @@ function ConnectedVercelConnector({
       className="mt-4 w-full rounded-md"
       data-testid="vercel-connected-project"
     >
+      <VercelDeployButton key={appId} appId={appId} />
       <p className="text-sm text-gray-600 dark:text-gray-300">
         Connected to Vercel Project:
       </p>

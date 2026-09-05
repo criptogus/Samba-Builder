@@ -1,3 +1,4 @@
+import { awsContracts } from "../types/aws";
 /**
  * Channel Definitions for Preload Script
  *
@@ -117,6 +118,7 @@ export const VALID_INVOKE_CHANNELS = [
   ...getInvokeChannels(githubContracts),
   ...getInvokeChannels(gitContracts),
   ...getInvokeChannels(mcpContracts),
+  ...getInvokeChannels(awsContracts),
   ...getInvokeChannels(vercelContracts),
   ...getInvokeChannels(coolifyContracts),
   ...getInvokeChannels(coolifySetupContracts),

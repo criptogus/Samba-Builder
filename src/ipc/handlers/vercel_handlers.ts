@@ -1,3 +1,5 @@
+import { submitVercelDeployment } from "../services/cloud/vercel_deploy";
+import { appOperationCoordinator } from "../services/app_operation_coordinator";
 import { IpcMainInvokeEvent } from "electron";
 import { writeSettings, readSettings } from "../../main/settings";
 import * as schema from "../../db/schema";
@@ -579,6 +581,45 @@ async function handleDisconnectVercelProject(
 
 // --- Registration ---
 export function registerVercelHandlers() {
+  createTypedHandler(vercelContracts.deploy, async (_, { appId, target }) =>
+    appOperationCoordinator.run(
+      {
+        appId,
+        operation: "vercel-deploy",
+        resources: ["provider", "repository"],
+      },
+      async () => {
+        const app = await db.query.apps.findFirst({
+          where: eq(apps.id, appId),
+        });
+        const token = readSettings().vercelAccessToken?.value;
+        if (
+          !token ||
+          !app?.vercelProjectId ||
+          !app.vercelProjectName ||
+          !app.githubOrg ||
+          !app.githubRepo
+        ) {
+          throw new DyadError(
+            "Conecte o GitHub e o projeto Vercel antes de publicar.",
+            DyadErrorKind.Precondition,
+          );
+        }
+        return submitVercelDeployment(
+          token,
+          {
+            id: app.vercelProjectId,
+            name: app.vercelProjectName,
+            teamId: app.vercelTeamId,
+            org: app.githubOrg,
+            repo: app.githubRepo,
+            branch: app.githubBranch || "main",
+          },
+          target,
+        );
+      },
+    ),
+  );
   // DO NOT LOG this handler because tokens are sensitive
   createTypedHandler(vercelContracts.saveToken, async (event, params) => {
     await handleSaveVercelToken(event, params);

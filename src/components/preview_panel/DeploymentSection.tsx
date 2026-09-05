@@ -1,3 +1,4 @@
+import { AwsConnector } from "@/components/AwsConnector";
 import { Server } from "lucide-react";
 import { VercelConnector } from "@/components/VercelConnector";
 import { CoolifyConnector } from "@/components/CoolifyConnector";
@@ -5,17 +6,6 @@ import { ipc } from "@/ipc/types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useSettings } from "@/hooks/useSettings";
-
-/**
- * Where an app is published: Vercel, or a server the user runs themselves.
- *
- * The two are alternatives, so they share one card and a pair of tabs rather
- * than stacking two cards that each look like the next required step.
- *
- * Deploying to your own server is off by default. With it off this renders
- * exactly the Vercel card that was here before the option existed — no tabs,
- * no mention of a second destination.
- */
 
 interface AppSummary {
   name: string;
@@ -101,56 +91,36 @@ export function DeploymentSection({
 }) {
   const { settings } = useSettings();
 
-  if (!settings?.enableOwnServerDeployment) {
-    return (
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="flex items-center gap-2">
-            <VercelDashboardLink />
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <VercelDeployment appId={appId} app={app} />
-        </CardContent>
-      </Card>
-    );
-  }
-
   return (
     <Card>
       <CardHeader className="pb-3">
-        <CardTitle>Deployment</CardTitle>
+        <CardTitle>Publicar aplicação</CardTitle>
       </CardHeader>
       <CardContent>
         <Tabs defaultValue="vercel">
-          <TabsList>
-            <TabsTrigger value="vercel">Vercel</TabsTrigger>
-            <TabsTrigger value="own-server">Your Own Server</TabsTrigger>
+          <TabsList className="flex h-auto flex-wrap">
+            <TabsTrigger value="vercel">Vercel — site simples</TabsTrigger>
+            <TabsTrigger value="aws">AWS — front e backend</TabsTrigger>
+            {settings?.enableOwnServerDeployment && (
+              <TabsTrigger value="own-server">Your Own Server</TabsTrigger>
+            )}
           </TabsList>
           <TabsContent value="vercel" className="pt-4 space-y-4">
-            {/* The link lived in the card header before the tabs, and the
-                header is no longer Vercel's alone. */}
-            <div className="text-sm font-semibold">
-              <VercelDashboardLink />
-            </div>
+            <VercelDashboardLink />
             <VercelDeployment appId={appId} app={app} />
           </TabsContent>
-          {/* Mounted with the card rather than on first click. The connector
-              cannot read its status until it mounts, so a lazy panel opens on
-              a spinner and then jumps to full height. The cost is that opening
-              Publish now reaches the user's Coolify server for its server and
-              project list, whether or not they come to this tab. */}
-          <TabsContent
-            value="own-server"
-            className="pt-4 space-y-4"
-            keepMounted
-          >
-            <div className="flex items-center gap-2 text-sm font-semibold">
-              <Server className="w-5 h-5" />
-              Your own server
-            </div>
-            <OwnServerDeployment appId={appId} />
+          <TabsContent value="aws" className="pt-4">
+            <AwsConnector appId={appId} />
           </TabsContent>
+          {settings?.enableOwnServerDeployment && (
+            <TabsContent value="own-server" className="pt-4 space-y-4">
+              <div className="flex items-center gap-2">
+                <Server className="w-5 h-5" />
+                Your own server
+              </div>
+              <OwnServerDeployment appId={appId} />
+            </TabsContent>
+          )}
         </Tabs>
       </CardContent>
     </Card>

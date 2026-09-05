@@ -1,3 +1,5 @@
+export { awsContracts, awsClient } from "./aws";
+import { awsClient } from "./aws";
 /**
  * Type-Safe IPC Layer
  *
@@ -612,6 +614,7 @@ export const ipc = {
   git: gitClient,
   connectionFlow: connectionFlowClient,
   mcp: mcpClient,
+  aws: awsClient,
   vercel: vercelClient,
   coolify: coolifyClient,
   coolifySetup: coolifySetupClient,
