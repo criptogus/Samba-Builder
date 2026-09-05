@@ -119,7 +119,7 @@ export function AzureConfiguration({
         variant: "default" as const,
         title: "Azure OpenAI Configured",
         description:
-          "Dyad will use the credentials saved in Settings for Azure OpenAI models.",
+          "Samba Builder will use the credentials saved in Settings for Azure OpenAI models.",
         icon: KeyRound,
         titleClassName: "",
         descriptionClassName: "",

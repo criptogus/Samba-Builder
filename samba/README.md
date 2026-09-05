@@ -96,8 +96,10 @@ python3 samba/learn/learn.py --project ~/Projetos/landing-x \
 - [x] Learning loop v1 (relatório → 00-Inbox → memória)
 - [x] App rodando em dev (fix: skip move-to-Applications em dev)
 - [x] Rebrand v1: nome "Samba Builder", logo oficial Samba (icns/png/TitleBar), pt-BR default e 100% coberto
-- [ ] Provider DeepSeek via gateway configurado na UI + primeiro build com design system do Córtex
+- [x] Anti-Dyad v1: trial/upsell removidos do fluxo principal (SetupBanner → DeepSeek, badge Pro, ModelPicker, strings visíveis)
+- [x] Providers pré-configurados: `npm run samba:seed` cria DeepSeek (gateway :8642) + OpenCode (proxy :11435)
+- [ ] Colar a chave do gateway na UI e fazer o primeiro build com design system do Córtex
 - [ ] MCP do Córtex conectado e tools chamáveis no chat
-- [ ] Rebrand fase 2: scheme `dyad://` → próprio; wordmark SVG; ícone Windows (.ico — precisa gerar); about/onboarding copy fino
+- [ ] Anti-Dyad fase 2: remover fluxo cloud restante (provider auto/Enable Dyad Pro na settings, SubscriptionStatusBanner, ProBanner/ImageGenerator cloud), scheme `dyad://`
 - [ ] Piloto: primeiro projeto de cliente real de ponta a ponta
 - [ ] Loop automático pós-projeto (cron/trigger) + eval de qualidade do que o Córtex devolve

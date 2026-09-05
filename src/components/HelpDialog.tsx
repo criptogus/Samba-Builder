@@ -572,7 +572,7 @@ export function HelpDialog() {
             <div className="flex items-center gap-2">
               <MessageSquareIcon className="h-4 w-4 text-primary" />
               <span className="text-sm font-semibold">
-                AI / Dyad Pro issues
+                AI / model issues
               </span>
             </div>
             <p className="text-sm text-muted-foreground">

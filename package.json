@@ -18,6 +18,7 @@
     "bump": "node scripts/bump-version.mjs",
     "clean": "rimraf out scaffold/node_modules",
     "start": "node scripts/start-supervisor.mjs",
+    "samba:seed": "python3 samba/setup/seed-providers.py",
     "start:onboarding": "node scripts/start-onboarding.mjs",
     "start:out-of-quota": "cross-env NODE_ENV=development DYAD_SIMULATE_FREE_AGENT_QUOTA_EXCEEDED=true npm start",
     "copy-data-to-dev": "node scripts/copy-data-to-dev.mjs",

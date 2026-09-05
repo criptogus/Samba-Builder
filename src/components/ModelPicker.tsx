@@ -1299,28 +1299,9 @@ export function ModelPicker() {
           </span>
         </DropdownMenuTrigger>
         <DropdownMenuContent className={MODEL_MENU_WIDTH_CLASS} align="start">
-          {/* Trial user upgrade banner */}
+          {/* Samba Builder: sem trial/cloud — o submenu abaixo nunca renderiza (isTrial exige conta Dyad ativa) */}
           {isTrial && (
             <>
-              <div className="px-2 py-3 bg-gradient-to-r from-indigo-50 to-sky-50 dark:from-indigo-950/50 dark:to-sky-950/50">
-                <p className="text-sm text-indigo-700 dark:text-indigo-300 mb-2">
-                  Upgrade from Dyad Pro trial to unlock more models.
-                </p>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="cursor-pointer w-full bg-indigo-600 hover:bg-indigo-700 text-white hover:text-white border-indigo-600"
-                  onClick={() => {
-                    ipc.system.openExternalUrl(
-                      "https://academy.dyad.sh/subscription",
-                    );
-                    setOpen(false);
-                  }}
-                >
-                  Upgrade to Dyad Pro
-                </Button>
-              </div>
-              <DropdownMenuSeparator />
               {/* Trial users only see the auto model */}
               <DropdownMenuSub>
                 <DropdownMenuSubTrigger

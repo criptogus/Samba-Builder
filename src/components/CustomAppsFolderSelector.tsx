@@ -45,9 +45,9 @@ export function CustomAppsFolderSelector() {
       await ipc.system.setCustomAppsFolder(null);
       // Update UI to show default directory
       await fetchCustomAppsFolder();
-      showSuccess("Dyad apps folder reset successfully");
+      showSuccess("Samba Builder apps folder reset successfully");
     } catch (error: any) {
-      showError(`Failed to reset Dyad Apps folder path: ${error.message}`);
+      showError(`Failed to reset Samba Builder apps folder path: ${error.message}`);
     }
   };
 
