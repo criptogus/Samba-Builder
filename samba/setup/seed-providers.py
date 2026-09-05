@@ -15,7 +15,7 @@ Uso:
 
 Env (opcionais):
     SAMBA_LLM_BASE_URL       default http://127.0.0.1:8642/v1  (gateway Hermes/DeepSeek)
-    SAMBA_OPENCODE_BASE_URL  default https://opencode.ai/zen/v1 (OpenCode Zen, OpenAI-compatible)
+    SAMBA_OPENCODE_BASE_URL  default https://opencode.ai/zen/go/v1 (OpenCode Go, OpenAI-compatible)
 """
 import os
 import sqlite3
@@ -27,10 +27,14 @@ DB = os.environ.get(
     os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "userData", "sqlite.db")),
 )
 GATEWAY_BASE = os.environ.get("SAMBA_LLM_BASE_URL", "http://127.0.0.1:8642/v1")
-# OpenCode Zen (hosted): endpoint OpenAI-compatible por modelo — deepseek-v4-pro/flash
-# (https://opencode.ai/docs/zen). Chave: opencode.ai/auth (cole na UI).
-OPENCODE_BASE = os.environ.get("SAMBA_OPENCODE_BASE_URL", "https://opencode.ai/zen/v1")
-OPENCODE_LEGACY_BASE = "http://127.0.0.1:11435/v1"  # default antigo (proxy local) — atualiza se ainda estiver nele
+# OpenCode Go (assinatura flat): endpoint OpenAI-compatible — deepseek-v4-pro/flash
+# (https://opencode.ai/docs/go). Chave: opencode.ai/auth (cole na UI). Mesma chave do Zen.
+OPENCODE_BASE = os.environ.get("SAMBA_OPENCODE_BASE_URL", "https://opencode.ai/zen/go/v1")
+# Defaults anteriores do seed — se o provider ainda estiver neles, migra para o Go
+OPENCODE_PREVIOUS_DEFAULTS = [
+    "http://127.0.0.1:11435/v1",      # proxy local (v1 do seed)
+    "https://opencode.ai/zen/v1",     # Zen pay-as-you-go (v2 do seed)
+]
 
 PROVIDERS = [
     {"id": "deepseek-samba", "name": "DeepSeek (Samba)", "api_base_url": GATEWAY_BASE},
@@ -58,12 +62,12 @@ def main() -> int:
                 "SELECT api_base_url FROM language_model_providers WHERE id = ?", (p["id"],)
             ).fetchone()
             if row:
-                if row[0] == OPENCODE_LEGACY_BASE:
+                if row[0] in OPENCODE_PREVIOUS_DEFAULTS:
                     con.execute(
                         "UPDATE language_model_providers SET api_base_url = ?, updated_at = ? WHERE id = ?",
                         (p["api_base_url"], now, p["id"]),
                     )
-                    print(f"provider '{p['id']}': base_url atualizada (proxy local -> {p['api_base_url']})")
+                    print(f"provider '{p['id']}': base_url migrada -> {p['api_base_url']}")
                 else:
                     print(f"provider '{p['id']}' já existe — mantido (preserva edição manual)")
                 continue
