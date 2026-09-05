@@ -37,6 +37,7 @@ import {
 import { useLoadApp } from "@/hooks/useLoadApp";
 import { HistoryNavigation, HISTORY_TRIGGER } from "./HistoryNavigation";
 import { slugForPrompt } from "@/ipc/utils/replaceSlashSkillReference";
+import { nativeSkills } from "@/shared/native_skills";
 
 // Define the theme for mentions
 const beautifulMentionsTheme: BeautifulMentionsTheme = {
@@ -398,7 +399,12 @@ export function LexicalChatInput({
         id: p.id,
       }))
       .filter((item) => item.value != null && item.value !== "");
-    result["/"] = skillItems;
+    result["/"] = [
+      ...nativeSkills.map((skill) => ({ value: skill.slug, type: "skill" })),
+      ...skillItems.filter(
+        (item) => !nativeSkills.some((skill) => skill.slug === item.value),
+      ),
+    ];
 
     if (!apps) return result;
 
