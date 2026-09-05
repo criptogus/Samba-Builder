@@ -25,3 +25,9 @@ describe("the coolify scope", () => {
     expect(others).not.toContainEqual(queryKeys.coolify.status({ appId: 7 }));
   });
 });
+
+it("invalidates the shared template catalog in all windows", () => {
+  expect(queryKeysForInvalidationScope({ family: "templates" })).toEqual([
+    queryKeys.templates.all,
+  ]);
+});

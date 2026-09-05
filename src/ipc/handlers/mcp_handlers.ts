@@ -1,8 +1,9 @@
 import log from "electron-log";
-import { getRemoteMcpCatalog } from "@/ipc/shared/remote_mcp_catalog";
+import { getMeetingAwareMcpCatalog } from "@/ipc/shared/meeting_mcp_catalog";
+import { GRANOLA_CATALOG_ENTRY, GRANOLA_URL } from "@/shared/meeting_briefing";
 import { db } from "../../db";
 import { mcpServers, mcpToolConsents } from "../../db/schema";
-import { eq, and, isNotNull } from "drizzle-orm";
+import { eq, and, or } from "drizzle-orm";
 import { createTypedHandler } from "./base";
 import { DyadError, DyadErrorKind } from "../../errors/dyad_error";
 
@@ -155,26 +156,30 @@ export function registerMcpHandlers() {
   createTypedHandler(mcpContracts.listCatalog, async () => {
     // The catalog fetch and the added-slugs read are independent.
     const [entries, rows] = await Promise.all([
-      getRemoteMcpCatalog(),
+      getMeetingAwareMcpCatalog(),
       db
-        .select({ catalogSlug: mcpServers.catalogSlug })
-        .from(mcpServers)
-        .where(isNotNull(mcpServers.catalogSlug)),
+        .select({ catalogSlug: mcpServers.catalogSlug, url: mcpServers.url })
+        .from(mcpServers),
     ]);
     const addedSlugs = rows
       .map((r) => r.catalogSlug)
       .filter((slug): slug is string => slug !== null);
+    if (rows.some((row) => row.url === GRANOLA_URL))
+      addedSlugs.push(GRANOLA_CATALOG_ENTRY.slug);
     return { entries, addedSlugs };
   });
 
   createTypedHandler(
     mcpContracts.addFromCatalog,
     async (_, { slug, expectedStdioConfig }) => {
-      const entries = await getRemoteMcpCatalog();
+      const entries = await getMeetingAwareMcpCatalog();
       // The user reached this from a populated catalog, so an empty list
       // here means the fetch failed rather than the slug being unknown.
       // Surface that as a connectivity problem instead of a not-found.
-      if (entries.length === 0) {
+      if (
+        entries.every((entry) => entry.slug === GRANOLA_CATALOG_ENTRY.slug) &&
+        slug !== GRANOLA_CATALOG_ENTRY.slug
+      ) {
         throw new DyadError(
           "Could not reach the plugin catalog. Please check your connection and try again.",
           DyadErrorKind.Precondition,
@@ -195,7 +200,17 @@ export function registerMcpHandlers() {
       const existing = await db
         .select()
         .from(mcpServers)
-        .where(eq(mcpServers.catalogSlug, slug));
+        .where(
+          slug === GRANOLA_CATALOG_ENTRY.slug
+            ? or(
+                eq(mcpServers.catalogSlug, slug),
+                and(
+                  eq(mcpServers.transport, "http"),
+                  eq(mcpServers.url, GRANOLA_URL),
+                ),
+              )
+            : eq(mcpServers.catalogSlug, slug),
+        );
       if (existing.length > 0) {
         return toMcpServer(existing[0]);
       }

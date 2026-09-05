@@ -588,7 +588,7 @@ describe("mcp catalog handlers", () => {
       "mcp:list-catalog",
       undefined,
     );
-    expect(result.entries).toHaveLength(2);
+    expect(result.entries).toHaveLength(3);
     expect(result.addedSlugs).toEqual(["figma"]);
   });
 

@@ -1,3 +1,9 @@
+import {
+  prepareProjectTemplate,
+  publishProjectTemplate,
+  discardTemplateDraft,
+  syncTeamTemplates,
+} from "../services/project_templates/store";
 import os from "node:os";
 import path from "node:path";
 import fs from "node:fs";
@@ -143,6 +149,42 @@ async function applyTemplateInPlace({
 }
 
 export function registerTemplateHandlers() {
+  createTypedHandler(
+    templateContracts.prepareProjectTemplate,
+    async (_, input) =>
+      appOperationCoordinator.run(
+        {
+          appId: input.appId,
+          operation: "save-project-template",
+          resources: [
+            { resource: "app-path", mode: "read" },
+            { resource: "repository-worktree", mode: "read" },
+          ],
+          refuseWhenRecording: "save a template",
+        },
+        async () => {
+          const project = await db.query.apps.findFirst({
+            where: eq(apps.id, input.appId),
+          });
+          if (!project)
+            throw new DyadError(
+              "Projeto não encontrado.",
+              DyadErrorKind.NotFound,
+            );
+          return prepareProjectTemplate(getDyadAppPath(project.path), input);
+        },
+      ),
+  );
+  createTypedHandler(templateContracts.publishProjectTemplate, (_, { id }) =>
+    publishProjectTemplate(id),
+  );
+  createTypedHandler(templateContracts.discardTemplateDraft, (_, { id }) =>
+    discardTemplateDraft(id),
+  );
+  createTypedHandler(templateContracts.syncTeamTemplates, () =>
+    syncTeamTemplates(),
+  );
+
   createTypedHandler(templateContracts.getTemplates, async () => {
     try {
       const templates = await getAllTemplates();

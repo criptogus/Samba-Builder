@@ -1,3 +1,5 @@
+export { meetingsContracts, meetingsClient } from "./meetings";
+import { meetingsClient } from "./meetings";
 export { awsContracts, awsClient } from "./aws";
 import { awsClient } from "./aws";
 /**
@@ -640,6 +642,7 @@ export const ipc = {
   freeAgentQuota: freeAgentQuotaClient,
   freeModelQuota: freeModelQuotaClient,
   audio: audioClient,
+  meetings: meetingsClient,
   media: mediaClient,
   appBlueprint: appBlueprintClient,
   appCollection: appCollectionClient,

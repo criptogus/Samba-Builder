@@ -164,6 +164,7 @@ export interface WindowCapabilityLease {
 
 export const QueryInvalidationScopeSchema = z.discriminatedUnion("family", [
   z.object({ family: z.literal("apps") }),
+  z.object({ family: z.literal("templates") }),
   z.object({ family: z.literal("chats") }),
   z.object({ family: z.literal("app-collections") }),
   z.object({ family: z.literal("media") }),

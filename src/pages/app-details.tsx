@@ -1,3 +1,4 @@
+import { SaveProjectTemplateButton } from "@/components/SaveProjectTemplateButton";
 import { useNavigate, useSearch } from "@tanstack/react-router";
 import { normalizePath } from "../../shared/normalizePath";
 import {
@@ -482,6 +483,12 @@ export default function AppDetailsPage() {
                 >
                   Copy app
                 </Button>
+                {selectedApp && (
+                  <SaveProjectTemplateButton
+                    appId={selectedApp.id}
+                    name={selectedApp.name}
+                  />
+                )}
                 <Button
                   onClick={() => setIsDeleteDialogOpen(true)}
                   variant="ghost"

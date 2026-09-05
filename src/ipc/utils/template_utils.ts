@@ -1,3 +1,4 @@
+import { cachedTeamTemplates } from "../services/project_templates/store";
 import {
   type Template,
   type ApiTemplate,
@@ -65,7 +66,11 @@ export async function fetchApiTemplates(): Promise<Template[]> {
 // Get all templates (local + API)
 export async function getAllTemplates(): Promise<Template[]> {
   const apiTemplates = await fetchApiTemplates();
-  return [...localTemplatesData, ...apiTemplates];
+  return [
+    ...localTemplatesData,
+    ...apiTemplates,
+    ...(await cachedTeamTemplates()),
+  ];
 }
 
 export async function getTemplateOrThrow(

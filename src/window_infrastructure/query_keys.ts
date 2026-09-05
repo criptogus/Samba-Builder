@@ -6,6 +6,8 @@ export function queryKeysForInvalidationScope(
   scope: QueryInvalidationScope,
 ): readonly QueryKey[] {
   switch (scope.family) {
+    case "templates":
+      return [queryKeys.templates.all];
     case "apps":
       return [queryKeys.apps.all];
     case "chats":

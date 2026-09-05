@@ -1,3 +1,4 @@
+import { meetingsContracts } from "../types/meetings";
 import { awsContracts } from "../types/aws";
 /**
  * Channel Definitions for Preload Script
@@ -119,6 +120,7 @@ export const VALID_INVOKE_CHANNELS = [
   ...getInvokeChannels(gitContracts),
   ...getInvokeChannels(mcpContracts),
   ...getInvokeChannels(awsContracts),
+  ...getInvokeChannels(meetingsContracts),
   ...getInvokeChannels(vercelContracts),
   ...getInvokeChannels(coolifyContracts),
   ...getInvokeChannels(coolifySetupContracts),

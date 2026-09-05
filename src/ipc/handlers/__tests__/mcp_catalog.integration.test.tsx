@@ -117,10 +117,26 @@ describe("Plugins catalog (integration)", () => {
     mcpServerProcess?.kill();
   });
 
+  it("reuses a manually configured Granola account without creating a duplicate", async () => {
+    const existing = await ipc.mcp.createServer({
+      name: "My Granola",
+      transport: "http",
+      url: "https://mcp.granola.ai/mcp",
+      enabled: false,
+      oauthEnabled: true,
+    });
+    const added = await ipc.mcp.addFromCatalog({ slug: "samba-granola" });
+    expect(added.id).toBe(existing.id);
+    expect(await ipc.mcp.listServers()).toHaveLength(1);
+    expect((await ipc.mcp.listCatalog()).addedSlugs).toContain("samba-granola");
+  });
+
   it("adds a catalog entry with one click and discovers its tools", async () => {
     harness.mountSurface({ route: "/plugins" });
 
-    const card = await screen.findByTestId("catalog-card");
+    const card = (await screen.findAllByTestId("catalog-card")).find(
+      (element) => element.textContent?.includes("Integration Open Server"),
+    )!;
     expect(card.textContent).toContain("Integration Open Server");
 
     fireEvent.click(within(card).getByRole("button", { name: "Add" }));
@@ -165,7 +181,9 @@ describe("Plugins catalog (integration)", () => {
     // Navigating back remounts the catalog; re-find the card (the
     // earlier reference is detached) and confirm it is addable again.
     await waitFor(async () => {
-      const readdable = await screen.findByTestId("catalog-card");
+      const readdable = (await screen.findAllByTestId("catalog-card")).find(
+        (element) => element.textContent?.includes("Integration Open Server"),
+      )!;
       within(readdable).getByRole("button", { name: "Add" });
     });
   }, 40_000);

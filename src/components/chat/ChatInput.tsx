@@ -1,3 +1,5 @@
+import { appendMeetingBriefing } from "@/shared/meeting_briefing";
+import { MeetingBriefingButton } from "@/components/MeetingBriefingButton";
 import {
   StopCircleIcon,
   X,
@@ -1008,6 +1010,13 @@ export function ChatInput({ chatId }: { chatId?: number }) {
             isStreaming={isStreaming}
           />
 
+          <div className="px-3 py-1">
+            <MeetingBriefingButton
+              onPrepared={(prompt) =>
+                setInputValue(appendMeetingBriefing(inputValue, prompt))
+              }
+            />
+          </div>
           {/* Use the AttachmentsList component */}
           <AttachmentsList
             attachments={attachments}
