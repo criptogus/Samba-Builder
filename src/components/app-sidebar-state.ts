@@ -7,7 +7,11 @@ export type AppSidebarHoverState =
 
 export type AppSidebarPanel = "Apps" | "Settings" | "Library";
 
-export type AppSidebarItemTitle = AppSidebarPanel | "Templates" | "Plugins";
+export type AppSidebarItemTitle =
+  | AppSidebarPanel
+  | "Templates"
+  | "Plugins"
+  | "Fábrica";
 
 export function getRouteSidebarPanel(pathname: string): AppSidebarPanel | null {
   if (
@@ -89,6 +93,7 @@ export function isSidebarItemActive({
   title: AppSidebarItemTitle;
   pathname: string;
 }) {
+  if (title === "Fábrica") return pathname === "/factory";
   if (title === "Apps") {
     return getRouteSidebarPanel(pathname) === "Apps";
   }

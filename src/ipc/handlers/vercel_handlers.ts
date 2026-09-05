@@ -31,6 +31,8 @@ import {
 } from "../utils/vercel_neon_sync";
 import { DyadError, DyadErrorKind } from "@/errors/dyad_error";
 
+import { assertFactoryRelease } from "../services/factory/guards";
+
 const logger = log.scope("vercel_handlers");
 
 // --- Helper Functions ---
@@ -295,6 +297,7 @@ async function handleCreateProject(
   event: IpcMainInvokeEvent,
   { name: rawName, appId }: CreateVercelProjectParams,
 ): Promise<CreateVercelProjectResult> {
+  await assertFactoryRelease(appId);
   // Normalize to a kebab-case slug so the project name is valid for Vercel
   // (which requires lowercase names) regardless of how it was entered.
   const name = slugifyAppPath(rawName);

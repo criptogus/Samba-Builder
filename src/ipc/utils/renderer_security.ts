@@ -46,6 +46,7 @@ const PACKAGED_RENDERER_STATIC_PATHS = new Set([
   "/plugins",
   "/settings",
   "/templates",
+  "/factory",
 ]);
 
 function getFileVolumePrefix(pathname: string): string {

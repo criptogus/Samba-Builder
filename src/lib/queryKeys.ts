@@ -15,6 +15,10 @@
  */
 
 export const queryKeys = {
+  factory: {
+    all: ["factory"] as const,
+    gate: (appId: number) => ["factory", "gate", appId] as const,
+  },
   subagents: {
     all: ["subagents"] as const,
     byChat: ({ chatId }: { chatId: number }) => ["subagents", chatId] as const,

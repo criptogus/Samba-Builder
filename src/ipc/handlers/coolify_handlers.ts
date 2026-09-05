@@ -332,6 +332,8 @@ export function registerCoolifyHandlers() {
   );
 
   createTypedHandler(coolifyContracts.deploy, async (_, { appId }) => {
+    const { assertFactoryRelease } = await import("../services/factory/guards");
+    await assertFactoryRelease(appId);
     await getApp(appId);
     if (!readConnection(await readConnectionState(appId))) {
       throw new DyadError(

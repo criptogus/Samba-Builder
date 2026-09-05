@@ -61,7 +61,10 @@ import { registerPreviewViewHandlers } from "./handlers/preview_view_handlers";
 import { registerNativeThemeHandlers } from "./handlers/native_theme_handlers";
 import { registerCoolifySetupHandlers } from "./handlers/coolify_setup_handlers";
 
+import { registerFactoryHandlers } from "./handlers/factory_handlers";
+
 export function registerIpcHandlers() {
+  registerFactoryHandlers();
   // Register all IPC handlers by category
   registerAppHandlers();
   registerChatHandlers();
