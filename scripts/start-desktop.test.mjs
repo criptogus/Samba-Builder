@@ -1,7 +1,22 @@
 import assert from "node:assert/strict";
 import path from "node:path";
 import test from "node:test";
+import { readFileSync } from "node:fs";
 import { desktopExecutable, desktopLaunchOptions } from "./start-desktop.mjs";
+
+test("the shipped manifest has one Samba product name and resolves the branded executable", () => {
+  const source = readFileSync(
+    new URL("../package.json", import.meta.url),
+    "utf8",
+  );
+  assert.equal((source.match(/"productName"\s*:/g) || []).length, 1);
+  const pkg = JSON.parse(source);
+  assert.equal(pkg.productName, "Samba Builder");
+  assert.match(
+    desktopExecutable("root", pkg.productName, "darwin", "arm64"),
+    /Samba Builder\.app/,
+  );
+});
 
 test("resolves separate native desktop packages on Mac and Windows", () => {
   assert.equal(

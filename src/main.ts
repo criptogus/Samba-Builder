@@ -183,6 +183,27 @@ log.errorHandler.startCatching({
   },
 });
 
+// Preserve the profile when a locally packaged build is opened via Finder or
+// Explorer. An explicit --user-data-dir always wins. Release builds have no
+// local profile metadata and retain any existing legacy production profile.
+if (app.isPackaged && !app.commandLine.hasSwitch("user-data-dir")) {
+  const metadata = JSON.parse(
+    fs.readFileSync(path.join(app.getAppPath(), "package.json"), "utf8"),
+  );
+  const profile = metadata.sambaLocalUserDataPath;
+  const legacyProfile = path.join(app.getPath("appData"), "dyad");
+  if (
+    typeof profile === "string" &&
+    path.isAbsolute(profile) &&
+    fs.existsSync(profile)
+  ) {
+    app.setPath("userData", profile);
+  } else if (fs.existsSync(legacyProfile)) {
+    app.setPath("userData", legacyProfile);
+  }
+}
+app.setName("Samba Builder");
+
 // In dev, keep minidumps and logs under the project's ./userData, not the OS
 // one. Must run before crashReporter.start and before the first log call, when
 // electron-log caches its dir. macOS logs ignore userData: ~/Library/Logs/dyad.
@@ -413,6 +434,14 @@ if (process.defaultApp) {
 }
 
 export async function onReady() {
+  if (process.platform === "darwin") {
+    const dockIcon = nativeImage.createFromPath(
+      app.isPackaged
+        ? path.join(process.resourcesPath, "logo.png")
+        : path.join(app.getAppPath(), "assets/icon/logo.png"),
+    );
+    if (!dockIcon.isEmpty()) app.dock?.setIcon(dockIcon);
+  }
   // Take over the sentinel before any startup work that can crash. Migrations,
   // the keychain and git all run below; if one of them kills us, a sentinel
   // still naming the previous session would report this crash as that one.

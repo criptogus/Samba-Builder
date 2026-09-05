@@ -14,6 +14,8 @@ import { FusesPlugin } from "@electron-forge/plugin-fuses";
 import { FuseV1Options, FuseVersion } from "@electron/fuses";
 import { AutoUnpackNativesPlugin } from "@electron-forge/plugin-auto-unpack-natives";
 import { readFileSync } from "fs";
+import { readFile, writeFile } from "node:fs/promises";
+import path from "node:path";
 import { createRequire } from "module";
 
 console.log("AZURE_CODE_SIGNING_DLIB", process.env.AZURE_CODE_SIGNING_DLIB);
@@ -168,6 +170,9 @@ if (isWindowsSigningEnabled && !process.env.AZURE_CODE_SIGNING_DLIB) {
 const config: ForgeConfig = {
   outDir: isLocalDesktopBuild ? "out/desktop" : undefined,
   packagerConfig: {
+    name: "Samba Builder",
+    // Keep the existing application identity while correcting its display name.
+    appBundleId: "com.electron.dyad",
     // E2E test builds install local file: dependencies as links on Windows.
     // Dereference them so packaging does not require symlink privileges in the temp app.
     // Local file: native packages install as symlinks; dereference them so the
@@ -176,7 +181,20 @@ const config: ForgeConfig = {
     windowsSign: isWindowsSigningEnabled ? windowsSign : undefined,
     afterCopy: [
       (buildPath, _electronVersion, platform, arch, callback) => {
-        removeUnusedAppPackageFiles(buildPath, platform, arch).then(
+        const prepare = async () => {
+          await removeUnusedAppPackageFiles(buildPath, platform, arch);
+          // Local desktop packages keep the existing development profile when
+          // opened from Finder/Explorer. Release packages never contain this path.
+          if (isLocalDesktopBuild) {
+            const packagePath = path.join(buildPath, "package.json");
+            const metadata = JSON.parse(await readFile(packagePath, "utf8"));
+            metadata.sambaLocalUserDataPath = path.resolve(
+              process.env.DYAD_DEV_USER_DATA_DIR?.trim() || "userData",
+            );
+            await writeFile(packagePath, JSON.stringify(metadata, null, 2));
+          }
+        };
+        prepare().then(
           () => callback(),
           (error) => callback(error as Error),
         );
@@ -229,6 +247,7 @@ const config: ForgeConfig = {
     extraResource: [
       "node_modules/dugite/git",
       "node_modules/@vscode",
+      "assets/icon/logo.png",
       "docs/native-skills/THIRD_PARTY_NOTICES.md",
     ],
     // ignore: [/node_modules\/(?!(better-sqlite3|bindings|file-uri-to-path)\/)/],
