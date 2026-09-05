@@ -22,6 +22,7 @@
     "desktop": "node scripts/start-desktop.mjs",
     "samba:seed": "python3 samba/setup/seed-providers.py",
     "samba:seed-mcp": "python3 samba/setup/seed-mcp-composio.py",
+    "samba:seed-playwright": "python3 samba/setup/seed-mcp-playwright.py",
     "start:onboarding": "node scripts/start-onboarding.mjs",
     "start:out-of-quota": "cross-env NODE_ENV=development DYAD_SIMULATE_FREE_AGENT_QUOTA_EXCEEDED=true npm start",
     "copy-data-to-dev": "node scripts/copy-data-to-dev.mjs",
@@ -230,7 +231,6 @@
   "engines": {
     "node": ">=24 <26"
   },
-  "productName": "dyad",
   "allowScripts": {
     "file:../native/keychain-reader": true,
     "@biomejs/biome@1.9.4": true,
