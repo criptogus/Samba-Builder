@@ -127,8 +127,10 @@ Draft ──submeter──▶ In Review ──ok tech──▶ Approved ──�
 - [x] Modelo conceitual (este doc)
 - [x] Schema + política de exemplo
 - [x] `gate.py` v1 (trilha local + validação de gates) — testes
+- [x] Auditoria com hash encadeado + export/verificação (`gate.py audit`)
+- [x] Adapter GitHub (`github_adapter.py` — papéis↔users/teams, membership, branch
+      protection) — validado contra a API real (whoami/check-role/protect dry-run)
+- [x] Documento comercial (1 página) p/ proposta corporativa (`proposta-comercial.md`)
 - [ ] Integrar estados ao app (campo de estado do projeto + UI de submit/approve)
-- [ ] Adapter GitHub (mapear papéis↔teams, consultar membership, branch protection)
+- [ ] Adapter GitHub no produto (consultar membership com o token do app)
 - [ ] Gate de deploy real no pipeline (bloquear publish se não `approved`)
-- [ ] Auditoria com hash encadeado + export
-- [ ] Documento comercial (1 página) p/ proposta corporativa

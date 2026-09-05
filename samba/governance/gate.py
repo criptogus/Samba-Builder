@@ -135,11 +135,12 @@ def is_allowed(roles: dict, role: str, by: str) -> bool:
 
 def main() -> int:
     ap = argparse.ArgumentParser(description="Samba Builder governance gate")
-    ap.add_argument("cmd", choices=["init", "status", "submit", "approve", "veto", "check"])
+    ap.add_argument("cmd", choices=["init", "status", "submit", "approve", "veto", "check", "audit"])
     ap.add_argument("--root", default=".", help="raiz do projeto")
     ap.add_argument("--by", default="", help="quem executa (email/usuário)")
     ap.add_argument("--role", default="", help="papel declarado (owner/tech/reviewer/admin)")
     ap.add_argument("--action", default="", help="ação para check")
+    ap.add_argument("--out", default="", help="arquivo de saída (audit)")
     ap.add_argument("--name", default="meu-projeto", help="nome do projeto (init)")
     ap.add_argument("--self-ok", action="store_true", help="2º aprovador presente (tech aprovando trabalho próprio)")
     ap.add_argument("--force", action="store_true", help="init sobrescreve política existente")
@@ -251,6 +252,45 @@ def main() -> int:
             print("GATE OK: deploy_production liberado (approved + ok tech na trilha).")
             return 0
         print(f"check: ação '{args.action}' sem gate definido — política atual só cobre deploy_production.")
+        return 0
+
+    if args.cmd == "audit":
+        # Exporta a trilha e verifica a integridade da cadeia de hashes (append-only).
+        log = os.path.join(root, AUDIT_DIR, "audit.jsonl")
+        if not os.path.exists(log):
+            print("Sem trilha de auditoria ainda (nenhum evento).")
+            return 0
+        events = []
+        broken = []
+        prev_line = "GENESIS"
+        with open(log, encoding="utf-8") as f:
+            for i, line in enumerate(f, start=1):
+                line = line.strip()
+                if not line:
+                    continue
+                try:
+                    e = json.loads(line)
+                except json.JSONDecodeError:
+                    broken.append((i, "json inválido"))
+                    continue
+                expected = hashlib.sha256(prev_line.encode()).hexdigest()
+                if e.get("prev_hash") != expected:
+                    broken.append((i, f"hash quebrado (esperado {expected[:12]}…)"))
+                prev_line = line
+                events.append(e)
+        print(f"Eventos na trilha: {len(events)} | cadeia: {'ÍNTEGRA' if not broken else 'QUEBRADA'}")
+        if args.out:
+            with open(args.out, "w", encoding="utf-8") as f:
+                for e in events:
+                    f.write(json.dumps(e, ensure_ascii=False) + "\n")
+            print(f"Exportado para: {args.out}")
+        else:
+            for e in events:
+                print(f"  {e.get('ts', '?')[:19]}  {e.get('event'):8s}  by={e.get('by')}  mode={e.get('mode', '-')}")
+        if broken:
+            for i, why in broken:
+                print(f"  AVISO linha {i}: {why}")
+            return 1
         return 0
 
     return 0
