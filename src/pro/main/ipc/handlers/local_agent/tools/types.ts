@@ -100,7 +100,7 @@ export interface AgentContext {
   chatSummary?: string;
   /** Turn-scoped todo list for agent task tracking */
   todos: Todo[];
-  /** Request ID for tracking requests to the Dyad engine */
+  /** Request ID for tracking requests to the Samba Builder engine */
   dyadRequestId: string;
   /** Tracks file edit tool usage per file for telemetry */
   fileEditTracker: FileEditTracker;
@@ -149,8 +149,8 @@ export interface AgentContext {
   /** Whether the last completed pre-commit run passed. */
   preCommitLastRunPassed?: boolean;
   /**
-   * If true, the user has Dyad Pro enabled.
-   * Engine-dependent tools require this to access the Dyad Pro API.
+   * If true, the user has Samba Builder enabled.
+   * Engine-dependent tools require this to access the Samba Builder API.
    */
   isDyadPro: boolean;
   /** The durable child thread currently executing this tool, if any. */
@@ -187,7 +187,7 @@ export interface AgentContext {
   /** Whether run_type_checks accepts no paths and reports the whole project. */
   runTypeScriptForWholeProject?: boolean;
   /**
-   * If true, this turn is using a Dyad Free model. Some Pro-enabled
+   * If true, this turn is using a Samba Builder Free model. Some Pro-enabled
    * conveniences, such as MCP auto-approval, should stay disabled.
    */
   freeModelMode?: boolean;
@@ -512,7 +512,7 @@ export interface ToolDefinition<T = any> {
    */
   readonly requiresBlueprintApproval?: boolean;
   /**
-   * If true, this tool calls a Dyad Engine endpoint outside the main model
+   * If true, this tool calls a Samba Builder Engine endpoint outside the main model
    * generation endpoint.
    */
   readonly usesEngineEndpoint?: boolean;

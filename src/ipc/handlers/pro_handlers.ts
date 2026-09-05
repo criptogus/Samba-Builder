@@ -150,7 +150,7 @@ export function registerProHandlers() {
 
     if (!apiKey) {
       // Expected state for non-Pro users; not an error.
-      logger.debug("LLM Gateway API key (Dyad Pro) is not configured.");
+      logger.debug("LLM Gateway API key (Samba Builder) is not configured.");
       return null;
     }
 
@@ -250,7 +250,7 @@ export function registerProHandlers() {
 
       if (!apiKey || !settings.enableDyadPro) {
         throw new DyadError(
-          "Dyad Pro is not enabled. Voice-to-text requires a Pro subscription.",
+          "Samba Builder is not enabled. Voice-to-text requires a Pro subscription.",
           DyadErrorKind.Auth,
         );
       }

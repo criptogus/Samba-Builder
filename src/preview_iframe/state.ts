@@ -11,7 +11,7 @@
 /**
  * Who put the preview on the route it is showing.
  *
- * "dyad" — the user chose it through Dyad's chrome (address bar, back/forward,
+ * "dyad" — the user chose it through Samba Builder's chrome (address bar, back/forward,
  * a restored presentation). "app" — the previewed app navigated itself, e.g. a
  * redirect or a click inside the page. "none" — nothing has navigated yet.
  *
@@ -76,7 +76,7 @@ export type PreviewIframeEvent =
       /**
        * `documentLoad` is a whole-document navigation the app performed itself
        * — a plain link or a server redirect. Those never reach the history
-       * shim, so without it the preview keeps reporting the route Dyad last
+       * shim, so without it the preview keeps reporting the route Samba Builder last
        * selected and a recording started afterwards pins replay to a route the
        * user never chose.
        */

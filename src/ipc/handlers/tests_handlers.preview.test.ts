@@ -222,7 +222,7 @@ describe("preview runs", () => {
     expect(lastSpawn().args).not.toContain("--headed");
   });
 
-  it("keeps Playwright's own recorders off Dyad's windows", async () => {
+  it("keeps Playwright's own recorders off Samba Builder's windows", async () => {
     const rotatePreviewView = mockPreviewBatch();
 
     await runAppTestsCore({
@@ -233,9 +233,9 @@ describe("preview runs", () => {
 
     expect(h.spawnStreaming).toHaveBeenCalledTimes(2);
     const { args, env } = lastSpawn();
-    // A trace of the borrowed context records every page in it, Dyad's own
+    // A trace of the borrowed context records every page in it, Samba Builder's own
     // included; the copy-prompt snapshot is taken from the context's FIRST
-    // page, which over CDP is a Dyad window rather than the app.
+    // page, which over CDP is a Samba Builder window rather than the app.
     expect(args).toContain("--trace=off");
     expect(env.PLAYWRIGHT_NO_COPY_PROMPT).toBe("1");
   });

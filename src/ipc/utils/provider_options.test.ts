@@ -99,7 +99,7 @@ describe("getProviderOptions model effort", () => {
 });
 
 describe("getAiHeaders", () => {
-  it("forwards the Dyad request ID for fallback diagnostics", () => {
+  it("forwards the Samba Builder request ID for fallback diagnostics", () => {
     expect(
       getAiHeaders({
         builtinProviderId: "dyad-engine",

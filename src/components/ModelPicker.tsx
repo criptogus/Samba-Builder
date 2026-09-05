@@ -639,7 +639,7 @@ export function ModelPicker() {
   };
 
   // Non-Pro users can still use any cloud model with their own API key, so a
-  // model is only locked when neither Dyad Pro nor a provider key can run it.
+  // model is only locked when neither Samba Builder nor a provider key can run it.
   // Custom and local providers are never locked: Pro doesn't unlock those.
   // While settings/env vars are still loading we can't tell whether a key
   // exists, so fail open rather than flash a lock at env-var-configured users.
@@ -930,7 +930,7 @@ export function ModelPicker() {
         aria-label={
           isFreeProviderRow
             ? `${model.displayName} — requires an API key from ${getProviderDisplayName(providerId)}`
-            : `${model.displayName} — requires Dyad Pro or an API key from ${getProviderDisplayName(providerId)}`
+            : `${model.displayName} — requires Samba Builder or an API key from ${getProviderDisplayName(providerId)}`
         }
         onClick={() => handleLockedModelClick(providerId, model)}
       >
@@ -1299,7 +1299,7 @@ export function ModelPicker() {
           </span>
         </DropdownMenuTrigger>
         <DropdownMenuContent className={MODEL_MENU_WIDTH_CLASS} align="start">
-          {/* Samba Builder: sem trial/cloud — o submenu abaixo nunca renderiza (isTrial exige conta Dyad ativa) */}
+          {/* Samba Builder: sem trial/cloud — o submenu abaixo nunca renderiza (isTrial exige conta Samba Builder ativa) */}
           {isTrial && (
             <>
               {/* Trial users only see the auto model */}
@@ -1578,7 +1578,7 @@ export function ModelPicker() {
                 <div className="flex items-center gap-2 w-full">
                   <SparklesIcon className="size-3.5 text-indigo-600 dark:text-indigo-300 shrink-0" />
                   <span className="text-[13px] font-medium text-indigo-700 dark:text-indigo-300">
-                    Unlock all models with Dyad Pro
+                    Unlock all models with Samba Builder
                   </span>
                 </div>
               </DropdownMenuItem>
@@ -1626,12 +1626,12 @@ export function ModelPicker() {
             <>
               <DialogHeader>
                 <DialogTitle>
-                  Unlock {unlockTarget?.model.displayName} with Dyad Pro
+                  Unlock {unlockTarget?.model.displayName} with Samba Builder
                 </DialogTitle>
                 <DialogDescription>
-                  Dyad Pro gives you {unlockTarget?.model.displayName} and every
-                  other leading AI model with one subscription — no API keys
-                  needed.
+                  Samba Builder gives you {unlockTarget?.model.displayName} and
+                  every other leading AI model with one subscription — no API
+                  keys needed.
                 </DialogDescription>
               </DialogHeader>
               <div className="flex flex-col gap-3">
@@ -1639,7 +1639,7 @@ export function ModelPicker() {
                   className="cursor-pointer w-full"
                   onClick={handleUnlockDialogUpgradeClick}
                 >
-                  Get Dyad Pro
+                  Get Samba Builder
                 </Button>
                 <button
                   type="button"

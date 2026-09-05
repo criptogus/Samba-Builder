@@ -137,7 +137,7 @@ if (values["dry-run"]) {
 
 if (matrix.length > 0 && authMode === "dyad-pro" && !process.env.DYAD_PRO_KEY) {
   throw new Error(
-    "DYAD_PRO_KEY must be set in .env for Dyad Engine benchmark runs",
+    "DYAD_PRO_KEY must be set in .env for Samba Builder Engine benchmark runs",
   );
 }
 
@@ -808,7 +808,9 @@ function extractInstructions(input) {
         .join("\n\n")
         .trim()
     : "";
-  return extracted || "You are Dyad's local agent running a benchmark task.";
+  return (
+    extracted || "You are Samba Builder's local agent running a benchmark task."
+  );
 }
 
 function extractContentText(content) {
@@ -834,7 +836,9 @@ function extractInstructionsFromMessages(messages) {
         .join("\n\n")
         .trim()
     : "";
-  return extracted || "You are Dyad's local agent running a benchmark task.";
+  return (
+    extracted || "You are Samba Builder's local agent running a benchmark task."
+  );
 }
 
 function chatMessagesToResponsesInput(messages) {
@@ -1234,7 +1238,7 @@ async function runTrial(trial, benchmarkAuth) {
 
   let electronApp;
   try {
-    logTrial(trial, "launching packaged Dyad");
+    logTrial(trial, "launching packaged Samba Builder");
     electronApp = await withTimeout(
       electron.launch({
         args: [
@@ -1246,7 +1250,7 @@ async function runTrial(trial, benchmarkAuth) {
         env,
       }),
       60_000,
-      "launching packaged Dyad",
+      "launching packaged Samba Builder",
     );
     electronApp.process().stdout?.on("data", (data) => {
       console.log(`[electron stdout] ${data.toString().trim()}`);

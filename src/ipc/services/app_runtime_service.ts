@@ -101,11 +101,11 @@ export function formatCloudSandboxError(error: unknown) {
 
   switch (error.code) {
     case "sandbox_pro_required":
-      return "Dyad Pro is required to use cloud sandboxes.";
+      return "Samba Builder is required to use cloud sandboxes.";
     case "sandbox_insufficient_credits":
       return "You need at least 1 credit available to start a cloud sandbox.";
     case "sandbox_billing_unavailable":
-      return "Dyad couldn’t verify sandbox billing right now. Please try again.";
+      return "Samba Builder couldn’t verify sandbox billing right now. Please try again.";
     case "sandbox_credits_exhausted":
       return "This cloud sandbox stopped because your credits ran out.";
     default:
@@ -113,13 +113,13 @@ export function formatCloudSandboxError(error: unknown) {
         return "This cloud sandbox is no longer available.";
       }
       if (error.status === 401 || error.status === 403) {
-        return "Dyad couldn’t authorize the cloud sandbox request. Please try again.";
+        return "Samba Builder couldn’t authorize the cloud sandbox request. Please try again.";
       }
       if (error.status === 429) {
-        return "Dyad is rate limiting cloud sandbox requests right now. Please try again.";
+        return "Samba Builder is rate limiting cloud sandbox requests right now. Please try again.";
       }
       if (typeof error.status === "number" && error.status >= 500) {
-        return "Dyad’s cloud sandbox service is temporarily unavailable. Please try again.";
+        return "Samba Builder’s cloud sandbox service is temporarily unavailable. Please try again.";
       }
       return error.message;
   }
@@ -328,7 +328,7 @@ export async function executeApp({
 
 // Discovery nudge for the consented "Migrate to pnpm N" app upgrade: the
 // contradiction (old pin/lockfile vs the managed pnpm) only bites outside
-// Dyad (CI, deploys, teammates), so surface it in the console the user is
+// Samba Builder (CI, deploys, teammates), so surface it in the console the user is
 // already watching instead of failing or silently rewriting the pin.
 function notifyPnpmVersionMigrationAvailable({
   appPath,
@@ -347,7 +347,7 @@ function notifyPnpmVersionMigrationAvailable({
     if (!pnpmVersionMigrationNotifiedAppIds.has(appId)) {
       output.send({
         type: "stdout",
-        message: `This pnpm app needs a pnpm ${managedMajor} migration (pre-9 lockfile or pnpm <= 8 pin). Dyad already runs pnpm ${managedMajor}, so deploys, CI, and teammates' installs can drift without the matching project pin. Open App Details -> App Upgrades and apply "Migrate to pnpm ${managedMajor}".`,
+        message: `This pnpm app needs a pnpm ${managedMajor} migration (pre-9 lockfile or pnpm <= 8 pin). Samba Builder already runs pnpm ${managedMajor}, so deploys, CI, and teammates' installs can drift without the matching project pin. Open App Details -> App Upgrades and apply "Migrate to pnpm ${managedMajor}".`,
         appId,
       });
       pnpmVersionMigrationNotifiedAppIds.add(appId);
@@ -355,7 +355,7 @@ function notifyPnpmVersionMigrationAvailable({
     output.send({
       type: "package-manager-warning",
       warningKind: "pnpm-migration",
-      message: `This app pins an older pnpm that can't read the lockfile Dyad writes. Migrate to pnpm ${managedMajor} so CI, deploys, and teammates can install it reliably.`,
+      message: `This app pins an older pnpm that can't read the lockfile Samba Builder writes. Migrate to pnpm ${managedMajor} so CI, deploys, and teammates can install it reliably.`,
       appId,
     });
   } catch (error) {
@@ -442,7 +442,7 @@ export async function ensureProxyForRunningApp({
   // Prefer the deterministic port so the iframe origin stays stable across
   // restarts — otherwise origin-scoped browser state (auth sessions,
   // localStorage) gets orphaned and users appear logged out. If that port is
-  // already taken (by a foreign service, or another Dyad app in the rare 10k
+  // already taken (by a foreign service, or another Samba Builder app in the rare 10k
   // overlap), the proxy worker scans the fallback band upward rather than
   // killing whatever holds the port.
   const proxyPort = getAppProxyPort(appId);
@@ -626,7 +626,7 @@ Details: ${details || "n/a"}
             output.send({
               type: "stdout",
               message:
-                "pnpm blocked dependency build scripts. Dyad recorded the decision in pnpm-workspace.yaml and is reinstalling...",
+                "pnpm blocked dependency build scripts. Samba Builder recorded the decision in pnpm-workspace.yaml and is reinstalling...",
               appId,
             });
 
@@ -1166,7 +1166,7 @@ ${errorOutput || "(empty)"}`,
             output.send({
               type: "stdout",
               message:
-                "pnpm blocked dependency build scripts. Dyad recorded the decision in pnpm-workspace.yaml and is reinstalling...",
+                "pnpm blocked dependency build scripts. Samba Builder recorded the decision in pnpm-workspace.yaml and is reinstalling...",
               appId,
             });
 
@@ -1785,7 +1785,7 @@ export class AppRuntimeService {
       type: "server",
       level: "info",
       message,
-      sourceName: "Dyad",
+      sourceName: "Samba Builder",
       appId: options.appId,
       timestamp,
       runtimeBoundary: options.operation,

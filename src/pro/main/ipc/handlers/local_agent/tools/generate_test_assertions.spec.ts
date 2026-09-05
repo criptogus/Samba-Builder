@@ -110,7 +110,7 @@ describe("generate_test_assertions", () => {
     expect(
       generateTestAssertionsTool.shouldTrackMutation?.(
         VALID_ARGS,
-        "The user approved the plan. Dyad generated a spec.",
+        "The user approved the plan. Samba Builder generated a spec.",
         makeCtx(),
       ),
     ).toBe(true);

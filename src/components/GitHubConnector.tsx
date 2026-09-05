@@ -452,7 +452,7 @@ function ConnectedGitHubConnector({
                   <p className="sr-only">
                     {(
                       conflictVerificationError ??
-                      "Dyad couldn't check the repository."
+                      "Samba Builder couldn't check the repository."
                     )
                       .split("\n", 1)[0]
                       .slice(0, 240)}
@@ -465,7 +465,7 @@ function ConnectedGitHubConnector({
                   <GitHubOperationError
                     message={
                       conflictVerificationError ??
-                      "Dyad couldn't check the repository."
+                      "Samba Builder couldn't check the repository."
                     }
                   />
                 </div>

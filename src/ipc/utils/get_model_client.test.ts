@@ -41,7 +41,7 @@ vi.mock("../shared/language_model_helpers", () => ({
   getLanguageModelProviders: vi.fn(async () => [
     {
       id: "auto",
-      name: "Dyad",
+      name: "Samba Builder",
       gatewayPrefix: "dyad/",
       type: "cloud",
     },
@@ -113,7 +113,7 @@ describe("getModelClient", () => {
     vi.mocked(getLanguageModels).mockResolvedValue([]);
   });
 
-  test("keeps the Anthropic gateway prefix for Dyad Engine models", async () => {
+  test("keeps the Anthropic gateway prefix for Samba Builder Engine models", async () => {
     const { modelClient } = await getModelClient(
       {
         provider: "anthropic",
@@ -136,7 +136,7 @@ describe("getModelClient", () => {
     );
   });
 
-  test("keeps the Anthropic gateway prefix for Dyad Engine auto-mode fallback models", async () => {
+  test("keeps the Anthropic gateway prefix for Samba Builder Engine auto-mode fallback models", async () => {
     const { modelClient, runtimeModel } = await getModelClient(
       {
         provider: "auto",
@@ -284,7 +284,7 @@ describe("getModelClient", () => {
     expect(runtimeModel).toMatchObject({ provider: "auto", name: "auto" });
   });
 
-  test("adds OpenRouter free as a regular auto fallback only outside Dyad Pro", async () => {
+  test("adds OpenRouter free as a regular auto fallback only outside Samba Builder", async () => {
     const { modelClient, isEngineEnabled } = await getModelClient(
       {
         provider: "auto",
@@ -316,7 +316,7 @@ describe("getModelClient", () => {
     expect(isEngineEnabled).toBeFalsy();
   });
 
-  test("routes Dyad Free through its dedicated engine model", async () => {
+  test("routes Samba Builder Free through its dedicated engine model", async () => {
     const { modelClient } = await getModelClient(
       {
         provider: "auto",
@@ -397,7 +397,7 @@ describe("getModelClient", () => {
     expect(runtimeModel).toEqual({ provider: "auto", name: "balanced" });
   });
 
-  test("rejects Auto (balanced) without Dyad Pro instead of falling back", async () => {
+  test("rejects Auto (balanced) without Samba Builder instead of falling back", async () => {
     await expect(
       getModelClient({ provider: "auto", name: "balanced" }, {
         enableDyadPro: false,
@@ -407,7 +407,7 @@ describe("getModelClient", () => {
       } as unknown as UserSettings),
     ).rejects.toMatchObject({
       message:
-        "Auto (balanced) requires Dyad Pro. Switch to another model or enable Dyad Pro.",
+        "Auto (balanced) requires Samba Builder. Switch to another model or enable Samba Builder.",
     });
   });
 

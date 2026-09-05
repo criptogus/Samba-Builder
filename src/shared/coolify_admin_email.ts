@@ -3,13 +3,13 @@ const UNDELIVERABLE =
   "domain resolves when it creates the admin account.";
 
 const UNSENDABLE =
-  "Dyad can't send an address containing quotes, backslashes or ` $ # ! to " +
+  "Samba Builder can't send an address containing quotes, backslashes or ` $ # ! to " +
   "the server. Try one without them.";
 
 /**
  * Why this address cannot be the admin account, in words for the person who
  * typed it, or null where it can. Not always Coolify's answer: one of the two
- * rules below is Dyad's own limit, and an address it refuses may be one
+ * rules below is Samba Builder's own limit, and an address it refuses may be one
  * Coolify would have taken.
  *
  * Lives in shared/ so the panel can warn while the user is still typing and
@@ -19,7 +19,7 @@ const UNSENDABLE =
  * rejected address leaves a finished install with no account on it.
  *
  * Two different rules refuse an address here and they are not the same news.
- * One is about where mail goes; the other is about what Dyad can put in a
+ * One is about where mail goes; the other is about what Samba Builder can put in a
  * shell command. Saying the first for both told someone whose address does
  * work that they could not receive mail at it, which is not true and leaves
  * them nothing to change.
@@ -34,9 +34,9 @@ export function adminEmailRefusal(email: string): string | null {
   // into a .env file, and buildInstallScript refuses every character that
   // could break either — so the set is wider than the quoting alone would
   // need. Said here too, so it is said while the address is being typed
-  // rather than after Dyad has connected and looked the server over.
+  // rather than after Samba Builder has connected and looked the server over.
   //
-  // Some of these are legal in a local part, so this is Dyad's limit rather
+  // Some of these are legal in a local part, so this is Samba Builder's limit rather
   // than the address being wrong — and it says so, because telling someone
   // their working address is undeliverable sends them to fix the wrong thing.
   if (/['"\\`$\n\r#!]/.test(trimmed)) return UNSENDABLE;

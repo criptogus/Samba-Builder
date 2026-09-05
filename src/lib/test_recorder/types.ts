@@ -39,7 +39,7 @@ function isRelativeInAppSourcePath(value: string): boolean {
 }
 
 /**
- * Development-only source information injected by Dyad's component tagger.
+ * Development-only source information injected by Samba Builder's component tagger.
  *
  * This is never a replay locator: line-based `data-dyad-id` values move as the
  * app is edited and are absent from production builds. A fragile CSS fallback
@@ -87,7 +87,7 @@ export const LocatorDescriptorSchema = z.object({
   exact: z.boolean().optional(),
   /** Zero-based index when the locator matches multiple elements. */
   nth: z.number().int().nonnegative().optional(),
-  /** Present on CSS fallbacks when Dyad can trace the DOM node to app source. */
+  /** Present on CSS fallbacks when Samba Builder can trace the DOM node to app source. */
   sourceHint: LocatorSourceHintSchema.optional(),
 });
 export type LocatorDescriptor = z.infer<typeof LocatorDescriptorSchema>;
@@ -163,7 +163,7 @@ export const RecordedActionSchema = z.discriminatedUnion("kind", [
     locator: LocatorDescriptorSchema,
     values: z.array(z.string().max(MAX_VALUE_LEN)).max(MAX_SELECT_VALUES),
   }),
-  // Synthesized in the renderer when the user navigates from Dyad's own chrome:
+  // Synthesized in the renderer when the user navigates from Samba Builder's own chrome:
   // the preview address bar and routes dropdown for `navigate`, its back and
   // forward buttons for the other two. Routing the app does on its own is not
   // recorded — the step that triggered it already is.

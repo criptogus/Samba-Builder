@@ -26,7 +26,7 @@
  *                       { type: "dyad-recorder-flushed", requestId }
  *
  * Known limitation — the top-level preview document only. This script is
- * injected into nested frames too, but Dyad activates only the frame it embeds,
+ * injected into nested frames too, but Samba Builder activates only the frame it embeds,
  * and `window.parent` from a nested document is the app, not the renderer. So
  * interactions inside an app's own iframes are absent from the recording rather
  * than misrecorded. Covering them needs the activation relayed down, the actions
@@ -904,7 +904,7 @@
 
     // `data-dyad-id` is deliberately NOT a candidate: it encodes a source
     // location, so it moves whenever the file it points into is edited, and the
-    // Dyad plugin that injects it doesn't run in the build the test replays
+    // Samba Builder plugin that injects it doesn't run in the build the test replays
     // against. An element with no better locator falls through to the CSS path.
 
     return candidates;
@@ -967,7 +967,7 @@
   }
 
   /**
-   * Find the source location Dyad's development tagger attached to this DOM
+   * Find the source location Samba Builder's development tagger attached to this DOM
    * node, or to its nearest tagged ancestor when a component rendered the
    * concrete control internally. This is agent navigation metadata only — the
    * generated Playwright test never locates by `data-dyad-id`.
@@ -1422,7 +1422,7 @@
   // is trivially true for a page's own scripts when this document is top-level
   // (opening the preview URL in a real browser), and arming the recorder there
   // would stream everything the user types — `fill` values included — to
-  // whoever asked. This script only has a job inside Dyad's preview frame.
+  // whoever asked. This script only has a job inside Samba Builder's preview frame.
   const isFramed = window.parent !== window;
 
   window.addEventListener("message", (e) => {
@@ -1445,7 +1445,7 @@
 
   function init() {
     window.parent.postMessage({ type: "dyad-recorder-initialized" }, "*");
-    console.debug("Dyad recorder client initialized");
+    console.debug("Samba Builder recorder client initialized");
   }
 
   if (document.readyState === "loading") {

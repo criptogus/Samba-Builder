@@ -694,7 +694,7 @@ function readExistingSettingsFile(
       };
     } else {
       // The address is not a secret and survives a token that will not
-      // decrypt, so the user is not asked to retype what Dyad still knows.
+      // decrypt, so the user is not asked to retype what Samba Builder still knows.
       const { accessToken: _dropped, ...rest } = combinedSettings.coolify;
       combinedSettings.coolify = rest;
     }
@@ -1031,7 +1031,7 @@ function readSettingsForWrite(filePath: string): {
     logger.error("Existing settings file is unreadable:", error);
     notifyRendererError({
       message:
-        "Dyad could not read your existing settings file, so it fell back to default settings.",
+        "Samba Builder could not read your existing settings file, so it fell back to default settings.",
       action: {
         label: "Read restore docs",
         url: RESTORE_SETTINGS_DOCS_URL,

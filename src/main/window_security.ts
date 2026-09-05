@@ -140,7 +140,7 @@ function isPreviewReferrer(
 
 /**
  * Electron does not expose the initiating WebFrameMain to this handler. Treat
- * a request as a preview popup only when the browser supplies a non-Dyad HTTP
+ * a request as a preview popup only when the browser supplies a non-Samba Builder HTTP
  * referrer, the target is another HTTP(S) document, and the request does not
  * ask Electron for privileged window features. Missing referrers fail closed.
  */

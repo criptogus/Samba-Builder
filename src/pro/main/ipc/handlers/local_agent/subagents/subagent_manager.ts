@@ -1908,7 +1908,7 @@ async function preflightPersonaModel(persona: SubagentPersona): Promise<void> {
   );
   if (!available) {
     throw new DyadError(
-      `${persona} requires ${defaults.name}, which is not currently available. Check your Dyad Pro model access and try again.`,
+      `${persona} requires ${defaults.name}, which is not currently available. Check your Samba Builder model access and try again.`,
       DyadErrorKind.Precondition,
     );
   }
@@ -1917,7 +1917,7 @@ async function preflightPersonaModel(persona: SubagentPersona): Promise<void> {
     await getModelClient(settings.selectedModel, settings);
   } catch (error) {
     throw new DyadError(
-      `${persona} could not start because ${defaults.name} is not configured. Check your Dyad Pro model access and try again.`,
+      `${persona} could not start because ${defaults.name} is not configured. Check your Samba Builder model access and try again.`,
       DyadErrorKind.Precondition,
       { cause: error },
     );
@@ -2000,10 +2000,10 @@ export function shouldDrainMutationOnAbort(persona: SubagentPersona): boolean {
 
 function systemPrompt(persona: SubagentPersona): string {
   if (persona === "reviewer")
-    return "You are Dyad Reviewer. Be independent, concise, evidence-based, and read-only.";
+    return "You are Samba Builder Reviewer. Be independent, concise, evidence-based, and read-only.";
   if (persona === "implementer")
-    return "You are Dyad Implementer. Complete the focused assignment using only provided tools. Treat assigned paths as the expected focus, but cross them when correctness requires it and report every changed file and unresolved issue.";
-  return "You are Dyad Explorer. Investigate read-only, cite files and evidence, and return a concise report with confidence and recommended next action.";
+    return "You are Samba Builder Implementer. Complete the focused assignment using only provided tools. Treat assigned paths as the expected focus, but cross them when correctness requires it and report every changed file and unresolved issue.";
+  return "You are Samba Builder Explorer. Investigate read-only, cite files and evidence, and return a concise report with confidence and recommended next action.";
 }
 
 export function resolveSubagentSystemPrompt(
@@ -2296,8 +2296,8 @@ function assertPro(persona?: SubagentPersona): void {
   if (!isDyadProEnabled(readSettings())) {
     throw new DyadError(
       persona
-        ? `${persona} sub-agents require Dyad Pro.`
-        : "Sub-agents require Dyad Pro.",
+        ? `${persona} sub-agents require Samba Builder.`
+        : "Sub-agents require Samba Builder.",
       DyadErrorKind.Auth,
     );
   }
@@ -2409,7 +2409,7 @@ function errorMessage(error: unknown): string {
 
 function boundDurableReport(value: string): string {
   if (value.length <= MAX_DURABLE_REPORT_CHARS) return value;
-  return `${value.slice(0, MAX_DURABLE_REPORT_CHARS)}\n\n[Report truncated by Dyad]`;
+  return `${value.slice(0, MAX_DURABLE_REPORT_CHARS)}\n\n[Report truncated by Samba Builder]`;
 }
 
 export function isReusableReviewStatus(status: string): boolean {
@@ -2674,7 +2674,7 @@ function watchEntitlement(
       threadId,
       "entitlement_revoked",
       null,
-      "Dyad Pro entitlement was revoked while this sub-agent was running.",
+      "Samba Builder entitlement was revoked while this sub-agent was running.",
     ).catch((error) =>
       logger.error(
         `Failed to persist entitlement revocation for ${threadId}`,

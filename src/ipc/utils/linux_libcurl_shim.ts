@@ -163,7 +163,7 @@ function readlinkSafe(p: string): string | undefined {
 }
 
 /**
- * The architecture tag ldconfig uses in its parenthesized annotations. Dyad
+ * The architecture tag ldconfig uses in its parenthesized annotations. Samba Builder
  * ships only an x64 Linux build, so we only map that; any other arch returns
  * undefined and the arch filter is simply skipped.
  */

@@ -6,10 +6,10 @@ export function getModelEffort(modelSelection: ModelSelection): string {
   return modelSelection.effortLevel;
 }
 
-// The Dyad Engine is backed by LiteLLM using the
+// The Samba Builder Engine is backed by LiteLLM using the
 // OpenAI-compatible chat completions API. This means
 // we need to configure thinking differently depending
-// on whether user is enabling Dyad Pro (uses engine)
+// on whether user is enabling Samba Builder (uses engine)
 // or uses the regular AI-SDK provider.
 export function getExtraProviderOptionsForEngine(
   providerId: string | undefined,
@@ -20,7 +20,7 @@ export function getExtraProviderOptionsForEngine(
     return {};
   }
   if (providerId === "openai") {
-    // OpenAI uses the same provider options because the Dyad Engine
+    // OpenAI uses the same provider options because the Samba Builder Engine
     // is implemented as an OpenAI-compatible provider.
     return getOpenAIProviderOptions(settings, modelSelection);
   }

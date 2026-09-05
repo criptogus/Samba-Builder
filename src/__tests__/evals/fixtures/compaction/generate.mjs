@@ -3,7 +3,7 @@
  * Compaction-benchmark fixture generator.
  *
  * Reads a scenario spec (see AUTHORING.md), has gpt-5.6-sol author the
- * session narrative phase-by-phase, materializes a Dyad-format message list
+ * session narrative phase-by-phase, materializes a Samba Builder-format message list
  * (full <dyad-write> contents, MCP tool tags), amplifies to the target
  * transcript size with deterministic bulk-asset/filler turns, validates that
  * every manifest evidence string landed, and writes <name>.json + stats.
@@ -275,7 +275,7 @@ function dyadWriteXml(p, description, content) {
 // ---------------------------------------------------------------------------
 // Phase authoring
 // ---------------------------------------------------------------------------
-const AUTHOR_SYSTEM = `You are authoring one phase of a realistic, long AI-pair-programming session transcript for Dyad (an AI app builder). The session is between a USER (a real developer: terse, sometimes changes their mind, pastes errors) and an ASSISTANT (a coding agent that narrates briefly, calls tools, and writes full files).
+const AUTHOR_SYSTEM = `You are authoring one phase of a realistic, long AI-pair-programming session transcript for Samba Builder (an AI app builder). The session is between a USER (a real developer: terse, sometimes changes their mind, pastes errors) and an ASSISTANT (a coding agent that narrates briefly, calls tools, and writes full files).
 
 You will receive: the app domain, a recap of the session so far, the current contents of the files this phase works on, this phase's goal, REQUIRED evidence strings, and how many turns to produce.
 

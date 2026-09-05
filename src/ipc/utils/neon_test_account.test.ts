@@ -48,7 +48,7 @@ describe("createNeonTestAccount", () => {
 
     const [, init] = mocks.fetchWithRetry.mock.calls[0];
     expect(JSON.parse(init.body)).toMatchObject({
-      name: "Dyad Test User",
+      name: "Samba Builder Test User",
       email: account.email,
       password: account.password,
       callbackURL: "https://branch-id.neonauth.example/neondb/auth",

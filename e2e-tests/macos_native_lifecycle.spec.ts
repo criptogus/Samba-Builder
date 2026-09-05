@@ -22,7 +22,7 @@ function postNativeCommandQ(pid: number) {
       fatalError("Accessibility permission is required for native lifecycle testing")
     }
     guard let target = NSRunningApplication(processIdentifier: pid_t(${pid})) else {
-      fatalError("Dyad process ${pid} is not running")
+      fatalError("Samba Builder process ${pid} is not running")
     }
 
     target.activate(options: [.activateAllWindows])
@@ -100,7 +100,7 @@ test("reopens from the Dock and exits after native Command-Q", async ({
   reopenPackagedApp(childProcess);
   const reopenedPage = await reopenedWindow;
   await reopenedPage.waitForLoadState("domcontentloaded");
-  await expect(reopenedPage).toHaveTitle("Dyad");
+  await expect(reopenedPage).toHaveTitle("Samba Builder");
 
   const processExited = waitForProcessExit(childProcess, 10_000);
   postNativeCommandQ(pid);

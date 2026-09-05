@@ -318,7 +318,7 @@ export async function deleteTempTestBranch(appData: AppRow): Promise<boolean> {
     // path reads this to decide whether anything was left behind, and would drop
     // the row — the last record of this branch — believing it was cleaned up.
     logger.error(
-      `App ${appData.id} still tracks temporary Neon test branch ${branchId}, but the app is no longer linked to a Neon project; Dyad cannot delete it and it must be removed manually.`,
+      `App ${appData.id} still tracks temporary Neon test branch ${branchId}, but the app is no longer linked to a Neon project; Samba Builder cannot delete it and it must be removed manually.`,
     );
     return false;
   }

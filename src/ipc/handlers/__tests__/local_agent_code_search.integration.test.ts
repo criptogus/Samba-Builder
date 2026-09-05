@@ -4,10 +4,10 @@
 //
 // Exercises the local-agent code_search tool end-to-end: the fixture streams a
 // code_search tool call, the real tool extracts the codebase and POSTs it to
-// the (fake) Dyad Engine /tools/code-search endpoint, and the resulting
+// the (fake) Samba Builder Engine /tools/code-search endpoint, and the resulting
 // <dyad-code-search> XML with the relevant files lands in the assistant
 // message — now also asserted as the rendered Code Search tool card in the
-// DOM. code_search requires Dyad Pro and uses the harness fake server via
+// DOM. code_search requires Samba Builder and uses the harness fake server via
 // `engine: true`.
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 

@@ -69,7 +69,7 @@ async function renderAndSettle() {
 
 describe("what is on screen without asking", () => {
   it("shows the details rather than hiding them behind a control", async () => {
-    // Made to click to discover Dyad even has these, most people never find
+    // Made to click to discover Samba Builder even has these, most people never find
     // out — and then signing out locks them out of their own server.
     await renderAndSettle();
 
@@ -82,7 +82,7 @@ describe("what is on screen without asking", () => {
   });
 
   it("includes the API token, not only the sign-in details", async () => {
-    // Signing out of Coolify in Dyad clears it, so without this the token is
+    // Signing out of Coolify in Samba Builder clears it, so without this the token is
     // gone for good and the instance has to be set up again.
     await renderAndSettle();
     expect(screen.getByTestId("coolify-field-api-token")).toBeTruthy();
@@ -138,9 +138,9 @@ describe("revealing one value", () => {
 });
 
 describe("naming the section", () => {
-  it("names a server Dyad installed but has no token for", async () => {
+  it("names a server Samba Builder installed but has no token for", async () => {
     // Reached by installing a server whose API token could not be minted, so
-    // the account is all Dyad has for it.
+    // the account is all Samba Builder has for it.
     h.revealCredentials.mockResolvedValue({ ...FULL, instance: null });
     render(<CoolifyCredentials showTitle />);
 
@@ -163,7 +163,7 @@ describe("while the read is still going", () => {
   it("says so rather than leaving the caller's heading over nothing", async () => {
     // Every caller introduces this panel as the details it is about to show.
     // Rendering nothing until the answer lands leaves "Its details are below"
-    // with nothing below it, which reads as Dyad holding nothing at all.
+    // with nothing below it, which reads as Samba Builder holding nothing at all.
     h.revealCredentials.mockReturnValue(new Promise(() => {}));
     render(<CoolifyCredentials showTitle />);
 
@@ -182,7 +182,7 @@ describe("while the read is still going", () => {
   });
 });
 
-describe("a password Dyad holds but cannot read", () => {
+describe("a password Samba Builder holds but cannot read", () => {
   it("says so rather than showing a server that never had one", async () => {
     // readSettings drops a password it cannot decrypt and keeps the account.
     // Left as a missing row, that reads as there never having been one — and
@@ -253,7 +253,7 @@ describe("two servers that are not the same server", () => {
     expect(forServer.textContent).toContain("http://203.0.113.5:8000");
     expect(forServer.textContent).not.toContain("someone-elses");
     expect(forInstance.textContent).toContain("someone-elses.example.com");
-    // The password belongs to the machine Dyad built, and stays with it.
+    // The password belongs to the machine Samba Builder built, and stays with it.
     // Asserted on the field rather than on the text: a secret renders as
     // bullets until it is revealed, so looking for the value itself passes
     // wherever the row is put.
@@ -274,7 +274,7 @@ describe("a read that did not answer", () => {
   it("keeps details it already has when a later read fails", async () => {
     // The panel refetches on window focus once its data is a minute old, and
     // production does not retry. Standing that failure in front of a password
-    // Dyad holds the only copy of takes it off screen with nothing to copy —
+    // Samba Builder holds the only copy of takes it off screen with nothing to copy —
     // and in the sign-out dialog it goes just as the user is asked to confirm
     // they have saved it.
     const client = new QueryClient({
@@ -301,7 +301,7 @@ describe("a read that did not answer", () => {
 
   it("says so rather than rendering nothing", async () => {
     // Callers introduce this panel as the details they are about to show, so
-    // a blank space where they should be reads as Dyad holding nothing.
+    // a blank space where they should be reads as Samba Builder holding nothing.
     h.revealCredentials.mockRejectedValue(new Error("keychain locked"));
     render(<CoolifyCredentials />);
 
@@ -326,9 +326,9 @@ describe("a read that did not answer", () => {
   });
 });
 
-describe("an instance Dyad did not set up", () => {
+describe("an instance Samba Builder did not set up", () => {
   it("renders nothing rather than an empty heading", async () => {
-    // Connected by pasting a token: no account Dyad created, no address it
+    // Connected by pasting a token: no account Samba Builder created, no address it
     // chose. A panel of blanks would read as something having failed.
     h.revealCredentials.mockResolvedValue({ instance: null, server: null });
     const { container } = render(<CoolifyCredentials />);

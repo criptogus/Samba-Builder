@@ -748,7 +748,7 @@ export function TestsPanel() {
   const isRestoringApp =
     isCleaningUp && runState.isolation?.mode === "neon-branch";
 
-  // With the experiment enabled, "headed" means visible in Dyad's preview
+  // With the experiment enabled, "headed" means visible in Samba Builder's preview
   // rather than in a separate Playwright browser window.
   const previewRunEnabled = !!settings?.enableTestRunInPreview;
   const runsInPreviewWebContentsView = previewRunEnabled && headed;
@@ -868,7 +868,7 @@ export function TestsPanel() {
     try {
       const { outcome } = await switchKeyAsync({ appId });
       // Only a real switch (or a key that was already current) may retire the
-      // warning. "not-applicable" means the key is still legacy and Dyad
+      // warning. "not-applicable" means the key is still legacy and Samba Builder
       // couldn't act on it, so the offer has to stay on screen.
       if (outcome === "switched") {
         markSwitched();
@@ -1138,7 +1138,7 @@ export function TestsPanel() {
     const currentPreviewUrl =
       previewIframeState.history[previewIframeState.position] ??
       previewIframeState.currentUrl;
-    // Only a route the user picked through Dyad's chrome becomes the session's
+    // Only a route the user picked through Samba Builder's chrome becomes the session's
     // opening navigation. A route the app reached on its own — a redirect, a
     // link followed before Record was pressed — is not a starting point the
     // user chose, and recording it as one makes replay `goto` straight to the
@@ -1175,7 +1175,7 @@ export function TestsPanel() {
       ? "Wait for the current test run to finish."
       : isRecordingSession
         ? "A recording session is already in progress."
-        : "Click through your app in the preview and Dyad writes the test for you.";
+        : "Click through your app in the preview and Samba Builder writes the test for you.";
 
   const enableTesting = useCallback(() => {
     if (selectedAppId == null) return;
@@ -1933,8 +1933,9 @@ function EnableTestingScreen({
         Enable testing for this app
       </h3>
       <p className="text-sm text-muted-foreground max-w-sm mb-5">
-        Let Dyad write and run end-to-end tests that drive your app like a real
-        user. Tests are a starting point you can review, edit, and re-run.
+        Let Samba Builder write and run end-to-end tests that drive your app
+        like a real user. Tests are a starting point you can review, edit, and
+        re-run.
       </p>
 
       {/* Data-safety warning, scaled to how well runs are isolated for this
@@ -1955,8 +1956,8 @@ function EnableTestingScreen({
             {hasSupabaseIsolation
               ? "Tests run as an isolated test user under Row-Level Security, but RLS may not cover every table. We strongly recommend enabling data backups before running tests, in case they do something unintended."
               : hasManagedDatabase
-                ? "Dyad can't isolate this database in the current setup. These tests can create, update, or delete current data, so we strongly recommend enabling data backups before running them."
-                : "These tests can create, update, or delete real data, and Dyad can't isolate a custom or non-database backend. We strongly recommend enabling data backups before running tests, in case they do something unintended."}
+                ? "Samba Builder can't isolate this database in the current setup. These tests can create, update, or delete current data, so we strongly recommend enabling data backups before running them."
+                : "These tests can create, update, or delete real data, and Samba Builder can't isolate a custom or non-database backend. We strongly recommend enabling data backups before running tests, in case they do something unintended."}
           </span>
         </div>
       )}

@@ -1,3 +1,5 @@
+import { appendMeetingBriefing } from "@/shared/meeting_briefing";
+import { MeetingBriefingButton } from "@/components/MeetingBriefingButton";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useSearch } from "@tanstack/react-router";
 import { useAtom, useAtomValue } from "jotai";
@@ -183,9 +185,14 @@ export default function HomePage() {
               What do you want to build?
             </h1>
             <p className="mx-auto mt-3 max-w-2xl text-base leading-7 text-muted-foreground">
-              Describe your idea. Dyad will turn it into a working app.
+              Describe your idea. Samba Builder will turn it into a working app.
             </p>
-            <div className="mt-4 flex justify-center">
+            <div className="mt-4 flex justify-center gap-3">
+              <MeetingBriefingButton
+                onPrepared={(prompt) =>
+                  setInputValue(appendMeetingBriefing(inputValue, prompt))
+                }
+              />
               <ImportAppButton
                 className="px-0 pb-0"
                 variant="outline"

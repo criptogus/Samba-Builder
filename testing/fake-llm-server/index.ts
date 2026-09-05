@@ -283,7 +283,7 @@ export function createFakeLlmApp(getPort: () => number) {
       );
   });
 
-  // Fake api.dyad.sh user info (Dyad Pro budget). Tests point
+  // Fake api.dyad.sh user info (Samba Builder budget). Tests point
   // DYAD_USER_INFO_URL here so get-user-budget never hits the real API.
   app.get("/api/user/info", (req, res) => {
     if (!req.headers.authorization?.startsWith("Bearer ")) {
@@ -735,7 +735,7 @@ export function createFakeLlmApp(getPort: () => number) {
   // GitHub Git endpoints - intercept all paths with /github/git prefix
   app.all("/github/git/*", handleGitPush);
 
-  // Dyad Engine free-model quota endpoint (free_model_quota_handlers).
+  // Samba Builder Engine free-model quota endpoint (free_model_quota_handlers).
   app.get("/engine/v1/free/quota", (req, res) => {
     if (!req.headers.authorization?.startsWith("Bearer ")) {
       res.status(401).json({ error: "Unauthorized" });
@@ -749,7 +749,7 @@ export function createFakeLlmApp(getPort: () => number) {
     });
   });
 
-  // Dyad Engine code-search endpoint for code_search tool
+  // Samba Builder Engine code-search endpoint for code_search tool
   app.post("/engine/v1/tools/code-search", (req, res) => {
     const { query, filesContext } = req.body;
     fakeLlmLog(
@@ -770,7 +770,7 @@ export function createFakeLlmApp(getPort: () => number) {
     }
   });
 
-  // Dyad Engine image generation endpoint for generate_image tool
+  // Samba Builder Engine image generation endpoint for generate_image tool
   app.post("/engine/v1/images/generations", (req, res) => {
     const { prompt, model } = req.body;
     fakeLlmLog(
@@ -803,7 +803,7 @@ export function createFakeLlmApp(getPort: () => number) {
     res.type("png").send(Buffer.from(tinyPngBase64, "base64"));
   });
 
-  // Dyad Engine web-crawl endpoint for web_fetch tool
+  // Samba Builder Engine web-crawl endpoint for web_fetch tool
   app.post("/engine/v1/tools/web-crawl", (req, res) => {
     const { url, markdownOnly } = req.body;
     fakeLlmLog(`* web-crawl: url="${url}", markdownOnly=${markdownOnly}`);

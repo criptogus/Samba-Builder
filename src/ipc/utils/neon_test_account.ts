@@ -39,7 +39,7 @@ export async function createNeonTestAccount({
   const password = crypto.randomBytes(24).toString("base64url");
 
   if (IS_TEST_BUILD) {
-    // Don't hit the network in Dyad's own E2E build.
+    // Don't hit the network in Samba Builder's own E2E build.
     return { email, password };
   }
 
@@ -58,7 +58,7 @@ export async function createNeonTestAccount({
         Origin: authUrl.origin,
       },
       body: JSON.stringify({
-        name: "Dyad Test User",
+        name: "Samba Builder Test User",
         email,
         password,
         callbackURL,

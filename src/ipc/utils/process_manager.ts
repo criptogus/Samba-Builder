@@ -252,7 +252,7 @@ export function removeAppIfCurrentProcess(
       `Removed app ${appId} (processId ${currentAppInfo.processId}) from running map. Current size: ${runningApps.size}`,
     );
     // The dev server went away on its own — a crash, or the user killing it
-    // outside Dyad. Stop/Restart/Delete end a recording explicitly, but this
+    // outside Samba Builder. Stop/Restart/Delete end a recording explicitly, but this
     // path had nothing watching it, so isolation and the session's whole-app
     // claim would have been held until the 30-minute cap with no preview left
     // to record.

@@ -88,7 +88,7 @@ export async function getPublishableKey({
   // generated client as `undefined`.
   if (!publishableKey?.api_key) {
     throw new DyadError(
-      "Dyad couldn't find a publishable key for this Supabase project. It may be paused or connected through the wrong Supabase account. Resume the project in Supabase, or reconnect the correct project in Dyad. See https://dyad.sh/docs/integrations/supabase#no-publishable-keys",
+      "Samba Builder couldn't find a publishable key for this Supabase project. It may be paused or connected through the wrong Supabase account. Resume the project in Supabase, or reconnect the correct project in Samba Builder. See https://dyad.sh/docs/integrations/supabase#no-publishable-keys",
       DyadErrorKind.NotFound,
     );
   }

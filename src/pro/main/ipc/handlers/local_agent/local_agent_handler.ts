@@ -734,8 +734,8 @@ export async function handleLocalAgentStream(
   ) {
     const errorMessage =
       referencedApps.length > 0
-        ? "Referencing other apps (@app:Name) in local-agent mode requires Dyad Pro. Please enable Dyad Pro in Settings → Pro."
-        : "Agent v2 requires Dyad Pro. Please enable Dyad Pro in Settings → Pro.";
+        ? "Referencing other apps (@app:Name) in local-agent mode requires Samba Builder. Please enable Samba Builder in Settings."
+        : "Agent v2 requires Samba Builder. Please enable Samba Builder in Settings.";
     safeSend(event.sender, "chat:response:error", {
       chatId: req.chatId,
       invocationRef: req.invocationRef,
@@ -2257,7 +2257,7 @@ export async function handleLocalAgentStream(
     const workspaceChanged =
       (ctx.mutationCount ?? 0) > 0 || ctx.workspaceMutated === true;
     // Successful MCP tools may have changed app files even though their
-    // schemas do not tell Dyad which tools are mutating. Preserve preview
+    // schemas do not tell Samba Builder which tools are mutating. Preserve preview
     // refresh for that conservative case without treating it as sufficient
     // evidence to start an automatic Git review.
     const updatedFiles =
@@ -2441,8 +2441,8 @@ function getErrorResponseBody(error: unknown, depth = 0): string | undefined {
 const FREE_MODEL_QUOTA_MARKERS = [
   "dyad_free_model_quota_exceeded",
   "FREE_MODEL_QUOTA_EXCEEDED",
-  "Dyad Free has reached its daily limit.",
-  "Dyad Free limit",
+  "Samba Builder Free has reached its daily limit.",
+  "Samba Builder Free limit",
 ];
 
 function getErrorMessageWithDetails(error: unknown): string {

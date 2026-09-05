@@ -19,7 +19,7 @@ const context = {
 const baseTriage = {
   labels: ["bug"],
   assessment: "environment_setup",
-  summary: "Dyad can't find Node.js on your computer.",
+  summary: "Samba Builder can't find Node.js on your computer.",
   steps: [],
   filedFromApp: true,
 };
@@ -136,7 +136,7 @@ test("composeComment renders every section for a full decision", () => {
       ...baseTriage,
       steps: [
         "Install Node.js from https://nodejs.org (pick the LTS version).",
-        "Quit Dyad completely and open it again.",
+        "Quit Samba Builder completely and open it again.",
       ],
       related: [
         { number: 3665, outcome: "resolved_with_workaround" },
@@ -153,13 +153,13 @@ test("composeComment renders every section for a full decision", () => {
   assert.equal(
     comment,
     [
-      "Hi @reporter, thanks for sending this from Dyad.",
+      "Hi @reporter, thanks for sending this from Samba Builder.",
       "",
-      "**What's going on:** Dyad can't find Node.js on your computer.",
+      "**What's going on:** Samba Builder can't find Node.js on your computer.",
       "",
       "**What you can do now:**",
       "1. Install Node.js from https://nodejs.org (pick the LTS version).",
-      "2. Quit Dyad completely and open it again.",
+      "2. Quit Samba Builder completely and open it again.",
       "",
       "**Others with the same problem:** #3665 (the steps above resolved it there) · #3348 (still open, you can follow it for updates)",
       "",
@@ -168,7 +168,7 @@ test("composeComment renders every section for a full decision", () => {
       SIGN_OFF,
       "",
       "<details>",
-      "<summary>Notes for the Dyad team</summary>",
+      "<summary>Notes for the Samba Builder team</summary>",
       "",
       "- Log: 'node' is not recognized",
       "- Assessment: environment_setup · Playbook: node-not-found-windows",
@@ -194,7 +194,7 @@ test("composeComment adds an update step when a release fixed it", () => {
   assert.match(comment, /^Hi @reporter, thanks for the report\./);
   assert.match(
     comment,
-    /1\. Update to Dyad 1\.13\.0 or newer from https:\/\/www\.dyad\.sh\/download, which includes the fix \(\[release notes\]\(https:\/\/www\.dyad\.sh\/docs\/releases\/1\.13\.0\)\)\.\n2\. Open a new chat after updating\./,
+    /1\. Update to Samba Builder 1\.13\.0 or newer from https:\/\/www\.dyad\.sh\/download, which includes the fix \(\[release notes\]\(https:\/\/www\.dyad\.sh\/docs\/releases\/1\.13\.0\)\)\.\n2\. Open a new chat after updating\./,
   );
   assert.match(comment, /Playbook: no match/);
 });
@@ -247,7 +247,7 @@ test("composeComment offers the existing route on feature requests", () => {
     /^Hi @reporter, thanks for the suggestion\. We've logged it as a feature request\.\n\n\*\*In the meantime:\*\* You can add it today/,
   );
   assert.doesNotMatch(comment, new RegExp(SIGN_OFF));
-  assert.match(comment, /Notes for the Dyad team/);
+  assert.match(comment, /Notes for the Samba Builder team/);
 });
 
 test("composeComment groups related reports that share an outcome", () => {
@@ -270,6 +270,6 @@ test("composeComment groups related reports that share an outcome", () => {
 test("composeFallbackComment greets the reporter", () => {
   assert.equal(
     composeFallbackComment({ author: "reporter" }),
-    "Hi @reporter, thanks for the report. Our automatic first look didn't complete, so someone from the Dyad team will take a look directly.",
+    "Hi @reporter, thanks for the report. Our automatic first look didn't complete, so someone from the Samba Builder team will take a look directly.",
   );
 });

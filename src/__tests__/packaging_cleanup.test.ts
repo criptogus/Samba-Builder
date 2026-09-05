@@ -190,7 +190,7 @@ describe("removeUnusedAppPackageFiles", () => {
 });
 
 describe("removeUnusedCopiedResources", () => {
-  it("keeps active Dyad Electron locales and removes git-lfs", async () => {
+  it("keeps active Samba Builder Electron locales and removes git-lfs", async () => {
     const buildPath = await fs.mkdtemp(
       path.join(os.tmpdir(), "dyad-package-cleanup-resources-"),
     );

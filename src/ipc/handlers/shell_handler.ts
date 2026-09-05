@@ -11,7 +11,7 @@ const logger = log.scope("shell_handlers");
 const handle = createLoggedHandler(logger);
 
 // Hosts whose OAuth flows redirect back into the app via a dyad:// deep link
-// (Neon, Supabase, and Dyad Pro all live under *.dyad.sh).
+// (Neon, Supabase, and Samba Builder all live under *.dyad.sh).
 function isDyadOAuthUrl(url: string): boolean {
   try {
     const host = new URL(url).hostname;
@@ -91,9 +91,9 @@ export function registerShellHandlers() {
     }
 
     // Security: only allow opening files within .dyad/media subdirectories.
-    // The dyad-apps tree contains AI-generated code, so opening arbitrary files
+    // The samba-apps tree contains AI-generated code, so opening arbitrary files
     // there via shell.openPath could execute malicious executables.
-    // App paths may be under the default dyad-apps base directory (normal) or
+    // App paths may be under the default samba-apps base directory (normal) or
     // at an external location (imported with skipCopy).
     if (!isFileWithinAnyDyadMediaDir(fullPath)) {
       throw new DyadError(

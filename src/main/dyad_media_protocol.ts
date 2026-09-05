@@ -177,7 +177,9 @@ export function createDyadMediaProtocolHandler({
             requestedVersion === thumbnail.sourceVersion
               ? "private, max-age=31536000, immutable"
               : "no-store",
-          "X-Dyad-Thumbnail-Cache": thumbnail.cacheHit ? "hit" : "miss",
+          "X-Samba Builder-Thumbnail-Cache": thumbnail.cacheHit
+            ? "hit"
+            : "miss",
         },
       });
     } catch (error) {

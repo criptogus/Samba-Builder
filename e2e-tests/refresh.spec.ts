@@ -15,7 +15,9 @@ testSkipIfWindows(
       return (
         viewMenu?.submenu?.items
           .filter((item) =>
-            ["Reload Dyad", "Force Reload Dyad"].includes(item.label),
+            ["Reload Samba Builder", "Force Reload Samba Builder"].includes(
+              item.label,
+            ),
           )
           .map((item) => ({
             label: item.label,
@@ -24,8 +26,8 @@ testSkipIfWindows(
       );
     });
     expect(reloadItems).toEqual([
-      { label: "Reload Dyad", accelerator: null },
-      { label: "Force Reload Dyad", accelerator: null },
+      { label: "Reload Samba Builder", accelerator: null },
+      { label: "Force Reload Samba Builder", accelerator: null },
     ]);
 
     await po.page.evaluate(() => {

@@ -417,7 +417,7 @@ export const agentActivities = sqliteTable(
     status: text("status", {
       enum: ["pending", "completed", "error", "aborted"],
     }).notNull(),
-    // Existing Dyad XML used to render the activity.
+    // Existing Samba Builder XML used to render the activity.
     presentationXml: text("presentation_xml").notNull(),
     // Validated tool arguments retained for grounded report reconstruction.
     inputJson: text("input_json", { mode: "json" }).$type<Record<

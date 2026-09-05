@@ -1,6 +1,6 @@
 // Single-line markers delimiting each run of the app in the log file. The log
 // is appended across launches, so without these it's ambiguous where one
-// session ends and the next begins. Grep for "===== Dyad " to find them all.
+// session ends and the next begins. Grep for "===== Samba Builder " to find them all.
 //
 // Lines written by the running process carry its pid, because a second instance
 // (a deep link, or a duplicate launch) writes into the same log before quitting.
@@ -25,7 +25,7 @@ export function formatStartBanner({
   electron,
   node,
 }: StartBannerInfo): string {
-  return `${MARKER} Dyad started | pid ${pid} | ${version} | ${platform} ${arch} | electron ${electron} | node ${node} ${MARKER}`;
+  return `${MARKER} Samba Builder started | pid ${pid} | ${version} | ${platform} ${arch} | electron ${electron} | node ${node} ${MARKER}`;
 }
 
 export function formatExitBanner(
@@ -35,7 +35,7 @@ export function formatExitBanner(
 ): string {
   const uptime =
     uptimeMs === undefined ? "" : ` | uptime ${formatUptime(uptimeMs)}`;
-  return `${MARKER} Dyad exiting | pid ${pid} | ${reason}${uptime} ${MARKER}`;
+  return `${MARKER} Samba Builder exiting | pid ${pid} | ${reason}${uptime} ${MARKER}`;
 }
 
 // Not a session boundary: these errors are caught and logged, and the app keeps
@@ -46,7 +46,7 @@ export function formatErrorBanner(
   kind: string,
   uptimeMs: number,
 ): string {
-  return `${MARKER} Dyad main-process error | pid ${pid} | ${kind} | uptime ${formatUptime(uptimeMs)} ${MARKER}`;
+  return `${MARKER} Samba Builder main-process error | pid ${pid} | ${kind} | uptime ${formatUptime(uptimeMs)} ${MARKER}`;
 }
 
 // lastSeenAt is the crashed session's final performance sample. It lags the
@@ -59,7 +59,7 @@ export function formatPreviousSessionBanner(
     startedAt === undefined
       ? "start time unknown"
       : `started ${formatTimestamp(startedAt)}`;
-  return `${MARKER} Dyad previous session ended unexpectedly | ${started}${formatPreviousUptime(startedAt, lastSeenAt)} ${MARKER}`;
+  return `${MARKER} Samba Builder previous session ended unexpectedly | ${started}${formatPreviousUptime(startedAt, lastSeenAt)} ${MARKER}`;
 }
 
 function formatPreviousUptime(

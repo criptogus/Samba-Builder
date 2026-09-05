@@ -164,7 +164,7 @@ describe("local-agent default request (integration)", () => {
     // Shared role block (create/modify web apps) — distinguishes agent mode from
     // the ask-mode "helps users understand" role.
     expect(systemText).toContain(
-      "You are Dyad, an AI assistant that creates and modifies web applications.",
+      "You are Samba Builder, an AI assistant that creates and modifies web applications.",
     );
     // Pro-only file-editing guidance (basic mode uses a shorter table).
     expect(systemText).toContain(

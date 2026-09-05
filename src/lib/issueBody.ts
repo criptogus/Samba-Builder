@@ -22,7 +22,7 @@ const SCREENSHOT_STATUS_PREFIX = "Screenshot status:";
 export function formatScreenshotStatusLine(outcome: ScreenshotOutcome): string {
   switch (outcome.status) {
     case "captured":
-      return `${SCREENSHOT_STATUS_PREFIX} captured (reporter captured a screenshot in Dyad; if no image is attached, ask them to paste it)`;
+      return `${SCREENSHOT_STATUS_PREFIX} captured (reporter captured a screenshot in Samba Builder; if no image is attached, ask them to paste it)`;
     case "declined":
       return `${SCREENSHOT_STATUS_PREFIX} declined`;
     case "capture-failed":
@@ -42,7 +42,7 @@ function formatSettingsLines(
     `- Selected Model: ${model.provider}:${model.name}`,
     `- Chat Mode: ${settings.selectedChatMode ?? "default"}`,
     `- Auto Approve Changes: ${settings.autoApproveChanges ?? "n/a"}`,
-    `- Dyad Pro Enabled: ${settings.enableDyadPro ?? "n/a"}`,
+    `- Samba Builder Enabled: ${settings.enableDyadPro ?? "n/a"}`,
     `- Effort Level: ${selectedModel?.effortLevel ?? "medium"}`,
     `- Runtime Mode: ${settings.runtimeMode2 ?? "n/a"}`,
     `- Release Channel: ${settings.releaseChannel ?? "n/a"}`,
@@ -54,7 +54,7 @@ function formatSystemInfoSection(
   userBudget: UserBudgetInfo | undefined,
 ): string {
   return `## System Information
-- Dyad Version: ${debugInfo.dyadVersion}
+- Samba Builder Version: ${debugInfo.dyadVersion}
 - Platform: ${debugInfo.platform}
 - Architecture: ${debugInfo.architecture}
 - Node Version: ${debugInfo.nodeVersion || "n/a"}

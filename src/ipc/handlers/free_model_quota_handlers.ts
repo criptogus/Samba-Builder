@@ -30,7 +30,7 @@ export async function getFreeModelQuotaStatus() {
 
   if (!settings.enableDyadPro || !isDyadProEnabled(settings) || !apiKey) {
     throw new DyadError(
-      "Dyad Pro must be enabled to check free model quota.",
+      "Samba Builder must be enabled to check free model quota.",
       DyadErrorKind.Auth,
     );
   }
@@ -47,7 +47,7 @@ export async function getFreeModelQuotaStatus() {
   } catch (error) {
     logger.warn("Failed to fetch free model quota.", error);
     throw new DyadError(
-      "Unable to fetch Dyad Free quota.",
+      "Unable to fetch Samba Builder Free quota.",
       DyadErrorKind.External,
     );
   }
@@ -60,7 +60,7 @@ export async function getFreeModelQuotaStatus() {
       `Failed to fetch free model quota. Status: ${response.status}. Body: ${errorSummary}`,
     );
     throw new DyadError(
-      "Unable to fetch Dyad Free quota.",
+      "Unable to fetch Samba Builder Free quota.",
       response.status === 401 || response.status === 403
         ? DyadErrorKind.Auth
         : DyadErrorKind.External,

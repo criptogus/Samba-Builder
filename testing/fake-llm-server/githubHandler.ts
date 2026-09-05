@@ -511,7 +511,7 @@ export function handleGitPush(req: Request, res: Response, next?: Function) {
         execSync(`git init --bare`, { cwd: bareRepoPath });
 
         // Most repos are created via the "create new repo" + sync flow, so they
-        // must start out empty: the very first push from Dyad is a fresh,
+        // must start out empty: the very first push from Samba Builder is a fresh,
         // fast-forward "create" of the default branch. Pre-seeding those repos
         // would make that push diverge (non-fast-forward) and fail.
         //

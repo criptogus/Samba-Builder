@@ -79,7 +79,7 @@ describe("AppRunActorService.executeAlreadyLockedExternalRestart", () => {
       type: "server",
       level: "info",
       message: "Restarting app",
-      sourceName: "Dyad",
+      sourceName: "Samba Builder",
       appId: 7,
       timestamp: expect.any(Number),
       runtimeBoundary: "restart",

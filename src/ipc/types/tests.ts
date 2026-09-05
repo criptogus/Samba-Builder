@@ -32,14 +32,14 @@ export const TEST_SPEC_EXTENSIONS = ["ts", "tsx", "js", "jsx"] as const;
 export const TEST_SPEC_EXT_ALTERNATION = TEST_SPEC_EXTENSIONS.join("|");
 
 /**
- * The app-relative directory where Dyad keeps a user app's Playwright E2E
+ * The app-relative directory where Samba Builder keeps a user app's Playwright E2E
  * specs. Everything that discovers, validates, or runs specs derives from this
  * constant, so the directory convention lives in exactly one place.
  */
 export const E2E_TEST_DIR = "e2e-tests";
 
 /**
- * The directory Dyad used for E2E specs before `E2E_TEST_DIR`. Existing apps may
+ * The directory Samba Builder used for E2E specs before `E2E_TEST_DIR`. Existing apps may
  * still have specs here; the migration flow detects them and offers to move them
  * into `E2E_TEST_DIR`.
  */

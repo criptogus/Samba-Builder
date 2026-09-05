@@ -58,15 +58,15 @@ export function FreeAgentQuotaBanner({
           <p className="text-sm text-amber-700 dark:text-amber-300">
             You have used all {messagesLimit} messages for the free Agent mode
             today. Check back in {resetTimeDisplay} ({resetDateTime}). If you
-            don't want to wait, upgrade to Dyad Pro
+            don't want to wait, upgrade to Samba Builder
             {onSwitchToBuildMode
               ? " or switch to Build mode."
-              : ". To use Build mode, first choose a model other than Dyad Free."}
+              : ". To use Build mode, first choose a model other than Samba Builder Free."}
           </p>
           <div className="flex flex-wrap gap-2">
             <Button onClick={handleUpgrade} size="sm" className="gap-1.5">
               <Sparkles className="h-3.5 w-3.5" />
-              Upgrade to Dyad Pro
+              Upgrade to Samba Builder
             </Button>
             {onSwitchToBuildMode && (
               <Button

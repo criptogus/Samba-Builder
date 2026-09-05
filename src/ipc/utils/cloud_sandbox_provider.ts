@@ -153,7 +153,7 @@ function appendBestEffortPnpmRebuild(
 
 function getDefaultCloudSandboxErrorMessage(status: number): string {
   if (status === 401 || status === 403) {
-    return "Dyad couldn’t authorize the cloud sandbox request. Please try again.";
+    return "Samba Builder couldn’t authorize the cloud sandbox request. Please try again.";
   }
 
   if (status === 404) {
@@ -161,11 +161,11 @@ function getDefaultCloudSandboxErrorMessage(status: number): string {
   }
 
   if (status === 429) {
-    return "Dyad is rate limiting cloud sandbox requests right now. Please try again.";
+    return "Samba Builder is rate limiting cloud sandbox requests right now. Please try again.";
   }
 
   if (status >= 500) {
-    return "Dyad’s cloud sandbox service is temporarily unavailable. Please try again.";
+    return "Samba Builder’s cloud sandbox service is temporarily unavailable. Please try again.";
   }
 
   return `Cloud sandbox request failed with ${status}.`;
@@ -233,7 +233,7 @@ function getDyadEngineApiKey() {
   const apiKey = settings.providerSettings?.auto?.apiKey?.value;
 
   if (!apiKey && !IS_TEST_BUILD) {
-    throw new Error("Dyad Pro API key is required for cloud sandboxes.");
+    throw new Error("Samba Builder API key is required for cloud sandboxes.");
   }
 
   return apiKey;
@@ -1016,7 +1016,7 @@ export function queueCloudSandboxSnapshotSync(input: {
 }
 
 export async function reconcileCloudSandboxes(): Promise<string[]> {
-  // Without a Dyad Pro API key there are no cloud sandboxes to reconcile;
+  // Without a Samba Builder API key there are no cloud sandboxes to reconcile;
   // skip instead of logging an auth error on every startup.
   const apiKey = readSettings().providerSettings?.auto?.apiKey?.value;
   if (!apiKey && !IS_TEST_BUILD) {

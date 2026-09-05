@@ -381,8 +381,8 @@ export function FirstPromptProvider({
             </DialogTitle>
             <DialogDescription>
               {hasConfiguredProvider
-                ? "Change how Dyad accesses AI."
-                : "Choose how Dyad should access AI before generating your app."}
+                ? "Change how Samba Builder accesses AI."
+                : "Choose how Samba Builder should access AI before generating your app."}
             </DialogDescription>
           </DialogHeader>
           <SetupBanner variant="dialog" forceShow />

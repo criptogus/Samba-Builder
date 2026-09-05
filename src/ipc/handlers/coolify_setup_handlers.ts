@@ -178,7 +178,7 @@ function setupController(): CoolifySetupController {
             // goes to the log and the user gets words of ours.
             logger.error("Could not store the admin account early", error);
             throw new DyadError(
-              "Dyad could not save the admin password on this computer, so " +
+              "Samba Builder could not save the admin password on this computer, so " +
                 "it has not started the install — a server it cannot record " +
                 "the password for is one nobody can sign in to. Nothing was " +
                 "sent to the server. Try again once there is room on disk " +
@@ -189,7 +189,7 @@ function setupController(): CoolifySetupController {
         },
         // Written the moment the account exists rather than at the end. A
         // server whose dashboard never answers still has this account on it,
-        // and Dyad is the only thing that knows the password it invented.
+        // and Samba Builder is the only thing that knows the password it invented.
         onAccountKnown: ({ credentials, dashboardUrl }) => {
           try {
             writeSettings({
@@ -238,7 +238,7 @@ function setupController(): CoolifySetupController {
           } else if (provisional && !accountConfirmed) {
             // Nothing was ever seeded, so the password written on the way in
             // opens nothing and comes back off. Nothing stood here before it:
-            // a run cannot start while Dyad holds an account, which is what
+            // a run cannot start while Samba Builder holds an account, which is what
             // the gate above is for.
             try {
               const now = readSettings().coolify;
@@ -279,7 +279,7 @@ function setupController(): CoolifySetupController {
             error.failure === "host-key-rejected"
           ) {
             throw new DyadError(
-              "This server is not the one Dyad looked at: its SSH identity " +
+              "This server is not the one Samba Builder looked at: its SSH identity " +
                 "has changed since. Nothing was sent to it. Check the address " +
                 "and look at the server again before installing.",
               DyadErrorKind.External,
@@ -305,7 +305,7 @@ function setupController(): CoolifySetupController {
                   instanceUrl: result.dashboardUrl,
                 },
                 // The address and token go together: an address stored without a
-                // token would read as an instance Dyad can talk to and cannot.
+                // token would read as an instance Samba Builder can talk to and cannot.
                 //
                 // Only when the address is encrypted. `coolify:save-token`
                 // will not store a token against a plain-HTTP address without
@@ -349,7 +349,7 @@ function setupController(): CoolifySetupController {
                 // panel, and the sentence the screen appends after this one
                 // already says "the details above". On this path the screen
                 // is the only copy of that password.
-                "Dyad could not save these details on this computer. Copy the " +
+                "Samba Builder could not save these details on this computer. Copy the " +
                 "password above before leaving this screen.",
             version: result.version,
           };
@@ -568,7 +568,7 @@ export function registerCoolifySetupHandlers() {
       selectCoolifySetupCapabilities(setupController().getState()).canStart &&
       readSettings().coolify?.admin
     ) {
-      // Dyad holds the only copy of one server's admin password, and a run
+      // Samba Builder holds the only copy of one server's admin password, and a run
       // writes its own over it before the installer starts. The screen that
       // offers this refuses while an account is held, but not over a failure
       // it is reporting — the message and the log live on that screen, so it
@@ -577,7 +577,7 @@ export function registerCoolifySetupHandlers() {
       // has Coolify on it; what is left is installing a different one, which
       // is this.
       throw new DyadError(
-        "Dyad is holding the admin password for a server it set up. Sign out " +
+        "Samba Builder is holding the admin password for a server it set up. Sign out " +
           "of Coolify first — that shows the password one last time and then " +
           "forgets it — before setting up another.",
         DyadErrorKind.Precondition,
@@ -585,7 +585,7 @@ export function registerCoolifySetupHandlers() {
     }
     if (!readyHosts.has(serverKeyFor(input))) {
       throw new DyadError(
-        "Check the server before installing. Dyad shows you its fingerprint " +
+        "Check the server before installing. Samba Builder shows you its fingerprint " +
           "first, so the install goes to the machine that answered rather " +
           "than to whatever holds the address by then.",
         DyadErrorKind.Precondition,
@@ -628,7 +628,7 @@ export function registerCoolifySetupHandlers() {
   // DO NOT LOG this handler: it exists to return secrets.
   createTypedHandler(coolifySetupContracts.revealCredentials, async () => {
     // The user's own credentials for their own server, on their own machine.
-    // Dyad generated the password on their behalf, so refusing to show it
+    // Samba Builder generated the password on their behalf, so refusing to show it
     // would lock them out of something they own.
     const coolify = readSettings().coolify;
     // Each with the address it belongs to, rather than one address over both.
@@ -671,7 +671,7 @@ export function registerCoolifySetupHandlers() {
   createTypedHandler(coolifySetupContracts.cancel, async () => {
     // Abandoning mid-install leaves whatever the installer had done on the
     // server. Nothing here tries to undo it: a half-installed Coolify is
-    // something the user can see and remove, whereas a Dyad that started
+    // something the user can see and remove, whereas a Samba Builder that started
     // deleting directories on their machine is not.
     logger.info("Cancelling Coolify server setup");
     setupController().cancel();

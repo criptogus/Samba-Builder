@@ -528,7 +528,7 @@ export function HelpDialog() {
       skipInitial={!hasNavigated.current}
     >
       <DialogHeader>
-        <DialogTitle>Need help with Dyad?</DialogTitle>
+        <DialogTitle>Need help with Samba Builder?</DialogTitle>
       </DialogHeader>
       <DialogDescription>
         If you need help or want to report an issue, here are some options:
@@ -541,8 +541,8 @@ export function HelpDialog() {
             onClick={() => setIsHelpBotOpen(true)}
             className="w-full py-6 border-primary/50 shadow-sm shadow-primary/10 transition-all hover:shadow-md hover:shadow-primary/15"
           >
-            <SparklesIcon className="mr-2 h-5 w-5" /> Chat with Dyad help bot
-            (Pro)
+            <SparklesIcon className="mr-2 h-5 w-5" /> Chat with Samba Builder
+            help bot (Pro)
           </Button>
         ) : (
           <Button
@@ -571,9 +571,7 @@ export function HelpDialog() {
           <div className="border rounded-lg p-4 space-y-3 relative">
             <div className="flex items-center gap-2">
               <MessageSquareIcon className="h-4 w-4 text-primary" />
-              <span className="text-sm font-semibold">
-                AI / model issues
-              </span>
+              <span className="text-sm font-semibold">AI / model issues</span>
             </div>
             <p className="text-sm text-muted-foreground">
               Best for AI quality issues. Uploads your chat session and code for
@@ -603,8 +601,8 @@ export function HelpDialog() {
               <span className="text-sm font-semibold">Non-AI issues</span>
             </div>
             <p className="text-sm text-muted-foreground">
-              Includes error logs to troubleshoot non-AI issues with Dyad (UI
-              bugs, crashes, setup problems, etc.).
+              Includes error logs to troubleshoot non-AI issues with Samba
+              Builder (UI bugs, crashes, setup problems, etc.).
             </p>
             <Button
               variant="outline"
@@ -671,7 +669,7 @@ export function HelpDialog() {
           )}
 
           <ReviewDetailsSection title="System Information" mono={false}>
-            <p>Dyad Version: {debugBundle.system.dyadVersion}</p>
+            <p>Samba Builder Version: {debugBundle.system.dyadVersion}</p>
             <p>Platform: {debugBundle.system.platform}</p>
             <p>Architecture: {debugBundle.system.architecture}</p>
             <p>

@@ -49,7 +49,7 @@ describe("native theme handlers", () => {
     expect(result).toEqual({ shouldUseDarkColors: true });
   });
 
-  it("publishes native theme changes to every live Dyad window", () => {
+  it("publishes native theme changes to every live Samba Builder window", () => {
     const firstSend = vi.fn();
     const secondSend = vi.fn();
     h.windows = [

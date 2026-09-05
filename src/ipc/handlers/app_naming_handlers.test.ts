@@ -361,7 +361,7 @@ describe("app naming handlers", () => {
       const sourceId = seedAppWithFolder("Source", "source");
       const copyError = Object.assign(
         new Error(
-          "EACCES: permission denied, copyfile '/Users/alice/Dyad/source/private.txt' -> '/Users/alice/Dyad/copy/private.txt'",
+          "EACCES: permission denied, copyfile '/Users/alice/Samba Builder/source/private.txt' -> '/Users/alice/Samba Builder/copy/private.txt'",
         ),
         { code: "EACCES" },
       );
@@ -445,7 +445,7 @@ describe("app naming handlers", () => {
         .run();
       restoreAppFromTestBranchMock.mockResolvedValueOnce(false);
 
-      // No in-memory mark exists: this models a fresh Dyad process whose
+      // No in-memory mark exists: this models a fresh Samba Builder process whose
       // startup recovery could not restore the durable branch marker.
       await expect(
         harness.invokeHandler("run-app", { appId }),

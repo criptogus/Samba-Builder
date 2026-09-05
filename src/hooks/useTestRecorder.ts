@@ -264,7 +264,7 @@ export function useTestRecorder({
   );
 
   /**
-   * Record a `page.goto` for a navigation the user made in Dyad's own chrome:
+   * Record a `page.goto` for a navigation the user made in Samba Builder's own chrome:
    * an app-relative path typed into the preview address bar or picked from its
    * routes dropdown.
    *

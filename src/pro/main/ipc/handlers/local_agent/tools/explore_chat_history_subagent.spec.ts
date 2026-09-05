@@ -116,7 +116,7 @@ describe("runExploreChatHistorySubagent", () => {
     harness.dispose();
   });
 
-  it("throws a Precondition error when the context is not Dyad Pro", async () => {
+  it("throws a Precondition error when the context is not Samba Builder", async () => {
     // makeAgentContext defaults to isDyadPro: false.
     await expect(
       runExploreChatHistorySubagent({
@@ -127,7 +127,7 @@ describe("runExploreChatHistorySubagent", () => {
     expect(mocks.streamText).not.toHaveBeenCalled();
   });
 
-  it("throws a Precondition error when settings do not enable Dyad Pro", async () => {
+  it("throws a Precondition error when settings do not enable Samba Builder", async () => {
     mocks.readSettings.mockReturnValue({
       enableDyadPro: false,
       providerSettings: {

@@ -287,7 +287,7 @@ export const supabaseContracts = {
    *
    * Declares `invalidates` because the handler rewrites a file and may commit
    * it: the mutation's own `onSuccess` refreshes only the window that fired it,
-   * and Dyad can have the same app open in another.
+   * and Samba Builder can have the same app open in another.
    */
   switchAppToPublishableKey: defineContract({
     channel: "supabase:switch-app-to-publishable-key",

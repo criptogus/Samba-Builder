@@ -44,7 +44,7 @@ describe("resolveChatModeForTurn", () => {
     expect(() =>
       assertChatModeCompatibleWithModel(makeFreeProSettings(), "build"),
     ).toThrow(
-      "Dyad Free is not available in Build mode. Switch to Agent, Ask, or Plan mode, or choose a paid model.",
+      "Samba Builder Free is not available in Build mode. Switch to Agent, Ask, or Plan mode, or choose a paid model.",
     );
   });
 });

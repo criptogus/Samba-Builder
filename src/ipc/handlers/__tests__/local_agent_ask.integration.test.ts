@@ -10,7 +10,7 @@
 // payload must contain ONLY the read-only toolset and preserve the engine auth
 // header through the hybrid harness's Node fetch seam.
 //
-// Dyad Pro engine/gateway calls are routed to the harness fake server via
+// Samba Builder engine/gateway calls are routed to the harness fake server via
 // `engine: true`.
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 

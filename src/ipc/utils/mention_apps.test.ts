@@ -36,7 +36,7 @@ vi.mock("@/ipc/utils/query_invalidation_delivery", () => ({
 }));
 
 vi.mock("@/paths/paths", () => ({
-  getDyadAppPath: vi.fn((appPath: string) => `/dyad-apps/${appPath}`),
+  getDyadAppPath: vi.fn((appPath: string) => `/samba-apps/${appPath}`),
 }));
 
 vi.mock("@/utils/codebase", () => ({
@@ -97,7 +97,7 @@ describe("mention app utilities", () => {
 
     expect(dbMocks.findMany).toHaveBeenCalledTimes(1);
     expect(result.references).toEqual([
-      { appName: "foo.app.com", appPath: "/dyad-apps/foo-app" },
+      { appName: "foo.app.com", appPath: "/samba-apps/foo-app" },
     ]);
     expect(result.appIds).toEqual([1]);
     expect(result.changed).toBe(true);
@@ -114,7 +114,7 @@ describe("mention app utilities", () => {
     expect(result.references).toEqual([
       {
         appName: "App With Spaces",
-        appPath: "/dyad-apps/spaced-app",
+        appPath: "/samba-apps/spaced-app",
       },
     ]);
     expect(result.appIds).toEqual([3]);
@@ -130,7 +130,7 @@ describe("mention app utilities", () => {
     });
 
     expect(result.references).toEqual([
-      { appName: "foo.app.com", appPath: "/dyad-apps/foo-app" },
+      { appName: "foo.app.com", appPath: "/samba-apps/foo-app" },
     ]);
     expect(result.appIds).toEqual([1]);
     // Nothing new, so the chat row does not need rewriting.
@@ -188,7 +188,7 @@ describe("mention app utilities", () => {
     });
 
     expect(result.references).toEqual([
-      { appName: "renamed", appPath: "/dyad-apps/moved-app" },
+      { appName: "renamed", appPath: "/samba-apps/moved-app" },
     ]);
     expect(result.changed).toBe(false);
   });

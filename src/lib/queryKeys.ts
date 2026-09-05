@@ -349,9 +349,9 @@ export const queryKeys = {
       ] as const,
     /** What the main process is doing with a server right now. */
     setup: ["coolify", "setup"] as const,
-    /** The public half of the key Dyad puts on servers it sets up. */
+    /** The public half of the key Samba Builder puts on servers it sets up. */
     serverKey: ["coolify", "serverKey"] as const,
-    /** What Dyad knows about signing in to the server it set up. */
+    /** What Samba Builder knows about signing in to the server it set up. */
     credentials: ["coolify", "credentials"] as const,
     /** Every instance's list, for invalidating after a token change. */
     discoveryAll: ["coolify", "discovery"] as const,

@@ -44,7 +44,7 @@ test("reports unique processes using production data", () => {
   );
 });
 
-test("reports the production Dyad process on Windows", () => {
+test("reports the production Samba Builder process on Windows", () => {
   assert.deepEqual(
     getProcessesUsingDataDirectories([], {
       platform: "win32",
@@ -59,12 +59,12 @@ test("replaces development data only after copying durable production data", () 
   const root = mkdtempSync(path.join(os.tmpdir(), "dyad-copy-data-"));
   const source = path.join(root, "production");
   const destination = path.join(root, "userData");
-  mkdirSync(path.join(source, "dyad-apps", "my-app"), { recursive: true });
+  mkdirSync(path.join(source, "samba-apps", "my-app"), { recursive: true });
   mkdirSync(path.join(source, "Cache"), { recursive: true });
   mkdirSync(destination);
   writeFileSync(path.join(source, "sqlite.db"), "production database");
   writeFileSync(path.join(source, "user-settings.json"), "settings");
-  writeFileSync(path.join(source, "dyad-apps", "my-app", "index.ts"), "app");
+  writeFileSync(path.join(source, "samba-apps", "my-app", "index.ts"), "app");
   writeFileSync(path.join(source, "Cache", "cache.bin"), "cache");
   writeFileSync(path.join(destination, "stale.txt"), "stale");
 
@@ -82,7 +82,7 @@ test("replaces development data only after copying durable production data", () 
   );
   assert.equal(
     readFileSync(
-      path.join(destination, "dyad-apps", "my-app", "index.ts"),
+      path.join(destination, "samba-apps", "my-app", "index.ts"),
       "utf8",
     ),
     "app",

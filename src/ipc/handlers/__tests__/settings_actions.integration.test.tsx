@@ -116,7 +116,7 @@ describe("settings actions (integration)", () => {
     );
   });
 
-  it("validates Dyad Pro keys before saving provider settings", async () => {
+  it("validates Samba Builder keys before saving provider settings", async () => {
     resetSettings();
 
     harness.mountSurface({
@@ -125,7 +125,7 @@ describe("settings actions (integration)", () => {
     });
 
     const keyInput = await screen.findByRole("textbox", {
-      name: "Set Dyad API Key",
+      name: "Set Samba Builder API Key",
     });
     fireEvent.change(keyInput, { target: { value: "invalid-dyad-key" } });
     fireEvent.click(screen.getByRole("button", { name: "Save Key" }));
@@ -134,7 +134,9 @@ describe("settings actions (integration)", () => {
     expect(
       within(dialog).getByRole("heading", { name: "API key rejected" }),
     ).toBeTruthy();
-    expect(within(dialog).getByText(/Dyad rejected this API key/)).toBeTruthy();
+    expect(
+      within(dialog).getByText(/Samba Builder rejected this API key/),
+    ).toBeTruthy();
     fireEvent.click(
       within(dialog).getByRole("button", { name: "Try another API key" }),
     );

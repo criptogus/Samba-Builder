@@ -379,7 +379,7 @@ export function SupabaseConnector({ appId }: { appId: number }) {
       } else if (outcome === "already-current") {
         toast.success(t("integrations.supabase.apiKeyAlreadyCurrent"));
       } else {
-        // The key is still legacy and Dyad couldn't act on it. Reporting
+        // The key is still legacy and Samba Builder couldn't act on it. Reporting
         // success here would leave the user believing a broken app was fixed.
         toast.info(t("integrations.supabase.apiKeyNotUpdated"));
       }

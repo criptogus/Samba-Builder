@@ -12,7 +12,7 @@ import {
  * Installing Coolify onto a server, through the packaged app.
  *
  * Two tests, both of which need real Chromium and the shipped build: the whole
- * chain through to a stored token, and a server Dyad refuses. Everything that
+ * chain through to a stored token, and a server Samba Builder refuses. Everything that
  * does not look at the screen belongs in
  * src/coolify_setup/setup_flow.integration.test.ts, which drives the same SSH
  * server in a fraction of the time.
@@ -91,7 +91,7 @@ async function openInstaller(po: any) {
 async function fillAndInstall(po: any) {
   await po.page.getByTestId("coolify-setup-host").fill("127.0.0.1");
   await po.page.getByTestId("coolify-setup-email").fill("me@gmail.com");
-  // Install is offered only for a server Dyad has looked at, so this is the
+  // Install is offered only for a server Samba Builder has looked at, so this is the
   // ordinary path rather than an extra step for the test.
   await po.page.getByTestId("coolify-setup-inspect").click();
   await expect(po.page.getByTestId("coolify-setup-inspection")).toBeVisible({
@@ -131,7 +131,7 @@ test("installs Coolify onto a server and connects to it", async ({ po }) => {
     timeout: Timeout.MEDIUM,
   });
   // The picker being present says only that a token was stored. This says the
-  // address stored with it is one Dyad can actually talk to: the servers came
+  // address stored with it is one Samba Builder can actually talk to: the servers came
   // back from the instance the install pointed it at.
   await po.page.getByTestId("coolify-server-select").click();
   // Named, not "the first option": while discovery is in flight the picker
@@ -141,7 +141,7 @@ test("installs Coolify onto a server and connects to it", async ({ po }) => {
     { timeout: Timeout.MEDIUM },
   );
 
-  // Dyad offered a key rather than a password, and the installer really ran.
+  // Samba Builder offered a key rather than a password, and the installer really ran.
   expect(server().state.keyOffered).toBe(true);
   expect(server().state.commands.some((c) => c.includes("install.sh"))).toBe(
     true,

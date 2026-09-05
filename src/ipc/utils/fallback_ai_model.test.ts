@@ -652,7 +652,7 @@ describe("fallback failure policy", () => {
     expect(calls).toEqual(["gpt-5.6-sol"]);
   });
 
-  it("classifies exhausted provider failures as external Dyad errors", async () => {
+  it("classifies exhausted provider failures as external Samba Builder errors", async () => {
     const calls: string[] = [];
     const transientError = apiCallError({
       message: "service unavailable",

@@ -108,7 +108,7 @@ describe("readCoolifyVersion", () => {
       run: vi.fn(async () => {
         throw new SshError(
           // The connection stopped answering, which is the case this tells
-          // apart from a bound Dyad set on one command.
+          // apart from a bound Samba Builder set on one command.
           "timeout",
           "the connection stopped answering",
           DyadErrorKind.External,
@@ -203,13 +203,13 @@ describe("mintApiToken", () => {
     expect(session.scripts[0]).toContain("session(['currentTeam' => $team])");
   });
 
-  it("asks for the scopes Dyad tells users to tick", async () => {
+  it("asks for the scopes Samba Builder tells users to tick", async () => {
     // Narrower tokens hide a server's private key id, which the deploy path
     // reads to tell a stale key from one it simply cannot see.
     const session = fakeSession([REAL_TOKEN]);
     await mintApiToken(session, "admin@gmail.com");
     // The same list the panel tells a user to tick and the 403 message names,
-    // so a token Dyad mints and one made by hand behave alike. Not root, which
+    // so a token Samba Builder mints and one made by hand behave alike. Not root, which
     // Coolify treats as a bypass of the ability check rather than a scope.
     expect(session.scripts[0]).toContain(COOLIFY_SCOPES_PHP_ARRAY);
     expect(session.scripts[0]).not.toContain("root");
@@ -280,7 +280,7 @@ describe("tryAutomaticAccess", () => {
   });
 
   it("declines quietly on an instance it does not know", async () => {
-    // Not a failure: an instance Dyad did not install is the ordinary case,
+    // Not a failure: an instance Samba Builder did not install is the ordinary case,
     // and the caller asks for a token by hand instead.
     const session = fakeSession(["3.1.0"]);
     expect(await tryAutomaticAccess(session, "admin@gmail.com")).toBeNull();

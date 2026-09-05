@@ -24,17 +24,17 @@ interface AppDeclarations {
 const NO_DECLARATIONS: AppDeclarations = { declaresStart: false };
 
 /**
- * The part of a build configuration Dyad supplies.
+ * The part of a build configuration Samba Builder supplies.
  *
- * One field, because there is one thing left worth saying. Anything Dyad adds
+ * One field, because there is one thing left worth saying. Anything Samba Builder adds
  * here is a claim that overrides what the build pack would have decided, and
- * is worth making only where Dyad knows something the build pack cannot read
+ * is worth making only where Samba Builder knows something the build pack cannot read
  * off the app.
  */
 interface FrameworkKnowledge {
   /**
    * Used only when the app declares no entry point of its own. An app that
-   * names one is describing something Dyad cannot see — a changed Nitro
+   * names one is describing something Samba Builder cannot see — a changed Nitro
    * output directory, a wrapper script — and overriding it would break a
    * configuration that was already correct.
    */
@@ -50,12 +50,12 @@ interface FrameworkKnowledge {
  * both railpack's Caddy and any framework's server bind what they are given.
  *
  * It is a container port, so every app can use the same one. Host ports are
- * Coolify's separate port mappings, which Dyad does not set.
+ * Coolify's separate port mappings, which Samba Builder does not set.
  */
 const DEFAULT_PORT = "3000";
 
 /**
- * What Dyad knows about each framework, over and above what the build pack
+ * What Samba Builder knows about each framework, over and above what the build pack
  * works out for itself.
  *
  * Partial on purpose: a framework belongs here only when there is something
@@ -97,7 +97,7 @@ export function buildConfigForFramework(
   return {
     buildPack: "railpack",
     portsExposes: DEFAULT_PORT,
-    // Absent where Dyad has never supplied one, so a value the user set in
+    // Absent where Samba Builder has never supplied one, so a value the user set in
     // Coolify survives a redeploy. Where it has — an app converted before the
     // conversion started writing a `start` script — the stored command is now
     // stale, and Coolify prefers its own over the app's, so it is cleared

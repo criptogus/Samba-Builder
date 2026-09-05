@@ -343,7 +343,7 @@ describe("useTestRecorder", () => {
     expect(navigatePreview).toHaveBeenCalledWith(1, PREVIEW_URL);
   });
 
-  // A route the user picked through Dyad's chrome IS the starting point, and it
+  // A route the user picked through Samba Builder's chrome IS the starting point, and it
   // is replayed as the session's opening navigation instead.
   it("leaves the preview alone when a start route was chosen", async () => {
     const { store, Wrapper } = makeWrapper();
@@ -660,7 +660,7 @@ describe("useTestRecorder", () => {
     expect(result.current.steps).toEqual([]);
   });
 
-  it("records a navigation made from Dyad's own address bar", async () => {
+  it("records a navigation made from Samba Builder's own address bar", async () => {
     const { result } = await recordingSession({
       iframe: makeIframe(),
       appUrl: true,
@@ -1475,7 +1475,8 @@ describe("useTestRecorder", () => {
       onEnded({
         appId: 1,
         reason: "error",
-        message: "Dyad couldn't restore your app's real database settings",
+        message:
+          "Samba Builder couldn't restore your app's real database settings",
       });
       return { ok: true };
     });

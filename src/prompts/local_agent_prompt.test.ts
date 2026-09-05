@@ -26,7 +26,9 @@ import {
 
 const expectGitContextGuidance = (prompt: string) => {
   expect(prompt).toContain("<git_context>");
-  expect(prompt).toContain("Dyad may add Git provenance to a user message");
+  expect(prompt).toContain(
+    "Samba Builder may add Git provenance to a user message",
+  );
   expect(prompt).toContain(
     "identifies the app state at the start of that turn",
   );
@@ -38,7 +40,9 @@ const expectGitContextGuidance = (prompt: string) => {
 
 const expectBuildGitContextGuidance = (prompt: string) => {
   expect(prompt).toContain("<git_context>");
-  expect(prompt).toContain("Dyad may add Git provenance to a user message");
+  expect(prompt).toContain(
+    "Samba Builder may add Git provenance to a user message",
+  );
   expect(prompt).toContain(
     "identifies the app state at the start of that turn",
   );
@@ -179,7 +183,7 @@ describe("local_agent_prompt", () => {
       supabaseConnected: true,
     });
 
-    expect(prompt).toContain("You are Dyad Implementer");
+    expect(prompt).toContain("You are Samba Builder Implementer");
     expect(prompt).toContain('<provider_invariants provider="supabase">');
     expect(prompt).toContain(SUPABASE_SERVICE_ROLE_BROWSER_RULE);
     expect(prompt).toContain(SUPABASE_GRANTS_AND_RLS_RULE);
@@ -426,7 +430,7 @@ describe("local_agent_prompt", () => {
     expect(prompt).toContain('<app_blueprint mode="required">');
     expect(prompt).toContain("Required App Blueprint Gate");
     expect(prompt).toContain(
-      "Blueprint mode is enabled for this turn. Dyad has already determined",
+      "Blueprint mode is enabled for this turn. Samba Builder has already determined",
     );
     expect(prompt).toContain("write_app_blueprint");
     expect(prompt).toContain("planning_questionnaire");

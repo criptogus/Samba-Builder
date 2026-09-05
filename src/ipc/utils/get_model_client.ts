@@ -145,7 +145,7 @@ export async function getModelClient(
   const dyadApiKey = settings.enableDyadPro
     ? getProviderApiKeyForRequest(
         settings.providerSettings?.auto?.apiKey?.value,
-        "Dyad",
+        "Samba Builder",
       )
     : undefined;
   const isDyadProEnabledForRequest = Boolean(
@@ -158,7 +158,7 @@ export async function getModelClient(
     !isDyadProEnabledForRequest
   ) {
     throw new DyadError(
-      "Auto (balanced) requires Dyad Pro. Switch to another model or enable Dyad Pro.",
+      "Auto (balanced) requires Samba Builder. Switch to another model or enable Samba Builder.",
       DyadErrorKind.Auth,
     );
   }
@@ -175,15 +175,15 @@ export async function getModelClient(
 
   if (isFreeProModel(model) && (!settings.enableDyadPro || !dyadApiKey)) {
     throw new DyadError(
-      "Dyad Free requires an active Dyad Pro API key. Switch to another model or enable Dyad Pro.",
+      "Samba Builder Free requires an active Samba Builder API key. Switch to another model or enable Samba Builder.",
       DyadErrorKind.Auth,
     );
   }
 
-  // Handle Dyad Pro override
+  // Handle Samba Builder override
   if (isDyadProEnabledForRequest) {
     const dyadEngineUrl = process.env.DYAD_ENGINE_URL;
-    // Check if the selected provider supports Dyad Pro (has a gateway prefix) OR
+    // Check if the selected provider supports Samba Builder (has a gateway prefix) OR
     // we're using local engine.
     // IMPORTANT: some providers like OpenAI have an empty string gateway prefix,
     // so we do a nullish and not a truthy check here.
@@ -206,11 +206,11 @@ export async function getModelClient(
       });
 
       logger.debug(
-        `\x1b[1;97;44m Using Dyad Pro API key for model: ${model.name} \x1b[0m`,
+        `\x1b[1;97;44m Using Samba Builder API key for model: ${model.name} \x1b[0m`,
       );
 
       logger.debug(
-        `\x1b[1;30;42m Using Dyad Pro engine: ${dyadEngineUrl ?? "<prod>"} \x1b[0m`,
+        `\x1b[1;30;42m Using Samba Builder engine: ${dyadEngineUrl ?? "<prod>"} \x1b[0m`,
       );
 
       // Do not use free variant (for openrouter).
@@ -230,7 +230,7 @@ export async function getModelClient(
       };
     } else {
       logger.warn(
-        `Dyad Pro enabled, but provider ${model.provider} does not have a gateway prefix defined. Falling back to direct provider connection.`,
+        `Samba Builder enabled, but provider ${model.provider} does not have a gateway prefix defined. Falling back to direct provider connection.`,
       );
       // Fall through to regular provider logic if gateway prefix is missing
     }
@@ -441,7 +441,7 @@ async function getProModelClient({
         // The stream's call options are computed for the PRIMARY selection, so
         // give each chain entry the options it would have received had IT been
         // selected: its own temperature and output cap from the catalog.
-        // Provider-family thinking options are already injected by the Dyad
+        // Provider-family thinking options are already injected by the Samba Builder
         // Engine fetch wrapper from this entry's providerId; adding e.g.
         // providerOptions.google here would be ignored because these AI SDK
         // model instances read the dyad-engine provider-options key.

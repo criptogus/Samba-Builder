@@ -30,7 +30,7 @@ describe("default chat mode selector (integration)", () => {
       electronMock: h,
       autoApprove: true,
       chatMode: "local-agent",
-      // Dyad Pro settings trigger free-quota fetches; route them to the fake
+      // Samba Builder settings trigger free-quota fetches; route them to the fake
       // engine instead of the real engine.dyad.sh.
       engine: true,
       settings: { isTestMode: true, ...DYAD_PRO_SETTINGS },

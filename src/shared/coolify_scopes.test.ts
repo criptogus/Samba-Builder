@@ -5,7 +5,7 @@ import {
   COOLIFY_SCOPES_PHP_ARRAY,
 } from "./coolify_scopes";
 
-describe("the scopes Dyad asks for", () => {
+describe("the scopes Samba Builder asks for", () => {
   it("asks for exactly these four", () => {
     // Written out rather than derived. Every other assertion about scopes in
     // the repo comes from this array, so only a literal notices the array

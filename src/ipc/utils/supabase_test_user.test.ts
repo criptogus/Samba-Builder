@@ -330,7 +330,7 @@ describe("createTempTestUser", () => {
     expect(init.headers.apikey).toBe("eyJ.legacy-service-role");
 
     expect(error.message).toMatch(/Create a secret key in Supabase/);
-    // User-fixable setup problem, not a Dyad failure worth reporting.
+    // User-fixable setup problem, not a Samba Builder failure worth reporting.
     expect(error.kind).toBe(DyadErrorKind.Precondition);
   });
 });

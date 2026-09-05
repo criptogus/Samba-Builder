@@ -100,7 +100,7 @@ describe("GitService", () => {
     });
     expect(mocks.gitCommit).toHaveBeenCalledWith({
       path: "/repo",
-      message: "Init Dyad app",
+      message: "Init Samba Builder app",
     });
     expect(hash).toBe("commit-hash");
   });

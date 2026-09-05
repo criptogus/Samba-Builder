@@ -10,7 +10,7 @@ import type { SshSession } from "@/ipc/utils/ssh_client";
 import { DyadErrorKind } from "@/errors/dyad_error";
 
 /**
- * What Dyad concludes when a server does not answer properly.
+ * What Samba Builder concludes when a server does not answer properly.
  *
  * The interesting cases here are not the ones where a server says something
  * unexpected — they are the ones where it says nothing at all, because every
@@ -229,7 +229,7 @@ describe("waiting for the admin account", () => {
 
   it("hands back a server to sign in to when the seeder itself dies", async () => {
     // Coolify is on the machine either way. Ending the run here would report
-    // an install that did not happen and take the password Dyad invented down
+    // an install that did not happen and take the password Samba Builder invented down
     // with it, when the honest answer is to go and sign in by hand.
     const session = sessionAnswering(
       vi.fn(async (command: string) => {

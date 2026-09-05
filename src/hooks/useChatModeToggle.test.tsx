@@ -150,7 +150,7 @@ describe("useChatModeToggle", () => {
     expect(mocks.setChatMode).toHaveBeenCalledWith("plan");
   });
 
-  it("skips Build when Dyad Free is selected", () => {
+  it("skips Build when Samba Builder Free is selected", () => {
     mocks.selectedMode = "plan";
     mocks.selectedModel = { provider: "auto", name: "free-pro" };
 

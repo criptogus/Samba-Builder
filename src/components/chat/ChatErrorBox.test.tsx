@@ -51,7 +51,7 @@ describe("ChatErrorBox Basic Agent quota error", () => {
     ).toBeTruthy();
     expect(screen.getByText(/Your quota resets at/)).toBeTruthy();
 
-    fireEvent.click(screen.getByText("Upgrade to Dyad Pro"));
+    fireEvent.click(screen.getByText("Upgrade to Samba Builder"));
     expect(mocks.openExternalUrl).toHaveBeenCalledWith(
       "https://dyad.sh/pro?utm_source=dyad-app&utm_medium=app&utm_campaign=free-agent-quota-exceeded",
     );
@@ -61,7 +61,7 @@ describe("ChatErrorBox Basic Agent quota error", () => {
     expect(onDismiss).not.toHaveBeenCalled();
   });
 
-  it("explains that Dyad Free must be changed before using Build", () => {
+  it("explains that Samba Builder Free must be changed before using Build", () => {
     render(
       <ChatErrorBox
         error='{"type":"FREE_AGENT_QUOTA_EXCEEDED","resetTime":1787295600000}'
@@ -71,7 +71,7 @@ describe("ChatErrorBox Basic Agent quota error", () => {
     );
 
     expect(
-      screen.getByText(/first choose a model other than Dyad Free/),
+      screen.getByText(/first choose a model other than Samba Builder Free/),
     ).toBeTruthy();
     expect(
       screen.queryByRole("button", { name: "Switch to Build" }),

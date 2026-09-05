@@ -2,7 +2,7 @@
   "name": "dyad-keychain-reader",
   "version": "1.0.0",
   "private": true,
-  "description": "macOS Security.framework Keychain reader for Dyad safeStorage recovery",
+  "description": "macOS Security.framework Keychain reader for Samba Builder safeStorage recovery",
   "main": "index.js",
   "scripts": {
     "install": "node-gyp rebuild"

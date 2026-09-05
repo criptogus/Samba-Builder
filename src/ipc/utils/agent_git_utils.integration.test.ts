@@ -252,7 +252,7 @@ describe("agent Git utilities", () => {
     expect(result.content).not.toContain("do-not-leak");
   });
 
-  it("includes pnpm workspace patches while omitting Dyad-internal patches", async () => {
+  it("includes pnpm workspace patches while omitting Samba Builder-internal patches", async () => {
     await fs.promises.mkdir(path.join(repo, ".dyad"));
     await fs.promises.writeFile(
       path.join(repo, "pnpm-workspace.yaml"),

@@ -466,7 +466,7 @@ describe("tryEnableHttps", () => {
 
   it("still accepts a custom domain whose name simply has no records yet", async () => {
     // The resolver answered. A name minutes old has nothing to say and the
-    // certificate wait is the real test, which is not the same as Dyad never
+    // certificate wait is the real test, which is not the same as Samba Builder never
     // having got an answer at all.
     const { session } = fakeSession();
     const result = await tryEnableHttps(session, "203.0.113.5", {

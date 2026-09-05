@@ -178,13 +178,13 @@ describe("ProviderSettingsPage", () => {
     });
   });
 
-  it("resumes an implicit first prompt with the new Dyad Pro default", async () => {
+  it("resumes an implicit first prompt with the new Samba Builder default", async () => {
     mocks.hasArmedPayload = true;
     mocks.validateProviderApiKey.mockResolvedValue(undefined);
     mocks.updateSettings.mockResolvedValue(undefined);
 
     renderProviderSettingsPage("auto");
-    await saveApiKey("Dyad", "auto");
+    await saveApiKey("Samba Builder", "auto");
 
     await waitFor(() =>
       expect(mocks.sendFirstPrompt).toHaveBeenCalledWith({

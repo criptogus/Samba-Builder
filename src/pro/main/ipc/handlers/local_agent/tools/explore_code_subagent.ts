@@ -140,7 +140,7 @@ export async function runExploreCodeSubagent({
   let explainBounceUsed = false;
   // Set only when a report is finally accepted (not on a bounced submit_report).
   // Used to stop the agent loop right after acceptance so the AI SDK does not
-  // spend an extra Dyad Engine step feeding the "Report accepted." tool result
+  // spend an extra Samba Builder Engine step feeding the "Report accepted." tool result
   // back to the model (which could also run more read-only tools post-report).
   let reportFinalized = false;
 
@@ -363,7 +363,7 @@ function renderFinalReport({
 function assertDyadValueAvailable(settings: UserSettings): void {
   if (!settings.enableDyadPro || !settings.providerSettings?.auto?.apiKey) {
     throw new DyadError(
-      "explore_code sub-agent requires Dyad Pro with an auto provider API key",
+      "explore_code sub-agent requires Samba Builder with an auto provider API key",
       DyadErrorKind.Precondition,
     );
   }

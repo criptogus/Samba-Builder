@@ -72,7 +72,7 @@ export function SupabaseLegacyKeyBanner({ appId }: { appId: number | null }) {
       } else if (outcome === "already-current") {
         showInfo(t("integrations.supabase.apiKeyAlreadyCurrent"));
       } else {
-        // Still on the legacy key, but not one Dyad can swap — saying "already
+        // Still on the legacy key, but not one Samba Builder can swap — saying "already
         // up to date" here would be a plain falsehood.
         showInfo(t("integrations.supabase.apiKeyNotUpdated"));
       }

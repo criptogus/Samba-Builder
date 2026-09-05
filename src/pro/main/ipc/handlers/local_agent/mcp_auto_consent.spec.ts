@@ -103,7 +103,7 @@ describe("buildMcpAutoApprove", () => {
     args: { a: 1 },
   };
 
-  it("does not build an auto-approve callback for Dyad Free turns", () => {
+  it("does not build an auto-approve callback for Samba Builder Free turns", () => {
     const autoApprove = buildMcpAutoApprove({
       ...baseParams,
       freeModelMode: true,

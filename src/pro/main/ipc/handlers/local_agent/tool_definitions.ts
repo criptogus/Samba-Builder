@@ -439,7 +439,7 @@ export interface BuildAgentToolSetOptions {
    */
   basicAgentMode?: boolean;
   /**
-   * If true, exclude tools that call separate Dyad Engine endpoints.
+   * If true, exclude tools that call separate Samba Builder Engine endpoints.
    * The free Pro model only uses the engine chat-completions endpoint.
    */
   freeModelMode?: boolean;

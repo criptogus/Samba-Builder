@@ -875,7 +875,7 @@ export interface CreatedSupabaseProjectResponse {
 }
 
 /**
- * Generated and deliberately never surfaced or stored: Dyad reaches projects
+ * Generated and deliberately never surfaced or stored: Samba Builder reaches projects
  * through the Management API and their API keys, so nothing needs it, and
  * holding a Postgres superuser password would be a liability. Users reset it
  * from the Supabase dashboard for direct access.
@@ -1478,7 +1478,7 @@ export function classifyManagementApiError(
     (error.response.status === 401 || error.response.status === 403)
   ) {
     return new DyadError(
-      `Supabase would not authorize Dyad to ${action}. Reconnect your Supabase account in Settings, or check that this organization still has access to the project. Original error: ${message}`,
+      `Supabase would not authorize Samba Builder to ${action}. Reconnect your Supabase account in Settings, or check that this organization still has access to the project. Original error: ${message}`,
       DyadErrorKind.Auth,
     );
   }

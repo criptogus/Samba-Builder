@@ -2,7 +2,7 @@
  * dyad-auth-bootstrap.js
  *
  * Injected into the preview iframe by the proxy server. Before a recording
- * session starts, the Dyad renderer sends the isolated test user's credentials
+ * session starts, the Samba Builder renderer sends the isolated test user's credentials
  * and this script establishes an authenticated session the SAME way the app's
  * own login would — so the user never has to record a sign-in, and the
  * generated test's `signIn` fixture mirrors this exact path at replay time.
@@ -21,12 +21,12 @@
  *
  * `nonce` identifies one sign-in attempt. Sign-in spans a document navigation
  * (sign in → replace("/") → verify), and the marker carrying state across it
- * lives in sessionStorage — scoped to the long-lived Dyad window, not to the
+ * lives in sessionStorage — scoped to the long-lived Samba Builder window, not to the
  * attempt. The nonce is how the new document tells "the marker this attempt just
  * wrote" from "one an earlier attempt abandoned".
  */
 (() => {
-  // A source check proves only which window sent the message, not that Dyad is
+  // A source check proves only which window sent the message, not that Samba Builder is
   // the window framing this otherwise-framable origin. The proxy embeds a
   // per-worker capability in this script tag; the trusted renderer learns the
   // matching value from main-process IPC and echoes it with the credentials.

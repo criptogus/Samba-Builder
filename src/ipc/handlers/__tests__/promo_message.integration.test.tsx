@@ -119,7 +119,7 @@ describe("promo message (integration)", () => {
       {},
       { timeout: 15_000 },
     );
-    expect(promo.textContent).toMatch(/Dyad|GitHub|subreddit|X/);
+    expect(promo.textContent).toMatch(/Samba Builder|GitHub|subreddit|X/);
     expect(within(promo).getByRole("button")).toBeTruthy();
 
     await harness.waitForStreamEnd(chatId);
@@ -192,7 +192,7 @@ describe("promo message (integration)", () => {
         name: message.cta,
       }),
     );
-    expect(await screen.findByText("Unlock Dyad Pro")).toBeTruthy();
+    expect(await screen.findByText("Unlock Samba Builder")).toBeTruthy();
   }, 60_000);
 
   it("opens an external URL from a community promo CTA", async () => {

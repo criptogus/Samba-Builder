@@ -876,7 +876,7 @@ describe("jsonSchemaToTs", () => {
   describe("definitions & $ref", () => {
     // Local $ref / $defs / definitions only. Remote refs (http://, file://)
     // are deliberately not implemented — the schema author would otherwise
-    // get to make the Dyad main process fetch arbitrary URLs (SSRF). An
+    // get to make the Samba Builder main process fetch arbitrary URLs (SSRF). An
     // unresolved or remote $ref renders as `unknown`.
     it("resolves local $ref against $defs", () => {
       const out = jsonSchemaToTs({
@@ -1060,7 +1060,7 @@ describe("jsonSchemaToTs", () => {
   //      Honored because many MCP servers come from OpenAPI specs.
   //   7. Remote `$ref` (http://, file://, relative file paths) renders as
   //      `unknown`. Resolving them would let third-party schemas trigger
-  //      arbitrary URL fetches from the Dyad main process (SSRF defense).
+  //      arbitrary URL fetches from the Samba Builder main process (SSRF defense).
   //   8. Dynamic refs (`$dynamicAnchor` / `$dynamicRef`) are not resolved —
   //      they encode runtime polymorphic dispatch with no static equivalent.
   //   9. `unevaluatedItems` is not applied. The standalone-schema case is

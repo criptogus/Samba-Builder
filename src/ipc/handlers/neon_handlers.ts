@@ -518,7 +518,7 @@ export function registerNeonHandlers() {
     }
   });
 
-  // Link an existing Neon project to a Dyad app
+  // Link an existing Neon project to a Samba Builder app
   createLockedHandler(neonContracts.setAppProject, async (_, params) => {
     const { appId, projectId } = params;
     logger.info(`Setting Neon project ${projectId} for app ${appId}`);
@@ -679,7 +679,7 @@ export function registerNeonHandlers() {
     }
   });
 
-  // Unlink a Neon project from a Dyad app
+  // Unlink a Neon project from a Samba Builder app
   createLockedHandler(neonContracts.unsetAppProject, async (_, params) => {
     const { appId } = params;
     logger.info(`Unsetting Neon project for app ${appId}`);

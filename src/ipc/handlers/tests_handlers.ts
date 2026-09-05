@@ -835,11 +835,11 @@ export async function runAppTestsCore({
   // interpreted as a shell command. A line suffix (`file:line`) targets a
   // single test; the line is validated to be a positive integer at the IPC
   // boundary, so it can't smuggle a flag.
-  // Always select Dyad's config by name. Playwright auto-resolves
+  // Always select Samba Builder's config by name. Playwright auto-resolves
   // `playwright.config.ts` — the app's own file, which may not exist, may
   // hardcode a baseURL, or may point at a different testDir. Ours is the only
   // one that honors DYAD_TEST_BASE_URL, so it's passed explicitly rather than
-  // Dyad taking over the canonical config name.
+  // Samba Builder taking over the canonical config name.
   const args = ["test", "--config", DYAD_CONFIG_FILENAME];
   appendRequestedTestTarget(args, normalizedTestFile ?? undefined, testLine);
   // `-g <regex>` narrows the run to the tests whose title matches (same as the
@@ -1279,7 +1279,7 @@ export async function runAppTestsWithIsolation({
   ): RunAppTestsResult => {
     if (!envRestoreFailed) return result;
     const restoreMessage =
-      "Dyad couldn't restore your app's real database settings after the test run. Restore .env.local before running the app again.";
+      "Samba Builder couldn't restore your app's real database settings after the test run. Restore .env.local before running the app again.";
     return {
       ...result,
       // Appended rather than substituted: an isolation-setup failure explains

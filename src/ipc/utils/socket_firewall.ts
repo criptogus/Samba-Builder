@@ -292,13 +292,13 @@ function findAllowBuildsManagedBlock(lines: string[]): {
     const beginIndex = beginIndexes[0];
     const endIndex = endIndexes[0];
     if (beginIndex >= endIndex) {
-      throw new Error("Malformed Dyad pnpm allow-builds markers.");
+      throw new Error("Malformed Samba Builder pnpm allow-builds markers.");
     }
     return { beginIndex, endIndex };
   }
 
   if (beginIndexes.length !== endIndexes.length || beginIndexes.length > 1) {
-    throw new Error("Malformed Dyad pnpm allow-builds markers.");
+    throw new Error("Malformed Samba Builder pnpm allow-builds markers.");
   }
 
   if (
@@ -311,7 +311,9 @@ function findAllowBuildsManagedBlock(lines: string[]): {
       );
     })
   ) {
-    throw new Error("Unsupported Dyad pnpm allow-builds marker version.");
+    throw new Error(
+      "Unsupported Samba Builder pnpm allow-builds marker version.",
+    );
   }
 
   return null;
@@ -414,7 +416,7 @@ function parseAllowBuildsLine(
 // pnpm 11 appends `pkg: set this to true or false` placeholder entries to
 // allowBuilds after a non-strict install that ignored builds. A placeholder
 // neither satisfies strict mode (installs still fail with
-// ERR_PNPM_IGNORED_BUILDS) nor represents a human decision, so Dyad treats
+// ERR_PNPM_IGNORED_BUILDS) nor represents a human decision, so Samba Builder treats
 // these as its own to resolve: remove them and let the caller convert them
 // into tagged denials (or a managed `true` when the allow-list covers them).
 const PNPM_PLACEHOLDER_ALLOW_BUILDS_VALUE_PATTERN =

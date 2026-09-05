@@ -94,7 +94,7 @@ describe("buildBugReportBody", () => {
     });
     expect(body).toContain("## Bug Description (required)");
     expect(body).toContain("## System Information");
-    expect(body).toContain("- Dyad Version: 1.2.3");
+    expect(body).toContain("- Samba Builder Version: 1.2.3");
     expect(body).toContain("## Settings");
     expect(body).toContain("## Logs");
   });

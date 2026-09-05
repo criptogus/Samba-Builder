@@ -63,7 +63,7 @@ beforeEach(() => {
 describe("acknowledging the loss", () => {
   it("will not sign out until the box is ticked", async () => {
     // The whole point of the dialog: the password below is about to go and
-    // Dyad has the only copy, so confirming has to be a separate act.
+    // Samba Builder has the only copy, so confirming has to be a separate act.
     await openAndSettle();
 
     expect(signOutButton().disabled).toBe(true);
@@ -169,7 +169,7 @@ describe("nothing to look at yet", () => {
     open();
 
     expect(
-      await screen.findAllByText(/Looking up what Dyad has stored/),
+      await screen.findAllByText(/Looking up what Samba Builder has stored/),
     ).toHaveLength(1);
   });
 
@@ -185,7 +185,7 @@ describe("nothing to look at yet", () => {
     const addendum = await waitFor(() =>
       screen.getByTestId("coolify-sign-out-locked-password"),
     );
-    // Said once. The panel below states what Dyad is holding; this only adds
+    // Said once. The panel below states what Samba Builder is holding; this only adds
     // what signing out does to it, so both saying it reads as a stutter.
     expect(screen.queryAllByText(/holding an admin password/i)).toHaveLength(1);
     // And said after it, for the same reason the read failure is.
@@ -219,8 +219,8 @@ describe("the last look", () => {
     );
   });
 
-  it("does not say it for an instance Dyad did not set up", async () => {
-    // Connected by pasting a token, so nothing here was invented by Dyad and
+  it("does not say it for an instance Samba Builder did not set up", async () => {
+    // Connected by pasting a token, so nothing here was invented by Samba Builder and
     // a warning about losing it forever would be untrue.
     h.revealCredentials.mockResolvedValue({ ...FULL, server: null });
     await openAndSettle();

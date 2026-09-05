@@ -5,7 +5,7 @@ import { parseFullMessage } from "@/lib/streamingMessageParser";
  * chat_search_fts index and for read_chat output.
  *
  * The projection policy is deliberately conservative: assistant messages can
- * embed entire files, SQL dumps, diffs, logs, and tool payloads inside Dyad
+ * embed entire files, SQL dumps, diffs, logs, and tool payloads inside Samba Builder
  * tags, and none of that belongs in chat recall. Only conversational signal
  * (prose, plans, summaries, findings) keeps its body; payload-bearing tags
  * are reduced to short metadata; unknown tags fail closed to metadata-only.

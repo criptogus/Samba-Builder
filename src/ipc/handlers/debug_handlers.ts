@@ -109,7 +109,7 @@ async function getSystemDebugInfo({
     console.error("Failed to get node path:", err);
   }
 
-  // Get Dyad version from package.json
+  // Get Samba Builder version from package.json
   const packageJsonPath = path.resolve(__dirname, "..", "..", "package.json");
   let dyadVersion = "unknown";
   try {
@@ -323,7 +323,7 @@ export function registerDebugHandlers() {
     try {
       const settings = readSettings();
 
-      // Get Dyad version
+      // Get Samba Builder version
       const packageJsonPath = path.resolve(
         __dirname,
         "..",

@@ -355,7 +355,7 @@ export function LexicalChatInput({
   onSubmit,
   onPaste,
   excludeCurrentApp,
-  placeholder = "Ask Dyad to build...",
+  placeholder = "Ask Samba Builder to build...",
   disabled = false,
   disableSendButton,
   messageHistory = [],

@@ -159,7 +159,7 @@ export interface ChatFlowHarnessOptions {
    */
   useFakeCatalog?: boolean;
   /**
-   * Point Dyad Engine and Gateway calls at this harness's fake LLM server.
+   * Point Samba Builder Engine and Gateway calls at this harness's fake LLM server.
    * Useful for Pro/local-agent fixtures without import-time env relay setup.
    */
   engine?: boolean;
@@ -296,7 +296,7 @@ export async function setupChatFlowHarness(
     if (options.useFakeCatalog !== false) {
       process.env.DYAD_LANGUAGE_MODEL_CATALOG_URL = `${fakeLlmUrl}/api/language-model-catalog`;
     }
-    // Always fake the Dyad Pro user-info endpoint: any test that configures an
+    // Always fake the Samba Builder user-info endpoint: any test that configures an
     // auto API key would otherwise send get-user-budget requests to the real
     // api.dyad.sh.
     process.env.DYAD_USER_INFO_URL = `${fakeLlmUrl}/api/user/info`;

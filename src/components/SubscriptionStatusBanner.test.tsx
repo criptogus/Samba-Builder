@@ -92,17 +92,17 @@ describe("SubscriptionStatusBanner", () => {
   it.each([
     {
       alert: "payment_past_due" as const,
-      text: "Payment failed. Update your payment method to keep Dyad Pro active.",
+      text: "Payment failed. Update your payment method to keep Samba Builder active.",
       action: "Update payment method",
     },
     {
       alert: "subscription_ending" as const,
-      text: "Your Dyad Pro subscription ends in 20 days. You will lose 650 credits.",
+      text: "Your Samba Builder subscription ends in 20 days. You will lose 650 credits.",
       action: "Manage subscription",
     },
     {
       alert: "subscription_paused" as const,
-      text: "Your Dyad Pro subscription is paused.",
+      text: "Your Samba Builder subscription is paused.",
       action: "Resume subscription",
     },
   ])("renders the $alert localized variant", ({ alert, text, action }) => {
@@ -172,7 +172,7 @@ describe("SubscriptionStatusBanner", () => {
 
     expect(
       screen.getByText(
-        "Your Dyad Pro subscription ends in 1 day. You will lose 1 credit.",
+        "Your Samba Builder subscription ends in 1 day. You will lose 1 credit.",
       ),
     ).not.toBeNull();
   });
@@ -188,7 +188,7 @@ describe("SubscriptionStatusBanner", () => {
 
     expect(
       screen.getByText(
-        "Your Dyad Pro subscription ends today. You will lose 650 credits.",
+        "Your Samba Builder subscription ends today. You will lose 650 credits.",
       ),
     ).not.toBeNull();
   });
@@ -280,8 +280,12 @@ describe("SubscriptionStatusBanner", () => {
   });
 
   it.each([
-    ["pt-BR", "Sua assinatura do Dyad Pro está pausada.", "Retomar assinatura"],
-    ["zh-CN", "您的 Dyad Pro 订阅已暂停。", "恢复订阅"],
+    [
+      "pt-BR",
+      "Sua assinatura do Samba Builder está pausada.",
+      "Retomar assinatura",
+    ],
+    ["zh-CN", "您的 Samba Builder 订阅已暂停。", "恢复订阅"],
   ])("renders localized copy in %s", async (language, text, action) => {
     await i18n.changeLanguage(language);
     mocks.status = {

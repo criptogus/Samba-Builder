@@ -224,7 +224,7 @@ vi.mock("@/hooks/useLanguageModelsByProviders", () => ({
             },
             {
               apiName: "free-pro",
-              displayName: "Dyad Free",
+              displayName: "Samba Builder Free",
               description: "Free Pro model",
               type: "cloud",
               tag: "Free",
@@ -337,7 +337,7 @@ vi.mock("@/hooks/useLanguageModelProviders", () => ({
     data: [
       {
         id: "auto",
-        name: "Dyad",
+        name: "Samba Builder",
         type: "cloud",
       },
       {
@@ -569,12 +569,12 @@ describe("ModelPicker", () => {
     expect(screen.queryByText("Premium")).toBeNull();
     expect(screen.queryByText("Local models")).toBeNull();
     expect(screen.queryByText("Free (OpenRouter)")).toBeNull();
-    expect(screen.getByText("Dyad Free")).toBeTruthy();
+    expect(screen.getByText("Samba Builder Free")).toBeTruthy();
     expect(screen.getByText("2/5 left")).toBeTruthy();
     expect(screen.getByText("Data sharing")).toBeTruthy();
     expect(
       screen
-        .getByText("Dyad Free")
+        .getByText("Samba Builder Free")
         .closest("button")
         ?.getAttribute("aria-label"),
     ).toContain("2/5 left. Data sharing");
@@ -1235,7 +1235,7 @@ describe("ModelPicker", () => {
     ]);
   });
 
-  it("keeps the non-Pro root compact while preserving its Dyad choices", () => {
+  it("keeps the non-Pro root compact while preserving its Samba Builder choices", () => {
     mocks.settings.enableDyadPro = false;
     mocks.settings.providerSettings.auto.apiKey.value = "";
 
@@ -1246,11 +1246,11 @@ describe("ModelPicker", () => {
     expect(screen.queryByText("GPT 5")).toBeNull();
     expect(screen.getByText("All models")).toBeTruthy();
     expect(screen.queryByText("Other AI providers")).toBeNull();
-    expect(screen.queryByText("Dyad Free")).toBeNull();
+    expect(screen.queryByText("Samba Builder Free")).toBeNull();
     expect(screen.getByText("Free (OpenRouter)")).toBeTruthy();
   });
 
-  it("shows Auto (balanced) to Dyad Pro users", () => {
+  it("shows Auto (balanced) to Samba Builder users", () => {
     render(<ModelPicker />);
 
     expect(screen.getByText("Auto (balanced)")).toBeTruthy();
@@ -1297,7 +1297,7 @@ describe("ModelPicker", () => {
       "model-picker:locked-model-click",
       { provider: "openai", model: "gpt-5" },
     );
-    expect(screen.getByText("Unlock GPT 5 with Dyad Pro")).toBeTruthy();
+    expect(screen.getByText("Unlock GPT 5 with Samba Builder")).toBeTruthy();
   });
 
   it("opens the Pro upgrade page from the unlock dialog", () => {
@@ -1308,7 +1308,7 @@ describe("ModelPicker", () => {
     render(<ModelPicker />);
 
     fireEvent.click(screen.getByText("GPT 5").closest("button")!);
-    fireEvent.click(screen.getByText("Get Dyad Pro"));
+    fireEvent.click(screen.getByText("Get Samba Builder"));
 
     expect(mocks.openExternalUrl).toHaveBeenCalledWith(
       expect.stringContaining("utm_campaign=model-picker-locked-model"),
@@ -1321,7 +1321,7 @@ describe("ModelPicker", () => {
         model: "gpt-5",
       },
     );
-    expect(screen.queryByText("Get Dyad Pro")).toBeNull();
+    expect(screen.queryByText("Get Samba Builder")).toBeNull();
   });
 
   it("navigates to provider settings from the unlock dialog own-key link", () => {
@@ -1387,7 +1387,7 @@ describe("ModelPicker", () => {
 
     expect(
       screen.getByText("GPT 5").closest("button")?.getAttribute("aria-label"),
-    ).toBe("GPT 5 — requires Dyad Pro or an API key from OpenAI");
+    ).toBe("GPT 5 — requires Samba Builder or an API key from OpenAI");
   });
 
   it("points locked free models at an OpenRouter key instead of Pro", () => {
@@ -1407,7 +1407,7 @@ describe("ModelPicker", () => {
       "model-picker:locked-model-click",
       { provider: "openrouter", model: "openrouter/free" },
     );
-    expect(screen.queryByText("Get Dyad Pro")).toBeNull();
+    expect(screen.queryByText("Get Samba Builder")).toBeNull();
 
     fireEvent.click(screen.getByText("Add OpenRouter API key"));
 
@@ -1425,7 +1425,9 @@ describe("ModelPicker", () => {
     render(<ModelPicker />);
 
     fireEvent.click(
-      screen.getByText("Unlock all models with Dyad Pro").closest("button")!,
+      screen
+        .getByText("Unlock all models with Samba Builder")
+        .closest("button")!,
     );
 
     expect(mocks.openExternalUrl).toHaveBeenCalledWith(
@@ -1440,7 +1442,9 @@ describe("ModelPicker", () => {
   it("hides the unlock-all footer for Pro users", () => {
     render(<ModelPicker />);
 
-    expect(screen.queryByText("Unlock all models with Dyad Pro")).toBeNull();
+    expect(
+      screen.queryByText("Unlock all models with Samba Builder"),
+    ).toBeNull();
     expect(document.querySelector("[data-locked]")).toBeNull();
   });
 
@@ -1528,14 +1532,16 @@ describe("ModelPicker", () => {
     });
   });
 
-  it("hides Dyad Free for Dyad Pro trial users", () => {
+  it("hides Samba Builder Free for Samba Builder trial users", () => {
     mocks.isTrial = true;
 
     render(<ModelPicker />);
 
-    expect(screen.queryByText("Dyad Free")).toBeNull();
+    expect(screen.queryByText("Samba Builder Free")).toBeNull();
     expect(
-      screen.getByText("Upgrade from Dyad Pro trial to unlock more models."),
+      screen.getByText(
+        "Upgrade from Samba Builder trial to unlock more models.",
+      ),
     ).toBeTruthy();
     const autoRow = document.querySelector<HTMLElement>(
       '[data-model-provider="auto"][data-model-name="auto"]',
@@ -1546,7 +1552,7 @@ describe("ModelPicker", () => {
     ).toBe("Med");
   });
 
-  it("does not select Dyad Free when quota is exhausted", () => {
+  it("does not select Samba Builder Free when quota is exhausted", () => {
     mocks.freeModelQuota.isQuotaExceeded = true;
     mocks.freeModelQuota.messagesRemaining = 0;
     mocks.freeModelQuota.quotaStatus = {
@@ -1559,15 +1565,15 @@ describe("ModelPicker", () => {
 
     render(<ModelPicker />);
 
-    fireEvent.click(screen.getByText("Dyad Free").closest("button")!);
+    fireEvent.click(screen.getByText("Samba Builder Free").closest("button")!);
 
     expect(mocks.updateSettings).not.toHaveBeenCalled();
   });
 
-  it("moves Build mode to Agent when selecting Dyad Free", async () => {
+  it("moves Build mode to Agent when selecting Samba Builder Free", async () => {
     render(<ModelPicker />);
 
-    fireEvent.click(screen.getByText("Dyad Free").closest("button")!);
+    fireEvent.click(screen.getByText("Samba Builder Free").closest("button")!);
 
     await waitFor(() => {
       expect(mocks.updateSettings).toHaveBeenCalledWith({
@@ -1595,7 +1601,7 @@ describe("ModelPicker", () => {
     };
 
     render(<ModelPicker />);
-    fireEvent.click(screen.getByText("Dyad Free").closest("button")!);
+    fireEvent.click(screen.getByText("Samba Builder Free").closest("button")!);
 
     await waitFor(() => {
       expect(mocks.setChatSelection).toHaveBeenCalledWith({
@@ -1610,7 +1616,7 @@ describe("ModelPicker", () => {
     expect(mocks.setChatModelSelection).not.toHaveBeenCalled();
   });
 
-  it("shows Dyad Free quota as unavailable when the quota fetch fails", () => {
+  it("shows Samba Builder Free quota as unavailable when the quota fetch fails", () => {
     mocks.freeModelQuota.error = new Error("quota unavailable");
     mocks.freeModelQuota.quotaStatus = null;
 

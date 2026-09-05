@@ -256,9 +256,11 @@ export class Settings {
       .filter({ hasText: /^DyadNeeds Setup$/ })
       .nth(1)
       .click();
-    await this.page.getByRole("textbox", { name: "Set Dyad API Key" }).click();
     await this.page
-      .getByRole("textbox", { name: "Set Dyad API Key" })
+      .getByRole("textbox", { name: "Set Samba Builder API Key" })
+      .click();
+    await this.page
+      .getByRole("textbox", { name: "Set Samba Builder API Key" })
       .fill("testdyadkey");
     await this.page.getByRole("button", { name: "Save Key" }).click();
   }

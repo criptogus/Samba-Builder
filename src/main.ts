@@ -233,7 +233,7 @@ log.info(
 );
 const execFileAsync = promisify(execFile);
 
-// Prefer the Dyad-managed pnpm (if installed) for everything spawned from the
+// Prefer the Samba Builder-managed pnpm (if installed) for everything spawned from the
 // main process. Runs after all module imports, so it wins over the shell PATH
 // that fixPath() restores at app_runtime_service load time.
 applyManagedPnpmToProcessPath();
@@ -478,7 +478,7 @@ export async function onReady() {
     const message = error instanceof Error ? error.message : String(error);
     dialog.showErrorBox(
       "Database Migration Failed",
-      `Dyad could not initialize its local database. ${message}`,
+      `Samba Builder could not initialize its local database. ${message}`,
     );
     app.quit();
     return;
@@ -518,11 +518,11 @@ export async function onReady() {
 
   const settings = await readEffectiveSettings();
 
-  // Add dyad-apps directory to git safe.directory (required for Windows).
+  // Add samba-apps directory to git safe.directory (required for Windows).
   // The trailing /* allows access to all repositories under the named directory.
   // See: https://git-scm.com/docs/git-config#Documentation/git-config.txt-safedirectory
   // Don't need to await because this only needs to run before
-  // the user starts interacting with Dyad app and uses a git-related feature.
+  // the user starts interacting with Samba Builder app and uses a git-related feature.
   gitAddSafeDirectory(`${getDyadAppsBaseDirectory()}/*`);
 
   // Check if app was force-closed by checking for the crash sentinel file.
@@ -893,7 +893,10 @@ const createWindow = ({
   rendererLoad: Promise<void>;
 } => {
   if (isAppQuitting) {
-    throw new DyadError("Dyad is shutting down", DyadErrorKind.Precondition);
+    throw new DyadError(
+      "Samba Builder is shutting down",
+      DyadErrorKind.Precondition,
+    );
   }
 
   // Create the browser window.
@@ -1236,7 +1239,7 @@ configureWindowProductController({
   openEntityInNewWindow: async (entity) => {
     if (productWindows.size >= MAX_PRODUCT_WINDOWS) {
       throw new DyadError(
-        `Dyad supports up to ${MAX_PRODUCT_WINDOWS} open windows`,
+        `Samba Builder supports up to ${MAX_PRODUCT_WINDOWS} open windows`,
         DyadErrorKind.Precondition,
       );
     }
@@ -1332,11 +1335,11 @@ const createApplicationMenu = () => {
       label: "View",
       submenu: [
         {
-          label: "Reload Dyad",
+          label: "Reload Samba Builder",
           click: () => BrowserWindow.getFocusedWindow()?.reload(),
         },
         {
-          label: "Force Reload Dyad",
+          label: "Force Reload Samba Builder",
           click: () =>
             BrowserWindow.getFocusedWindow()?.webContents.reloadIgnoringCache(),
         },
@@ -1548,7 +1551,7 @@ async function handleDeepLinkReturn(url: string) {
         apiKey,
       });
     } catch (error) {
-      showDeepLinkSettingsError("save Dyad Pro settings", error);
+      showDeepLinkSettingsError("save Samba Builder settings", error);
       return;
     }
     // Send message to renderer to trigger re-render
@@ -1557,7 +1560,7 @@ async function handleDeepLinkReturn(url: string) {
     });
     return;
   }
-  // Fired by the OAuth callback page to hand focus back to Dyad
+  // Fired by the OAuth callback page to hand focus back to Samba Builder
   // after consent. Tokens land via the loopback listener; focusing
   // the window is the only side-effect needed here.
   if (parsed.hostname === "mcp-oauth-return") {

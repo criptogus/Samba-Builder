@@ -256,7 +256,7 @@ describe("performCompaction", () => {
     );
   });
 
-  it("pins the benchmarked compaction model for Dyad Pro users", async () => {
+  it("pins the benchmarked compaction model for Samba Builder users", async () => {
     settingsState.current = {
       selectedModel: { provider: "anthropic", name: "test-model" },
       enableDyadPro: true,
