@@ -189,7 +189,9 @@ const config: ForgeConfig = {
     ],
     protocols: [
       {
-        name: "Dyad",
+        // Samba Builder: scheme técnico "dyad://" mantido nesta fase — deep links e
+        // OAuth dependem dele em todo o main process. Rebrand de scheme = fase 2.
+        name: "Samba Builder",
         schemes: ["dyad"],
       },
     ],

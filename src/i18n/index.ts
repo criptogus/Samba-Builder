@@ -76,7 +76,7 @@ const resources = {
 
 i18n.use(initReactI18next).init({
   resources,
-  lng: "en", // Default; overridden by user setting on startup
+  lng: "pt-BR", // Samba Builder: default português; overridden by user setting on startup
   fallbackLng: "en",
   defaultNS: "common",
   ns: ["common", "settings", "chat", "home", "errors"],

@@ -227,7 +227,7 @@ export function useNotificationHandler() {
       // get app name so user knows which app is making the request
       const appName = chatSummary?.appId
         ? await resolveAppNameForAppId(chatSummary.appId, queryClient)
-        : "Dyad";
+        : "Samba Builder";
       const title = appName;
 
       // A terminal event can arrive while permission or chat/app metadata is

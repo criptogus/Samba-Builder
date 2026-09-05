@@ -1,16 +1,17 @@
 {
-  "name": "dyad",
+  "name": "samba-builder",
+  "productName": "Samba Builder",
   "version": "1.14.0-beta.1",
-  "description": "Free, local, open-source AI app builder",
+  "description": "Construtor de apps com IA da SambaTech — fork do Dyad, alimentado pelo Córtex",
   "keywords": [],
-  "license": "MIT",
+  "license": "Apache-2.0",
   "author": {
-    "name": "Will Chen",
-    "email": "willchen90@gmail.com"
+    "name": "SambaTech",
+    "email": "gustavo@sambatech.com"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/dyad-sh/dyad.git"
+    "url": "https://github.com/criptogus/Samba-Builder.git"
   },
   "main": ".vite/build/main_bootstrap.js",
   "scripts": {
@@ -225,5 +226,26 @@
   "engines": {
     "node": ">=24 <26"
   },
-  "productName": "dyad"
+  "productName": "dyad",
+  "allowScripts": {
+    "file:../native/keychain-reader": true,
+    "@biomejs/biome@1.9.4": true,
+    "esbuild@0.18.20": true,
+    "esbuild@0.19.12": true,
+    "esbuild@0.25.9": true,
+    "esbuild@0.21.5": true,
+    "@tailwindcss/oxide@4.1.13": true,
+    "@vscode/ripgrep@1.17.0": true,
+    "better-sqlite3@12.6.2": true,
+    "core-js@3.45.1": true,
+    "cpu-features@0.0.10": true,
+    "dugite@3.0.0": true,
+    "electron@40.0.0": true,
+    "electron-winstaller@5.4.0": true,
+    "fsevents@2.3.2": true,
+    "fsevents@2.3.3": true,
+    "node-pty@1.1.0": true,
+    "sharp@0.34.3": true,
+    "ssh2@1.17.0": true
+  }
 }

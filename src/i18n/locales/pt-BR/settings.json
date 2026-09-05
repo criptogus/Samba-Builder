@@ -80,7 +80,9 @@
     "defaultChatModeDescription": "Controla o modo de chat padrão ao abrir um novo chat.",
     "selectDefaultChatMode": "Selecionar modo de chat padrão",
     "autoApprove": "Aprovar alterações automaticamente",
-    "autoApproveDescription": "Aprova automaticamente as alterações de código e as executa."
+    "autoApproveDescription": "Aprova automaticamente as alterações de código e as executa.",
+    "appBlueprint": "Blueprint do app",
+    "appBlueprintDescription": "Ao criar um novo app, gere um blueprint leve (nome, design, cor, template) antes de começar a construir."
   },
   "ai": {
     "title": "Configurações de IA",
@@ -123,7 +125,10 @@
     "apiKeyEmpty": "A Chave de API não pode estar vazia.",
     "errorTogglingPro": "Erro ao alternar Dyad Pro: {{error}}",
     "failedSaveApiKey": "Falha ao salvar a chave de API.",
-    "failedDeleteApiKey": "Falha ao excluir a chave de API."
+    "failedDeleteApiKey": "Falha ao excluir a chave de API.",
+    "maxToolCallSteps": "Máx. de chamadas de ferramenta (Agente)",
+    "maxToolCallStepsDescription": "Limita quantas chamadas de ferramenta o agente pode fazer antes de pausar.",
+    "selectMaxToolCallSteps": "Selecionar máx. de chamadas de ferramenta"
   },
   "telemetry": {
     "title": "Telemetria",

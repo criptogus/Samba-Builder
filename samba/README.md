@@ -90,11 +90,14 @@ python3 samba/learn/learn.py --project ~/Projetos/landing-x \
 
 ## Roadmap
 
-- [x] Fork clonado + npm install validado
+- [x] Fork clonado + npm install validado (Node 24 em `~/.local/node24`)
+- [x] Repo GitHub privado: `criptogus/Samba-Builder` (origin) + `upstream` = dyad-sh/dyad
 - [x] MCP server do Córtex (units, design system, search, kg)
 - [x] Learning loop v1 (relatório → 00-Inbox → memória)
-- [ ] App rodando em dev + provider DeepSeek via gateway funcionando
+- [x] App rodando em dev (fix: skip move-to-Applications em dev)
+- [x] Rebrand v1: nome "Samba Builder", logo oficial Samba (icns/png/TitleBar), pt-BR default e 100% coberto
+- [ ] Provider DeepSeek via gateway configurado na UI + primeiro build com design system do Córtex
 - [ ] MCP do Córtex conectado e tools chamáveis no chat
-- [ ] Branding v1 (nome/ícone, identidade Samba — design system aprovado)
+- [ ] Rebrand fase 2: scheme `dyad://` → próprio; wordmark SVG; ícone Windows (.ico — precisa gerar); about/onboarding copy fino
 - [ ] Piloto: primeiro projeto de cliente real de ponta a ponta
 - [ ] Loop automático pós-projeto (cron/trigger) + eval de qualidade do que o Córtex devolve

@@ -383,5 +383,8 @@
     "discard": "Descartar",
     "sending": "Enviando...",
     "send": "Enviar {{count}}"
-  }
+  },
+  "flaggedForReview": "Sinalizado para revisão",
+  "autoApproved": "Aprovado automaticamente",
+  "aiReviewingRequest": "A IA está revisando esta solicitação para decidir se é seguro aprovar automaticamente…"
 }

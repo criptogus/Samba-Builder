@@ -388,7 +388,25 @@
       "proFeatureTitle": "O Anotador é um Recurso Pro",
       "proFeatureDescription": "Desbloqueie a capacidade de anotar capturas de tela e aprimore seu fluxo de trabalho com o Dyad Pro.",
       "getDyadPro": "Obtenha o Dyad Pro"
-    }
+    },
+    "loadingChanges": "Carregando alterações...",
+    "errorLoadingChanges": "Não foi possível carregar as alterações desta versão.",
+    "noChangesInVersion": "Nenhuma alteração de arquivo nesta versão",
+    "noStagedChanges": "Nenhuma alteração preparada",
+    "failedToLoadChanges": "Não foi possível carregar as alterações deste arquivo. Selecione outro arquivo ou tente novamente.",
+    "noChangesToDisplay": "Nenhuma alteração para exibir",
+    "viewingStagedChanges": "Visualizando alterações preparadas",
+    "backToEditor": "Voltar ao editor",
+    "commit": "Commit",
+    "committing": "Commitando...",
+    "cancel": "Cancelar",
+    "stagedFiles": "Arquivos preparados",
+    "stagedFilesWithCount": "Arquivos preparados ({{count}})",
+    "commitChanges": "Commitar alterações",
+    "commitDialogDescription": "Revise os arquivos preparados e digite uma mensagem de commit.",
+    "commitMessage": "Mensagem de commit",
+    "commitMessagePlaceholder": "Digite a mensagem de commit...",
+    "filesToCommit": "Arquivos para commitar ({{count}})"
   },
   "integrations": {
     "github": {
@@ -560,7 +578,12 @@
       "failedCreateProject": "Falha ao criar projeto.",
       "failedConnectProject": "Falha ao conectar ao projeto.",
       "failedSaveToken": "Falha ao salvar o token de acesso.",
-      "failedCheckAvailability": "Falha ao verificar a disponibilidade do projeto."
+      "failedCheckAvailability": "Falha ao verificar a disponibilidade do projeto.",
+      "syncPreviewTitle": "Configuração automática do banco de dados",
+      "syncPreviewLoading": "Carregando configuração do banco de dados…",
+      "syncPreviewError": "Não foi possível carregar a prévia da configuração automática do banco. Você ainda pode criar o projeto.",
+      "syncPreviewIntro": "Ao criar este projeto, o Samba Builder enviará estas variáveis de ambiente do seu banco {{branchType}} para a Vercel (valores secretos ficam ocultos e são enviados com segurança):",
+      "syncPreviewAuthDomain": "Seu domínio de deploy será adicionado aos domínios de redirecionamento confiáveis do Neon após o primeiro deploy."
     },
     "supabase": {
       "title": "Integração com Supabase",
@@ -689,7 +712,10 @@
       "connecting": "Conectando...",
       "disconnectAccountTitle": "Desconectar conta Neon",
       "disconnectAccountConfirmation": "Tem certeza de que deseja desconectar sua conta Neon? Você precisará autenticar novamente via OAuth para reconectar.",
-      "connectFailed": "Falha ao conectar ao Neon"
+      "connectFailed": "Falha ao conectar ao Neon",
+      "removeVercelEnvVars": "Remover variáveis de ambiente do Neon da Vercel",
+      "removeVercelEnvVarsHelp": "Remove as variáveis DATABASE_URL e de autenticação do Neon do projeto vinculado na Vercel, para que não apontem para um banco desconectado.",
+      "failedRemoveVercelEnvVars": "Desconectado, mas falha ao remover as variáveis de ambiente do Neon da Vercel."
     },
     "db": {
       "projectInfo": "{{provider}} Informações do Projeto",
@@ -785,6 +811,38 @@
       "supabaseUnavailable": "O Supabase não está disponível porque um banco de dados Neon já está conectado. Apenas uma integração de banco de dados pode estar ativa por vez.",
       "neonUnavailable": "O Neon não está disponível porque um projeto Supabase já está conectado. Apenas uma integração de banco de dados pode estar ativa por vez.",
       "chooseOne": "Escolha uma integração de banco de dados. Conectar Supabase ou Neon bloqueará o outro para este aplicativo."
+    },
+    "database": {
+      "title": "Banco de dados",
+      "pickDatabase": "Escolha o banco de dados ao qual seu app em produção deve se conectar.",
+      "continue": "Continuar",
+      "backToSelection": "Voltar à seleção",
+      "loading": "Carregando banco de dados…",
+      "productionActiveMessage": "Seu app está no branch de produção; o banco de produção será usado no deploy. Nenhuma migração é necessária.",
+      "recommended": "Recomendado",
+      "production": {
+        "title": "Banco de produção separado",
+        "description": "Mantém os dados de produção separados do desenvolvimento. O mais seguro para usuários reais, mas mudanças no banco exigem uma etapa de migração."
+      },
+      "development": {
+        "title": "Usar banco de desenvolvimento",
+        "description": "Usa um único banco para desenvolvimento e produção. Setup mais rápido, mas mudanças em dev afetam os dados de produção."
+      },
+      "envVars": {
+        "title": "Variáveis de ambiente",
+        "description": "Adicione-as às variáveis de ambiente do seu provedor de hospedagem para o app em produção.",
+        "loading": "Carregando…"
+      },
+      "syncToVercel": "Sincronizar com a Vercel",
+      "syncToVercelHelp": "Envia as variáveis de ambiente do banco para a Vercel e adiciona seu domínio de deploy à allowlist de redirecionamento do Neon.",
+      "syncing": "Sincronizando…",
+      "syncSuccess": "Configuração do banco sincronizada com a Vercel, mas é necessário um novo deploy para o app em produção usá-la.",
+      "syncError": "Falha ao sincronizar com a Vercel.",
+      "selectBranchError": "Falha ao salvar a seleção de branch do banco de dados.",
+      "clearBranchError": "Falha ao limpar a seleção de branch do banco de dados."
     }
-  }
+  },
+  "failedCreateChat": "Falha ao criar o chat. {{error}}",
+  "startingChat": "Iniciando novo chat",
+  "creatingNewChat": "Criando um novo chat no seu app atual."
 }
