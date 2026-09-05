@@ -15,7 +15,7 @@ Uso:
 
 Env (opcionais):
     SAMBA_LLM_BASE_URL       default http://127.0.0.1:8642/v1  (gateway Hermes/DeepSeek)
-    SAMBA_OPENCODE_BASE_URL  default http://127.0.0.1:11435/v1 (proxy OpenAI-compatível do OpenCode)
+    SAMBA_OPENCODE_BASE_URL  default https://opencode.ai/zen/v1 (OpenCode Zen, OpenAI-compatible)
 """
 import os
 import sqlite3
@@ -27,7 +27,10 @@ DB = os.environ.get(
     os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "userData", "sqlite.db")),
 )
 GATEWAY_BASE = os.environ.get("SAMBA_LLM_BASE_URL", "http://127.0.0.1:8642/v1")
-OPENCODE_BASE = os.environ.get("SAMBA_OPENCODE_BASE_URL", "http://127.0.0.1:11435/v1")
+# OpenCode Zen (hosted): endpoint OpenAI-compatible por modelo — deepseek-v4-pro/flash
+# (https://opencode.ai/docs/zen). Chave: opencode.ai/auth (cole na UI).
+OPENCODE_BASE = os.environ.get("SAMBA_OPENCODE_BASE_URL", "https://opencode.ai/zen/v1")
+OPENCODE_LEGACY_BASE = "http://127.0.0.1:11435/v1"  # default antigo (proxy local) — atualiza se ainda estiver nele
 
 PROVIDERS = [
     {"id": "deepseek-samba", "name": "DeepSeek (Samba)", "api_base_url": GATEWAY_BASE},
@@ -37,6 +40,7 @@ PROVIDERS = [
 MODELS = [
     {"provider": "deepseek-samba", "display_name": "DeepSeek V4 Flash", "api_name": "deepseek-v4-flash"},
     {"provider": "opencode-local", "display_name": "DeepSeek V4 Pro (OpenCode)", "api_name": "deepseek-v4-pro"},
+    {"provider": "opencode-local", "display_name": "DeepSeek V4 Flash (OpenCode)", "api_name": "deepseek-v4-flash"},
 ]
 
 
@@ -50,11 +54,18 @@ def main() -> int:
     now = int(time.time())
     try:
         for p in PROVIDERS:
-            exists = con.execute(
-                "SELECT 1 FROM language_model_providers WHERE id = ?", (p["id"],)
+            row = con.execute(
+                "SELECT api_base_url FROM language_model_providers WHERE id = ?", (p["id"],)
             ).fetchone()
-            if exists:
-                print(f"provider '{p['id']}' já existe — mantido (preserva edição manual)")
+            if row:
+                if row[0] == OPENCODE_LEGACY_BASE:
+                    con.execute(
+                        "UPDATE language_model_providers SET api_base_url = ?, updated_at = ? WHERE id = ?",
+                        (p["api_base_url"], now, p["id"]),
+                    )
+                    print(f"provider '{p['id']}': base_url atualizada (proxy local -> {p['api_base_url']})")
+                else:
+                    print(f"provider '{p['id']}' já existe — mantido (preserva edição manual)")
                 continue
             con.execute(
                 "INSERT INTO language_model_providers (id, name, api_base_url, created_at, updated_at) "
