@@ -5,6 +5,10 @@ pode fazer o quê, fluxo de aprovação negócio↔tecnologia e trilha de audito
 
 ## Princípios
 
+0. **Dois modos, um produto.** `single` (um dev faz tudo, sem gates — default,
+   backward-compatible com o app atual) e `governed` (papéis + aprovações +
+   auditoria, p/ corporativo). O modo é declarado no `governance.yaml`;
+   projeto sem o arquivo = `single`. Transição single → governed é aditiva.
 1. **Autoridade delegada, não reinventada.** Identidade, permissão de repo e
    revisão vêm do GitHub Enterprise do cliente (teams, branch protection, PR
    review). O Samba Builder **não** substitui o IAM — adiciona a política do
@@ -15,13 +19,29 @@ pode fazer o quê, fluxo de aprovação negócio↔tecnologia e trilha de audito
    admin do repo (proteção GitHub).
 3. **Gates, não esperança.** Nenhuma ação sensível (deploy/produção/merge para
    main) acontece sem o gate da política ter passado. Gate falho = ação
-   bloqueada, não aviso.
-4. **Separação negócio × tecnologia.** Negócio **cria e valida o "o quê"**;
-   tecnologia **aprova o "como"** antes de qualquer subida (deploy/produção).
-   Inspiração: o pedido do Gustavo — "área de negócio cria o projeto; só sobe
-   com o ok da tecnologia".
-5. **Tudo auditável.** Decisões de aprovação e ações sensíveis ficam na trilha
-   (`.samba/audit/` no repo + log do app), imutáveis para quem não é admin.
+   bloqueada, não aviso. (Aplica em `governed`; em `single` não há gates.)
+4. **Separação negócio × tecnologia** (modo `governed`). Negócio **cria e
+   valida o "o quê"**; tecnologia **aprova o "como"** antes de qualquer subida
+   (deploy/produção). Inspiração: o pedido do Gustavo — "área de negócio cria
+   o projeto; só sobe com o ok da tecnologia".
+5. **Tudo auditável** (modo `governed`). Decisões de aprovação e ações
+   sensíveis ficam na trilha (`.samba/audit/` no repo + log do app), imutáveis
+   para quem não é admin.
+
+## Modos de operação
+
+|                    | **Single**                       | **Governado**                                |
+| ------------------ | -------------------------------- | -------------------------------------------- |
+| Quem               | 1 dev (solo/freela/time pequeno) | equipe + áreas de negócio (corp)             |
+| `governance.yaml`  | ausente (ou `mode: single`)      | `mode: governed` + papéis                    |
+| Ciclo              | criar → construir → publicar     | draft → in_review → approved → produção      |
+| Gates de aprovação | nenhum (dev é o dono)            | submit/approve/veto obrigatórios p/ produção |
+| Auditoria          | opcional (log do app)            | trilha hash-encadeada no repo                |
+| Branch protection  | opcional                         | obrigatória (main sem push direto)           |
+
+Transição: um projeto single vira governed quando o cliente adiciona
+`governance.yaml` com `mode: governed` e os papéis — nada do que o dev fez
+se perde; os gates passam a valer a partir daí.
 
 ## Papéis (por projeto)
 

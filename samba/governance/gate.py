@@ -35,19 +35,33 @@ from typing import Optional
 GOV_FILE = "governance.yaml"
 AUDIT_DIR = ".samba/audit"
 STATE_FILE = ".samba/state.json"
-AUDIT_LOG = os.path.join(AUDIT_DIR, "audit.jsonl")
 
 DEFAULT_POLICY = """\
 # Governança do projeto — Samba Builder (schema: samba/governance/policy.schema.yaml)
+# mode: single = um dev faz tudo (sem gates) | governed = papéis + aprovações
 project: {name}
+mode: {mode}
 roles:
-  owner: []        # emails/usuários GitHub da área de negócio
+  owner: []        # usuários/teams da área de negócio (ex: user:ana, team:org/squad)
   tech: []         # tech leads / aprovadores técnicos
   reviewer: []     # QA/segurança (podem vetar)
   admin: []        # plataforma (política/auditoria)
 gates:
   deploy_production: [approved]
 """
+
+
+def load_mode(root: str) -> str:
+    """single (sem arquivo ou mode: single) | governed (arquivo com mode governed/default)."""
+    path = os.path.join(root, GOV_FILE)
+    if not os.path.exists(path):
+        return "single"
+    with open(path) as f:
+        for raw in f:
+            m = re.match(r"^\s*mode:\s*(single|governed)\s*(?:#.*)?$", raw.strip())
+            if m:
+                return m.group(1)
+    return "governed"  # arquivo existe sem mode explícito → conservador
 
 # Mapa: papel -> emails (da política). Resolução real (GitHub teams) = adapter futuro.
 def load_policy(root: str) -> dict:
@@ -129,6 +143,7 @@ def main() -> int:
     ap.add_argument("--name", default="meu-projeto", help="nome do projeto (init)")
     ap.add_argument("--self-ok", action="store_true", help="2º aprovador presente (tech aprovando trabalho próprio)")
     ap.add_argument("--force", action="store_true", help="init sobrescreve política existente")
+    ap.add_argument("--mode", choices=["single", "governed"], default="governed", help="modo do projeto (init)")
     args = ap.parse_args()
 
     root = os.path.abspath(args.root)
@@ -139,26 +154,32 @@ def main() -> int:
             return 1
         os.makedirs(root, exist_ok=True)
         with open(os.path.join(root, GOV_FILE), "w") as f:
-            f.write(DEFAULT_POLICY.format(name=args.name))
+            f.write(DEFAULT_POLICY.format(name=args.name, mode=args.mode))
         save_state(root, {"state": "draft", "vetos": []})
-        append_audit(root, {"event": "init", "by": args.by or "system", "project": args.name})
-        print(f"Governança inicializada em {root} — estado: draft")
+        append_audit(root, {"event": "init", "by": args.by or "system", "project": args.name, "mode": args.mode})
+        print(f"Governança inicializada em {root} — modo: {args.mode} ({'sem gates' if args.mode == 'single' else 'com ciclo de aprovação'})")
         return 0
 
     roles = load_policy(root)
     state = load_state(root)
     cur = state["state"]
+    mode = load_mode(root)
 
     if args.cmd == "status":
+        print(f"modo: {mode}")
         print(f"estado: {cur}")
         print(f"vetos ativos: {len(state.get('vetos', []))}")
         ok = is_allowed(roles, "tech", args.by) if args.by else False
         print(f"papéis na política: owner={roles.get('owner', [])} tech={roles.get('tech', [])} "
               f"reviewer={roles.get('reviewer', [])} admin={roles.get('admin', [])}")
-        print(f"gates: deploy_production exige approved (sem veto ativo)")
+        print(f"gates: deploy_production exige approved (sem veto ativo)" if mode == "governed"
+              else "gates: nenhum (modo single — dev é o dono)")
         return 0
 
     if args.cmd == "submit":
+        if mode == "single":
+            print("Modo single: não há ciclo de aprovação — o dev é o dono do começo ao fim.")
+            return 0
         if not is_allowed(roles, "owner", args.by):
             print(f"BLOQUEADO: submit exige papel owner (negócio). '{args.by}' não está em owner.")
             return 1
@@ -172,6 +193,9 @@ def main() -> int:
         return 0
 
     if args.cmd == "approve":
+        if mode == "single":
+            print("Modo single: sem ciclo de aprovação — nada a aprovar.")
+            return 0
         if not is_allowed(roles, "tech", args.by):
             print(f"BLOQUEADO: approve exige papel tech. '{args.by}' não está em tech.")
             return 1
@@ -193,6 +217,9 @@ def main() -> int:
         return 0
 
     if args.cmd == "veto":
+        if mode == "single":
+            print("Modo single: sem ciclo de aprovação — nada a vetar.")
+            return 0
         if not (is_allowed(roles, "tech", args.by) or is_allowed(roles, "reviewer", args.by)):
             print(f"BLOQUEADO: veto exige tech ou reviewer. '{args.by}' sem papel.")
             return 1
@@ -208,6 +235,9 @@ def main() -> int:
 
     if args.cmd == "check":
         if args.action == "deploy_production":
+            if mode == "single":
+                print("GATE OK: modo single — sem gates, deploy liberado para o dev.")
+                return 0
             if cur != "approved":
                 print(f"GATE FALHOU: deploy_production exige estado approved (atual: {cur}).")
                 return 1
