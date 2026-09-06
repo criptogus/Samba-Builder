@@ -66,8 +66,7 @@ const PNPM_IGNORED_BUILDS_ERROR_CODE = "ERR_PNPM_IGNORED_BUILDS";
 const DYAD_ALLOW_BUILDS_METADATA_PATTERN =
   /^#\s*(dyad-default-allow-builds-(?:schema|data-version|channel))=(.+)$/;
 const DYAD_ALLOW_BUILDS_REMOTE_URL =
-  process.env.DYAD_DEFAULT_APPROVE_BUILDS_URL ??
-  "https://api.dyad.sh/v1/default-approve-builds.txt";
+  process.env.DYAD_DEFAULT_APPROVE_BUILDS_URL ?? null;
 const DYAD_ALLOW_BUILDS_FETCH_TIMEOUT_MS = 5_000;
 export const DYAD_ALLOW_BUILDS_CACHE_TTL_MS = 60 * 60 * 1000;
 const DYAD_ALLOW_BUILDS_MAX_BYTES = 256 * 1024;
@@ -675,6 +674,11 @@ async function fetchRemoteAllowBuildsSource(
 async function fetchRemoteAllowBuildsSourceFromNetwork(
   fetcher: AllowBuildsTextFetcher,
 ): Promise<AllowBuildsSource | null> {
+  // Samba Builder: zero backend do Dyad — a lista remota de builds aprovados
+  // (api.dyad.sh) não é consultada; só allowlist local.
+  if (!DYAD_ALLOW_BUILDS_REMOTE_URL) {
+    return null;
+  }
   const controller = new AbortController();
   const timeout = setTimeout(
     () => controller.abort(),

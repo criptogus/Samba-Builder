@@ -154,54 +154,9 @@ export function registerProHandlers() {
       return null;
     }
 
-    const url = getUserInfoUrl();
-    const headers = {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${apiKey}`,
-    };
-
-    try {
-      // Use native fetch if available, otherwise node-fetch will be used via import
-      const response = await fetch(url, {
-        method: "GET",
-        headers: headers,
-      });
-
-      if (!response.ok) {
-        const errorBody = await response.text();
-        logger.error(
-          `Failed to fetch user budget. Status: ${response.status}. Body: ${errorBody}`,
-        );
-        return null;
-      }
-
-      const rawData = await response.json();
-
-      // Validate the API response structure
-      const data = UserInfoResponseSchema.parse(rawData);
-
-      // Turn user_abc1234 =>  "****1234"
-      // Preserve the last 4 characters so we can correlate bug reports
-      // with the user.
-      const redactedUserId =
-        data.userId.length > 8 ? "****" + data.userId.slice(-4) : "<redacted>";
-
-      logger.debug("Successfully fetched user budget information.");
-
-      // Transform to UserBudgetInfo format
-      const userBudgetInfo = UserBudgetInfoSchema.parse({
-        usedCredits: data.usedCredits,
-        totalCredits: data.totalCredits,
-        budgetResetDate: new Date(data.budgetResetDate),
-        redactedUserId: redactedUserId,
-        isTrial: data.isTrial,
-      });
-
-      return userBudgetInfo;
-    } catch (error: any) {
-      logger.error(`Error fetching user budget: ${error.message}`, error);
-      return null;
-    }
+    // Samba Builder: zero backend do Dyad — o user/budget (api.dyad.sh) não é
+    // consultado. Sem assinatura/backend, não há budget a buscar.
+    return null;
   });
 
   typedHandle(systemContracts.getSubscriptionStatus, async () => {
@@ -209,28 +164,9 @@ export function registerProHandlers() {
     if (!apiKey) {
       return null;
     }
-    if (IS_TEST_BUILD && !process.env.DYAD_SUBSCRIPTION_STATUS_URL) {
-      return null;
-    }
-
-    try {
-      const response = await fetch(getSubscriptionStatusUrl(), {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${apiKey}`,
-        },
-      });
-      if (!response.ok) {
-        logger.warn(
-          `Failed to fetch subscription status. Status: ${response.status}`,
-        );
-        return null;
-      }
-      return SubscriptionStatusSchema.parse(await response.json());
-    } catch (error) {
-      logger.error("Failed to fetch subscription status", error);
-      return null;
-    }
+    // Samba Builder: zero backend do Dyad — o subscription status não é
+    // consultado (sem assinatura/backend, o status é sempre null).
+    return null;
   });
 
   typedHandle(systemContracts.openBillingAction, async (_event, value) => {

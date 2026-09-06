@@ -30,7 +30,7 @@ const REMOTE_LANGUAGE_MODEL_CATALOG_TIMEOUT_MS = 5_000;
 const DEFAULT_CACHE_TTL_MS = 60 * 60 * 1000;
 const FALLBACK_CACHE_TTL_MS = 30 * 1000;
 
-function getRemoteLanguageModelCatalogUrl() {
+function getRemoteLanguageModelCatalogUrl(): string | null {
   if (process.env.DYAD_LANGUAGE_MODEL_CATALOG_URL) {
     return process.env.DYAD_LANGUAGE_MODEL_CATALOG_URL;
   }
@@ -39,7 +39,9 @@ function getRemoteLanguageModelCatalogUrl() {
     return `http://localhost:${process.env.FAKE_LLM_PORT}/api/language-model-catalog`;
   }
 
-  return "https://api.dyad.sh/v1/language-model-catalog";
+  // Samba Builder: zero backend do Dyad — o catálogo é o builtin local
+  // (CLOUD_PROVIDERS + MODEL_OPTIONS); nada é baixado de api.dyad.sh.
+  return null;
 }
 
 export type { ThemeGenerationModelOption };
@@ -358,8 +360,12 @@ function convertRemoteCatalog(
 }
 
 async function fetchRemoteCatalog(): Promise<BuiltinLanguageModelCatalog | null> {
-  const controller = new AbortController();
   const catalogUrl = getRemoteLanguageModelCatalogUrl();
+  // Samba Builder: sem backend remoto — usa o catálogo builtin local.
+  if (!catalogUrl) {
+    return null;
+  }
+  const controller = new AbortController();
   const timeoutId = setTimeout(
     () => controller.abort(),
     REMOTE_LANGUAGE_MODEL_CATALOG_TIMEOUT_MS,

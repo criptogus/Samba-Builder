@@ -12,7 +12,7 @@ const DEFAULT_CACHE_TTL_MS = 60 * 60 * 1000;
 const MAX_CACHE_TTL_MS = 24 * 60 * 60 * 1000;
 const FAILURE_CACHE_TTL_MS = 30 * 1000;
 
-function getRemoteMcpCatalogUrl() {
+function getRemoteMcpCatalogUrl(): string | null {
   if (process.env.DYAD_MCP_CATALOG_URL) {
     return process.env.DYAD_MCP_CATALOG_URL;
   }
@@ -21,7 +21,8 @@ function getRemoteMcpCatalogUrl() {
     return `http://localhost:${process.env.FAKE_LLM_PORT}/api/mcp-catalog`;
   }
 
-  return "https://api.dyad.sh/v1/mcp-catalog";
+  // Samba Builder: zero backend do Dyad — sem catálogo remoto de MCPs.
+  return null;
 }
 
 // The envelope is parsed strictly but entries are validated one by
@@ -63,7 +64,12 @@ async function fetchRemoteMcpCatalog(): Promise<{
   entries: McpCatalogEntry[];
   expiresAt: number;
 }> {
-  const response = await fetch(getRemoteMcpCatalogUrl(), {
+  const catalogUrl = getRemoteMcpCatalogUrl();
+  // Samba Builder: sem backend remoto — catálogo vazio é estado normal.
+  if (!catalogUrl) {
+    return { entries: [], expiresAt: Date.now() + DEFAULT_CACHE_TTL_MS };
+  }
+  const response = await fetch(catalogUrl, {
     signal: AbortSignal.timeout(REMOTE_MCP_CATALOG_TIMEOUT_MS),
   });
   if (!response.ok) {

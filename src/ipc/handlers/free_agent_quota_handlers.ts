@@ -7,7 +7,7 @@ import log from "electron-log";
 import { IS_TEST_BUILD } from "../utils/test_utils";
 import { registerTrustedIpcHandler } from "./trusted_handle";
 import { FREE_AGENT_QUOTA_LIMIT } from "@/lib/free_agent_quota_limit";
-import fetch from "node-fetch";
+// (import de fetch removido — sem consulta ao servidor de tempo)
 import { withLock } from "../utils/lock_utils";
 import { shouldSimulateFreeAgentQuotaExceeded } from "../utils/free_agent_quota_fixture";
 
@@ -16,55 +16,13 @@ const FREE_AGENT_QUOTA_ADMISSION_LOCK = "free-agent-quota-admission";
 const pendingQuotaReservations = new Set<number>();
 let nextQuotaReservationId = 1;
 
-/** Timeout for server time fetch in milliseconds */
-const SERVER_TIME_TIMEOUT_MS = 5000;
-
 /**
- * Fetches the current time from a trusted server to prevent clock manipulation.
- * Uses the HTTP Date header from api.dyad.sh.
- * Falls back to local time if the server is unreachable (but logs a warning).
+ * Retorna o tempo atual para a quota do Basic Agent.
+ * Samba Builder: zero backend do Dyad — o relógio do servidor
+ * (api.dyad.sh/health) não é consultado; usa o relógio local.
  */
 async function getServerTime(): Promise<number> {
-  // In test builds, use local time to allow test manipulation
-  if (IS_TEST_BUILD) {
-    return Date.now();
-  }
-
-  try {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(
-      () => controller.abort(),
-      SERVER_TIME_TIMEOUT_MS,
-    );
-
-    const response = await fetch("https://api.dyad.sh/health", {
-      method: "HEAD",
-      signal: controller.signal,
-    });
-
-    clearTimeout(timeoutId);
-
-    const dateHeader = response.headers.get("Date");
-    if (dateHeader) {
-      const serverTime = new Date(dateHeader).getTime();
-      if (!isNaN(serverTime)) {
-        logger.debug(
-          `Server time fetched: ${new Date(serverTime).toISOString()}`,
-        );
-        return serverTime;
-      }
-    }
-
-    logger.warn(
-      "Server response missing valid Date header, falling back to local time",
-    );
-    return Date.now();
-  } catch (error) {
-    logger.warn(
-      `Failed to fetch server time, falling back to local time: ${error}`,
-    );
-    return Date.now();
-  }
+  return Date.now();
 }
 
 export { FREE_AGENT_QUOTA_LIMIT };

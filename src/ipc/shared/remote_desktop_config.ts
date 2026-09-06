@@ -28,16 +28,22 @@ let remoteDesktopConfigCache: RemoteDesktopConfigCacheEntry | null = null;
 let remoteDesktopConfigFetchPromise: Promise<RemoteDesktopConfig | null> | null =
   null;
 
-function getRemoteDesktopConfigUrl() {
+function getRemoteDesktopConfigUrl(): string | null {
   if (process.env.DYAD_DESKTOP_CONFIG_URL) {
     return process.env.DYAD_DESKTOP_CONFIG_URL;
   }
 
-  return "https://api.dyad.sh/v1/desktop-config";
+  // Samba Builder: zero backend do Dyad — sem config remota do desktop.
+  return null;
 }
 
 async function fetchRemoteDesktopConfig(): Promise<RemoteDesktopConfig | null> {
-  const response = await fetch(getRemoteDesktopConfigUrl(), {
+  const configUrl = getRemoteDesktopConfigUrl();
+  // Samba Builder: sem backend remoto — sem config remota (defaults locais).
+  if (!configUrl) {
+    return null;
+  }
+  const response = await fetch(configUrl, {
     signal: AbortSignal.timeout(REMOTE_DESKTOP_CONFIG_TIMEOUT_MS),
   });
 
