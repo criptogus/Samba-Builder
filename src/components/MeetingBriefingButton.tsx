@@ -1,4 +1,5 @@
 import { lazy, Suspense, useState } from "react";
+import { AudioLines } from "lucide-react";
 import { Button } from "@/components/ui/button";
 const MeetingBriefingDialog = lazy(() => import("./MeetingBriefingDialog"));
 export function MeetingBriefingButton({
@@ -9,7 +10,8 @@ export function MeetingBriefingButton({
   const [open, setOpen] = useState(false);
   return (
     <>
-      <Button variant="outline" size="sm" onClick={() => setOpen(true)}>
+      <Button variant="ghost" size="sm" onClick={() => setOpen(true)}>
+        <AudioLines aria-hidden="true" className="size-4" />
         Briefing de reunião
       </Button>
       {open && (

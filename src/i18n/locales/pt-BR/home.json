@@ -844,5 +844,11 @@
   },
   "failedCreateChat": "Falha ao criar o chat. {{error}}",
   "startingChat": "Iniciando novo chat",
-  "creatingNewChat": "Criando um novo chat no seu app atual."
+  "creatingNewChat": "Criando um novo chat no seu app atual.",
+  "workspace": {
+    "planHint": "Transforme uma ideia em um plano claro, com orientação de um PM sênior.",
+    "meetingHint": "Traga o contexto do cliente de uma reunião ou transcrição.",
+    "importHint": "Continue construindo a partir de um projeto que você já tem.",
+    "ideasLabel": "Explore um ponto de partida"
+  }
 }

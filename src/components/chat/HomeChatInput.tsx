@@ -144,7 +144,7 @@ export function HomeChatInput({
           aria-disabled={disabled}
           inert={disabled}
           className={cn(
-            "relative flex flex-col border border-border rounded-2xl bg-(--background-lighter) transition-colors duration-200",
+            "relative flex flex-col border border-border rounded-2xl bg-card shadow-sm transition-[border-color,box-shadow] duration-200 focus-within:shadow-md focus-within:ring-2 focus-within:ring-primary/15",
             "hover:border-primary/30",
             "focus-within:border-primary/30 focus-within:ring-1 focus-within:ring-primary/20",
             isDraggingOver && "ring-2 ring-blue-500 border-blue-500",

@@ -879,7 +879,7 @@ export function ChatInput({ chatId }: { chatId?: number }) {
         )}
         <div
           className={cn(
-            "relative flex flex-col border border-border rounded-2xl bg-(--background-lighter) transition-colors duration-200",
+            "relative flex flex-col border border-border rounded-2xl bg-card shadow-sm transition-[border-color,box-shadow] duration-200 focus-within:shadow-md focus-within:ring-2 focus-within:ring-primary/15",
             "focus-within:border-primary/30 focus-within:ring-1 focus-within:ring-primary/20",
             isDraggingOver && "ring-2 ring-blue-500 border-blue-500",
             (showBanner || showPromo || isCancellationRequested) &&
@@ -1012,7 +1012,11 @@ export function ChatInput({ chatId }: { chatId?: number }) {
             isStreaming={isStreaming}
           />
 
-          <div className="flex flex-wrap gap-2 px-3 py-1">
+          <div
+            role="group"
+            aria-label="Ferramentas de criação"
+            className="flex flex-wrap gap-0.5 border-b border-border/60 px-2 py-1.5 [&_button]:h-8 [&_button]:px-2 [&_button]:text-xs [&_svg]:size-3.5"
+          >
             <ProductCoachButton
               key={chatId ?? "chat"}
               draftKey={`chat:${chatId ?? "new"}`}

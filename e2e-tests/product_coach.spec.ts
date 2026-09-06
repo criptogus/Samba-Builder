@@ -3,7 +3,10 @@ import { expect } from "@playwright/test";
 test("guides discovery, resumes its draft and prepares a review without submitting", async ({
   po,
 }) => {
-  await po.setUp();
+  // Discovery and layout work before an AI provider is connected.
+  await expect(
+    po.page.getByRole("heading", { name: "What do you want to build?" }),
+  ).toBeVisible();
   const input = po.chatActions.getChatInput();
   await input.fill("Clínicas precisam reduzir horários duplicados.");
   await po.page.getByRole("button", { name: "Planejar com PM" }).click();

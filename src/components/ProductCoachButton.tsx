@@ -18,7 +18,7 @@ export function ProductCoachButton({
   return (
     <>
       <Button
-        variant="outline"
+        variant="ghost"
         size="sm"
         disabled={disabled}
         onClick={() => setOpen(true)}

@@ -786,5 +786,11 @@
       "neonUnavailable": "Neon no está disponible porque ya hay un proyecto de Supabase conectado. Solo puede haber una integración de base de datos activa a la vez.",
       "chooseOne": "Elige una integración de base de datos. Conectar Supabase o Neon bloqueará la otra para esta aplicación."
     }
+  },
+  "workspace": {
+    "planHint": "Convierte una idea en un plan claro con un PM sénior.",
+    "meetingHint": "Trae el contexto del cliente desde una reunión o transcripción.",
+    "importHint": "Continúa desde un proyecto que ya tienes.",
+    "ideasLabel": "Explora un punto de partida"
   }
 }

@@ -83,7 +83,6 @@ type AppSidebarItemTo = (typeof items)[number]["to"];
 function AppSidebarRailButton({
   icon: Icon,
   label,
-  isExpanded,
   isActive = false,
   to,
   onClick,
@@ -98,8 +97,8 @@ function AppSidebarRailButton({
   onMouseEnter?: () => void;
 }) {
   const className = cn(
-    "group/rail-button relative mb-1 flex h-10 items-center justify-center rounded-xl outline-none transition-[width,background-color] duration-200 ease-linear focus-visible:ring-2 focus-visible:ring-sidebar-ring",
-    isExpanded ? "w-14" : "w-10",
+    "group/rail-button relative mb-1 flex h-14 items-center justify-center rounded-xl outline-none transition-[width,background-color] duration-200 ease-linear focus-visible:ring-2 focus-visible:ring-sidebar-ring",
+    "w-16",
     isActive
       ? "bg-primary/15"
       : "hover:bg-sidebar-accent active:bg-sidebar-accent",
@@ -109,15 +108,15 @@ function AppSidebarRailButton({
       <span
         className={cn(
           "absolute left-1/2 -translate-x-1/2 -translate-y-1/2 transition-[top] duration-200 ease-linear",
-          isExpanded ? "top-[42%]" : "top-1/2",
+          "top-[35%]",
         )}
       >
         <Icon className={cn("size-5", isActive && "text-primary")} />
       </span>
       <span
         className={cn(
-          "pointer-events-none absolute bottom-0.5 left-1/2 max-w-[calc(100%-0.5rem)] -translate-x-1/2 truncate text-[10px] leading-3 transition-[opacity,transform] duration-200 ease-linear",
-          isExpanded ? "translate-y-0 opacity-100" : "translate-y-1 opacity-0",
+          "pointer-events-none absolute bottom-1.5 left-1/2 max-w-[calc(100%-0.5rem)] -translate-x-1/2 truncate text-[10px] leading-3 transition-[opacity,transform] duration-200 ease-linear",
+          "translate-y-0 opacity-100",
           isActive ? "font-medium text-primary" : "text-sidebar-foreground/80",
         )}
       >
@@ -131,6 +130,7 @@ function AppSidebarRailButton({
       <Link
         to={to}
         aria-label={label}
+        aria-current={isActive ? "page" : undefined}
         className={className}
         onMouseEnter={onMouseEnter}
       >
@@ -234,7 +234,7 @@ export function AppSidebar() {
   return (
     <Sidebar
       collapsible="icon"
-      className="shadow-lg"
+      className="border-r border-sidebar-border"
       onMouseEnter={() => {
         isPointerOverSidebar.current = true;
         cancelPendingCollapse();
@@ -256,15 +256,11 @@ export function AppSidebar() {
       <SidebarContent className="overflow-hidden">
         <div className="flex mt-[calc(var(--layout-title-bar-offset)+0.25rem)]">
           {/* Left Column: Icon rail */}
-          <div
-            className={`px-1 transition-[width] duration-200 ease-linear ${
-              state === "expanded" ? "w-16" : "w-12"
-            }`}
-          >
+          <div className="w-18 shrink-0 px-1">
             <SidebarTrigger
               className={cn(
                 "transition-[width,background-color,color] duration-200 ease-linear focus-visible:ring-0",
-                state === "expanded" ? "w-14" : "w-10",
+                "w-16",
               )}
               onMouseEnter={() => {
                 setHoverState("clear-hover");

@@ -179,36 +179,19 @@ export default function HomePage() {
 
   // Main Home Page Content
   return (
-    <div className="flex min-h-full w-full flex-col pb-28">
-      <div className="flex flex-col items-center justify-center max-w-3xl w-full m-auto p-8 relative">
+    <div className="flex min-h-full w-full flex-col pb-16">
+      <div className="relative mx-auto flex w-full max-w-4xl flex-col px-6 py-10 sm:px-10 sm:py-14">
         <div className="w-full">
-          <div className="mb-6 text-center">
-            <h1 className="text-4xl font-semibold tracking-tight text-foreground">
+          <div className="mb-6 text-left">
+            <p className="mb-5 text-xs font-semibold tracking-[0.18em] text-primary uppercase">
+              Samba Builder · Workspace
+            </p>
+            <h1 className="max-w-xl text-3xl sm:text-4xl font-semibold tracking-tight text-foreground">
               What do you want to build?
             </h1>
-            <p className="mx-auto mt-3 max-w-2xl text-base leading-7 text-muted-foreground">
+            <p className="mt-3 max-w-xl text-base leading-7 text-muted-foreground">
               Describe your idea. Samba Builder will turn it into a working app.
             </p>
-            <div className="mt-4 flex flex-wrap justify-center gap-3">
-              <ProductCoachButton
-                key={selectedApp?.id ?? "home"}
-                draftKey={selectedApp ? `app:${selectedApp.id}` : "home"}
-                idea={inputValue}
-                onPrepared={(brief) =>
-                  setInputValue((current) => appendProductBrief(current, brief))
-                }
-              />
-              <MeetingBriefingButton
-                onPrepared={(prompt) =>
-                  setInputValue(appendMeetingBriefing(inputValue, prompt))
-                }
-              />
-              <ImportAppButton
-                className="px-0 pb-0"
-                variant="outline"
-                size="sm"
-              />
-            </div>
           </div>
           <HomeChatInput
             onSubmit={handleSubmit}
@@ -248,7 +231,45 @@ export default function HomePage() {
               </div>
             )}
 
-          <div className="mt-4 flex flex-wrap justify-center gap-2">
+          <div className="mt-8 grid grid-cols-1 gap-3 sm:grid-cols-3">
+            <div className="rounded-xl border border-border bg-card p-4">
+              <ProductCoachButton
+                key={selectedApp?.id ?? "home"}
+                draftKey={selectedApp ? `app:${selectedApp.id}` : "home"}
+                idea={inputValue}
+                onPrepared={(brief) =>
+                  setInputValue((current) => appendProductBrief(current, brief))
+                }
+              />
+              <p className="mt-2 text-xs leading-5 text-muted-foreground">
+                {t("workspace.planHint")}
+              </p>
+            </div>
+            <div className="rounded-xl border border-border bg-card p-4">
+              <MeetingBriefingButton
+                onPrepared={(prompt) =>
+                  setInputValue(appendMeetingBriefing(inputValue, prompt))
+                }
+              />
+              <p className="mt-2 text-xs leading-5 text-muted-foreground">
+                {t("workspace.meetingHint")}
+              </p>
+            </div>
+            <div className="rounded-xl border border-border bg-card p-4">
+              <ImportAppButton
+                className="justify-start px-0 pb-0"
+                variant="ghost"
+                size="sm"
+              />
+              <p className="mt-2 text-xs leading-5 text-muted-foreground">
+                {t("workspace.importHint")}
+              </p>
+            </div>
+          </div>
+          <p className="mt-8 mb-3 text-xs font-medium text-muted-foreground">
+            {t("workspace.ideasLabel")}
+          </p>
+          <div className="flex flex-wrap gap-2">
             {randomPrompts.map((item) => (
               <button
                 type="button"
