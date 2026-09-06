@@ -19,11 +19,11 @@ import { getEnvVar } from "./read_env";
 import { getMaxTokens, getTemperature } from "./token_utils";
 import log from "electron-log";
 import { FREE_OPENROUTER_MODEL_NAMES } from "../shared/language_model_constants";
-import { getLanguageModelProviders } from "../shared/language_model_helpers";
 import {
-  getBuiltinLanguageModelCatalog,
-  resolveBuiltinModelAlias,
-} from "../shared/remote_language_model_catalog";
+  getLanguageModelProviders,
+  getLanguageModelsByProviders,
+} from "../shared/language_model_helpers";
+import { resolveBuiltinModelAlias } from "../shared/remote_language_model_catalog";
 import { LanguageModelProvider } from "@/ipc/types";
 import {
   createDyadEngine,
@@ -318,11 +318,10 @@ export async function getModelClient(
         );
       }
     }
-    // Samba Builder: sem plano Pro (herança Dyad removida), o modo auto cai nos
-    // providers conectados (BYOK) que tenham chave de API — ex.: DeepSeek do
-    // catálogo. Antes era só Dyad Pro + OpenRouter; um provider com chave válida
-    // nunca era considerado e o auto falhava mesmo com tudo configurado.
-    const byokCatalog = await getBuiltinLanguageModelCatalog();
+    // Samba Builder: o modo auto resolve SEMPRE para um modelo cujo provider
+    // esteja conectado via API (chave salva ou env var) — catálogo E custom
+    // models (language_models do DB). Nunca tenta modelo sem conexão.
+    const byokModelsByProvider = await getLanguageModelsByProviders();
     for (const provider of allProviders) {
       const byokApiKey =
         settings.providerSettings?.[provider.id]?.apiKey?.value ||
@@ -330,11 +329,11 @@ export async function getModelClient(
       if (!byokApiKey) {
         continue;
       }
-      const byokModels = byokCatalog.modelsByProvider[provider.id];
+      const byokModels = byokModelsByProvider[provider.id];
       if (byokModels?.length) {
         const byokModel = byokModels[0];
         logger.log(
-          `[auto] provider BYOK com chave: ${provider.id} model: ${byokModel.apiName}`,
+          `[auto] provider conectado via API: ${provider.id} model: ${byokModel.apiName}`,
         );
         return await getModelClient(
           { provider: provider.id, name: byokModel.apiName },
@@ -344,7 +343,7 @@ export async function getModelClient(
     }
     // If no models have API keys, throw an error
     throw new Error(
-      "No API keys available for any model supported by the 'auto' provider.",
+      "Nenhum provider conectado via API. Conecte um provider (ex.: DeepSeek) em Settings → Providers e adicione a chave de API.",
     );
   }
   return {

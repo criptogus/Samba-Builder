@@ -177,7 +177,7 @@ export function ModelPicker() {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const posthog = usePostHog();
-  const { isTrial, isLoadingTrialStatus } = useTrialModelRestriction();
+  const { isTrial } = useTrialModelRestriction();
   const freeModelQuota = useFreeModelQuota();
   const hasEstablishedChat = Boolean(
     chat && (chat.modelSelection || chat.messages.length > 0),
@@ -377,20 +377,17 @@ export function ModelPicker() {
     return selectedModel.name;
   };
 
-  // Get auto provider models (if any)
+  // Get auto provider models (if any) — Samba Builder: sem backend free/Pro,
+  // as variantes free/value/balanced do auto ficam fora; só o "auto" clássico.
   const catalogAutoModels =
     !loading && modelsByProviders && modelsByProviders["auto"]
       ? modelsByProviders["auto"].filter((model) => {
-          if (model.apiName === FREE_PRO_MODEL_NAME) {
-            return dyadProEnabled && !isTrial && !isLoadingTrialStatus;
-          }
-          if (settings && !dyadProEnabled && model.apiName === "value") {
-            return false;
-          }
-          if (settings && !dyadProEnabled && model.apiName === "balanced") {
-            return false;
-          }
-          if (settings && dyadProEnabled && model.apiName === "free") {
+          if (
+            model.apiName === "free" ||
+            model.apiName === "value" ||
+            model.apiName === "balanced" ||
+            model.apiName === FREE_PRO_MODEL_NAME
+          ) {
             return false;
           }
           return true;
@@ -457,10 +454,14 @@ export function ModelPicker() {
   }).effortLevel;
   // The root menu is a quick switcher. The complete catalog is prepared here
   // for the nested "All models" menu.
+  // Samba Builder: como no Hermes — só aparecem modelos de providers
+  // CONECTADOS via API (chave salva). Provider sem chave fica fora da lista;
+  // nada de catálogo inteiro com modelo que não funciona.
   const providerEntries =
     !loading && modelsByProviders
       ? Object.entries(modelsByProviders).filter(
-          ([providerId]) => providerId !== "auto",
+          ([providerId]) =>
+            providerId !== "auto" && isProviderSetup(providerId),
         )
       : [];
   const isVisibleCatalogModel = (providerId: string, model: LanguageModel) =>
@@ -644,7 +645,9 @@ export function ModelPicker() {
   // While settings/env vars are still loading we can't tell whether a key
   // exists, so fail open rather than flash a lock at env-var-configured users.
   const isModelLocked = (providerId: string) => {
-    if (settingsLoading || dyadProEnabled || providerId === "auto") {
+    // Samba Builder: sem assinatura — um modelo só fica disponível se o provider
+    // tiver uma chave de API conectada (BYOK). Pro não desbloqueia nada aqui.
+    if (settingsLoading || providerId === "auto") {
       return false;
     }
     const provider = providers?.find((p) => p.id === providerId);
@@ -670,21 +673,6 @@ export function ModelPicker() {
     setOpen(false);
   };
 
-  const handleUnlockDialogUpgradeClick = () => {
-    if (!unlockTarget) {
-      return;
-    }
-    posthog.capture("model-picker:upgrade-click", {
-      source: "locked-model-dialog",
-      provider: unlockTarget.providerId,
-      model: unlockTarget.model.apiName,
-    });
-    ipc.system.openExternalUrl(
-      `${DYAD_PRO_UPGRADE_BASE_URL}&utm_campaign=model-picker-locked-model`,
-    );
-    setUnlockTarget(null);
-  };
-
   const handleUnlockDialogOwnKeyClick = () => {
     if (!unlockTarget) {
       return;
@@ -700,9 +688,6 @@ export function ModelPicker() {
     });
   };
 
-  const unlockTargetIsFreeModel = unlockTarget
-    ? isFreeOpenRouterModelName(unlockTarget.model.apiName)
-    : false;
   const unlockTargetProviderName = unlockTarget
     ? getProviderDisplayName(unlockTarget.providerId)
     : "";
@@ -1600,57 +1585,25 @@ export function ModelPicker() {
           className="sm:max-w-md"
           data-testid="unlock-model-dialog"
         >
-          {/* Free models aren't a Pro feature, so don't sell Pro for them —
-              they just need the user's own (free) provider API key. */}
-          {unlockTargetIsFreeModel ? (
-            <>
-              <DialogHeader>
-                <DialogTitle>
-                  Use {unlockTarget?.model.displayName} with your own{" "}
-                  {unlockTargetProviderName} API key
-                </DialogTitle>
-                <DialogDescription>
-                  Free models run through your own {unlockTargetProviderName}{" "}
-                  account. Add an API key in provider settings to use this
-                  model.
-                </DialogDescription>
-              </DialogHeader>
-              <Button
-                className="cursor-pointer w-full"
-                onClick={handleUnlockDialogOwnKeyClick}
-              >
-                Add {unlockTargetProviderName} API key
-              </Button>
-            </>
-          ) : (
-            <>
-              <DialogHeader>
-                <DialogTitle>
-                  Unlock {unlockTarget?.model.displayName} with Samba Builder
-                </DialogTitle>
-                <DialogDescription>
-                  Samba Builder gives you {unlockTarget?.model.displayName} and
-                  every other leading AI model with one subscription — no API
-                  keys needed.
-                </DialogDescription>
-              </DialogHeader>
-              <div className="flex flex-col gap-3">
-                <Button
-                  className="cursor-pointer w-full"
-                  onClick={handleUnlockDialogUpgradeClick}
-                >
-                  Get Samba Builder
-                </Button>
-                <button
-                  type="button"
-                  className="cursor-pointer text-sm text-primary hover:underline underline-offset-4"
-                  onClick={handleUnlockDialogOwnKeyClick}
-                >
-                  Or use your own {unlockTargetProviderName} API key
-                </button>
-              </div>
-            </>
-          )}
+          {/* Samba Builder: sem assinatura — modelo locked significa que o
+              provider precisa de uma chave de API (BYOK). Conectar em
+              Settings → Providers. */}
+          <DialogHeader>
+            <DialogTitle>
+              Use {unlockTarget?.model.displayName} with your own{" "}
+              {unlockTargetProviderName} API key
+            </DialogTitle>
+            <DialogDescription>
+              Connect your {unlockTargetProviderName} API key in provider
+              settings to use this model.
+            </DialogDescription>
+          </DialogHeader>
+          <Button
+            className="cursor-pointer w-full"
+            onClick={handleUnlockDialogOwnKeyClick}
+          >
+            Add {unlockTargetProviderName} API key
+          </Button>
         </DialogContent>
       </Dialog>
     </>
