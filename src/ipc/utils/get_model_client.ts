@@ -151,8 +151,12 @@ export async function getModelClient(
         "Samba Builder",
       )
     : undefined;
-  // Samba Builder: sem plano Pro — sempre liberado (sem assinatura no produto).
-  const isDyadProEnabledForRequest = true;
+  // Samba Builder: produto BYOK puro — SEM backend de engine gerenciado
+  // (herança do Dyad autenticava por cookie de sessão; sem sessão logada o
+  // engine responde "No cookie auth credentials found"). O caminho do engine
+  // fica permanentemente desligado: o modelo vai SEMPRE direto ao provider
+  // conectado via API (chave do usuário).
+  const isDyadProEnabledForRequest = false;
 
   if (
     model.provider === "auto" &&
@@ -160,7 +164,7 @@ export async function getModelClient(
     !isDyadProEnabledForRequest
   ) {
     throw new DyadError(
-      "Auto (balanced) requires Samba Builder. Switch to another model or enable Samba Builder.",
+      "Auto (balanced) requer um modelo conectado. Selecione Auto ou um modelo conectado via API.",
       DyadErrorKind.Auth,
     );
   }

@@ -178,23 +178,9 @@ describe("ProviderSettingsPage", () => {
     });
   });
 
-  it("resumes an implicit first prompt with the new Samba Builder default", async () => {
-    mocks.hasArmedPayload = true;
-    mocks.validateProviderApiKey.mockResolvedValue(undefined);
-    mocks.updateSettings.mockResolvedValue(undefined);
-
+  it("does not show an API key field for Auto (it aggregates connected providers)", async () => {
     renderProviderSettingsPage("auto");
-    await saveApiKey("Samba Builder", "auto");
-
-    await waitFor(() =>
-      expect(mocks.sendFirstPrompt).toHaveBeenCalledWith({
-        providerSettings: {
-          auto: { apiKey: { value: "test-google-key" } },
-        },
-        enableDyadPro: true,
-        defaultChatMode: "local-agent",
-      }),
-    );
+    expect(screen.queryByLabelText(/Set .* API Key/)).toBeNull();
   });
 
   it("does not auto-submit when replacing an existing provider key", async () => {

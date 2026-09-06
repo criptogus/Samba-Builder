@@ -81,14 +81,11 @@ const mocks = vi.hoisted(() => ({
   settings: {
     enableDyadPro: true,
     providerSettings: {
-      auto: {
-        apiKey: {
-          value: "dyad-pro-key",
-        },
-      },
+      // Samba Builder (BYOK): o provider "auto" não tem chave própria; um
+      // provider real conectado (openrouter) mantém a lista populada.
       openrouter: {
         apiKey: {
-          value: "",
+          value: "openrouter-key",
         },
       },
     },

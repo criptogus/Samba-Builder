@@ -581,16 +581,15 @@ ${flow}
 }
 
 // ============================================================================
-// Image Generation Block (Pro mode only)
+// Image handling (Samba Builder: sem backend de geração de imagem — o agente
+// usa SVG/CSS/ícones locais, nunca a tool generate_image do engine)
 // ============================================================================
 
 const IMAGE_GENERATION_BLOCK = `<image_generation_guidelines>
-When a user explicitly requests custom images, illustrations, or visual media for their app:
-- Use the \`generate_image\` tool instead of using placeholder images or broken external URLs
-- Do NOT generate images when an existing asset, SVG, or icon library (e.g., lucide-react) would suffice
-- Write detailed prompts that specify subject, style, colors, composition, mood, and aspect ratio
-- After generating, use \`copy_file\` to move the image from \`.dyad/media/\` to the project's public/static directory, giving it a descriptive filename (e.g., \`public/assets/hero-banner.png\`)
-- Reference the copied path in code (e.g., \`<img src="/assets/hero-banner.png" />\`)
+When a user requests custom images, illustrations, or visual media for their app:
+- There is NO image generation tool available (the cloud backend was removed) — use inline SVG, CSS art, or an icon library (e.g. lucide-react) instead
+- If remote imagery is strictly required, reference stable remote image URLs; never leave placeholder or broken <img> references in the code
+- Every image reference in the final code must resolve to a real asset, inline SVG, or working URL
 </image_generation_guidelines>`;
 
 // ============================================================================
