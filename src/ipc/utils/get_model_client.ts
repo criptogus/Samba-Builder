@@ -20,7 +20,10 @@ import { getMaxTokens, getTemperature } from "./token_utils";
 import log from "electron-log";
 import { FREE_OPENROUTER_MODEL_NAMES } from "../shared/language_model_constants";
 import { getLanguageModelProviders } from "../shared/language_model_helpers";
-import { resolveBuiltinModelAlias } from "../shared/remote_language_model_catalog";
+import {
+  getBuiltinLanguageModelCatalog,
+  resolveBuiltinModelAlias,
+} from "../shared/remote_language_model_catalog";
 import { LanguageModelProvider } from "@/ipc/types";
 import {
   createDyadEngine,
@@ -310,6 +313,30 @@ export async function getModelClient(
             provider: resolvedModel.providerId,
             name: resolvedModel.apiName,
           },
+          settings,
+        );
+      }
+    }
+    // Samba Builder: sem plano Pro (herança Dyad removida), o modo auto cai nos
+    // providers conectados (BYOK) que tenham chave de API — ex.: DeepSeek do
+    // catálogo. Antes era só Dyad Pro + OpenRouter; um provider com chave válida
+    // nunca era considerado e o auto falhava mesmo com tudo configurado.
+    const byokCatalog = await getBuiltinLanguageModelCatalog();
+    for (const provider of allProviders) {
+      const byokApiKey =
+        settings.providerSettings?.[provider.id]?.apiKey?.value ||
+        (provider.envVarName ? getEnvVar(provider.envVarName) : undefined);
+      if (!byokApiKey) {
+        continue;
+      }
+      const byokModels = byokCatalog.modelsByProvider[provider.id];
+      if (byokModels?.length) {
+        const byokModel = byokModels[0];
+        logger.log(
+          `[auto] provider BYOK com chave: ${provider.id} model: ${byokModel.apiName}`,
+        );
+        return await getModelClient(
+          { provider: provider.id, name: byokModel.apiName },
           settings,
         );
       }
