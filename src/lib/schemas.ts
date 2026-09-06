@@ -659,8 +659,11 @@ export function migrateStoredSettings(
   };
 }
 
-export function isDyadProEnabled(settings: UserSettings): boolean {
-  return settings.enableDyadPro === true && hasDyadProKey(settings);
+export function isDyadProEnabled(_settings: UserSettings): boolean {
+  // Samba Builder: sem plano Pro — todas as features liberadas para qualquer
+  // usuário (o produto vende serviços, não assinatura). Mantido o nome da
+  // função para não tocar os call sites do upstream.
+  return true;
 }
 
 export function hasDyadProKey(settings: UserSettings): boolean {

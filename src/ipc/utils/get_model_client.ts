@@ -151,9 +151,8 @@ export async function getModelClient(
         "Samba Builder",
       )
     : undefined;
-  const isDyadProEnabledForRequest = Boolean(
-    dyadApiKey && settings.enableDyadPro,
-  );
+  // Samba Builder: sem plano Pro — sempre liberado (sem assinatura no produto).
+  const isDyadProEnabledForRequest = true;
 
   if (
     model.provider === "auto" &&

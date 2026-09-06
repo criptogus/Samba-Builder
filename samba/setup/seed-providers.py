@@ -26,7 +26,7 @@ DB = os.environ.get(
     "SAMBA_DB",
     os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "userData", "sqlite.db")),
 )
-GATEWAY_BASE = os.environ.get("SAMBA_LLM_BASE_URL", "http://127.0.0.1:8642/v1")
+DEEPSEEK_BASE = os.environ.get("SAMBA_DEEPSEEK_BASE_URL", "https://api.deepseek.com")
 # OpenCode Go (assinatura flat): endpoint OpenAI-compatible — deepseek-v4-pro/flash
 # (https://opencode.ai/docs/go). Chave: opencode.ai/auth (cole na UI). Mesma chave do Zen.
 OPENCODE_BASE = os.environ.get("SAMBA_OPENCODE_BASE_URL", "https://opencode.ai/zen/go/v1")
@@ -34,10 +34,11 @@ OPENCODE_BASE = os.environ.get("SAMBA_OPENCODE_BASE_URL", "https://opencode.ai/z
 OPENCODE_PREVIOUS_DEFAULTS = [
     "http://127.0.0.1:11435/v1",      # proxy local (v1 do seed)
     "https://opencode.ai/zen/v1",     # Zen pay-as-you-go (v2 do seed)
+    "http://127.0.0.1:8642/v1",       # gateway local do Hermes (v3 do seed — revertido p/ API direta)
 ]
 
 PROVIDERS = [
-    {"id": "deepseek-samba", "name": "DeepSeek (Samba)", "api_base_url": GATEWAY_BASE},
+    {"id": "deepseek-samba", "name": "DeepSeek", "api_base_url": DEEPSEEK_BASE},
     {"id": "opencode-local", "name": "OpenCode", "api_base_url": OPENCODE_BASE},
 ]
 
