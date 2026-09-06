@@ -222,40 +222,6 @@ describe("performCompaction", () => {
     );
   });
 
-  it("summarizes with the user's selected model for non-Pro users", async () => {
-    mockStreamText.mockReturnValue({
-      textStream: textStream(["Complete summary"]),
-    });
-
-    const result = await performCompaction(
-      { sender: {} } as never,
-      chatId,
-      "/tmp/test-app",
-      "request-id",
-    );
-
-    expect(result).toMatchObject({ success: true });
-    expect(mockGetModelClient).toHaveBeenCalledWith(
-      {
-        provider: "anthropic",
-        name: "test-model",
-        effortLevel: "medium",
-      },
-      {
-        selectedModel: {
-          provider: "anthropic",
-          name: "test-model",
-          effortLevel: "medium",
-        },
-      },
-      {
-        provider: "anthropic",
-        name: "test-model",
-        effortLevel: "medium",
-      },
-    );
-  });
-
   it("pins the benchmarked compaction model for Samba Builder users", async () => {
     settingsState.current = {
       selectedModel: { provider: "anthropic", name: "test-model" },

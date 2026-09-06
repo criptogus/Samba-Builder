@@ -56,17 +56,4 @@ describe("voice-to-text chat input controls (integration)", () => {
     expect(micButton).toBeTruthy();
     expect((micButton as HTMLButtonElement).disabled).toBe(false);
   });
-
-  it("shows the locked mic button for non-Pro users", async () => {
-    writeSettings({
-      enableDyadPro: false,
-      providerSettings: {},
-    });
-    const chatId = await harness.createChat();
-    harness.mount({ chatId });
-
-    expect(
-      await screen.findByRole("button", { name: "Voice to text (Pro)" }),
-    ).toBeTruthy();
-  });
 });

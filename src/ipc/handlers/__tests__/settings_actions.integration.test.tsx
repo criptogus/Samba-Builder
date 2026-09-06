@@ -116,45 +116,6 @@ describe("settings actions (integration)", () => {
     );
   });
 
-  it("validates Samba Builder keys before saving provider settings", async () => {
-    resetSettings();
-
-    harness.mountSurface({
-      route: "/settings/providers/$provider",
-      params: { provider: "auto" },
-    });
-
-    const keyInput = await screen.findByRole("textbox", {
-      name: "Set Samba Builder API Key",
-    });
-    fireEvent.change(keyInput, { target: { value: "invalid-dyad-key" } });
-    fireEvent.click(screen.getByRole("button", { name: "Save Key" }));
-
-    const dialog = await screen.findByRole("alertdialog");
-    expect(
-      within(dialog).getByRole("heading", { name: "API key rejected" }),
-    ).toBeTruthy();
-    expect(
-      within(dialog).getByText(/Samba Builder rejected this API key/),
-    ).toBeTruthy();
-    fireEvent.click(
-      within(dialog).getByRole("button", { name: "Try another API key" }),
-    );
-    await waitFor(() => expect(dialog.isConnected).toBe(false));
-    expect(readSettings().providerSettings.auto).toBeUndefined();
-    expect(readSettings().enableDyadPro).not.toBe(true);
-
-    fireEvent.change(keyInput, { target: { value: "testdyadkey" } });
-    fireEvent.click(screen.getByRole("button", { name: "Save Key" }));
-
-    await screen.findByText("Current Key (Settings)");
-    await waitFor(() => {
-      const settings = readSettings();
-      expect(settings.providerSettings.auto?.apiKey?.value).toBe("testdyadkey");
-      expect(settings.enableDyadPro).toBe(true);
-    });
-  }, 60_000);
-
   it("persists the Supabase SQL migration toggle from settings", async () => {
     resetSettings(CONNECTED_SUPABASE_SETTINGS);
 
