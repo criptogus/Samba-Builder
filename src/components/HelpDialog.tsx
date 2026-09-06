@@ -7,7 +7,6 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import {
-  BookOpenIcon,
   BugIcon,
   UploadIcon,
   ChevronLeftIcon,
@@ -534,27 +533,16 @@ export function HelpDialog() {
         If you need help or want to report an issue, here are some options:
       </DialogDescription>
       <div className="flex flex-col w-full mt-4 space-y-5">
-        {/* Self-service help */}
-        {isDyadProUser ? (
-          <Button
-            variant="default"
-            onClick={() => setIsHelpBotOpen(true)}
-            className="w-full py-6 border-primary/50 shadow-sm shadow-primary/10 transition-all hover:shadow-md hover:shadow-primary/15"
-          >
-            <SparklesIcon className="mr-2 h-5 w-5" /> Chat with Samba Builder
-            help bot (Pro)
-          </Button>
-        ) : (
-          <Button
-            variant="outline"
-            onClick={() =>
-              ipc.system.openExternalUrl("https://www.dyad.sh/docs")
-            }
-            className="w-full py-6 bg-(--background-lightest)"
-          >
-            <BookOpenIcon className="mr-2 h-5 w-5" /> Open Docs
-          </Button>
-        )}
+        {/* Self-service help — Samba Builder sem plano Pro: assistente sempre
+            disponível (o link de docs externo do Dyad foi removido) */}
+        <Button
+          variant="default"
+          onClick={() => setIsHelpBotOpen(true)}
+          className="w-full py-6 border-primary/50 shadow-sm shadow-primary/10 transition-all hover:shadow-md hover:shadow-primary/15"
+        >
+          <SparklesIcon className="mr-2 h-5 w-5" /> Chat with the Samba Builder
+          help bot
+        </Button>
 
         {/* Divider */}
         <div className="flex items-center gap-3">

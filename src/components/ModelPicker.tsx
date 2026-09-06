@@ -18,7 +18,7 @@ import { useLocalModels } from "@/hooks/useLocalModels";
 import { useLocalLMSModels } from "@/hooks/useLMStudioModels";
 import { useLanguageModelsByProviders } from "@/hooks/useLanguageModelsByProviders";
 
-import { ipc, type LanguageModel, type LocalModel } from "@/ipc/types";
+import { type LanguageModel, type LocalModel } from "@/ipc/types";
 import { useLanguageModelProviders } from "@/hooks/useLanguageModelProviders";
 import { useSettings } from "@/hooks/useSettings";
 import { PriceBadge } from "@/components/PriceBadge";
@@ -35,7 +35,6 @@ import {
   CheckIcon,
   ChevronRightIcon,
   LockIcon,
-  SparklesIcon,
 } from "lucide-react";
 import { ProviderIcon } from "@/components/ProviderIcon";
 import {
@@ -86,9 +85,6 @@ const PRO_PILL_CLASS = cn(
   PILL_CLASS,
   "bg-gradient-to-r from-indigo-600 via-indigo-500 to-indigo-600 bg-[length:200%_100%] animate-[shimmer_5s_ease-in-out_infinite] text-white",
 );
-
-const DYAD_PRO_UPGRADE_BASE_URL =
-  "https://www.dyad.sh/pro?utm_source=dyad-app&utm_medium=app";
 
 const NAVIGATION_SUBMENU_HOVER_PROPS = {
   openOnHover: true,
@@ -661,16 +657,6 @@ export function ModelPicker() {
     });
     setOpen(false);
     setUnlockTarget({ providerId, model });
-  };
-
-  const handleUnlockAllClick = () => {
-    posthog.capture("model-picker:upgrade-click", {
-      source: "unlock-all-footer",
-    });
-    ipc.system.openExternalUrl(
-      `${DYAD_PRO_UPGRADE_BASE_URL}&utm_campaign=model-picker-unlock-all`,
-    );
-    setOpen(false);
   };
 
   const handleUnlockDialogOwnKeyClick = () => {
@@ -1551,24 +1537,6 @@ export function ModelPicker() {
             </>
           )}
 
-          {/* Upgrade footer for non-Pro users */}
-          {!isTrial && !dyadProEnabled && (
-            <>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem
-                data-testid="model-picker-unlock-all"
-                className="px-2 py-2 bg-gradient-to-r from-indigo-50 to-sky-50 dark:from-indigo-950/50 dark:to-sky-950/50 focus:from-indigo-100 focus:to-sky-100 dark:focus:from-indigo-950 dark:focus:to-sky-950"
-                onClick={handleUnlockAllClick}
-              >
-                <div className="flex items-center gap-2 w-full">
-                  <SparklesIcon className="size-3.5 text-indigo-600 dark:text-indigo-300 shrink-0" />
-                  <span className="text-[13px] font-medium text-indigo-700 dark:text-indigo-300">
-                    Unlock all models with Samba Builder
-                  </span>
-                </div>
-              </DropdownMenuItem>
-            </>
-          )}
         </DropdownMenuContent>
       </DropdownMenu>
 

@@ -106,7 +106,6 @@ import {
   ContextLimitBanner,
   shouldShowContextLimitBanner,
 } from "./ContextLimitBanner";
-import { PromoMessage, usePromoMessage } from "./PromoMessage";
 import { useCountTokens } from "@/hooks/useCountTokens";
 import { useChats } from "@/hooks/useChats";
 import { useRouter } from "@tanstack/react-router";
@@ -353,8 +352,9 @@ export function ChatInput({ chatId }: { chatId?: number }) {
 
   // Promo cap row on the composer; never stack two caps — the context limit
   // warning wins the slot.
-  const promo = usePromoMessage(chatId);
-  const showPromo = promo.visible && !showBanner;
+  // Samba Builder: promos de trial/upgrade removidas — sem plano Pro, nada a
+  // promover. (import de PromoMessage eliminado)
+  const showPromo = false;
 
   useEffect(() => {
     if (error) {
@@ -863,8 +863,7 @@ export function ChatInput({ chatId }: { chatId?: number }) {
         </div>
       )}
       <div className="p-2 pt-0" data-testid="chat-input-container">
-        {/* Promo cap row fused to the top of the composer */}
-        {showPromo && <PromoMessage seed={promo.seed} />}
+        {/* Promo de trial/upgrade removida (Samba Builder sem plano Pro) */}
         {/* Show context limit banner above chat input for visibility */}
         {showBanner && tokenCountResult && (
           <ContextLimitBanner
