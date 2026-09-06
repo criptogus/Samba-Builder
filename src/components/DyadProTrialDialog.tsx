@@ -19,13 +19,13 @@ export function DyadProTrialDialog({
 
   const handleStartTrial = () => {
     ipc.system.openExternalUrl(
-      `https://academy.dyad.sh/redirect-to-checkout?trialCode=7PRO30&${utmParams}`,
+      `https://sambatech.com
     );
     onClose();
   };
 
   const handleLearnMore = () => {
-    ipc.system.openExternalUrl(`https://www.dyad.sh/pro?${utmParams}`);
+    ipc.system.openExternalUrl(`https://sambatech.com);
   };
 
   const features = [

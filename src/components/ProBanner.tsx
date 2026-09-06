@@ -44,7 +44,7 @@ export function ManageDyadProButton({ className }: { className?: string }) {
         className,
       )}
       onClick={() => {
-        ipc.system.openExternalUrl("https://academy.dyad.sh/subscription");
+        ipc.system.openExternalUrl("https://sambatech.com");
       }}
     >
       <Wallet aria-hidden="true" className="w-5 h-5" />
@@ -61,7 +61,7 @@ export function SetupDyadProButton() {
       type="button"
       className="inline-flex cursor-pointer items-center gap-1.5 text-xs font-medium text-muted-foreground transition-colors hover:text-primary hover:underline"
       onClick={() => {
-        ipc.system.openExternalUrl("https://academy.dyad.sh/settings");
+        ipc.system.openExternalUrl("https://sambatech.com");
       }}
     >
       <KeyRound aria-hidden="true" className="size-3.5" />
@@ -77,7 +77,7 @@ export function AiAccessBanner() {
       className="w-full py-2 sm:py-2.5 md:py-3 rounded-lg bg-gradient-to-br from-white via-indigo-50 to-sky-100 dark:from-indigo-700 dark:via-indigo-700 dark:to-indigo-900 flex items-center justify-center relative overflow-hidden ring-1 ring-inset ring-black/5 dark:ring-white/10 shadow-sm cursor-pointer transition-all duration-200 hover:shadow-md hover:-translate-y-[1px]"
       onClick={() => {
         ipc.system.openExternalUrl(
-          "https://www.dyad.sh/pro?utm_source=dyad-app&utm_medium=app&utm_campaign=in-app-banner-ai-access",
+          "https://sambatech.com",
         );
       }}
     >
@@ -144,7 +144,7 @@ export function SmartContextBanner() {
       className="w-full py-2 sm:py-2.5 md:py-3 rounded-lg bg-gradient-to-br from-emerald-50 via-emerald-100 to-emerald-200 dark:from-emerald-700 dark:via-emerald-700 dark:to-emerald-900 flex items-center justify-center relative overflow-hidden ring-1 ring-inset ring-emerald-900/10 dark:ring-white/10 shadow-sm cursor-pointer transition-all duration-200 hover:shadow-md hover:-translate-y-[1px]"
       onClick={() => {
         ipc.system.openExternalUrl(
-          "https://www.dyad.sh/pro?utm_source=dyad-app&utm_medium=app&utm_campaign=in-app-banner-smart-context",
+          "https://sambatech.com",
         );
       }}
     >

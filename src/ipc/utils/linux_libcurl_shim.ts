@@ -19,7 +19,7 @@ const logger = log.scope("linux_libcurl_shim");
  * We do this purely at runtime, only when the gnutls soname is genuinely
  * missing, so systems that already have it are never touched.
  *
- * https://github.com/dyad-sh/dyad/issues/2975
+ * https://sambatech.com
  */
 
 const SONAME = "libcurl-gnutls.so.4";

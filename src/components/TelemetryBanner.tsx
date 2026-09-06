@@ -39,7 +39,7 @@ export function PrivacyBanner() {
             type="button"
             onClick={() => {
               ipc.system.openExternalUrl(
-                "https://dyad.sh/docs/policies/privacy-policy",
+                "https://sambatech.com",
               );
             }}
             className="font-medium text-blue-600 hover:underline dark:text-blue-400"

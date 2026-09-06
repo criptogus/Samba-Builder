@@ -879,7 +879,7 @@ export function ChatInput({ chatId }: { chatId?: number }) {
         )}
         <div
           className={cn(
-            "relative flex flex-col border border-border rounded-2xl bg-card shadow-sm transition-[border-color,box-shadow] duration-200 focus-within:shadow-md focus-within:ring-2 focus-within:ring-primary/15",
+            "relative flex flex-col border border-border rounded-xl bg-card transition-colors duration-150 focus-within:ring-2 focus-within:ring-primary/15",
             "focus-within:border-primary/30 focus-within:ring-1 focus-within:ring-primary/20",
             isDraggingOver && "ring-2 ring-blue-500 border-blue-500",
             (showBanner || showPromo || isCancellationRequested) &&
@@ -986,7 +986,7 @@ export function ChatInput({ chatId }: { chatId?: number }) {
                     render={
                       <button
                         onClick={() => {
-                          ipc.system.openExternalUrl("https://dyad.sh/pro");
+                          ipc.system.openExternalUrl("https://sambatech.com");
                         }}
                         className="flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors cursor-pointer"
                       />
@@ -1106,27 +1106,7 @@ export function ChatInput({ chatId }: { chatId?: number }) {
                       : t("voiceToText", "Voice to text")}
                 </TooltipContent>
               </Tooltip>
-            ) : (
-              <Tooltip>
-                <TooltipTrigger
-                  render={
-                    <button
-                      onClick={() =>
-                        ipc.system.openExternalUrl("https://dyad.sh/pro")
-                      }
-                      aria-label={t("voiceToTextPro", "Voice to text (Pro)")}
-                      className="px-2 py-2 mb-0.5 text-muted-foreground hover:text-primary rounded-lg transition-colors duration-150 cursor-pointer relative"
-                    />
-                  }
-                >
-                  <Mic size={20} />
-                  <Lock size={10} className="absolute -top-0.5 -right-0.5" />
-                </TooltipTrigger>
-                <TooltipContent>
-                  {t("voiceToTextRequiresPro", "Voice to text (requires Pro)")}
-                </TooltipContent>
-              </Tooltip>
-            )}
+            ) : null}
 
             {isStreaming ? (
               // Cancelling is not instant — an in-flight tool has to unwind

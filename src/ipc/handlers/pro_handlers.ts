@@ -83,7 +83,7 @@ function getUserInfoUrl() {
 function getSubscriptionStatusUrl() {
   return (
     process.env.DYAD_SUBSCRIPTION_STATUS_URL ??
-    "https://academy.dyad.sh/api/desktop/subscription-status"
+    "https://sambatech.com"
   );
 }
 

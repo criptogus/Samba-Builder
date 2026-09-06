@@ -280,7 +280,7 @@ function SecurityHeader({
                   aria-label="Open Security Review documentation"
                   onClick={() =>
                     ipc.system.openExternalUrl(
-                      "https://www.dyad.sh/docs/guides/security-review",
+                      "https://sambatech.com",
                     )
                   }
                 />

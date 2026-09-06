@@ -633,7 +633,7 @@ export const CLOUD_PROVIDERS: Record<
   },
   auto: {
     displayName: "Samba Builder",
-    websiteUrl: "https://academy.dyad.sh/subscription",
+    websiteUrl: "https://sambatech.com",
     gatewayPrefix: "dyad/",
   },
   azure: {

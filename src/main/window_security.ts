@@ -5,8 +5,8 @@ import type {
 } from "electron";
 
 const RELEASE_NOTES_ORIGINS = new Set([
-  "https://dyad.sh",
-  "https://www.dyad.sh",
+  "https://sambatech.com",
+  "https://sambatech.com",
 ]);
 const RESERVED_FRAME_NAMES = new Set([
   "_parent",

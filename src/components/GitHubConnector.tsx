@@ -74,11 +74,11 @@ interface LinkedGitHubRepo {
 function GitHubTroubleshootingLink({ className = "" }: { className?: string }) {
   return (
     <a
-      href="https://www.dyad.sh/docs/integrations/github#troubleshooting"
+      href="https://sambatech.com"
       onClick={(event) => {
         event.preventDefault();
         ipc.system.openExternalUrl(
-          "https://www.dyad.sh/docs/integrations/github#troubleshooting",
+          "https://sambatech.com",
         );
       }}
       className={`cursor-pointer text-blue-600 hover:underline dark:text-blue-400 ${className}`}

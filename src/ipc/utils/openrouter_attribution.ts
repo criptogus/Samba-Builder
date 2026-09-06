@@ -1,4 +1,4 @@
-export const OPENROUTER_APP_REFERER = "https://www.dyad.sh";
+export const OPENROUTER_APP_REFERER = "https://sambatech.com";
 export const OPENROUTER_APP_TITLE = "Samba Builder";
 export const OPENROUTER_APP_CATEGORIES = "native-app-builder,programming-app";
 

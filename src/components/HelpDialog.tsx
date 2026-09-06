@@ -84,7 +84,7 @@ const screenTransition = {
 // =============================================================================
 
 const GITHUB_ISSUES_BASE =
-  "https://github.com/dyad-sh/dyad/issues/new" as const;
+  "https://sambatech.com" as const;
 
 function openGitHubIssue(params: {
   title: string;
@@ -396,38 +396,10 @@ export function HelpDialog() {
   };
 
   const handleSubmitChatLogs = async () => {
-    if (!debugBundle) return;
-    setIsUploading(true);
-    try {
-      const response = await fetch(
-        "https://upload-logs.dyad.sh/generate-upload-url",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            extension: "json",
-            contentType: "application/json",
-          }),
-        },
-      );
-      if (!response.ok) {
-        showError(`Failed to get upload URL: ${response.statusText}`);
-        throw new Error(`Failed to get upload URL: ${response.statusText}`);
-      }
-      const { uploadUrl, filename } = await response.json();
-      await ipc.system.uploadToSignedUrl({
-        url: uploadUrl,
-        contentType: "application/json",
-        data: debugBundle,
-      });
-      setSessionId("v2:" + filename.replace(".json", ""));
-      navigateTo("upload-complete");
-    } catch (error) {
-      console.error("Failed to upload chat logs:", error);
-      alert("Failed to upload chat logs. Please try again.");
-    } finally {
-      setIsUploading(false);
-    }
+    // Samba Builder: sem backend próprio — os logs NÃO são enviados a servidor
+    // externo (o upload para o servidor do Dyad foi removido). O suporte é
+    // acionado pelo contato da Samba.
+    ipc.system.openExternalUrl("https://sambatech.com");
   };
 
   const handleCancelReview = () => {
@@ -533,15 +505,14 @@ export function HelpDialog() {
         If you need help or want to report an issue, here are some options:
       </DialogDescription>
       <div className="flex flex-col w-full mt-4 space-y-5">
-        {/* Self-service help — Samba Builder sem plano Pro: assistente sempre
-            disponível (o link de docs externo do Dyad foi removido) */}
+        {/* Suporte — sem backend próprio: o chat de ajuda (que falava com o
+            servidor do Dyad) foi substituído pelo contato da Samba */}
         <Button
           variant="default"
-          onClick={() => setIsHelpBotOpen(true)}
+          onClick={() => ipc.system.openExternalUrl("https://sambatech.com")}
           className="w-full py-6 border-primary/50 shadow-sm shadow-primary/10 transition-all hover:shadow-md hover:shadow-primary/15"
         >
-          <SparklesIcon className="mr-2 h-5 w-5" /> Chat with the Samba Builder
-          help bot
+          <SparklesIcon className="mr-2 h-5 w-5" /> Contact Samba support
         </Button>
 
         {/* Divider */}

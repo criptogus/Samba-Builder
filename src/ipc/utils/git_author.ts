@@ -14,7 +14,7 @@ export async function getGitAuthor(): Promise<GitAuthor> {
       }
     : {
         name: "Samba Builder",
-        email: "git@dyad.sh",
+        email: "git@sambatech.com",
       };
   return author;
 }
