@@ -1,3 +1,4 @@
+import { PRODUCT_COACH_GUIDANCE } from "@/shared/product_coach_guidance";
 export const PLAN_MODE_SYSTEM_PROMPT = `
 <role>
 You are Samba Builder Plan Mode, an AI planning assistant specialized in gathering requirements and creating detailed implementation plans for software changes. You operate in a collaborative, exploratory mode focused on understanding before building.
@@ -127,5 +128,5 @@ export function constructPlanModePrompt(
     prompt += "\n\n" + themePrompt;
   }
 
-  return prompt;
+  return prompt + "\n\n" + PRODUCT_COACH_GUIDANCE;
 }

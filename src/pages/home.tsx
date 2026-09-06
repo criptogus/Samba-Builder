@@ -1,3 +1,5 @@
+import { ProductCoachButton } from "@/components/ProductCoachButton";
+import { appendProductBrief } from "@/product_coach/model";
 import { appendMeetingBriefing } from "@/shared/meeting_briefing";
 import { MeetingBriefingButton } from "@/components/MeetingBriefingButton";
 import { useTranslation } from "react-i18next";
@@ -187,7 +189,15 @@ export default function HomePage() {
             <p className="mx-auto mt-3 max-w-2xl text-base leading-7 text-muted-foreground">
               Describe your idea. Samba Builder will turn it into a working app.
             </p>
-            <div className="mt-4 flex justify-center gap-3">
+            <div className="mt-4 flex flex-wrap justify-center gap-3">
+              <ProductCoachButton
+                key={selectedApp?.id ?? "home"}
+                draftKey={selectedApp ? `app:${selectedApp.id}` : "home"}
+                idea={inputValue}
+                onPrepared={(brief) =>
+                  setInputValue((current) => appendProductBrief(current, brief))
+                }
+              />
               <MeetingBriefingButton
                 onPrepared={(prompt) =>
                   setInputValue(appendMeetingBriefing(inputValue, prompt))

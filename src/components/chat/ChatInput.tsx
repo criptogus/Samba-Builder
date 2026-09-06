@@ -1,3 +1,5 @@
+import { ProductCoachButton } from "@/components/ProductCoachButton";
+import { appendProductBrief } from "@/product_coach/model";
 import { NativeAgentsButton } from "@/components/NativeAgentsButton";
 import { appendMeetingBriefing } from "@/shared/meeting_briefing";
 import { MeetingBriefingButton } from "@/components/MeetingBriefingButton";
@@ -1012,6 +1014,15 @@ export function ChatInput({ chatId }: { chatId?: number }) {
           />
 
           <div className="flex flex-wrap gap-2 px-3 py-1">
+            <ProductCoachButton
+              key={chatId ?? "chat"}
+              draftKey={`chat:${chatId ?? "new"}`}
+              idea={inputValue}
+              disabled={isStreaming}
+              onPrepared={(brief) =>
+                setInputValue((current) => appendProductBrief(current, brief))
+              }
+            />
             {appId && <NativeAgentsButton appId={appId} />}
             <MeetingBriefingButton
               onPrepared={(prompt) =>

@@ -1,3 +1,5 @@
+import { ProductCoachButton } from "@/components/ProductCoachButton";
+import { appendProductBrief } from "@/product_coach/model";
 import { useEffect, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ipc } from "@/ipc/types";
@@ -114,6 +116,15 @@ export default function NativeAgentsDialog({
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-4">
+          <ProductCoachButton
+            key={appId}
+            draftKey={`native:${appId}`}
+            idea={prompt}
+            disabled={busy}
+            onPrepared={(brief) =>
+              setPrompt((current) => appendProductBrief(current, brief))
+            }
+          />
           <div className="flex flex-wrap gap-2" aria-label="Escolher agente">
             {NATIVE_AGENTS.map((item) => (
               <Button

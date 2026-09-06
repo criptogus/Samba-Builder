@@ -1,3 +1,4 @@
+import { PRODUCT_COACH_GUIDANCE } from "@/shared/product_coach_guidance";
 /**
  * System prompt for Local Agent v2 mode
  * Tool-based agent with parallel execution support
@@ -1022,7 +1023,7 @@ export function constructLocalAgentPrompt(
     prompt += "\n\n" + themePrompt;
   }
 
-  return prompt;
+  return prompt + "\n\n" + PRODUCT_COACH_GUIDANCE;
 }
 
 /** Build-mode prompt for the shared agentic loop's curated tool surface. */
@@ -1068,5 +1069,5 @@ export function constructBuildAgentPrompt(
     prompt += "\n\n" + themePrompt;
   }
 
-  return prompt;
+  return prompt + "\n\n" + PRODUCT_COACH_GUIDANCE;
 }

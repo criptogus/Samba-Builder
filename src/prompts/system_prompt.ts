@@ -1,3 +1,4 @@
+import { PRODUCT_COACH_GUIDANCE } from "@/shared/product_coach_guidance";
 import path from "node:path";
 import fs from "node:fs";
 import log from "electron-log";
@@ -894,7 +895,7 @@ export const getSystemPromptForChatMode = ({
   hasSupabaseProject?: boolean;
 }) => {
   if (chatMode === "ask") {
-    return ASK_MODE_SYSTEM_PROMPT;
+    return ASK_MODE_SYSTEM_PROMPT + "\n\n" + PRODUCT_COACH_GUIDANCE;
   }
   // The Nitro server-layer nudge is Vite-specific. Only inject it for Vite
   // apps that haven't already enabled Nitro (`"vite-nitro"` apps already have
@@ -907,7 +908,12 @@ export const getSystemPromptForChatMode = ({
   const buildPrompt =
     BUILD_SYSTEM_PROMPT_BASE +
     (shouldAppendNitroNudge ? `\n\n${BUILD_SERVER_LAYER_NUDGE}` : "");
-  return buildPrompt + (enableTurboEditsV2 ? TURBO_EDITS_V2_SYSTEM_PROMPT : "");
+  return (
+    buildPrompt +
+    (enableTurboEditsV2 ? TURBO_EDITS_V2_SYSTEM_PROMPT : "") +
+    "\n\n" +
+    PRODUCT_COACH_GUIDANCE
+  );
 };
 
 export const readAiRules = async (dyadAppPath: string) => {
