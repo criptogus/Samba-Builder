@@ -830,5 +830,27 @@
     "meetingHint": "회의나 녹취록에서 고객의 맥락을 가져오세요.",
     "importHint": "기존 프로젝트에서 계속 개발하세요.",
     "ideasLabel": "시작점 살펴보기"
+  },
+  "delivery": {
+    "title": "프로젝트 작업 공간",
+    "subtitle": "프로젝트를 찾고 고객의 요구를 반영하여 작업을 이어가세요.",
+    "newProject": "새 프로젝트",
+    "templates": "프로젝트 템플릿",
+    "library": "스킬 및 라이브러리",
+    "projects": "프로젝트",
+    "search": "프로젝트 또는 컬렉션 검색",
+    "favorites": "즐겨찾기",
+    "loading": "프로젝트 로딩 중…",
+    "error": "프로젝트를 불러올 수 없습니다.",
+    "retry": "다시 시도",
+    "noResults": "검색 결과가 없습니다",
+    "empty": "다음 프로젝트를 시작하세요",
+    "filterHint": "검색어를 바꾸거나 즐겨찾기 필터를 해제하세요.",
+    "emptyHint": "아래 고객 브리프로 시작하거나 기존 프로젝트를 가져오세요.",
+    "ungrouped": "컬렉션 없음",
+    "updated": "업데이트",
+    "more": "프로젝트 더 보기",
+    "localHint": "이 컴퓨터의 프로젝트 · 기존 컬렉션으로 정리됩니다.",
+    "intakeLabel": "새 프로젝트 · 고객 브리프"
   }
 }

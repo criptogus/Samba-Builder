@@ -850,5 +850,27 @@
     "meetingHint": "Bring client context from a meeting or transcript.",
     "importHint": "Keep building from a project you already have.",
     "ideasLabel": "Explore a starting point"
+  },
+  "delivery": {
+    "title": "Delivery workspace",
+    "subtitle": "Find a project, bring the client’s context, and keep delivery moving.",
+    "newProject": "New project",
+    "templates": "Project templates",
+    "library": "Skills & library",
+    "projects": "Projects",
+    "search": "Search projects or collections",
+    "favorites": "Favorites",
+    "loading": "Loading projects…",
+    "error": "Projects could not be loaded.",
+    "retry": "Try again",
+    "noResults": "No matching projects",
+    "empty": "Your next delivery starts here",
+    "filterHint": "Try another search or turn off the favorites filter.",
+    "emptyHint": "Start with a client brief below, or import an existing project.",
+    "ungrouped": "No collection",
+    "updated": "Updated",
+    "more": "Show more projects",
+    "localHint": "Projects on this computer · Organized using your existing collections.",
+    "intakeLabel": "New project · Client brief"
   }
 }

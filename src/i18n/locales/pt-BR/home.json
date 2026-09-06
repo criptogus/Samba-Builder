@@ -850,5 +850,27 @@
     "meetingHint": "Traga o contexto do cliente de uma reunião ou transcrição.",
     "importHint": "Continue construindo a partir de um projeto que você já tem.",
     "ideasLabel": "Explore um ponto de partida"
+  },
+  "delivery": {
+    "title": "Central de projetos",
+    "subtitle": "Encontre um projeto, traga o contexto do cliente e avance na entrega.",
+    "newProject": "Novo projeto",
+    "templates": "Templates de projetos",
+    "library": "Skills e biblioteca",
+    "projects": "Projetos",
+    "search": "Buscar projetos ou coleções",
+    "favorites": "Favoritos",
+    "loading": "Carregando projetos…",
+    "error": "Não foi possível carregar os projetos.",
+    "retry": "Tentar novamente",
+    "noResults": "Nenhum projeto encontrado",
+    "empty": "Sua próxima entrega começa aqui",
+    "filterHint": "Tente outra busca ou desative o filtro de favoritos.",
+    "emptyHint": "Comece pelo briefing do cliente abaixo ou importe um projeto existente.",
+    "ungrouped": "Sem coleção",
+    "updated": "Atualizado",
+    "more": "Mostrar mais projetos",
+    "localHint": "Projetos neste computador · Organizados pelas suas coleções existentes.",
+    "intakeLabel": "Novo projeto · Briefing do cliente"
   }
 }

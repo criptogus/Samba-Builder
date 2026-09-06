@@ -12,14 +12,13 @@ import {
   homeSelectedAppAtom,
 } from "../atoms/chatAtoms";
 import { useSettings } from "@/hooks/useSettings";
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 import { HomeChatInput } from "@/components/chat/HomeChatInput";
 import { usePostHog } from "posthog-js/react";
 import { PrivacyBanner } from "@/components/TelemetryBanner";
-import { INSPIRATION_PROMPTS } from "@/prompts/inspiration_prompts";
 
 import { ImportAppButton } from "@/components/ImportAppButton";
-import { FeaturedAppShowcase } from "@/components/FeaturedAppShowcase";
+import { DeliveryWorkspace } from "@/components/DeliveryWorkspace";
 
 import type { FileAttachment } from "@/ipc/types";
 import type { ListedApp } from "@/ipc/types/app";
@@ -29,7 +28,7 @@ import {
   isFreeProBuildModeCombination,
 } from "@/lib/freeProModel";
 import { useLanguageModelProviders } from "@/hooks/useLanguageModelProviders";
-import { RefreshCw, Zap } from "lucide-react";
+import { Zap } from "lucide-react";
 import {
   useFirstPromptSaga,
   useFirstPromptSend,
@@ -69,22 +68,6 @@ export default function HomePage() {
 
   // Get the appId from search params
   const appId = search.appId ? Number(search.appId) : null;
-
-  // State for random prompts
-  const [randomPrompts, setRandomPrompts] = useState<
-    typeof INSPIRATION_PROMPTS
-  >([]);
-
-  // Function to get random prompts
-  const getRandomPrompts = useCallback(() => {
-    const shuffled = [...INSPIRATION_PROMPTS].sort(() => 0.5 - Math.random());
-    return shuffled.slice(0, 3);
-  }, []);
-
-  // Initialize random prompts
-  useEffect(() => {
-    setRandomPrompts(getRandomPrompts());
-  }, [getRandomPrompts]);
 
   // Redirect to app details page if appId is present. Use `replace` so the
   // intermediate `/?appId=…` entry doesn't sit in history and trap the back
@@ -182,122 +165,106 @@ export default function HomePage() {
     <div className="flex min-h-full w-full flex-col pb-16">
       <div className="relative mx-auto flex w-full max-w-4xl flex-col px-6 py-10 sm:px-10 sm:py-14">
         <div className="w-full">
-          <div className="mb-6 text-left">
-            <p className="mb-5 text-xs font-semibold tracking-[0.18em] text-primary uppercase">
-              Samba Builder · Workspace
-            </p>
-            <h1 className="max-w-xl text-3xl sm:text-4xl font-semibold tracking-tight text-foreground">
-              What do you want to build?
-            </h1>
-            <p className="mt-3 max-w-xl text-base leading-7 text-muted-foreground">
-              Describe your idea. Samba Builder will turn it into a working app.
-            </p>
-          </div>
-          <HomeChatInput
-            onSubmit={handleSubmit}
-            disabled={isCheckingProviders}
-          />
-
-          {!isSettingsLoading &&
-            !isLoadingLanguageModelProviders &&
-            !hasDyadProApiKey && (
-              <div className="-mt-2 flex justify-end px-4">
-                <button
-                  type="button"
-                  onClick={() => {
-                    posthog.capture("home:setup-pill:click");
-                    sendFirstPrompt({
-                      type: "ARM_FOR_SETUP",
-                      payload: {
-                        prompt: inputValue,
-                        attachments,
-                        selectedApp: selectedApp ?? undefined,
-                        chatMode: homeSubmitChatMode,
-                        isChatModeExplicit: hasManuallySelectedChatMode,
-                      },
-                    });
-                  }}
-                  className={
-                    hasConfiguredAiProvider
-                      ? "flex cursor-pointer items-center gap-1 rounded-md px-2 py-1 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted/60 hover:text-foreground hover:underline"
-                      : "flex cursor-pointer items-center gap-1 rounded-md px-2 py-1 text-xs font-semibold text-primary transition-colors hover:bg-primary/10 hover:underline"
-                  }
-                >
-                  <Zap aria-hidden="true" className="size-3.5" />
-                  {hasConfiguredAiProvider
-                    ? "Manage AI setup"
-                    : "Connect AI to build — takes a minute"}
-                </button>
-              </div>
-            )}
-
-          <div className="mt-8 grid grid-cols-1 gap-3 sm:grid-cols-3">
-            <div className="rounded-xl border border-border bg-card p-4">
-              <ProductCoachButton
-                key={selectedApp?.id ?? "home"}
-                draftKey={selectedApp ? `app:${selectedApp.id}` : "home"}
-                idea={inputValue}
-                onPrepared={(brief) =>
-                  setInputValue((current) => appendProductBrief(current, brief))
-                }
-              />
-              <p className="mt-2 text-xs leading-5 text-muted-foreground">
-                {t("workspace.planHint")}
+          <DeliveryWorkspace />
+          <section
+            id="project-intake"
+            aria-labelledby="project-intake-title"
+            className="scroll-mt-12"
+          >
+            <div className="mb-6 text-left">
+              <p className="mb-5 text-xs font-semibold tracking-[0.18em] text-primary uppercase">
+                {t("delivery.intakeLabel")}
               </p>
-            </div>
-            <div className="rounded-xl border border-border bg-card p-4">
-              <MeetingBriefingButton
-                onPrepared={(prompt) =>
-                  setInputValue(appendMeetingBriefing(inputValue, prompt))
-                }
-              />
-              <p className="mt-2 text-xs leading-5 text-muted-foreground">
-                {t("workspace.meetingHint")}
-              </p>
-            </div>
-            <div className="rounded-xl border border-border bg-card p-4">
-              <ImportAppButton
-                className="justify-start px-0 pb-0"
-                variant="ghost"
-                size="sm"
-              />
-              <p className="mt-2 text-xs leading-5 text-muted-foreground">
-                {t("workspace.importHint")}
-              </p>
-            </div>
-          </div>
-          <p className="mt-8 mb-3 text-xs font-medium text-muted-foreground">
-            {t("workspace.ideasLabel")}
-          </p>
-          <div className="flex flex-wrap gap-2">
-            {randomPrompts.map((item) => (
-              <button
-                type="button"
-                key={item.label}
-                disabled={isCheckingProviders}
-                onClick={() => setInputValue(item.prompt)}
-                className="flex cursor-pointer items-center gap-2 rounded-full border border-border bg-background px-3.5 py-1.5 text-sm text-muted-foreground transition-colors hover:border-primary/30 hover:bg-accent hover:text-foreground disabled:cursor-default disabled:opacity-50"
+              <h2
+                id="project-intake-title"
+                className="max-w-xl text-2xl font-semibold tracking-tight text-foreground"
               >
-                <span aria-hidden="true" className="[&_svg]:size-4">
-                  {item.icon}
-                </span>
-                {item.label}
-              </button>
-            ))}
-            <button
-              type="button"
+                What do you want to build?
+              </h2>
+              <p className="mt-3 max-w-xl text-base leading-7 text-muted-foreground">
+                Describe your idea. Samba Builder will turn it into a working
+                app.
+              </p>
+            </div>
+            <HomeChatInput
+              onSubmit={handleSubmit}
               disabled={isCheckingProviders}
-              onClick={() => setRandomPrompts(getRandomPrompts())}
-              className="group flex cursor-pointer items-center gap-2 rounded-full border border-border bg-background px-3.5 py-1.5 text-sm text-muted-foreground transition-colors hover:border-primary/30 hover:bg-accent hover:text-foreground disabled:cursor-default disabled:opacity-50"
-            >
-              <RefreshCw className="size-4 transition-transform duration-200 group-hover:rotate-[-25deg]" />
-              {t("moreIdeas")}
-            </button>
-          </div>
+            />
+
+            {!isSettingsLoading &&
+              !isLoadingLanguageModelProviders &&
+              !hasDyadProApiKey && (
+                <div className="-mt-2 flex justify-end px-4">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      posthog.capture("home:setup-pill:click");
+                      sendFirstPrompt({
+                        type: "ARM_FOR_SETUP",
+                        payload: {
+                          prompt: inputValue,
+                          attachments,
+                          selectedApp: selectedApp ?? undefined,
+                          chatMode: homeSubmitChatMode,
+                          isChatModeExplicit: hasManuallySelectedChatMode,
+                        },
+                      });
+                    }}
+                    className={
+                      hasConfiguredAiProvider
+                        ? "flex cursor-pointer items-center gap-1 rounded-md px-2 py-1 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted/60 hover:text-foreground hover:underline"
+                        : "flex cursor-pointer items-center gap-1 rounded-md px-2 py-1 text-xs font-semibold text-primary transition-colors hover:bg-primary/10 hover:underline"
+                    }
+                  >
+                    <Zap aria-hidden="true" className="size-3.5" />
+                    {hasConfiguredAiProvider
+                      ? "Manage AI setup"
+                      : "Connect AI to build — takes a minute"}
+                  </button>
+                </div>
+              )}
+
+            <div className="mt-8 grid grid-cols-1 gap-3 sm:grid-cols-3">
+              <div className="rounded-xl border border-border bg-card p-4">
+                <ProductCoachButton
+                  key={selectedApp?.id ?? "home"}
+                  draftKey={selectedApp ? `app:${selectedApp.id}` : "home"}
+                  idea={inputValue}
+                  onPrepared={(brief) =>
+                    setInputValue((current) =>
+                      appendProductBrief(current, brief),
+                    )
+                  }
+                />
+                <p className="mt-2 text-xs leading-5 text-muted-foreground">
+                  {t("workspace.planHint")}
+                </p>
+              </div>
+              <div className="rounded-xl border border-border bg-card p-4">
+                <MeetingBriefingButton
+                  onPrepared={(prompt) =>
+                    setInputValue(appendMeetingBriefing(inputValue, prompt))
+                  }
+                />
+                <p className="mt-2 text-xs leading-5 text-muted-foreground">
+                  {t("workspace.meetingHint")}
+                </p>
+              </div>
+              <div className="rounded-xl border border-border bg-card p-4">
+                <ImportAppButton
+                  className="justify-start px-0 pb-0"
+                  variant="ghost"
+                  size="sm"
+                />
+                <p className="mt-2 text-xs leading-5 text-muted-foreground">
+                  {t("workspace.importHint")}
+                </p>
+              </div>
+            </div>
+          </section>
         </div>
         <PrivacyBanner />
       </div>
-      <FeaturedAppShowcase />
     </div>
   );
 }

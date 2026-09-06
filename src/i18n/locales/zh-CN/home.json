@@ -792,5 +792,27 @@
     "meetingHint": "从会议或转录中导入客户需求。",
     "importHint": "从已有项目继续构建。",
     "ideasLabel": "探索起点"
+  },
+  "delivery": {
+    "title": "项目工作台",
+    "subtitle": "查找项目，整理客户需求，推进交付。",
+    "newProject": "新建项目",
+    "templates": "项目模板",
+    "library": "技能与资料库",
+    "projects": "项目",
+    "search": "搜索项目或集合",
+    "favorites": "收藏",
+    "loading": "正在加载项目…",
+    "error": "无法加载项目。",
+    "retry": "重试",
+    "noResults": "未找到项目",
+    "empty": "从这里开始下一次交付",
+    "filterHint": "请尝试其他搜索词或关闭收藏筛选。",
+    "emptyHint": "从下面的客户简报开始，或导入现有项目。",
+    "ungrouped": "无集合",
+    "updated": "更新日期",
+    "more": "显示更多项目",
+    "localHint": "此计算机上的项目 · 按现有集合组织。",
+    "intakeLabel": "新建项目 · 客户简报"
   }
 }
