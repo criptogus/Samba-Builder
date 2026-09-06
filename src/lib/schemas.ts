@@ -203,13 +203,18 @@ export type GithubUser = z.infer<typeof GithubUserSchema>;
 
 /**
  * Supabase organization credentials.
- * Each organization has its own OAuth tokens.
+ * Each organization has its own access token.
+ *
+ * `refreshToken` / `expiresIn` / `tokenTimestamp` are optional: they are only
+ * present for OAuth connections. A direct connection (a Personal Access Token
+ * pasted by the user) has just an `accessToken`, which is long-lived and never
+ * needs refreshing.
  */
 export const SupabaseOrganizationCredentialsSchema = z.object({
   accessToken: SecretSchema,
-  refreshToken: SecretSchema,
-  expiresIn: z.number(),
-  tokenTimestamp: z.number(),
+  refreshToken: SecretSchema.optional(),
+  expiresIn: z.number().optional(),
+  tokenTimestamp: z.number().optional(),
 });
 export type SupabaseOrganizationCredentials = z.infer<
   typeof SupabaseOrganizationCredentialsSchema

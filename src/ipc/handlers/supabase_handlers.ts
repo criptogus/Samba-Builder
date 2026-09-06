@@ -27,6 +27,7 @@ import {
 } from "../services/app_operation_coordinator";
 import { createTestOnlyLoggedHandler } from "./safe_handle";
 import { readSettings, writeSettings } from "../../main/settings";
+import { connectSupabaseWithAccessToken } from "../../supabase_admin/supabase_return_handler";
 import {
   SUPABASE_PROJECT_CREATED_BUT_UNLINKED,
   supabaseContracts,
@@ -198,6 +199,18 @@ export function registerSupabaseHandlers() {
       });
 
       logger.info(`Deleted Supabase organization ${organizationSlug}`);
+    },
+  );
+
+  // Direct connection with a Personal Access Token (no Dyad OAuth proxy).
+  createTypedHandler(
+    supabaseContracts.connectWithAccessToken,
+    async (_, { accessToken }) => {
+      const result = await connectSupabaseWithAccessToken(accessToken);
+      logger.info(
+        `Connected Supabase directly with an access token (${result.organizations} organization(s)).`,
+      );
+      return result;
     },
   );
 

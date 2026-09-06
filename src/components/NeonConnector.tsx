@@ -1,8 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import {
   acknowledgeConnectionFlow,
-  cancelConnectionFlow,
-  startConnectionFlow,
   useConnectionFlow,
   useUnsolicitedConnectionReturn,
 } from "@/hooks/useConnectionFlow";
@@ -72,6 +70,8 @@ export function NeonConnector({ appId }: { appId: number }) {
     null,
   );
   const [isConnecting, setIsConnecting] = useState(false);
+  const [isConnectingAccount, setIsConnectingAccount] = useState(false);
+  const [apiKeyDraft, setApiKeyDraft] = useState("");
   const [isSwitchingBranch, setIsSwitchingBranch] = useState(false);
   const [isUpdatingEmailVerification, setIsUpdatingEmailVerification] =
     useState(false);
@@ -104,7 +104,7 @@ export function NeonConnector({ appId }: { appId: number }) {
   // The connection flow lives in the main process; this component only
   // projects it. Timeouts, double-start protection and OAuth-return
   // correlation are all handled by the typed-ref-keyed state machine.
-  const { flowState, isFlowActive } = useConnectionFlow("neon");
+  const { flowState } = useConnectionFlow("neon");
 
   const refreshAfterConnectRef = useRef<() => Promise<void>>(async () => {});
   refreshAfterConnectRef.current = async () => {
@@ -148,27 +148,27 @@ export function NeonConnector({ appId }: { appId: number }) {
     })();
   });
 
-  const handleConnect = async () => {
+  const connectWithApiKey = async () => {
+    const key = apiKeyDraft.trim();
+    if (!key || isConnectingAccount) return;
+    setIsConnectingAccount(true);
     try {
-      // Starting is a no-op while a flow is already active (double-click).
-      const { started, invocationRef } = await startConnectionFlow("neon");
-      if (!started) {
-        return;
+      if (settings?.isTestMode) {
+        await ipc.neon.fakeConnect();
+      } else {
+        await ipc.neon.connectWithApiKey({ apiKey: key });
       }
-      try {
-        if (settings?.isTestMode) {
-          await ipc.neon.fakeConnect();
-        } else {
-          await ipc.system.openExternalUrl(
-            "https://oauth.dyad.sh/api/integrations/neon/login",
-          );
-        }
-      } catch (error) {
-        await cancelConnectionFlow("neon", invocationRef);
-        throw error;
-      }
+      setApiKeyDraft("");
+      toast.success(t("integrations.neon.connectedSuccess"));
+      await refreshAfterConnectRef.current();
     } catch (error) {
-      toast.error(formatToastError(error));
+      toast.error(
+        t("integrations.neon.connectFailed", {
+          error: formatToastError(error),
+        }),
+      );
+    } finally {
+      setIsConnectingAccount(false);
     }
   };
 
@@ -865,41 +865,46 @@ export function NeonConnector({ appId }: { appId: number }) {
         <CardDescription>{t("integrations.neon.freeTier")}</CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            onClick={handleConnect}
-            disabled={isFlowActive}
-            className="w-auto h-10 flex items-center justify-center px-4 py-2 border-2 transition-colors font-medium text-sm dark:bg-gray-900 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800"
-            data-testid="connect-neon-button"
-            aria-label={t("integrations.neon.connectTo") + " Neon"}
-          >
-            {isFlowActive ? (
-              <>
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                <span>{t("integrations.neon.completingSignIn")}</span>
-              </>
-            ) : (
-              <>
-                <span className="mr-2">{t("integrations.neon.connectTo")}</span>
-                <NeonSvg isDarkMode={isDarkMode} />
-              </>
-            )}
-          </Button>
-          {isFlowActive && (
+        <div className="space-y-2" data-testid="neon-api-key-form">
+          <Label htmlFor="neon-api-key-input">Neon API key</Label>
+          <Input
+            id="neon-api-key-input"
+            type="password"
+            autoComplete="off"
+            spellCheck={false}
+            value={apiKeyDraft}
+            onChange={(e) => setApiKeyDraft(e.target.value)}
+            placeholder="napi_…"
+            onKeyDown={(e) => {
+              if (e.key === "Enter") void connectWithApiKey();
+            }}
+            disabled={isConnectingAccount}
+          />
+          <p className="text-xs text-muted-foreground">
+            Paste a Neon account API key to connect directly. Create one at
+            console.neon.tech/app/settings/keys.
+          </p>
+          <div className="flex items-center gap-2">
             <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => {
-                if ("invocationRef" in flowState) {
-                  void cancelConnectionFlow("neon", flowState.invocationRef);
-                }
-              }}
-              data-testid="cancel-neon-flow-button"
+              variant="outline"
+              onClick={connectWithApiKey}
+              disabled={isConnectingAccount || !apiKeyDraft.trim()}
+              className="w-auto h-10 flex items-center justify-center px-4 py-2 border-2 transition-colors font-medium text-sm dark:bg-gray-900 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800"
+              data-testid="connect-neon-button"
             >
-              {t("integrations.neon.cancelSignIn")}
+              {isConnectingAccount ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  <span>{t("integrations.neon.connecting")}</span>
+                </>
+              ) : (
+                <>
+                  <span className="mr-2">{t("integrations.neon.connectTo")}</span>
+                  <NeonSvg isDarkMode={isDarkMode} />
+                </>
+              )}
             </Button>
-          )}
+          </div>
         </div>
       </CardContent>
     </Card>

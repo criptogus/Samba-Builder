@@ -194,6 +194,17 @@ export const supabaseContracts = {
     output: z.void(),
   }),
 
+  /**
+   * Direct connection to Supabase with a Personal Access Token (sb_pat_…).
+   * No OAuth / Dyad proxy involved: the token is validated against the
+   * Supabase Management API and stored for every organization it can reach.
+   */
+  connectWithAccessToken: defineContract({
+    channel: "supabase:connect-with-access-token",
+    input: z.object({ accessToken: z.string().min(1) }),
+    output: z.object({ organizations: z.number().int().nonnegative() }),
+  }),
+
   listAllProjects: defineContract({
     channel: "supabase:list-all-projects",
     input: z.void(),

@@ -1,9 +1,8 @@
 import { withLock } from "../ipc/utils/lock_utils";
-import { readSettings, writeSettings } from "../main/settings";
+import { readSettings } from "../main/settings";
 import { Api, createApiClient } from "@neondatabase/api-client";
 import log from "electron-log";
 import { IS_TEST_BUILD } from "../ipc/utils/test_utils";
-import { fetchWithRetry } from "../ipc/utils/retryWithRateLimit";
 import { DyadError, DyadErrorKind } from "@/errors/dyad_error";
 import { getNeonErrorMessage } from "./neon_errors";
 
@@ -14,10 +13,14 @@ const logger = log.scope("neon_management_client");
  * Returns true if token needs to be refreshed
  */
 function isTokenExpired(expiresIn?: number): boolean {
+  const settings = readSettings();
+  // A connection without a refresh token is a long-lived access token (an API
+  // key pasted directly) — it does not expire, so never attempt a refresh (the
+  // OAuth proxy no longer exists).
+  if (!settings.neon?.refreshToken?.value) return false;
   if (!expiresIn) return true;
 
   // Get when the token was saved (expiresIn is stored at the time of token receipt)
-  const settings = readSettings();
   const tokenTimestamp = settings.neon?.tokenTimestamp || 0;
   const currentTime = Math.floor(Date.now() / 1000);
 
@@ -32,66 +35,11 @@ function isTokenExpired(expiresIn?: number): boolean {
 let refreshNeonTokenPromise: Promise<void> | null = null;
 
 async function refreshNeonTokenOnce(): Promise<void> {
-  const settings = readSettings();
-  const refreshToken = settings.neon?.refreshToken?.value;
-
-  if (!isTokenExpired(settings.neon?.expiresIn)) {
-    return;
-  }
-
-  if (!refreshToken) {
-    throw new DyadError(
-      "Neon refresh token not found. Please authenticate first.",
-      DyadErrorKind.Auth,
-    );
-  }
-
-  try {
-    // Make request to Neon refresh endpoint. Use fetchWithRetry so a burst of
-    // token refreshes (e.g. running several in-app tests back-to-back) backs
-    // off on 429 instead of failing the whole flow.
-    const response = await fetchWithRetry(
-      "https://oauth.dyad.sh/api/integrations/neon/refresh",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ refreshToken }),
-      },
-      "Refresh Neon token",
-    );
-
-    if (!response.ok) {
-      throw new DyadError(
-        `Token refresh failed: ${response.statusText}`,
-        DyadErrorKind.External,
-      );
-    }
-
-    const {
-      accessToken,
-      refreshToken: newRefreshToken,
-      expiresIn,
-    } = await response.json();
-
-    // Update settings with new tokens
-    writeSettings({
-      neon: {
-        accessToken: {
-          value: accessToken,
-        },
-        refreshToken: {
-          value: newRefreshToken,
-        },
-        expiresIn,
-        tokenTimestamp: Math.floor(Date.now() / 1000), // Store current timestamp
-      },
-    });
-  } catch (error) {
-    logger.error("Error refreshing Neon token:", error);
-    throw error;
-  }
+  // Neon token refresh used to round-trip through the retired Dyad OAuth
+  // proxy. Connections are now made directly with a long-lived Neon API key
+  // that never expires, so there is nothing to refresh — this is a deliberate
+  // no-op and never makes a network request.
+  return;
 }
 
 export function refreshNeonToken(): Promise<void> {

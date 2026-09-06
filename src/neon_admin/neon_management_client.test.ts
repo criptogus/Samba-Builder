@@ -11,7 +11,7 @@ import { refreshNeonToken } from "./neon_management_client";
 describe("refreshNeonToken", () => {
   afterEach(() => vi.unstubAllGlobals());
 
-  it("shares one refresh request across concurrent callers", async () => {
+  it("is a no-op and never calls the retired Dyad refresh endpoint", async () => {
     vi.mocked(readSettings).mockReturnValue({
       neon: {
         refreshToken: { value: "rotating-refresh-token" },
@@ -19,35 +19,13 @@ describe("refreshNeonToken", () => {
         tokenTimestamp: 0,
       },
     } as ReturnType<typeof readSettings>);
-    let release: (response: Response) => void = () => {};
-    vi.stubGlobal(
-      "fetch",
-      vi.fn(
-        () =>
-          new Promise<Response>((resolve) => {
-            release = resolve;
-          }),
-      ),
-    );
+    vi.stubGlobal("fetch", vi.fn());
 
-    const first = refreshNeonToken();
-    const second = refreshNeonToken();
-    expect(second).toBe(first);
-    expect(fetch).toHaveBeenCalledOnce();
+    await refreshNeonToken();
 
-    release(
-      new Response(
-        JSON.stringify({
-          accessToken: "access",
-          refreshToken: "rotated",
-          expiresIn: 3600,
-        }),
-        { status: 200 },
-      ),
-    );
-    await expect(Promise.all([first, second])).resolves.toEqual([
-      undefined,
-      undefined,
-    ]);
+    // Token refresh used to round-trip through the retired Dyad OAuth proxy.
+    // Connections are now direct long-lived Neon API keys, so refreshing must
+    // never hit the network.
+    expect(fetch).not.toHaveBeenCalled();
   });
 });
