@@ -182,8 +182,10 @@ export async function getModelClient(
     );
   }
 
-  // Handle Samba Builder override
-  if (isDyadProEnabledForRequest) {
+  // Handle Samba Builder override — só quando existe a chave do engine (backend
+  // cloud da Samba/Dyad). Sem chave (produto sem backend próprio), o provider é
+  // usado direto com a chave BYOK do usuário — evita AI_LoadAPIKeyError.
+  if (isDyadProEnabledForRequest && dyadApiKey) {
     const dyadEngineUrl = process.env.DYAD_ENGINE_URL;
     // Check if the selected provider supports Samba Builder (has a gateway prefix) OR
     // we're using local engine.
