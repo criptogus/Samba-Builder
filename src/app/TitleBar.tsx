@@ -37,7 +37,7 @@ export const TitleBar = () => {
 
   return (
     <>
-      <div className="@container z-11 w-full h-[calc(var(--layout-title-bar-offset)+1px)] pt-1 bg-(--sidebar) absolute top-0 left-0 app-region-drag flex items-center">
+      <div className="@container z-11 w-full h-[calc(var(--layout-title-bar-offset)+1px)] pt-1 bg-(--sidebar) border-b border-sidebar-border absolute top-0 left-0 app-region-drag flex items-center">
         {/*
          * Left region matches the sidebar's expanded width so chat tabs always
          * start past the sidebar panel's right edge. Without this, an active
@@ -72,9 +72,13 @@ export const TitleBar = () => {
                 />
               }
             >
-              <img src={logo} alt="Samba Builder" className="w-5 h-5 shrink-0" />
+              <img
+                src={logo}
+                alt="Samba Builder"
+                className="w-5 h-5 shrink-0"
+              />
               <span className="hidden @2xl:inline max-w-40 truncate">
-                Manage app
+                Samba Builder
               </span>
             </TooltipTrigger>
             <TooltipContent>{displayText}</TooltipContent>

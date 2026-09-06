@@ -17,55 +17,11 @@ export function ErrorBoundary({ error }: ErrorComponentProps) {
   const handleReportBug = async () => {
     setIsLoading(true);
     try {
-      // Get system debug info
-      const debugInfo = await ipc.system.getSystemDebugInfo();
-
-      // Create a formatted issue body with the debug info and error information
-      const issueBody = `
-## Bug Description
-<!-- Please describe the issue you're experiencing -->
-
-## Steps to Reproduce
-<!-- Please list the steps to reproduce the issue -->
-
-## Expected Behavior
-<!-- What did you expect to happen? -->
-
-## Actual Behavior
-<!-- What actually happened? -->
-
-## Error Details
-- Error Name: ${error?.name || "Unknown"}
-- Error Message: ${error?.message || "Unknown"}
-${error?.stack ? `\n\`\`\`\n${error.stack.slice(0, 1000)}\n\`\`\`` : ""}
-
-## System Information
-- Samba Builder Version: ${debugInfo.dyadVersion}
-- Platform: ${debugInfo.platform}
-- Architecture: ${debugInfo.architecture}
-- Node Version: ${debugInfo.nodeVersion || "Not available"}
-- PNPM Version: ${debugInfo.pnpmVersion || "Not available"}
-- Node Path: ${debugInfo.nodePath || "Not available"}
-- Telemetry ID: ${debugInfo.telemetryId || "Not available"}
-
-## Logs
-\`\`\`
-${debugInfo.logs.slice(-3_500) || "No logs available"}
-\`\`\`
-`;
-
-      // Create the GitHub issue URL with the pre-filled body
-      const encodedBody = encodeURIComponent(issueBody);
-      const encodedTitle = encodeURIComponent(
-        "[bug] Error in Samba Builder application",
-      );
-      const githubIssueUrl = `https://sambatech.com
-
-      // Open the pre-filled GitHub issue page
-      await ipc.system.openExternalUrl(githubIssueUrl);
+      // Support opens without collecting or attaching local diagnostic logs.
+      await ipc.system.openExternalUrl("https://sambatech.com");
     } catch (err) {
-      console.error("Failed to prepare bug report:", err);
-      // Fallback to opening the regular GitHub issue page
+      console.error("Failed to open Samba support:", err);
+      // Retry opening the support website
       ipc.system.openExternalUrl("https://sambatech.com");
     } finally {
       setIsLoading(false);

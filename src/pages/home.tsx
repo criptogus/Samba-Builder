@@ -163,16 +163,16 @@ export default function HomePage() {
   // Main Home Page Content
   return (
     <div className="flex min-h-full w-full flex-col pb-16">
-      <div className="relative mx-auto flex w-full max-w-4xl flex-col px-6 py-10 sm:px-10 sm:py-14">
-        <div className="w-full">
+      <div className="relative mx-auto flex w-full max-w-6xl flex-col px-6 py-8 sm:px-9 sm:py-10">
+        <div className="grid grid-cols-[repeat(auto-fit,minmax(min(100%,25rem),1fr))] items-start gap-8">
           <DeliveryWorkspace />
           <section
             id="project-intake"
             aria-labelledby="project-intake-title"
-            className="scroll-mt-12"
+            className="scroll-mt-12 rounded-xl border border-border bg-card p-5 sm:p-6"
           >
-            <div className="mb-6 text-left">
-              <p className="mb-5 text-xs font-semibold tracking-[0.18em] text-primary uppercase">
+            <div className="mb-4 text-left">
+              <p className="mb-3 text-[11px] font-medium tracking-[0.1em] text-muted-foreground uppercase">
                 {t("delivery.intakeLabel")}
               </p>
               <h2
@@ -181,7 +181,7 @@ export default function HomePage() {
               >
                 What do you want to build?
               </h2>
-              <p className="mt-3 max-w-xl text-base leading-7 text-muted-foreground">
+              <p className="mt-2 max-w-xl text-sm leading-6 text-muted-foreground">
                 Describe your idea. Samba Builder will turn it into a working
                 app.
               </p>
@@ -224,8 +224,8 @@ export default function HomePage() {
                 </div>
               )}
 
-            <div className="mt-8 grid grid-cols-1 gap-3 sm:grid-cols-3">
-              <div className="rounded-xl border border-border bg-card p-4">
+            <div className="mt-5 divide-y divide-border border-t border-border">
+              <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)] items-center gap-4 py-3 [&_button]:justify-start [&_button]:whitespace-normal">
                 <ProductCoachButton
                   key={selectedApp?.id ?? "home"}
                   draftKey={selectedApp ? `app:${selectedApp.id}` : "home"}
@@ -236,27 +236,27 @@ export default function HomePage() {
                     )
                   }
                 />
-                <p className="mt-2 text-xs leading-5 text-muted-foreground">
+                <p className="max-w-60 text-xs leading-5 text-muted-foreground">
                   {t("workspace.planHint")}
                 </p>
               </div>
-              <div className="rounded-xl border border-border bg-card p-4">
+              <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)] items-center gap-4 py-3 [&_button]:justify-start [&_button]:whitespace-normal">
                 <MeetingBriefingButton
                   onPrepared={(prompt) =>
                     setInputValue(appendMeetingBriefing(inputValue, prompt))
                   }
                 />
-                <p className="mt-2 text-xs leading-5 text-muted-foreground">
+                <p className="max-w-60 text-xs leading-5 text-muted-foreground">
                   {t("workspace.meetingHint")}
                 </p>
               </div>
-              <div className="rounded-xl border border-border bg-card p-4">
+              <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)] items-center gap-4 py-3 [&_button]:justify-start [&_button]:whitespace-normal">
                 <ImportAppButton
                   className="justify-start px-0 pb-0"
                   variant="ghost"
                   size="sm"
                 />
-                <p className="mt-2 text-xs leading-5 text-muted-foreground">
+                <p className="max-w-60 text-xs leading-5 text-muted-foreground">
                   {t("workspace.importHint")}
                 </p>
               </div>

@@ -1,3 +1,5 @@
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { ClipboardList, ListChecks, ShieldCheck, BookOpen } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { ipc } from "@/ipc/types";
@@ -177,16 +179,20 @@ function DeliveryEditor({
   return (
     <section
       aria-labelledby="delivery-plan-title"
-      className="my-6 rounded-xl border bg-card p-5 space-y-5"
+      className="my-6 rounded-xl border border-border bg-card p-5 sm:p-7 space-y-6"
     >
-      <div className="sticky top-9 z-10 flex flex-wrap justify-between gap-3 bg-card py-2">
+      <div className="sticky top-9 z-10 -mx-5 flex flex-wrap items-center justify-between gap-3 bg-card px-5 py-2 sm:-mx-7 sm:px-7">
         <div>
-          <h2 id="delivery-plan-title" className="text-lg font-semibold">
+          <h2
+            id="delivery-plan-title"
+            className="text-base font-semibold tracking-tight"
+          >
             Plano de entrega
           </h2>
           <p className="text-xs text-muted-foreground">
-            Do briefing à aprovação de uma versão.{" "}
-            {dirty ? "Rascunho não salvo" : "Salvo no aplicativo"}
+            {dirty
+              ? "Alterações protegidas neste dispositivo · salve para confirmar"
+              : "Salvo no aplicativo"}
           </p>
         </div>
         <Button disabled={busy || !dirty} onClick={() => void save()}>
@@ -221,7 +227,7 @@ function DeliveryEditor({
         </p>
       )}
       <fieldset disabled={busy} className="space-y-5 disabled:opacity-60">
-        <div className="grid gap-3 sm:grid-cols-2">
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
           {(
             [
               ["client", "Cliente"],
@@ -259,259 +265,411 @@ function DeliveryEditor({
             </select>
           </label>
         </div>
-        <details open className="rounded-lg border p-3">
-          <summary className="cursor-pointer font-medium">
-            1. Briefing e escopo
-          </summary>
-          <div className="mt-3 space-y-3">
-            <div className="flex flex-wrap gap-2">
-              <ProductCoachButton
-                draftKey={`delivery:${appId}`}
-                idea={plan.brief}
-                onPrepared={(brief) => field("brief", brief)}
-              />
-              <MeetingBriefingButton
-                onPrepared={(brief) =>
-                  field("brief", plan.brief + "\n\n" + brief)
-                }
-              />
-            </div>
-            {(
-              [
-                ["brief", "Briefing do cliente"],
-                ["scope", "Escopo da entrega"],
-                ["acceptance", "Critérios de aceite"],
-              ] as const
-            ).map(([key, label]) => (
-              <label key={key} className="block space-y-1 text-sm">
-                <span>{label}</span>
-                <Textarea
-                  value={plan[key]}
-                  onChange={(e) => field(key, e.target.value)}
-                  rows={3}
+        <Tabs defaultValue="brief" className="gap-4">
+          <TabsList
+            aria-label="Etapas do plano de entrega"
+            className="h-auto w-full justify-start gap-1 overflow-x-auto rounded-none border-b border-border bg-transparent p-0 pb-3"
+          >
+            <TabsTrigger value="brief" className="gap-2">
+              <ClipboardList className="size-4" />
+              Briefing
+            </TabsTrigger>
+            <TabsTrigger value="tasks" className="gap-2">
+              <ListChecks className="size-4" />
+              Tarefas{" "}
+              <span className="text-xs text-muted-foreground">
+                {plan.tasks.filter((t) => t.status === "done").length}/
+                {plan.tasks.length}
+              </span>
+            </TabsTrigger>
+            <TabsTrigger value="review" className="gap-2">
+              <ShieldCheck className="size-4" />
+              Revisão
+            </TabsTrigger>
+            <TabsTrigger value="knowledge" className="gap-2">
+              <BookOpen className="size-4" />
+              Memória
+            </TabsTrigger>
+          </TabsList>
+          <TabsContent value="brief" className="mt-0">
+            <h3 className="text-sm font-medium">
+              Defina o resultado antes de construir
+            </h3>
+            <div className="mt-3 space-y-3">
+              <div className="flex flex-wrap gap-2">
+                <ProductCoachButton
+                  draftKey={`delivery:${appId}`}
+                  idea={plan.brief}
+                  onPrepared={(brief) => field("brief", brief)}
                 />
-              </label>
-            ))}
-            <Button
-              variant="outline"
-              size="sm"
-              disabled={!plan.acceptance.trim() || plan.tasks.length > 0}
-              onClick={() => {
-                const criteria = plan.acceptance
-                  .split("\n")
-                  .map((s) => s.replace(/^\s*[-*\d.)]+\s*/, "").trim())
-                  .filter(Boolean)
-                  .slice(0, 150);
-                update({
-                  ...plan,
-                  tasks: criteria.map((criterion) => ({
-                    id: crypto.randomUUID(),
-                    title: criterion.slice(0, 300),
-                    owner: plan.owner,
-                    acceptance: criterion,
-                    evidence: "",
-                    status: "todo",
-                  })),
-                });
-              }}
-            >
-              Criar tarefas a partir dos critérios
-            </Button>
-            <p className="text-xs text-muted-foreground">
-              Cada linha vira uma tarefa para revisão. O sistema não estima
-              esforço nem inicia a IA automaticamente.
-            </p>
-          </div>
-        </details>
-        <details open className="rounded-lg border p-3">
-          <summary className="cursor-pointer font-medium">
-            2. Tarefas e bloqueios ·{" "}
-            {plan.tasks.filter((t) => t.status === "done").length}/
-            {plan.tasks.length}
-          </summary>
-          <div className="mt-3 space-y-3">
-            <div className="flex gap-2">
-              <Input
-                aria-label="Nova tarefa"
-                placeholder="Qual resultado precisa ser entregue?"
-                value={taskTitle}
-                onChange={(e) => setTaskTitle(e.target.value)}
-                maxLength={300}
-              />
-              <Button
-                variant="outline"
-                disabled={!taskTitle.trim() || plan.tasks.length >= 150}
-                onClick={addTask}
-              >
-                Adicionar
-              </Button>
-            </div>
-            {plan.tasks.map((task) => (
-              <article
-                key={task.id}
-                className="rounded-lg border p-3 space-y-2"
-              >
-                <div className="flex flex-wrap items-start justify-between gap-2">
-                  <Input
-                    aria-label="Título da tarefa"
-                    maxLength={300}
-                    value={task.title}
-                    onChange={(e) =>
-                      update({
-                        ...plan,
-                        tasks: plan.tasks.map((t) =>
-                          t.id === task.id
-                            ? { ...t, title: e.target.value }
-                            : t,
-                        ),
-                      })
-                    }
-                  />
-                  <select
-                    aria-label={`Status de ${task.title}`}
-                    className="rounded border bg-background p-1 text-xs"
-                    value={task.status}
-                    onChange={(e) =>
-                      update({
-                        ...plan,
-                        tasks: plan.tasks.map((t) =>
-                          t.id === task.id
-                            ? {
-                                ...t,
-                                status: e.target.value as typeof t.status,
-                              }
-                            : t,
-                        ),
-                      })
-                    }
-                  >
-                    {Object.entries({
-                      todo: "A fazer",
-                      doing: "Em andamento",
-                      blocked: "Bloqueada",
-                      done: "Concluída",
-                    }).map(([value, label]) => (
-                      <option key={value} value={value}>
-                        {label}
-                      </option>
-                    ))}
-                  </select>
-                </div>
+                <MeetingBriefingButton
+                  onPrepared={(brief) =>
+                    field("brief", plan.brief + "\n\n" + brief)
+                  }
+                />
+              </div>
+              <div className="grid gap-4 md:grid-cols-2">
                 {(
                   [
-                    ["owner", "Responsável pela tarefa"],
-                    ["acceptance", "Aceite da tarefa"],
-                    ["evidence", "Evidências ou bloqueio"],
+                    ["brief", "Briefing do cliente"],
+                    ["scope", "Escopo da entrega"],
+                    ["acceptance", "Critérios de aceite"],
                   ] as const
                 ).map(([key, label]) => (
-                  <label key={key} className="block text-xs space-y-1">
+                  <label
+                    key={key}
+                    className="block space-y-2 text-sm first:md:col-span-2"
+                  >
                     <span>{label}</span>
                     <Textarea
-                      rows={1}
-                      value={task[key]}
-                      onChange={(e) =>
-                        update({
-                          ...plan,
-                          tasks: plan.tasks.map((t) =>
-                            t.id === task.id
-                              ? { ...t, [key]: e.target.value }
-                              : t,
-                          ),
-                        })
-                      }
+                      value={plan[key]}
+                      onChange={(e) => field(key, e.target.value)}
+                      rows={3}
                     />
                   </label>
                 ))}
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  disabled={dirty}
-                  onClick={() => void handoff(task.id)}
-                >
-                  Preparar execução no chat
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() =>
-                    update({
-                      ...plan,
-                      tasks: plan.tasks.filter((t) => t.id !== task.id),
-                    })
-                  }
-                >
-                  Remover tarefa
-                </Button>
-              </article>
-            ))}
-          </div>
-        </details>
-        <details className="rounded-lg border p-3">
-          <summary className="cursor-pointer font-medium">
-            3. Qualidade e aprovação por versão
-          </summary>
-          <div className="mt-3 space-y-3">
-            <Button
-              variant="outline"
-              size="sm"
-              disabled={dirty}
-              onClick={async () => {
-                setBusy(true);
-                try {
-                  const chatId = await ipc.chat.createChat({ appId });
-                  selectChat({
-                    chatId,
-                    appId,
-                    prefillInput:
-                      "Revise esta entrega usando as ferramentas disponíveis. Verifique fluxos essenciais, segurança e permissões, acessibilidade e responsividade. Execute os testes existentes relevantes; informe o que foi executado, resultados e limitações. Não declare aprovação nem publique. Critérios: " +
-                      plan.acceptance +
-                      "\nEscopo: " +
-                      plan.scope,
-                  });
-                } catch (e) {
-                  showError(e);
-                } finally {
-                  setBusy(false);
-                }
-              }}
-            >
-              Preparar validação no chat
-            </Button>
-            <p className="text-xs text-muted-foreground">
-              Registre verificações realmente executadas e seus resultados. Este
-              formulário não executa testes nem substitui a aprovação do
-              cliente.
-            </p>
-            {qualityAreas.map((area) => (
-              <label key={area} className="block space-y-1 text-sm">
-                <span>{checkNames[area]}</span>
-                <Textarea
-                  value={plan.checks[area]}
-                  onChange={(e) =>
-                    update({
-                      ...plan,
-                      checks: { ...plan.checks, [area]: e.target.value },
-                    })
-                  }
-                  placeholder="Teste realizado, resultado e referência da evidência"
-                />
-              </label>
-            ))}
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={async () => {
-                setBusy(true);
-                try {
-                  const commit = await ipc.delivery.snapshot({ appId });
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={!plan.acceptance.trim() || plan.tasks.length > 0}
+                onClick={() => {
+                  const criteria = plan.acceptance
+                    .split("\n")
+                    .map((s) => s.replace(/^\s*[-*\d.)]+\s*/, "").trim())
+                    .filter(Boolean)
+                    .slice(0, 150);
                   update({
                     ...plan,
-                    reviewCommit: commit,
-                    approvalCommit: "",
-                    reviewer: "",
-                    approvalNote: "",
-                    stage: "review",
+                    tasks: criteria.map((criterion) => ({
+                      id: crypto.randomUUID(),
+                      title: criterion.slice(0, 300),
+                      owner: plan.owner,
+                      acceptance: criterion,
+                      evidence: "",
+                      status: "todo",
+                    })),
                   });
+                }}
+              >
+                Criar tarefas a partir dos critérios
+              </Button>
+              <p className="text-xs text-muted-foreground">
+                Cada linha vira uma tarefa para revisão. O sistema não estima
+                esforço nem inicia a IA automaticamente.
+              </p>
+            </div>
+          </TabsContent>
+          <TabsContent value="tasks" className="mt-0">
+            <h3 className="text-sm font-medium">
+              Tarefas e bloqueios ·{" "}
+              {plan.tasks.filter((t) => t.status === "done").length}/
+              {plan.tasks.length}
+            </h3>
+            <div className="mt-3 space-y-3">
+              <div className="flex gap-2">
+                <Input
+                  aria-label="Nova tarefa"
+                  placeholder="Qual resultado precisa ser entregue?"
+                  value={taskTitle}
+                  onChange={(e) => setTaskTitle(e.target.value)}
+                  maxLength={300}
+                />
+                <Button
+                  variant="outline"
+                  disabled={!taskTitle.trim() || plan.tasks.length >= 150}
+                  onClick={addTask}
+                >
+                  Adicionar
+                </Button>
+              </div>
+              {plan.tasks.length === 0 && (
+                <p className="rounded-lg border border-dashed p-6 text-center text-sm text-muted-foreground">
+                  Adicione uma tarefa ou transforme os critérios do briefing em
+                  tarefas.
+                </p>
+              )}
+              {plan.tasks.map((task) => (
+                <details
+                  data-task-id={task.id}
+                  key={task.id}
+                  className="group rounded-lg border border-border"
+                >
+                  <summary className="flex cursor-pointer list-none items-center gap-3 px-4 py-3 text-sm [&::-webkit-details-marker]:hidden">
+                    <ListChecks className="size-4 shrink-0 text-muted-foreground" />
+                    <span className="min-w-0 flex-1 truncate font-medium">
+                      {task.title}
+                    </span>
+                    <span className="rounded-md bg-muted px-2 py-1 text-xs text-muted-foreground">
+                      {
+                        {
+                          todo: "A fazer",
+                          doing: "Em andamento",
+                          blocked: "Bloqueada",
+                          done: "Concluída",
+                        }[task.status]
+                      }
+                    </span>
+                    <span className="text-xs text-muted-foreground group-open:hidden">
+                      Editar
+                    </span>
+                  </summary>
+                  <div className="space-y-3 border-t border-border p-4">
+                    <div className="flex flex-wrap items-start justify-between gap-2">
+                      <Input
+                        aria-label="Título da tarefa"
+                        maxLength={300}
+                        value={task.title}
+                        onChange={(e) =>
+                          update({
+                            ...plan,
+                            tasks: plan.tasks.map((t) =>
+                              t.id === task.id
+                                ? { ...t, title: e.target.value }
+                                : t,
+                            ),
+                          })
+                        }
+                      />
+                      <select
+                        aria-label={`Status de ${task.title}`}
+                        className="rounded border bg-background p-1 text-xs"
+                        value={task.status}
+                        onChange={(e) =>
+                          update({
+                            ...plan,
+                            tasks: plan.tasks.map((t) =>
+                              t.id === task.id
+                                ? {
+                                    ...t,
+                                    status: e.target.value as typeof t.status,
+                                  }
+                                : t,
+                            ),
+                          })
+                        }
+                      >
+                        {Object.entries({
+                          todo: "A fazer",
+                          doing: "Em andamento",
+                          blocked: "Bloqueada",
+                          done: "Concluída",
+                        }).map(([value, label]) => (
+                          <option key={value} value={value}>
+                            {label}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    {(
+                      [
+                        ["owner", "Responsável pela tarefa"],
+                        ["acceptance", "Aceite da tarefa"],
+                        ["evidence", "Evidências ou bloqueio"],
+                      ] as const
+                    ).map(([key, label]) => (
+                      <label key={key} className="block text-xs space-y-1">
+                        <span>{label}</span>
+                        <Textarea
+                          rows={1}
+                          value={task[key]}
+                          onChange={(e) =>
+                            update({
+                              ...plan,
+                              tasks: plan.tasks.map((t) =>
+                                t.id === task.id
+                                  ? { ...t, [key]: e.target.value }
+                                  : t,
+                              ),
+                            })
+                          }
+                        />
+                      </label>
+                    ))}
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      disabled={dirty}
+                      onClick={() => void handoff(task.id)}
+                    >
+                      Preparar execução no chat
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() =>
+                        update({
+                          ...plan,
+                          tasks: plan.tasks.filter((t) => t.id !== task.id),
+                        })
+                      }
+                    >
+                      Remover tarefa
+                    </Button>
+                  </div>
+                </details>
+              ))}
+            </div>
+          </TabsContent>
+          <TabsContent value="review" className="mt-0">
+            <h3 className="text-sm font-medium">
+              Qualidade e aprovação por versão
+            </h3>
+            <div className="mt-3 space-y-3">
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={dirty}
+                onClick={async () => {
+                  setBusy(true);
+                  try {
+                    const chatId = await ipc.chat.createChat({ appId });
+                    selectChat({
+                      chatId,
+                      appId,
+                      prefillInput:
+                        "Revise esta entrega usando as ferramentas disponíveis. Verifique fluxos essenciais, segurança e permissões, acessibilidade e responsividade. Execute os testes existentes relevantes; informe o que foi executado, resultados e limitações. Não declare aprovação nem publique. Critérios: " +
+                        plan.acceptance +
+                        "\nEscopo: " +
+                        plan.scope,
+                    });
+                  } catch (e) {
+                    showError(e);
+                  } finally {
+                    setBusy(false);
+                  }
+                }}
+              >
+                Preparar validação no chat
+              </Button>
+              <p className="text-xs text-muted-foreground">
+                Registre verificações realmente executadas e seus resultados.
+                Este formulário não executa testes nem substitui a aprovação do
+                cliente.
+              </p>
+              {qualityAreas.map((area) => (
+                <label key={area} className="block space-y-1 text-sm">
+                  <span>{checkNames[area]}</span>
+                  <Textarea
+                    value={plan.checks[area]}
+                    onChange={(e) =>
+                      update({
+                        ...plan,
+                        checks: { ...plan.checks, [area]: e.target.value },
+                      })
+                    }
+                    placeholder="Teste realizado, resultado e referência da evidência"
+                  />
+                </label>
+              ))}
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={async () => {
+                  setBusy(true);
+                  try {
+                    const commit = await ipc.delivery.snapshot({ appId });
+                    update({
+                      ...plan,
+                      reviewCommit: commit,
+                      approvalCommit: "",
+                      reviewer: "",
+                      approvalNote: "",
+                      stage: "review",
+                    });
+                  } catch (e) {
+                    showError(e);
+                  } finally {
+                    setBusy(false);
+                  }
+                }}
+              >
+                Vincular versão Git atual
+              </Button>
+              <p className="break-all text-xs text-muted-foreground">
+                Versão revisada: {plan.reviewCommit || "Nenhuma"}
+              </p>
+              {(
+                [
+                  ["reviewer", "Nome de quem aprovou"],
+                  ["approvalNote", "Evidência da aprovação recebida"],
+                ] as const
+              ).map(([key, label]) => (
+                <label key={key} className="block text-sm space-y-1">
+                  <span>{label}</span>
+                  <Textarea
+                    rows={2}
+                    value={plan[key]}
+                    onChange={(e) => field(key, e.target.value)}
+                  />
+                </label>
+              ))}
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={
+                  blockers.length > 0 ||
+                  !plan.reviewer.trim() ||
+                  !plan.approvalNote.trim()
+                }
+                onClick={() =>
+                  update({
+                    ...plan,
+                    approvalCommit: plan.reviewCommit,
+                    stage: "approved",
+                  })
+                }
+              >
+                Registrar aprovação desta versão
+              </Button>
+              {approvals.data && approvals.data.length > 0 && (
+                <div className="space-y-2 text-xs">
+                  <h4 className="font-medium">
+                    Últimos registros de aprovação
+                  </h4>
+                  {approvals.data.map((item) => (
+                    <div key={item.id} className="rounded border p-2">
+                      <p>
+                        {item.reviewer} ·{" "}
+                        {new Date(item.createdAt).toLocaleDateString()}
+                      </p>
+                      <p className="break-all">{item.commit}</p>
+                      <p className="whitespace-pre-wrap">{item.note}</p>
+                    </div>
+                  ))}
+                </div>
+              )}
+              {blockers.length > 0 && (
+                <ul className="list-disc pl-5 text-xs text-muted-foreground">
+                  {blockers.map((b) => (
+                    <li key={b}>{b}</li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          </TabsContent>
+          <TabsContent value="knowledge" className="mt-0">
+            <h3 className="text-sm font-medium">
+              Decisões e memória do projeto
+            </h3>
+            <Button
+              className="mt-3"
+              variant="outline"
+              size="sm"
+              disabled={dirty || !plan.decisions.trim()}
+              onClick={async () => {
+                setBusy(true);
+                try {
+                  await ipc.prompt.create({
+                    slug: undefined,
+                    title:
+                      "Padrões de entrega — " +
+                      (plan.client || "Projeto " + appId),
+                    description:
+                      "Decisões reutilizáveis registradas no projeto " + appId,
+                    content: plan.decisions,
+                  });
+                  showSuccess("Decisões salvas na biblioteca de prompts.");
                 } catch (e) {
                   showError(e);
                 } finally {
@@ -519,113 +677,23 @@ function DeliveryEditor({
                 }
               }}
             >
-              Vincular versão Git atual
+              Salvar decisões na biblioteca
             </Button>
-            <p className="break-all text-xs text-muted-foreground">
-              Versão revisada: {plan.reviewCommit || "Nenhuma"}
+            <label className="mt-3 block text-sm space-y-1">
+              <span>Decisões técnicas, padrões e aprendizados</span>
+              <Textarea
+                rows={4}
+                value={plan.decisions}
+                onChange={(e) => field("decisions", e.target.value)}
+              />
+            </label>
+            <p className="mt-2 text-xs text-muted-foreground">
+              As decisões acompanham cada tarefa preparada no chat. Para
+              compartilhar padrões entre projetos, use a biblioteca de skills e
+              templates.
             </p>
-            {(
-              [
-                ["reviewer", "Nome de quem aprovou"],
-                ["approvalNote", "Evidência da aprovação recebida"],
-              ] as const
-            ).map(([key, label]) => (
-              <label key={key} className="block text-sm space-y-1">
-                <span>{label}</span>
-                <Textarea
-                  rows={2}
-                  value={plan[key]}
-                  onChange={(e) => field(key, e.target.value)}
-                />
-              </label>
-            ))}
-            <Button
-              variant="outline"
-              size="sm"
-              disabled={
-                blockers.length > 0 ||
-                !plan.reviewer.trim() ||
-                !plan.approvalNote.trim()
-              }
-              onClick={() =>
-                update({
-                  ...plan,
-                  approvalCommit: plan.reviewCommit,
-                  stage: "approved",
-                })
-              }
-            >
-              Registrar aprovação desta versão
-            </Button>
-            {approvals.data && approvals.data.length > 0 && (
-              <div className="space-y-2 text-xs">
-                <h4 className="font-medium">Últimos registros de aprovação</h4>
-                {approvals.data.map((item) => (
-                  <div key={item.id} className="rounded border p-2">
-                    <p>
-                      {item.reviewer} ·{" "}
-                      {new Date(item.createdAt).toLocaleDateString()}
-                    </p>
-                    <p className="break-all">{item.commit}</p>
-                    <p className="whitespace-pre-wrap">{item.note}</p>
-                  </div>
-                ))}
-              </div>
-            )}
-            {blockers.length > 0 && (
-              <ul className="list-disc pl-5 text-xs text-muted-foreground">
-                {blockers.map((b) => (
-                  <li key={b}>{b}</li>
-                ))}
-              </ul>
-            )}
-          </div>
-        </details>
-        <details className="rounded-lg border p-3">
-          <summary className="cursor-pointer font-medium">
-            4. Decisões e memória do projeto
-          </summary>
-          <Button
-            className="mt-3"
-            variant="outline"
-            size="sm"
-            disabled={dirty || !plan.decisions.trim()}
-            onClick={async () => {
-              setBusy(true);
-              try {
-                await ipc.prompt.create({
-                  slug: undefined,
-                  title:
-                    "Padrões de entrega — " +
-                    (plan.client || "Projeto " + appId),
-                  description:
-                    "Decisões reutilizáveis registradas no projeto " + appId,
-                  content: plan.decisions,
-                });
-                showSuccess("Decisões salvas na biblioteca de prompts.");
-              } catch (e) {
-                showError(e);
-              } finally {
-                setBusy(false);
-              }
-            }}
-          >
-            Salvar decisões na biblioteca
-          </Button>
-          <label className="mt-3 block text-sm space-y-1">
-            <span>Decisões técnicas, padrões e aprendizados</span>
-            <Textarea
-              rows={4}
-              value={plan.decisions}
-              onChange={(e) => field("decisions", e.target.value)}
-            />
-          </label>
-          <p className="mt-2 text-xs text-muted-foreground">
-            As decisões acompanham cada tarefa preparada no chat. Para
-            compartilhar padrões entre projetos, use a biblioteca de skills e
-            templates.
-          </p>
-        </details>
+          </TabsContent>
+        </Tabs>
       </fieldset>
       <details className="rounded-lg border p-3 space-y-2">
         <summary className="cursor-pointer text-sm font-medium">

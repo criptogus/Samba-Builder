@@ -25,7 +25,7 @@ export function registerReleaseNoteHandlers() {
       if (IS_TEST_BUILD) {
         return { exists: false };
       }
-      const releaseNoteUrl = `https://sambatech.com
+      const releaseNoteUrl = `https://github.com/criptogus/Samba-Builder/releases/tag/v${encodeURIComponent(version)}`;
 
       logger.debug(`Checking for release note at: ${releaseNoteUrl}`);
 

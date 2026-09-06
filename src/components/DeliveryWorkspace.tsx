@@ -40,15 +40,15 @@ export function DeliveryWorkspace() {
   );
 
   return (
-    <section aria-labelledby="delivery-workspace-title" className="mb-12">
-      <div className="mb-6 flex flex-wrap items-start justify-between gap-4">
+    <section aria-labelledby="delivery-workspace-title" className="min-w-0">
+      <div className="mb-5 flex flex-wrap items-start justify-between gap-4">
         <div>
-          <p className="mb-3 text-xs font-semibold uppercase tracking-[0.16em] text-primary">
+          <p className="mb-3 text-[11px] font-medium uppercase tracking-[0.1em] text-muted-foreground">
             Samba Builder · Software House
           </p>
           <h1
             id="delivery-workspace-title"
-            className="text-3xl font-semibold tracking-tight"
+            className="text-2xl font-semibold tracking-tight"
           >
             {t("delivery.title")}
           </h1>
@@ -67,7 +67,7 @@ export function DeliveryWorkspace() {
       <div className="mb-5 flex flex-wrap items-center gap-2 text-sm">
         <Link
           to="/templates"
-          className="rounded-md border px-3 py-2 hover:bg-accent focus-visible:outline-2"
+          className="rounded-md px-2 py-1.5 text-xs text-muted-foreground hover:bg-accent hover:text-foreground focus-visible:outline-2"
         >
           {t("delivery.templates")}
         </Link>
@@ -79,7 +79,7 @@ export function DeliveryWorkspace() {
         </Link>
       </div>
       <DeliveryAttention apps={apps} />
-      <div className="overflow-hidden rounded-2xl border bg-card">
+      <div className="overflow-hidden rounded-xl border bg-card">
         <div className="flex flex-wrap items-center gap-3 border-b p-4">
           <h2 className="mr-auto text-sm font-semibold">
             {t("delivery.projects")}{" "}
@@ -142,9 +142,9 @@ export function DeliveryWorkspace() {
                 <button
                   type="button"
                   onClick={() => openApp(app.id)}
-                  className="group flex w-full items-center gap-3 px-4 py-4 text-left transition-colors hover:bg-accent/50 focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-primary"
+                  className="group flex w-full items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-accent/50 focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-primary"
                 >
-                  <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                  <span className="flex size-9 shrink-0 items-center justify-center rounded-lg border border-border bg-background text-muted-foreground">
                     <Folder className="size-5" />
                   </span>
                   <span className="min-w-0 flex-1">

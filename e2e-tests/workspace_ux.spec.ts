@@ -9,6 +9,18 @@ test("workspace keeps navigation readable and starting tools preserve the draft"
     po.page.getByRole("heading", { name: "What do you want to build?" }),
   ).toBeVisible();
   await po.page.setViewportSize({ width: 1100, height: 800 });
+  const sidebar = po.page.locator('[data-slot="sidebar"][data-state]');
+  if ((await sidebar.getAttribute("data-state")) === "expanded") {
+    await po.page.getByRole("button", { name: "Toggle Menu" }).click();
+  }
+  await po.page.getByRole("link", { name: "Settings", exact: true }).hover();
+  await expect(sidebar).toHaveAttribute("data-state", "collapsed");
+  await po.page.getByRole("button", { name: "Toggle Menu" }).click();
+  await expect(sidebar).toHaveAttribute("data-state", "expanded");
+  await po.page.getByRole("button", { name: "Toggle Menu" }).click();
+  await expect(
+    po.page.getByRole("button", { name: "Pro", exact: true }),
+  ).toHaveCount(0);
   const input = po.chatActions.getChatInput();
   await input.fill("A simple appointment app");
   const apps = po.page.getByRole("link", { name: "Apps", exact: true });
@@ -25,6 +37,8 @@ test("workspace keeps navigation readable and starting tools preserve the draft"
   ).toHaveValue("A simple appointment app");
   await po.page.getByRole("button", { name: "Close", exact: true }).click();
   await expect(input).toContainText("A simple appointment app");
+  const privacyLater = po.page.getByTestId("telemetry-later-button");
+  if (await privacyLater.isVisible()) await privacyLater.click();
   await po.page.evaluate(() => {
     document.documentElement.classList.remove("dark");
     document.documentElement.classList.add("light");

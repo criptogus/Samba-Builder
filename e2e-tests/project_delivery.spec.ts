@@ -113,11 +113,35 @@ test("delivery persists scope, preserves conflicts, refuses premature approval a
     .getByRole("button")
     .click();
   await po.page.setViewportSize({ width: 1100, height: 900 });
+  const setup = po.page
+    .locator("summary")
+    .filter({ hasText: "Configuração do projeto" });
+  await setup.click();
+  await expect(
+    po.page.getByRole("button", { name: "Connect to GitHub", exact: true }),
+  ).toBeVisible();
+  await setup.click();
   await panel.scrollIntoViewIfNeeded();
+  await expect(
+    panel.getByRole("tab", { name: "Briefing", exact: true }),
+  ).toHaveAttribute("aria-selected", "true");
   await po.page.screenshot({
     path: "test-results/project-delivery.png",
     animations: "disabled",
   });
+  await panel.getByRole("tab", { name: "Briefing", exact: true }).focus();
+  await po.page.keyboard.press("ArrowRight");
+  await expect(panel.getByRole("tab", { name: /Tarefas/ })).toBeFocused();
+  await po.page.keyboard.press("Enter");
+  await expect(panel.getByRole("tab", { name: /Tarefas/ })).toHaveAttribute(
+    "aria-selected",
+    "true",
+  );
+  await po.page.screenshot({
+    path: "test-results/project-delivery-tasks.png",
+    animations: "disabled",
+  });
+  await panel.locator("details[data-task-id] summary").first().click();
   await panel
     .getByRole("button", { name: "Preparar execução no chat" })
     .first()

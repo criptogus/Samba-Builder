@@ -13,19 +13,14 @@ interface DyadProTrialDialogProps {
 export function DyadProTrialDialog({
   isOpen,
   onClose,
-  utmCampaign = "setup-dialog-v2",
 }: DyadProTrialDialogProps) {
-  const utmParams = `utm_source=dyad-app&utm_medium=app&utm_campaign=${encodeURIComponent(utmCampaign)}`;
-
   const handleStartTrial = () => {
-    ipc.system.openExternalUrl(
-      `https://sambatech.com
-    );
+    ipc.system.openExternalUrl("https://sambatech.com");
     onClose();
   };
 
   const handleLearnMore = () => {
-    ipc.system.openExternalUrl(`https://sambatech.com);
+    ipc.system.openExternalUrl("https://sambatech.com");
   };
 
   const features = [

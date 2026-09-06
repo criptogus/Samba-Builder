@@ -6,7 +6,6 @@ import {
   Mic,
   MicOff,
   Loader2,
-  Lock,
 } from "lucide-react";
 import {
   Tooltip,
@@ -27,7 +26,6 @@ import { HomeSubmitOptions } from "@/pages/home";
 import { ChatInputControls } from "../ChatInputControls";
 import { LexicalChatInput } from "./LexicalChatInput";
 import { useChatModeToggle } from "@/hooks/useChatModeToggle";
-import { useTypingPlaceholder } from "@/hooks/useTypingPlaceholder";
 import { AuxiliaryActionsMenu } from "./AuxiliaryActionsMenu";
 import { cn } from "@/lib/utils";
 import { useLoadApps } from "@/hooks/useLoadApps";
@@ -35,7 +33,6 @@ import { AppSearchDialog } from "../AppSearchDialog";
 import { useVoiceToText } from "@/hooks/useVoiceToText";
 import { useUserBudgetInfo } from "@/hooks/useUserBudgetInfo";
 import { showError } from "@/lib/toast";
-import { ipc } from "@/ipc/types";
 
 export function HomeChatInput({
   onSubmit,
@@ -72,14 +69,9 @@ export function HomeChatInput({
   const { apps, loading: appsLoading } = useLoadApps();
   const canSelectApp = !appsLoading && apps.length > 0;
 
-  const typingText = useTypingPlaceholder([
-    "an ecommerce store...",
-    "an information page...",
-    "a landing page...",
-  ]);
   const placeholder = selectedApp
     ? `Send a message to ${selectedApp.name}...`
-    : `Ask Samba Builder to build ${typingText ?? ""}`;
+    : "Ask Samba Builder to build your next project…";
 
   // Use the attachments hook
   const {
@@ -144,7 +136,7 @@ export function HomeChatInput({
           aria-disabled={disabled}
           inert={disabled}
           className={cn(
-            "relative flex flex-col border border-border rounded-2xl bg-card shadow-sm transition-[border-color,box-shadow] duration-200 focus-within:shadow-md focus-within:ring-2 focus-within:ring-primary/15",
+            "relative flex flex-col border border-border rounded-xl bg-card transition-colors duration-150 focus-within:ring-2 focus-within:ring-primary/15",
             "hover:border-primary/30",
             "focus-within:border-primary/30 focus-within:ring-1 focus-within:ring-primary/20",
             isDraggingOver && "ring-2 ring-blue-500 border-blue-500",
@@ -223,26 +215,7 @@ export function HomeChatInput({
                       : "Voice to text"}
                 </TooltipContent>
               </Tooltip>
-            ) : (
-              <Tooltip>
-                <TooltipTrigger
-                  render={
-                    <button
-                      onClick={() =>
-                        ipc.system.openExternalUrl("https://dyad.sh/pro")
-                      }
-                      disabled={disabled}
-                      aria-label="Voice to text (Pro)"
-                      className="px-2 py-2 mb-0.5 text-muted-foreground hover:text-primary rounded-lg transition-colors duration-150 cursor-pointer relative"
-                    />
-                  }
-                >
-                  <Mic size={20} />
-                  <Lock size={10} className="absolute -top-0.5 -right-0.5" />
-                </TooltipTrigger>
-                <TooltipContent>Voice to text (requires Pro)</TooltipContent>
-              </Tooltip>
-            )}
+            ) : null}
 
             {isStreaming ? (
               <Tooltip>
