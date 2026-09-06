@@ -1,3 +1,4 @@
+import { buildPlanningQuestionnaireReflectionMessage } from "./planning_recovery";
 /**
  * Local Agent v2 Handler
  * Main orchestrator for tool-based agent mode with parallel execution
@@ -2634,18 +2635,6 @@ function getPlanningQuestionnaireErrorFromStep(step: {
   }
 
   return null;
-}
-
-function buildPlanningQuestionnaireReflectionMessage(
-  errorDetail?: string,
-  planModeOnly?: boolean,
-): string {
-  const base = "Your planning_questionnaire tool call had a format error.";
-  const detail = errorDetail ? ` The error was: ${errorDetail}` : "";
-  if (planModeOnly) {
-    return `[System]${base}${detail} Review the tool's input schema, fix the issue, and re-call planning_questionnaire with correct arguments.`;
-  }
-  return `[System]${base}${detail} Skip the questionnaire step and proceed directly to the planning phase.`;
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {

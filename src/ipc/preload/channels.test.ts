@@ -1,3 +1,4 @@
+import { deliveryContracts } from "../types/delivery";
 import { nativeAgentContracts } from "../types/native_agents";
 import { meetingsContracts } from "../types/meetings";
 import { awsContracts } from "../types/aws";
@@ -98,5 +99,10 @@ it("exposes the project template workflow channels", () => {
 
 it("allows native agent lifecycle contracts", () => {
   for (const contract of Object.values(nativeAgentContracts))
+    expect(VALID_INVOKE_CHANNELS).toContain(contract.channel);
+});
+
+it("allows delivery contracts through preload", () => {
+  for (const contract of Object.values(deliveryContracts))
     expect(VALID_INVOKE_CHANNELS).toContain(contract.channel);
 });

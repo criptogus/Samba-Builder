@@ -1,3 +1,5 @@
+import { deliveryClient } from "./delivery";
+export { deliveryContracts, deliveryClient } from "./delivery";
 import { nativeAgentClient } from "./native_agents";
 export * from "./native_agents";
 export { meetingsContracts, meetingsClient } from "./meetings";
@@ -649,6 +651,7 @@ export const ipc = {
   media: mediaClient,
   appBlueprint: appBlueprintClient,
   appCollection: appCollectionClient,
+  delivery: deliveryClient,
   terminal: terminalClient,
   tests: testsClient,
   recording: recordingClient,

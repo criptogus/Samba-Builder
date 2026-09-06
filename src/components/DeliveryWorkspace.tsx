@@ -1,3 +1,4 @@
+import { DeliveryAttention } from "./DeliveryAttention";
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "@tanstack/react-router";
@@ -77,6 +78,7 @@ export function DeliveryWorkspace() {
           {t("delivery.library")}
         </Link>
       </div>
+      <DeliveryAttention apps={apps} />
       <div className="overflow-hidden rounded-2xl border bg-card">
         <div className="flex flex-wrap items-center gap-3 border-b p-4">
           <h2 className="mr-auto text-sm font-semibold">

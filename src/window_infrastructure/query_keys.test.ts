@@ -45,3 +45,11 @@ it("invalidates file content changed by native agents in the correct project", (
       .slice(0, 3),
   ).toEqual(queryKeys.appFiles.byApp({ appId: 7 }));
 });
+
+it("invalidates delivery editors and attention panels in other windows", () => {
+  expect(queryKeysForInvalidationScope({ family: "delivery" })).toEqual([
+    ["project-delivery"],
+    ["delivery-attention"],
+    ["delivery-approvals"],
+  ]);
+});

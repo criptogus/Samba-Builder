@@ -1,3 +1,4 @@
+import { registerDeliveryHandlers } from "./handlers/delivery_handlers";
 import { registerNativeAgentHandlers } from "./handlers/native_agent_handlers";
 import { registerMeetingsHandlers } from "./handlers/meetings_handlers";
 import { registerAwsHandlers } from "./handlers/aws_handlers";
@@ -118,6 +119,7 @@ export function registerIpcHandlers() {
   registerMiscHandlers();
   registerAppBlueprintHandlers();
   registerAppCollectionHandlers();
+  registerDeliveryHandlers();
   registerTerminalHandlers();
   registerTestsHandlers();
   registerTestAssertionHandlers();

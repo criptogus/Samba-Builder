@@ -12,6 +12,12 @@ export function queryKeysForInvalidationScope(
       return [queryKeys.apps.all];
     case "chats":
       return [queryKeys.chats.all];
+    case "delivery":
+      return [
+        ["project-delivery"],
+        ["delivery-attention"],
+        ["delivery-approvals"],
+      ];
     case "app-collections":
       return [queryKeys.appCollections.all];
     case "media":

@@ -1,3 +1,4 @@
+import { assertDeliveryReadyForPublish } from "../services/delivery_readiness";
 import { submitVercelDeployment } from "../services/cloud/vercel_deploy";
 import { appOperationCoordinator } from "../services/app_operation_coordinator";
 import { IpcMainInvokeEvent } from "electron";
@@ -392,6 +393,10 @@ async function handleCreateProject(
     // Trigger the first deployment
     logger.info(`Triggering first deployment for project: ${projectData.id}`);
     try {
+      const approvedCommit = await assertDeliveryReadyForPublish(
+        appId,
+        getDyadAppPath(app.path),
+      );
       // Create deployment via Vercel SDK using the project settings we just created
       const deploymentData = await vercel.deployments.createDeployment({
         requestBody: {
@@ -403,6 +408,7 @@ async function handleCreateProject(
             org: app.githubOrg,
             repo: app.githubRepo,
             ref: app.githubBranch || "main",
+            ...(approvedCommit ? { sha: approvedCommit } : {}),
           },
         },
       });
@@ -586,7 +592,7 @@ export function registerVercelHandlers() {
       {
         appId,
         operation: "vercel-deploy",
-        resources: ["provider", "repository"],
+        resources: ["app-path", "provider", "repository"],
       },
       async () => {
         const app = await db.query.apps.findFirst({
@@ -605,6 +611,13 @@ export function registerVercelHandlers() {
             DyadErrorKind.Precondition,
           );
         }
+        const approvedCommit =
+          target === "production"
+            ? await assertDeliveryReadyForPublish(
+                appId,
+                getDyadAppPath(app.path),
+              )
+            : undefined;
         return submitVercelDeployment(
           token,
           {
@@ -614,6 +627,7 @@ export function registerVercelHandlers() {
             org: app.githubOrg,
             repo: app.githubRepo,
             branch: app.githubBranch || "main",
+            sha: approvedCommit,
           },
           target,
         );
@@ -637,7 +651,14 @@ export function registerVercelHandlers() {
   );
 
   createTypedHandler(vercelContracts.createProject, async (event, params) => {
-    return handleCreateProject(event, params);
+    return appOperationCoordinator.run(
+      {
+        appId: params.appId,
+        operation: "vercel-create-project",
+        resources: ["app-path", "provider", "repository"],
+      },
+      () => handleCreateProject(event, params),
+    );
   });
 
   createTypedHandler(

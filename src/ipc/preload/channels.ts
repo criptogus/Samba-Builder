@@ -1,3 +1,4 @@
+import { deliveryContracts } from "../types/delivery";
 import { nativeAgentContracts } from "../types/native_agents";
 import { meetingsContracts } from "../types/meetings";
 import { awsContracts } from "../types/aws";
@@ -152,6 +153,7 @@ export const VALID_INVOKE_CHANNELS = [
   ...getInvokeChannels(mediaContracts),
   ...getInvokeChannels(appBlueprintContracts),
   ...getInvokeChannels(appCollectionContracts),
+  ...getInvokeChannels(deliveryContracts),
   ...getInvokeChannels(terminalContracts),
   ...getInvokeChannels(testsContracts),
   ...getInvokeChannels(recordingContracts),

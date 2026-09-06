@@ -1,3 +1,4 @@
+import { ProjectDeliveryPanel } from "@/components/ProjectDeliveryPanel";
 import { SaveProjectTemplateButton } from "@/components/SaveProjectTemplateButton";
 import { useNavigate, useSearch } from "@tanstack/react-router";
 import { normalizePath } from "../../shared/normalizePath";
@@ -526,6 +527,7 @@ export default function AppDetailsPage() {
           </button>
         )}
 
+        <ProjectDeliveryPanel key={selectedApp.id} appId={selectedApp.id} />
         <div className="grid grid-cols-2 gap-3 text-sm mb-4">
           <div>
             <span className="block text-gray-500 dark:text-gray-400 mb-0.5 text-xs">

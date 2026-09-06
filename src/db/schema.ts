@@ -843,3 +843,33 @@ export const customThemes = sqliteTable("custom_themes", {
     .notNull()
     .default(sql`(unixepoch())`),
 });
+
+// Durable delivery metadata is separate from generated project files.
+export const projectDeliveries = sqliteTable("project_deliveries", {
+  appId: integer("app_id")
+    .primaryKey()
+    .references(() => apps.id, { onDelete: "cascade" }),
+  revision: integer("revision").notNull().default(0),
+  data: text("data").notNull(),
+  updatedAt: integer("updated_at", { mode: "timestamp" })
+    .notNull()
+    .$defaultFn(() => new Date()),
+});
+
+export const projectDeliveryApprovals = sqliteTable(
+  "project_delivery_approvals",
+  {
+    id: integer("id").primaryKey({ autoIncrement: true }),
+    appId: integer("app_id")
+      .notNull()
+      .references(() => apps.id, { onDelete: "cascade" }),
+    revision: integer("revision").notNull(),
+    commit: text("commit").notNull(),
+    reviewer: text("reviewer").notNull(),
+    note: text("note").notNull(),
+    snapshot: text("snapshot").notNull(),
+    createdAt: integer("created_at", { mode: "timestamp" })
+      .notNull()
+      .$defaultFn(() => new Date()),
+  },
+);
