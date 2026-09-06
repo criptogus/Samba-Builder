@@ -81,3 +81,19 @@ describe("native skill activation", () => {
     }
   });
 });
+
+it("loads the portable PM Samba skill through the real command resolver", async () => {
+  const request = parseNativeSkillRequest(
+    "/samba-pm Quero reduzir retrabalho em uma clínica",
+  );
+  expect(request).toEqual({
+    slugs: ["samba-pm"],
+    prompt: "Quero reduzir retrabalho em uma clínica",
+  });
+  const body = await loadNativeSkill(request.slugs[0]);
+  expect(body.startsWith("---\nname: samba-pm")).toBe(true);
+  const context = await nativeSkillContext(request.slugs);
+  expect(context).toContain(body);
+  expect(context).toContain("Em Ask/Plan, não realize alterações");
+  expect(parseNativeSkillRequest("Explique /samba-pm").slugs).toEqual([]);
+});

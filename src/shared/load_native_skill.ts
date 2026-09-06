@@ -3,10 +3,13 @@ import { nativeSkills } from "./native_skills";
 
 // Vite packages each Markdown file as a separate lazy chunk in main and renderer.
 // No network access, directory scanning, subprocesses, or mutable global cache.
-const loaders = import.meta.glob<string>("./native-skills/*.md", {
-  query: "?raw",
-  import: "default",
-});
+const loaders = import.meta.glob<string>(
+  ["./native-skills/*.md", "./native-skills/*/SKILL.md"],
+  {
+    query: "?raw",
+    import: "default",
+  },
+);
 
 export const MAX_NATIVE_SKILLS = 3;
 export const MAX_NATIVE_SKILL_CHARS = 6000;
@@ -15,7 +18,9 @@ export async function loadNativeSkill(slug: string): Promise<string> {
   if (!nativeSkills.some((skill) => skill.slug === slug)) {
     throw new Error(`Skill nativa desconhecida: /${slug}`);
   }
-  const loader = loaders[`./native-skills/${slug}.md`];
+  const loader =
+    loaders[`./native-skills/${slug}.md`] ??
+    loaders[`./native-skills/${slug}/SKILL.md`];
   if (!loader) throw new Error(`Conteúdo indisponível: /${slug}`);
   const body = await loader();
   if (!body.trim() || body.length > MAX_NATIVE_SKILL_CHARS) {

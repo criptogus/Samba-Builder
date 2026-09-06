@@ -9,6 +9,15 @@ export interface NativeSkill {
 }
 export const nativeSkills: readonly NativeSkill[] = [
   {
+    slug: "samba-pm",
+    title: "PM Samba",
+    category: "Produto",
+    description:
+      "Guia ideias e briefings até um produto simples, inovador e com design marcante, resolvendo um problema real.",
+    sources: ["criptogus/Samba-Builder"],
+    prerequisite: null,
+  },
+  {
     slug: "samba-spec",
     title: "Especificação de produto",
     category: "Produto",

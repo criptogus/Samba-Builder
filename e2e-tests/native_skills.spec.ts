@@ -31,12 +31,23 @@ test("discovers bundled skills and loads instructions only on selection", async 
   expect(
     await electronApp.evaluate(({ clipboard }) => clipboard.readText()),
   ).toBe("/samba-debug ");
+  await library.getByLabel("Buscar skills nativas").fill("PM Samba");
+  await library
+    .getByRole("button", { name: "Ver PM Samba", exact: true })
+    .click();
+  await expect(library.getByLabel("Instruções da skill")).toContainText(
+    "Faça valer a pena construir",
+  );
+  await library.getByRole("button", { name: "Copiar comando" }).click();
+  await expect
+    .poll(() => electronApp.evaluate(({ clipboard }) => clipboard.readText()))
+    .toBe("/samba-pm ");
   await po.navigation.goToAppsTab();
   const chatInput = po.chatActions.getChatInput();
-  await chatInput.fill("/samba-deb");
+  await chatInput.fill("/samba-pm");
   const menu = po.page.locator('[data-mentions-menu="true"]');
   await expect(menu).toBeVisible();
-  await menu.getByText("samba-debug", { exact: true }).click();
-  await expect(chatInput).toContainText("/samba-debug");
+  await menu.getByText("samba-pm", { exact: true }).click();
+  await expect(chatInput).toContainText("/samba-pm");
   await session.detach();
 });

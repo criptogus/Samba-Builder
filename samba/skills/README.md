@@ -1,5 +1,7 @@
 # Samba Builder — Skill System
 
+**PM Samba:** skill nativa original para descobrir um problema real, escolher um diferencial útil e orientar um produto simples, com design marcante. Use `/samba-pm` no início da mensagem ou encontre **PM Samba** em Library → Prompts → Skills nativas. [Instruções e versão portátil](../../src/shared/native-skills/samba-pm/SKILL.md).
+
 Skills nativos que fazem o agente do Samba Builder produzir apps **incríveis**, e o
 loop que os **evolui automaticamente** com o feedback dos devs.
 
