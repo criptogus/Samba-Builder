@@ -47,7 +47,7 @@ describe("local-agent default request (integration)", () => {
     await harness?.dispose();
   });
 
-  it("sends the full Pro agent-mode tool list and system prompt", async () => {
+  it("sends the full agent-mode tool list and system prompt", async () => {
     harness.mount();
     await waitFor(
       () => {
@@ -77,7 +77,9 @@ describe("local-agent default request (integration)", () => {
     ).toHaveLength(0);
 
     const req = harness.getServerDump({ type: "request" });
-    expect(req.parsed.headers.authorization).toBe("Bearer testdyadkey");
+    // Samba Builder (BYOK): sem backend/engine — o request não carrega a chave
+    // do provider "auto" (testdyadkey) como Authorization.
+    expect(req.parsed.headers.authorization).toBeUndefined();
     expect(req.parsed.body.model).toBe("[[MODEL]]");
 
     const tools = (req.parsed.body.tools ?? []) as Array<{
@@ -86,8 +88,8 @@ describe("local-agent default request (integration)", () => {
       description?: string;
     }>;
     const toolNames = tools.map((t) => t.function?.name ?? t.name).sort();
-    // The exact default (Pro, code-explorer-off) agent-mode toolset the e2e
-    // request snapshot asserted.
+    // Toolset do agente (sem as tools do backend cloud do Dyad — removidas:
+    // generate_image, web_search, web_crawl, web_fetch).
     expect(toolNames).toEqual([
       "add_dependency",
       "add_integration",
@@ -96,7 +98,6 @@ describe("local-agent default request (integration)", () => {
       "enable_nitro",
       "execute_sandbox_script",
       "explore_chat_history",
-      "generate_image",
       "git_diff",
       "git_log",
       "git_restore_file",
@@ -119,9 +120,6 @@ describe("local-agent default request (integration)", () => {
       "set_chat_summary",
       "spawn_agent",
       "update_todos",
-      "web_crawl",
-      "web_fetch",
-      "web_search",
       "write_file",
     ]);
     const spawnAgent = tools.find(

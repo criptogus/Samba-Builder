@@ -562,6 +562,7 @@ function getRegularModelClient(
   // Samba Builder (BYOK): provider sem chave conectada NUNCA recebe request —
   // o backend do provider responde erros confusos (ex.: OpenRouter devolve
   // "No cookie auth credentials found"). Erro claro e acionável no lugar.
+  // (Modo de teste com fetch mockado não exige chave — o fake LLM responde.)
   const providerRequiresKey = ![
     "azure",
     "ollama",
@@ -569,7 +570,8 @@ function getRegularModelClient(
     "vertex",
     "bedrock",
   ].includes(providerId);
-  if (providerRequiresKey && !apiKey) {
+  const hasTestFetchOverride = Boolean(getModelClientFetchOption().fetch);
+  if (providerRequiresKey && !apiKey && !hasTestFetchOverride) {
     throw new DyadError(
       `O provider ${providerConfig.name ?? providerId} não está conectado (chave de API ausente). Adicione a chave em Settings → Providers ou selecione um modelo conectado (ex.: DeepSeek).`,
       DyadErrorKind.Auth,

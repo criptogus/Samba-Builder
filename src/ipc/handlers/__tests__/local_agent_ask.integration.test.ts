@@ -171,7 +171,8 @@ describe("local-agent ask mode (integration)", () => {
     ).toHaveLength(0);
 
     const req = harness.getServerDump({ type: "request" });
-    expect(req.parsed.headers.authorization).toBe("Bearer testdyadkey");
+    // Samba Builder (BYOK): sem backend/engine — request sem Authorization.
+    expect(req.parsed.headers.authorization).toBeUndefined();
     expect(req.parsed.body.model).toBe("[[MODEL]]");
 
     const tools = (req.parsed.body.tools ?? []) as Array<{
@@ -197,9 +198,8 @@ describe("local-agent ask mode (integration)", () => {
       "run_type_checks",
       "set_chat_summary",
       "spawn_agent",
-      "web_crawl",
-      "web_fetch",
-      "web_search",
+      // Samba Builder: tools do backend cloud do Dyad removidas (sem
+      // web_crawl/web_fetch/web_search) — a lista read-only termina aqui.
     ]);
     const spawnAgent = tools.find(
       (tool) => (tool.function?.name ?? tool.name) === "spawn_agent",
