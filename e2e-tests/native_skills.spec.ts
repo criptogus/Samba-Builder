@@ -44,6 +44,17 @@ test("discovers bundled skills and loads instructions only on selection", async 
   await expect
     .poll(() => electronApp.evaluate(({ clipboard }) => clipboard.readText()))
     .toBe("/samba-pm ");
+  await library.getByLabel("Buscar skills nativas").fill("movimento");
+  await library
+    .getByRole("button", { name: "Ver Direção de movimento", exact: true })
+    .click();
+  await expect(library.getByLabel("Instruções da skill")).toContainText(
+    "prefers-reduced-motion",
+  );
+  await library.getByRole("button", { name: "Copiar comando" }).click();
+  await expect
+    .poll(() => electronApp.evaluate(({ clipboard }) => clipboard.readText()))
+    .toBe("/samba-motion ");
   await po.navigation.goToAppsTab();
   const chatInput = po.chatActions.getChatInput();
   await chatInput.fill("/samba-pm");

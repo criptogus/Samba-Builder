@@ -7,6 +7,7 @@ Abra Library → Prompts → Skills nativas. Busque uma tarefa, veja as instruç
 /samba-spec Quero um portal de agendamento para clínicas.
 /samba-debug /samba-tdd Corrija a falha de login e comprove a correção.
 /samba-design Melhore a página inicial preservando a identidade da marca.
+/samba-design /samba-motion /samba-security Crie uma interface expressiva, acessível e segura.
 /samba-performance Investigue o consumo de memória durante o preview.
 ```
 

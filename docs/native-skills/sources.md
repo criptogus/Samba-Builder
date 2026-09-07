@@ -131,3 +131,9 @@ As 14 skills nativas são sínteses/adaptações para as ferramentas e permissõ
 - [Anthropic frontend-design](https://github.com/anthropics/skills/tree/main/skills/frontend-design): consultado como referência de direção visual; nenhum arquivo, ativo, script ou texto da skill foi incorporado nesta revisão.
 
 A revisão não baixa nem executa conteúdo remoto em tempo de uso. Os arquivos locais e os testes são a versão efetiva do comportamento; popularidade dos repositórios não é evidência de qualidade das aplicações geradas.
+
+## Movimento e direção de arte — revisão de 6 de setembro de 2026
+
+`/samba-motion` é uma síntese original: coreografia, interrupção, tokens, fallback estático e manutenção. Referências técnicas consultadas: [Motion — acessibilidade](https://motion.dev/docs/react-accessibility) e [web.dev — animações eficientes](https://web.dev/articles/animations-guide). Nenhum componente pago, ativo visual ou código de exemplo foi incorporado. CSS é a primeira opção; a biblioteca existente é usada quando o comportamento exige coordenação adicional.
+
+O padrão de geração agora inclui direção de arte e movimento sem seleção manual. As skills detalhadas continuam disponíveis por comando ou catálogo e carregadas sob demanda. Esses controles orientam o modelo; não constituem evidência de que qualquer aplicação gerada alcançou qualidade estética superior.

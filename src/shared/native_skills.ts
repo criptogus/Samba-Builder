@@ -80,11 +80,23 @@ export const nativeSkills: readonly NativeSkill[] = [
     title: "Design de interfaces",
     category: "Design",
     description:
-      "Define direção visual, componentes e estados com identidade consistente.",
+      "Cria direção de arte própria, composição editorial e interfaces refinadas, com revisão visual e design system sustentável.",
     sources: [
       "nextlevelbuilder/ui-ux-pro-max-skill",
       "Leonxlnx/taste-skill",
       "VoltAgent/awesome-design-md",
+    ],
+    prerequisite: null,
+  },
+  {
+    slug: "samba-motion",
+    title: "Direção de movimento",
+    category: "Design",
+    description:
+      "Coreografa transições e interações expressivas, leves e acessíveis, com padrões fáceis de manter.",
+    sources: [
+      "https://motion.dev/docs/react-accessibility",
+      "https://web.dev/articles/animations-guide",
     ],
     prerequisite: null,
   },

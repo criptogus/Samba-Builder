@@ -83,10 +83,13 @@ Registrar versões suportadas, dependências críticas e procedimento de atualiz
 Status: pendente de definição. A direção aprovada no blueprint deve orientar este documento; não significa que todos os tokens já foram aprovados.
 
 ## Identidade e princípios
-Pendente: público, tom, marca e objetivos de usabilidade.
+Pendente: público, tom, marca e objetivos de usabilidade. Registrar tese visual específica, referências com uso permitido, composição, direção de imagens e o que evitar para não repetir interfaces genéricas.
 
 ## Tokens oficiais
 Registrar valores e arquivos de origem para cores semânticas, tipografia, espaçamento, grid, raios, elevação e movimento. Usar uma única fonte no código e referenciá-la aqui.
+
+## Movimento e implementação
+Registrar transições, gatilhos, duração, easing, interrupção e alternativa para movimento reduzido. Identificar arquivos reais dos tokens, componentes e conteúdo; explicar como trocar marca, editar textos e evoluir uma tela sem duplicar estilos. Anexar evidências observadas desktop/mobile e estados críticos, sem declarar qualidade por existir documentação.
 
 ## Componentes e estados
 Documentar botões, campos, navegação, diálogos, feedback, carregamento, vazio, erro, sucesso e permissões. Reutilizar componentes oficiais.

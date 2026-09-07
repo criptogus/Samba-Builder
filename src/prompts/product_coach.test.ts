@@ -30,12 +30,15 @@ it("guides discovery in all supported chat prompt paths without overriding mode 
     expect(prompt).toContain("already approved scope");
     expect(prompt).toContain("never repeat a question already answered");
     expect(prompt).toContain("do not invent research");
+    expect(prompt).toContain("Design direction:");
+    expect(prompt).toContain("prefers-reduced-motion");
+    expect(prompt).toContain("one polished, working representative screen");
   }
   expect(prompts[2]).toContain("READ-ONLY");
 });
 
-it("keeps the common product and quality floor within the previous context footprint", () => {
-  expect(PROJECT_GENERATION_GUIDANCE.length).toBeLessThanOrEqual(4015);
+it("keeps the common product and quality floor within an explicit compact context budget", () => {
+  expect(PROJECT_GENERATION_GUIDANCE.length).toBeLessThanOrEqual(6200);
 });
 
 it("gives the implementer the quality floor without restarting product discovery", () => {

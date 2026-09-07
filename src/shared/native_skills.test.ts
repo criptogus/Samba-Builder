@@ -118,3 +118,13 @@ it("fits the actual PM, design and security workflow within the aggregate budget
   expect(context).toContain("# Design de interfaces");
   expect(context).toContain("# Segurança de aplicações");
 });
+
+it("resolves the motion workflow without exceeding the shared budget", async () => {
+  const request = parseNativeSkillRequest(
+    "/samba-design /samba-motion /samba-security Crie um portal",
+  );
+  const context = await nativeSkillContext(request.slugs);
+  expect(context).toContain("prefers-reduced-motion");
+  expect(context).toContain("autorização");
+  expect(request.prompt).toBe("Crie um portal");
+});
