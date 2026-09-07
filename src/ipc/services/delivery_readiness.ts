@@ -1,25 +1,30 @@
+import { assertEngineeringReady } from "./engineering_readiness";
+import { assertFoundationReviewed } from "./foundation_review";
 import { eq } from "drizzle-orm";
 import { db } from "@/db";
 import { projectDeliveries } from "@/db/schema";
 import { DeliveryPlanSchema, deliveryBlockers } from "@/delivery/model";
 import { DyadError, DyadErrorKind } from "@/errors/dyad_error";
-import { promisify } from "node:util";
-import { execFile } from "node:child_process";
-const exec = promisify(execFile);
+import { execGit } from "../utils/git_utils";
 export async function readDeliveryCommit(root: string): Promise<string> {
-  const status = await exec("git", ["status", "--porcelain"], {
-    cwd: root,
-    timeout: 10000,
+  const status = await execGit(["status", "--porcelain"], root, {
+    signal: AbortSignal.timeout(10000),
     maxBuffer: 1000000,
   });
+  if (status.exitCode !== 0)
+    throw new Error("Não foi possível verificar o estado Git do projeto.");
   if (status.stdout.trim())
     throw new DyadError(
       "Salve as alterações do projeto em uma versão Git antes de vincular ou aprovar a revisão.",
       DyadErrorKind.Precondition,
     );
-  return (
-    await exec("git", ["rev-parse", "HEAD"], { cwd: root, timeout: 10000 })
-  ).stdout.trim();
+  const head = await execGit(["rev-parse", "HEAD"], root, {
+    signal: AbortSignal.timeout(10000),
+    maxBuffer: 1000000,
+  });
+  if (head.exitCode !== 0)
+    throw new Error("Não foi possível identificar a versão Git do projeto.");
+  return head.stdout.trim();
 }
 /** Caller holds repository/app-path coordination until publishing finishes. */
 export async function assertDeliveryReadyForPublish(
@@ -31,7 +36,10 @@ export async function assertDeliveryReadyForPublish(
     .from(projectDeliveries)
     .where(eq(projectDeliveries.appId, appId))
     .get();
-  if (!row) return undefined;
+  if (!row) {
+    await assertFoundationReviewed(root);
+    return undefined;
+  }
   const plan = DeliveryPlanSchema.parse(JSON.parse(row.data));
   if (
     !["approved", "delivered"].includes(plan.stage) ||
@@ -43,11 +51,13 @@ export async function assertDeliveryReadyForPublish(
       "Esta entrega ainda não está aprovada. Conclua a revisão e registre a aprovação no plano de entrega antes de publicar em produção.",
       DyadErrorKind.Precondition,
     );
+  await assertFoundationReviewed(root, plan);
   const commit = await readDeliveryCommit(root);
   if (commit !== plan.reviewCommit || commit !== plan.approvalCommit)
     throw new DyadError(
       "O código mudou desde a aprovação. Revise e aprove a nova versão antes de publicar em produção.",
       DyadErrorKind.Precondition,
     );
+  await assertEngineeringReady(appId, plan, commit, root);
   return commit;
 }

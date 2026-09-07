@@ -77,9 +77,7 @@ function GitHubTroubleshootingLink({ className = "" }: { className?: string }) {
       href="https://sambatech.com"
       onClick={(event) => {
         event.preventDefault();
-        ipc.system.openExternalUrl(
-          "https://sambatech.com",
-        );
+        ipc.system.openExternalUrl("https://sambatech.com");
       }}
       className={`cursor-pointer text-blue-600 hover:underline dark:text-blue-400 ${className}`}
       target="_blank"

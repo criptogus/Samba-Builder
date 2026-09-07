@@ -49,8 +49,8 @@ export function ChatErrorBox({
     return (
       <ChatErrorContainer onDismiss={onDismiss}>
         You have used all {messagesLimit} free Basic Agent messages for today.
-        {resetText} This message was not sent. Switch to Build mode (or wait
-        for the reset) to continue.
+        {resetText} This message was not sent. Switch to Build mode (or wait for
+        the reset) to continue.
         {onSwitchToBuildMode && (
           <div className="mt-2 flex flex-wrap gap-2">
             <Button

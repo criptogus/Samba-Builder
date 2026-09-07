@@ -105,6 +105,10 @@ export async function runExploreCodeSubagent({
   onProgress?: (progressText: string) => void;
   beforeModelStep?: () => void;
   onStepUsage?: (usage: {
+    provider?: string;
+    model?: string;
+    inputUnknown?: boolean;
+    outputUnknown?: boolean;
     inputTokens: number;
     outputTokens: number;
     toolCallCount: number;
@@ -221,6 +225,14 @@ export async function runExploreCodeSubagent({
         await onStepUsage?.({
           inputTokens: step.usage.inputTokens ?? 0,
           outputTokens: step.usage.outputTokens ?? 0,
+          provider:
+            modelInfo.modelClient.builtinProviderId ?? selectedModel.provider,
+          model:
+            typeof modelInfo.modelClient.model === "string"
+              ? modelInfo.modelClient.model
+              : modelInfo.modelClient.model.modelId,
+          inputUnknown: step.usage.inputTokens === undefined,
+          outputUnknown: step.usage.outputTokens === undefined,
           toolCallCount: step.toolCalls.length,
         });
       },

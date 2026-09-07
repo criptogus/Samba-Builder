@@ -1,3 +1,4 @@
+import { recordProjectTokenUsage } from "@/ipc/services/project_accounting";
 import { assertDeliveryAgentBudget } from "@/ipc/services/delivery_usage";
 import { subagentCapacity, activeSubagentCount } from "./capacity";
 import crypto from "node:crypto";
@@ -1833,6 +1834,15 @@ async function runModel(
       await recordModelUsage(params.threadId, {
         inputTokens: step.usage.inputTokens ?? 0,
         outputTokens: step.usage.outputTokens ?? 0,
+        provider:
+          modelInfo.modelClient.builtinProviderId ??
+          settings.selectedModel.provider,
+        model:
+          typeof modelInfo.modelClient.model === "string"
+            ? modelInfo.modelClient.model
+            : modelInfo.modelClient.model.modelId,
+        inputUnknown: step.usage.inputTokens === undefined,
+        outputUnknown: step.usage.outputTokens === undefined,
         toolCallCount: step.toolCalls.length,
       });
     },
@@ -1880,10 +1890,24 @@ async function recordModelUsage(
   usage: {
     inputTokens: number;
     outputTokens: number;
+    provider?: string;
+    model?: string;
+    inputUnknown?: boolean;
+    outputUnknown?: boolean;
     toolCallCount: number;
   },
 ): Promise<void> {
   const thread = await getThread(threadId);
+  recordProjectTokenUsage(
+    thread.chatId,
+    usage.provider ?? thread.provider,
+    usage.model ?? thread.model,
+    "subagent",
+    {
+      inputTokens: usage.inputUnknown ? undefined : usage.inputTokens,
+      outputTokens: usage.outputUnknown ? undefined : usage.outputTokens,
+    },
+  );
   await db
     .update(agentThreads)
     .set({

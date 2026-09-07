@@ -1,4 +1,4 @@
-import { PRODUCT_COACH_GUIDANCE } from "@/shared/product_coach_guidance";
+import { PROJECT_GENERATION_GUIDANCE } from "@/shared/product_coach_guidance";
 import path from "node:path";
 import fs from "node:fs";
 import log from "electron-log";
@@ -14,55 +14,7 @@ import type { AppBlueprintData } from "@/ipc/types/app_blueprint";
 const logger = log.scope("system_prompt");
 
 export const THINKING_PROMPT = `
-# Thinking Process
-
-Before responding to user requests, ALWAYS use <think></think> tags to carefully plan your approach. This structured thinking process helps you organize your thoughts and ensure you provide the most accurate and helpful response. Your thinking should:
-
-- Use **bullet points** to break down the steps
-- **Bold key insights** and important considerations
-- Follow a clear analytical framework
-
-Example of proper thinking structure for a debugging request:
-
-<think>
-• **Identify the specific UI/FE bug described by the user**
-  - "Form submission button doesn't work when clicked"
-  - User reports clicking the button has no effect
-  - This appears to be a **functional issue**, not just styling
-
-• **Examine relevant components in the codebase**
-  - Form component at \`src/components/ContactForm.tsx\`
-  - Button component at \`src/components/Button.tsx\`
-  - Form submission logic in \`src/utils/formHandlers.ts\`
-  - **Key observation**: onClick handler in Button component doesn't appear to be triggered
-
-• **Diagnose potential causes**
-  - Event handler might not be properly attached to the button
-  - **State management issue**: form validation state might be blocking submission
-  - Button could be disabled by a condition we're missing
-  - Event propagation might be stopped elsewhere
-  - Possible React synthetic event issues
-
-• **Plan debugging approach**
-  - Add console.logs to track execution flow
-  - **Fix #1**: Ensure onClick prop is properly passed through Button component
-  - **Fix #2**: Check form validation state before submission
-  - **Fix #3**: Verify event handler is properly bound in the component
-  - Add error handling to catch and display submission issues
-
-• **Consider improvements beyond the fix**
-  - Add visual feedback when button is clicked (loading state)
-  - Implement better error handling for form submissions
-  - Add logging to help debug edge cases
-</think>
-
-After completing your thinking process, proceed with your response following the guidelines above. Remember to be concise in your explanations to the user while being thorough in your thinking process.
-
-This structured thinking ensures you:
-1. Don't miss important aspects of the request
-2. Consider all relevant factors before making changes
-3. Deliver more accurate and helpful responses
-4. Maintain a consistent approach to problem-solving
+Plan privately. Share only a concise description of the intended change, important assumptions and verifiable results. Do not emit a private reasoning transcript or <think> blocks. Use existing evidence before requesting more context; do not invent inspected files, executed tests or successful outcomes.
 `;
 
 export const BUILD_SYSTEM_PREFIX = `
@@ -895,7 +847,7 @@ export const getSystemPromptForChatMode = ({
   hasSupabaseProject?: boolean;
 }) => {
   if (chatMode === "ask") {
-    return ASK_MODE_SYSTEM_PROMPT + "\n\n" + PRODUCT_COACH_GUIDANCE;
+    return ASK_MODE_SYSTEM_PROMPT + "\n\n" + PROJECT_GENERATION_GUIDANCE;
   }
   // The Nitro server-layer nudge is Vite-specific. Only inject it for Vite
   // apps that haven't already enabled Nitro (`"vite-nitro"` apps already have
@@ -912,7 +864,7 @@ export const getSystemPromptForChatMode = ({
     buildPrompt +
     (enableTurboEditsV2 ? TURBO_EDITS_V2_SYSTEM_PROMPT : "") +
     "\n\n" +
-    PRODUCT_COACH_GUIDANCE
+    PROJECT_GENERATION_GUIDANCE
   );
 };
 

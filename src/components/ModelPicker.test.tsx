@@ -355,27 +355,27 @@ vi.mock("@/hooks/useLanguageModelProviders", () => ({
   useLanguageModelProviders: () => ({
     isLoading: false,
     isProviderSetup: (provider: string) => {
-        // BYOK: um provider so esta conectado quando tem chave salva no
-        // settings ou uma env var correspondente.
-        const ps = mocks.settings.providerSettings as unknown as Record<
-          string,
-          { apiKey?: { value?: string } } | undefined
-        >;
-        const key = ps[provider]?.apiKey?.value;
-        const envName =
-          provider === "openai"
-            ? "OPENAI_API_KEY"
-            : provider === "google"
-              ? "GOOGLE_API_KEY"
-              : provider === "openrouter"
-                ? "OPENROUTER_API_KEY"
-                : provider === "vertex"
-                  ? "VERTEX_API_KEY"
-                  : provider === "xai"
-                    ? "XAI_API_KEY"
-                    : undefined;
-        return Boolean(key || (envName && mocks.envVars[envName]));
-      },
+      // BYOK: um provider so esta conectado quando tem chave salva no
+      // settings ou uma env var correspondente.
+      const ps = mocks.settings.providerSettings as unknown as Record<
+        string,
+        { apiKey?: { value?: string } } | undefined
+      >;
+      const key = ps[provider]?.apiKey?.value;
+      const envName =
+        provider === "openai"
+          ? "OPENAI_API_KEY"
+          : provider === "google"
+            ? "GOOGLE_API_KEY"
+            : provider === "openrouter"
+              ? "OPENROUTER_API_KEY"
+              : provider === "vertex"
+                ? "VERTEX_API_KEY"
+                : provider === "xai"
+                  ? "XAI_API_KEY"
+                  : undefined;
+      return Boolean(key || (envName && mocks.envVars[envName]));
+    },
 
     data: [
       {

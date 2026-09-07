@@ -88,8 +88,7 @@ export const DEFAULT_SETTINGS: UserSettings = {
 const CRASH_SENTINEL_FILE = "session.lock";
 const RENDERER_CRASH_FILE = "renderer-crash.json";
 const SETTINGS_FILE = "user-settings.json";
-const RESTORE_SETTINGS_DOCS_URL =
-  "https://sambatech.com";
+const RESTORE_SETTINGS_DOCS_URL = "https://sambatech.com";
 let initialLoadIsFirstSession = false;
 
 export function setInitialLoadIsFirstSession(value: boolean): void {

@@ -245,6 +245,7 @@ const config: ForgeConfig = {
     },
     ignore,
     extraResource: [
+      "quality-tools",
       "node_modules/dugite/git",
       "node_modules/@vscode",
       "assets/icon/logo.png",

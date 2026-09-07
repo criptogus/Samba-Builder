@@ -1,5 +1,9 @@
+import { managementClient } from "./management";
+export { managementContracts, managementClient } from "./management";
 import { deliveryClient } from "./delivery";
 export { deliveryContracts, deliveryClient } from "./delivery";
+import { governanceClient } from "./governance";
+export { governanceContracts, governanceClient } from "./governance";
 import { nativeAgentClient } from "./native_agents";
 export * from "./native_agents";
 export { meetingsContracts, meetingsClient } from "./meetings";
@@ -101,6 +105,7 @@ export { appBlueprintContracts, appBlueprintEvents } from "./app_blueprint";
 export { appCollectionContracts } from "./app_collections";
 export { terminalContracts } from "./terminal";
 export { testsContracts, testsEvents } from "./tests";
+export { designSystemContracts } from "./design_system";
 export { userInputContracts, userInputEvents } from "./user_input";
 export { firstPromptSendContracts } from "./first_prompt";
 export {
@@ -166,6 +171,7 @@ export { appBlueprintClient, appBlueprintEventClient } from "./app_blueprint";
 export { appCollectionClient } from "./app_collections";
 export { terminalClient } from "./terminal";
 export { testsClient, testsEventClient } from "./tests";
+export { designSystemClient } from "./design_system";
 export { userInputClient, userInputEventClient } from "./user_input";
 export { firstPromptClient } from "./first_prompt";
 export {
@@ -469,6 +475,16 @@ export type {
   TestIsolation,
   TestOutputPayload,
 } from "./tests";
+
+// Design System Toolkit types
+export type {
+  DesignSystemTemplate,
+  ListDesignSystemsResult,
+  ExtractDesignSystemParams,
+  ExtractDesignSystemResult,
+  ApplyDesignSystemParams,
+  ApplyDesignSystemResult,
+} from "./design_system";
 export type {
   UserInputDescriptorPayload,
   UserInputResponsePayload,
@@ -568,6 +584,7 @@ import { appBlueprintClient, appBlueprintEventClient } from "./app_blueprint";
 import { appCollectionClient } from "./app_collections";
 import { terminalClient } from "./terminal";
 import { testsClient, testsEventClient } from "./tests";
+import { designSystemClient } from "./design_system";
 import { recordingClient, recordingEventClient } from "./recording";
 import { userInputClient, userInputEventClient } from "./user_input";
 import { firstPromptClient } from "./first_prompt";
@@ -652,8 +669,11 @@ export const ipc = {
   appBlueprint: appBlueprintClient,
   appCollection: appCollectionClient,
   delivery: deliveryClient,
+  management: managementClient,
+  governance: governanceClient,
   terminal: terminalClient,
   tests: testsClient,
+  designSystem: designSystemClient,
   recording: recordingClient,
   userInput: userInputClient,
   firstPrompt: firstPromptClient,

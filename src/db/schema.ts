@@ -873,3 +873,73 @@ export const projectDeliveryApprovals = sqliteTable(
       .$defaultFn(() => new Date()),
   },
 );
+
+// Project-level accounting survives chat deletion. App deletion removes it.
+export const projectManagement = sqliteTable("project_management", {
+  appId: integer("app_id")
+    .primaryKey()
+    .references(() => apps.id, { onDelete: "cascade" }),
+  revision: integer("revision").notNull().default(0),
+  data: text("data").notNull(),
+});
+export const projectTokenEvents = sqliteTable(
+  "project_token_events",
+  {
+    id: text("id").primaryKey(),
+    appId: integer("app_id")
+      .notNull()
+      .references(() => apps.id, { onDelete: "cascade" }),
+    occurredAt: integer("occurred_at").notNull(),
+    provider: text("provider").notNull(),
+    model: text("model").notNull(),
+    source: text("source").notNull(),
+    inputTokens: integer("input_tokens"),
+    outputTokens: integer("output_tokens"),
+  },
+  (table) => [
+    index("project_token_events_app_time_idx").on(
+      table.appId,
+      table.occurredAt,
+    ),
+  ],
+);
+
+export const projectTestExecutions = sqliteTable(
+  "project_test_executions",
+  {
+    id: text("id").primaryKey(),
+    appId: integer("app_id")
+      .notNull()
+      .references(() => apps.id, { onDelete: "cascade" }),
+    startedAt: integer("started_at").notNull(),
+    finishedAt: integer("finished_at").notNull(),
+    commit: text("commit"),
+    source: text("source").notNull(),
+    status: text("status").notNull(),
+    passed: integer("passed").notNull(),
+    failed: integer("failed").notNull(),
+    inconclusive: integer("inconclusive").notNull(),
+    files: integer("files").notNull(),
+  },
+  (table) => [
+    index("project_test_execution_app_time").on(table.appId, table.startedAt),
+  ],
+);
+
+export const projectQualityRuns = sqliteTable(
+  "project_quality_runs",
+  {
+    id: text("id").primaryKey(),
+    appId: integer("app_id")
+      .notNull()
+      .references(() => apps.id, { onDelete: "cascade" }),
+    kind: text("kind").notNull(),
+    commit: text("commit"),
+    createdAt: integer("created_at").notNull(),
+    report: text("report").notNull(),
+    toolVersion: text("tool_version").notNull(),
+  },
+  (table) => [
+    index("project_quality_app_time").on(table.appId, table.createdAt),
+  ],
+);

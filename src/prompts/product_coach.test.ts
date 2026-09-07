@@ -1,8 +1,13 @@
 import { expect, it } from "vitest";
-import { PRODUCT_COACH_GUIDANCE } from "@/shared/product_coach_guidance";
+import {
+  PRODUCT_COACH_GUIDANCE,
+  APPLICATION_QUALITY_GUIDANCE,
+  PROJECT_GENERATION_GUIDANCE,
+} from "@/shared/product_coach_guidance";
 import {
   constructLocalAgentPrompt,
   constructBuildAgentPrompt,
+  constructImplementerPrompt,
 } from "./local_agent_prompt";
 import { constructPlanModePrompt } from "./plan_mode_prompt";
 import { getSystemPromptForChatMode } from "./system_prompt";
@@ -21,9 +26,21 @@ it("guides discovery in all supported chat prompt paths without overriding mode 
   ];
   for (const prompt of prompts) {
     expect(prompt.split(PRODUCT_COACH_GUIDANCE)).toHaveLength(2);
+    expect(prompt.split(APPLICATION_QUALITY_GUIDANCE)).toHaveLength(2);
     expect(prompt).toContain("already approved scope");
     expect(prompt).toContain("never repeat a question already answered");
     expect(prompt).toContain("do not invent research");
   }
   expect(prompts[2]).toContain("READ-ONLY");
+});
+
+it("keeps the common product and quality floor within the previous context footprint", () => {
+  expect(PROJECT_GENERATION_GUIDANCE.length).toBeLessThanOrEqual(4015);
+});
+
+it("gives the implementer the quality floor without restarting product discovery", () => {
+  const prompt = constructImplementerPrompt(undefined);
+  expect(prompt.split(APPLICATION_QUALITY_GUIDANCE)).toHaveLength(2);
+  expect(prompt).not.toContain(PRODUCT_COACH_GUIDANCE);
+  expect(prompt).toContain("focused assignment");
 });

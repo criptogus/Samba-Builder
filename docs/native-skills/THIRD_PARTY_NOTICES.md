@@ -314,3 +314,9 @@ WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 OTHER DEALINGS IN THE SOFTWARE.
 ```
+
+## Vercel React Best Practices — referência adicional
+
+Fonte: https://github.com/vercel-labs/agent-skills/tree/063bee94c3f4df8453406c830b0a7df0f2860278/skills/react-best-practices
+
+O frontmatter da skill declara `license: MIT`, autoria `vercel`. Foram consideradas suas prioridades de desempenho para uma redação própria e reduzida; não foram redistribuídos arquivos, scripts, exemplos de código ou o catálogo de regras. Esta identificação é da skill específica, não uma atribuição de licença a todo o repositório. Vercel não endossa o Samba Builder.

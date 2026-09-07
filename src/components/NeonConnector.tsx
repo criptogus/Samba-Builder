@@ -899,7 +899,9 @@ export function NeonConnector({ appId }: { appId: number }) {
                 </>
               ) : (
                 <>
-                  <span className="mr-2">{t("integrations.neon.connectTo")}</span>
+                  <span className="mr-2">
+                    {t("integrations.neon.connectTo")}
+                  </span>
                   <NeonSvg isDarkMode={isDarkMode} />
                 </>
               )}

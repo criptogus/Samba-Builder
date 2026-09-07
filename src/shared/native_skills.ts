@@ -59,7 +59,11 @@ export const nativeSkills: readonly NativeSkill[] = [
     category: "Engenharia",
     description:
       "Encontra regressões acionáveis com arquivo, cenário e impacto.",
-    sources: ["mattpocock/skills", "msitarzewski/agency-agents"],
+    sources: [
+      "mattpocock/skills",
+      "msitarzewski/agency-agents",
+      "obra/superpowers",
+    ],
     prerequisite: null,
   },
   {
@@ -68,7 +72,7 @@ export const nativeSkills: readonly NativeSkill[] = [
     category: "Engenharia",
     description:
       "Revisa autenticação, dados, segredos e fronteiras de confiança.",
-    sources: ["affaan-m/ECC"],
+    sources: ["affaan-m/ECC", "OWASP/ASVS"],
     prerequisite: null,
   },
   {
@@ -103,11 +107,11 @@ export const nativeSkills: readonly NativeSkill[] = [
   },
   {
     slug: "samba-performance",
-    title: "Desempenho e memória",
+    title: "Desempenho web e memória",
     category: "Engenharia",
     description:
-      "Mede consumo, identifica retenção e valida otimizações com carga comparável.",
-    sources: ["affaan-m/ECC"],
+      "Analisa carregamento web, backend e memória; prioriza gargalos medidos com carga comparável.",
+    sources: ["affaan-m/ECC", "vercel-labs/agent-skills"],
     prerequisite: null,
   },
   {

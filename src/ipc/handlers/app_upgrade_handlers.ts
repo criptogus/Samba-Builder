@@ -41,8 +41,7 @@ function getAvailableUpgrades(): Omit<AppUpgrade, "isNeeded">[] {
       title: "Upgrade to hybrid mobile app with Capacitor",
       description:
         "Adds Capacitor to your app lets it run on iOS and Android in addition to the web.",
-      manualUpgradeUrl:
-        "https://sambatech.com",
+      manualUpgradeUrl: "https://sambatech.com",
     },
     {
       id: "pnpm-version-migration",

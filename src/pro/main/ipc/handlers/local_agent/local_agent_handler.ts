@@ -1,3 +1,4 @@
+import { recordProjectTokenUsage } from "@/ipc/services/project_accounting";
 import { buildPlanningQuestionnaireReflectionMessage } from "./planning_recovery";
 /**
  * Local Agent v2 Handler
@@ -1506,6 +1507,15 @@ export async function handleLocalAgentStream(
               return result;
             },
             onStepFinish: async (step) => {
+              recordProjectTokenUsage(
+                req.chatId,
+                modelClient.builtinProviderId ?? selectedModel.provider,
+                typeof modelClient.model === "string"
+                  ? modelClient.model
+                  : modelClient.model.modelId,
+                "agent",
+                step.usage,
+              );
               if (!hasInjectedPlanningQuestionnaireReflection) {
                 const questionnaireError =
                   getPlanningQuestionnaireErrorFromStep(step);

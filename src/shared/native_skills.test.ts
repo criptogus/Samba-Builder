@@ -3,6 +3,7 @@ import { nativeSkills } from "./native_skills";
 import {
   loadNativeSkill,
   MAX_NATIVE_SKILL_CHARS,
+  MAX_NATIVE_CONTEXT_CHARS,
   nativeSkillContext,
   parseNativeSkillRequest,
 } from "./load_native_skill";
@@ -96,4 +97,24 @@ it("loads the portable PM Samba skill through the real command resolver", async 
   expect(context).toContain(body);
   expect(context).toContain("Em Ask/Plan, não realize alterações");
   expect(parseNativeSkillRequest("Explique /samba-pm").slugs).toEqual([]);
+});
+
+it("rejects combined instruction bloat without silently truncating any skill", async () => {
+  const body = "x".repeat(Math.floor(MAX_NATIVE_CONTEXT_CHARS / 3));
+  await expect(
+    nativeSkillContext(
+      ["samba-design", "samba-security", "samba-performance"],
+      async () => body,
+    ),
+  ).rejects.toThrow("limite de contexto");
+});
+it("fits the actual PM, design and security workflow within the aggregate budget", async () => {
+  const context = await nativeSkillContext([
+    "samba-pm",
+    "samba-design",
+    "samba-security",
+  ]);
+  expect(context).toContain("# PM Samba");
+  expect(context).toContain("# Design de interfaces");
+  expect(context).toContain("# Segurança de aplicações");
 });

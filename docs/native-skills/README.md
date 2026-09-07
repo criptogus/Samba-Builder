@@ -14,6 +14,8 @@ As 15 opções incluem PM Samba, especificação, plano, depuração, TDD, revis
 
 ## Ativação e limites
 
+- Os prompts comuns já incluem critérios proporcionais de produto, design, segurança, desempenho e evidência; as skills detalhadas continuam opcionais.
+- Limite agregado de 12.000 caracteres nas seções selecionadas, além do limite individual de 6.000. Combinações grandes são rejeitadas com explicação, sem truncar instruções.
 - Até 3 skills distintas no início de cada mensagem; repetições são deduplicadas. Uma quarta é rejeitada com erro visível, sem truncamento silencioso.
 - Menções no meio do texto, blocos de código, citações e conteúdo de anexos/prompts salvos não ativam skills nativas.
 - Os 15 slugs do catálogo são reservados. Prompts pessoais com outros slugs continuam disponíveis; um prompt pessoal com um slug idêntico deve ser renomeado.

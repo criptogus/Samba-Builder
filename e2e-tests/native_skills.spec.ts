@@ -5,15 +5,17 @@ test("discovers bundled skills and loads instructions only on selection", async 
   po,
   electronApp,
 }) => {
-  await po.setUp();
+  await expect(
+    po.page.getByRole("heading", { name: "What do you want to build?" }),
+  ).toBeVisible();
   // file:// resources are not consistently exposed by Resource Timing.
   // Observe scripts actually parsed by Electron, including already loaded ones.
   const session = await po.page.context().newCDPSession(po.page);
   const scripts: string[] = [];
   session.on("Debugger.scriptParsed", ({ url }) => scripts.push(url));
   await session.send("Debugger.enable");
-  await po.navigation.goToLibraryTab();
-  await po.page.getByRole("link", { name: "Prompts", exact: true }).click();
+  await po.page.getByRole("link", { name: "Library", exact: true }).click();
+  await po.page.getByRole("button", { name: "Prompts", exact: true }).click();
   const library = po.page.getByRole("region", { name: "Skills nativas" });
   await expect(library).toBeVisible();
   expect(scripts.some((name) => /samba-debug.*\.js/.test(name))).toBe(false);

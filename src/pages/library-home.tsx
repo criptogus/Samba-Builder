@@ -1,3 +1,4 @@
+import { NativeSkillsLibrary } from "@/components/NativeSkillsLibrary";
 import { useState, useMemo } from "react";
 import { usePrompts } from "@/hooks/usePrompts";
 import { useCustomThemes } from "@/hooks/useCustomThemes";
@@ -154,6 +155,10 @@ export default function LibraryHomePage() {
 
           {/* Filter Tabs */}
           <LibraryFilterTabs active={activeFilter} onChange={setActiveFilter} />
+
+          {(activeFilter === "all" || activeFilter === "prompts") && (
+            <NativeSkillsLibrary />
+          )}
 
           {/* Grid */}
           {isLoading ? (
