@@ -25,6 +25,8 @@
     "samba:seed-playwright": "python3 samba/setup/seed-mcp-playwright.py",
     "samba:seed-cua": "python3 samba/setup/seed-mcp-cua.py",
     "samba:seed-cortex": "python3 samba/setup/seed-mcp-cortex.py",
+    "samba:score": "python3 samba/quality/score.py",
+    "samba:governance": "python3 samba/governance/gate.py",
     "start:onboarding": "node scripts/start-onboarding.mjs",
     "start:out-of-quota": "cross-env NODE_ENV=development DYAD_SIMULATE_FREE_AGENT_QUOTA_EXCEEDED=true npm start",
     "copy-data-to-dev": "node scripts/copy-data-to-dev.mjs",
