@@ -31,3 +31,11 @@ Versões fixadas em `quality-tools/package-lock.json`: Secretlint (MIT), axe-cor
 ## Distribuição
 
 `.github/workflows/samba-quality-release.yml` verifica tipos, testes de engenharia e Electron e gera pacotes macOS/Windows. Execuções CI e assinatura precisam ser confirmadas antes de distribuir como release estável. Builds locais são pacotes de desenvolvimento sem notarização; não substituir por pacote E2E. O banco migra de forma aditiva com as migrações 0052–0054.
+
+## Validação da consolidação (6 de setembro de 2026)
+
+A consolidação atualizou dependências compatíveis e migrou Vite para 6.4.3+, Drizzle ORM para 0.45.2+, Vitest para 3.2.7+ e happy-dom para 20.14.0+. Um override de tar 7.5.22+ substitui a versão vulnerável transitiva do empacotador. Tipagem e os 40 testes focados de documentação, gestão, requisitos e evidências passaram após essas alterações. O build Electron para macOS também passou.
+
+A auditoria npm de produção caiu de 32 alertas (quatro críticos) para zero na consulta realizada. A árvore completa ainda apresenta 34 alertas em ferramentas de desenvolvimento, sem críticos. Essa consulta não substitui revisão de código ou testes de exploração.
+
+A primeira execução da matriz macOS/Windows no GitHub Actions foi impedida antes de iniciar qualquer etapa: a conta precisa regularizar cobrança ou elevar o limite de gastos. Não houve validação Windows nessa execução. O benchmark pago também permanece sem execução até definição do orçamento.
