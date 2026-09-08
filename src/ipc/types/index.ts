@@ -621,7 +621,11 @@ import {
  * // Event subscriptions
  * ipc.events.agent.onTodosUpdate(handler);
  */
+export { factoryClient, factoryContracts } from "./factory";
+import { factoryClient } from "./factory";
+
 export const ipc = {
+  factory: factoryClient,
   // Core domains
   settings: settingsClient,
   app: appClient,

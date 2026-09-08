@@ -1861,7 +1861,10 @@ export async function gitPush({
   force,
   forceWithLease,
 }: GitPushParams): Promise<void> {
+  const { assertFactoryReleaseForPath } =
+    await import("../services/factory/guards");
   const targetBranch = branch || "main";
+  await assertFactoryReleaseForPath(path, targetBranch);
 
   try {
     const args = ["push", "origin", `${targetBranch}:${targetBranch}`];

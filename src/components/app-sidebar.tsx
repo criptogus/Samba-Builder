@@ -6,6 +6,7 @@ import {
   Store,
   BookOpen,
   Blocks,
+  Factory,
 } from "lucide-react";
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useSidebar } from "@/components/ui/sidebar"; // import useSidebar hook
@@ -40,6 +41,7 @@ import {
 
 // Menu items.
 const items = [
+  { title: "Fábrica", to: "/factory", icon: Factory },
   {
     title: "Apps",
     to: "/",

@@ -21,6 +21,7 @@ import {
 } from "../contracts/core";
 
 // Import all contracts
+import { factoryContracts } from "../types/factory";
 import { settingsContracts } from "../types/settings";
 import { appContracts } from "../types/app";
 import { chatContracts, chatStreamContract } from "../types/chat";
@@ -110,6 +111,7 @@ const TEST_INVOKE_CHANNELS = [
  */
 export const VALID_INVOKE_CHANNELS = [
   // Core domains
+  ...getInvokeChannels(factoryContracts),
   ...getInvokeChannels(settingsContracts),
   ...getInvokeChannels(appContracts),
   ...getInvokeChannels(chatContracts),

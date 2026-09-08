@@ -1,34 +1,48 @@
-# Dyad
+# Samba Builder
 
-Dyad is a local, open-source AI app builder. It's fast, private, and fully under your control — like Lovable, v0, or Bolt, but running right on your machine.
+Ambiente local da Samba para construir aplicações de clientes com IA. Evolui o [Dyad](https://github.com/dyad-sh/dyad) com uma camada de fábrica: briefing, plano aprovado, marca, execução, segurança e handoff.
 
-[![Image](https://github.com/user-attachments/assets/f6c83dfc-6ffd-4d32-93dd-4b9c46d17790)](https://dyad.sh/)
+## Fábrica
 
-More info at: [https://dyad.sh/](https://dyad.sh/)
+Abra **Fábrica** na barra lateral para organizar aplicativos por cliente e conduzir a entrega:
 
-## 🚀 Features
+- Briefing e conhecimento separados por projeto.
+- Planos Must/Should/Could com critérios de aceite e aprovação explícita.
+- Tokens de marca confirmados antes do Build.
+- Oito skills P0 roteados por modo: Discover, Plan, Design, Build, Fix, Secure, Review e Ask.
+- Scope Guard com registro e classificação de novos pedidos.
+- Verificação local de segurança, typecheck, smoke e dependências, com gate antes das entradas de publicação integradas.
+- Exportação de documentos e evidências para o repositório do aplicativo.
 
-- ⚡️ **Local**: Fast, private and no lock-in.
-- 🛠 **Bring your own keys**: Use your own AI API keys — no vendor lock-in.
-- 🖥️ **Cross-platform**: Easy to run on Mac or Windows.
+A fundação local está implementada. Recursos como RBAC de equipe, deep scan, canvas de telas, preview autenticado para cliente e governança cloud continuam no roadmap. Consulte o [guia de uso e matriz de implementação](docs/samba-factory/README.md) e o [PRD fornecido](docs/samba-factory/PRD-original.md).
 
-## 📦 Download
+## Executar
 
-No sign-up required. Just download and go.
+Requer Node.js 24 e as ferramentas de compilação nativa da sua plataforma.
 
-### [👉 Download for your platform](https://www.dyad.sh/#download)
+```sh
+npm ci
+npm run init-precommit
+npm start
+```
 
-## 🤝 Community
+Os provedores de IA, o editor, o preview, Git e integrações usam os recursos existentes do fork. Configure suas chaves no Builder. O código das aplicações continua em repositórios normais, editáveis fora da ferramenta.
 
-Join our growing community of AI app builders on **Reddit**: [r/dyadbuilders](https://www.reddit.com/r/dyadbuilders/) - share your projects and get help from the community!
+## Validação
 
-## 🛠️ Contributing
+```sh
+npm run ts
+npm run lint
+npm test -- src/__tests__/factory src/components/factory/FactoryPage.test.tsx
+npm run build
+PLAYWRIGHT_HTML_OPEN=never npm run e2e -- samba_factory.spec.ts
+```
 
-**Dyad** is open-source (see License info below).
+`npm run build` prepara o pacote de testes E2E. Não é um instalador de produção assinado.
 
-If you're interested in contributing to dyad, please read our [contributing](./CONTRIBUTING.md) doc.
+## Origem e licença
 
-## License
+O Samba Builder é um fork do Dyad. Consulte [NOTICE](NOTICE) e [CONTRIBUTING.md](CONTRIBUTING.md) para atribuições e convenções da base.
 
-- All the code in this repo outside of `src/pro` is open-source and licensed under Apache 2.0 - see [LICENSE](./LICENSE).
-- All the code in this repo within `src/pro` is fair-source and licensed under [Functional Source License 1.1 Apache 2.0](https://fsl.software/) - see [LICENSE](./src/pro/LICENSE).
+- Código fora de `src/pro`, incluindo `packages/samba-factory`, é licenciado sob [Apache-2.0](LICENSE).
+- Código dentro de `src/pro` mantém a [Functional Source License](src/pro/LICENSE).

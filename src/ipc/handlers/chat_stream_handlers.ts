@@ -206,6 +206,11 @@ function createEmptyTextStream(): AsyncIterableStream<TextStreamPart<ToolSet>> {
   }) as AsyncIterableStream<TextStreamPart<ToolSet>>;
 }
 
+import {
+  assertFactoryChat,
+  getFactoryPrompt,
+} from "../services/factory/guards";
+
 const logger = log.scope("chat_stream_handlers");
 
 type ImplementerCapabilityApp = Pick<
@@ -1152,6 +1157,16 @@ export function registerChatStreamHandlers() {
           settings: { ...baseSettings, selectedModel },
         });
       assertChatModeCompatibleWithModel(storedSettings, selectedChatMode);
+      const initialFactoryReferences = await resolveStickyReferencedApps({
+        prompt: req.prompt,
+        persistedAppIds: readStoredReferencedAppIds(chat.referencedAppIds),
+        excludeCurrentAppId: chat.app.id,
+      });
+      await assertFactoryChat(
+        chat.app.id,
+        selectedChatMode,
+        initialFactoryReferences.appIds,
+      );
 
       // Reserve quota before redo or attachment persistence. The reservation
       // is converted to a durable message mark only after turn acceptance.
@@ -1557,6 +1572,16 @@ ${componentSnippet}
           ({ settings: storedSettings, mode: selectedChatMode } =
             latestResolution);
           assertChatModeCompatibleWithModel(storedSettings, selectedChatMode);
+          const factoryReferences = await resolveStickyReferencedApps({
+            prompt: req.prompt,
+            persistedAppIds: readStoredReferencedAppIds(chat.referencedAppIds),
+            excludeCurrentAppId: chat.app.id,
+          });
+          await assertFactoryChat(
+            chat.app.id,
+            selectedChatMode,
+            factoryReferences.appIds,
+          );
           isBasicAgentModeRequest = isBasicAgentMode({
             ...storedSettings,
             selectedChatMode,
@@ -2617,6 +2642,9 @@ This conversation includes one or more image attachments. When the user uploads 
           return fullResponse;
         };
 
+        const sambaFactoryPrompt = await getFactoryPrompt(updatedChat.app.id);
+        systemPrompt += sambaFactoryPrompt;
+
         // Handle ask mode: use local-agent in read-only mode
         // This gives users access to code reading tools while in ask mode
         // Ask mode does not consume free agent quota
@@ -2654,7 +2682,7 @@ This conversation includes one or more image attachments. When the user uploads 
               //
               // This is OK because those intents should always happen in a new chat
               // and new chats will default to non-ask modes.
-              systemPrompt: readOnlySystemPrompt + selectedNativeContext,
+              systemPrompt: readOnlySystemPrompt + sambaFactoryPrompt + selectedNativeContext,
               dyadRequestId: dyadRequestId ?? "[no-request-id]",
               readOnly: true,
               messageOverride: isSummarizeIntent ? chatMessages : undefined,
@@ -2702,7 +2730,7 @@ This conversation includes one or more image attachments. When the user uploads 
             abortController,
             {
               placeholderMessageId: placeholderAssistantMessage.id,
-              systemPrompt: planModeSystemPrompt + selectedNativeContext,
+              systemPrompt: planModeSystemPrompt + sambaFactoryPrompt + selectedNativeContext,
               dyadRequestId: dyadRequestId ?? "[no-request-id]",
               planModeOnly: true,
               messageOverride: isSummarizeIntent ? chatMessages : undefined,
