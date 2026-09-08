@@ -50,6 +50,10 @@ export const RebuildActionSchema = z.object({ id: z.literal("rebuild") });
 export const RestartActionSchema = z.object({ id: z.literal("restart") });
 export const RefreshActionSchema = z.object({ id: z.literal("refresh") });
 export const KeepGoingActionSchema = z.object({ id: z.literal("keep-going") });
+export const NextStepActionSchema = z.object({
+  id: z.literal("next-step"),
+  prompt: z.string(),
+});
 
 export const SuggestedActionSchema = z.union([
   RestartAppActionSchema,
@@ -60,6 +64,7 @@ export const SuggestedActionSchema = z.union([
   RestartActionSchema,
   RefreshActionSchema,
   KeepGoingActionSchema,
+  NextStepActionSchema,
 ]);
 
 export const ActionProposalSchema = z.object({

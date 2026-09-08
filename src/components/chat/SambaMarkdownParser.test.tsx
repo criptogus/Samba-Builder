@@ -139,6 +139,23 @@ describe("SambaMarkdownParser samba-command", () => {
     ).toBeTruthy();
     expect(screen.queryByText(/Unsupported:/)).toBeNull();
   });
+
+  it("renders a next-step suggestion as a clickable button with its prompt", () => {
+    render(
+      <SambaMarkdownParser
+        content={
+          '<samba-command type="next-step" prompt="Adicione autenticação de usuários"></samba-command>'
+        }
+      />,
+    );
+
+    expect(
+      screen.getByRole("button", {
+        name: /Adicione autenticação de usuários/i,
+      }),
+    ).toBeTruthy();
+    expect(screen.queryByText(/Unsupported:/)).toBeNull();
+  });
 });
 
 describe("SambaMarkdownParser samba-explore-chat-history", () => {

@@ -23,6 +23,7 @@ import {
   Lock,
   Mic,
   MicOff,
+  Sparkles,
 } from "lucide-react";
 import type React from "react";
 import { useCallback, useEffect, useRef, useState, useMemo } from "react";
@@ -50,6 +51,7 @@ import {
   SuggestedAction,
   FileChange,
   SqlQuery,
+  NextStepAction,
 } from "@/lib/schemas";
 
 import { isPreviewOpenAtom } from "@/atoms/viewAtoms";
@@ -1377,6 +1379,29 @@ function KeepGoingButton() {
   );
 }
 
+// Sugestão de próximo passo emitida pelo agente ao finalizar uma tarefa —
+// texto clicável que envia o prompt sugerido e continua a evolução.
+export function NextStepButton({ action }: { action: NextStepAction }) {
+  const { streamMessage } = useStreamChat();
+  const chatId = useAtomValue(selectedChatIdAtom);
+  const onClick = () => {
+    if (!chatId) {
+      console.error("No chat id found");
+      return;
+    }
+    streamMessage({
+      prompt: action.prompt,
+      chatId,
+    });
+  };
+  return (
+    <SuggestionButton onClick={onClick} tooltipText={action.prompt}>
+      <Sparkles className="w-3.5 h-3.5 mr-1.5 text-primary" />
+      {action.prompt}
+    </SuggestionButton>
+  );
+}
+
 function AddTypeScriptButton() {
   const { t } = useTranslation("chat");
   const { streamMessage } = useStreamChat();
@@ -1415,6 +1440,8 @@ export function mapActionToButton(action: SuggestedAction) {
       return <RefreshButton />;
     case "keep-going":
       return <KeepGoingButton />;
+    case "next-step":
+      return <NextStepButton action={action} />;
     case "add-typescript":
       return <AddTypeScriptButton />;
     default:

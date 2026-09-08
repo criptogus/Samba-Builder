@@ -793,6 +793,7 @@ export type SuggestedAction =
   | RestartAction
   | RefreshAction
   | KeepGoingAction
+  | NextStepAction
   | AddTypeScriptAction;
 
 export interface RestartAppAction {
@@ -830,6 +831,11 @@ export interface AddTypeScriptAction {
 
 export interface KeepGoingAction {
   id: "keep-going";
+}
+
+export interface NextStepAction {
+  id: "next-step";
+  prompt: string;
 }
 
 export interface ActionProposal {

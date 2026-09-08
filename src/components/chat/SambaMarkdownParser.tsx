@@ -1041,6 +1041,9 @@ function renderCustomTag(
       if (attributes.type) {
         const action = {
           id: attributes.type,
+          ...(attributes.type === "next-step" && attributes.prompt
+            ? { prompt: attributes.prompt }
+            : {}),
         } as SuggestedAction;
         return <>{mapActionToButton(action)}</>;
       }
