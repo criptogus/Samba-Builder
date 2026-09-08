@@ -1,3 +1,5 @@
+import { awsContracts } from "../types/aws";
+import { vercelContracts } from "../types/vercel";
 import { describe, expect, it } from "vitest";
 import { userInputContracts, userInputEvents } from "../types/user_input";
 import { supabaseEvents } from "../types/supabase";
@@ -66,4 +68,12 @@ describe("coolify-setup preload channels", () => {
       expect(VALID_RECEIVE_CHANNELS).toContain(event.channel);
     }
   });
+});
+
+it("allows native AWS and Vercel publishing contracts", () => {
+  for (const contract of [
+    ...Object.values(awsContracts),
+    ...Object.values(vercelContracts),
+  ])
+    expect(VALID_INVOKE_CHANNELS).toContain(contract.channel);
 });

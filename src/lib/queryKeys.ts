@@ -312,6 +312,10 @@ export const queryKeys = {
   // ─────────────────────────────────────────────────────────────────────────────
   // Vercel Deployments
   // ─────────────────────────────────────────────────────────────────────────────
+  aws: {
+    deploy: (appId: number) => ["aws", "deploy", appId] as const,
+    status: (appId: number) => ["aws", "status", appId] as const,
+  },
   vercel: {
     all: ["vercel"] as const,
     deployments: ({ appId }: { appId: number }) =>

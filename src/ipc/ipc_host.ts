@@ -1,3 +1,4 @@
+import { registerAwsHandlers } from "./handlers/aws_handlers";
 import { registerAppHandlers } from "./handlers/app_handlers";
 import { registerChatHandlers } from "./handlers/chat_handlers";
 import { registerChatStreamHandlers } from "./handlers/chat_stream_handlers";
@@ -73,6 +74,7 @@ export function registerIpcHandlers() {
   registerConnectionFlowHandlers();
   registerGithubHandlers();
   registerGithubBranchHandlers();
+  registerAwsHandlers();
   registerVercelHandlers();
   registerNodeHandlers();
   registerProblemsHandlers();

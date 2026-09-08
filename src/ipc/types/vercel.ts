@@ -149,6 +149,14 @@ export type CreateVercelProjectResult = z.infer<
 // =============================================================================
 
 export const vercelContracts = {
+  deploy: defineContract({
+    channel: "vercel:deploy",
+    input: z.object({
+      appId: z.number().int(),
+      target: z.enum(["preview", "production"]),
+    }),
+    output: z.object({ id: z.string(), url: z.string(), state: z.string() }),
+  }),
   saveToken: defineContract({
     channel: "vercel:save-token",
     input: SaveVercelAccessTokenParamsSchema,
