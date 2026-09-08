@@ -115,6 +115,7 @@ describe("local-agent default request (integration)", () => {
       "rename_file",
       "restart_app",
       "run_build",
+      "run_repo_command",
       "run_type_checks",
       "search_replace",
       "set_chat_summary",

@@ -33,6 +33,7 @@ import { searchReplaceTool } from "./tools/search_replace";
 // removidas — o engine exige sessão/cookie inexistente no produto.
 import { updateTodosTool } from "./tools/update_todos";
 import { runTypeChecksTool } from "./tools/run_type_checks";
+import { runRepoCommandTool } from "./tools/run_repo_command";
 import { runTestsTool } from "./tools/run_tests";
 import { runPreCommitTool } from "./tools/run_pre_commit";
 import { runBuildTool } from "./tools/run_build";
@@ -171,6 +172,7 @@ export const TOOL_DEFINITIONS: readonly ToolDefinition[] = [
   readLogsTool,
   updateTodosTool,
   runTypeChecksTool,
+  runRepoCommandTool,
   runPreCommitTool,
   runBuildTool,
   runTestsTool,
