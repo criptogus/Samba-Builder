@@ -58,6 +58,14 @@ export function DeliveryWorkspace() {
         </div>
         <a
           href="#project-intake"
+          onClick={(e) => {
+            // O hash muda mas o app não rola sozinho até a âncora (o layout
+            // tem scroll próprio) — scroll explícito para o fluxo abrir.
+            e.preventDefault();
+            document
+              .getElementById("project-intake")
+              ?.scrollIntoView({ behavior: "smooth", block: "start" });
+          }}
           className="inline-flex h-9 items-center gap-2 rounded-lg bg-primary px-4 text-sm font-medium text-primary-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
         >
           <Plus className="size-4" />

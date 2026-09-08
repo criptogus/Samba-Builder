@@ -90,3 +90,19 @@ describe("DeliveryWorkspace", () => {
     expect(screen.getAllByRole("listitem")).toHaveLength(18);
   });
 });
+
+// Samba Builder: o botão "Novo projeto" é uma âncora (#project-intake) mas o
+// layout tem scroll próprio — o clique deve rolar explicitamente até a seção.
+describe("DeliveryWorkspace novo projeto", () => {
+  it("rola até o intake ao clicar em novo projeto", () => {
+    const scrollIntoView = vi.fn();
+    const anchor = document.createElement("div");
+    anchor.id = "project-intake";
+    document.body.appendChild(anchor);
+    Element.prototype.scrollIntoView = scrollIntoView;
+    render(<DeliveryWorkspace />);
+    fireEvent.click(screen.getByText("delivery.newProject"));
+    expect(scrollIntoView).toHaveBeenCalledTimes(1);
+    anchor.remove();
+  });
+});
