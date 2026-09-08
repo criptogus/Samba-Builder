@@ -7,6 +7,7 @@ import {
   resolveEffectiveSettings,
   readEffectiveSettings,
   getSettingsFilePath,
+  DEFAULT_SETTINGS,
   recordRendererCrash,
   readRendererCrashRecord,
   writeSettings,
@@ -55,6 +56,7 @@ vi.mock("electron", () => ({
   safeStorage: {
     isEncryptionAvailable: vi.fn(),
     decryptString: vi.fn(),
+    encryptString: vi.fn(),
   },
 }));
 vi.mock("@/paths/paths", () => ({
@@ -801,36 +803,62 @@ describe("writeSettings", () => {
     vi.restoreAllMocks();
   });
 
-  it("falls back to defaults and shows a restore-docs toast when the existing settings file cannot be read", () => {
+  it("aborts (never overwrites with defaults) when the existing settings file cannot be read", () => {
     notifyRendererErrorToastListenerReady(mockWebContents);
     mockFs.existsSync.mockReturnValue(true);
     mockFs.readFileSync.mockReturnValue("invalid json");
 
-    writeSettings({ enableAutoUpdate: false });
+    expect(() => writeSettings({ enableAutoUpdate: false })).toThrow(
+      "left untouched",
+    );
 
     expect(mockSend).toHaveBeenCalledWith(
       "toast:error",
       expect.objectContaining({
         action: {
           label: "Read restore docs",
-          url: "https://www.samba.sh/docs/guides/migrate-restore#restoring-settings-from-backup",
+          url: "https://sambatech.com",
         },
         message: expect.not.stringContaining("https://"),
       }),
     );
-    expect(mockFs.writeFileSync).toHaveBeenCalledWith(
-      expect.stringMatching(
-        /^\/mock\/user\/data\/user-settings\.json\.tmp-\d+-\d+$/,
-      ),
-      expect.stringContaining('"enableAutoUpdate": false'),
+    // Nothing may be written over the unreadable file.
+    expect(mockFs.writeFileSync).not.toHaveBeenCalled();
+    expect(mockFs.renameSync).not.toHaveBeenCalled();
+  });
+
+  it("preserves providers a partial write does not touch (API keys survive)", () => {
+    mockFs.existsSync.mockReturnValue(true);
+    const stored = JSON.stringify({
+      ...DEFAULT_SETTINGS,
+      providerSettings: {
+        "deepseek-samba": {
+          apiBaseUrl: "https://api.deepseek.com",
+          apiKey: {
+            value: "encrypted-sk",
+            encryptionType: "electron-safe-storage",
+          },
+        },
+      },
+    });
+    mockFs.readFileSync.mockReturnValue(stored);
+    mockSafeStorage.decryptString.mockReturnValue("sk-plaintext");
+    mockSafeStorage.encryptString.mockReturnValue(
+      Buffer.from("encrypted-again"),
     );
-    expect(mockFs.copyFileSync).toHaveBeenCalledWith(
-      mockSettingsPath,
-      expect.stringMatching(
-        /^\/mock\/user\/data\/user-settings\.json\.recovery-\d+\.bak$/,
-      ),
+
+    writeSettings({
+      providerSettings: { "opencode-local": { apiBaseUrl: "http://x" } },
+    });
+
+    const writtenCall = mockFs.writeFileSync.mock.calls.find((call) =>
+      String(call[0]).includes(".tmp-"),
     );
-    expect(mockFs.renameSync).toHaveBeenCalled();
+    expect(writtenCall).toBeDefined();
+    const written = String(writtenCall![1]);
+    expect(written).toContain("deepseek-samba");
+    expect(written).toContain("opencode-local");
+    expect(written).not.toContain("sk-plaintext");
   });
 
   it("writes through a temporary file and backs up the previous settings file", () => {
@@ -1347,10 +1375,14 @@ describe("preserving undecryptable secrets", () => {
       providerSettings: { openai: { apiKey: lockedSecret("openai") } },
     });
 
-    // The caller rebuilds providerSettings dropping the openai provider entirely.
+    // The caller rebuilds providerSettings dropping the openai provider.
+    // Removal is explicit (provider: undefined) — an absent provider is
+    // preserved by the write merge, so partial writes never drop keys.
     writeSettings({
       providerSettings: {
         anthropic: { apiKey: { value: "sk-ant", encryptionType: "plaintext" } },
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        openai: undefined as any,
       },
     });
 

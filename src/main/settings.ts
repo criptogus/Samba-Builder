@@ -388,7 +388,27 @@ export function writeSettings(settings: Partial<UserSettings>): void {
   try {
     const filePath = getSettingsFilePath();
     const settingsForWrite = readSettingsForWrite(filePath);
+    // Never overwrite an unreadable-but-existing settings file with defaults:
+    // that would silently destroy every stored secret. Abort and keep the file
+    // (and its .bak) intact so the user can restore it.
+    if (settingsForWrite.wasUnreadable) {
+      throw new SambaError(
+        "Samba Builder could not read your existing settings file, so nothing was saved. Your settings file was left untouched.",
+        SambaErrorKind.Internal,
+      );
+    }
     const newSettings = { ...settingsForWrite.settings, ...settings };
+    // Deep-merge provider settings: the shallow spread above would replace the
+    // whole map, silently dropping every provider the caller did not touch —
+    // including their stored API keys. Merging per provider preserves keys the
+    // caller never meant to change; a provider present in `settings` still
+    // wins entirely (so explicit key updates/removals keep working).
+    if (settings.providerSettings) {
+      newSettings.providerSettings = {
+        ...settingsForWrite.settings.providerSettings,
+        ...settings.providerSettings,
+      };
+    }
     // Decide which still-locked ciphertext secrets must survive this write, and
     // strip untouched ones out so the encryption pass below can't corrupt them.
     const preservedToReinject = reconcilePreservedSecrets(
@@ -464,13 +484,17 @@ export function writeSettings(settings: Partial<UserSettings>): void {
       }
     }
     for (const provider in newSettings.providerSettings) {
-      if (newSettings.providerSettings[provider].apiKey) {
-        newSettings.providerSettings[provider].apiKey = encrypt(
-          newSettings.providerSettings[provider].apiKey.value,
-        );
+      // Explicit removals arrive as `undefined` — skip them so they serialize
+      // away instead of crashing the encryption pass.
+      const providerSetting = newSettings.providerSettings[provider];
+      if (!providerSetting) {
+        continue;
+      }
+      if (providerSetting.apiKey) {
+        providerSetting.apiKey = encrypt(providerSetting.apiKey.value);
       }
       // Encrypt Vertex service account key if present
-      const v = newSettings.providerSettings[provider] as VertexProviderSetting;
+      const v = providerSetting as VertexProviderSetting;
       if (provider === "vertex" && v?.serviceAccountKey) {
         v.serviceAccountKey = encrypt(v.serviceAccountKey.value);
       }
@@ -482,6 +506,12 @@ export function writeSettings(settings: Partial<UserSettings>): void {
         value: secret.value,
         encryptionType: secret.encryptionType,
       });
+    }
+    // Drop explicit removals (undefined) so the stored schema never sees them.
+    for (const provider of Object.keys(newSettings.providerSettings)) {
+      if (newSettings.providerSettings[provider] === undefined) {
+        delete newSettings.providerSettings[provider];
+      }
     }
     // Use StoredUserSettingsSchema for writing to maintain backwards compatibility
     const validatedSettings = StoredUserSettingsSchema.parse(newSettings);

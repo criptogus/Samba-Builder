@@ -20,7 +20,7 @@ import {
   language_model_providers as languageModelProvidersSchema,
   language_models as languageModelsSchema,
 } from "@/db/schema";
-import { and, eq } from "drizzle-orm";
+import { and, eq, or } from "drizzle-orm";
 import { IpcMainInvokeEvent } from "electron";
 import { SambaError, SambaErrorKind } from "@/errors/samba_error";
 
@@ -269,11 +269,19 @@ export function registerLanguageModelHandlers() {
         );
       }
 
-      // Check if the provider being edited exists
+      // Check if the provider being edited exists. Legacy providers (created
+      // before the "custom::" prefix existed) are stored without the prefix;
+      // newer ones carry it. Match either form so editing never fails with a
+      // spurious "not found".
       const existingProvider = db
         .select()
         .from(languageModelProvidersSchema)
-        .where(eq(languageModelProvidersSchema.id, CUSTOM_PROVIDER_PREFIX + id))
+        .where(
+          or(
+            eq(languageModelProvidersSchema.id, id),
+            eq(languageModelProvidersSchema.id, CUSTOM_PROVIDER_PREFIX + id),
+          ),
+        )
         .get();
 
       if (!existingProvider) {
@@ -285,18 +293,17 @@ export function registerLanguageModelHandlers() {
 
       // Use transaction to ensure atomicity when updating provider and potentially its models
       const result = db.transaction((tx) => {
-        // Update the provider
+        // Update the provider, preserving the stored id (legacy providers
+        // have no "custom::" prefix; re-prefixing would orphan them).
         const updateResult = tx
           .update(languageModelProvidersSchema)
           .set({
-            id: CUSTOM_PROVIDER_PREFIX + id,
+            id: existingProvider.id,
             name,
             api_base_url: apiBaseUrl,
             env_var_name: envVarName || null,
           })
-          .where(
-            eq(languageModelProvidersSchema.id, CUSTOM_PROVIDER_PREFIX + id),
-          )
+          .where(eq(languageModelProvidersSchema.id, existingProvider.id))
           .run();
 
         if (updateResult.changes === 0) {
