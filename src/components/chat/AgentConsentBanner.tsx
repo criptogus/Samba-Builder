@@ -197,28 +197,31 @@ export function AgentConsentBanner({
           <Button
             onClick={() => onDecision("accept-always")}
             size="sm"
-            variant="outline"
-            className="h-7 px-3 text-xs"
+            variant="default"
+            className="h-8 px-3.5 text-xs font-semibold shadow-sm"
+            title="Permitir esta tool sempre que ela for usada (não perguntar de novo)"
           >
-            <ShieldCheck className="w-3.5 h-3.5 mr-1" />
+            <ShieldCheck className="w-4 h-4 mr-1.5" />
             Always allow
           </Button>
           <Button
             onClick={() => onDecision("accept-once")}
             size="sm"
-            variant="outline"
-            className="h-7 px-3 text-xs"
+            variant="secondary"
+            className="h-8 px-3.5 text-xs font-semibold"
+            title="Permitir esta tool apenas agora"
           >
-            <Check className="w-3.5 h-3.5 mr-1" />
+            <Check className="w-4 h-4 mr-1.5" />
             Allow once
           </Button>
           <Button
             onClick={() => onDecision("decline")}
             size="sm"
             variant="outline"
-            className="h-7 px-3 text-xs"
+            className="h-8 px-3.5 text-xs font-semibold border-destructive/50 text-destructive hover:bg-destructive/10 hover:text-destructive dark:border-destructive/60 dark:hover:bg-destructive/15"
+            title="Bloquear esta tool desta vez"
           >
-            <Ban className="w-3.5 h-3.5 mr-1" />
+            <Ban className="w-4 h-4 mr-1.5" />
             Decline
           </Button>
         </div>
