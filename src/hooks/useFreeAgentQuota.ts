@@ -2,7 +2,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { ipc, type FreeAgentQuotaStatus } from "@/ipc/types";
 import { queryKeys } from "@/lib/queryKeys";
 import { useSettings } from "./useSettings";
-import { isDyadProEnabled } from "@/lib/schemas";
+import { isSambaProEnabled } from "@/lib/schemas";
 import { FREE_AGENT_QUOTA_LIMIT } from "@/lib/free_agent_quota_limit";
 
 const THIRTY_MINUTES_IN_MS = 30 * 60 * 1000;
@@ -20,7 +20,7 @@ const TEST_STALE_TIME_MS = 500;
 export function useFreeAgentQuota() {
   const { settings } = useSettings();
   const queryClient = useQueryClient();
-  const isPro = settings ? isDyadProEnabled(settings) : false;
+  const isPro = settings ? isSambaProEnabled(settings) : false;
   const isTestMode = settings?.isTestMode ?? false;
 
   const {

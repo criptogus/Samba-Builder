@@ -16,7 +16,7 @@ export interface PreviewIframeCommandAdapter extends PreviewIframeCommandRunner 
     appId: number,
     message:
       | Exclude<PreviewIframePostMessage, { type: "restore-overlays" }>
-      | { type: "dyad-take-screenshot"; requestId: string },
+      | { type: "samba-take-screenshot"; requestId: string },
   ): void;
 }
 
@@ -29,7 +29,7 @@ export function createPreviewIframeCommandAdapter(
     appId: number,
     message:
       | Exclude<PreviewIframePostMessage, { type: "restore-overlays" }>
-      | { type: "dyad-take-screenshot"; requestId: string },
+      | { type: "samba-take-screenshot"; requestId: string },
   ) => targets.get(appId)?.()?.postMessage(message, "*");
 
   return {
@@ -54,9 +54,9 @@ export function createPreviewIframeCommandAdapter(
         .map((component) => component.id);
       target.postMessage(
         componentIds.length === 0
-          ? { type: "clear-dyad-component-overlays" }
+          ? { type: "clear-samba-component-overlays" }
           : {
-              type: "restore-dyad-component-overlays",
+              type: "restore-samba-component-overlays",
               componentIds,
             },
         "*",
@@ -71,12 +71,12 @@ export function createPreviewIframeCommandAdapter(
 }
 
 export type PreviewIframeMachineMessageType =
-  | "dyad-component-selector-initialized"
-  | "dyad-preview-reload-shortcut"
-  | "dyad-screenshot-response"
+  | "samba-component-selector-initialized"
+  | "samba-preview-reload-shortcut"
+  | "samba-screenshot-response"
   | "pushState"
   | "replaceState"
-  | "dyad-document-loaded";
+  | "samba-document-loaded";
 
 export const PREVIEW_IFRAME_MESSAGE_ROUTES: Readonly<
   Record<
@@ -84,19 +84,19 @@ export const PREVIEW_IFRAME_MESSAGE_ROUTES: Readonly<
     "machine" | "shared-and-component" | "component"
   >
 > = {
-  "dyad-component-selector-initialized": "shared-and-component",
+  "samba-component-selector-initialized": "shared-and-component",
   // The component binding owns the visual-editing cleanup that must accompany
   // every user-requested reload.
-  "dyad-preview-reload-shortcut": "component",
+  "samba-preview-reload-shortcut": "component",
   // The screenshot machine and annotator share this response. Correlation by
   // requestId lets each owner ignore messages belonging to the other.
-  "dyad-screenshot-response": "shared-and-component",
+  "samba-screenshot-response": "shared-and-component",
   pushState: "machine",
   replaceState: "machine",
   // The shim announces every document it loads. Only the machine cares: it is
   // how a navigation the app made on its own — a link, a redirect — becomes
   // visible at all, since neither passes through the history overrides.
-  "dyad-document-loaded": "machine",
+  "samba-document-loaded": "machine",
 };
 
 export type PreviewSharedMachineEvent =
@@ -142,10 +142,10 @@ export function routePreviewIframeMessage(input: {
       ? PREVIEW_IFRAME_MESSAGE_ROUTES[type as PreviewIframeMachineMessageType]
       : undefined;
 
-  if (type === "dyad-component-selector-initialized") {
+  if (type === "samba-component-selector-initialized") {
     send({ type: "SELECTOR_READY" });
     onSharedMachineEvent({ type: "SELECTOR_READY" });
-  } else if (type === "dyad-screenshot-response") {
+  } else if (type === "samba-screenshot-response") {
     const requestId = event.data?.requestId;
     if (typeof requestId === "string") {
       onSharedMachineEvent({
@@ -160,7 +160,7 @@ export function routePreviewIframeMessage(input: {
   } else if (
     type === "pushState" ||
     type === "replaceState" ||
-    type === "dyad-document-loaded"
+    type === "samba-document-loaded"
   ) {
     const rawUrl = event.data?.payload?.newUrl;
     if (typeof rawUrl === "string" && rawUrl && appUrl) {
@@ -173,7 +173,7 @@ export function routePreviewIframeMessage(input: {
         // a recording could replay.
         if (url.protocol !== "http:" && url.protocol !== "https:") return;
         send(
-          type === "dyad-document-loaded"
+          type === "samba-document-loaded"
             ? {
                 type: "NAVIGATED_IN_APP",
                 kind: "documentLoad",

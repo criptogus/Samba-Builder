@@ -76,7 +76,7 @@
     }
   },
   "dismissError": "忽略错误",
-  "askDyadToBuild": "让 Samba Builder 来构建...",
+  "askSambaToBuild": "让 Samba Builder 来构建...",
   "cancelGeneration": "取消生成",
   "stoppingGeneration": "正在停止…",
   "cancellationEndingTestRun": "正在结束测试运行。",
@@ -253,7 +253,7 @@
   "total": "总计",
   "failedCountTokens": "令牌计数失败",
   "optimizeTokens": "通过以下方式优化您的令牌",
-  "dyadProSmartContext": "Samba Builder 的智能上下文",
+  "sambaProSmartContext": "Samba Builder 的智能上下文",
   "attachFiles": "附加文件",
   "themes": "主题",
   "noTheme": "无主题",
@@ -329,9 +329,9 @@
     "versionCount": "版本 {{count}}"
   },
   "errorBox": {
-    "accessWithDyadPro": "使用 Samba Builder 访问",
+    "accessWithSambaPro": "使用 Samba Builder 访问",
     "orSwitchModel": "或切换到其他模型。",
-    "upgradeToDyadPro": "升级到 Samba Builder",
+    "upgradeToSambaPro": "升级到 Samba Builder",
     "troubleshootingGuide": "故障排除指南",
     "invalidProKey": "您似乎没有有效的 Samba Builder 密钥。",
     "today": "今天。",
@@ -342,12 +342,12 @@
   },
   "promo": {
     "tiredOfWaiting": "厌倦了等待 AI？",
-    "getDyadPro": "获取 Samba Builder",
+    "getSambaPro": "获取 Samba Builder",
     "fasterEdits": "使用 Turbo Edits 实现更快的编辑。",
     "saveOnCosts": "使用以下功能节省高达 3 倍的 AI 成本",
     "debuggingLoop": "陷入调试循环？尝试换一个模型。",
     "joinBuilders": "加入 600 多名开发者，访问",
-    "dyadSubreddit": "Samba Builder 论坛",
+    "sambaSubreddit": "Samba Builder 论坛",
     "foundBug": "发现了 Bug？点击「帮助」>「报告 Bug」",
     "reportBadResponse": "想要报告不良的 AI 回复？点击「帮助」上传聊天",
     "watch": "观看",
@@ -359,7 +359,7 @@
     "keepFocused": "想让 AI 更专注？开始新聊天。",
     "whatsNext": "想知道接下来有什么？查看我们的",
     "roadmap": "路线图",
-    "likeDyad": "喜欢 Samba Builder？在 GitHub 上给个 Star",
+    "likeSamba": "喜欢 Samba Builder？在 GitHub 上给个 Star",
     "gitHub": "GitHub"
   },
   "consent": {

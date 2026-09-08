@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { getNeonClient } from "./neon_management_client";
 import { getConnectionUri, getNeonTableSchema } from "./neon_context";
-import { DyadError, DyadErrorKind } from "@/errors/dyad_error";
+import { SambaError, SambaErrorKind } from "@/errors/samba_error";
 import {
   filterSchemaForTable,
   getSchemaFromSnapshot,
@@ -197,10 +197,10 @@ describe("Neon context", () => {
     );
   });
 
-  it("preserves existing DyadError classifications", async () => {
-    const authError = new DyadError(
+  it("preserves existing SambaError classifications", async () => {
+    const authError = new SambaError(
       "Neon authentication failed",
-      DyadErrorKind.Auth,
+      SambaErrorKind.Auth,
     );
     getNeonClientMock.mockRejectedValue(authError);
 

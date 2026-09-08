@@ -35,7 +35,7 @@ describe("preview iframe command adapter", () => {
 
     const selectorMessage = {
       source: contentWindow,
-      data: { type: "dyad-component-selector-initialized" },
+      data: { type: "samba-component-selector-initialized" },
     } as unknown as MessageEvent;
     routePreviewIframeMessage({
       event: selectorMessage,
@@ -51,18 +51,18 @@ describe("preview iframe command adapter", () => {
     });
     expect(onComponentMessage).toHaveBeenCalledWith(selectorMessage);
     expect(PREVIEW_IFRAME_MESSAGE_ROUTES).toEqual({
-      "dyad-component-selector-initialized": "shared-and-component",
-      "dyad-preview-reload-shortcut": "component",
-      "dyad-screenshot-response": "shared-and-component",
+      "samba-component-selector-initialized": "shared-and-component",
+      "samba-preview-reload-shortcut": "component",
+      "samba-screenshot-response": "shared-and-component",
       pushState: "machine",
       replaceState: "machine",
-      "dyad-document-loaded": "machine",
+      "samba-document-loaded": "machine",
     });
 
     const responseMessage = {
       source: contentWindow,
       data: {
-        type: "dyad-screenshot-response",
+        type: "samba-screenshot-response",
         requestId: "capture:1",
         success: true,
         dataUrl: "data:image/png;base64,abc",
@@ -99,7 +99,7 @@ describe("preview iframe command adapter", () => {
       event: {
         source: contentWindow,
         data: {
-          type: "dyad-document-loaded",
+          type: "samba-document-loaded",
           payload: { newUrl: "http://localhost:3000/dashboard" },
         },
       } as unknown as MessageEvent,
@@ -142,7 +142,7 @@ describe("preview iframe command adapter", () => {
         event: {
           source: contentWindow,
           data: {
-            type: "dyad-document-loaded",
+            type: "samba-document-loaded",
             payload: {
               newUrl: "http://localhost:3000/dashboard",
               historyEffect: sent,
@@ -175,7 +175,7 @@ describe("preview iframe command adapter", () => {
       event: {
         source: contentWindow,
         data: {
-          type: "dyad-document-loaded",
+          type: "samba-document-loaded",
           payload: {
             newUrl: "blob:http://localhost:3000/8f1c4a2e-0000-4000-8000-abc",
           },
@@ -199,7 +199,7 @@ describe("preview iframe command adapter", () => {
 
     const message = {
       source: contentWindow,
-      data: { type: "dyad-preview-reload-shortcut" },
+      data: { type: "samba-preview-reload-shortcut" },
     } as unknown as MessageEvent;
     routePreviewIframeMessage({
       event: message,
@@ -224,7 +224,7 @@ describe("preview iframe command adapter", () => {
     for (const type of [
       "replaceState",
       "pushState",
-      "dyad-document-loaded",
+      "samba-document-loaded",
     ] as const) {
       for (const newUrl of ["https://untrusted.example/path", "http://["]) {
         routePreviewIframeMessage({
@@ -289,7 +289,7 @@ describe("preview iframe command adapter", () => {
     expect(target.postMessage).toHaveBeenNthCalledWith(
       2,
       {
-        type: "restore-dyad-component-overlays",
+        type: "restore-samba-component-overlays",
         componentIds: ["component-1"],
       },
       "*",

@@ -5,10 +5,10 @@ import { db } from "@/db";
 import { apps, chats } from "@/db/schema";
 import type { DistributedMachineDefinition } from "@/distributed_machines/definition";
 import { REMOTE_MACHINE_PROTOCOL_VERSION } from "@/distributed_machines/remote_protocol";
-import { DyadError, DyadErrorKind } from "@/errors/dyad_error";
+import { SambaError, SambaErrorKind } from "@/errors/samba_error";
 import { createChatForApp } from "@/ipc/utils/chat_creation_utils";
 import { savePlanToDisk } from "@/ipc/handlers/planPersistence";
-import { getDyadAppPath } from "@/paths/paths";
+import { getSambaAppPath } from "@/paths/paths";
 import {
   publishChatInvalidations,
   routePlanHandoffPresentation,
@@ -55,9 +55,9 @@ function assertPlanHash(intent: PlanHandoffIntent): void {
     .update(serializePlanDocument(intent.plan))
     .digest("hex");
   if (actual !== intent.planHash || intent.planVersion !== actual) {
-    throw new DyadError(
+    throw new SambaError(
       "Plan handoff payload does not match its immutable version",
-      DyadErrorKind.Validation,
+      SambaErrorKind.Validation,
     );
   }
 }
@@ -136,10 +136,10 @@ function createCommandRunner(
         .where(eq(apps.id, intent.appId))
         .get();
       if (!app) {
-        throw new DyadError("App not found", DyadErrorKind.NotFound);
+        throw new SambaError("App not found", SambaErrorKind.NotFound);
       }
       const planSlug = await savePlanToDisk({
-        appPath: getDyadAppPath(app.path),
+        appPath: getSambaAppPath(app.path),
         chatId: intent.sourceChatId,
         title: intent.plan.title,
         summary: intent.plan.summary,
@@ -211,7 +211,7 @@ function createCommandRunner(
       });
       await runPostAdmissionStep("Plan status update", () =>
         savePlanToDisk({
-          appPath: getDyadAppPath(app.path),
+          appPath: getSambaAppPath(app.path),
           chatId: intent.sourceChatId,
           title: intent.plan.title,
           summary: intent.plan.summary,
@@ -265,9 +265,9 @@ function requireSourceChat(sourceChatId: number, appId?: number): void {
     .where(eq(chats.id, sourceChatId))
     .get();
   if (!chat || (appId !== undefined && chat.appId !== appId)) {
-    throw new DyadError(
+    throw new SambaError(
       "Plan handoff chat is not authorized",
-      DyadErrorKind.Auth,
+      SambaErrorKind.Auth,
     );
   }
 }
@@ -336,18 +336,18 @@ export const planHandoffDefinition = {
       if (event.type !== "ACCEPT") return;
       requireSourceChat(key.sourceChatId, event.intent.appId);
       if (event.intent.sourceChatId !== key.sourceChatId) {
-        throw new DyadError(
+        throw new SambaError(
           "Plan handoff does not belong to the routed chat",
-          DyadErrorKind.Auth,
+          SambaErrorKind.Auth,
         );
       }
       if (
         event.intent.originWindowSessionId &&
         event.intent.originWindowSessionId !== sender.windowSessionId
       ) {
-        throw new DyadError(
+        throw new SambaError(
           "Plan handoff origin does not match the sender",
-          DyadErrorKind.Auth,
+          SambaErrorKind.Auth,
         );
       }
       event.intent.originWindowSessionId = sender.windowSessionId;

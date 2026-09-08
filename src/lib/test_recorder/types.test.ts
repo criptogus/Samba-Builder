@@ -55,13 +55,13 @@ describe("parseRecorderAction", () => {
     // Naming the sentinel base the validator resolves against doesn't help:
     // Playwright resolves this against the real preview, not that base.
     expect(
-      parseRecorderAction({ kind: "navigate", path: "//dyad.invalid/x" }),
+      parseRecorderAction({ kind: "navigate", path: "//samba.invalid/x" }),
     ).toBeNull();
   });
 
   it("rejects a navigation hiding its authority behind a control character", () => {
     // WHATWG URL deletes every tab, LF and CR before it parses anything, so
-    // these are all the authority-relative `//dyad.invalid/x` by the time
+    // these are all the authority-relative `//samba.invalid/x` by the time
     // Playwright resolves them against the real preview — and it leaves the
     // app. Reading the raw second character would find the control character,
     // pass the structural check, and let the escape through.
@@ -69,7 +69,7 @@ describe("parseRecorderAction", () => {
       expect(
         parseRecorderAction({
           kind: "navigate",
-          path: `/${separator}/dyad.invalid/x`,
+          path: `/${separator}/samba.invalid/x`,
         }),
       ).toBeNull();
       expect(

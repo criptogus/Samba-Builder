@@ -30,7 +30,7 @@ describe("vite_config_patcher", () => {
 
   it("adds nitro import and appends nitro() last in the standard scaffold form", async () => {
     const original = `import { defineConfig } from "vite";
-import dyadComponentTagger from "@dyad-sh/react-vite-component-tagger";
+import sambaComponentTagger from "@samba-sh/react-vite-component-tagger";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
 
@@ -39,7 +39,7 @@ export default defineConfig(() => ({
     host: "::",
     port: 8080,
   },
-  plugins: [dyadComponentTagger(), react()],
+  plugins: [sambaComponentTagger(), react()],
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
@@ -61,7 +61,7 @@ export default defineConfig(() => ({
     const pluginsMatch = next.match(/plugins:\s*\[([^\]]*)\]/);
     expect(pluginsMatch).not.toBeNull();
     const pluginsText = pluginsMatch![1].replace(/\s+/g, " ").trim();
-    expect(pluginsText).toBe("dyadComponentTagger(), react(), nitro()");
+    expect(pluginsText).toBe("sambaComponentTagger(), react(), nitro()");
 
     expect(next).toContain('host: "::"');
     expect(next).toContain('"@": path.resolve(__dirname, "./src")');

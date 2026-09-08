@@ -4,7 +4,7 @@ import { appOutputInterests } from "@/window_infrastructure/main/production_high
 import type { AppRunProducerEvent } from "@/app_run/transport";
 import type { AppRunInvocationRef, RunUrl } from "@/app_run/state";
 
-const PROXY_PREFIX = "[dyad-proxy-server]started=[";
+const PROXY_PREFIX = "[samba-proxy-server]started=[";
 
 export interface AppRunProducerSink {
   send(event: AppRunProducerEvent): void;
@@ -114,7 +114,7 @@ export class MainAppRuntimeOutput implements AppRuntimeOutput {
 }
 
 function parseProxyReady(message: string): RunUrl | undefined {
-  const appUrl = message.match(/\[dyad-proxy-server\]started=\[(.*?)\]/)?.[1];
+  const appUrl = message.match(/\[samba-proxy-server\]started=\[(.*?)\]/)?.[1];
   const originalUrl = message.match(/original=\[(.*?)\]/)?.[1];
   const mode = message.match(/mode=\[(.*?)\]/)?.[1];
   if (

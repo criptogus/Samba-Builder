@@ -5,12 +5,12 @@
 // Exercises the local-agent (Agent v2) list_files tool through the real
 // chat:stream handler: the fake LLM streams tool calls from the
 // e2e-tests/fixtures/engine/local-agent/*.ts fixtures, the real tool executes
-// against the checked-out fixture app, and the resulting <dyad-list-files>
+// against the checked-out fixture app, and the resulting <samba-list-files>
 // XML (with the actual file listing) lands in the assistant message.
 //
 // The e2e asserted the rendered list via aria snapshots; the hybrid harness
-// renders the same DyadListFiles cards in the DOM (asserted below via
-// data-testid="dyad-list-files"), and the same listing is still asserted
+// renders the same SambaListFiles cards in the DOM (asserted below via
+// data-testid="samba-list-files"), and the same listing is still asserted
 // from the persisted assistant message content, as in the node version.
 //
 // Samba Builder engine/gateway calls are routed to the harness fake server via
@@ -41,8 +41,8 @@ describe("local-agent list_files (integration)", () => {
       chatMode: "local-agent",
       settings: {
         isTestMode: true,
-        enableDyadPro: true,
-        providerSettings: { auto: { apiKey: { value: "testdyadkey" } } },
+        enableSambaPro: true,
+        providerSettings: { auto: { apiKey: { value: "testsambakey" } } },
         enableCodeExplorer: false,
       },
     });
@@ -71,7 +71,7 @@ describe("local-agent list_files (integration)", () => {
     // The list_files tool card renders in the DOM — the same surface the e2e
     // asserted via aria snapshots.
     await waitFor(
-      () => expect(screen.getByTestId("dyad-list-files")).toBeTruthy(),
+      () => expect(screen.getByTestId("samba-list-files")).toBeTruthy(),
       { timeout: 20_000 },
     );
     await waitFor(
@@ -121,9 +121,9 @@ describe("local-agent list_files (integration)", () => {
     // A second list_files card renders for the recursive turn.
     await waitFor(
       () =>
-        expect(screen.getAllByTestId("dyad-list-files").length).toBeGreaterThan(
-          1,
-        ),
+        expect(
+          screen.getAllByTestId("samba-list-files").length,
+        ).toBeGreaterThan(1),
       { timeout: 20_000 },
     );
 
@@ -152,17 +152,17 @@ describe("local-agent list_files (integration)", () => {
   }, 60_000);
 
   it("lists ignored files with include_ignored", async () => {
-    // The e2e used the minimal-with-dyad fixture app (it has a git-ignored
-    // .dyad/plans/test-plan.md). Check it out as a second app in this
+    // The e2e used the minimal-with-samba fixture app (it has a git-ignored
+    // .samba/plans/test-plan.md). Check it out as a second app in this
     // harness's temp root and run the fixture in its own chat.
     const fixtureAppDir = path.join(
       process.cwd(),
       "e2e-tests",
       "fixtures",
       "import-app",
-      "minimal-with-dyad",
+      "minimal-with-samba",
     );
-    const appDir = path.join(path.dirname(harness.appDir), "app-with-dyad");
+    const appDir = path.join(path.dirname(harness.appDir), "app-with-samba");
     fs.cpSync(fixtureAppDir, appDir, { recursive: true });
     const git = (...args: string[]) =>
       execFileSync(
@@ -182,7 +182,7 @@ describe("local-agent list_files (integration)", () => {
 
     const [appRow] = await harness.db
       .insert(apps)
-      .values({ name: "minimal-with-dyad", path: appDir })
+      .values({ name: "minimal-with-samba", path: appDir })
       .returning();
     const [chatRow] = await harness.db
       .insert(chats)
@@ -207,15 +207,15 @@ describe("local-agent list_files (integration)", () => {
     );
     send();
 
-    // The list_files tool card renders in the DOM with the ignored .dyad file.
+    // The list_files tool card renders in the DOM with the ignored .samba file.
     await waitFor(
-      () => expect(screen.getByTestId("dyad-list-files")).toBeTruthy(),
+      () => expect(screen.getByTestId("samba-list-files")).toBeTruthy(),
       { timeout: 20_000 },
     );
     await waitFor(
       () =>
         expect(
-          screen.getByText(/Here are the ignored \.dyad files\./),
+          screen.getByText(/Here are the ignored \.samba files\./),
         ).toBeTruthy(),
       { timeout: 20_000 },
     );
@@ -235,10 +235,10 @@ describe("local-agent list_files (integration)", () => {
     const assistant = chatMessages[chatMessages.length - 1];
     expect(assistant.role).toBe("assistant");
     expect(assistant.content).toContain(
-      'directory=".dyad" recursive="true" include_ignored="true"',
+      'directory=".samba" recursive="true" include_ignored="true"',
     );
-    expect(assistant.content).toContain(".dyad/plans/test-plan.md");
-    expect(assistant.content).toContain("Here are the ignored .dyad files.");
+    expect(assistant.content).toContain(".samba/plans/test-plan.md");
+    expect(assistant.content).toContain("Here are the ignored .samba files.");
 
     // Every channel the UI invoked had a real handler.
     expect([...harness.bridge.missingChannels]).toEqual([]);

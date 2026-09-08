@@ -7,8 +7,8 @@ import { shellEnvSync } from "shell-env";
 import { eq } from "drizzle-orm";
 import { db } from "../../db";
 import { apps } from "../../db/schema";
-import { getDyadAppPath } from "../../paths/paths";
-import { DyadError, DyadErrorKind } from "@/errors/dyad_error";
+import { getSambaAppPath } from "../../paths/paths";
+import { SambaError, SambaErrorKind } from "@/errors/samba_error";
 import { safeSend } from "./safe_sender";
 import { terminatePtyProcess, type PtyProcessLike } from "./pty_command_runner";
 
@@ -193,7 +193,7 @@ async function defaultResolveApp(
   return {
     id: app.id,
     name: app.name,
-    cwd: getDyadAppPath(app.path),
+    cwd: getSambaAppPath(app.path),
   };
 }
 
@@ -231,14 +231,14 @@ export class PtySessionManager {
 
     const terminalApp = await this.deps.resolveApp(params.appId);
     if (!terminalApp) {
-      throw new DyadError("App not found", DyadErrorKind.NotFound);
+      throw new SambaError("App not found", SambaErrorKind.NotFound);
     }
 
     const cwdExists = await this.deps.pathExists(terminalApp.cwd);
     if (!cwdExists) {
-      throw new DyadError(
+      throw new SambaError(
         `App folder no longer exists at ${terminalApp.cwd}`,
-        DyadErrorKind.Precondition,
+        SambaErrorKind.Precondition,
       );
     }
 
@@ -330,9 +330,9 @@ export class PtySessionManager {
   write(sessionId: string, data: string, sender?: WebContents): void {
     const session = this.findAuthorizedSession(sessionId, sender);
     if (!session?.pty) {
-      throw new DyadError(
+      throw new SambaError(
         "Terminal session is not running",
-        DyadErrorKind.Precondition,
+        SambaErrorKind.Precondition,
       );
     }
     session.lastUsedAt = this.deps.now();
@@ -357,7 +357,10 @@ export class PtySessionManager {
   ): SerializedTerminalSession {
     const session = this.findAuthorizedSession(sessionId, sender);
     if (!session) {
-      throw new DyadError("Terminal session not found", DyadErrorKind.NotFound);
+      throw new SambaError(
+        "Terminal session not found",
+        SambaErrorKind.NotFound,
+      );
     }
     if (sender) {
       const subscriber = session.subscribers.get(sender.id);
@@ -437,9 +440,9 @@ export class PtySessionManager {
 
     this.removeDestroyedSubscribers(session);
     if (sender.isDestroyed() || !session.subscribers.has(sender.id)) {
-      throw new DyadError(
+      throw new SambaError(
         "Terminal session is not attached to this window",
-        DyadErrorKind.Precondition,
+        SambaErrorKind.Precondition,
       );
     }
     return session;

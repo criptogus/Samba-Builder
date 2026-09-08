@@ -2,7 +2,7 @@ import { expect } from "@playwright/test";
 import { testSkipIfWindows, Timeout } from "./helpers/test_helper";
 
 testSkipIfWindows("local-agent - searches historical chats", async ({ po }) => {
-  await po.setUpDyadPro({ localAgent: true });
+  await po.setUpSambaPro({ localAgent: true });
   // For Pro, explore_chat_history supersedes direct search_chats in the
   // toolset. Opting the explorer out via consent re-exposes search_chats —
   // this spec covers exactly that fallback path (and the legacy card).
@@ -29,7 +29,7 @@ testSkipIfWindows("local-agent - searches historical chats", async ({ po }) => {
   await po.chatActions.clickNewChat();
   await po.sendPrompt("tc=local-agent/search-chats");
 
-  const searchCard = po.page.getByTestId("dyad-search-chats");
+  const searchCard = po.page.getByTestId("samba-search-chats");
   await expect(searchCard).toBeVisible({ timeout: Timeout.MEDIUM });
   await expect(searchCard).toContainText("quartzneedle");
   await expect(searchCard).toContainText("1 chat");

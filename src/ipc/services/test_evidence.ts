@@ -3,7 +3,7 @@ import { eq } from "drizzle-orm";
 import log from "electron-log";
 import { db } from "@/db";
 import { apps, projectTestExecutions } from "@/db/schema";
-import { getDyadAppPath } from "@/paths/paths";
+import { getSambaAppPath } from "@/paths/paths";
 import { execGit } from "../utils/git_utils";
 import type { RunAppTestsResult } from "../types/tests";
 
@@ -80,7 +80,7 @@ export async function withTestEvidence(
       .from(apps)
       .where(eq(apps.id, appId))
       .get();
-    root = app ? getDyadAppPath(app.path) : null;
+    root = app ? getSambaAppPath(app.path) : null;
   } catch {
     /* Evidence failure must not prevent the test lifecycle. */
   }

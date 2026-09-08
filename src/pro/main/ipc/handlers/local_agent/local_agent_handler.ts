@@ -32,7 +32,7 @@ import { parseMcpToolKey, sanitizeMcpName } from "@/ipc/utils/mcp_tool_utils";
 import { sanitizeMcpToolResult } from "@/ipc/utils/mcp_result_sanitizer";
 
 import {
-  isDyadProEnabled,
+  isSambaProEnabled,
   isBasicAgentMode,
   type ModelSelection,
   type UserSettings,
@@ -40,7 +40,7 @@ import {
 import type { SqlConsentMetadata } from "@/shared/sqlConsentMetadata";
 import { isFreeProModel } from "@/lib/freeProModel";
 import { readSettings } from "@/main/settings";
-import { getDyadAppPath } from "@/paths/paths";
+import { getSambaAppPath } from "@/paths/paths";
 import { detectFrameworkType } from "@/ipc/utils/framework_utils";
 import { getModelClient } from "@/ipc/utils/get_model_client";
 import { safeSend } from "@/ipc/utils/safe_sender";
@@ -59,7 +59,7 @@ import {
 import {
   getProviderOptions,
   getAiHeaders,
-  DYAD_INTERNAL_REQUEST_ID_HEADER,
+  SAMBA_INTERNAL_REQUEST_ID_HEADER,
 } from "@/ipc/utils/provider_options";
 
 import {
@@ -120,7 +120,7 @@ import {
   type InjectedMessage,
 } from "./prepare_step_utils";
 import { deleteTodos, loadTodos, saveTodos } from "./todo_persistence";
-import { ensureDyadGitignored } from "@/ipc/handlers/gitignoreUtils";
+import { ensureSambaGitignored } from "@/ipc/handlers/gitignoreUtils";
 import { TOOL_DEFINITIONS } from "./tool_definitions";
 import {
   normalizeToolCallIdsForOpenAIResponses,
@@ -155,7 +155,7 @@ import {
 } from "@/ipc/handlers/compaction/compaction_handler";
 import { getPostCompactionMessages } from "@/ipc/handlers/compaction/compaction_utils";
 import { DEFAULT_MAX_TOOL_CALL_STEPS } from "@/constants/settings_constants";
-import { DyadError, DyadErrorKind } from "@/errors/dyad_error";
+import { SambaError, SambaErrorKind } from "@/errors/samba_error";
 import {
   type RetryReplayEvent,
   maybeCaptureRetryReplayEvent,
@@ -254,7 +254,7 @@ function buildPreExecutionToolErrorStatus(
     fullMessage.length > TOOL_ERROR_STATUS_MAX_CHARS
       ? `${fullMessage.slice(0, TOOL_ERROR_STATUS_MAX_CHARS)}…[truncated]`
       : fullMessage;
-  return `<dyad-status title="${escapeXmlAttr(`Tool "${toolName}" failed`)}" state="error">\n${escapeXmlContent(message)}\n</dyad-status>`;
+  return `<samba-status title="${escapeXmlAttr(`Tool "${toolName}" failed`)}" state="error">\n${escapeXmlContent(message)}\n</samba-status>`;
 }
 
 function appendGitReminderToUserMessage(
@@ -562,12 +562,12 @@ export function buildImplementerOutcomeNotices(
   const notices: string[] = [];
   if (partialImplementerNames.length > 0) {
     notices.push(
-      `<dyad-status title="Implementer step limit" state="warning">${escapeXmlContent(`Stopped after the model-step budget: ${partialImplementerNames.join(", ")}. Partial changes were preserved; the root agent remains responsible for reviewing the final diff and choosing appropriate verification.`)}</dyad-status>`,
+      `<samba-status title="Implementer step limit" state="warning">${escapeXmlContent(`Stopped after the model-step budget: ${partialImplementerNames.join(", ")}. Partial changes were preserved; the root agent remains responsible for reviewing the final diff and choosing appropriate verification.`)}</samba-status>`,
     );
   }
   if (cancelledImplementerNames.length > 0) {
     notices.push(
-      `<dyad-status title="Implementer cancelled" state="warning">${escapeXmlContent(`Cancelled before completion: ${cancelledImplementerNames.join(", ")}. Partial changes may have been preserved; the root agent remains responsible for reviewing the final diff and choosing appropriate verification.`)}</dyad-status>`,
+      `<samba-status title="Implementer cancelled" state="warning">${escapeXmlContent(`Cancelled before completion: ${cancelledImplementerNames.join(", ")}. Partial changes may have been preserved; the root agent remains responsible for reviewing the final diff and choosing appropriate verification.`)}</samba-status>`,
     );
   }
   return notices;
@@ -580,7 +580,7 @@ export async function handleLocalAgentStream(
   {
     placeholderMessageId,
     systemPrompt,
-    dyadRequestId,
+    sambaRequestId,
     readOnly = false,
     planModeOnly = false,
     messageOverride,
@@ -598,7 +598,7 @@ export async function handleLocalAgentStream(
   }: {
     placeholderMessageId: number;
     systemPrompt: string;
-    dyadRequestId: string;
+    sambaRequestId: string;
     /**
      * If true, the agent operates in read-only mode (e.g., ask mode).
      * State-modifying tools are disabled, and no commits/deploys are made.
@@ -714,7 +714,7 @@ export async function handleLocalAgentStream(
       summary && summary.trim().length > 0
         ? summary
         : "Conversation compacted.";
-    const inlineCompaction = `<dyad-compaction title="Conversation compacted" state="finished">\n${escapeXmlContent(summaryText)}\n</dyad-compaction>`;
+    const inlineCompaction = `<samba-compaction title="Conversation compacted" state="finished">\n${escapeXmlContent(summaryText)}\n</samba-compaction>`;
     const backupPathNote = backupPath
       ? `\nIf you need to retrieve earlier parts of the conversation history, you can read the backup file at: ${backupPath}\nNote: This file may be large. Read only the sections you need or use grep to search for specific content rather than reading the entire file.`
       : "";
@@ -723,29 +723,6 @@ export async function handleLocalAgentStream(
     fullResponse = `${fullResponse}${separator}${inlineCompaction}${backupPathNote}\n`;
     await updateResponseInDb(placeholderMessageId, fullResponse);
   };
-
-  // Check Pro status or Basic Agent mode
-  // Basic Agent mode allows non-Pro users with quota (quota check is done in chat_stream_handlers)
-  // Read-only mode (ask mode) is allowed for all users without Pro
-  if (
-    !buildMode &&
-    !readOnly &&
-    !planModeOnly &&
-    !isDyadProEnabled(settings) &&
-    !isBasicAgentMode(settings)
-  ) {
-    const errorMessage =
-      referencedApps.length > 0
-        ? "Referencing other apps (@app:Name) in local-agent mode requires Samba Builder. Please enable Samba Builder in Settings."
-        : "Agent v2 requires Samba Builder. Please enable Samba Builder in Settings.";
-    safeSend(event.sender, "chat:response:error", {
-      chatId: req.chatId,
-      invocationRef: req.invocationRef,
-      streamId: req.streamId,
-      error: errorMessage,
-    });
-    return false;
-  }
 
   const loadChat = async () =>
     db.query.chats.findFirst({
@@ -765,9 +742,9 @@ export async function handleLocalAgentStream(
   const initialChat = await loadChat();
 
   if (!initialChat || !initialChat.app) {
-    throw new DyadError(
+    throw new SambaError(
       `Chat not found: ${req.chatId}`,
-      DyadErrorKind.NotFound,
+      SambaErrorKind.NotFound,
     );
   }
 
@@ -783,7 +760,7 @@ export async function handleLocalAgentStream(
     hiddenMessageIdsForStreaming.add(id);
   }
 
-  const appPath = getDyadAppPath(chat.app.path);
+  const appPath = getSambaAppPath(chat.app.path);
 
   const maybePerformPendingCompaction = async (options?: {
     showOnTopOfCurrentResponse?: boolean;
@@ -806,14 +783,14 @@ export async function handleLocalAgentStream(
       event,
       req.chatId,
       appPath,
-      dyadRequestId,
+      sambaRequestId,
       (accumulatedSummary: string) => {
         // Stream compaction summary to the frontend in real-time.
         // During mid-turn compaction, keep already streamed content visible.
         // streamingPreview rides a separate overlay channel — do NOT mix it
         // into message.content here; the renderer continues to show its
         // preview overlay alongside this compaction-progress block.
-        const compactionPreview = `<dyad-compaction title="Compacting conversation">\n${escapeXmlContent(accumulatedSummary)}\n</dyad-compaction>`;
+        const compactionPreview = `<samba-compaction title="Compacting conversation">\n${escapeXmlContent(accumulatedSummary)}\n</samba-compaction>`;
         const previewContent = options?.showOnTopOfCurrentResponse
           ? `${fullResponse}\n${compactionPreview}`
           : compactionPreview;
@@ -927,11 +904,11 @@ export async function handleLocalAgentStream(
 
     // Load persisted todos from a previous turn (if any)
     persistedTodos = await loadTodos(appPath, chat.id);
-    // Ensure .dyad/ is gitignored (idempotent; also done by compaction/plans)
+    // Ensure .samba/ is gitignored (idempotent; also done by compaction/plans)
     // Skip in read-only/plan-only mode to avoid modifying the workspace
     if (!readOnly && !planModeOnly) {
-      await ensureDyadGitignored(appPath).catch((err: unknown) =>
-        logger.warn("Failed to ensure .dyad gitignored:", err),
+      await ensureSambaGitignored(appPath).catch((err: unknown) =>
+        logger.warn("Failed to ensure .samba gitignored:", err),
       );
     }
     if (persistedTodos.length > 0) {
@@ -979,7 +956,7 @@ export async function handleLocalAgentStream(
       cancelledImplementerNames,
       deliveredExplorerThreadIds,
       todos: persistedTodos,
-      dyadRequestId,
+      sambaRequestId,
       fileEditTracker,
       refreshImplementerContext,
       implementerFallbackSystemPrompt,
@@ -991,22 +968,18 @@ export async function handleLocalAgentStream(
       appBlueprintQuestionnaireCompleted: hasCompletedAppBlueprintQuestionnaire(
         chat.messages,
       ),
-      isDyadPro: isDyadProEnabled(settings),
+      isSambaPro: isSambaProEnabled(settings),
       canUseExplorerSubagent:
         !buildMode &&
-        isDyadProEnabled(settings) &&
         settings.enableExplorerSubagent !== false &&
         settings.agentToolConsents?.spawn_agent !== "never",
       canUseImplementerSubagent:
         !buildMode &&
-        isDyadProEnabled(settings) &&
         isImplementerSubagentEnabled(settings) &&
         !readOnly &&
         !planModeOnly,
       canUseAdvancedSubagentTools:
-        !buildMode &&
-        isDyadProEnabled(settings) &&
-        settings.enableAdvancedSubagents === true,
+        !buildMode && settings.enableAdvancedSubagents === true,
       runTypeScriptForWholeProject:
         settings.runTypeScriptForWholeProject === true,
       freeModelMode: effectiveFreeModelMode,
@@ -1330,12 +1303,12 @@ export async function handleLocalAgentStream(
               ...getAiHeaders({
                 builtinProviderId: modelClient.builtinProviderId,
               }),
-              [DYAD_INTERNAL_REQUEST_ID_HEADER]: dyadRequestId,
+              [SAMBA_INTERNAL_REQUEST_ID_HEADER]: sambaRequestId,
             },
             providerOptions: getProviderOptions({
-              dyadAppId: chat.app.id,
-              dyadRequestId,
-              dyadDisableFiles: true, // Local agent uses tools, not file injection
+              sambaAppId: chat.app.id,
+              sambaRequestId,
+              sambaDisableFiles: true, // Local agent uses tools, not file injection
               files: [],
               mentionedAppsCodebases: [],
               builtinProviderId: modelClient.builtinProviderId,
@@ -1787,7 +1760,7 @@ export async function handleLocalAgentStream(
                   // visible terminal state and clear the sidecar only after
                   // that status has reached the renderer. Execution errors
                   // are excluded because buildAgentToolSet already renders
-                  // those as dyad-output cards.
+                  // those as samba-output cards.
                   if (invalidToolCallIds.delete(part.toolCallId)) {
                     chunk += `${buildPreExecutionToolErrorStatus(
                       part.toolName,
@@ -1867,7 +1840,7 @@ export async function handleLocalAgentStream(
                 STREAM_RETRY_BASE_DELAY_MS * terminatedRetryCount;
               sendTelemetryEvent("local_agent:terminated_stream_retry", {
                 chatId: req.chatId,
-                dyadRequestId,
+                sambaRequestId,
                 retryCount: terminatedRetryCount,
                 error: String(streamError),
                 phase: "stream_iteration",
@@ -1882,7 +1855,7 @@ export async function handleLocalAgentStream(
               "local_agent:terminated_stream_retries_exhausted",
               {
                 chatId: req.chatId,
-                dyadRequestId,
+                sambaRequestId,
                 retryCount: terminatedRetryCount,
                 error: String(streamError),
                 phase: "stream_iteration",
@@ -1916,7 +1889,7 @@ export async function handleLocalAgentStream(
                 STREAM_RETRY_BASE_DELAY_MS * terminatedRetryCount;
               sendTelemetryEvent("local_agent:terminated_stream_retry", {
                 chatId: req.chatId,
-                dyadRequestId,
+                sambaRequestId,
                 retryCount: terminatedRetryCount,
                 error: String(err),
                 phase: "response_finalization",
@@ -1932,7 +1905,7 @@ export async function handleLocalAgentStream(
                 "local_agent:terminated_stream_retries_exhausted",
                 {
                   chatId: req.chatId,
-                  dyadRequestId,
+                  sambaRequestId,
                   retryCount: terminatedRetryCount,
                   error: String(err),
                   phase: "response_finalization",
@@ -2091,9 +2064,9 @@ export async function handleLocalAgentStream(
             ...failureReport.telemetryProperties,
           });
         }
-        throw new DyadError(
+        throw new SambaError(
           failureReport.displayMessage,
-          DyadErrorKind.Precondition,
+          SambaErrorKind.Precondition,
         );
       }
       partialImplementerNames.push(
@@ -2147,7 +2120,7 @@ export async function handleLocalAgentStream(
       logger.info(
         `Chat ${req.chatId} hit step limit of ${maxToolCallSteps} steps`,
       );
-      const stepLimitXml = `<dyad-step-limit steps="${totalStepsExecuted}" limit="${maxToolCallSteps}">Automatically paused after ${totalStepsExecuted} tool calls.</dyad-step-limit>`;
+      const stepLimitXml = `<samba-step-limit steps="${totalStepsExecuted}" limit="${maxToolCallSteps}">Automatically paused after ${totalStepsExecuted} tool calls.</samba-step-limit>`;
       postTurnXmlParts.push(stepLimitXml);
       fullResponse += `\n\n${stepLimitXml}`;
       await updateResponseInDb(placeholderMessageId, fullResponse);
@@ -2165,12 +2138,12 @@ export async function handleLocalAgentStream(
         },
       });
       if (deployResult.warning) {
-        const warningXml = `<dyad-output type="warning" message="${escapeXmlAttr("Supabase function deploy warning")}">${escapeXmlContent(deployResult.warning)}</dyad-output>`;
+        const warningXml = `<samba-output type="warning" message="${escapeXmlAttr("Supabase function deploy warning")}">${escapeXmlContent(deployResult.warning)}</samba-output>`;
         postTurnXmlParts.push(warningXml);
         ctx.onXmlComplete(warningXml);
       }
       if (!deployResult.success) {
-        const errorXml = `<dyad-output type="error" message="${escapeXmlAttr("Failed to deploy Supabase functions")}">${escapeXmlContent(deployResult.error ?? "Unknown deploy error")}</dyad-output>`;
+        const errorXml = `<samba-output type="error" message="${escapeXmlAttr("Failed to deploy Supabase functions")}">${escapeXmlContent(deployResult.error ?? "Unknown deploy error")}</samba-output>`;
         postTurnXmlParts.push(errorXml);
         ctx.onXmlComplete(errorXml);
       }
@@ -2194,7 +2167,7 @@ export async function handleLocalAgentStream(
     ) {
       const unreadAttachmentWarning =
         "Your model did not reference the attached file. If this was unintended, try a larger model or paste the contents inline.";
-      const warningMessage = `\n\n<dyad-output type="warning" message="${escapeXmlAttr(unreadAttachmentWarning)}">${escapeXmlContent(unreadAttachmentWarning)}</dyad-output>`;
+      const warningMessage = `\n\n<samba-output type="warning" message="${escapeXmlAttr(unreadAttachmentWarning)}">${escapeXmlContent(unreadAttachmentWarning)}</samba-output>`;
       fullResponse += warningMessage;
       await updateResponseInDb(placeholderMessageId, fullResponse);
       sendChunk(fullResponse);
@@ -2279,7 +2252,7 @@ export async function handleLocalAgentStream(
       !buildMode &&
       workspaceChanged &&
       !hitStepLimit &&
-      isDyadProEnabled(settings) &&
+      isSambaProEnabled(settings) &&
       settings.enableAutoReview === true;
 
     // Send completion
@@ -2450,7 +2423,7 @@ function getErrorResponseBody(error: unknown, depth = 0): string | undefined {
 // ChatErrorBox can recognize the quota error; other errors keep their normal
 // (non-verbose) message.
 const FREE_MODEL_QUOTA_MARKERS = [
-  "dyad_free_model_quota_exceeded",
+  "samba_free_model_quota_exceeded",
   "FREE_MODEL_QUOTA_EXCEEDED",
   "Samba Builder Free has reached its daily limit.",
   "Samba Builder Free limit",
@@ -2719,8 +2692,8 @@ function shouldRunTodoFollowUpPass(params: {
  *
  * Mirrors the consent flow + XML emission of the sandbox capability
  * map: every call requires user consent, emits a
- * `<dyad-mcp-tool-call>` / `<dyad-mcp-tool-result>` pair for the UI,
- * and surfaces tool errors as `<dyad-output type="error">`.
+ * `<samba-mcp-tool-call>` / `<samba-mcp-tool-result>` pair for the UI,
+ * and surfaces tool errors as `<samba-output type="error">`.
  */
 async function getMcpTools(
   event: IpcMainInvokeEvent,
@@ -2771,7 +2744,7 @@ async function getMcpTools(
 
               const autoApprove = buildMcpAutoApprove({
                 settings: readSettings(),
-                isDyadPro: ctx.isDyadPro,
+                isSambaPro: ctx.isSambaPro,
                 freeModelMode: ctx.freeModelMode,
                 chatId: ctx.chatId,
                 serverName: s.name,
@@ -2794,9 +2767,9 @@ async function getMcpTools(
                 });
 
               if (!approved)
-                throw new DyadError(
+                throw new SambaError(
                   `User declined running tool ${key}`,
-                  DyadErrorKind.UserCancelled,
+                  SambaErrorKind.UserCancelled,
                 );
 
               // Emit XML for UI (MCP tools don't stream, so use onXmlComplete directly)
@@ -2805,7 +2778,7 @@ async function getMcpTools(
                 ? ` auto-approved-reason="${escapeXmlAttr(autoApprovedReason)}"`
                 : "";
               ctx.onXmlComplete(
-                `<dyad-mcp-tool-call server="${escapeXmlAttr(serverName)}" tool="${escapeXmlAttr(toolName)}" call-id="${escapeXmlAttr(callId)}"${autoApprovedAttr}>\n${escapeXmlContent(content)}\n</dyad-mcp-tool-call>`,
+                `<samba-mcp-tool-call server="${escapeXmlAttr(serverName)}" tool="${escapeXmlAttr(toolName)}" call-id="${escapeXmlAttr(callId)}"${autoApprovedAttr}>\n${escapeXmlContent(content)}\n</samba-mcp-tool-call>`,
               );
               callEmitted = true;
 
@@ -2816,7 +2789,7 @@ async function getMcpTools(
               const safeResult = sanitizeMcpToolResult(res);
 
               ctx.onXmlComplete(
-                `<dyad-mcp-tool-result server="${escapeXmlAttr(serverName)}" tool="${escapeXmlAttr(toolName)}" call-id="${escapeXmlAttr(callId)}">\n${escapeXmlContent(safeResult.serialized)}\n</dyad-mcp-tool-result>`,
+                `<samba-mcp-tool-result server="${escapeXmlAttr(serverName)}" tool="${escapeXmlAttr(toolName)}" call-id="${escapeXmlAttr(callId)}">\n${escapeXmlContent(safeResult.serialized)}\n</samba-mcp-tool-result>`,
               );
 
               return safeResult.serialized;
@@ -2834,11 +2807,11 @@ async function getMcpTools(
               // it stuck on "Running" (only when its call card was emitted).
               if (callEmitted) {
                 ctx.onXmlComplete(
-                  `<dyad-mcp-tool-result server="${escapeXmlAttr(serverName)}" tool="${escapeXmlAttr(toolName)}" call-id="${escapeXmlAttr(callId)}" is-error="true">\n${escapeXmlContent(safeErrorMessage)}\n</dyad-mcp-tool-result>`,
+                  `<samba-mcp-tool-result server="${escapeXmlAttr(serverName)}" tool="${escapeXmlAttr(toolName)}" call-id="${escapeXmlAttr(callId)}" is-error="true">\n${escapeXmlContent(safeErrorMessage)}\n</samba-mcp-tool-result>`,
                 );
               }
               ctx.onXmlComplete(
-                `<dyad-output type="error" message="MCP tool '${key}' failed: ${escapeXmlAttr(safeErrorMessage)}">${escapeXmlContent(safeErrorDetails)}</dyad-output>`,
+                `<samba-output type="error" message="MCP tool '${key}' failed: ${escapeXmlAttr(safeErrorMessage)}">${escapeXmlContent(safeErrorDetails)}</samba-output>`,
               );
               throw error;
             }

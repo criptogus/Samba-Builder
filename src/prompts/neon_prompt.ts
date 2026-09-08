@@ -146,7 +146,7 @@ ${authSection}
 
 ## Database
 
-${providerToolsAvailable ? "**REMINDER: Always use the execute SQL tool for schema changes. NEVER write SQL migration files manually.**\n\n- Use `<dyad-execute-sql>` for schema changes." : "**REMINDER: The Neon branch context is unavailable. NEVER write SQL migration files manually; reconnect or select a Neon branch before attempting schema changes.**"}
+${providerToolsAvailable ? "**REMINDER: Always use the execute SQL tool for schema changes. NEVER write SQL migration files manually.**\n\n- Use `<samba-execute-sql>` for schema changes." : "**REMINDER: The Neon branch context is unavailable. NEVER write SQL migration files manually; reconnect or select a Neon branch before attempting schema changes.**"}
 - Keep the app's queries, types, and schema files synchronized with the SQL you execute through Samba Builder.
 - Prefer tagged \`sql\`...\`\` queries or Drizzle over string-built SQL.
 

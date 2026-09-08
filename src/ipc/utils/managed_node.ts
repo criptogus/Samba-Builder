@@ -7,7 +7,7 @@ import os from "node:os";
 import path from "node:path";
 import { spawn } from "node:child_process";
 import log from "electron-log";
-import { DyadError, DyadErrorKind } from "@/errors/dyad_error";
+import { SambaError, SambaErrorKind } from "@/errors/samba_error";
 import { IS_TEST_BUILD } from "@/ipc/utils/test_utils";
 import {
   clearSanitizedPathCache,
@@ -22,8 +22,8 @@ const logger = log.scope("managed_node");
 
 export const MANAGED_NODE_VERSION = "v24.18.0";
 const EXPECTED_MANAGED_NODE_VERSION =
-  IS_TEST_BUILD && process.env.DYAD_TEST_MANAGED_NODE_EXPECTED_VERSION
-    ? process.env.DYAD_TEST_MANAGED_NODE_EXPECTED_VERSION
+  IS_TEST_BUILD && process.env.SAMBA_TEST_MANAGED_NODE_EXPECTED_VERSION
+    ? process.env.SAMBA_TEST_MANAGED_NODE_EXPECTED_VERSION
     : MANAGED_NODE_VERSION;
 export const MINIMUM_SYSTEM_NODE_VERSION = "20.0.0";
 export const MANAGED_NODE_INSTALL_CANCELLED_MESSAGE =
@@ -81,11 +81,11 @@ export type ManagedNodeInstallFailureCategory =
   | "disk"
   | "unsupported";
 
-export class ManagedNodeInstallError extends DyadError {
+export class ManagedNodeInstallError extends SambaError {
   category: ManagedNodeInstallFailureCategory;
 
   constructor(message: string, category: ManagedNodeInstallFailureCategory) {
-    super(message, DyadErrorKind.Precondition);
+    super(message, SambaErrorKind.Precondition);
     this.name = "ManagedNodeInstallError";
     this.category = category;
   }
@@ -97,16 +97,16 @@ const managedNodeInstallProgressListeners = new Set<
   (progress: ManagedNodeInstallProgress) => void
 >();
 
-function createManagedNodeInstallCancelledError(): DyadError {
-  return new DyadError(
+function createManagedNodeInstallCancelledError(): SambaError {
+  return new SambaError(
     MANAGED_NODE_INSTALL_CANCELLED_MESSAGE,
-    DyadErrorKind.UserCancelled,
+    SambaErrorKind.UserCancelled,
   );
 }
 
 function isManagedNodeInstallCancelledError(error: unknown): boolean {
   return (
-    error instanceof DyadError && error.kind === DyadErrorKind.UserCancelled
+    error instanceof SambaError && error.kind === SambaErrorKind.UserCancelled
   );
 }
 
@@ -238,10 +238,10 @@ export function isManagedNodeSupported(): boolean {
 
 function getManagedNodeArtifact(): ManagedNodeArtifact | null {
   const testArchiveUrl = IS_TEST_BUILD
-    ? process.env.DYAD_TEST_MANAGED_NODE_ARCHIVE_URL
+    ? process.env.SAMBA_TEST_MANAGED_NODE_ARCHIVE_URL
     : undefined;
   if (testArchiveUrl) {
-    let fileName = "dyad-test-managed-node.tar.gz";
+    let fileName = "samba-test-managed-node.tar.gz";
     try {
       const parsedUrl = new URL(testArchiveUrl);
       fileName = path.basename(parsedUrl.pathname) || fileName;
@@ -250,7 +250,7 @@ function getManagedNodeArtifact(): ManagedNodeArtifact | null {
     }
     return {
       fileName,
-      sha256: process.env.DYAD_TEST_MANAGED_NODE_SHA256 ?? "",
+      sha256: process.env.SAMBA_TEST_MANAGED_NODE_SHA256 ?? "",
     };
   }
 
@@ -762,7 +762,7 @@ async function cleanupOldManagedNodeVersions(): Promise<void> {
 
 function getDownloadCandidates(artifact: ManagedNodeArtifact): string[] {
   const testArchiveUrl = IS_TEST_BUILD
-    ? process.env.DYAD_TEST_MANAGED_NODE_ARCHIVE_URL
+    ? process.env.SAMBA_TEST_MANAGED_NODE_ARCHIVE_URL
     : undefined;
   if (testArchiveUrl) {
     return [testArchiveUrl];
@@ -774,8 +774,8 @@ function getDownloadCandidates(artifact: ManagedNodeArtifact): string[] {
 }
 
 function getExpectedSha256(artifact: ManagedNodeArtifact): string {
-  return IS_TEST_BUILD && process.env.DYAD_TEST_MANAGED_NODE_SHA256
-    ? process.env.DYAD_TEST_MANAGED_NODE_SHA256
+  return IS_TEST_BUILD && process.env.SAMBA_TEST_MANAGED_NODE_SHA256
+    ? process.env.SAMBA_TEST_MANAGED_NODE_SHA256
     : artifact.sha256;
 }
 

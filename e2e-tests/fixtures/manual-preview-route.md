@@ -1,6 +1,6 @@
 Creating a multi-page app with a route that is not declared as JSX Route elements.
 
-<dyad-write path="src/pages/Index.tsx" description="Home page">
+<samba-write path="src/pages/Index.tsx" description="Home page">
 const Index = () => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
@@ -12,9 +12,9 @@ const Index = () => {
 };
 
 export default Index;
-</dyad-write>
+</samba-write>
 
-<dyad-write path="src/pages/ManualOnly.tsx" description="Manual route page">
+<samba-write path="src/pages/ManualOnly.tsx" description="Manual route page">
 const ManualOnly = () => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
@@ -26,9 +26,9 @@ const ManualOnly = () => {
 };
 
 export default ManualOnly;
-</dyad-write>
+</samba-write>
 
-<dyad-write path="src/App.tsx" description="App with routes declared in an object array">
+<samba-write path="src/App.tsx" description="App with routes declared in an object array">
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -59,4 +59,4 @@ const App = () => (
 );
 
 export default App;
-</dyad-write>
+</samba-write>

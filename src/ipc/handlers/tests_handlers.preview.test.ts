@@ -29,7 +29,7 @@ const h = vi.hoisted(() => ({
 vi.mock("electron", () => ({
   BrowserWindow: { fromWebContents: vi.fn(), getAllWindows: vi.fn(() => []) },
   app: {
-    getPath: vi.fn(() => "/tmp/dyad-tests-preview"),
+    getPath: vi.fn(() => "/tmp/samba-tests-preview"),
     getAppPath: vi.fn(() => process.cwd()),
   },
   ipcMain: { handle: vi.fn(), on: vi.fn() },
@@ -57,8 +57,8 @@ vi.mock("../utils/process_manager", async (importOriginal) => ({
 
 vi.mock("@/paths/paths", async (importOriginal) => ({
   ...(await importOriginal<typeof import("@/paths/paths")>()),
-  getDyadAppPath: (appPath: string) =>
-    path.join(os.tmpdir(), "dyad-tests-preview", "apps", appPath),
+  getSambaAppPath: (appPath: string) =>
+    path.join(os.tmpdir(), "samba-tests-preview", "apps", appPath),
 }));
 
 import {
@@ -75,7 +75,12 @@ import { buildWindowsCommandInvocation } from "../utils/windows_command";
 const PROXY_URL = "http://localhost:42101/";
 const CDP_ENDPOINT = "http://127.0.0.1:51234";
 const CDP_TOKEN = "test-preview-token";
-const APP_PATH = path.join(os.tmpdir(), "dyad-tests-preview", "apps", "my-app");
+const APP_PATH = path.join(
+  os.tmpdir(),
+  "samba-tests-preview",
+  "apps",
+  "my-app",
+);
 
 function runAppTestsCore(options: RunAppTestsCoreOptions) {
   return runAppTestsCoreWithoutToken({

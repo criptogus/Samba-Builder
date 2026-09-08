@@ -22,7 +22,7 @@ import { DeliveryWorkspace } from "@/components/DeliveryWorkspace";
 
 import type { FileAttachment } from "@/ipc/types";
 import type { ListedApp } from "@/ipc/types/app";
-import { hasDyadProKey, type ChatMode } from "@/lib/schemas";
+import { hasSambaProKey, type ChatMode } from "@/lib/schemas";
 import {
   FREE_PRO_MODEL_FALLBACK_CHAT_MODE,
   isFreeProBuildModeCombination,
@@ -53,7 +53,7 @@ export default function HomePage() {
   const { settings, envVars, loading: isSettingsLoading } = useSettings();
   const { isAnyProviderSetup, isLoading: isLoadingLanguageModelProviders } =
     useLanguageModelProviders();
-  const hasDyadProApiKey = settings ? hasDyadProKey(settings) : false;
+  const hasSambaProApiKey = settings ? hasSambaProKey(settings) : false;
   const hasConfiguredAiProvider =
     !isLoadingLanguageModelProviders && isAnyProviderSetup();
   const homeInitialChatMode = useMemo<ChatMode | undefined>(() => {
@@ -193,7 +193,7 @@ export default function HomePage() {
 
             {!isSettingsLoading &&
               !isLoadingLanguageModelProviders &&
-              !hasDyadProApiKey && (
+              !hasSambaProApiKey && (
                 <div className="-mt-2 flex justify-end px-4">
                   <button
                     type="button"

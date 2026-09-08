@@ -3,7 +3,7 @@ import path from "node:path";
 import { db } from "../../db";
 import { apps } from "../../db/schema";
 import { eq } from "drizzle-orm";
-import { getDyadAppPath } from "../../paths/paths";
+import { getSambaAppPath } from "../../paths/paths";
 import log from "electron-log";
 import { createTypedHandler } from "./base";
 import { planContracts } from "../types/plan";
@@ -13,22 +13,22 @@ import {
   planDirForAppPath,
   savePlanToDisk,
 } from "./planPersistence";
-import { ensureDyadGitignored } from "./gitignoreUtils";
-import { DyadError, DyadErrorKind } from "@/errors/dyad_error";
+import { ensureSambaGitignored } from "./gitignoreUtils";
+import { SambaError, SambaErrorKind } from "@/errors/samba_error";
 
 const logger = log.scope("plan_handlers");
 
 async function getAppPath(appId: number): Promise<string> {
   const app = await db.query.apps.findFirst({ where: eq(apps.id, appId) });
   if (!app) throw new Error("App not found");
-  return getDyadAppPath(app.path);
+  return getSambaAppPath(app.path);
 }
 
 async function getPlanDir(appId: number): Promise<string> {
   const appPath = await getAppPath(appId);
   const planDir = planDirForAppPath(appPath);
   await fs.promises.mkdir(planDir, { recursive: true });
-  await ensureDyadGitignored(appPath);
+  await ensureSambaGitignored(appPath);
   return planDir;
 }
 
@@ -68,9 +68,9 @@ export function registerPlanHandlers() {
       raw = await fs.promises.readFile(filePath, "utf-8");
     } catch (err) {
       if ((err as NodeJS.ErrnoException).code === "ENOENT") {
-        throw new DyadError(
+        throw new SambaError(
           `Plan not found: ${planId}`,
-          DyadErrorKind.NotFound,
+          SambaErrorKind.NotFound,
         );
       }
       throw err;
@@ -182,9 +182,9 @@ export function registerPlanHandlers() {
       await fs.promises.unlink(filePath);
     } catch (err) {
       if ((err as NodeJS.ErrnoException).code === "ENOENT") {
-        throw new DyadError(
+        throw new SambaError(
           `Plan not found: ${planId}`,
-          DyadErrorKind.NotFound,
+          SambaErrorKind.NotFound,
         );
       }
       throw err;

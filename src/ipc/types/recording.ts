@@ -50,7 +50,7 @@ export const StartRecordingResultSchema = z.object({
   /** Auth to establish before recording (`{ mode: "none" }` when unavailable). */
   auth: RecordingAuthSchema,
   /**
-   * Per-proxy capability the renderer must echo with `dyad-auth-login` and
+   * Per-proxy capability the renderer must echo with `samba-auth-login` and
    * recorder activation/deactivation messages.
    * Absent on setup failures, where no preview authentication is attempted.
    */

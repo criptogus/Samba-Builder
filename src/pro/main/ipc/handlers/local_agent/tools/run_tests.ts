@@ -283,7 +283,7 @@ async function runSpec(
 ): Promise<RunAppTestsResult> {
   const label = grep ? `${testFile} › /${grep}/` : testFile;
   ctx.onXmlStream(
-    `<dyad-status title="${escapeXmlAttr(`Running ${label}`)}"></dyad-status>`,
+    `<samba-status title="${escapeXmlAttr(`Running ${label}`)}"></samba-status>`,
   );
   // Honor the modes the user picked in the Tests panel — including slow motion,
   // so a user watching the agent's runs gets the same pace as their own. With

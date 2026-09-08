@@ -2,7 +2,7 @@ import { z } from "zod";
 import log from "electron-log";
 import { ToolDefinition, escapeXmlContent, AgentContext } from "./types";
 import { engineFetch } from "./engine_fetch";
-import { DyadError, DyadErrorKind } from "@/errors/dyad_error";
+import { SambaError, SambaErrorKind } from "@/errors/samba_error";
 
 const logger = log.scope("web_fetch");
 
@@ -11,7 +11,7 @@ function validateHttpUrl(url: string): void {
   try {
     parsed = new URL(url);
   } catch {
-    throw new DyadError(`Invalid URL: ${url}`, DyadErrorKind.Validation);
+    throw new SambaError(`Invalid URL: ${url}`, SambaErrorKind.Validation);
   }
   if (parsed.protocol !== "http:" && parsed.protocol !== "https:") {
     throw new Error(
@@ -63,7 +63,7 @@ Examples:
 
 async function callWebFetch(
   url: string,
-  ctx: Pick<AgentContext, "dyadRequestId" | "abortSignal">,
+  ctx: Pick<AgentContext, "sambaRequestId" | "abortSignal">,
 ): Promise<z.infer<typeof webFetchResponseSchema>> {
   const response = await engineFetch(ctx, "/tools/web-crawl", {
     method: "POST",
@@ -89,7 +89,7 @@ export const webFetchTool: ToolDefinition<z.infer<typeof webFetchSchema>> = {
   usesEngineEndpoint: true,
 
   // Requires Samba Builder engine API
-  isEnabled: (ctx) => ctx.isDyadPro,
+  isEnabled: (ctx) => ctx.isSambaPro,
 
   getConsentPreview: (args) => `Fetch URL: "${args.url}"`,
 
@@ -97,7 +97,7 @@ export const webFetchTool: ToolDefinition<z.infer<typeof webFetchSchema>> = {
     if (!args.url) return undefined;
     // When complete, return undefined so execute's onXmlComplete provides the final XML
     if (isComplete) return undefined;
-    return `<dyad-web-fetch>${escapeXmlContent(args.url)}`;
+    return `<samba-web-fetch>${escapeXmlContent(args.url)}`;
   },
 
   execute: async (args, ctx) => {
@@ -105,15 +105,15 @@ export const webFetchTool: ToolDefinition<z.infer<typeof webFetchSchema>> = {
 
     validateHttpUrl(args.url);
 
-    ctx.onXmlStream(`<dyad-web-fetch>${escapeXmlContent(args.url)}`);
+    ctx.onXmlStream(`<samba-web-fetch>${escapeXmlContent(args.url)}`);
 
     try {
       const result = await callWebFetch(args.url, ctx);
 
       if (!result) {
-        throw new DyadError(
+        throw new SambaError(
           "Web fetch returned no results",
-          DyadErrorKind.NotFound,
+          SambaErrorKind.NotFound,
         );
       }
 
@@ -123,9 +123,9 @@ export const webFetchTool: ToolDefinition<z.infer<typeof webFetchSchema>> = {
         .join("\n\n---\n\n");
 
       if (!allContent) {
-        throw new DyadError(
+        throw new SambaError(
           "No content available from web fetch",
-          DyadErrorKind.NotFound,
+          SambaErrorKind.NotFound,
         );
       }
 
@@ -134,13 +134,13 @@ export const webFetchTool: ToolDefinition<z.infer<typeof webFetchSchema>> = {
       );
 
       ctx.onXmlComplete(
-        `<dyad-web-fetch>${escapeXmlContent(args.url)}</dyad-web-fetch>`,
+        `<samba-web-fetch>${escapeXmlContent(args.url)}</samba-web-fetch>`,
       );
 
       return truncateContent(allContent);
     } catch (error) {
       ctx.onXmlComplete(
-        `<dyad-web-fetch>${escapeXmlContent(args.url)}</dyad-web-fetch>`,
+        `<samba-web-fetch>${escapeXmlContent(args.url)}</samba-web-fetch>`,
       );
       throw error;
     }

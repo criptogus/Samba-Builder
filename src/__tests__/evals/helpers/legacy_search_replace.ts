@@ -1,7 +1,7 @@
 /* eslint-disable no-irregular-whitespace */
 /**
  * Frozen copy of the search_replace processor as it stood at 67c9ee7c, the
- * commit before https://github.com/dyad-sh/dyad/pull/4338.
+ * commit before https://github.com/samba-sh/samba/pull/4338.
  *
  * It exists so the recorded calls in `recorded_calls/` can be replayed against
  * the behavior they were captured from. Replaying them against the current

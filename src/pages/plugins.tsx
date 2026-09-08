@@ -10,7 +10,7 @@ const PluginsPage: React.FC = () => {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const { lastDeepLink } = useDeepLink();
 
-  // The dyad://add-mcp-server deep link lands on this page; open the
+  // The sambabuilder://add-mcp-server deep link lands on this page; open the
   // add dialog so the prefilled form (see AddPluginDialog) is visible.
   useEffect(() => {
     if (lastDeepLink?.type === "add-mcp-server") {

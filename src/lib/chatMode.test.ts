@@ -108,9 +108,9 @@ describe("chat mode resolution", () => {
 
   it("defaults Pro users to Agent", () => {
     const settings = makeSettings({
-      enableDyadPro: true,
+      enableSambaPro: true,
       providerSettings: {
-        auto: { apiKey: { value: "dyad-key" } },
+        auto: { apiKey: { value: "samba-key" } },
       },
     });
 

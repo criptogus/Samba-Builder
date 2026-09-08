@@ -13,7 +13,7 @@ vi.mock("node:fs/promises", () => ({
   default: { rm: mocks.rm },
 }));
 vi.mock("@/paths/paths", () => ({
-  getTypeScriptCachePath: () => "/tmp/dyad-typescript-cache",
+  getTypeScriptCachePath: () => "/tmp/samba-typescript-cache",
 }));
 vi.mock("./base", () => ({
   createTypedHandler: (

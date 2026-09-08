@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 // The mocked class, so the handler recognises what it is handed.
 import { SshError } from "../utils/ssh_client";
-import { DyadError, DyadErrorKind } from "@/errors/dyad_error";
+import { SambaError, SambaErrorKind } from "@/errors/samba_error";
 import {
   SETUP_MACHINE_REPORTED,
   SetupResultSchema,
@@ -10,7 +10,7 @@ import {
 const h = vi.hoisted(() => ({
   settings: {} as Record<string, unknown>,
   written: [] as Array<Record<string, unknown>>,
-  serverKey: { publicKey: "ssh-ed25519 AAAAPUB dyad", privateKey: "PRIVATE" },
+  serverKey: { publicKey: "ssh-ed25519 AAAAPUB samba", privateKey: "PRIVATE" },
   setupResult: null as unknown,
   setupError: null as unknown,
   lastSetupOptions: null as Record<string, unknown> | null,
@@ -101,7 +101,7 @@ vi.mock("../utils/ssh_client", () => ({
     return (fingerprint: string) => fingerprint === expected;
   },
   // Close enough to the real class for what this file asserts: the failure,
-  // the kind, the errno, and the name `sshFailureOf` matches on. It is not a DyadError,
+  // the kind, the errno, and the name `sshFailureOf` matches on. It is not a SambaError,
   // so a case about what survives serialization would need more than this.
   //
   // The failure and the kind are asserted on for opposite reasons. The
@@ -213,7 +213,7 @@ const RESULT = {
   // user to agree to rather than stored, and omitting this reads as that.
   secure: true,
   credentials: {
-    username: "dyad-admin",
+    username: "samba-admin",
     email: "me@gmail.com",
     password: "Abc123@xyz",
   },
@@ -295,7 +295,7 @@ describe("inspect", () => {
       "unreachable",
       "Could not reach the server (ENOTFOUND). Check the address and that " +
         "port 22 is open.",
-      DyadErrorKind.External,
+      SambaErrorKind.External,
       "ENOTFOUND",
     );
 
@@ -338,7 +338,7 @@ describe("inspect", () => {
       call("coolify-setup:inspect", { ...TARGET, host: "203.0.113.5/coolify" }),
     ).rejects.toMatchObject({
       failure: "unreachable",
-      kind: DyadErrorKind.External,
+      kind: SambaErrorKind.External,
       // Ends there: the sentence the client wrapped the code in offers a
       // closed port as the other suspect, and keeping it would put a second
       // answer under the one this just gave.
@@ -355,7 +355,7 @@ describe("inspect", () => {
       "timeout",
       "The server did not answer in time. Check the address and that port " +
         "22 is reachable.",
-      DyadErrorKind.External,
+      SambaErrorKind.External,
     );
 
     await expect(
@@ -408,7 +408,7 @@ describe("run", () => {
     // Its seeder resolves the domain. Finding out afterwards costs the whole
     // install and leaves an instance with no account on it.
     await expect(
-      call("coolify-setup:run", { ...TARGET, adminEmail: "admin@dyad.test" }),
+      call("coolify-setup:run", { ...TARGET, adminEmail: "admin@samba.test" }),
     ).rejects.toMatchObject({ kind: "validation" });
   });
 
@@ -450,7 +450,7 @@ describe("run", () => {
     h.setupError = new SshError(
       "host-key-rejected",
       "The server's identity was not accepted, so nothing was sent to it.",
-      DyadErrorKind.UserCancelled,
+      SambaErrorKind.UserCancelled,
     );
 
     await expect(checkThenRun()).rejects.toThrow(/identity has changed/);
@@ -598,7 +598,7 @@ describe("run", () => {
     h.writeOkFirst = 1;
     h.writeFailures = 1;
     h.reportsAccount = true;
-    h.setupError = new DyadError("exit 1", DyadErrorKind.External);
+    h.setupError = new SambaError("exit 1", SambaErrorKind.External);
 
     await expect(checkThenRun()).rejects.toThrow("exit 1");
 
@@ -618,7 +618,7 @@ describe("run", () => {
     h.writeFailures = 1;
     h.reportsAccount = true;
     h.reportsAccountTwice = true;
-    h.setupError = new DyadError("exit 1", DyadErrorKind.External);
+    h.setupError = new SambaError("exit 1", SambaErrorKind.External);
 
     await expect(checkThenRun()).rejects.toThrow("exit 1");
 
@@ -637,7 +637,7 @@ describe("run", () => {
     h.writeOkFirst = 1;
     h.writeThrows = true;
     h.reportsAccount = true;
-    h.setupError = new DyadError("exit 1", DyadErrorKind.External);
+    h.setupError = new SambaError("exit 1", SambaErrorKind.External);
 
     await expect(checkThenRun()).rejects.toThrow("exit 1");
   });
@@ -645,7 +645,7 @@ describe("run", () => {
   it("marks a failure the machine already put on screen", async () => {
     // The panel suppresses what carries this and shows everything else, so
     // the mark is what stops one failure being reported twice.
-    h.setupError = new DyadError("exit 1", DyadErrorKind.External);
+    h.setupError = new SambaError("exit 1", SambaErrorKind.External);
 
     await expect(checkThenRun()).rejects.toMatchObject({
       code: SETUP_MACHINE_REPORTED,

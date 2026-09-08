@@ -27,7 +27,7 @@ export function AutoUpdateSwitch() {
             action: {
               label: "Restart Samba Builder",
               onClick: () => {
-                ipc.system.restartDyad();
+                ipc.system.restartSamba();
               },
             },
           });

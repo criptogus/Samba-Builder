@@ -122,7 +122,7 @@ test("moves a chat tab to another window only after destination adoption", async
         dataTransfer,
       }),
     );
-    return dataTransfer.getData("application/x-dyad-chat-tab-transfer");
+    return dataTransfer.getData("application/x-samba-chat-tab-transfer");
   });
   expect(dragPayload).not.toBe("");
 
@@ -130,7 +130,7 @@ test("moves a chat tab to another window only after destination adoption", async
     .getByTestId("chat-tab-drop-zone")
     .evaluate((dropZone, payload) => {
       const dataTransfer = new DataTransfer();
-      dataTransfer.setData("application/x-dyad-chat-tab-transfer", payload);
+      dataTransfer.setData("application/x-samba-chat-tab-transfer", payload);
       dropZone.dispatchEvent(
         new DragEvent("drop", {
           bubbles: true,

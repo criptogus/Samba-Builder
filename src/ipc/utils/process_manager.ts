@@ -168,7 +168,7 @@ export function stopDockerContainer(containerName: string): Promise<void> {
  */
 export function removeDockerVolumesForApp(appId: number): Promise<void> {
   return new Promise<void>((resolve) => {
-    const pnpmVolume = `dyad-pnpm-${appId}`;
+    const pnpmVolume = `samba-pnpm-${appId}`;
 
     const rm = spawn("docker", ["volume", "rm", "-f", pnpmVolume], {
       stdio: "pipe",
@@ -203,7 +203,7 @@ export async function stopAppByInfo(
         await destroyCloudSandbox(appInfo.cloudSandboxId);
       }
     } else if (appInfo.mode === "docker") {
-      const containerName = appInfo.containerName || `dyad-app-${appId}`;
+      const containerName = appInfo.containerName || `samba-app-${appId}`;
       await stopDockerContainer(containerName);
     } else if (appInfo.process) {
       await killProcess(appInfo.process);
@@ -475,7 +475,7 @@ export function stopAllAppsSync(): void {
         `Cloud sandbox ${appInfo.cloudSandboxId ?? "<unknown>"} for app ${appId} will be reconciled asynchronously after quit if needed.`,
       );
     } else if (appInfo.mode === "docker") {
-      const containerName = appInfo.containerName || `dyad-app-${appId}`;
+      const containerName = appInfo.containerName || `samba-app-${appId}`;
       // Fire-and-forget: spawn docker stop without awaiting
       const stop = spawn("docker", ["stop", containerName], {
         stdio: "ignore",

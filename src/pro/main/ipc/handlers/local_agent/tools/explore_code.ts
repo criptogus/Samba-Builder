@@ -21,10 +21,10 @@ export function getExploreCodeAvailabilityForAppPath(
   reason: string | null;
   tsconfigPath: string | null;
 } {
-  if (!ctx.isDyadPro) {
+  if (!ctx.isSambaPro) {
     return {
       enabled: false,
-      reason: "dyad_pro_required",
+      reason: "samba_pro_required",
       tsconfigPath: null,
     };
   }

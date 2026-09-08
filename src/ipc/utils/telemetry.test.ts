@@ -17,7 +17,7 @@ vi.mock("electron", () => ({
     ],
   },
 }));
-import { DyadError, DyadErrorKind } from "@/errors/dyad_error";
+import { SambaError, SambaErrorKind } from "@/errors/samba_error";
 import {
   sendTelemetryEventToWindow,
   sendTelemetryException,
@@ -44,7 +44,7 @@ describe("shouldFilterTelemetryException", () => {
         new SshError(
           "unreachable",
           "Could not reach the server (ENOTFOUND).",
-          DyadErrorKind.External,
+          SambaErrorKind.External,
         ),
       ),
     ).toBe(true);
@@ -53,7 +53,7 @@ describe("shouldFilterTelemetryException", () => {
         new SshError(
           "timeout",
           "The server did not answer in time.",
-          DyadErrorKind.External,
+          SambaErrorKind.External,
         ),
       ),
     ).toBe(true);
@@ -67,7 +67,7 @@ describe("shouldFilterTelemetryException", () => {
         new SshError(
           "unknown",
           "Could not connect over SSH: something new",
-          DyadErrorKind.External,
+          SambaErrorKind.External,
         ),
       ),
     ).toBe(false);
@@ -103,32 +103,34 @@ describe("shouldFilterTelemetryException", () => {
     ).toBe(false);
   });
 
-  it("filters DyadError kinds that are non-actionable for telemetry", () => {
+  it("filters SambaError kinds that are non-actionable for telemetry", () => {
     expect(
       shouldFilterTelemetryException(
-        new DyadError("bad input", DyadErrorKind.Validation),
+        new SambaError("bad input", SambaErrorKind.Validation),
       ),
     ).toBe(true);
     expect(
       shouldFilterTelemetryException(
-        new DyadError("missing", DyadErrorKind.NotFound),
+        new SambaError("missing", SambaErrorKind.NotFound),
       ),
     ).toBe(true);
   });
 
-  it("does not filter DyadError Internal, External, or Unknown", () => {
+  it("does not filter SambaError Internal, External, or Unknown", () => {
     expect(
       shouldFilterTelemetryException(
-        new DyadError("bug", DyadErrorKind.Internal),
+        new SambaError("bug", SambaErrorKind.Internal),
       ),
     ).toBe(false);
     expect(
       shouldFilterTelemetryException(
-        new DyadError("upstream", DyadErrorKind.External),
+        new SambaError("upstream", SambaErrorKind.External),
       ),
     ).toBe(false);
     expect(
-      shouldFilterTelemetryException(new DyadError("?", DyadErrorKind.Unknown)),
+      shouldFilterTelemetryException(
+        new SambaError("?", SambaErrorKind.Unknown),
+      ),
     ).toBe(false);
   });
 });

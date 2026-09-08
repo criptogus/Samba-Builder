@@ -4,7 +4,7 @@ import os from "node:os";
 import { randomUUID } from "node:crypto";
 import { getUserDataPath } from "@/paths/paths";
 import { AwsStateSchema, type AwsConfig, type AwsState } from "@/ipc/types/aws";
-import { DyadError, DyadErrorKind } from "@/errors/dyad_error";
+import { SambaError, SambaErrorKind } from "@/errors/samba_error";
 import { withLock } from "@/ipc/utils/lock_utils";
 import { awsCommand, cloudCommand, CloudCommandError } from "./aws_cli";
 import { prepareAwsSource } from "./aws_source";
@@ -59,9 +59,9 @@ export async function awsIdentity(config: AwsConfig, root: string) {
     ...config.secrets.map((s) => s.valueFrom),
   ]) {
     if (arn.split(":")[4] !== identity.Account)
-      throw new DyadError(
+      throw new SambaError(
         "As roles e os segredos devem pertencer à conta AWS selecionada.",
-        DyadErrorKind.Precondition,
+        SambaErrorKind.Precondition,
       );
   }
   return {
@@ -110,9 +110,9 @@ export async function deployAws(
   return withLock("samba-aws-deploy", async () => {
     const identity = await awsIdentity(config, root);
     if (identity.accountId !== accountId)
-      throw new DyadError(
+      throw new SambaError(
         "A conta AWS mudou. Revise a publicação novamente.",
-        DyadErrorKind.Precondition,
+        SambaErrorKind.Precondition,
       );
     const previous = await readAwsState(appId);
     if (
@@ -122,9 +122,9 @@ export async function deployAws(
         previous.config.serviceName !== config.serviceName ||
         previous.config.infrastructureRoleArn !== config.infrastructureRoleArn)
     )
-      throw new DyadError(
+      throw new SambaError(
         "Este projeto já está vinculado a outro destino AWS. Mantenha conta, região, nome e role de infraestrutura para atualizá-lo.",
-        DyadErrorKind.Precondition,
+        SambaErrorKind.Precondition,
       );
     const workspace = await fs.mkdtemp(path.join(os.tmpdir(), "samba-aws-"));
     let state: AwsState = {
@@ -147,9 +147,9 @@ export async function deployAws(
       await fs.mkdir(context);
       const source = await prepareAwsSource(root, context);
       if (source.sourceDigest !== sourceDigest)
-        throw new DyadError(
+        throw new SambaError(
           "Os arquivos mudaram desde a revisão. Revise novamente antes de publicar.",
-          DyadErrorKind.Precondition,
+          SambaErrorKind.Precondition,
         );
       const dockerHost = (
         process.env.DOCKER_HOST && !process.env.DOCKER_CONTEXT
@@ -161,9 +161,9 @@ export async function deployAws(
             )
       ).trim();
       if (!/^(unix:\/\/|npipe:\/\/)/.test(dockerHost))
-        throw new DyadError(
+        throw new SambaError(
           "Use um contexto Docker local (Docker Desktop) para esta publicação.",
-          DyadErrorKind.Precondition,
+          SambaErrorKind.Precondition,
         );
       dockerEnv = { ...process.env, DOCKER_HOST: dockerHost };
       delete dockerEnv.DOCKER_CONTEXT;
@@ -280,11 +280,11 @@ export async function deployAws(
     } catch (error) {
       await progress(
         "failed",
-        error instanceof DyadError
+        error instanceof SambaError
           ? error.message
           : "Falha na publicação. Confira o console AWS antes de repetir.",
       );
-      throw error instanceof DyadError
+      throw error instanceof SambaError
         ? error
         : new CloudCommandError(state.message);
     } finally {
@@ -303,15 +303,15 @@ export async function deployAws(
 export async function refreshAws(appId: number, root: string) {
   const state = await readAwsState(appId);
   if (!state?.serviceArn)
-    throw new DyadError(
+    throw new SambaError(
       "Não há serviço AWS vinculado.",
-      DyadErrorKind.Precondition,
+      SambaErrorKind.Precondition,
     );
   const identity = await awsIdentity(state.config, root);
   if (identity.accountId !== state.accountId)
-    throw new DyadError(
+    throw new SambaError(
       "O perfil AWS aponta para outra conta.",
-      DyadErrorKind.Precondition,
+      SambaErrorKind.Precondition,
     );
   const { service } = await awsCommand(
     state.config,

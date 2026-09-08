@@ -12,10 +12,10 @@ import {
   RIPGREP_EXCLUDED_GLOBS,
 } from "@/ipc/utils/ripgrep_utils";
 import {
-  DYAD_INTERNAL_RIPGREP_EXCLUDE,
+  SAMBA_INTERNAL_RIPGREP_EXCLUDE,
   resolveTargetAppPath,
 } from "./resolve_app_context";
-import { DyadError, DyadErrorKind } from "@/errors/dyad_error";
+import { SambaError, SambaErrorKind } from "@/errors/samba_error";
 import { isDotenvFilePath } from "@/utils/dotenv_redaction";
 import log from "electron-log";
 
@@ -146,7 +146,7 @@ async function runRipgrep({
   caseSensitive,
   literal,
   maxMatches,
-  excludeDyadFolder,
+  excludeSambaFolder,
 }: {
   appPath: string;
   query: string;
@@ -156,7 +156,7 @@ async function runRipgrep({
   caseSensitive?: boolean;
   literal?: boolean;
   maxMatches?: number;
-  excludeDyadFolder?: boolean;
+  excludeSambaFolder?: boolean;
 }): Promise<{ matches: RipgrepMatch[]; stoppedEarly: boolean }> {
   return new Promise((resolve, reject) => {
     const results: RipgrepMatch[] = [];
@@ -199,8 +199,8 @@ async function runRipgrep({
       : RIPGREP_EXCLUDED_GLOBS;
     args.push(...exclusionGlobs.flatMap((glob) => ["--glob", glob]));
 
-    if (excludeDyadFolder) {
-      args.push("--glob", DYAD_INTERNAL_RIPGREP_EXCLUDE);
+    if (excludeSambaFolder) {
+      args.push("--glob", SAMBA_INTERNAL_RIPGREP_EXCLUDE);
     }
 
     args.push("--", query, ".");
@@ -329,7 +329,7 @@ export const grepTool: ToolDefinition<z.infer<typeof grepSchema>> = {
 
     if (!args.query) return undefined;
     const attrs = buildGrepAttributes(args);
-    return `<dyad-grep ${attrs}>Searching...</dyad-grep>`;
+    return `<samba-grep ${attrs}>Searching...</samba-grep>`;
   },
 
   execute: async (args, ctx: AgentContext) => {
@@ -352,7 +352,7 @@ export const grepTool: ToolDefinition<z.infer<typeof grepSchema>> = {
         caseSensitive: args.case_sensitive,
         literal: args.literal,
         maxMatches: args.include_ignored ? limit + 1 : undefined,
-        excludeDyadFolder: Boolean(args.app_name),
+        excludeSambaFolder: Boolean(args.app_name),
       });
       allMatches = result.matches;
       stoppedEarly = result.stoppedEarly;
@@ -366,9 +366,9 @@ export const grepTool: ToolDefinition<z.infer<typeof grepSchema>> = {
         error instanceof RipgrepError &&
         isRegexParseError(error.stderr)
       ) {
-        throw new DyadError(
+        throw new SambaError(
           formatRegexParseError(args.query, error.stderr),
-          DyadErrorKind.Validation,
+          SambaErrorKind.Validation,
         );
       }
       throw error;
@@ -385,7 +385,7 @@ export const grepTool: ToolDefinition<z.infer<typeof grepSchema>> = {
     const attrs = buildGrepAttributes(args, matches.length, totalCount);
 
     if (matches.length === 0) {
-      ctx.onXmlComplete(`<dyad-grep ${attrs}>No matches found.</dyad-grep>`);
+      ctx.onXmlComplete(`<samba-grep ${attrs}>No matches found.</samba-grep>`);
       return "No matches found.";
     }
 
@@ -406,7 +406,7 @@ export const grepTool: ToolDefinition<z.infer<typeof grepSchema>> = {
       resultText += `\n\n[NOTE: include_pattern="*" was ignored because it matches all files including git-ignored files! Omit include_pattern to search all files, or use a specific glob like "*.ts".]`;
     }
     ctx.onXmlComplete(
-      `<dyad-grep ${attrs}>\n${escapeXmlContent(resultText)}\n</dyad-grep>`,
+      `<samba-grep ${attrs}>\n${escapeXmlContent(resultText)}\n</samba-grep>`,
     );
 
     return resultText;

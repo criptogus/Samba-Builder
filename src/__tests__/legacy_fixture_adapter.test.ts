@@ -9,13 +9,13 @@ import {
 describe("legacy Build fixture adapter", () => {
   it("converts ordered file and SQL tags into native tool turns", () => {
     const fixture = convertLegacyFixtureToLocalAgent(`Starting
-<dyad-write path="src/App.tsx" description="replace app">
+<samba-write path="src/App.tsx" description="replace app">
 export default function App() {}
-</dyad-write>
-<dyad-rename from="old.ts" to="new.ts"></dyad-rename>
-<dyad-execute-sql description="create users">
+</samba-write>
+<samba-rename from="old.ts" to="new.ts"></samba-rename>
+<samba-execute-sql description="create users">
 CREATE TABLE users (id int);
-</dyad-execute-sql>
+</samba-execute-sql>
 Done`);
 
     expect(fixture.turns).toEqual([
@@ -57,13 +57,13 @@ Done`);
 
   it("converts search-replace blocks without trimming their match text", () => {
     const fixture =
-      convertLegacyFixtureToLocalAgent(`<dyad-search-replace path="src/App.tsx">
+      convertLegacyFixtureToLocalAgent(`<samba-search-replace path="src/App.tsx">
 <<<<<<< SEARCH
   old text
 =======
   new text
 >>>>>>> REPLACE
-</dyad-search-replace>`);
+</samba-search-replace>`);
 
     expect(fixture.turns).toEqual([
       {

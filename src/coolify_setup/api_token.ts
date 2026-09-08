@@ -1,4 +1,4 @@
-import { DyadError, DyadErrorKind } from "@/errors/dyad_error";
+import { SambaError, SambaErrorKind } from "@/errors/samba_error";
 import { COOLIFY_SCOPES_PHP_ARRAY } from "@/shared/coolify_scopes";
 import { SshError } from "@/ipc/utils/ssh_client";
 import type { SshSession } from "@/ipc/utils/ssh_client";
@@ -89,11 +89,11 @@ export async function readCoolifyVersion(
     // installer always fetches the newest one, so that is the least likely
     // thing to be true. The key this reads is Coolify's own and free to move,
     // which is the ordinary way to arrive here.
-    throw new DyadError(
+    throw new SambaError(
       "Samba Builder could not read which version of Coolify this is, so it could not " +
         "set up an API token by itself. The server is installed — open it " +
         "and make a token there.",
-      DyadErrorKind.External,
+      SambaErrorKind.External,
     );
   } catch (error) {
     // A cancelled setup is the user stopping, not an instance that cannot be
@@ -108,11 +108,11 @@ export async function readCoolifyVersion(
       // Reachable and simply slow, which on a small server right after an
       // install is ordinary. Worth saying as itself: the version is not the
       // problem, and there is nothing to fix by finding a newer Coolify.
-      throw new DyadError(
+      throw new SambaError(
         "Coolify did not answer in time when Samba Builder asked which version it " +
           "is. It may still be starting up — open it and connect with a " +
           "token once it does.",
-        DyadErrorKind.External,
+        SambaErrorKind.External,
       );
     }
     throw error;
@@ -156,9 +156,9 @@ export async function enableApi(
   // One line of the answer, not the whole of it: Coolify prints its own
   // notices between the markers.
   if (!answerLine(output, (line) => line === "enabled")) {
-    throw new DyadError(
+    throw new SambaError(
       "Could not turn Coolify's API on automatically.",
-      DyadErrorKind.External,
+      SambaErrorKind.External,
     );
   }
 }
@@ -183,13 +183,13 @@ export async function mintApiToken(
   adminEmail: string,
   {
     signal,
-    tokenName = "dyad",
+    tokenName = "samba",
   }: { signal?: AbortSignal; tokenName?: string } = {},
 ): Promise<string> {
   if (!/^[A-Za-z0-9 _-]{1,40}$/.test(tokenName)) {
-    throw new DyadError(
+    throw new SambaError(
       `Unsafe token name: ${tokenName}`,
-      DyadErrorKind.Internal,
+      SambaErrorKind.Internal,
     );
   }
   const output = await runTinker(
@@ -199,7 +199,7 @@ export async function mintApiToken(
     // that does not parse produces no output at all rather than the branch it
     // was meant to take.
     [
-      `$u = \\App\\Models\\User::where('email', getenv('DYAD_ADMIN_EMAIL'))->first();`,
+      `$u = \\App\\Models\\User::where('email', getenv('SAMBA_ADMIN_EMAIL'))->first();`,
       `$team = $u ? $u->teams()->first() : null;`,
       // The session line is doing real work: Coolify's createToken override
       // reads the team from a session tinker does not otherwise have, and the
@@ -208,7 +208,7 @@ export async function mintApiToken(
       `echo !$u ? 'no-user' : (!$team ? 'no-team' : $u->createToken('${tokenName}', ${COOLIFY_SCOPES_PHP_ARRAY}, null)->plainTextToken);`,
     ].join("\n"),
     {
-      env: { DYAD_ADMIN_EMAIL: adminEmail },
+      env: { SAMBA_ADMIN_EMAIL: adminEmail },
       signal,
       timeoutMs: TINKER_TIMEOUT_MS,
     },
@@ -216,15 +216,15 @@ export async function mintApiToken(
 
   const token = output;
   if (answerLine(token, (line) => line === "no-user")) {
-    throw new DyadError(
+    throw new SambaError(
       "Coolify has no account for this address, so no token could be created.",
-      DyadErrorKind.Precondition,
+      SambaErrorKind.Precondition,
     );
   }
   if (answerLine(token, (line) => line === "no-team")) {
-    throw new DyadError(
+    throw new SambaError(
       "Coolify's admin account has no team yet, so no token could be created.",
-      DyadErrorKind.Precondition,
+      SambaErrorKind.Precondition,
     );
   }
   // Sanctum's plain text token is `<id>|<40+ characters>`. Read as one line
@@ -234,9 +234,9 @@ export async function mintApiToken(
     /^\d+\|[A-Za-z0-9]{40,}$/.test(line),
   );
   if (!minted) {
-    throw new DyadError(
+    throw new SambaError(
       "Coolify did not return a usable API token.",
-      DyadErrorKind.External,
+      SambaErrorKind.External,
     );
   }
   return minted;

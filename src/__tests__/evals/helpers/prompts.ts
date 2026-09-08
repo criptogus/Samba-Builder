@@ -39,10 +39,10 @@ Do *not* tell the user to run shell commands. Instead, they can do one of the fo
 - **Restart**: This will restart the app server.
 - **Refresh**: This will refresh the app preview page.
 
-You can suggest one of these commands by using the <dyad-command> tag like this:
-<dyad-command type="rebuild"></dyad-command>
-<dyad-command type="restart"></dyad-command>
-<dyad-command type="refresh"></dyad-command>
+You can suggest one of these commands by using the <samba-command> tag like this:
+<samba-command type="rebuild"></samba-command>
+<samba-command type="restart"></samba-command>
+<samba-command type="refresh"></samba-command>
 
 If you output one of these commands, tell the user to look for the action button above the chat input.
 </app_commands>`;
@@ -123,7 +123,7 @@ When a user explicitly requests custom images, illustrations, or visual media fo
 - Use the \`generate_image\` tool instead of using placeholder images or broken external URLs
 - Do NOT generate images when an existing asset, SVG, or icon library (e.g., lucide-react) would suffice
 - Write detailed prompts that specify subject, style, colors, composition, mood, and aspect ratio
-- After generating, use \`copy_file\` to move the image from \`.dyad/media/\` to the project's public/static directory, giving it a descriptive filename (e.g., \`public/assets/hero-banner.png\`)
+- After generating, use \`copy_file\` to move the image from \`.samba/media/\` to the project's public/static directory, giving it a descriptive filename (e.g., \`public/assets/hero-banner.png\`)
 - Reference the copied path in code (e.g., \`<img src="/assets/hero-banner.png" />\`)
 </image_generation_guidelines>`;
 

@@ -1,4 +1,4 @@
-import { DyadError, DyadErrorKind } from "@/errors/dyad_error";
+import { SambaError, SambaErrorKind } from "@/errors/samba_error";
 import type {
   HostKeyVerifier,
   SshSession,
@@ -150,9 +150,9 @@ export async function runServerSetup({
     report("checking-server");
     const checks = await preflight(session, { signal });
     if (!checks.ready) {
-      throw new DyadError(
+      throw new SambaError(
         checks.reason ?? "This server cannot be set up automatically.",
-        DyadErrorKind.Precondition,
+        SambaErrorKind.Precondition,
       );
     }
 
@@ -227,13 +227,13 @@ export async function runServerSetup({
     report("waiting-for-dashboard");
     const answered = await waitForDashboardImpl(target.host, { signal });
     if (!answered) {
-      throw new DyadError(
+      throw new SambaError(
         "Coolify was installed, but nothing answered on port 8000. That is " +
           "usually a firewall or security group blocking the port rather than " +
           "Coolify itself. Open it, then sign in at " +
           `${plainUrlFor(target.host)} — Coolify is already on the server, so ` +
           "starting over would be refused.",
-        DyadErrorKind.External,
+        SambaErrorKind.External,
       );
     }
 
@@ -249,13 +249,13 @@ export async function runServerSetup({
       // people reach — an address Coolify will not take is the ordinary cause.
       // Saying only what it objected to leaves an installed server, no
       // account, and a preflight that refuses to install again.
-      throw new DyadError(
+      throw new SambaError(
         (seeded.reason
           ? `Coolify would not create its admin account: ${seeded.reason} `
           : `Coolify has not created an admin account for ${credentials.email}. `) +
           `The server is installed — open ${plainUrlFor(target.host)} to ` +
           `finish setting it up there.`,
-        DyadErrorKind.External,
+        SambaErrorKind.External,
       );
     }
 

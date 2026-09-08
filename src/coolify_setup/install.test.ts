@@ -7,7 +7,7 @@ import {
 } from "./install";
 import { SshError } from "@/ipc/utils/ssh_client";
 import type { SshSession } from "@/ipc/utils/ssh_client";
-import { DyadErrorKind } from "@/errors/dyad_error";
+import { SambaErrorKind } from "@/errors/samba_error";
 
 /**
  * What Samba Builder concludes when a server does not answer properly.
@@ -26,16 +26,16 @@ const HEALTHY = "mem=1967\ncontainer=\nbusy=no";
 /** What a tinker script's output looks like coming back off the wire. */
 function transcript(output: string): string {
   return [
-    '> echo "__DYAD_OUT_START__" . PHP_EOL;',
-    "> __DYAD_OUT_START__",
+    '> echo "__SAMBA_OUT_START__" . PHP_EOL;',
+    "> __SAMBA_OUT_START__",
     output,
-    "__DYAD_OUT_END__",
+    "__SAMBA_OUT_END__",
   ].join("\n");
 }
 
 describe("what the installer is sent", () => {
   const CREDENTIALS = {
-    username: "dyad",
+    username: "samba",
     email: "me@gmail.com",
     password: "Abc123@xyz",
   };
@@ -194,7 +194,7 @@ describe("a server that answers the connection but not the question", () => {
     );
 
     await installCoolify(session, {
-      username: "dyad-admin",
+      username: "samba-admin",
       email: "me@gmail.com",
       password: "Abc123@xyz",
     });
@@ -268,7 +268,7 @@ describe("waiting for the admin account", () => {
         attemptTimeoutMs: 20,
         signal: controller.signal,
       }),
-    ).rejects.toMatchObject({ kind: DyadErrorKind.UserCancelled });
+    ).rejects.toMatchObject({ kind: SambaErrorKind.UserCancelled });
   });
 
   it("sees the account past a notice printed beside the answer", async () => {
@@ -329,7 +329,7 @@ describe("waiting for the admin account", () => {
           throw new SshError(
             "command-timeout",
             "The server did not answer in time.",
-            DyadErrorKind.External,
+            SambaErrorKind.External,
           );
         }
         return { code: 0, stdout: transcript("yes"), stderr: "" };
@@ -364,7 +364,7 @@ describe("waiting for the admin account", () => {
         throw new SshError(
           "command-timeout",
           "The server did not answer in time.",
-          DyadErrorKind.External,
+          SambaErrorKind.External,
         );
       }) as never,
     );
@@ -391,7 +391,7 @@ describe("waiting for the admin account", () => {
         throw new SshError(
           "timeout",
           "The server stopped answering.",
-          DyadErrorKind.External,
+          SambaErrorKind.External,
         );
       }) as never,
     );

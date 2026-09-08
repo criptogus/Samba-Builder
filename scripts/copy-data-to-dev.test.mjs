@@ -12,14 +12,14 @@ import {
 test("resolves Electron's production user data path on each platform", () => {
   assert.equal(
     getProductionUserDataPath({ platform: "darwin", homeDir: "/home/me" }),
-    path.join("/home/me", "Library", "Application Support", "dyad"),
+    path.join("/home/me", "Library", "Application Support", "samba"),
   );
   assert.equal(
     getProductionUserDataPath({
       platform: "win32",
       env: { APPDATA: "C:\\Users\\me\\AppData\\Roaming" },
     }),
-    path.join("C:\\Users\\me\\AppData\\Roaming", "dyad"),
+    path.join("C:\\Users\\me\\AppData\\Roaming", "samba"),
   );
   assert.equal(
     getProductionUserDataPath({
@@ -27,12 +27,12 @@ test("resolves Electron's production user data path on each platform", () => {
       env: { XDG_CONFIG_HOME: "/config" },
       homeDir: "/home/me",
     }),
-    path.join("/config", "dyad"),
+    path.join("/config", "samba"),
   );
 });
 
 test("reports unique processes using production data", () => {
-  const root = mkdtempSync(path.join(os.tmpdir(), "dyad-copy-processes-"));
+  const root = mkdtempSync(path.join(os.tmpdir(), "samba-copy-processes-"));
   writeFileSync(path.join(root, "sqlite.db"), "database");
 
   assert.deepEqual(
@@ -49,14 +49,14 @@ test("reports the production Samba Builder process on Windows", () => {
     getProcessesUsingDataDirectories([], {
       platform: "win32",
       runSync: () =>
-        '"dyad.exe","789","Console","1","123,456 K"\r\nINFO: No other tasks',
+        '"samba.exe","789","Console","1","123,456 K"\r\nINFO: No other tasks',
     }),
     ["789"],
   );
 });
 
 test("replaces development data only after copying durable production data", () => {
-  const root = mkdtempSync(path.join(os.tmpdir(), "dyad-copy-data-"));
+  const root = mkdtempSync(path.join(os.tmpdir(), "samba-copy-data-"));
   const source = path.join(root, "production");
   const destination = path.join(root, "userData");
   mkdirSync(path.join(source, "samba-apps", "my-app"), { recursive: true });

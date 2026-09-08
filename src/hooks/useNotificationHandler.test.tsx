@@ -131,7 +131,7 @@ describe("useNotificationHandler", () => {
       title: "Notes",
       options: {
         body: "Built a notes app",
-        tag: "dyad-chat-complete-42",
+        tag: "samba-chat-complete-42",
       },
     });
 

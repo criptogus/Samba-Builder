@@ -3,12 +3,12 @@ import path from "node:path";
 import { constants } from "node:fs";
 import { createHash } from "node:crypto";
 import ignore, { type Ignore } from "ignore";
-import { DyadError, DyadErrorKind } from "@/errors/dyad_error";
+import { SambaError, SambaErrorKind } from "@/errors/samba_error";
 import type { TemplateDraft } from "@/shared/project_templates";
 
 const excluded = new Set([
   ".git",
-  ".dyad",
+  ".samba",
   "node_modules",
   ".next",
   ".nuxt",
@@ -70,15 +70,15 @@ export async function snapshotTemplateFiles(
     inherited: { base: string; rules: Ignore }[] = [],
   ) {
     if (++visited > 5000 || relative.split("/").length > 40)
-      throw new DyadError(
+      throw new SambaError(
         "Projeto grande demais para template.",
-        DyadErrorKind.Validation,
+        SambaErrorKind.Validation,
       );
     const directory = path.join(root, relative);
     if ((await fs.realpath(directory)) !== directory)
-      throw new DyadError(
+      throw new SambaError(
         "A pasta mudou durante o salvamento. Tente novamente.",
-        DyadErrorKind.Conflict,
+        SambaErrorKind.Conflict,
       );
     const rules = [...inherited];
     try {
@@ -118,15 +118,15 @@ export async function snapshotTemplateFiles(
         continue;
       }
       if (!safeTemplatePath(name))
-        throw new DyadError(
+        throw new SambaError(
           `Nome incompatível com Mac/Windows: ${name}`,
-          DyadErrorKind.Validation,
+          SambaErrorKind.Validation,
         );
       const portableName = name.normalize("NFC").toLowerCase();
       if (seen.has(portableName))
-        throw new DyadError(
+        throw new SambaError(
           `Nomes duplicados em Mac/Windows: ${name}`,
-          DyadErrorKind.Validation,
+          SambaErrorKind.Validation,
         );
       seen.add(portableName);
       if (entry.isDirectory()) {
@@ -150,9 +150,9 @@ export async function snapshotTemplateFiles(
           bytes > 100_000_000 ||
           files.length >= 1000
         )
-          throw new DyadError(
+          throw new SambaError(
             "Limite do template: 1.000 arquivos, 100 MB no total e 20 MB por arquivo.",
-            DyadErrorKind.Validation,
+            SambaErrorKind.Validation,
           );
         const content = Buffer.alloc(stat.size);
         let offset = 0;
@@ -172,9 +172,9 @@ export async function snapshotTemplateFiles(
           after.size !== stat.size ||
           after.mtimeMs !== stat.mtimeMs
         )
-          throw new DyadError(
+          throw new SambaError(
             "O projeto mudou durante a cópia. Tente novamente.",
-            DyadErrorKind.Conflict,
+            SambaErrorKind.Conflict,
           );
         const target = path.join(destination, name);
         await fs.mkdir(path.dirname(target), { recursive: true });
@@ -195,9 +195,9 @@ export async function snapshotTemplateFiles(
   }
   await walk("");
   if (!files.length)
-    throw new DyadError(
+    throw new SambaError(
       "O projeto não contém arquivos reutilizáveis.",
-      DyadErrorKind.Validation,
+      SambaErrorKind.Validation,
     );
   files.sort((a, b) => a.path.localeCompare(b.path));
   return { files, excluded: excludedCount };

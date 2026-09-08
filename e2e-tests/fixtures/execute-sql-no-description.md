@@ -1,7 +1,7 @@
 No description!
 
-<dyad-execute-sql>
+<samba-execute-sql>
 DROP TABLE users;
-</dyad-execute-sql>
+</samba-execute-sql>
 
 Done.

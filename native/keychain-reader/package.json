@@ -1,5 +1,5 @@
 {
-  "name": "dyad-keychain-reader",
+  "name": "samba-keychain-reader",
   "version": "1.0.0",
   "private": true,
   "description": "macOS Security.framework Keychain reader for Samba Builder safeStorage recovery",

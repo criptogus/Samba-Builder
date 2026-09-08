@@ -1149,7 +1149,7 @@ export function TestsPanel() {
     // alone would keep the app-driven route and run every captured action
     // against a page the spec's `page.goto("/")` never visits.
     const startPath =
-      previewIframeState.currentUrlSource === "dyad"
+      previewIframeState.currentUrlSource === "samba"
         ? sameOriginStartPath(currentPreviewUrl, appUrl.appUrl)
         : undefined;
     requestRecording({

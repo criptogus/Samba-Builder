@@ -20,7 +20,7 @@ import {
   escapeXmlContent,
   type AgentContext,
 } from "../tools/types";
-import { DyadError, DyadErrorKind } from "@/errors/dyad_error";
+import { SambaError, SambaErrorKind } from "@/errors/samba_error";
 import { deleteSupabaseFunction } from "@/supabase_admin/supabase_management_client";
 import {
   appOperationCoordinator,
@@ -94,7 +94,7 @@ function renderSupabaseDeployStatus(progress: SupabaseDeployProgress): string {
     content.push(`Latest: ${progress.functionName}`);
   }
 
-  return `<dyad-status title="${escapeXmlAttr(title)}" state="${state}">\n${escapeXmlContent(content.join("\n"))}${isComplete ? "\n</dyad-status>" : ""}`;
+  return `<samba-status title="${escapeXmlAttr(title)}" state="${state}">\n${escapeXmlContent(content.join("\n"))}${isComplete ? "\n</samba-status>" : ""}`;
 }
 
 /**
@@ -291,9 +291,9 @@ export async function commitAllChanges(
         };
       } catch (error) {
         logger.error(`Failed to commit changes: ${error}`);
-        throw new DyadError(
+        throw new SambaError(
           `Failed to commit changes: ${error}`,
-          DyadErrorKind.External,
+          SambaErrorKind.External,
         );
       }
     },

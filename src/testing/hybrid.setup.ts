@@ -5,14 +5,14 @@ import type { RendererIpcBridge } from "./renderer_ipc_bridge";
 
 // Quiet electron-log's console transport during tests: per-request info/debug
 // chatter from IPC handlers otherwise floods vitest output. Warnings and
-// errors still print. Override with DYAD_TEST_LOG_LEVEL=debug (or another
+// errors still print. Override with SAMBA_TEST_LOG_LEVEL=debug (or another
 // electron-log level) when debugging a test.
 log.transports.console.level =
-  (process.env.DYAD_TEST_LOG_LEVEL as typeof log.transports.console.level) ??
+  (process.env.SAMBA_TEST_LOG_LEVEL as typeof log.transports.console.level) ??
   "warn";
 
 type HybridBridgeDiagnosticGlobal = typeof globalThis & {
-  __DYAD_HYBRID_BRIDGE__?: RendererIpcBridge;
+  __SAMBA_HYBRID_BRIDGE__?: RendererIpcBridge;
 };
 
 configure({ asyncUtilTimeout: 5_000 });
@@ -160,7 +160,7 @@ afterEach(({ task }) => {
   );
 
   const bridge = (globalThis as HybridBridgeDiagnosticGlobal)
-    .__DYAD_HYBRID_BRIDGE__;
+    .__SAMBA_HYBRID_BRIDGE__;
   if (!bridge) return;
 
   console.error(

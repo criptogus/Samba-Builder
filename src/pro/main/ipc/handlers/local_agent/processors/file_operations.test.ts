@@ -409,7 +409,9 @@ describe("reconcileDeferredFunctionOperations", () => {
 
 describe("supabaseFunctionEntryExists", () => {
   it("requires the concrete index.ts entry point", async () => {
-    const appPath = await fs.mkdtemp(path.join(os.tmpdir(), "dyad-functions-"));
+    const appPath = await fs.mkdtemp(
+      path.join(os.tmpdir(), "samba-functions-"),
+    );
     const functionPath = path.join(appPath, "supabase", "functions", "hello");
     try {
       await fs.mkdir(functionPath, { recursive: true });

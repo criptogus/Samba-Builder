@@ -4,8 +4,8 @@ import log from "electron-log";
 import { assertMutationPathAllowed, safeJoin } from "./path_utils";
 import { gitAdd } from "./git_utils";
 import {
-  DYAD_MEDIA_DIR_NAME,
-  isWithinDyadMediaDir,
+  SAMBA_MEDIA_DIR_NAME,
+  isWithinSambaMediaDir,
   resolveAttachmentLogicalPath,
 } from "./media_path_utils";
 import {
@@ -18,11 +18,11 @@ import {
   isSharedServerModule,
   extractFunctionNameFromPath,
 } from "../../supabase_admin/supabase_utils";
-import { DyadError, DyadErrorKind } from "@/errors/dyad_error";
+import { SambaError, SambaErrorKind } from "@/errors/samba_error";
 import { db } from "@/db";
 import { apps } from "@/db/schema";
 import { eq } from "drizzle-orm";
-import { getDyadAppPath } from "@/paths/paths";
+import { getSambaAppPath } from "@/paths/paths";
 
 const logger = log.scope("copy_file_utils");
 
@@ -39,7 +39,7 @@ export interface CopyFileResult {
  * Copy a file within a Samba Builder app, with security validation, git staging,
  * and optional Supabase function deployment.
  *
- * @throws Error if an absolute source path is outside the app's .dyad/media directory.
+ * @throws Error if an absolute source path is outside the app's .samba/media directory.
  *   Relative paths are resolved within the app root (consistent with write_file access).
  * @throws Error if the source file does not exist
  */
@@ -60,8 +60,8 @@ export async function executeCopyFile({
   const readsMedia =
     from.startsWith("attachments:") ||
     path.isAbsolute(from) ||
-    normalizedSource === DYAD_MEDIA_DIR_NAME ||
-    normalizedSource.startsWith(`${DYAD_MEDIA_DIR_NAME}/`);
+    normalizedSource === SAMBA_MEDIA_DIR_NAME ||
+    normalizedSource.startsWith(`${SAMBA_MEDIA_DIR_NAME}/`);
   return appOperationCoordinator.run(
     {
       appId,
@@ -78,27 +78,27 @@ export async function executeCopyFile({
         where: eq(apps.id, appId),
       });
       if (!app) {
-        throw new DyadError("App not found", DyadErrorKind.NotFound);
+        throw new SambaError("App not found", SambaErrorKind.NotFound);
       }
-      const appPath = getDyadAppPath(app.path);
+      const appPath = getSambaAppPath(app.path);
       const { supabaseProjectId, supabaseOrganizationSlug } = app;
 
-      // Resolve the source path: allow both .dyad/media paths and app-relative paths
+      // Resolve the source path: allow both .samba/media paths and app-relative paths
       let fromFullPath: string;
       if (from.startsWith("attachments:")) {
         const attachment = await resolveAttachmentLogicalPath(appPath, from);
         if (!attachment) {
-          throw new DyadError(
+          throw new SambaError(
             `Attachment does not exist: ${from}`,
-            DyadErrorKind.NotFound,
+            SambaErrorKind.NotFound,
           );
         }
         fromFullPath = attachment.filePath;
       } else if (path.isAbsolute(from)) {
-        // Security: only allow absolute paths within the app's .dyad/media directory
-        if (!isWithinDyadMediaDir(from, appPath)) {
+        // Security: only allow absolute paths within the app's .samba/media directory
+        if (!isWithinSambaMediaDir(from, appPath)) {
           throw new Error(
-            `Absolute source paths are only allowed within the .dyad/media directory`,
+            `Absolute source paths are only allowed within the .samba/media directory`,
           );
         }
         fromFullPath = path.resolve(from);
@@ -113,9 +113,9 @@ export async function executeCopyFile({
       const toFullPath = safeJoin(appPath, operationPath);
 
       if (!fs.existsSync(fromFullPath)) {
-        throw new DyadError(
+        throw new SambaError(
           `Source file does not exist: ${from}`,
-          DyadErrorKind.NotFound,
+          SambaErrorKind.NotFound,
         );
       }
 
@@ -126,10 +126,10 @@ export async function executeCopyFile({
       const resolvedAppPath = fs.realpathSync(appPath);
       if (
         path.isAbsolute(from) &&
-        !isWithinDyadMediaDir(realFromPath, resolvedAppPath)
+        !isWithinSambaMediaDir(realFromPath, resolvedAppPath)
       ) {
         throw new Error(
-          `Source path resolves to a location outside the .dyad/media directory (possible symlink traversal)`,
+          `Source path resolves to a location outside the .samba/media directory (possible symlink traversal)`,
         );
       }
       if (

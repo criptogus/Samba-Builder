@@ -133,7 +133,7 @@ testWithNotificationsEnabled(
 
     const notification =
       await po.browserNotifications.waitForNotificationWithTag(
-        `dyad-chat-complete-${chatId}`,
+        `samba-chat-complete-${chatId}`,
       );
 
     expect(notification.title).toBe("minimal");
@@ -162,7 +162,7 @@ testWithNotificationsEnabled(
 
     const notification =
       await po.browserNotifications.waitForNotificationWithTag(
-        `dyad-chat-complete-${chatId}`,
+        `samba-chat-complete-${chatId}`,
       );
 
     expect(notification.title).toBe("minimal");
@@ -192,7 +192,7 @@ testWithNotificationsEnabled(
     await po.chatActions.sendPrompt("hello", { skipWaitForCompletion: true });
     await triggerHidden(po);
 
-    const tag = `dyad-chat-complete-${chatId}`;
+    const tag = `samba-chat-complete-${chatId}`;
     let notification =
       await po.browserNotifications.waitForNotificationWithTag(tag);
     expect(notification.closed).toBe(false);
@@ -238,7 +238,7 @@ testWithNotificationsEnabled(
     });
     await triggerDifferentChat(po, initialChatId);
 
-    const tag = `dyad-chat-complete-${initialChatId}`;
+    const tag = `samba-chat-complete-${initialChatId}`;
     await po.browserNotifications.waitForNotificationWithTag(tag);
 
     // Click notification to navigate back
@@ -264,7 +264,7 @@ testWithNotificationsEnabled(
     const chatId = await createChat(po);
 
     await po.browserNotifications.injectFakeNotifications();
-    const tag = `dyad-chat-complete-${chatId}`;
+    const tag = `samba-chat-complete-${chatId}`;
 
     // Send first message
     await po.chatActions.sendPrompt("first", { skipWaitForCompletion: true });
@@ -374,7 +374,7 @@ testWithNotificationsEnabled(
       { chatId },
     );
 
-    const tag = "dyad-agent-consent-test-request";
+    const tag = "samba-agent-consent-test-request";
     const notification =
       await po.browserNotifications.waitForNotificationWithTag(tag);
     expect(notification.requireInteraction).toBe(true);
@@ -408,7 +408,7 @@ testWithNotificationsEnabled(
       { chatId },
     );
 
-    const agentTag = "dyad-agent-consent-agent-resolved-request";
+    const agentTag = "samba-agent-consent-agent-resolved-request";
     const agentNotification =
       await po.browserNotifications.waitForNotificationWithTag(agentTag);
     expect(agentNotification.closed).toBe(false);
@@ -478,7 +478,7 @@ testWithNotificationsEnabled(
       await po.browserNotifications.getCreatedNotifications();
     expect(
       notifications.some(
-        (item) => item.tag === "dyad-mcp-consent-mcp-in-flight-request",
+        (item) => item.tag === "samba-mcp-consent-mcp-in-flight-request",
       ),
     ).toBe(false);
   },
@@ -512,7 +512,7 @@ testWithNotificationsEnabled(
       { chatId },
     );
 
-    const tag = "dyad-agent-consent-test-request";
+    const tag = "samba-agent-consent-test-request";
     const notification =
       await po.browserNotifications.waitForNotificationWithTag(tag);
     expect(notification.requireInteraction).toBe(true);
@@ -547,7 +547,7 @@ testWithNotificationsEnabled(
       { chatId },
     );
 
-    const tag = "dyad-agent-consent-test-request";
+    const tag = "samba-agent-consent-test-request";
     await po.browserNotifications.waitForNotificationWithTag(tag);
 
     await po.browserNotifications.clickNotificationWithTag(tag);
@@ -585,7 +585,7 @@ testWithNotificationsEnabled(
       { chatId },
     );
 
-    const tag = "dyad-mcp-consent-mcp-request";
+    const tag = "samba-mcp-consent-mcp-request";
     const notification =
       await po.browserNotifications.waitForNotificationWithTag(tag);
     expect(notification.body).toContain("mcp_tool");
@@ -623,7 +623,7 @@ testWithNotificationsEnabled(
       { chatId },
     );
 
-    const tag = "dyad-mcp-consent-mcp-request";
+    const tag = "samba-mcp-consent-mcp-request";
     const notification =
       await po.browserNotifications.waitForNotificationWithTag(tag);
     expect(notification.body).toContain("mcp_tool");
@@ -661,7 +661,7 @@ testWithNotificationsEnabled(
       { chatId },
     );
 
-    const tag = "dyad-mcp-consent-mcp-request";
+    const tag = "samba-mcp-consent-mcp-request";
     await po.browserNotifications.waitForNotificationWithTag(tag);
 
     await po.browserNotifications.clickNotificationWithTag(tag);
@@ -703,7 +703,7 @@ testWithNotificationsEnabled(
       { chatId },
     );
 
-    const tag = "dyad-plan-questionnaire-plan-request";
+    const tag = "samba-plan-questionnaire-plan-request";
     const notification =
       await po.browserNotifications.waitForNotificationWithTag(tag);
     expect(notification.body).toContain("Planning Questions");
@@ -745,7 +745,7 @@ testWithNotificationsEnabled(
       { chatId },
     );
 
-    const tag = "dyad-plan-questionnaire-plan-request";
+    const tag = "samba-plan-questionnaire-plan-request";
     const notification =
       await po.browserNotifications.waitForNotificationWithTag(tag);
     expect(notification.body).toContain("Planning Questions");
@@ -787,7 +787,7 @@ testWithNotificationsEnabled(
       { chatId },
     );
 
-    const tag = "dyad-plan-questionnaire-plan-request";
+    const tag = "samba-plan-questionnaire-plan-request";
     await po.browserNotifications.waitForNotificationWithTag(tag);
 
     await po.browserNotifications.clickNotificationWithTag(tag);

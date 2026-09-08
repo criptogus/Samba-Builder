@@ -1061,6 +1061,6 @@ export function makeEvalContext(seeded: SeededCategory): AgentContext {
     appId: seeded.appId,
     chatId: seeded.currentChatId,
     messageId: seeded.cutoffMessageId,
-    isDyadPro: true,
+    isSambaPro: true,
   });
 }

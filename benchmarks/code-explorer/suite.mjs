@@ -24,7 +24,7 @@ const { values } = parseArgs({
     timeout: { type: "string", default: "600000" },
     concurrency: { type: "string" },
     model: { type: "string", default: "auto" },
-    auth: { type: "string", default: "dyad-pro" },
+    auth: { type: "string", default: "samba-pro" },
     "codex-auth-path": { type: "string" },
     "codex-model": { type: "string", default: "gpt-5.5" },
     "retry-from": { type: "string" },

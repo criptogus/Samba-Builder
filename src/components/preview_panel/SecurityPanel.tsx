@@ -37,7 +37,7 @@ import type {
   SecurityReviewResult,
 } from "@/ipc/types/security";
 import { useState, useEffect, useRef } from "react";
-import { VanillaMarkdownParser } from "@/components/chat/DyadMarkdownParser";
+import { VanillaMarkdownParser } from "@/components/chat/SambaMarkdownParser";
 import { showSuccess, showWarning, toast } from "@/lib/toast";
 import { useLoadAppFile } from "@/hooks/useLoadAppFile";
 import { useQueryClient } from "@tanstack/react-query";

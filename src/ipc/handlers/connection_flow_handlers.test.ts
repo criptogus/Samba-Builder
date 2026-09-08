@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { DyadErrorKind } from "@/errors/dyad_error";
+import { SambaErrorKind } from "@/errors/samba_error";
 import { getRegisteredHandlerForTesting } from "./base";
 import { registerConnectionFlowHandlers } from "./connection_flow_handlers";
 
@@ -46,7 +46,7 @@ describe("connection-flow remote admission", () => {
         appId: null,
         expectedRevision: 0,
       }),
-    ).rejects.toMatchObject({ kind: DyadErrorKind.Conflict });
+    ).rejects.toMatchObject({ kind: SambaErrorKind.Conflict });
 
     await cancel(secondWindow as never, {
       provider: "neon",

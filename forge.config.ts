@@ -102,7 +102,7 @@ const ignore = (file: string) => {
   if (file.startsWith("/node_modules/better-sqlite3")) {
     return false;
   }
-  if (file.startsWith("/node_modules/dyad-keychain-reader")) {
+  if (file.startsWith("/node_modules/samba-keychain-reader")) {
     return false;
   }
   if (file.startsWith("/node_modules/node-pty")) {
@@ -152,12 +152,13 @@ const isEndToEndTestBuild = process.env.E2E_TEST_BUILD === "true";
 const isLocalDesktopBuild =
   process.env.SAMBA_LOCAL_DESKTOP_BUILD === "true" && !isEndToEndTestBuild;
 const isWindowsSigningEnabled = process.env.WINDOWS_SIGN === "true";
-const shouldSkipNativeRebuild = process.env.DYAD_SKIP_NATIVE_REBUILD === "true";
+const shouldSkipNativeRebuild =
+  process.env.SAMBA_SKIP_NATIVE_REBUILD === "true";
 const nativeRebuildModules = [
   "better-sqlite3",
   "node-pty",
   "mustardscript",
-  ...(process.platform === "darwin" ? ["dyad-keychain-reader"] : []),
+  ...(process.platform === "darwin" ? ["samba-keychain-reader"] : []),
 ];
 
 if (isWindowsSigningEnabled && !process.env.AZURE_CODE_SIGNING_DLIB) {
@@ -172,7 +173,7 @@ const config: ForgeConfig = {
   packagerConfig: {
     name: "Samba Builder",
     // Keep the existing application identity while correcting its display name.
-    appBundleId: "com.electron.dyad",
+    appBundleId: "com.sambatech.builder",
     // E2E test builds install local file: dependencies as links on Windows.
     // Dereference them so packaging does not require symlink privileges in the temp app.
     // Local file: native packages install as symlinks; dereference them so the
@@ -189,7 +190,7 @@ const config: ForgeConfig = {
             const packagePath = path.join(buildPath, "package.json");
             const metadata = JSON.parse(await readFile(packagePath, "utf8"));
             metadata.sambaLocalUserDataPath = path.resolve(
-              process.env.DYAD_DEV_USER_DATA_DIR?.trim() || "userData",
+              process.env.SAMBA_DEV_USER_DATA_DIR?.trim() || "userData",
             );
             await writeFile(packagePath, JSON.stringify(metadata, null, 2));
           }
@@ -210,10 +211,8 @@ const config: ForgeConfig = {
     ],
     protocols: [
       {
-        // Samba Builder: scheme técnico "dyad://" mantido nesta fase — deep links e
-        // OAuth dependem dele em todo o main process. Rebrand de scheme = fase 2.
         name: "Samba Builder",
-        schemes: ["dyad"],
+        schemes: ["sambabuilder"],
       },
     ],
     icon: "./assets/icon/logo",
@@ -241,7 +240,7 @@ const config: ForgeConfig = {
     asar: {
       // Native modules and node-pty helper binaries must be loadable from disk.
       unpackDir:
-        "{node_modules/dyad-keychain-reader,node_modules/node-pty,node_modules/mustardscript,node_modules/@mustardscript}",
+        "{node_modules/samba-keychain-reader,node_modules/node-pty,node_modules/mustardscript,node_modules/@mustardscript}",
     },
     ignore,
     extraResource: [
@@ -265,26 +264,22 @@ const config: ForgeConfig = {
       isWindowsSigningEnabled
         ? {
             windowsSign,
-            iconUrl:
-              "https://raw.githubusercontent.com/dyad-sh/dyad/main/assets/icon/logo.ico",
             setupIcon: "./assets/icon/logo.ico",
           }
         : {
-            iconUrl:
-              "https://raw.githubusercontent.com/dyad-sh/dyad/main/assets/icon/logo.ico",
             setupIcon: "./assets/icon/logo.ico",
           },
     ),
     new MakerZIP({}, ["darwin"]),
     new MakerRpm({
       options: {
-        mimeType: ["x-scheme-handler/dyad"],
+        mimeType: ["x-scheme-handler/sambabuilder"],
         icon: "./assets/icon/logo.png",
       },
     }),
     new MakerDeb({
       options: {
-        mimeType: ["x-scheme-handler/dyad"],
+        mimeType: ["x-scheme-handler/sambabuilder"],
         icon: "./assets/icon/logo.png",
       },
     }),
@@ -297,8 +292,8 @@ const config: ForgeConfig = {
       name: "@electron-forge/publisher-github",
       config: {
         repository: {
-          owner: "dyad-sh",
-          name: "dyad",
+          owner: "criptogus",
+          name: "Samba-Builder",
         },
         draft: true,
         force: true,

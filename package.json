@@ -35,8 +35,6 @@
     "start:paused-sub": "node scripts/start-subscription-status.mjs subscription_paused",
     "start:healthy-sub": "node scripts/start-subscription-status.mjs healthy",
     "dev": "cross-env NODE_ENV=development npm start",
-    "dev:engine": "cross-env DYAD_ENGINE_URL=http://localhost:8080/v1 npm start",
-    "staging:engine": "cross-env DYAD_ENGINE_URL=https://staging---dyad-llm-engine-kq7pivehnq-uc.a.run.app/v1 npm start",
     "package": "npm run rebuild:keychain-reader && npm run clean && electron-forge package",
     "make": "npm run rebuild:keychain-reader && npm run clean && electron-forge make",
     "publish": "npm run rebuild:keychain-reader && npm run clean && electron-forge publish",
@@ -173,7 +171,7 @@
     "zod": "^4.3.6"
   },
   "optionalDependencies": {
-    "dyad-keychain-reader": "file:native/keychain-reader"
+    "samba-keychain-reader": "file:native/keychain-reader"
   },
   "devDependencies": {
     "@electron-forge/cli": "^7.11.1",

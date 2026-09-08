@@ -118,8 +118,8 @@
     "errorLoadingSettings": "加载设置出错",
     "couldNotLoadProvider": "无法加载提供商数据：{{message}}",
     "couldNotLoadSettings": "无法加载配置数据：{{message}}",
-    "enableDyadPro": "启用 Samba Builder",
-    "toggleDyadPro": "切换以启用 Samba Builder",
+    "enableSambaPro": "启用 Samba Builder",
+    "toggleSambaPro": "切换以启用 Samba Builder",
     "apiKeyEmpty": "API 密钥不能为空。",
     "errorTogglingPro": "切换 Samba Builder 时出错：{{error}}",
     "failedSaveApiKey": "保存 API 密钥失败。",
@@ -300,6 +300,6 @@
     "updateProvider": "更新提供商",
     "failedCreate": "创建自定义提供商失败"
   },
-  "manageDyadPro": "管理 Samba Builder 订阅",
-  "setupDyadPro": "设置 Samba Builder 订阅"
+  "manageSambaPro": "管理 Samba Builder 订阅",
+  "setupSambaPro": "设置 Samba Builder 订阅"
 }

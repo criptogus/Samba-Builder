@@ -10,7 +10,7 @@ export const fixture: LocalAgentFixture = {
           name: "write_file",
           args: {
             path: "src/pages/Index.tsx",
-            content: `import { MadeWithDyad } from "@/components/made-with-dyad";
+            content: `import { MadeWithSamba } from "@/components/made-with-samba";
 
 const Index = () => {
   return (
@@ -18,7 +18,7 @@ const Index = () => {
       <div className="text-center">
         <h1 className="text-4xl font-bold mb-4">No more errors!</h1>
       </div>
-      <MadeWithDyad />
+      <MadeWithSamba />
     </div>
   );
 };

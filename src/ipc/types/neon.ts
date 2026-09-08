@@ -148,7 +148,7 @@ export const neonContracts = {
   }),
 
   /**
-   * Direct connection to Neon with an account API key. No OAuth / Dyad proxy
+   * Direct connection to Neon with an account API key. No OAuth / Samba proxy
    * involved: the key is validated against the Neon API and stored.
    */
   connectWithApiKey: defineContract({

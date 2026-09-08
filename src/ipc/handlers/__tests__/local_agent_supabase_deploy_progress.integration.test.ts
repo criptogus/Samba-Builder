@@ -6,10 +6,10 @@
 // Supabase module (supabase/functions/_shared/cors.ts) plus 20 edge
 // functions. With the app connected to a Supabase project, the local agent
 // deploys the functions through a bounded-concurrency queue at the end of
-// the turn, streaming `<dyad-status>` progress updates
+// the turn, streaming `<samba-status>` progress updates
 // ("Deploying Supabase functions: X/20 complete (N active, M queued)") and
 // finishing with "Supabase functions deployed: 20/20 complete" — which now
-// renders as the real <dyad-status> card in the messages list (the surface
+// renders as the real <samba-status> card in the messages list (the surface
 // the Playwright spec polled).
 //
 // E2E_TEST_BUILD=true (set in the hoisted block, before app modules import,
@@ -42,9 +42,9 @@ describe("local agent supabase deploy progress (integration)", () => {
       chatMode: "local-agent",
       settings: {
         isTestMode: true,
-        enableDyadPro: true,
+        enableSambaPro: true,
         providerSettings: {
-          auto: { apiKey: { value: "testdyadkey" } },
+          auto: { apiKey: { value: "testsambakey" } },
         },
       },
     });
@@ -76,7 +76,7 @@ describe("local agent supabase deploy progress (integration)", () => {
     );
     send();
 
-    // The finished <dyad-status> card renders in the messages list — the same
+    // The finished <samba-status> card renders in the messages list — the same
     // progress surface the e2e polled, in its terminal state.
     await waitFor(
       () =>
@@ -132,7 +132,7 @@ describe("local agent supabase deploy progress (integration)", () => {
     });
     const assistant = messages.find((m) => m.role === "assistant")!;
     expect(assistant.content).toContain(
-      '<dyad-status title="Supabase functions deployed: 20/20 complete" state="finished">',
+      '<samba-status title="Supabase functions deployed: 20/20 complete" state="finished">',
     );
     // The transient in-progress statuses were not persisted — only the
     // finished one.

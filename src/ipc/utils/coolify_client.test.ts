@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { CoolifyClient, isCoolifyStatus } from "./coolify_client";
 import { isSecureInstanceUrl } from "../types/coolify";
-import { DyadErrorKind } from "@/errors/dyad_error";
+import { SambaErrorKind } from "@/errors/samba_error";
 import { shouldFilterTelemetryException } from "@/ipc/utils/telemetry";
 
 function mockFetch(
@@ -37,7 +37,7 @@ describe("error classification", () => {
       { status: 403, body: '{"success":true,"message":"API is disabled."}' },
     ]);
     await expect(client().listServers()).rejects.toMatchObject({
-      kind: DyadErrorKind.Precondition,
+      kind: SambaErrorKind.Precondition,
       message: expect.stringContaining("Settings → Advanced"),
     });
   });
@@ -83,10 +83,10 @@ describe("setEnv", () => {
 describe("registerPrivateKey", () => {
   it("reuses an existing key with the same name", async () => {
     const fetchMock = mockFetch([
-      { status: 200, body: '[{"uuid":"k1","name":"dyad_deploy_o_r","id":7}]' },
+      { status: 200, body: '[{"uuid":"k1","name":"samba_deploy_o_r","id":7}]' },
     ]);
     const result = await client().registerPrivateKey({
-      name: "dyad_deploy_o_r",
+      name: "samba_deploy_o_r",
       privateKey: "PRIVATE",
     });
     expect(result).toEqual({ uuid: "k1", id: 7 });
@@ -112,7 +112,7 @@ describe("createApplicationFromPrivateRepo", () => {
       privateKeyUuid: "k",
       gitRepository: "git@github.com:o/r.git",
       gitBranch: "main",
-      name: "dyad-app",
+      name: "samba-app",
       build: {
         buildPack: "railpack",
         portsExposes: "80",
@@ -152,18 +152,18 @@ describe("isSecureInstanceUrl", () => {
 
 describe("auth failures are classified as Auth", () => {
   it("treats a rejected token as an auth failure, not bad input", async () => {
-    // rules/dyad-errors.md: Auth is "not signed in, missing token"; Validation
+    // rules/samba-errors.md: Auth is "not signed in, missing token"; Validation
     // is for malformed input. A revoked token is the former.
     mockFetch([{ status: 401, body: "" }]);
     await expect(client().listServers()).rejects.toMatchObject({
-      kind: DyadErrorKind.Auth,
+      kind: SambaErrorKind.Auth,
     });
   });
 
   it("treats missing scopes as an auth failure", async () => {
     mockFetch([{ status: 403, body: '{"message":"Forbidden"}' }]);
     await expect(client().listServers()).rejects.toMatchObject({
-      kind: DyadErrorKind.Auth,
+      kind: SambaErrorKind.Auth,
     });
   });
 
@@ -172,7 +172,7 @@ describe("auth failures are classified as Auth", () => {
       { status: 403, body: '{"success":true,"message":"API is disabled."}' },
     ]);
     await expect(client().listServers()).rejects.toMatchObject({
-      kind: DyadErrorKind.Precondition,
+      kind: SambaErrorKind.Precondition,
     });
   });
 });
@@ -183,7 +183,7 @@ describe("transport and response robustness", () => {
     // back as the expected type and read as undefined fields downstream.
     mockFetch([{ status: 200, body: "<html>login</html>" }]);
     await expect(client().listServers()).rejects.toMatchObject({
-      kind: DyadErrorKind.External,
+      kind: SambaErrorKind.External,
       message: expect.stringContaining("not JSON"),
     });
   });
@@ -191,7 +191,7 @@ describe("transport and response robustness", () => {
   it("classifies throttling as rate limiting, not a crash", async () => {
     mockFetch([{ status: 429, body: "slow down" }]);
     await expect(client().listServers()).rejects.toMatchObject({
-      kind: DyadErrorKind.RateLimited,
+      kind: SambaErrorKind.RateLimited,
     });
   });
 
@@ -208,7 +208,7 @@ describe("transport and response robustness", () => {
       })),
     );
     await expect(client().listServers()).rejects.toMatchObject({
-      kind: DyadErrorKind.External,
+      kind: SambaErrorKind.External,
       message: expect.stringContaining("no response within"),
     });
   });
@@ -219,7 +219,7 @@ describe("validating list responses", () => {
     // A newer Coolify answering {data:[...]} used to yield an empty picker.
     mockFetch([{ status: 200, body: JSON.stringify({ data: [] }) }]);
     await expect(client().listServers()).rejects.toMatchObject({
-      kind: DyadErrorKind.External,
+      kind: SambaErrorKind.External,
       message: expect.stringContaining("did not return a list"),
     });
   });
@@ -227,7 +227,7 @@ describe("validating list responses", () => {
   it("rejects a list with nothing usable in it", async () => {
     mockFetch([{ status: 200, body: JSON.stringify([{ uuid: "srv-1" }]) }]);
     await expect(client().listServers()).rejects.toMatchObject({
-      kind: DyadErrorKind.External,
+      kind: SambaErrorKind.External,
       message: expect.stringContaining("unexpected shape"),
     });
   });

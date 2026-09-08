@@ -295,7 +295,7 @@ async function createBoundedSourceSnapshot(
 export function getMediaThumbnailCacheRoot(cachePath: string): string {
   return path.join(
     cachePath,
-    "dyad-media-thumbnails",
+    "samba-media-thumbnails",
     MEDIA_THUMBNAIL_CACHE_VERSION,
   );
 }

@@ -134,10 +134,12 @@ describe("mergeWindowsPathSegments", () => {
   it("appends new registry entries after current entries", () => {
     expect(
       mergeWindowsPathSegments(
-        "C:\\dyad\\managed;C:\\Windows\\system32",
+        "C:\\samba\\managed;C:\\Windows\\system32",
         "C:\\Windows\\system32;C:\\Program Files\\nodejs",
       ),
-    ).toBe("C:\\dyad\\managed;C:\\Windows\\system32;C:\\Program Files\\nodejs");
+    ).toBe(
+      "C:\\samba\\managed;C:\\Windows\\system32;C:\\Program Files\\nodejs",
+    );
   });
 
   it("dedupes case-insensitively and ignores trailing slashes", () => {

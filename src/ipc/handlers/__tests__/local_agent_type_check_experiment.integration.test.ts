@@ -19,9 +19,9 @@ describe("project-wide TypeScript setting (integration)", () => {
       chatMode: "local-agent",
       settings: {
         isTestMode: true,
-        enableDyadPro: true,
+        enableSambaPro: true,
         runTypeScriptForWholeProject: true,
-        providerSettings: { auto: { apiKey: { value: "testdyadkey" } } },
+        providerSettings: { auto: { apiKey: { value: "testsambakey" } } },
       },
     });
   }, 60_000);
@@ -47,7 +47,7 @@ describe("project-wide TypeScript setting (integration)", () => {
     send();
 
     await waitFor(
-      () => expect(screen.getByText(/dyad-dump-path/)).toBeTruthy(),
+      () => expect(screen.getByText(/samba-dump-path/)).toBeTruthy(),
       { timeout: 20_000 },
     );
     await streamEnd;

@@ -7,7 +7,7 @@ import { processSupabaseDependencyAnalysis } from "../../../workers/supabase_dep
 describe("Supabase dependency analysis worker", () => {
   it("distinguishes a missing TypeScript install from an incompatible compiler API", async () => {
     const appPath = await fs.mkdtemp(
-      path.join(os.tmpdir(), "dyad-supabase-no-ts-analysis-"),
+      path.join(os.tmpdir(), "samba-supabase-no-ts-analysis-"),
     );
     try {
       await expect(
@@ -26,7 +26,7 @@ describe("Supabase dependency analysis worker", () => {
 
   it("uses bundled TypeScript 6 when an installed TS7 lacks the legacy API", async () => {
     const appPath = await fs.mkdtemp(
-      path.join(os.tmpdir(), "dyad-supabase-ts7-analysis-"),
+      path.join(os.tmpdir(), "samba-supabase-ts7-analysis-"),
     );
     try {
       const write = async (relativePath: string, contents: string) => {
@@ -71,7 +71,7 @@ describe("Supabase dependency analysis worker", () => {
 
   it("uses bundled TypeScript 6 when a local compiler has null enum exports", async () => {
     const appPath = await fs.mkdtemp(
-      path.join(os.tmpdir(), "dyad-supabase-null-enum-analysis-"),
+      path.join(os.tmpdir(), "samba-supabase-null-enum-analysis-"),
     );
     try {
       const write = async (relativePath: string, contents: string) => {

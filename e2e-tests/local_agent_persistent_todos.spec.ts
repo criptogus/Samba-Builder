@@ -5,7 +5,7 @@ import { testSkipIfWindows } from "./helpers/test_helper";
  *
  * This tests that when an agent creates a todo list but doesn't complete
  * all items by the end of a turn, the incomplete todos are:
- * 1. Persisted to disk (.dyad/todos/<chatId>.json)
+ * 1. Persisted to disk (.samba/todos/<chatId>.json)
  * 2. Loaded at the start of the next turn
  * 3. Injected as a synthetic "[System]" message so the LLM is aware of them
  * 4. Completed by the agent in the subsequent turn
@@ -23,7 +23,7 @@ import { testSkipIfWindows } from "./helpers/test_helper";
 testSkipIfWindows(
   "local-agent - persistent todos across turns",
   async ({ po }) => {
-    await po.setUpDyadPro({ localAgent: true, autoApprove: true });
+    await po.setUpSambaPro({ localAgent: true, autoApprove: true });
     await po.importApp("minimal");
     await po.chatActions.selectLocalAgentMode();
 

@@ -1,6 +1,6 @@
 import log from "electron-log";
 import { z } from "zod";
-import { DyadError, DyadErrorKind } from "@/errors/dyad_error";
+import { SambaError, SambaErrorKind } from "@/errors/samba_error";
 import type {
   LanguageModel,
   LanguageModelProvider,
@@ -31,16 +31,16 @@ const DEFAULT_CACHE_TTL_MS = 60 * 60 * 1000;
 const FALLBACK_CACHE_TTL_MS = 30 * 1000;
 
 function getRemoteLanguageModelCatalogUrl(): string | null {
-  if (process.env.DYAD_LANGUAGE_MODEL_CATALOG_URL) {
-    return process.env.DYAD_LANGUAGE_MODEL_CATALOG_URL;
+  if (process.env.SAMBA_LANGUAGE_MODEL_CATALOG_URL) {
+    return process.env.SAMBA_LANGUAGE_MODEL_CATALOG_URL;
   }
 
   if (process.env.E2E_TEST_BUILD === "true" && process.env.FAKE_LLM_PORT) {
     return `http://localhost:${process.env.FAKE_LLM_PORT}/api/language-model-catalog`;
   }
 
-  // Samba Builder: zero backend do Dyad — o catálogo é o builtin local
-  // (CLOUD_PROVIDERS + MODEL_OPTIONS); nada é baixado de api.dyad.sh.
+  // Samba Builder: zero backend do Samba — o catálogo é o builtin local
+  // (CLOUD_PROVIDERS + MODEL_OPTIONS); nada é baixado de servidor remoto.
   return null;
 }
 
@@ -78,15 +78,15 @@ const CatalogModelSchema = z.object({
 const ApiProtocolSchema = z.enum(["responses", "chat-completions", "messages"]);
 
 const KNOWN_BUILTIN_MODEL_ALIASES = [
-  "dyad/theme-generator/google",
-  "dyad/theme-generator/anthropic",
-  "dyad/theme-generator/openai",
-  "dyad/auto/openai",
-  "dyad/auto/anthropic",
-  "dyad/auto/google",
-  "dyad/auto/openrouter",
-  "dyad/auto/balanced",
-  "dyad/help-bot/default",
+  "samba/theme-generator/google",
+  "samba/theme-generator/anthropic",
+  "samba/theme-generator/openai",
+  "samba/auto/openai",
+  "samba/auto/anthropic",
+  "samba/auto/google",
+  "samba/auto/openrouter",
+  "samba/auto/balanced",
+  "samba/help-bot/default",
 ] as const;
 
 export type BuiltinModelAlias = (typeof KNOWN_BUILTIN_MODEL_ALIASES)[number];
@@ -140,9 +140,9 @@ let builtinCatalogFetchPromise: Promise<BuiltinLanguageModelCatalog> | null =
   null;
 
 const DEFAULT_THEME_GENERATION_OPTIONS: ThemeGenerationModelOption[] = [
-  { id: "dyad/theme-generator/google", label: "Google" },
-  { id: "dyad/theme-generator/anthropic", label: "Anthropic" },
-  { id: "dyad/theme-generator/openai", label: "OpenAI" },
+  { id: "samba/theme-generator/google", label: "Google" },
+  { id: "samba/theme-generator/anthropic", label: "Anthropic" },
+  { id: "samba/theme-generator/openai", label: "OpenAI" },
 ];
 
 function buildFallbackCatalog(): BuiltinLanguageModelCatalog {
@@ -183,7 +183,7 @@ function buildFallbackCatalog(): BuiltinLanguageModelCatalog {
     modelsByProvider,
     aliases: [
       {
-        id: "dyad/theme-generator/google",
+        id: "samba/theme-generator/google",
         resolvedModel: {
           providerId: "google",
           apiName: GEMINI_3_1_PRO_PREVIEW,
@@ -192,7 +192,7 @@ function buildFallbackCatalog(): BuiltinLanguageModelCatalog {
         purpose: "theme-generation",
       },
       {
-        id: "dyad/theme-generator/anthropic",
+        id: "samba/theme-generator/anthropic",
         resolvedModel: {
           providerId: "anthropic",
           apiName: OPUS_4_6,
@@ -201,7 +201,7 @@ function buildFallbackCatalog(): BuiltinLanguageModelCatalog {
         purpose: "theme-generation",
       },
       {
-        id: "dyad/theme-generator/openai",
+        id: "samba/theme-generator/openai",
         resolvedModel: {
           providerId: "openai",
           apiName: GPT_5_2_MODEL_NAME,
@@ -210,7 +210,7 @@ function buildFallbackCatalog(): BuiltinLanguageModelCatalog {
         purpose: "theme-generation",
       },
       {
-        id: "dyad/auto/openai",
+        id: "samba/auto/openai",
         resolvedModel: {
           providerId: "openai",
           apiName: GPT_5_5_MODEL_NAME,
@@ -219,7 +219,7 @@ function buildFallbackCatalog(): BuiltinLanguageModelCatalog {
         purpose: "auto-mode",
       },
       {
-        id: "dyad/auto/anthropic",
+        id: "samba/auto/anthropic",
         resolvedModel: {
           providerId: "anthropic",
           apiName: OPUS_4_8,
@@ -228,7 +228,7 @@ function buildFallbackCatalog(): BuiltinLanguageModelCatalog {
         purpose: "auto-mode",
       },
       {
-        id: "dyad/auto/google",
+        id: "samba/auto/google",
         resolvedModel: {
           providerId: "google",
           apiName: GEMINI_3_5_FLASH,
@@ -237,7 +237,7 @@ function buildFallbackCatalog(): BuiltinLanguageModelCatalog {
         purpose: "auto-mode",
       },
       {
-        id: "dyad/auto/openrouter",
+        id: "samba/auto/openrouter",
         resolvedModel: {
           providerId: "openrouter",
           apiName: NEMOTRON_3_SUPER_FREE,
@@ -246,7 +246,7 @@ function buildFallbackCatalog(): BuiltinLanguageModelCatalog {
         purpose: "auto-mode",
       },
       {
-        id: "dyad/auto/balanced",
+        id: "samba/auto/balanced",
         resolvedModel: {
           providerId: "openrouter",
           apiName: "x-ai/grok-4.6",
@@ -256,7 +256,7 @@ function buildFallbackCatalog(): BuiltinLanguageModelCatalog {
         apiProtocol: "responses",
       },
       {
-        id: "dyad/help-bot/default",
+        id: "samba/help-bot/default",
         resolvedModel: {
           providerId: "openai",
           apiName: GPT_5_NANO,
@@ -382,9 +382,9 @@ async function fetchRemoteCatalog(): Promise<BuiltinLanguageModelCatalog | null>
     });
 
     if (!response.ok) {
-      throw new DyadError(
+      throw new SambaError(
         `Failed to fetch language model catalog: ${response.status} ${response.statusText}`,
-        DyadErrorKind.External,
+        SambaErrorKind.External,
       );
     }
 

@@ -7,7 +7,7 @@ import {
   appendAttachmentManifestEntriesWithLogicalNames,
   createUniqueAttachmentLogicalName,
   getAttachmentsManifestPath,
-  getDyadMediaDir,
+  getSambaMediaDir,
   listStoredAttachments,
   pruneAttachmentManifest,
 } from "@/ipc/utils/media_path_utils";
@@ -34,7 +34,7 @@ describe("sandbox capabilities", () => {
   let appPath: string;
 
   beforeEach(async () => {
-    appPath = await fs.mkdtemp(path.join(os.tmpdir(), "dyad-sandbox-"));
+    appPath = await fs.mkdtemp(path.join(os.tmpdir(), "samba-sandbox-"));
     await fs.mkdir(path.join(appPath, "src"), { recursive: true });
     await fs.writeFile(path.join(appPath, "src", "data.txt"), "abcdef", "utf8");
     await fs.writeFile(path.join(appPath, ".env"), "SECRET=1", "utf8");
@@ -50,7 +50,7 @@ describe("sandbox capabilities", () => {
       "x",
       "utf8",
     );
-    const mediaDir = getDyadMediaDir(appPath);
+    const mediaDir = getSambaMediaDir(appPath);
     await fs.mkdir(mediaDir, { recursive: true });
     await fs.writeFile(path.join(mediaDir, "stored-log.txt"), "line1\nline2\n");
     await appendAttachmentManifestEntries(appPath, [
@@ -169,7 +169,7 @@ describe("sandbox capabilities", () => {
 
   it("rejects sandbox writes that escape the app through symlinks", async () => {
     const outsideDir = await fs.mkdtemp(
-      path.join(os.tmpdir(), "dyad-outside-"),
+      path.join(os.tmpdir(), "samba-outside-"),
     );
     try {
       // Directory symlink pointing outside the app.
@@ -219,17 +219,17 @@ describe("sandbox capabilities", () => {
     ).rejects.toThrow("protected path");
   });
 
-  it("allows reading and listing under .dyad/", async () => {
+  it("allows reading and listing under .samba/", async () => {
     await expect(
-      sandboxReadFile(appPath, ".dyad/media/stored-log.txt"),
+      sandboxReadFile(appPath, ".samba/media/stored-log.txt"),
     ).resolves.toBe("line1\nline2\n");
     await expect(
-      sandboxReadFile(appPath, ".dyad/media/attachments-manifest.json"),
+      sandboxReadFile(appPath, ".samba/media/attachments-manifest.json"),
     ).resolves.toContain("server.log");
-    await expect(sandboxListFiles(appPath, ".dyad/media")).resolves.toEqual(
+    await expect(sandboxListFiles(appPath, ".samba/media")).resolves.toEqual(
       expect.arrayContaining([
-        ".dyad/media/attachments-manifest.json",
-        ".dyad/media/stored-log.txt",
+        ".samba/media/attachments-manifest.json",
+        ".samba/media/stored-log.txt",
       ]),
     );
   });
@@ -246,7 +246,7 @@ describe("sandbox capabilities", () => {
   });
 
   it("allocates manifest logical names under the manifest lock", async () => {
-    const mediaDir = getDyadMediaDir(appPath);
+    const mediaDir = getSambaMediaDir(appPath);
     await fs.writeFile(path.join(mediaDir, "stored-log-2.txt"), "line3\n");
 
     const [entry] = await appendAttachmentManifestEntriesWithLogicalNames(
@@ -304,7 +304,7 @@ describe("sandbox capabilities", () => {
   });
 
   it("allows explicit attachment aliases with protected-looking names", async () => {
-    const mediaDir = getDyadMediaDir(appPath);
+    const mediaDir = getSambaMediaDir(appPath);
     await fs.writeFile(path.join(mediaDir, "stored-env.txt"), "ATTACHED=1");
     await appendAttachmentManifestEntries(appPath, [
       {
@@ -363,7 +363,7 @@ describe("sandbox capabilities", () => {
       "attachments:server.log",
     ]);
 
-    const mediaDir = getDyadMediaDir(appPath);
+    const mediaDir = getSambaMediaDir(appPath);
     await fs.writeFile(path.join(mediaDir, "stored-missing.txt"), "new\n");
     const [entry] = await appendAttachmentManifestEntriesWithLogicalNames(
       appPath,
@@ -443,7 +443,7 @@ describe("sandbox capabilities", () => {
       return;
     }
 
-    const mediaDir = getDyadMediaDir(appPath);
+    const mediaDir = getSambaMediaDir(appPath);
     const storedFileName = "stored-large.log";
     await fs.writeFile(path.join(mediaDir, storedFileName), "large", "utf8");
     await fs.truncate(

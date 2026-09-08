@@ -24,7 +24,7 @@
   "selectingFolder": "Seleccionando carpeta...",
   "selectedFolder": "Carpeta seleccionada:",
   "clearSelection": "Borrar selección",
-  "copyToDyadApps": "Copiar a la carpeta samba-apps",
+  "copyToSambaApps": "Copiar a la carpeta samba-apps",
   "appNameExists": "Ya existe una aplicación con este nombre. Por favor elige un nombre diferente:",
   "appName": "Nombre de la aplicación",
   "appNameOptional": "Nombre de la aplicación (opcional)",
@@ -73,16 +73,16 @@
   "deleteItemTitle": "Eliminar {{itemType}}",
   "deleteItemConfirmation": "¿Estás seguro de que quieres eliminar \"{{itemName}}\"? Esta acción no se puede deshacer.",
   "proBanner": {
-    "manageDyadPro": "Gestionar Samba Builder",
+    "manageSambaPro": "Gestionar Samba Builder",
     "alreadyHavePro": "¿Ya tienes Samba Builder? Añade tu clave",
     "accessLeadingModels": "Accede a los modelos líderes de IA con un solo plan",
-    "getDyadPro": "Consigue Samba Builder",
+    "getSambaPro": "Consigue Samba Builder",
     "upTo3xCheaper": "Hasta 3 veces más barato",
     "byUsingSmartContext": "al usar Smart Context"
   },
   "setup": {
     "buildNewApp": "Construir una nueva aplicación",
-    "setupDyad": "Configurar Samba Builder",
+    "setupSamba": "Configurar Samba Builder",
     "installNodeJs": "1. Instalar Node.js (Entorno de ejecución de la app)",
     "errorCheckingNode": "Error al comprobar el estado de Node.js. Intenta instalar Node.js.",
     "nodeInstalled": "Node.js ({{version}}) instalado.",
@@ -102,7 +102,7 @@
     "notSureWatchVideo": "¿No estás seguro de qué hacer? Mira el video de Primeros Pasos arriba",
     "setupGeminiApiKey": "Configurar Clave API de Google Gemini",
     "setupOpenRouterApiKey": "Configurar Clave API de OpenRouter",
-    "setupDyadPro": "Configurar Samba Builder",
+    "setupSambaPro": "Configurar Samba Builder",
     "accessAllModels": "Accede a todos los modelos de IA con un solo plan",
     "setupOtherProviders": "Configurar otros proveedores de IA",
     "openAiAnthropicMore": "OpenAI, Anthropic y más",
@@ -180,7 +180,7 @@
     "assistant": "Asistente",
     "codebaseSnapshot": "Instantánea del Código Fuente",
     "systemInformation": "Información del Sistema",
-    "dyadVersion": "Versión de Samba Builder:",
+    "sambaVersion": "Versión de Samba Builder:",
     "platform": "Plataforma:",
     "architecture": "Arquitectura:",
     "nodeVersion": "Versión de Node:",
@@ -391,7 +391,7 @@
       "closeAnnotator": "Cerrar Anotador",
       "proFeatureTitle": "El Anotador es una Función Pro",
       "proFeatureDescription": "Desbloquea la capacidad de anotar capturas de pantalla y mejora tu flujo de trabajo con Samba Builder.",
-      "getDyadPro": "Consigue Samba Builder"
+      "getSambaPro": "Consigue Samba Builder"
     }
   },
   "integrations": {

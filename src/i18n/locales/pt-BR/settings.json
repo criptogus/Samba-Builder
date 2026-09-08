@@ -120,8 +120,8 @@
     "errorLoadingSettings": "Erro ao Carregar Configurações",
     "couldNotLoadProvider": "Não foi possível carregar os dados do provedor: {{message}}",
     "couldNotLoadSettings": "Não foi possível carregar os dados de configuração: {{message}}",
-    "enableDyadPro": "Ativar Samba Builder",
-    "toggleDyadPro": "Alternar para ativar o Samba Builder",
+    "enableSambaPro": "Ativar Samba Builder",
+    "toggleSambaPro": "Alternar para ativar o Samba Builder",
     "apiKeyEmpty": "A Chave de API não pode estar vazia.",
     "errorTogglingPro": "Erro ao alternar Samba Builder: {{error}}",
     "failedSaveApiKey": "Falha ao salvar a chave de API.",
@@ -305,6 +305,6 @@
     "updateProvider": "Atualizar Provedor",
     "failedCreate": "Falha ao criar provedor personalizado"
   },
-  "manageDyadPro": "Gerenciar Assinatura Samba Builder",
-  "setupDyadPro": "Configurar Assinatura Samba Builder"
+  "manageSambaPro": "Gerenciar Assinatura Samba Builder",
+  "setupSambaPro": "Configurar Assinatura Samba Builder"
 }

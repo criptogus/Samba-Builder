@@ -4,7 +4,7 @@ import { desc, eq, and, like } from "drizzle-orm";
 import type { ChatSearchResult, ChatSummary } from "../../lib/schemas";
 
 import log from "electron-log";
-import { DyadError, DyadErrorKind } from "@/errors/dyad_error";
+import { SambaError, SambaErrorKind } from "@/errors/samba_error";
 import { createTypedHandler } from "./base";
 import { entityDisposalBus } from "@/window_infrastructure/main/entity_disposal_bus";
 import { chatContracts } from "../types/chat";
@@ -157,7 +157,7 @@ export function registerChatHandlers() {
     });
 
     if (!chat) {
-      throw new DyadError("Chat not found", DyadErrorKind.NotFound);
+      throw new SambaError("Chat not found", SambaErrorKind.NotFound);
     }
 
     return {
@@ -181,7 +181,7 @@ export function registerChatHandlers() {
       });
 
       if (!chat) {
-        throw new DyadError("Chat not found", DyadErrorKind.NotFound);
+        throw new SambaError("Chat not found", SambaErrorKind.NotFound);
       }
 
       // Detaching revokes read access, so it has to reach the turn that is
@@ -231,7 +231,7 @@ export function registerChatHandlers() {
     });
 
     if (!chat) {
-      throw new DyadError("Chat not found", DyadErrorKind.NotFound);
+      throw new SambaError("Chat not found", SambaErrorKind.NotFound);
     }
 
     return {
@@ -341,7 +341,7 @@ export function registerChatHandlers() {
       .returning({ isFavorite: chats.isFavorite });
 
     if (updated.length === 0) {
-      throw new DyadError("Chat not found", DyadErrorKind.NotFound);
+      throw new SambaError("Chat not found", SambaErrorKind.NotFound);
     }
 
     return updated[0];

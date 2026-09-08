@@ -85,7 +85,7 @@ export function usePreviewIframe(input: {
   }, [appUrl, iframeRef, send]);
 
   const postMessage = useCallback(
-    (message: { type: "dyad-take-screenshot"; requestId: string }) => {
+    (message: { type: "samba-take-screenshot"; requestId: string }) => {
       if (appId !== null) manager.commands.post(appId, message);
     },
     [appId, manager],

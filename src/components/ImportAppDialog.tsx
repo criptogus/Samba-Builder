@@ -55,12 +55,12 @@ export function ImportAppDialog({ isOpen, onClose }: ImportAppDialogProps) {
   const [isCheckingName, setIsCheckingName] = useState<boolean>(false);
   const [installCommand, setInstallCommand] = useState("");
   const [startCommand, setStartCommand] = useState("");
-  const [copyToDyadApps, setCopyToDyadApps] = useState(true);
+  const [copyToSambaApps, setCopyToSambaApps] = useState(true);
   const { streamMessage } = useStreamChat({ hasChatId: false });
   const { selectChat } = useSelectChat();
   const { refreshApps } = useLoadApps();
   const setSelectedAppId = useSetAtom(selectedAppIdAtom);
-  const [optimizeForDyad, setOptimizeForDyad] = useState(true);
+  const [optimizeForSamba, setOptimizeForSamba] = useState(true);
   // GitHub import state
   const [url, setUrl] = useState("");
   const [importing, setImporting] = useState(false);
@@ -78,16 +78,16 @@ export function ImportAppDialog({ isOpen, onClose }: ImportAppDialogProps) {
       setGithubAppName("");
       setGithubNameExists(false);
       // Reset optimize flag when dialog opens so tabs don't carry over state
-      setOptimizeForDyad(true);
+      setOptimizeForSamba(true);
     }
   }, [isOpen]);
 
-  // Re-check app name when copyToDyadApps changes
+  // Re-check app name when copyToSambaApps changes
   useEffect(() => {
     if (customAppName.trim() && selectedPath) {
-      checkAppName({ name: customAppName, skipCopy: !copyToDyadApps });
+      checkAppName({ name: customAppName, skipCopy: !copyToSambaApps });
     }
-  }, [copyToDyadApps]);
+  }, [copyToSambaApps]);
 
   const handleUrlBlur = async () => {
     if (!url.trim()) return;
@@ -164,7 +164,7 @@ export function ImportAppDialog({ isOpen, onClose }: ImportAppDialogProps) {
         installCommand: installCommand.trim() || undefined,
         startCommand: startCommand.trim() || undefined,
         appName,
-        optimizeForDyad,
+        optimizeForSamba,
       });
       if (!(await processCloneResult(result))) {
         setImporting(false);
@@ -191,7 +191,7 @@ export function ImportAppDialog({ isOpen, onClose }: ImportAppDialogProps) {
         installCommand: installCommand.trim() || undefined,
         startCommand: startCommand.trim() || undefined,
         appName,
-        optimizeForDyad,
+        optimizeForSamba,
       });
       if (!(await processCloneResult(result))) {
         setImporting(false);
@@ -270,7 +270,7 @@ export function ImportAppDialog({ isOpen, onClose }: ImportAppDialogProps) {
       // Use the folder name from the IPC response
       setCustomAppName(result.name);
       // Check if the app name already exists
-      await checkAppName({ name: result.name, skipCopy: !copyToDyadApps });
+      await checkAppName({ name: result.name, skipCopy: !copyToSambaApps });
       return result;
     },
     onError: (error: Error) => {
@@ -286,7 +286,7 @@ export function ImportAppDialog({ isOpen, onClose }: ImportAppDialogProps) {
         appName: customAppName,
         installCommand: installCommand || undefined,
         startCommand: startCommand || undefined,
-        skipCopy: !copyToDyadApps,
+        skipCopy: !copyToSambaApps,
       });
     },
     onSuccess: async (result) => {
@@ -326,7 +326,7 @@ export function ImportAppDialog({ isOpen, onClose }: ImportAppDialogProps) {
     setNameExists(false);
     setInstallCommand("");
     setStartCommand("");
-    setCopyToDyadApps(true);
+    setCopyToSambaApps(true);
   };
 
   const handleAppNameChange = async (
@@ -335,7 +335,7 @@ export function ImportAppDialog({ isOpen, onClose }: ImportAppDialogProps) {
     const newName = e.target.value;
     setCustomAppName(newName);
     if (newName.trim()) {
-      await checkAppName({ name: newName, skipCopy: !copyToDyadApps });
+      await checkAppName({ name: newName, skipCopy: !copyToSambaApps });
     }
   };
 
@@ -431,9 +431,9 @@ export function ImportAppDialog({ isOpen, onClose }: ImportAppDialogProps) {
                       <Checkbox
                         id="copy-to-samba-apps"
                         aria-label="Copy to the samba-apps folder"
-                        checked={copyToDyadApps}
+                        checked={copyToSambaApps}
                         onCheckedChange={(checked) =>
-                          setCopyToDyadApps(checked === true)
+                          setCopyToSambaApps(checked === true)
                         }
                         disabled={importAppMutation.isPending}
                       />
@@ -441,7 +441,7 @@ export function ImportAppDialog({ isOpen, onClose }: ImportAppDialogProps) {
                         htmlFor="copy-to-samba-apps"
                         className="text-xs sm:text-sm cursor-pointer"
                       >
-                        {t("home:copyToDyadApps")}
+                        {t("home:copyToSambaApps")}
                       </label>
                     </div>
 
@@ -649,15 +649,15 @@ export function ImportAppDialog({ isOpen, onClose }: ImportAppDialogProps) {
                           <AccordionContent className="space-y-4">
                             <div className="flex items-center space-x-2 py-1">
                               <Checkbox
-                                id="optimize-for-dyad-repos"
-                                checked={optimizeForDyad}
+                                id="optimize-for-samba-repos"
+                                checked={optimizeForSamba}
                                 onCheckedChange={(checked) =>
-                                  setOptimizeForDyad(checked === true)
+                                  setOptimizeForSamba(checked === true)
                                 }
                                 disabled={importing}
                               />
                               <Label
-                                htmlFor="optimize-for-dyad-repos"
+                                htmlFor="optimize-for-samba-repos"
                                 className="text-xs sm:text-sm cursor-pointer"
                               >
                                 {t("home:autoUpgradeAnnotator")} (
@@ -750,15 +750,15 @@ export function ImportAppDialog({ isOpen, onClose }: ImportAppDialogProps) {
                   <AccordionContent className="space-y-4">
                     <div className="flex items-center space-x-2 py-1">
                       <Checkbox
-                        id="optimize-for-dyad-url"
-                        checked={optimizeForDyad}
+                        id="optimize-for-samba-url"
+                        checked={optimizeForSamba}
                         onCheckedChange={(checked) =>
-                          setOptimizeForDyad(checked === true)
+                          setOptimizeForSamba(checked === true)
                         }
                         disabled={importing}
                       />
                       <Label
-                        htmlFor="optimize-for-dyad-url"
+                        htmlFor="optimize-for-samba-url"
                         className="text-xs sm:text-sm cursor-pointer"
                       >
                         {t("home:autoUpgradeAnnotator")} (

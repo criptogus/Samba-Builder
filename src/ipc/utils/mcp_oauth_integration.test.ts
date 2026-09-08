@@ -118,7 +118,7 @@ const electronImport = await import("electron");
 const flowImport = await import("@/ipc/utils/mcp_oauth_flow");
 const providerImport = await import("@/ipc/utils/mcp_oauth_provider");
 const { runOAuthFlow } = flowImport;
-const { oauthStateHasTokens, DyadOAuthClientProvider, encryptToString } =
+const { oauthStateHasTokens, SambaOAuthClientProvider, encryptToString } =
   providerImport;
 const { shell } = electronImport;
 
@@ -304,7 +304,7 @@ describe("OAuth integration: DCR mode against fake server", () => {
       // the provider's own invalidateCredentials path rather than
       // hand-parsing the encrypted blob -- keeps the test honest
       // about the storage format.
-      const provider = new DyadOAuthClientProvider({ serverId });
+      const provider = new SambaOAuthClientProvider({ serverId });
       await provider.invalidateCredentials("tokens");
 
       const second = await runOAuthFlow({

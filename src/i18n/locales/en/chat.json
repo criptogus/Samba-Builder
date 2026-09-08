@@ -76,7 +76,7 @@
     }
   },
   "dismissError": "Dismiss error",
-  "askDyadToBuild": "Ask Samba Builder to build...",
+  "askSambaToBuild": "Ask Samba Builder to build...",
   "cancelGeneration": "Cancel generation",
   "stoppingGeneration": "Stopping…",
   "cancellationEndingTestRun": "Ending the test run.",
@@ -256,7 +256,7 @@
   "total": "Total",
   "failedCountTokens": "Failed to count tokens",
   "optimizeTokens": "Optimize your tokens with",
-  "dyadProSmartContext": "Samba Builder's Smart Context",
+  "sambaProSmartContext": "Samba Builder's Smart Context",
   "attachFiles": "Attach files",
   "themes": "Themes",
   "noTheme": "No Theme",
@@ -332,9 +332,9 @@
     "versionCount": "Version {{count}}"
   },
   "errorBox": {
-    "accessWithDyadPro": "Access with Samba Builder",
+    "accessWithSambaPro": "Access with Samba Builder",
     "orSwitchModel": "or switch to another model.",
-    "upgradeToDyadPro": "Upgrade to Samba Builder",
+    "upgradeToSambaPro": "Upgrade to Samba Builder",
     "troubleshootingGuide": "Troubleshooting guide",
     "invalidProKey": "Looks like you don't have a valid Samba Builder key.",
     "today": "today.",
@@ -345,12 +345,12 @@
   },
   "promo": {
     "tiredOfWaiting": "Tired of waiting on AI?",
-    "getDyadPro": "Get Samba Builder",
+    "getSambaPro": "Get Samba Builder",
     "fasterEdits": "for faster edits with Turbo Edits.",
     "saveOnCosts": "Save up to 3x on AI costs with",
     "debuggingLoop": "Getting stuck in a debugging loop? Try a different model.",
     "joinBuilders": "Join 600+ builders in the",
-    "dyadSubreddit": "Samba Builder subreddit",
+    "sambaSubreddit": "Samba Builder subreddit",
     "foundBug": "Found a bug? Click Help > Report a Bug",
     "reportBadResponse": "Want to report a bad AI response? Upload the chat by clicking Help",
     "watch": "Watch",
@@ -362,7 +362,7 @@
     "keepFocused": "Want to keep the AI focused? Start a new chat.",
     "whatsNext": "Want to know what's next? Check out our",
     "roadmap": "roadmap",
-    "likeDyad": "Like Samba Builder? Star it on",
+    "likeSamba": "Like Samba Builder? Star it on",
     "gitHub": "GitHub"
   },
   "consent": {

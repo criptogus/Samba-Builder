@@ -2,7 +2,7 @@ import { createHash, generateKeyPairSync, randomBytes } from "crypto";
 import * as fs from "fs";
 import * as path from "path";
 import log from "electron-log";
-import { DyadError, DyadErrorKind } from "@/errors/dyad_error";
+import { SambaError, SambaErrorKind } from "@/errors/samba_error";
 import { getUserDataPath } from "@/paths/paths";
 
 const logger = log.scope("coolify_deploy_key");
@@ -16,7 +16,7 @@ const logger = log.scope("coolify_deploy_key");
  */
 
 /** Written into the key so a human reading the directory sees where it came from. */
-const KEY_COMMENT = "dyad-deploy";
+const KEY_COMMENT = "samba-deploy";
 
 /**
  * Samba Builder's own directory, not ~/.ssh.
@@ -62,7 +62,7 @@ export function repoKeyName(owner: string, repo: string): string {
     .update(`${owner}/${repo}`)
     .digest("hex")
     .slice(0, 8);
-  return `dyad_deploy_${readable}_${distinct}`;
+  return `samba_deploy_${readable}_${distinct}`;
 }
 
 /**
@@ -141,10 +141,10 @@ export function generateDeployKeyPair(comment: string): {
   const { x } = pair.publicKey.export({ format: "jwk" });
   const { d } = pair.privateKey.export({ format: "jwk" });
   if (!x || !d) {
-    throw new DyadError(
+    throw new SambaError(
       "Could not generate a deploy key: the runtime returned an ed25519 key " +
         "without its raw halves.",
-      DyadErrorKind.Internal,
+      SambaErrorKind.Internal,
     );
   }
   const publicBytes = Buffer.from(x, "base64url");
@@ -260,7 +260,7 @@ export async function ensureDeployKey(keyName: string): Promise<string> {
     // pair being replaced.
     const derived = publicKeyFromPrivate(readPrivateKey(keyName));
     if (!derived) {
-      throw new DyadError(
+      throw new SambaError(
         `The deploy key at ${keyPath} could not be read, and its public half ` +
           `is missing. Delete it to have a new pair generated, then add the ` +
           `new key to the repository's deploy keys.`,
@@ -270,7 +270,7 @@ export async function ensureDeployKey(keyName: string): Promise<string> {
         // path — the OS username on macOS and Windows — plus the owner and
         // repo in the filename. External is not filtered, so classifying it
         // that way shipped all three to PostHog.
-        DyadErrorKind.Precondition,
+        SambaErrorKind.Precondition,
       );
     }
     fs.writeFileSync(`${keyPath}.pub`, derived, { mode: 0o644 });
@@ -290,10 +290,10 @@ export async function ensureDeployKey(keyName: string): Promise<string> {
 
   const publicKey = readPublicKey(keyName);
   if (!publicKey) {
-    throw new DyadError(
+    throw new SambaError(
       `Deploy key exists but ${keyPath}.pub is unreadable`,
       // Same reason as above: the message embeds the userData path.
-      DyadErrorKind.Precondition,
+      SambaErrorKind.Precondition,
     );
   }
   return publicKey;

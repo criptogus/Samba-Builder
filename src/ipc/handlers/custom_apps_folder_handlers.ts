@@ -9,9 +9,9 @@ import { createTypedHandler } from "./base";
 import { systemContracts } from "../types/system";
 import {
   getCustomFolderCache,
-  getDefaultDyadAppsDirectory,
-  getDyadAppsBaseDirectory,
-  invalidateDyadAppsBaseDirectoryCache,
+  getDefaultSambaAppsDirectory,
+  getSambaAppsBaseDirectory,
+  invalidateSambaAppsBaseDirectoryCache,
   isDirectoryAccessible,
 } from "@/paths/paths";
 import { gitAddSafeDirectory } from "../utils/git_utils";
@@ -21,8 +21,8 @@ const logger = log.scope("custom_apps_folder_handlers");
 
 export function registerCustomAppsFolderHandlers() {
   createTypedHandler(systemContracts.getCustomAppsFolder, async () => {
-    invalidateDyadAppsBaseDirectoryCache(); // ensure UI is up-to-date
-    const directory = getDyadAppsBaseDirectory();
+    invalidateSambaAppsBaseDirectoryCache(); // ensure UI is up-to-date
+    const directory = getSambaAppsBaseDirectory();
 
     return {
       path: directory,
@@ -52,10 +52,10 @@ export function registerCustomAppsFolderHandlers() {
 
   createTypedHandler(systemContracts.setCustomAppsFolder, async (_, input) => {
     // Ensure fresh settings read
-    invalidateDyadAppsBaseDirectoryCache();
+    invalidateSambaAppsBaseDirectoryCache();
 
-    const prevPath = getDyadAppsBaseDirectory();
-    let newDyadAppsBaseDir = getDefaultDyadAppsDirectory();
+    const prevPath = getSambaAppsBaseDirectory();
+    let newSambaAppsBaseDir = getDefaultSambaAppsDirectory();
     let updatedSettingValue = null;
 
     if (input) {
@@ -66,16 +66,16 @@ export function registerCustomAppsFolderHandlers() {
       if (!isDirectoryAccessible(input))
         throw new Error("Path is not a directory");
 
-      newDyadAppsBaseDir = normalize(input);
-      updatedSettingValue = newDyadAppsBaseDir;
+      newSambaAppsBaseDir = normalize(input);
+      updatedSettingValue = newSambaAppsBaseDir;
     } else {
       // Resetting to default
-      await mkdir(newDyadAppsBaseDir, { recursive: true });
+      await mkdir(newSambaAppsBaseDir, { recursive: true });
     }
 
     // Only convert paths and make git config changes if the user selected
     // a directory different from the one they're currently using
-    if (newDyadAppsBaseDir !== prevPath) {
+    if (newSambaAppsBaseDir !== prevPath) {
       logger.info("Beginning path updates");
 
       // We don't want to make current apps inaccessible after changing the directory.
@@ -106,13 +106,13 @@ export function registerCustomAppsFolderHandlers() {
       // Add custom apps folder to git safe.directory (required for Windows).
       // The trailing /* allows access to all repositories under the named directory.
       // See: https://git-scm.com/docs/git-config#Documentation/git-config.txt-safedirectory
-      const directory = updatedSettingValue ?? getDefaultDyadAppsDirectory();
+      const directory = updatedSettingValue ?? getDefaultSambaAppsDirectory();
       await gitAddSafeDirectory(`${directory}/*`);
     }
 
     writeSettings({
       customAppsFolder: updatedSettingValue,
     });
-    invalidateDyadAppsBaseDirectoryCache();
+    invalidateSambaAppsBaseDirectoryCache();
   });
 }

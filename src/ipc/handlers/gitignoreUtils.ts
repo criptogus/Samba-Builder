@@ -37,9 +37,9 @@ async function ensureGitignored(
 }
 
 /**
- * Ensures `.dyad/` is listed in the project's `.gitignore`.
+ * Ensures `.samba/` is listed in the project's `.gitignore`.
  * Creates `.gitignore` if it doesn't exist.
  */
-export async function ensureDyadGitignored(appPath: string): Promise<void> {
-  await ensureGitignored(appPath, [".dyad/"]);
+export async function ensureSambaGitignored(appPath: string): Promise<void> {
+  await ensureGitignored(appPath, [".samba/"]);
 }

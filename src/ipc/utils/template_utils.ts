@@ -5,7 +5,7 @@ import { type Template, localTemplatesData } from "../../shared/templates";
 let apiTemplatesCache: Template[] | null = null;
 let apiTemplatesFetchPromise: Promise<Template[]> | null = null;
 
-// (convertApiTemplate removido — sem templates remotos da API do Dyad)
+// (convertApiTemplate removido — sem templates remotos da API do Samba)
 
 // Fetch templates from API with caching
 export async function fetchApiTemplates(): Promise<Template[]> {
@@ -21,8 +21,8 @@ export async function fetchApiTemplates(): Promise<Template[]> {
 
   // Start new fetch
   apiTemplatesFetchPromise = (async (): Promise<Template[]> => {
-    // Samba Builder: zero backend do Dyad — os templates remotos
-    // (api.dyad.sh/v1/templates) não são buscados; só templates locais.
+    // Samba Builder: zero backend do Samba — os templates remotos
+    // (sem catálogo remoto; só templates locais).
     return [];
   })();
 

@@ -24,13 +24,13 @@ function buildStressManyWritesSmall(): string {
 ${Array.from(
   { length: 5000 },
   (_, i) =>
-    `<dyad-write path="src/stress/file_${i}.ts" description="stress file ${i}">
+    `<samba-write path="src/stress/file_${i}.ts" description="stress file ${i}">
 export const id${i} = ${i};
 export const name${i} = "file_${i}";
 export const meta${i} = { id: id${i}, name: name${i} };
 export function describe${i}() { return \`\${name${i}}:\${id${i}}\`; }
 export default meta${i};
-</dyad-write>`,
+</samba-write>`,
 ).join("\n")}
 
 EOM`;
@@ -51,7 +51,7 @@ ${Array.from({ length: 10000 }, (_, i) => {
   return x + id${i} + ${j};
 }`,
   ).join("\n");
-  return `<dyad-write path="src/stress/file_${i}.ts" description="stress file ${i}">
+  return `<samba-write path="src/stress/file_${i}.ts" description="stress file ${i}">
 export const id${i} = ${i};
 export const name${i} = "file_${i}";
 
@@ -91,51 +91,51 @@ export function summarize${i}(): string {
 }
 
 export default meta${i};
-</dyad-write>`;
+</samba-write>`;
 }).join("\n")}
 
 EOM`;
 }
 
-// e.g. [dyad-qa=add-dep]
+// e.g. [samba-qa=add-dep]
 // Canned responses for test prompts. Stress fixtures are wrapped in
 // memoized thunks so the multi-megabyte strings are only built when an
-// explicit [dyad-qa=stress-...] prompt fires, not at module import.
+// explicit [samba-qa=stress-...] prompt fires, not at module import.
 const TEST_RESPONSES: Record<string, ResponseEntry> = {
   "ts-error": `This will get a TypeScript error.
 
-  <dyad-write path="src/bad-file.ts" description="This will get a TypeScript error.">
+  <samba-write path="src/bad-file.ts" description="This will get a TypeScript error.">
   import NonExistentClass from 'non-existent-class';
 
   const x = new Object();
   x.nonExistentMethod();
-  </dyad-write>
+  </samba-write>
 
   EOM`,
   "add-dep": `I'll add that dependency for you.
 
-  <dyad-add-dependency packages="deno"></dyad-add-dependency>
+  <samba-add-dependency packages="deno"></samba-add-dependency>
 
   EOM`,
   "add-non-existing-dep": `I'll add that dependency for you.
 
-  <dyad-add-dependency packages="@angular/does-not-exist"></dyad-add-dependency>
+  <samba-add-dependency packages="@angular/does-not-exist"></samba-add-dependency>
 
   EOM`,
   "add-multiple-deps": `I'll add that dependency for you.
 
-  <dyad-add-dependency packages="react-router-dom react-query"></dyad-add-dependency>
+  <samba-add-dependency packages="react-router-dom react-query"></samba-add-dependency>
 
   EOM`,
   write: `Hello world
-  <dyad-write path="src/hello.ts" content="Hello world">
+  <samba-write path="src/hello.ts" content="Hello world">
   console.log("Hello world");
-  </dyad-write>
+  </samba-write>
   EOM`,
   "string-literal-leak": `BEFORE TAG
-  <dyad-write path="src/pages/locations/neighborhoods/louisville/Highlands.tsx" description="Updating Highlands neighborhood page to use <a> tags.">
+  <samba-write path="src/pages/locations/neighborhoods/louisville/Highlands.tsx" description="Updating Highlands neighborhood page to use <a> tags.">
 import React from 'react';
-</dyad-write>
+</samba-write>
 AFTER TAG
 `,
   "stress-many-writes-small": memoize(buildStressManyWritesSmall),
@@ -148,7 +148,7 @@ AFTER TAG
  * @returns The canned response if it's a test prompt, null otherwise
  */
 export function getTestResponse(prompt: string): string | null {
-  const match = prompt.match(/\[dyad-qa=([^\]]+)\]/);
+  const match = prompt.match(/\[samba-qa=([^\]]+)\]/);
   if (match) {
     const entry = TEST_RESPONSES[match[1]];
     if (entry === undefined) return null;
@@ -199,7 +199,7 @@ const CHUNK_SIZE = 500;
  * observed.
  *
  * `cleanFullResponse` runs once on the canned input up front. Its rewrite
- * is local to fully-formed `<dyad-*>` tags and idempotent, so the cleaned
+ * is local to fully-formed `<samba-*>` tags and idempotent, so the cleaned
  * full string is identical to the result of cleaning every growing prefix
  * — and pre-cleaning avoids an O(N²) regex sweep over the accumulator.
  */

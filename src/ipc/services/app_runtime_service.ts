@@ -25,9 +25,9 @@ import {
   invocationRegistryKey,
   sameInvocationRef,
 } from "@/state_machines/invocation_ref";
-import { DyadError, DyadErrorKind } from "@/errors/dyad_error";
+import { SambaError, SambaErrorKind } from "@/errors/samba_error";
 import { addLog, clearLogs } from "@/lib/log_store";
-import { getDyadAppPath } from "@/paths/paths";
+import { getSambaAppPath } from "@/paths/paths";
 import { startProxy } from "@/ipc/utils/start_proxy_server";
 import {
   buildCloudSandboxFileMap,
@@ -380,7 +380,7 @@ export function emitProxyServerStarted({
 }) {
   output.send({
     type: "stdout",
-    message: `[dyad-proxy-server]started=[${proxyUrl}] original=[${originalUrl}] mode=[${mode}]`,
+    message: `[samba-proxy-server]started=[${proxyUrl}] original=[${originalUrl}] mode=[${mode}]`,
     appId,
     invocationRef,
   });
@@ -481,7 +481,7 @@ export async function ensureProxyForRunningApp({
       logger.error(`Failed to start proxy for app ${appId}:`, error);
       output.send({
         type: "stderr",
-        message: `[dyad-proxy-server] ${error.message}`,
+        message: `[samba-proxy-server] ${error.message}`,
         appId,
       });
     },
@@ -962,7 +962,7 @@ async function executeAppInDocker({
   invocationRef?: AppRunInvocationRef;
   ignoredBuildsSelfHealAttempted?: boolean;
 }): Promise<void> {
-  const containerName = `dyad-app-${appId}`;
+  const containerName = `samba-app-${appId}`;
 
   try {
     await new Promise<void>((resolve, reject) => {
@@ -1004,7 +1004,7 @@ async function executeAppInDocker({
     );
   }
 
-  const dockerfilePath = path.join(appPath, "Dockerfile.dyad");
+  const dockerfilePath = path.join(appPath, "Dockerfile.samba");
   if (!fs.existsSync(dockerfilePath)) {
     const dockerfileContent = `FROM node:22-alpine
 
@@ -1016,16 +1016,16 @@ RUN npm install -g pnpm
       await fs.promises.writeFile(dockerfilePath, dockerfileContent, "utf-8");
     } catch (error) {
       logger.error(`Failed to create Dockerfile for app ${appId}:`, error);
-      throw new DyadError(
+      throw new SambaError(
         `Failed to create Dockerfile: ${error}`,
-        DyadErrorKind.External,
+        SambaErrorKind.External,
       );
     }
   }
 
   const buildProcess = spawn(
     "docker",
-    ["build", "-f", "Dockerfile.dyad", "-t", `dyad-app-${appId}`, "."],
+    ["build", "-f", "Dockerfile.samba", "-t", `samba-app-${appId}`, "."],
     {
       cwd: appPath,
       stdio: "pipe",
@@ -1063,12 +1063,12 @@ RUN npm install -g pnpm
       "-v",
       `${appPath}:/app`,
       "-v",
-      `dyad-pnpm-${appId}:/app/.pnpm-store`,
+      `samba-pnpm-${appId}:/app/.pnpm-store`,
       "-e",
       "PNPM_STORE_PATH=/app/.pnpm-store",
       "-w",
       "/app",
-      `dyad-app-${appId}`,
+      `samba-app-${appId}`,
       "sh",
       "-c",
       (
@@ -1626,9 +1626,9 @@ export class AppRuntimeService {
             this.dependencies.deleteRunningApp(appId);
           }
         }
-        throw new DyadError(
+        throw new SambaError(
           `Failed to run app ${appId}: ${errorMessage(error)}`,
-          DyadErrorKind.External,
+          SambaErrorKind.External,
         );
       }
     });
@@ -1727,9 +1727,9 @@ export class AppRuntimeService {
         } else if (appInfo.mode !== "cloud") {
           this.dependencies.deleteRunningApp(appId);
         }
-        throw new DyadError(
+        throw new SambaError(
           `Failed to stop app ${appId}: ${errorMessage(error)}`,
-          DyadErrorKind.External,
+          SambaErrorKind.External,
         );
       }
     });
@@ -1817,9 +1817,9 @@ export class AppRuntimeService {
       options.invocationRef ?? this.createExternalLifecycleRef(options.appId);
     if (options.abortSignal?.aborted) {
       this.cancelExternalLifecycle(invocationRef);
-      throw new DyadError(
+      throw new SambaError(
         "The app lifecycle operation was cancelled before it started",
-        DyadErrorKind.UserCancelled,
+        SambaErrorKind.UserCancelled,
       );
     }
     const claim = this.claimExternalLifecycle({
@@ -1827,9 +1827,9 @@ export class AppRuntimeService {
       invocationRef,
     });
     if (!claim) {
-      throw new DyadError(
+      throw new SambaError(
         "The app lifecycle operation was cancelled before it started",
-        DyadErrorKind.UserCancelled,
+        SambaErrorKind.UserCancelled,
       );
     }
     try {
@@ -1873,7 +1873,7 @@ export class AppRuntimeService {
   private async requireApp(appId: number): Promise<RuntimeAppRecord> {
     const app = await this.dependencies.findApp(appId);
     if (!app) {
-      throw new DyadError("App not found", DyadErrorKind.NotFound);
+      throw new SambaError("App not found", SambaErrorKind.NotFound);
     }
     return app;
   }
@@ -1974,9 +1974,9 @@ async function waitForAppReady(
   while (Date.now() - startedAt < timeoutMs) {
     const appInfo = runningApps.get(appId);
     if (!appInfo) {
-      throw new DyadError(
+      throw new SambaError(
         "The app process exited before the preview became ready",
-        DyadErrorKind.External,
+        SambaErrorKind.External,
       );
     }
     if (appInfo.proxyUrl) {
@@ -1986,9 +1986,9 @@ async function waitForAppReady(
       setTimeout(resolve, APP_READY_POLL_MS);
     });
   }
-  throw new DyadError(
+  throw new SambaError(
     "Timed out waiting for the app preview to become ready",
-    DyadErrorKind.External,
+    SambaErrorKind.External,
   );
 }
 
@@ -2006,7 +2006,7 @@ export const appRuntimeService = new AppRuntimeService({
     db.query.apps.findFirst({
       where: eq(apps.id, appId),
     }),
-  resolveAppPath: getDyadAppPath,
+  resolveAppPath: getSambaAppPath,
   getRunningApp: (appId) => runningApps.get(appId),
   deleteRunningApp: (appId) => {
     runningApps.delete(appId);

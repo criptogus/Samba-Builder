@@ -103,9 +103,9 @@ describe("useChatMode with an active chat", () => {
     mocks.isQuotaLoading = false;
     mocks.settings = makeSettings({
       defaultChatMode: "build",
-      enableDyadPro: true,
+      enableSambaPro: true,
       providerSettings: {
-        auto: { apiKey: { value: "dyad-pro-key" } },
+        auto: { apiKey: { value: "samba-pro-key" } },
       },
       selectedModel: { provider: "auto", name: "free-pro" },
     });

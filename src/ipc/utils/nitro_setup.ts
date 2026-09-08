@@ -14,7 +14,7 @@ import {
 } from "@/ipc/utils/vite_config_patcher";
 import { detectFrameworkType } from "@/ipc/utils/framework_utils";
 import { NITRO_START_COMMAND } from "@/lib/framework_constants";
-import { DyadError, DyadErrorKind } from "@/errors/dyad_error";
+import { SambaError, SambaErrorKind } from "@/errors/samba_error";
 
 const logger = log.scope("nitro_setup");
 
@@ -220,7 +220,7 @@ export async function ensureNitroOnViteApp(
  * Vite apps need a Nitro server layer to host server-only code (DATABASE_URL,
  * Neon client, auth secrets). This helper detects the framework, runs
  * `ensureNitroOnViteApp` when the app is Vite, and wraps any failure in a
- * `DyadError` so callers surface a clear "Nitro setup" error rather than a
+ * `SambaError` so callers surface a clear "Nitro setup" error rather than a
  * generic provider error. Returns an empty result + no-op rollback when the
  * app is not Vite.
  */
@@ -235,9 +235,9 @@ export async function ensureNitroIfVite(
   } catch (nitroError: unknown) {
     const message =
       nitroError instanceof Error ? nitroError.message : String(nitroError);
-    throw new DyadError(
+    throw new SambaError(
       `Failed to set up Nitro server layer: ${message}`,
-      DyadErrorKind.External,
+      SambaErrorKind.External,
     );
   }
 }

@@ -17,7 +17,7 @@ vi.mock("electron", () => ({
   },
   BrowserWindow: { fromWebContents: h.fromWebContents },
   app: {
-    getPath: vi.fn(() => "/tmp/dyad-preview-view-handlers-test"),
+    getPath: vi.fn(() => "/tmp/samba-preview-view-handlers-test"),
     getAppPath: vi.fn(() => process.cwd()),
   },
 }));

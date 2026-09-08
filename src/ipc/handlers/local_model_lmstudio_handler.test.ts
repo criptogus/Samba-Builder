@@ -1,4 +1,4 @@
-import { DyadError, DyadErrorKind } from "@/errors/dyad_error";
+import { SambaError, SambaErrorKind } from "@/errors/samba_error";
 import { fetchLMStudioModels } from "@/ipc/handlers/local_model_lmstudio_handler";
 import { afterEach, describe, it, expect, vi } from "vitest";
 
@@ -80,7 +80,7 @@ describe("fetchLMStudioModels", () => {
     expect(models.map((model) => model.modelName)).toEqual(["chat-model"]);
   });
 
-  it("throws an external DyadError when the response is not ok", async () => {
+  it("throws an external SambaError when the response is not ok", async () => {
     vi.stubGlobal(
       "fetch",
       vi.fn().mockResolvedValue({
@@ -90,9 +90,9 @@ describe("fetchLMStudioModels", () => {
     );
 
     await expect(fetchLMStudioModels()).rejects.toEqual(
-      new DyadError(
+      new SambaError(
         "Failed to fetch models from LM Studio",
-        DyadErrorKind.External,
+        SambaErrorKind.External,
       ),
     );
   });

@@ -5,7 +5,7 @@ import { dismissedImageGenerationJobIdsAtom } from "@/atoms/imageGenerationAtoms
 import { useChatImageGenerationJobs } from "@/image_generation/hooks";
 import { selectedAppIdAtom } from "@/atoms/appAtoms";
 import { useGenerateImage } from "@/hooks/useGenerateImage";
-import { buildDyadMediaUrlForApp } from "@/lib/dyadMediaUrl";
+import { buildSambaMediaUrlForApp } from "@/lib/sambaMediaUrl";
 import { ImageLightbox } from "./ImageLightbox";
 import type { ImageGenerationJobView } from "@/image_generation/state";
 
@@ -158,7 +158,7 @@ export function ChatImageGenerationStrip({
               <>
                 {job.result && (
                   <img
-                    src={buildDyadMediaUrlForApp(
+                    src={buildSambaMediaUrlForApp(
                       job.result.appId,
                       job.result.fileName,
                     )}
@@ -198,7 +198,7 @@ export function ChatImageGenerationStrip({
 
       {lightboxJob?.result && (
         <ImageLightbox
-          imageUrl={buildDyadMediaUrlForApp(
+          imageUrl={buildSambaMediaUrlForApp(
             lightboxJob.result.appId,
             lightboxJob.result.fileName,
           )}

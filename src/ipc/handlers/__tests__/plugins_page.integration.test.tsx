@@ -86,7 +86,7 @@ describe("Plugins page (integration)", () => {
     // self-exit is a backstop against a leak when an assertion fails.
     const sentinel = path.join(
       os.tmpdir(),
-      `dyad-hanging-mcp-${process.pid}.sentinel`,
+      `samba-hanging-mcp-${process.pid}.sentinel`,
     );
     await ipc.mcp.createServer({
       name: "hanging-mcp-server",

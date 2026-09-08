@@ -7,7 +7,7 @@ message: [{"type":"text","text":"tc=local-agent/compaction-mid-turn\\n\\n<system
 
 ===
 role: assistant
-message: [{"type":"text","text":"<dyad-compaction title=\\"Conversation compacted\\" state=\\"finished\\">\\n## Key Decisions Made\\n- Completed initial task as requested\\n\\n## Current Task State\\nConversation was compacted to save context space.\\n</dyad-compaction>\\n\\nIf you need to retrieve earlier parts of the conversation history, you can read the backup file at: [[compaction-backup-path]]\\nNote: This file may be large. Read only the sections you need or use grep to search for specific content rather than reading the entire file."},{"type":"text","text":"post-compaction step"},{"type":"tool_use","id":"[[TOOL_CALL_0]]","name":"read_file","input":{"path":"SOMEFILE.md"}}]
+message: [{"type":"text","text":"<samba-compaction title=\\"Conversation compacted\\" state=\\"finished\\">\\n## Key Decisions Made\\n- Completed initial task as requested\\n\\n## Current Task State\\nConversation was compacted to save context space.\\n</samba-compaction>\\n\\nIf you need to retrieve earlier parts of the conversation history, you can read the backup file at: [[compaction-backup-path]]\\nNote: This file may be large. Read only the sections you need or use grep to search for specific content rather than reading the entire file."},{"type":"text","text":"post-compaction step"},{"type":"tool_use","id":"[[TOOL_CALL_0]]","name":"read_file","input":{"path":"SOMEFILE.md"}}]
 
 ===
 role: user
@@ -25,7 +25,7 @@ message: [{"type":"text","text":"[dump] hi\\n\\n<system-reminder>Previous assist
 exports[`context compaction (integration) > compaction triggers and shows summary > compaction-post-summary-transcript 1`] = `
 "===
 role: assistant
-message: [{"type":"text","text":"<dyad-compaction title=\\"Conversation compacted\\" state=\\"finished\\">\\n## Key Decisions Made\\n- Completed initial task as requested\\n\\n## Current Task State\\nConversation was compacted to save context space.\\n</dyad-compaction>\\n\\nIf you need to retrieve earlier parts of the conversation history, you can read the backup file at: [[compaction-backup-path]]\\nNote: This file may be large. Read only the sections you need or use grep to search for specific content rather than reading the entire file."}]
+message: [{"type":"text","text":"<samba-compaction title=\\"Conversation compacted\\" state=\\"finished\\">\\n## Key Decisions Made\\n- Completed initial task as requested\\n\\n## Current Task State\\nConversation was compacted to save context space.\\n</samba-compaction>\\n\\nIf you need to retrieve earlier parts of the conversation history, you can read the backup file at: [[compaction-backup-path]]\\nNote: This file may be large. Read only the sections you need or use grep to search for specific content rather than reading the entire file."}]
 
 ===
 role: user

@@ -12,16 +12,16 @@ import log from "electron-log";
 import { eq } from "drizzle-orm";
 import { db } from "@/db";
 import { apps, chats } from "@/db/schema";
-import { DyadError, DyadErrorKind } from "@/errors/dyad_error";
+import { SambaError, SambaErrorKind } from "@/errors/samba_error";
 import { getAllTemplates } from "../utils/template_utils";
 import { localTemplatesData } from "../../shared/templates";
 import { createTypedHandler } from "./base";
 import { templateContracts } from "../types/templates";
-import { getDyadAppPath } from "../../paths/paths";
+import { getSambaAppPath } from "../../paths/paths";
 import { appOperationCoordinator } from "../services/app_operation_coordinator";
 import { runningApps, stopAppByInfo } from "../utils/process_manager";
 import { createFromTemplate } from "./createFromTemplate";
-import { ensureDyadGitignored } from "./gitignoreUtils";
+import { ensureSambaGitignored } from "./gitignoreUtils";
 import { slugifyAppFolderName } from "@/shared/app_names";
 import { resolveUniqueFolderName } from "../utils/app_name_resolution";
 import { getGitUncommittedFiles } from "../utils/git_utils";
@@ -29,7 +29,7 @@ import { gitService } from "../services/git_service";
 
 const logger = log.scope("template_handlers");
 
-const PRESERVED_TEMPLATE_PATHS = new Set([".git", ".dyad", "project-docs"]);
+const PRESERVED_TEMPLATE_PATHS = new Set([".git", ".samba", "project-docs"]);
 
 function shouldPreservePath(name: string): boolean {
   return PRESERVED_TEMPLATE_PATHS.has(name) || name.startsWith(".env");
@@ -70,7 +70,7 @@ async function allocateNewAppPath({
   const newSlug = await resolveUniqueFolderName(slugifyAppFolderName(newName), {
     excludeAppId: appId,
   });
-  return { newSlug, newAbsPath: getDyadAppPath(newSlug) };
+  return { newSlug, newAbsPath: getSambaAppPath(newSlug) };
 }
 
 async function copyPreservedEntries({
@@ -103,7 +103,7 @@ async function applyTemplateInPlace({
   templateId: string;
 }): Promise<{ appWasStopped: boolean }> {
   const tempRoot = await fsPromises.mkdtemp(
-    path.join(os.tmpdir(), "dyad-template-"),
+    path.join(os.tmpdir(), "samba-template-"),
   );
   const stagedTemplatePath = path.join(tempRoot, "app");
 
@@ -137,11 +137,11 @@ async function applyTemplateInPlace({
         error,
       );
       if (appWasStopped) {
-        throw new DyadError(
+        throw new SambaError(
           `Failed to apply template "${templateId}". The dev server was stopped before the failure and will need to be started manually. (${
             error instanceof Error ? error.message : String(error)
           })`,
-          DyadErrorKind.Unknown,
+          SambaErrorKind.Unknown,
         );
       }
       throw error;
@@ -175,11 +175,11 @@ export function registerTemplateHandlers() {
             where: eq(apps.id, input.appId),
           });
           if (!project)
-            throw new DyadError(
+            throw new SambaError(
               "Projeto não encontrado.",
-              DyadErrorKind.NotFound,
+              SambaErrorKind.NotFound,
             );
-          return prepareProjectTemplate(getDyadAppPath(project.path), input);
+          return prepareProjectTemplate(getSambaAppPath(project.path), input);
         },
       ),
   );
@@ -221,18 +221,18 @@ export function registerTemplateHandlers() {
         });
 
         if (!appRecord) {
-          throw new DyadError("App not found", DyadErrorKind.NotFound);
+          throw new SambaError("App not found", SambaErrorKind.NotFound);
         }
 
-        const oldAbsPath = getDyadAppPath(appRecord.path);
+        const oldAbsPath = getSambaAppPath(appRecord.path);
         const uncommittedFiles = await getGitUncommittedFiles({
           path: oldAbsPath,
         });
 
         if (uncommittedFiles.length > 0) {
-          throw new DyadError(
+          throw new SambaError(
             "Cannot change templates after local modifications. Please commit or discard your changes first.",
-            DyadErrorKind.Precondition,
+            SambaErrorKind.Precondition,
           );
         }
 
@@ -261,11 +261,11 @@ export function registerTemplateHandlers() {
 
         if (didPathSwap && newAbsPath && newSlug) {
           // Path-swap branch: build the template at a new directory, migrate
-          // preserved files (.git, .dyad, .env*) from the old directory, update
+          // preserved files (.git, .samba, .env*) from the old directory, update
           // the DB, then best-effort delete the old directory. This avoids
           // Windows file-lock failures on node_modules/build artifacts.
           const tempRoot = await fsPromises.mkdtemp(
-            path.join(os.tmpdir(), "dyad-template-"),
+            path.join(os.tmpdir(), "samba-template-"),
           );
           const stagedTemplatePath = path.join(tempRoot, "app");
 
@@ -298,10 +298,10 @@ export function registerTemplateHandlers() {
               toPath: newAbsPath,
             });
 
-            // The new template's `.gitignore` likely doesn't contain `.dyad/`,
+            // The new template's `.gitignore` likely doesn't contain `.samba/`,
             // so re-apply it before staging to keep internal metadata out of
             // git.
-            await ensureDyadGitignored(newAbsPath);
+            await ensureSambaGitignored(newAbsPath);
 
             const commitHash = await gitService.stageAllAndCommitIfChanged({
               path: newAbsPath,
@@ -357,11 +357,11 @@ export function registerTemplateHandlers() {
               }
             }
             if (appWasStopped) {
-              throw new DyadError(
+              throw new SambaError(
                 `Failed to apply template "${templateId}". The dev server was stopped before the failure and will need to be started manually. (${
                   error instanceof Error ? error.message : String(error)
                 })`,
-                DyadErrorKind.Unknown,
+                SambaErrorKind.Unknown,
               );
             }
             throw error;
@@ -395,9 +395,9 @@ export function registerTemplateHandlers() {
           templateId,
         }));
 
-        // The new template's `.gitignore` likely doesn't contain `.dyad/`, so
+        // The new template's `.gitignore` likely doesn't contain `.samba/`, so
         // re-apply it before staging to keep internal metadata out of git.
-        await ensureDyadGitignored(workingPath);
+        await ensureSambaGitignored(workingPath);
 
         // If the clear-and-recopy produced no effective diff (e.g. the template
         // is already applied), skip the commit — git would fail with "nothing to

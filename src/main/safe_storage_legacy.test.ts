@@ -89,11 +89,11 @@ function makeFakeReader(map: Record<string, string>): FakeReader {
 
 function assertInProcessKeychainReaderAddonAvailable(): void {
   try {
-    require("dyad-keychain-reader");
+    require("samba-keychain-reader");
   } catch (error) {
     throw new Error(
-      "Failed to load dyad-keychain-reader native addon. " +
-        "Run `npm rebuild dyad-keychain-reader` before running macOS " +
+      "Failed to load samba-keychain-reader native addon. " +
+        "Run `npm rebuild samba-keychain-reader` before running macOS " +
         "safeStorage integration tests.\nOriginal error: " +
         (error instanceof Error ? error.message : String(error)),
     );
@@ -112,10 +112,10 @@ interface NativeKeychainReaderBinding {
 }
 
 function loadNativeKeychainReaderBinding(): NativeKeychainReaderBinding {
-  return require("dyad-keychain-reader") as NativeKeychainReaderBinding;
+  return require("samba-keychain-reader") as NativeKeychainReaderBinding;
 }
 
-const DYAD_KEY = "dyad Safe Storage::dyad Key";
+const SAMBA_KEY = "samba Safe Storage::samba Key";
 const CHROMIUM_KEY = "Chromium Safe Storage::Chromium Key";
 
 describe("deriveLegacyOsCryptKey", () => {
@@ -192,7 +192,7 @@ describe("InProcessKeychainPasswordReader", () => {
 
     await withPlatform("linux", () => {
       const reader = new InProcessKeychainPasswordReader();
-      expect(reader.readPassword("dyad Safe Storage", "dyad Key")).toBeNull();
+      expect(reader.readPassword("samba Safe Storage", "samba Key")).toBeNull();
     });
     expect(loadCount).toBe(0);
   });
@@ -207,7 +207,7 @@ describe("InProcessKeychainPasswordReader", () => {
     setInProcessKeychainBindingLoaderForTesting(() => ({
       readGenericPassword(service, account, keychainPath, allowUI) {
         calls.push({ service, account, keychainPath, allowUI });
-        if (service === "dyad Safe Storage" && account === "dyad Key") {
+        if (service === "samba Safe Storage" && account === "samba Key") {
           return { status: 0, password: "stored-password" };
         }
         return { status: -25300, password: null };
@@ -217,10 +217,10 @@ describe("InProcessKeychainPasswordReader", () => {
 
     await withPlatform("darwin", () => {
       const reader = new InProcessKeychainPasswordReader("/tmp/test.keychain");
-      expect(reader.readPassword("dyad Safe Storage", "dyad Key")).toBe(
+      expect(reader.readPassword("samba Safe Storage", "samba Key")).toBe(
         "stored-password",
       );
-      expect(reader.readPassword("dyad Safe Storage", "dyad Key")).toBe(
+      expect(reader.readPassword("samba Safe Storage", "samba Key")).toBe(
         "stored-password",
       );
       expect(
@@ -233,8 +233,8 @@ describe("InProcessKeychainPasswordReader", () => {
 
     expect(calls).toEqual([
       {
-        service: "dyad Safe Storage",
-        account: "dyad Key",
+        service: "samba Safe Storage",
+        account: "samba Key",
         keychainPath: "/tmp/test.keychain",
         allowUI: false,
       },
@@ -258,7 +258,7 @@ describe("InProcessKeychainPasswordReader", () => {
 
     await withPlatform("darwin", () => {
       const reader = new InProcessKeychainPasswordReader();
-      expect(reader.readPassword("dyad Safe Storage", "dyad Key")).toBeNull();
+      expect(reader.readPassword("samba Safe Storage", "samba Key")).toBeNull();
     });
   });
 
@@ -271,7 +271,7 @@ describe("InProcessKeychainPasswordReader", () => {
 
     await withPlatform("darwin", () => {
       const reader = new InProcessKeychainPasswordReader();
-      expect(reader.readPassword("dyad Safe Storage", "dyad Key")).toBeNull();
+      expect(reader.readPassword("samba Safe Storage", "samba Key")).toBeNull();
       expect(
         reader.readPassword("Chromium Safe Storage", "Chromium Key"),
       ).toBeNull();
@@ -280,22 +280,22 @@ describe("InProcessKeychainPasswordReader", () => {
   });
 
   it("env var selects CLI vs in-process default reader", () => {
-    const savedReader = process.env.DYAD_SAFE_STORAGE_READER;
+    const savedReader = process.env.SAMBA_SAFE_STORAGE_READER;
     try {
-      delete process.env.DYAD_SAFE_STORAGE_READER;
+      delete process.env.SAMBA_SAFE_STORAGE_READER;
       expect(createDefaultKeychainPasswordReaderForTesting()).toBeInstanceOf(
         InProcessKeychainPasswordReader,
       );
 
-      process.env.DYAD_SAFE_STORAGE_READER = "cli";
+      process.env.SAMBA_SAFE_STORAGE_READER = "cli";
       expect(createDefaultKeychainPasswordReaderForTesting()).toBeInstanceOf(
         SecurityCliKeychainPasswordReader,
       );
     } finally {
       if (savedReader === undefined) {
-        delete process.env.DYAD_SAFE_STORAGE_READER;
+        delete process.env.SAMBA_SAFE_STORAGE_READER;
       } else {
-        process.env.DYAD_SAFE_STORAGE_READER = savedReader;
+        process.env.SAMBA_SAFE_STORAGE_READER = savedReader;
       }
     }
   });
@@ -308,7 +308,7 @@ describe("InProcessKeychainPasswordReader", () => {
     setInProcessKeychainBindingLoaderForTesting(() => ({
       readGenericPassword(service, account) {
         calls.push({ service, account });
-        if (service === "dyad Safe Storage" && account === "dyad Key") {
+        if (service === "samba Safe Storage" && account === "samba Key") {
           return { status: 0, password: "in-process-default-pw" };
         }
         return { status: -25300, password: null };
@@ -322,7 +322,7 @@ describe("InProcessKeychainPasswordReader", () => {
       );
     });
     expect(calls).toEqual([
-      { service: "dyad Safe Storage", account: "dyad Key" },
+      { service: "samba Safe Storage", account: "samba Key" },
       { service: "Chromium Safe Storage", account: "Chromium Key" },
     ]);
   });
@@ -330,27 +330,27 @@ describe("InProcessKeychainPasswordReader", () => {
 
 describe("Keychain unlock recovery retry", () => {
   const savedRecoveryKillSwitch =
-    process.env.DYAD_DISABLE_SAFE_STORAGE_RECOVERY;
+    process.env.SAMBA_DISABLE_SAFE_STORAGE_RECOVERY;
   const savedPromptKillSwitch =
-    process.env.DYAD_DISABLE_SAFE_STORAGE_UNLOCK_PROMPT;
+    process.env.SAMBA_DISABLE_SAFE_STORAGE_UNLOCK_PROMPT;
 
   beforeEach(() => {
     clearRecoveryCacheForTesting();
-    delete process.env.DYAD_DISABLE_SAFE_STORAGE_RECOVERY;
-    delete process.env.DYAD_DISABLE_SAFE_STORAGE_UNLOCK_PROMPT;
+    delete process.env.SAMBA_DISABLE_SAFE_STORAGE_RECOVERY;
+    delete process.env.SAMBA_DISABLE_SAFE_STORAGE_UNLOCK_PROMPT;
   });
 
   afterEach(() => {
     clearRecoveryCacheForTesting();
     if (savedRecoveryKillSwitch === undefined) {
-      delete process.env.DYAD_DISABLE_SAFE_STORAGE_RECOVERY;
+      delete process.env.SAMBA_DISABLE_SAFE_STORAGE_RECOVERY;
     } else {
-      process.env.DYAD_DISABLE_SAFE_STORAGE_RECOVERY = savedRecoveryKillSwitch;
+      process.env.SAMBA_DISABLE_SAFE_STORAGE_RECOVERY = savedRecoveryKillSwitch;
     }
     if (savedPromptKillSwitch === undefined) {
-      delete process.env.DYAD_DISABLE_SAFE_STORAGE_UNLOCK_PROMPT;
+      delete process.env.SAMBA_DISABLE_SAFE_STORAGE_UNLOCK_PROMPT;
     } else {
-      process.env.DYAD_DISABLE_SAFE_STORAGE_UNLOCK_PROMPT =
+      process.env.SAMBA_DISABLE_SAFE_STORAGE_UNLOCK_PROMPT =
         savedPromptKillSwitch;
     }
   });
@@ -367,7 +367,7 @@ describe("Keychain unlock recovery retry", () => {
 
     await withPlatform("darwin", () => {
       const reader = new InProcessKeychainPasswordReader();
-      expect(reader.readPassword("dyad Safe Storage", "dyad Key")).toBeNull();
+      expect(reader.readPassword("samba Safe Storage", "samba Key")).toBeNull();
       expect(recoveryNeedsKeychainUnlock()).toBe(false);
     });
 
@@ -434,7 +434,7 @@ describe("Keychain unlock recovery retry", () => {
 
     await withPlatform("darwin", () => {
       expect(recoverLegacySafeStorageSecret(ciphertext)).toBeNull();
-      process.env.DYAD_DISABLE_SAFE_STORAGE_UNLOCK_PROMPT = "1";
+      process.env.SAMBA_DISABLE_SAFE_STORAGE_UNLOCK_PROMPT = "1";
       expect(recoveryNeedsKeychainUnlock()).toBe(false);
       expect(retryRecoveryWithKeychainUnlock()).toBe(false);
     });
@@ -486,8 +486,8 @@ describe("Keychain unlock recovery retry", () => {
         calls.push({ service, account, allowUI: allowUI ?? false });
         if (
           unlocked &&
-          service === "dyad Safe Storage" &&
-          account === "dyad Key"
+          service === "samba Safe Storage" &&
+          account === "samba Key"
         ) {
           return { status: 0, password: "unlocked-password" };
         }
@@ -513,8 +513,8 @@ describe("Keychain unlock recovery retry", () => {
     expect(unlockCalls).toBe(1);
     expect(calls).toEqual([
       {
-        service: "dyad Safe Storage",
-        account: "dyad Key",
+        service: "samba Safe Storage",
+        account: "samba Key",
         allowUI: false,
       },
       {
@@ -523,8 +523,8 @@ describe("Keychain unlock recovery retry", () => {
         allowUI: false,
       },
       {
-        service: "dyad Safe Storage",
-        account: "dyad Key",
+        service: "samba Safe Storage",
+        account: "samba Key",
         allowUI: false,
       },
       {
@@ -537,42 +537,42 @@ describe("Keychain unlock recovery retry", () => {
 });
 
 describe("recoverLegacySafeStorageSecret", () => {
-  const savedKillSwitch = process.env.DYAD_DISABLE_SAFE_STORAGE_RECOVERY;
-  const savedReader = process.env.DYAD_SAFE_STORAGE_READER;
+  const savedKillSwitch = process.env.SAMBA_DISABLE_SAFE_STORAGE_RECOVERY;
+  const savedReader = process.env.SAMBA_SAFE_STORAGE_READER;
 
   beforeEach(() => {
     clearRecoveryCacheForTesting();
-    delete process.env.DYAD_DISABLE_SAFE_STORAGE_RECOVERY;
-    delete process.env.DYAD_SAFE_STORAGE_READER;
+    delete process.env.SAMBA_DISABLE_SAFE_STORAGE_RECOVERY;
+    delete process.env.SAMBA_SAFE_STORAGE_READER;
   });
 
   afterEach(() => {
     if (savedKillSwitch === undefined) {
-      delete process.env.DYAD_DISABLE_SAFE_STORAGE_RECOVERY;
+      delete process.env.SAMBA_DISABLE_SAFE_STORAGE_RECOVERY;
     } else {
-      process.env.DYAD_DISABLE_SAFE_STORAGE_RECOVERY = savedKillSwitch;
+      process.env.SAMBA_DISABLE_SAFE_STORAGE_RECOVERY = savedKillSwitch;
     }
     if (savedReader === undefined) {
-      delete process.env.DYAD_SAFE_STORAGE_READER;
+      delete process.env.SAMBA_SAFE_STORAGE_READER;
     } else {
-      process.env.DYAD_SAFE_STORAGE_READER = savedReader;
+      process.env.SAMBA_SAFE_STORAGE_READER = savedReader;
     }
   });
 
-  it("recovers via the dyad identity", async () => {
-    const key = deriveLegacyOsCryptKey("dyad-keychain-pw");
-    const ciphertext = encryptV10Base64("dyad-real-secret", key);
-    const reader = makeFakeReader({ [DYAD_KEY]: "dyad-keychain-pw" });
+  it("recovers via the samba identity", async () => {
+    const key = deriveLegacyOsCryptKey("samba-keychain-pw");
+    const ciphertext = encryptV10Base64("samba-real-secret", key);
+    const reader = makeFakeReader({ [SAMBA_KEY]: "samba-keychain-pw" });
 
     await withPlatform("darwin", () => {
       expect(recoverLegacySafeStorageSecret(ciphertext, reader)).toBe(
-        "dyad-real-secret",
+        "samba-real-secret",
       );
     });
     // Both identities are consulted before returning so a later plausible
     // decrypt cannot be skipped.
     expect(reader.calls).toEqual([
-      { service: "dyad Safe Storage", account: "dyad Key" },
+      { service: "samba Safe Storage", account: "samba Key" },
       { service: "Chromium Safe Storage", account: "Chromium Key" },
     ]);
     expect(getRecoveryStatsForTesting()).toEqual({
@@ -582,7 +582,7 @@ describe("recoverLegacySafeStorageSecret", () => {
     });
   });
 
-  it("recovers via the chromium identity when the dyad identity misses", async () => {
+  it("recovers via the chromium identity when the samba identity misses", async () => {
     const key = deriveLegacyOsCryptKey("chromium-keychain-pw");
     const ciphertext = encryptV10Base64("chromium-real-secret", key);
     const reader = makeFakeReader({ [CHROMIUM_KEY]: "chromium-keychain-pw" });
@@ -593,7 +593,7 @@ describe("recoverLegacySafeStorageSecret", () => {
       );
     });
     expect(reader.calls).toEqual([
-      { service: "dyad Safe Storage", account: "dyad Key" },
+      { service: "samba Safe Storage", account: "samba Key" },
       { service: "Chromium Safe Storage", account: "Chromium Key" },
     ]);
   });
@@ -626,12 +626,12 @@ describe("recoverLegacySafeStorageSecret", () => {
     expect(falsePositivePw).not.toBeNull();
 
     const reader = makeFakeReader({
-      [DYAD_KEY]: falsePositivePw!,
+      [SAMBA_KEY]: falsePositivePw!,
       [CHROMIUM_KEY]: "correct-chromium-pw",
     });
 
     await withPlatform("darwin", () => {
-      // The dyad identity "decrypts" to garbage and is rejected; the chromium
+      // The samba identity "decrypts" to garbage and is rejected; the chromium
       // identity yields the real plaintext.
       expect(recoverLegacySafeStorageSecret(ciphertext, reader)).toBe(
         "the real secret",
@@ -644,7 +644,7 @@ describe("recoverLegacySafeStorageSecret", () => {
     const key = deriveLegacyOsCryptKey("shared-keychain-pw");
     const ciphertext = encryptV10Base64("ambiguous-secret", key);
     const reader = makeFakeReader({
-      [DYAD_KEY]: "shared-keychain-pw",
+      [SAMBA_KEY]: "shared-keychain-pw",
       [CHROMIUM_KEY]: "shared-keychain-pw",
     });
 
@@ -652,7 +652,7 @@ describe("recoverLegacySafeStorageSecret", () => {
       expect(recoverLegacySafeStorageSecret(ciphertext, reader)).toBeNull();
     });
     expect(reader.calls).toEqual([
-      { service: "dyad Safe Storage", account: "dyad Key" },
+      { service: "samba Safe Storage", account: "samba Key" },
       { service: "Chromium Safe Storage", account: "Chromium Key" },
     ]);
     expect(getRecoveryStatsForTesting()).toEqual({
@@ -663,10 +663,10 @@ describe("recoverLegacySafeStorageSecret", () => {
   });
 
   it("returns null under the kill switch and never reads the keychain", async () => {
-    process.env.DYAD_DISABLE_SAFE_STORAGE_RECOVERY = "1";
+    process.env.SAMBA_DISABLE_SAFE_STORAGE_RECOVERY = "1";
     const key = deriveLegacyOsCryptKey("pw");
     const ciphertext = encryptV10Base64("secret", key);
-    const reader = makeFakeReader({ [DYAD_KEY]: "pw" });
+    const reader = makeFakeReader({ [SAMBA_KEY]: "pw" });
 
     await withPlatform("darwin", () => {
       expect(recoverLegacySafeStorageSecret(ciphertext, reader)).toBeNull();
@@ -675,7 +675,7 @@ describe("recoverLegacySafeStorageSecret", () => {
   });
 
   it("returns null for non-v10 ciphertext without reading the keychain", async () => {
-    const reader = makeFakeReader({ [DYAD_KEY]: "pw" });
+    const reader = makeFakeReader({ [SAMBA_KEY]: "pw" });
     const notV10 = Buffer.from("not-a-v10-ciphertext-at-all").toString(
       "base64",
     );
@@ -689,7 +689,7 @@ describe("recoverLegacySafeStorageSecret", () => {
   it("returns null on non-darwin platforms", async () => {
     const key = deriveLegacyOsCryptKey("pw");
     const ciphertext = encryptV10Base64("secret", key);
-    const reader = makeFakeReader({ [DYAD_KEY]: "pw" });
+    const reader = makeFakeReader({ [SAMBA_KEY]: "pw" });
 
     await withPlatform("linux", () => {
       expect(recoverLegacySafeStorageSecret(ciphertext, reader)).toBeNull();
@@ -698,9 +698,9 @@ describe("recoverLegacySafeStorageSecret", () => {
   });
 
   it("caches results so the keychain is read once per ciphertext", async () => {
-    const key = deriveLegacyOsCryptKey("dyad-keychain-pw");
+    const key = deriveLegacyOsCryptKey("samba-keychain-pw");
     const ciphertext = encryptV10Base64("cached-secret", key);
-    const reader = makeFakeReader({ [DYAD_KEY]: "dyad-keychain-pw" });
+    const reader = makeFakeReader({ [SAMBA_KEY]: "samba-keychain-pw" });
 
     await withPlatform("darwin", () => {
       expect(recoverLegacySafeStorageSecret(ciphertext, reader)).toBe(
@@ -775,9 +775,9 @@ describe.skipIf(process.platform !== "darwin")(
   "SecurityCliKeychainPasswordReader (darwin integration)",
   () => {
     const tmpDir = fs.mkdtempSync(
-      path.join(os.tmpdir(), "dyad-safe-storage-legacy-"),
+      path.join(os.tmpdir(), "samba-safe-storage-legacy-"),
     );
-    const keychainPath = path.join(tmpDir, "dyad-recovery-test.keychain");
+    const keychainPath = path.join(tmpDir, "samba-recovery-test.keychain");
     const keychainPassword = "testpass";
     const storedPassword = "integration-test-password";
 
@@ -798,9 +798,9 @@ describe.skipIf(process.platform !== "darwin")(
         "add-generic-password",
         "-A",
         "-s",
-        "dyad Safe Storage",
+        "samba Safe Storage",
         "-a",
-        "dyad Key",
+        "samba Key",
         "-w",
         storedPassword,
         keychainPath,
@@ -821,7 +821,7 @@ describe.skipIf(process.platform !== "darwin")(
 
     it("reads a stored password from the temp keychain", () => {
       const reader = new SecurityCliKeychainPasswordReader(keychainPath);
-      expect(reader.readPassword("dyad Safe Storage", "dyad Key")).toBe(
+      expect(reader.readPassword("samba Safe Storage", "samba Key")).toBe(
         storedPassword,
       );
     });
@@ -848,18 +848,18 @@ describe.skipIf(process.platform !== "darwin")(
       // under the reader: cached answers must keep being served without any
       // further CLI calls (a re-read of the now-missing item would return
       // null, and a prompt-per-secret would stall startup on real machines).
-      expect(reader.readPassword("dyad Safe Storage", "dyad Key")).toBe(
+      expect(reader.readPassword("samba Safe Storage", "samba Key")).toBe(
         storedPassword,
       );
       expect(reader.readPassword("Missing Safe Storage", "nobody")).toBeNull();
       execFileSync("security", [
         "delete-generic-password",
         "-s",
-        "dyad Safe Storage",
+        "samba Safe Storage",
         keychainPath,
       ]);
       try {
-        expect(reader.readPassword("dyad Safe Storage", "dyad Key")).toBe(
+        expect(reader.readPassword("samba Safe Storage", "samba Key")).toBe(
           storedPassword,
         );
         expect(
@@ -869,8 +869,8 @@ describe.skipIf(process.platform !== "darwin")(
         // above came from the cache.
         expect(
           new SecurityCliKeychainPasswordReader(keychainPath).readPassword(
-            "dyad Safe Storage",
-            "dyad Key",
+            "samba Safe Storage",
+            "samba Key",
           ),
         ).toBeNull();
       } finally {
@@ -879,9 +879,9 @@ describe.skipIf(process.platform !== "darwin")(
           "add-generic-password",
           "-A",
           "-s",
-          "dyad Safe Storage",
+          "samba Safe Storage",
           "-a",
-          "dyad Key",
+          "samba Key",
           "-w",
           storedPassword,
           keychainPath,
@@ -895,12 +895,12 @@ describe.skipIf(process.platform !== "darwin")(
   "InProcessKeychainPasswordReader (darwin integration)",
   () => {
     const tmpDir = fs.mkdtempSync(
-      path.join(os.tmpdir(), "dyad-safe-storage-in-process-"),
+      path.join(os.tmpdir(), "samba-safe-storage-in-process-"),
     );
-    const keychainPath = path.join(tmpDir, "dyad-recovery-test.keychain");
+    const keychainPath = path.join(tmpDir, "samba-recovery-test.keychain");
     const keychainPassword = "testpass";
     const storedPassword = "integration-test-password";
-    const promptService = "dyad Prompt Test Safe Storage";
+    const promptService = "samba Prompt Test Safe Storage";
 
     beforeAll(() => {
       assertInProcessKeychainReaderAddonAvailable();
@@ -921,9 +921,9 @@ describe.skipIf(process.platform !== "darwin")(
         "add-generic-password",
         "-A",
         "-s",
-        "dyad Safe Storage",
+        "samba Safe Storage",
         "-a",
-        "dyad Key",
+        "samba Key",
         "-w",
         storedPassword,
         keychainPath,
@@ -933,7 +933,7 @@ describe.skipIf(process.platform !== "darwin")(
         "-s",
         promptService,
         "-a",
-        "dyad Key",
+        "samba Key",
         "-w",
         "prompt-required-password",
         keychainPath,
@@ -954,7 +954,7 @@ describe.skipIf(process.platform !== "darwin")(
 
     it("reads a stored password from the temp keychain", () => {
       const reader = new InProcessKeychainPasswordReader(keychainPath);
-      expect(reader.readPassword("dyad Safe Storage", "dyad Key")).toBe(
+      expect(reader.readPassword("samba Safe Storage", "samba Key")).toBe(
         storedPassword,
       );
     });
@@ -979,7 +979,7 @@ describe.skipIf(process.platform !== "darwin")(
       const reader = new InProcessKeychainPasswordReader(keychainPath);
       const startedAt = Date.now();
 
-      expect(reader.readPassword(promptService, "dyad Key")).toBeNull();
+      expect(reader.readPassword(promptService, "samba Key")).toBeNull();
 
       expect(Date.now() - startedAt).toBeLessThan(2_000);
     });
@@ -993,8 +993,8 @@ describe.skipIf(process.platform !== "darwin")(
           isDefaultKeychainLockedForSafeStorageRecovery(keychainPath),
         ).toBe(true);
         const lockedRead = binding.readGenericPassword(
-          "dyad Safe Storage",
-          "dyad Key",
+          "samba Safe Storage",
+          "samba Key",
           keychainPath,
           false,
         );
@@ -1018,8 +1018,8 @@ describe.skipIf(process.platform !== "darwin")(
       );
       expect(
         binding.readGenericPassword(
-          "dyad Safe Storage",
-          "dyad Key",
+          "samba Safe Storage",
+          "samba Key",
           keychainPath,
           false,
         ),

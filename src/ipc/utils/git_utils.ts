@@ -17,7 +17,7 @@ import { safeJoin } from "./path_utils";
 import { ensureLibcurlShimOnLinux } from "./linux_libcurl_shim";
 import { getPathEnvKey } from "./path_env";
 import type { UncommittedFile, UncommittedFileStatus } from "@/ipc/types";
-import { DyadError, DyadErrorKind, isDyadError } from "@/errors/dyad_error";
+import { SambaError, SambaErrorKind, isSambaError } from "@/errors/samba_error";
 import { GIT_ERROR_CODES, type GitErrorCode } from "@/shared/git_error_codes";
 import {
   isDotenvFilePath,
@@ -41,7 +41,7 @@ const GIT_STATE_FINGERPRINT_MAX_UNTRACKED_PATHS = 10_000;
 let didReportGitLaunchFailure = false;
 
 function isUserVisibleGitPath(filePath: string) {
-  return !filePath.startsWith(".dyad/") && filePath !== "pnpm-workspace.yaml";
+  return !filePath.startsWith(".samba/") && filePath !== "pnpm-workspace.yaml";
 }
 
 function isAgentGitPatchVisiblePath(filePath: string) {
@@ -526,8 +526,8 @@ function getGitNetworkEnv(accessToken?: string): Record<string, string> {
 /**
  * Helper function that wraps exec and throws an error if the exit code is non-zero.
  *
- * Defaults to {@link DyadErrorKind.External} so unexpected failures (network, permissions,
- * corrupted repos) surface in telemetry. Use {@link DyadErrorKind.Conflict} only when the
+ * Defaults to {@link SambaErrorKind.External} so unexpected failures (network, permissions,
+ * corrupted repos) surface in telemetry. Use {@link SambaErrorKind.Conflict} only when the
  * dominant failure mode is genuinely merge/working-tree conflict (callers that detect
  * conflict state often rethrow {@link GitConflictError} instead).
  */
@@ -535,7 +535,7 @@ async function execOrThrow(
   args: string[],
   path: string,
   errorMessage?: string,
-  kind: DyadErrorKind = DyadErrorKind.External,
+  kind: SambaErrorKind = SambaErrorKind.External,
   options?: IGitStringExecutionOptions,
 ): Promise<void> {
   const result = await execGit(args, path, options);
@@ -544,7 +544,7 @@ async function execOrThrow(
     const error = errorMessage
       ? `${errorMessage}. ${errorDetails}`
       : `Git command failed: ${args.join(" ")}. ${errorDetails}`;
-    throw new DyadError(error, kind);
+    throw new SambaError(error, kind);
   }
 }
 
@@ -702,9 +702,9 @@ export async function getCurrentCommitHash({
 }: GitInitParams): Promise<string> {
   const result = await execGit(["rev-parse", ref], path);
   if (result.exitCode !== 0) {
-    throw new DyadError(
+    throw new SambaError(
       `Failed to resolve ref '${ref}': ${result.stderr.trim() || result.stdout.trim()}`,
-      DyadErrorKind.Conflict,
+      SambaErrorKind.Conflict,
     );
   }
   return result.stdout.trim();
@@ -732,9 +732,9 @@ export async function isGitStatusClean({
   );
 
   if (result.exitCode !== 0) {
-    throw new DyadError(
+    throw new SambaError(
       `Failed to get status: ${result.stderr}`,
-      DyadErrorKind.Conflict,
+      SambaErrorKind.Conflict,
     );
   }
 
@@ -756,9 +756,9 @@ export async function isUserVisibleGitStatusClean({
     path,
   );
   if (result.exitCode !== 0) {
-    throw new DyadError(
+    throw new SambaError(
       `Failed to get status: ${result.stderr.trim() || result.stdout.trim()}`,
-      DyadErrorKind.Conflict,
+      SambaErrorKind.Conflict,
     );
   }
   return !result.stdout
@@ -792,9 +792,9 @@ async function gitInternalPath(
     repositoryPath,
   );
   if (result.exitCode !== 0) {
-    throw new DyadError(
+    throw new SambaError(
       `Failed to inspect Git state: ${result.stderr.trim() || result.stdout.trim()}`,
-      DyadErrorKind.Conflict,
+      SambaErrorKind.Conflict,
     );
   }
   const markerPath = result.stdout.trim();
@@ -886,9 +886,9 @@ export async function isGitPathClean({
     path,
   );
   if (result.exitCode !== 0) {
-    throw new DyadError(
+    throw new SambaError(
       `Failed to get status for ${filepath}: ${result.stderr.trim() || result.stdout.trim()}`,
-      DyadErrorKind.Conflict,
+      SambaErrorKind.Conflict,
     );
   }
   return result.stdout.trim().length === 0;
@@ -902,9 +902,9 @@ export async function hasStagedChanges({
   // git diff --cached --quiet exits with 1 if there are staged changes, 0 if none
   const result = await execGit(["diff", "--cached", "--quiet"], path);
   if (result.exitCode !== 0 && result.exitCode !== 1) {
-    throw new DyadError(
+    throw new SambaError(
       `Failed to check staged changes: ${result.stderr.trim() || result.stdout.trim()}`,
-      DyadErrorKind.Conflict,
+      SambaErrorKind.Conflict,
     );
   }
   return result.exitCode === 1;
@@ -925,7 +925,7 @@ export async function gitCommit({
   // commit. A repository-relative path would let the repository supply hooks
   // at that path and execute code during an automatic checkpoint.
   const noHooksPath = await fsPromises.mkdtemp(
-    pathModule.join(tmpdir(), "dyad-no-git-hooks-"),
+    pathModule.join(tmpdir(), "samba-no-git-hooks-"),
   );
   try {
     const commitArgs = [
@@ -949,9 +949,9 @@ export async function gitCommit({
     // Get the new commit hash
     const result = await execGit(["rev-parse", "HEAD"], path);
     if (result.exitCode !== 0) {
-      throw new DyadError(
+      throw new SambaError(
         `Failed to get commit hash: ${result.stderr.trim() || result.stdout.trim()}`,
-        DyadErrorKind.Conflict,
+        SambaErrorKind.Conflict,
       );
     }
     return result.stdout.trim();
@@ -993,9 +993,9 @@ export async function gitStageToRevert({
   // Get the current HEAD commit hash
   const currentHeadResult = await execGit(["rev-parse", "HEAD"], path);
   if (currentHeadResult.exitCode !== 0) {
-    throw new DyadError(
+    throw new SambaError(
       `Failed to get current commit: ${currentHeadResult.stderr.trim() || currentHeadResult.stdout.trim()}`,
-      DyadErrorKind.Conflict,
+      SambaErrorKind.Conflict,
     );
   }
 
@@ -1007,25 +1007,25 @@ export async function gitStageToRevert({
   // commit, and untracked runtime files could trigger an empty commit failure.
   const statusResult = await execGit(["status", "--porcelain"], path);
   if (statusResult.exitCode !== 0) {
-    throw new DyadError(
+    throw new SambaError(
       `Failed to get status: ${statusResult.stderr.trim() || statusResult.stdout.trim()}`,
-      DyadErrorKind.Conflict,
+      SambaErrorKind.Conflict,
     );
   }
   const userVisibleChanges = statusResult.stdout
     .split("\n")
     .filter((line) => line.trim() !== "")
     // A staged rename shows up as `old -> new`. Examine BOTH sides: a rename
-    // from a managed `.dyad/` file to a user-visible destination must still
+    // from a managed `.samba/` file to a user-visible destination must still
     // count as a user-visible change, otherwise the following `reset --hard`
     // would silently destroy the destination file. Mirrors the rename
     // handling in `getGitUncommittedFilesWithStatus`.
     .flatMap(getPorcelainPaths)
     .filter(isUserVisibleGitPath);
   if (userVisibleChanges.length > 0) {
-    throw new DyadError(
+    throw new SambaError(
       "Cannot revert: working tree has uncommitted changes.",
-      DyadErrorKind.Conflict,
+      SambaErrorKind.Conflict,
     );
   }
 
@@ -1148,11 +1148,11 @@ export async function readGitIndexEntries({
     path,
   );
   if (result.exitCode !== 0) {
-    throw new DyadError(
+    throw new SambaError(
       `Failed to read the index entry for '${normalizedFilepath}'. ${
         result.stderr.trim() || result.stdout.trim()
       }`,
-      DyadErrorKind.External,
+      SambaErrorKind.External,
     );
   }
   // `<mode> <oid> <stage>\t<path>` per line, empty when the path isn't staged.
@@ -1193,7 +1193,7 @@ export async function restoreGitIndexEntries({
     ["update-index", "--index-info"],
     path,
     `Failed to restore the index entry for '${normalizedFilepath}'`,
-    DyadErrorKind.External,
+    SambaErrorKind.External,
     {
       stdin: entries
         .map(
@@ -1250,9 +1250,9 @@ export async function getGitUncommittedFiles({
 }: GitBaseParams): Promise<string[]> {
   const result = await execGit(["status", "--porcelain"], path);
   if (result.exitCode !== 0) {
-    throw new DyadError(
+    throw new SambaError(
       `Failed to get uncommitted files: ${result.stderr.trim() || result.stdout.trim()}`,
-      DyadErrorKind.Conflict,
+      SambaErrorKind.Conflict,
     );
   }
   return (
@@ -1262,7 +1262,7 @@ export async function getGitUncommittedFiles({
       .filter((line) => line.trim() !== "")
       // Decode git's C-style path quoting (including `\NNN` octal escapes for
       // non-ASCII/control bytes) and expand rename entries into both sides, so
-      // non-ASCII paths are returned verbatim and `.dyad/` filtering matches.
+      // non-ASCII paths are returned verbatim and `.samba/` filtering matches.
       .flatMap(getPorcelainPaths)
       .filter(isUserVisibleGitPath)
   );
@@ -1577,9 +1577,9 @@ export async function getGitUncommittedFilesWithStatus({
 }: GitBaseParams): Promise<UncommittedFile[]> {
   const result = await execGit(["status", "--porcelain"], path);
   if (result.exitCode !== 0) {
-    throw new DyadError(
+    throw new SambaError(
       `Failed to get uncommitted files: ${result.stderr.trim() || result.stdout.trim()}`,
-      DyadErrorKind.Conflict,
+      SambaErrorKind.Conflict,
     );
   }
   const files = result.stdout
@@ -1661,7 +1661,7 @@ export async function getOldFileContent({
  * Lists the files changed in a single commit (compared to its parent), with the
  * kind of change. Renames are decomposed into a delete + add pair so the result
  * maps cleanly onto per-path content lookups. Filters out files that are not
- * user-visible (e.g. .dyad/, pnpm-workspace.yaml) for parity with the rest of
+ * user-visible (e.g. .samba/, pnpm-workspace.yaml) for parity with the rest of
  * the file.
  */
 export async function getChangedFilesForCommit({
@@ -1691,9 +1691,9 @@ export async function getChangedFilesForCommit({
     path,
   );
   if (result.exitCode !== 0) {
-    throw new DyadError(
+    throw new SambaError(
       result.stderr.toString() || result.stdout.toString(),
-      DyadErrorKind.External,
+      SambaErrorKind.External,
     );
   }
 
@@ -1734,7 +1734,7 @@ export async function gitListBranches({
   const result = await execGit(["branch", "--list"], path);
 
   if (result.exitCode !== 0) {
-    throw new DyadError(result.stderr.toString(), DyadErrorKind.Conflict);
+    throw new SambaError(result.stderr.toString(), SambaErrorKind.Conflict);
   }
   // Parse output:
   // e.g. "* main\n  feature/login"
@@ -1752,7 +1752,7 @@ export async function gitListRemoteBranches({
   const result = await execGit(["branch", "-r", "--list"], path);
 
   if (result.exitCode !== 0) {
-    throw new DyadError(result.stderr.toString(), DyadErrorKind.Conflict);
+    throw new SambaError(result.stderr.toString(), SambaErrorKind.Conflict);
   }
   // Parse output:
   // e.g. "  origin/main\n  origin/feature/login\n  upstream/develop"
@@ -1781,7 +1781,7 @@ export async function gitRenameBranch({
   // git branch -m oldBranch newBranch
   const result = await execGit(["branch", "-m", oldBranch, newBranch], path);
   if (result.exitCode !== 0) {
-    throw new DyadError(result.stderr.toString(), DyadErrorKind.Conflict);
+    throw new SambaError(result.stderr.toString(), SambaErrorKind.Conflict);
   }
 }
 
@@ -1809,7 +1809,7 @@ export async function gitClone({
   });
 
   if (result.exitCode !== 0) {
-    throw new DyadError(result.stderr.toString(), DyadErrorKind.Conflict);
+    throw new SambaError(result.stderr.toString(), SambaErrorKind.Conflict);
   }
 }
 
@@ -1820,7 +1820,7 @@ export async function gitSetRemoteUrl({
   // Validate remoteUrl to prevent argument injection attacks
   // URLs starting with "-" could be interpreted as command-line options
   if (remoteUrl.startsWith("-")) {
-    throw new DyadError("Invalid remote URL", DyadErrorKind.Validation);
+    throw new SambaError("Invalid remote URL", SambaErrorKind.Validation);
   }
 
   // Dugite version
@@ -1836,16 +1836,16 @@ export async function gitSetRemoteUrl({
       );
 
       if (updateResult.exitCode !== 0) {
-        throw new DyadError(
+        throw new SambaError(
           `Failed to update remote: ${updateResult.stderr}`,
-          DyadErrorKind.Conflict,
+          SambaErrorKind.Conflict,
         );
       }
     } else if (result.exitCode !== 0) {
       // Handle other errors
-      throw new DyadError(
+      throw new SambaError(
         `Failed to add remote: ${result.stderr}`,
-        DyadErrorKind.Conflict,
+        SambaErrorKind.Conflict,
       );
     }
   } catch (error: any) {
@@ -1879,18 +1879,18 @@ export async function gitPush({
     if (result.exitCode !== 0) {
       const errorMsg = result.stderr.toString() || result.stdout.toString();
       throw classifyGitOperationError(
-        new DyadError(`Git push failed: ${errorMsg}`, DyadErrorKind.Conflict),
+        new SambaError(`Git push failed: ${errorMsg}`, SambaErrorKind.Conflict),
         [GIT_ERROR_CODES.NON_FAST_FORWARD, GIT_ERROR_CODES.DIVERGENT_BRANCHES],
       );
     }
     return;
   } catch (error: any) {
     logger.error("Error during git push:", error);
-    if (isDyadError(error)) throw error;
+    if (isSambaError(error)) throw error;
     if (typeof error?.code === "string") throw error;
-    throw new DyadError(
+    throw new SambaError(
       `Git push failed: ${error.message}`,
-      DyadErrorKind.Conflict,
+      SambaErrorKind.Conflict,
     );
   }
 }
@@ -1939,9 +1939,9 @@ export async function gitCurrentBranch({
   // Dugite version
   const result = await execGit(["branch", "--show-current"], path);
   if (result.exitCode !== 0) {
-    throw new DyadError(
+    throw new SambaError(
       `Failed to get current branch: ${result.stderr.trim() || result.stdout.trim()}`,
-      DyadErrorKind.Conflict,
+      SambaErrorKind.Conflict,
     );
   }
   const branch = result.stdout.trim() || null;
@@ -1971,7 +1971,7 @@ export async function gitIsIgnored({
   if (result.exitCode === 1) return false;
 
   // Other exit codes are actual errors
-  throw new DyadError(result.stderr.toString(), DyadErrorKind.Conflict);
+  throw new SambaError(result.stderr.toString(), SambaErrorKind.Conflict);
 }
 
 /**
@@ -2000,9 +2000,9 @@ export async function gitListFilesNative({
     path,
   );
   if (result.exitCode !== 0) {
-    throw new DyadError(
+    throw new SambaError(
       `Failed to list files: ${result.stderr.trim() || result.stdout.trim()}`,
-      DyadErrorKind.Conflict,
+      SambaErrorKind.Conflict,
     );
   }
   return result.stdout.split("\0").filter(Boolean).map(normalizePath);
@@ -2028,7 +2028,7 @@ export async function gitLogNative(
   const logResult = await execGit(logArgs, path);
 
   if (logResult.exitCode !== 0) {
-    throw new DyadError(logResult.stderr.toString(), DyadErrorKind.Conflict);
+    throw new SambaError(logResult.stderr.toString(), SambaErrorKind.Conflict);
   }
 
   const output = logResult.stdout.toString().trim();
@@ -2140,10 +2140,10 @@ function agentGitErrorDetails(result: IGitStringResult): string {
 function assertAgentGitSuccess(
   result: IGitStringResult,
   message: string,
-  kind: DyadErrorKind = DyadErrorKind.Conflict,
+  kind: SambaErrorKind = SambaErrorKind.Conflict,
 ): void {
   if (result.exitCode !== 0) {
-    throw new DyadError(`${message}: ${agentGitErrorDetails(result)}`, kind);
+    throw new SambaError(`${message}: ${agentGitErrorDetails(result)}`, kind);
   }
 }
 
@@ -2180,9 +2180,9 @@ function assertAgentGitRevisionInput(revision: string): void {
     revision.includes("..") ||
     /[\0\r\n]/.test(revision)
   ) {
-    throw new DyadError(
+    throw new SambaError(
       `Invalid Git revision: ${JSON.stringify(revision)}`,
-      DyadErrorKind.Validation,
+      SambaErrorKind.Validation,
     );
   }
 }
@@ -2197,9 +2197,9 @@ export function normalizeAgentGitPath(
     /[\0\r\n]/.test(filePath) ||
     /(^|[\\/])\.\.([\\/]|$)/.test(filePath)
   ) {
-    throw new DyadError(
+    throw new SambaError(
       `Invalid Git path: ${JSON.stringify(filePath)}`,
-      DyadErrorKind.Validation,
+      SambaErrorKind.Validation,
     );
   }
   const fullPath = safeJoin(repoPath, filePath);
@@ -2210,9 +2210,9 @@ export function normalizeAgentGitPath(
     ),
   ).replace(/^\.\//, "");
   if (!relativePath || relativePath === ".") {
-    throw new DyadError(
+    throw new SambaError(
       "A file or directory path inside the app is required",
-      DyadErrorKind.Validation,
+      SambaErrorKind.Validation,
     );
   }
   return relativePath;
@@ -2239,16 +2239,16 @@ export async function resolveAgentGitCommit({
     path,
   );
   if (result.exitCode !== 0) {
-    throw new DyadError(
+    throw new SambaError(
       `Git revision not found: ${revision}`,
-      DyadErrorKind.NotFound,
+      SambaErrorKind.NotFound,
     );
   }
   const oid = result.stdout.trim();
   if (!/^[0-9a-f]{40,64}$/i.test(oid)) {
-    throw new DyadError(
+    throw new SambaError(
       `Git returned an invalid commit ID for revision: ${revision}`,
-      DyadErrorKind.External,
+      SambaErrorKind.External,
     );
   }
   return oid;
@@ -2712,16 +2712,16 @@ async function getAgentGitTreeEntry({
   assertAgentGitSuccess(result, "Failed to inspect historical Git path");
   const record = result.stdout.split("\0").find(Boolean);
   if (!record) {
-    throw new DyadError(
+    throw new SambaError(
       `File does not exist at commit ${oid}: ${filePath}`,
-      DyadErrorKind.NotFound,
+      SambaErrorKind.NotFound,
     );
   }
   const match = /^(\d+) ([^ ]+) ([0-9a-f]+)\t([\s\S]+)$/.exec(record);
   if (!match || normalizePath(match[4]) !== filePath) {
-    throw new DyadError(
+    throw new SambaError(
       `Historical Git path is not an exact file match: ${filePath}`,
-      DyadErrorKind.Validation,
+      SambaErrorKind.Validation,
     );
   }
   return { mode: match[1], type: match[2], oid: match[3], path: match[4] };
@@ -2729,17 +2729,17 @@ async function getAgentGitTreeEntry({
 
 function decodeAgentGitText(bytes: Buffer, displayPath: string): string {
   if (bytes.includes(0)) {
-    throw new DyadError(
+    throw new SambaError(
       `Cannot display binary file from Git history: ${displayPath}`,
-      DyadErrorKind.Validation,
+      SambaErrorKind.Validation,
     );
   }
   try {
     return new TextDecoder("utf-8", { fatal: true }).decode(bytes);
   } catch {
-    throw new DyadError(
+    throw new SambaError(
       `Cannot display non-UTF-8 file from Git history: ${displayPath}`,
-      DyadErrorKind.Validation,
+      SambaErrorKind.Validation,
     );
   }
 }
@@ -2764,24 +2764,24 @@ export async function getAgentGitFile({
     filePath: normalizedPath,
   });
   if (entry.type !== "blob") {
-    throw new DyadError(
+    throw new SambaError(
       `Historical Git path is not a file: ${normalizedPath}`,
-      DyadErrorKind.Validation,
+      SambaErrorKind.Validation,
     );
   }
   const sizeResult = await execAgentGit(["cat-file", "-s", entry.oid], path);
   assertAgentGitSuccess(sizeResult, "Failed to inspect historical file size");
   const size = Number(sizeResult.stdout.trim());
   if (!Number.isSafeInteger(size) || size < 0) {
-    throw new DyadError(
+    throw new SambaError(
       `Git returned an invalid size for historical file: ${normalizedPath}`,
-      DyadErrorKind.External,
+      SambaErrorKind.External,
     );
   }
   if (size > AGENT_GIT_SOURCE_FILE_LIMIT_BYTES) {
-    throw new DyadError(
+    throw new SambaError(
       `Historical file is too large to read safely: ${normalizedPath} (${size} bytes; ${AGENT_GIT_SOURCE_FILE_LIMIT_BYTES} byte limit)`,
-      DyadErrorKind.Validation,
+      SambaErrorKind.Validation,
     );
   }
   const contentResult = await execAgentGit(
@@ -2823,24 +2823,24 @@ export async function restoreAgentGitFile({
     entry.type !== "blob" ||
     (entry.mode !== "100644" && entry.mode !== "100755")
   ) {
-    throw new DyadError(
+    throw new SambaError(
       `Only regular files can be restored: ${normalizedPath}`,
-      DyadErrorKind.Validation,
+      SambaErrorKind.Validation,
     );
   }
   const sizeResult = await execAgentGit(["cat-file", "-s", entry.oid], path);
   assertAgentGitSuccess(sizeResult, "Failed to inspect historical file size");
   const size = Number(sizeResult.stdout.trim());
   if (!Number.isSafeInteger(size) || size < 0) {
-    throw new DyadError(
+    throw new SambaError(
       `Git returned an invalid size for historical file: ${normalizedPath}`,
-      DyadErrorKind.External,
+      SambaErrorKind.External,
     );
   }
   if (size > AGENT_GIT_SOURCE_FILE_LIMIT_BYTES) {
-    throw new DyadError(
+    throw new SambaError(
       `Historical file is too large to restore safely: ${normalizedPath} (${size} bytes; ${AGENT_GIT_SOURCE_FILE_LIMIT_BYTES} byte limit)`,
-      DyadErrorKind.Validation,
+      SambaErrorKind.Validation,
     );
   }
   const contentResult = await execAgentGit(
@@ -2856,7 +2856,7 @@ export async function restoreAgentGitFile({
   const parent = pathModule.dirname(destination);
   await fsPromises.mkdir(parent, { recursive: true });
   const temporaryDirectory = await fsPromises.mkdtemp(
-    pathModule.join(parent, ".dyad-git-restore-"),
+    pathModule.join(parent, ".samba-git-restore-"),
   );
   const temporaryFile = pathModule.join(temporaryDirectory, "file");
   try {
@@ -2874,9 +2874,9 @@ export async function restoreAgentGitFile({
       throw error;
     });
     if (existing?.isDirectory()) {
-      throw new DyadError(
+      throw new SambaError(
         `Cannot restore a file over a directory: ${normalizedPath}`,
-        DyadErrorKind.Validation,
+        SambaErrorKind.Validation,
       );
     }
     await fsPromises.rm(destination, { force: true });
@@ -2901,13 +2901,13 @@ export async function gitFetch({
   );
 }
 
-class CodedGitError extends DyadError {
+class CodedGitError extends SambaError {
   readonly code: GitErrorCode;
 
   constructor(
     message: string,
     code: GitErrorCode,
-    kind: DyadErrorKind,
+    kind: SambaErrorKind,
     name: string,
   ) {
     super(message, kind);
@@ -2952,7 +2952,7 @@ export function classifyGitOperationError(
     return new CodedGitError(
       message,
       GIT_ERROR_CODES.UNCOMMITTED_CHANGES,
-      DyadErrorKind.Conflict,
+      SambaErrorKind.Conflict,
       "GitStateError",
     );
   }
@@ -2965,7 +2965,7 @@ export function classifyGitOperationError(
     return new CodedGitError(
       message,
       GIT_ERROR_CODES.NON_FAST_FORWARD,
-      DyadErrorKind.Conflict,
+      SambaErrorKind.Conflict,
       "GitStateError",
     );
   }
@@ -2976,7 +2976,7 @@ export function classifyGitOperationError(
     return new CodedGitError(
       message,
       GIT_ERROR_CODES.DIVERGENT_BRANCHES,
-      DyadErrorKind.Conflict,
+      SambaErrorKind.Conflict,
       "GitStateError",
     );
   }
@@ -2985,11 +2985,11 @@ export function classifyGitOperationError(
 }
 
 /** Merge/pull conflicts — `name` kept for UI checks (e.g. GitHubConnector). */
-class GitConflictErrorImpl extends DyadError {
+class GitConflictErrorImpl extends SambaError {
   readonly code = GIT_ERROR_CODES.MERGE_CONFLICT;
 
   constructor(message: string) {
-    super(message, DyadErrorKind.Conflict);
+    super(message, SambaErrorKind.Conflict);
     this.name = "GitConflictError";
   }
 }
@@ -3003,7 +3003,7 @@ export function GitStateError(message: string, code: GitErrorCode): Error {
   return new CodedGitError(
     message,
     code,
-    DyadErrorKind.Precondition,
+    SambaErrorKind.Precondition,
     "GitStateError",
   );
 }
@@ -3121,9 +3121,9 @@ export async function gitGetMergeConflicts({
     exitCode: number;
   };
   if (result.exitCode !== 0) {
-    throw new DyadError(
+    throw new SambaError(
       `Failed to get merge conflicts: ${result.stderr}`,
-      DyadErrorKind.Conflict,
+      SambaErrorKind.Conflict,
     );
   }
   return result.stdout

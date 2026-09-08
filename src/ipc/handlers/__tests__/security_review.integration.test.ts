@@ -8,7 +8,7 @@
 // Covers the security-review flow:
 //  - a "/security-review" prompt (typed + sent through the real UI) swaps in
 //    the security-review system prompt and yields an assistant message full of
-//    <dyad-security-finding> tags, which render in the messages list (the
+//    <samba-security-finding> tags, which render in the messages list (the
 //    same DOM surface the e2e asserted) and are parsed by the real
 //    get-latest-security-review handler;
 //  - the LLM request payload for the review turn (masked server dump);
@@ -105,7 +105,7 @@ describe("security review (integration)", () => {
     send();
 
     // The streamed review renders in the messages list: the intro text and the
-    // <dyad-security-finding> cards' content (the same DOM surface the e2e
+    // <samba-security-finding> cards' content (the same DOM surface the e2e
     // asserted on).
     await waitFor(
       () =>
@@ -134,7 +134,7 @@ describe("security review (integration)", () => {
 
     const messages = await loadChatMessages(reviewChatId);
     const assistant = messages.find((m) => m.role === "assistant")!;
-    expect(assistant.content).toContain("<dyad-security-finding");
+    expect(assistant.content).toContain("<samba-security-finding");
 
     // The request payload for the review turn: security system prompt (masked)
     // and the raw "/security-review" prompt. Agentic Build reads files through
@@ -383,7 +383,7 @@ ${finding.description}`;
     const dump = harness.getServerDump({ type: "all-messages" });
     // Agentic Build does not send full codebase context. The rules are instead
     // appended to the unmasked security system prompt.
-    expect(dump.text).not.toContain('<dyad-file path="SECURITY_RULES.md">');
+    expect(dump.text).not.toContain('<samba-file path="SECURITY_RULES.md">');
     const raw = JSON.parse(fs.readFileSync(dump.dumpPath, "utf-8"));
     const systemMessage = raw.body.messages.find(
       (m: { role: string }) => m.role === "system",

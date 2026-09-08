@@ -12,7 +12,7 @@ import {
   createSequentialIdSource,
 } from "@/state_machines/testing";
 import { TwoWindowHarness } from "@/testing/two_window_harness";
-import { DyadError, DyadErrorKind } from "@/errors/dyad_error";
+import { SambaError, SambaErrorKind } from "@/errors/samba_error";
 import { AppRunActorService } from "@/ipc/services/app_run_actor_service";
 import { appRunClientDefinition } from "./client_definition";
 import { appRunDefinition } from "./definition";
@@ -161,14 +161,14 @@ describe("main-hosted app-run actor", () => {
     const service = new AppRunActorService();
 
     await expect(service.getRunState(7)).rejects.toMatchObject({
-      kind: DyadErrorKind.NotFound,
+      kind: SambaErrorKind.NotFound,
     });
     await expect(
       appRunDefinition.remote.authorizeSubscribe?.({
         key: appRunKey(7),
       } as never),
     ).rejects.toMatchObject({
-      kind: DyadErrorKind.Auth,
+      kind: SambaErrorKind.Auth,
     });
   });
 
@@ -202,7 +202,7 @@ describe("main-hosted app-run actor", () => {
       type: "stdout",
       appId: 7,
       message:
-        "[dyad-proxy-server]started=[http://localhost:3210] original=[http://localhost:5173] mode=[host]",
+        "[samba-proxy-server]started=[http://localhost:3210] original=[http://localhost:5173] mode=[host]",
     });
     expect(actorA.getSnapshot()).toMatchObject({
       phase: "starting",
@@ -363,7 +363,7 @@ describe("main-hosted app-run actor", () => {
 
   it("rejects renderer dispatch when the runtime settlement fails", async () => {
     runtime.start.mockRejectedValue(
-      new DyadError("spawn failed", DyadErrorKind.External),
+      new SambaError("spawn failed", SambaErrorKind.External),
     );
     const { duplex } = createHarness();
     const manager = new AppRunRemoteManager(
@@ -376,7 +376,7 @@ describe("main-hosted app-run actor", () => {
       manager.dispatch(7, { type: "START", startedAt: 10 }),
     ).rejects.toMatchObject({
       message: "spawn failed",
-      kind: DyadErrorKind.External,
+      kind: SambaErrorKind.External,
     });
     manager.dispose();
   });
@@ -595,7 +595,7 @@ describe("main-hosted app-run actor", () => {
     await service.disposeAllApps();
 
     await expect(dispatch).rejects.toMatchObject({
-      kind: DyadErrorKind.Precondition,
+      kind: SambaErrorKind.Precondition,
     });
   });
 
@@ -618,7 +618,7 @@ describe("main-hosted app-run actor", () => {
         },
       }),
     ).rejects.toMatchObject({
-      kind: DyadErrorKind.Conflict,
+      kind: SambaErrorKind.Conflict,
     });
   });
 
@@ -1525,7 +1525,7 @@ describe("main-hosted app-run actor", () => {
       type: "stdout",
       appId: 7,
       message:
-        "[dyad-proxy-server]started=[http://localhost:3210] original=[http://localhost:5173] mode=[host]",
+        "[samba-proxy-server]started=[http://localhost:3210] original=[http://localhost:5173] mode=[host]",
     });
     oldOutput.send({
       type: "app-exit",

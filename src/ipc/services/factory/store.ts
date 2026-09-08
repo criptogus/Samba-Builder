@@ -3,7 +3,7 @@ import path from "node:path";
 import { randomUUID } from "node:crypto";
 import { getUserDataPath } from "@/paths/paths";
 import { withLock } from "@/ipc/utils/lock_utils";
-import { DyadError, DyadErrorKind } from "@/errors/dyad_error";
+import { SambaError, SambaErrorKind } from "@/errors/samba_error";
 import {
   StoreSchema,
   type FactoryProject,
@@ -23,9 +23,9 @@ export async function readFactoryStore(): Promise<FactoryStore> {
   } catch (error) {
     if ((error as NodeJS.ErrnoException).code === "ENOENT")
       return { version: 1, projects: [] };
-    throw new DyadError(
+    throw new SambaError(
       "Não foi possível ler o registro da Fábrica. Preserve o arquivo samba-factory.json e restaure o backup.",
-      DyadErrorKind.Precondition,
+      SambaErrorKind.Precondition,
     );
   }
 }
@@ -64,14 +64,14 @@ export async function mutateFactoryProject(
   const store = await writeFactoryStore((current) => {
     const project = current.projects.find((entry) => entry.appId === appId);
     if (!project)
-      throw new DyadError(
+      throw new SambaError(
         "Projeto não cadastrado na Fábrica.",
-        DyadErrorKind.NotFound,
+        SambaErrorKind.NotFound,
       );
     if (project.revision !== revision)
-      throw new DyadError(
+      throw new SambaError(
         "O projeto mudou em outra janela. Atualize antes de continuar.",
-        DyadErrorKind.Conflict,
+        SambaErrorKind.Conflict,
       );
     return {
       ...current,

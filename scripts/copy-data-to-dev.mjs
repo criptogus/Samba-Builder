@@ -21,7 +21,7 @@ const TRANSIENT_TOP_LEVEL_ENTRIES = new Set([
   "DawnGraphiteCache",
   "DawnWebGPUCache",
   "GPUCache",
-  "dyad-crash-reports",
+  "samba-crash-reports",
   "logs",
   "typescript-cache",
 ]);
@@ -42,12 +42,12 @@ export function getProductionUserDataPath({
   env = process.env,
   homeDir = os.homedir(),
 } = {}) {
-  if (env.DYAD_PROD_USER_DATA_DIR) {
-    return path.resolve(env.DYAD_PROD_USER_DATA_DIR);
+  if (env.SAMBA_PROD_USER_DATA_DIR) {
+    return path.resolve(env.SAMBA_PROD_USER_DATA_DIR);
   }
 
   if (platform === "darwin") {
-    return path.join(homeDir, "Library", "Application Support", "dyad");
+    return path.join(homeDir, "Library", "Application Support", "samba");
   }
 
   if (platform === "win32") {
@@ -56,12 +56,12 @@ export function getProductionUserDataPath({
         "APPDATA is not set; cannot locate Samba Builder's production data.",
       );
     }
-    return path.join(env.APPDATA, "dyad");
+    return path.join(env.APPDATA, "samba");
   }
 
   return path.join(
     env.XDG_CONFIG_HOME || path.join(homeDir, ".config"),
-    "dyad",
+    "samba",
   );
 }
 
@@ -90,7 +90,7 @@ export function getProcessesUsingDataDirectories(
     try {
       const output = runSync(
         "tasklist",
-        ["/FI", "IMAGENAME eq dyad.exe", "/FO", "CSV", "/NH"],
+        ["/FI", "IMAGENAME eq samba.exe", "/FO", "CSV", "/NH"],
         {
           encoding: "utf8",
           stdio: ["ignore", "pipe", "ignore"],
@@ -98,7 +98,7 @@ export function getProcessesUsingDataDirectories(
       );
       return output
         .split(/\r?\n/)
-        .map((line) => line.match(/^"dyad\.exe","(\d+)"/i)?.[1])
+        .map((line) => line.match(/^"samba\.exe","(\d+)"/i)?.[1])
         .filter(Boolean);
     } catch (error) {
       throw new Error(

@@ -34,7 +34,7 @@ import { ArrowDown } from "lucide-react";
 import { useSettings } from "@/hooks/useSettings";
 import { useFreeAgentQuota } from "@/hooks/useFreeAgentQuota";
 import { useChatMode } from "@/hooks/useChatMode";
-import { isDyadProEnabled } from "@/lib/schemas";
+import { isSambaProEnabled } from "@/lib/schemas";
 import { isFreeProModel } from "@/lib/freeProModel";
 import { terminalOpenByChatIdAtom } from "@/atoms/terminalAtoms";
 import { selectedAppIdAtom } from "@/atoms/appAtoms";
@@ -109,7 +109,7 @@ export function ChatPanel({
   const { isQuotaExceeded } = useFreeAgentQuota();
   const showFreeAgentQuotaBanner =
     settings &&
-    !isDyadProEnabled(settings) &&
+    !isSambaProEnabled(settings) &&
     selectedMode === "local-agent" &&
     isQuotaExceeded;
 

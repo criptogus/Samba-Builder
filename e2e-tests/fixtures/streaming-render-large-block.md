@@ -1,10 +1,10 @@
 Writing a large file to verify the in-progress open-block render path.
 
-<dyad-write path="src/streaming/StreamingRenderLargeBlock.tsx" description="Large block test fixture for in-progress render">
+<samba-write path="src/streaming/StreamingRenderLargeBlock.tsx" description="Large block test fixture for in-progress render">
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 // This fixture is intentionally large so that the renderer spends a meaningful
-// portion of stream time inside the open dyad-write tag. The e2e test asserts
+// portion of stream time inside the open samba-write tag. The e2e test asserts
 // that the renderer surfaces the path attribute and the "Writing..." pending
 // indicator while the closing tag has not yet arrived.
 
@@ -47,7 +47,7 @@ export const StreamingRenderLargeBlock: React.FC<StreamingRenderLargeBlockProps>
   }, [label, value, step]);
 
   // Padding lines so the streamed content takes long enough that the e2e test
-  // can reliably observe the open dyad-write tag mid-stream. The fake LLM
+  // can reliably observe the open samba-write tag mid-stream. The fake LLM
   // server streams 32 characters every 10ms, so each kilobyte of content adds
   // roughly 300ms to the total stream time.
   // padding-line-0001
@@ -469,6 +469,6 @@ export const StreamingRenderLargeBlock: React.FC<StreamingRenderLargeBlockProps>
 };
 
 export default StreamingRenderLargeBlock;
-</dyad-write>
+</samba-write>
 
 Wrote one large file.

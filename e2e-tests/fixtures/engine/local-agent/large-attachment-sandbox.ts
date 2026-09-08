@@ -17,7 +17,7 @@ export const fixture: LocalAgentFixture = {
             script: `
 async function main() {
   const text = await read_file("attachments:large-log.txt");
-  const markerCount = text.split("DYAD_LARGE_ATTACHMENT_MARKER").length - 1;
+  const markerCount = text.split("SAMBA_LARGE_ATTACHMENT_MARKER").length - 1;
   return {
     markerCount,
     hasTail: text.includes("TAIL_SENTINEL_98765")

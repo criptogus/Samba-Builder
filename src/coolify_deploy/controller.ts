@@ -164,6 +164,7 @@ export class CoolifyDeployRegistry {
 
   /** Abandons every running deployment; the apps themselves survive. */
   cancelAll(): void {
+    // eslint-disable-next-line unicorn/no-useless-spread -- snapshot das keys; cancelDeploy muta `machines` durante a iteração
     for (const appId of [...this.machines.keys()]) this.cancelDeploy(appId);
   }
 

@@ -7,7 +7,7 @@ import {
   executeAddDependency,
   ExecuteAddDependencyError,
 } from "@/ipc/processors/executeAddDependency";
-import { DyadError, DyadErrorKind } from "@/errors/dyad_error";
+import { SambaError, SambaErrorKind } from "@/errors/samba_error";
 import { trackAppMutation } from "./tool_invocation";
 import {
   appOperationCoordinator,
@@ -40,7 +40,7 @@ export const addDependencyTool: ToolDefinition<
 
   buildXml: (args, _isComplete) => {
     if (!args.packages || args.packages.length === 0) return undefined;
-    return `<dyad-add-dependency packages="${escapeXmlAttr(args.packages.join(" "))}"></dyad-add-dependency>`;
+    return `<samba-add-dependency packages="${escapeXmlAttr(args.packages.join(" "))}"></samba-add-dependency>`;
   },
 
   execute: async (args, ctx: AgentContext) => {
@@ -51,9 +51,9 @@ export const addDependencyTool: ToolDefinition<
       : undefined;
 
     if (!message) {
-      throw new DyadError(
+      throw new SambaError(
         "Message not found for adding dependencies",
-        DyadErrorKind.NotFound,
+        SambaErrorKind.NotFound,
       );
     }
 

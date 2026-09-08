@@ -17,7 +17,7 @@ import {
   RateLimitError,
   retryWithRateLimit,
 } from "../ipc/utils/retryWithRateLimit";
-import { DyadError, DyadErrorKind, isDyadError } from "@/errors/dyad_error";
+import { SambaError, SambaErrorKind, isSambaError } from "@/errors/samba_error";
 import { enqueueSupabaseDeploy } from "./supabase_deploy_queue";
 
 const fsPromises = fs.promises;
@@ -162,7 +162,7 @@ function isTokenExpired(expiresIn?: number): boolean {
 let refreshSupabaseTokenPromise: Promise<void> | null = null;
 
 async function refreshSupabaseTokenOnce(): Promise<void> {
-  // Supabase token refresh used to round-trip through the retired Dyad OAuth
+  // Supabase token refresh used to round-trip through the retired Samba OAuth
   // proxy. Connections are now made directly with a long-lived Personal Access
   // Token that never expires, so there is nothing to refresh — this is a
   // deliberate no-op and never makes a network request.
@@ -195,9 +195,9 @@ export async function getSupabaseClient({
   const expiresIn = settings.supabase?.expiresIn;
 
   if (!supabaseAccessToken) {
-    throw new DyadError(
+    throw new SambaError(
       "Supabase access token not found. Please authenticate first.",
-      DyadErrorKind.Auth,
+      SambaErrorKind.Auth,
     );
   }
 
@@ -209,9 +209,9 @@ export async function getSupabaseClient({
     const newAccessToken = updatedSettings.supabase?.accessToken?.value;
 
     if (!newAccessToken) {
-      throw new DyadError(
+      throw new SambaError(
         "Failed to refresh Supabase access token",
-        DyadErrorKind.Auth,
+        SambaErrorKind.Auth,
       );
     }
 
@@ -255,13 +255,13 @@ async function refreshSupabaseTokenForOrganization(
   const org = settings.supabase?.organizations?.[organizationSlug];
 
   if (!org) {
-    throw new DyadError(
+    throw new SambaError(
       `Supabase organization ${organizationSlug} not found. Please authenticate first.`,
-      DyadErrorKind.Auth,
+      SambaErrorKind.Auth,
     );
   }
 
-  // Supabase token refresh used to round-trip through the retired Dyad OAuth
+  // Supabase token refresh used to round-trip through the retired Samba OAuth
   // proxy. Connections are now made directly with a long-lived Personal Access
   // Token that never expires, so there is nothing to refresh — this is a
   // deliberate no-op and never makes a network request.
@@ -278,17 +278,17 @@ export async function getSupabaseClientForOrganization(
   const org = settings.supabase?.organizations?.[organizationSlug];
 
   if (!org) {
-    throw new DyadError(
+    throw new SambaError(
       `Supabase organization ${organizationSlug} not found. Please authenticate first.`,
-      DyadErrorKind.Auth,
+      SambaErrorKind.Auth,
     );
   }
 
   const accessToken = org.accessToken?.value;
   if (!accessToken) {
-    throw new DyadError(
+    throw new SambaError(
       `Supabase access token not found for organization ${organizationSlug}. Please authenticate first.`,
-      DyadErrorKind.Auth,
+      SambaErrorKind.Auth,
     );
   }
 
@@ -304,9 +304,9 @@ export async function getSupabaseClientForOrganization(
     const newAccessToken = updatedOrg?.accessToken?.value;
 
     if (!newAccessToken) {
-      throw new DyadError(
+      throw new SambaError(
         `Failed to refresh Supabase access token for organization ${organizationSlug}`,
-        DyadErrorKind.Auth,
+        SambaErrorKind.Auth,
       );
     }
 
@@ -582,9 +582,9 @@ export async function getProjectApiKeys({
 
   const parsed = SupabaseApiKeysSchema.safeParse(await response.json());
   if (!parsed.success) {
-    throw new DyadError(
+    throw new SambaError(
       `Supabase returned an unexpected API-keys response for project ${projectId}: ${parsed.error.message}`,
-      DyadErrorKind.External,
+      SambaErrorKind.External,
     );
   }
   return parsed.data as SupabaseApiKey[];
@@ -649,18 +649,18 @@ LIMIT 1000`;
     await response.json(),
   );
   if (!parsed.success) {
-    throw new DyadError(
+    throw new SambaError(
       `Supabase returned an unexpected logs response for project ${projectId}: ${parsed.error.message}`,
-      DyadErrorKind.External,
+      SambaErrorKind.External,
     );
   }
 
   const result = (parsed.data.result ?? []).map((logEntry) => {
     const timestamp = parseSupabaseLogTimestamp(logEntry.timestamp);
     if (!Number.isFinite(timestamp)) {
-      throw new DyadError(
+      throw new SambaError(
         `Supabase returned an invalid log timestamp for project ${projectId}`,
-        DyadErrorKind.External,
+        SambaErrorKind.External,
       );
     }
 
@@ -847,11 +847,11 @@ export async function createSupabaseProject({
     logger.error("Supabase returned an unreadable create response", error);
   }
   if (!project?.id) {
-    const unnamed = new DyadError(
+    const unnamed = new SambaError(
       `Supabase created a project but returned no project ref: ${JSON.stringify(project)}`,
-      DyadErrorKind.External,
+      SambaErrorKind.External,
     );
-    (unnamed as DyadError & { code: string }).code =
+    (unnamed as SambaError & { code: string }).code =
       SUPABASE_PROJECT_CREATED_BUT_UNLINKED;
     throw unnamed;
   }
@@ -915,9 +915,9 @@ export async function listSupabaseBranches({
     logger.info(
       `Branches not available for project ${supabaseProjectId} (403 Forbidden - likely free tier)`,
     );
-    throw new DyadError(
+    throw new SambaError(
       "Branches are only supported for Supabase paid customers",
-      DyadErrorKind.Precondition,
+      SambaErrorKind.Precondition,
     );
   }
 
@@ -1163,9 +1163,9 @@ async function collectFunctionFiles({
   }
 
   if (!functionDirectory) {
-    throw new DyadError(
+    throw new SambaError(
       `Unable to locate directory for Supabase function ${functionName}`,
-      DyadErrorKind.NotFound,
+      SambaErrorKind.NotFound,
     );
   }
 
@@ -1174,9 +1174,9 @@ async function collectFunctionFiles({
   try {
     await fsPromises.access(indexPath);
   } catch {
-    throw new DyadError(
+    throw new SambaError(
       `Supabase function ${functionName} is missing an index.ts entrypoint`,
-      DyadErrorKind.Validation,
+      SambaErrorKind.Validation,
     );
   }
 
@@ -1348,17 +1348,17 @@ function guessMimeType(filePath: string): string {
 /**
  * Classify a Management API failure before it crosses the IPC boundary.
  *
- * Existing `DyadError`s pass through with their kind intact. A 401/403 means the
+ * Existing `SambaError`s pass through with their kind intact. A 401/403 means the
  * organization's token was revoked or no longer has access to the project — an
  * auth/setup problem the user fixes by reconnecting, so it must reach the
  * renderer as `Auth` rather than as an unclassified product exception (see
- * `rules/dyad-errors.md`).
+ * `rules/samba-errors.md`).
  */
 export function classifyManagementApiError(
   error: unknown,
   action: string,
 ): unknown {
-  if (isDyadError(error)) {
+  if (isSambaError(error)) {
     return error;
   }
   const message = error instanceof Error ? error.message : String(error);
@@ -1366,9 +1366,9 @@ export function classifyManagementApiError(
     error instanceof SupabaseManagementAPIError &&
     (error.response.status === 401 || error.response.status === 403)
   ) {
-    return new DyadError(
+    return new SambaError(
       `Supabase would not authorize Samba Builder to ${action}. Reconnect your Supabase account in Settings, or check that this organization still has access to the project. Original error: ${message}`,
-      DyadErrorKind.Auth,
+      SambaErrorKind.Auth,
     );
   }
   return error;

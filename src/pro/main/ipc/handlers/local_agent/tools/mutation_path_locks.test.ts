@@ -58,10 +58,10 @@ describe("Local Agent mutation path locks", () => {
 
   beforeEach(async () => {
     physicalAppPath = await fs.mkdtemp(
-      path.join(os.tmpdir(), "dyad-path-locks-physical-"),
+      path.join(os.tmpdir(), "samba-path-locks-physical-"),
     );
     appPathAliasParent = await fs.mkdtemp(
-      path.join(os.tmpdir(), "dyad-path-locks-alias-"),
+      path.join(os.tmpdir(), "samba-path-locks-alias-"),
     );
     appPath = path.join(appPathAliasParent, "app");
     await fs.symlink(

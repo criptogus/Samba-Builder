@@ -13,7 +13,7 @@ import {
 } from "@/ipc/utils/stream_text_utils";
 import { getMaxTokens, getTemperature } from "@/ipc/utils/token_utils";
 import type { UserSettings } from "@/lib/schemas";
-import { DyadError, DyadErrorKind } from "@/errors/dyad_error";
+import { SambaError, SambaErrorKind } from "@/errors/samba_error";
 import { searchChatsTool } from "./search_chats";
 import { readChatTool } from "./read_chat";
 import type { AgentContext, ToolDefinition } from "./types";
@@ -59,7 +59,7 @@ export async function runExploreChatHistorySubagent({
   onProgress?: (progressText: string) => void;
 }): Promise<ExploreChatHistoryRunResult> {
   const storedSettings = readSettings();
-  assertHistoryExplorerAvailable(storedSettings, ctx);
+  assertHistoryExplorerAvailable(storedSettings);
   const selectedModel = await resolveModelSelection({
     model: SUBAGENT_MODEL,
     preferredEffortLevel:
@@ -132,9 +132,9 @@ export async function runExploreChatHistorySubagent({
         builtinProviderId: modelInfo.modelClient.builtinProviderId,
       }),
       providerOptions: getProviderOptions({
-        dyadAppId: ctx.appId,
-        dyadRequestId: ctx.dyadRequestId,
-        dyadDisableFiles: true,
+        sambaAppId: ctx.appId,
+        sambaRequestId: ctx.sambaRequestId,
+        sambaDisableFiles: true,
         files: [],
         mentionedAppsCodebases: [],
         builtinProviderId: modelInfo.modelClient.builtinProviderId,
@@ -198,21 +198,12 @@ function finalReport({
   });
 }
 
-function assertHistoryExplorerAvailable(
-  settings: UserSettings,
-  ctx: AgentContext,
-): void {
+function assertHistoryExplorerAvailable(settings: UserSettings): void {
   // Toolset exclusion is not an execution-time security boundary — re-check.
-  if (!ctx.isDyadPro || !settings.enableDyadPro) {
-    throw new DyadError(
-      "explore_chat_history requires Samba Builder",
-      DyadErrorKind.Precondition,
-    );
-  }
   if (!settings.providerSettings?.auto?.apiKey) {
-    throw new DyadError(
+    throw new SambaError(
       "explore_chat_history requires a Samba Builder auto provider API key",
-      DyadErrorKind.Precondition,
+      SambaErrorKind.Precondition,
     );
   }
 }

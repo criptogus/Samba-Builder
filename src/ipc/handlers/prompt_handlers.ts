@@ -4,7 +4,7 @@ import { prompts } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { createTypedHandler } from "./base";
 import { promptContracts } from "../types/prompts";
-import { DyadError, DyadErrorKind } from "@/errors/dyad_error";
+import { SambaError, SambaErrorKind } from "@/errors/samba_error";
 
 const _logger = log.scope("prompt_handlers");
 
@@ -25,9 +25,9 @@ export function registerPromptHandlers() {
   createTypedHandler(promptContracts.create, async (_, params) => {
     const { title, content, description, slug } = params;
     if (!title || !content) {
-      throw new DyadError(
+      throw new SambaError(
         "Title and content are required",
-        DyadErrorKind.External,
+        SambaErrorKind.External,
       );
     }
     const result = db

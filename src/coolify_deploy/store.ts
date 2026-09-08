@@ -3,7 +3,7 @@ import { db } from "@/db";
 import { coolifyAppConnections } from "@/db/schema";
 import { CoolifyClient } from "@/ipc/utils/coolify_client";
 import { readSettings } from "@/main/settings";
-import { DyadError, DyadErrorKind } from "@/errors/dyad_error";
+import { SambaError, SambaErrorKind } from "@/errors/samba_error";
 import {
   coolifyConnectionFromRow,
   coolifyConnectionRow,
@@ -30,9 +30,9 @@ export function getClient(signal?: AbortSignal): CoolifyClient {
   const token = settings.coolify?.accessToken?.value;
   const instanceUrl = settings.coolify?.instanceUrl;
   if (!token || !instanceUrl) {
-    throw new DyadError(
+    throw new SambaError(
       "Coolify is not connected. Add your instance URL and API token first.",
-      DyadErrorKind.Validation,
+      SambaErrorKind.Validation,
     );
   }
   return new CoolifyClient({ instanceUrl, token, signal });

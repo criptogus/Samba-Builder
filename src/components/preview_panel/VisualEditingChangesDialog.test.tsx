@@ -116,7 +116,7 @@ describe("VisualEditingChangesDialog", () => {
       window.dispatchEvent(
         new MessageEvent("message", {
           data: {
-            type: "dyad-text-content-response",
+            type: "samba-text-content-response",
             componentId: "src/pages/Index.tsx:7",
             text: "Welcome to Your Blank App",
           },

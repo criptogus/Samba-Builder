@@ -1,6 +1,6 @@
 import type { IpcMainInvokeEvent } from "electron";
 import log from "electron-log";
-import { DyadError } from "@/errors/dyad_error";
+import { SambaError } from "@/errors/samba_error";
 import {
   createIpcErrorEnvelope,
   createIpcSuccessEnvelope,
@@ -17,8 +17,8 @@ export function createLoggedHandler(logger: log.LogFunctions) {
     const handleError = (error: unknown, args: any[]) => {
       logger.error(`Error in ${fn.name}: args: ${JSON.stringify(args)}`, error);
       sendTelemetryException(error, { ipc_channel: channel });
-      // Preserve DyadError so telemetry classification stay consistent.
-      if (error instanceof DyadError) {
+      // Preserve SambaError so telemetry classification stay consistent.
+      if (error instanceof SambaError) {
         return createIpcErrorEnvelope(error);
       }
       return createIpcErrorEnvelope(new Error(`[${channel}] ${error}`));

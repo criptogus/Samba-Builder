@@ -1,5 +1,5 @@
 ---
-name: dyad:add-models
+name: samba:add-models
 description: Add one or more AI models to the language model constants file, researching specs from official docs.
 ---
 

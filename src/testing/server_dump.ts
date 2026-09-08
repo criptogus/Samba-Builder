@@ -2,7 +2,7 @@
  * Server-dump processing for the chat-flow harness.
  *
  * The fake-LLM server writes each `[dump]`-triggered request body to a JSON
- * file and embeds `[[dyad-dump-path=<file>]]` in its streamed reply. This
+ * file and embeds `[[samba-dump-path=<file>]]` in its streamed reply. This
  * module reads that file and applies the SAME normalizations the Playwright
  * PageObject.snapshotServerDump uses, so migrated payload snapshots stay
  * deterministic and comparable.
@@ -36,21 +36,21 @@ function isIgnoredSnapshotFile(filePath: string | undefined): boolean {
   );
 }
 
-function removeIgnoredDyadFileBlocks(text: string): string {
+function removeIgnoredSambaFileBlocks(text: string): string {
   return text
     .replace(
-      /\n?<dyad-file path="\.gitattributes">[\s\S]*?<\/dyad-file>\n*/g,
+      /\n?<samba-file path="\.gitattributes">[\s\S]*?<\/samba-file>\n*/g,
       "",
     )
     .replace(
-      /This is my codebase\.\s+(<dyad-file)/g,
+      /This is my codebase\.\s+(<samba-file)/g,
       "This is my codebase. $1",
     );
 }
 
 function sanitizeContentForSnapshot(content: unknown): unknown {
   if (typeof content === "string") {
-    return removeIgnoredDyadFileBlocks(content);
+    return removeIgnoredSambaFileBlocks(content);
   }
   if (Array.isArray(content)) {
     return content.map((part) => {
@@ -62,7 +62,7 @@ function sanitizeContentForSnapshot(content: unknown): unknown {
       ) {
         return {
           ...part,
-          text: removeIgnoredDyadFileBlocks((part as { text: string }).text),
+          text: removeIgnoredSambaFileBlocks((part as { text: string }).text),
         };
       }
       return part;
@@ -87,14 +87,14 @@ function removeIgnoredSnapshotFilesFromDump(dump: any): void {
     }
   }
 
-  if (Array.isArray(body.dyad_options?.files)) {
-    body.dyad_options.files = body.dyad_options.files.filter(
+  if (Array.isArray(body.samba_options?.files)) {
+    body.samba_options.files = body.samba_options.files.filter(
       (file: any) => !isIgnoredSnapshotFile(file.path),
     );
   }
 
-  if (Array.isArray(body.dyad_options?.mentioned_apps)) {
-    for (const mentionedApp of body.dyad_options.mentioned_apps) {
+  if (Array.isArray(body.samba_options?.mentioned_apps)) {
+    for (const mentionedApp of body.samba_options.mentioned_apps) {
       if (Array.isArray(mentionedApp.files)) {
         mentionedApp.files = mentionedApp.files.filter(
           (file: any) => !isIgnoredSnapshotFile(file.path),
@@ -103,7 +103,7 @@ function removeIgnoredSnapshotFilesFromDump(dump: any): void {
     }
   }
 
-  const vf = body.dyad_options?.versioned_files;
+  const vf = body.samba_options?.versioned_files;
   if (!vf) {
     return;
   }
@@ -233,19 +233,19 @@ export interface ServerDumpResult {
   dumpPath: string;
 }
 
-/** Extract every `[[dyad-dump-path=...]]` path from message text, in order. */
+/** Extract every `[[samba-dump-path=...]]` path from message text, in order. */
 export function extractDumpPaths(text: string): string[] {
-  const matches = text.match(/\[\[dyad-dump-path=([^\]]+)\]\]/g) ?? [];
+  const matches = text.match(/\[\[samba-dump-path=([^\]]+)\]\]/g) ?? [];
   return matches
-    .map((m) => m.match(/\[\[dyad-dump-path=([^\]]+)\]\]/)?.[1])
+    .map((m) => m.match(/\[\[samba-dump-path=([^\]]+)\]\]/)?.[1])
     .filter((p): p is string => Boolean(p));
 }
 
 function scrubDumpFileContent(raw: string): string {
   return raw
-    .replaceAll(/\[\[dyad-dump-path=([^\]]+)\]\]/g, "[[dyad-dump-path=*]]")
+    .replaceAll(/\[\[samba-dump-path=([^\]]+)\]\]/g, "[[samba-dump-path=*]]")
     .replaceAll(
-      /\.dyad[\\/]+chats[\\/]+\d+[\\/]+compaction-[^\s"\\]+\.md/g,
+      /\.samba[\\/]+chats[\\/]+\d+[\\/]+compaction-[^\s"\\]+\.md/g,
       "[[compaction-backup-path]]",
     );
 }

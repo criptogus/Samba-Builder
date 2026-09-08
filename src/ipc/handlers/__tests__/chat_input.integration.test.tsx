@@ -55,7 +55,7 @@ describe("chat input validation (integration)", () => {
         chatId,
         role: "assistant",
         content:
-          '<dyad-write path="src/review-action.txt" description="Add review fixture">approved</dyad-write>',
+          '<samba-write path="src/review-action.txt" description="Add review fixture">approved</samba-write>',
       })
       .returning({ id: messages.id });
 
@@ -79,7 +79,7 @@ describe("chat input validation (integration)", () => {
         chatId,
         role: "assistant",
         content:
-          '<dyad-write path="src/rejected.txt" description="Reject review fixture">rejected</dyad-write>',
+          '<samba-write path="src/rejected.txt" description="Reject review fixture">rejected</samba-write>',
       })
       .returning({ id: messages.id });
 
@@ -101,7 +101,7 @@ describe("chat input validation (integration)", () => {
       chatId,
       role: "assistant",
       content:
-        '<dyad-write path="src/already-applied.txt" description="Already applied">applied</dyad-write>',
+        '<samba-write path="src/already-applied.txt" description="Already applied">applied</samba-write>',
       aiMessagesJson: {
         sdkVersion: "ai@v6",
         messages: [

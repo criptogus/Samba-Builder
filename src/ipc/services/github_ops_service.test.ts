@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { DyadErrorKind } from "@/errors/dyad_error";
+import { SambaErrorKind } from "@/errors/samba_error";
 import { activeRecordings } from "./recording_registry";
 import {
   getGithubOperationResources,
@@ -49,7 +49,7 @@ describe("GithubOpsService lifecycle", () => {
       getGithubOperationResources({
         type: "connect-repo",
         mode: "create",
-        org: "dyad",
+        org: "samba",
         repo: "app",
         branch: "main",
         thenAutoPush: false,
@@ -67,7 +67,7 @@ describe("GithubOpsService lifecycle", () => {
 
     await expect(
       service.run(7, { type: "push", mode: "normal" }),
-    ).rejects.toMatchObject({ kind: DyadErrorKind.Precondition });
+    ).rejects.toMatchObject({ kind: SambaErrorKind.Precondition });
     expect(handlers.push).not.toHaveBeenCalled();
 
     service.endAppDeletion(7);
@@ -84,7 +84,7 @@ describe("GithubOpsService lifecycle", () => {
 
     await expect(
       service.run(7, { type: "push", mode: "normal" }),
-    ).rejects.toMatchObject({ kind: DyadErrorKind.Precondition });
+    ).rejects.toMatchObject({ kind: SambaErrorKind.Precondition });
     await expect(
       service.run(7, { type: "disconnect" }),
     ).resolves.toBeUndefined();
@@ -99,10 +99,10 @@ describe("GithubOpsService lifecycle", () => {
 
     await expect(
       service.run(7, { type: "push", mode: "normal" }),
-    ).rejects.toMatchObject({ kind: DyadErrorKind.Precondition });
+    ).rejects.toMatchObject({ kind: SambaErrorKind.Precondition });
     await expect(
       service.run(8, { type: "push", mode: "normal" }),
-    ).rejects.toMatchObject({ kind: DyadErrorKind.Precondition });
+    ).rejects.toMatchObject({ kind: SambaErrorKind.Precondition });
     expect(handlers.push).not.toHaveBeenCalled();
 
     service.endReset();

@@ -229,7 +229,7 @@ export async function removeUnusedAppPackageFiles(
     ),
     pruneBetterSqlite3(path.join(appPath, "node_modules", "better-sqlite3")),
     pruneKeychainReader(
-      path.join(appPath, "node_modules", "dyad-keychain-reader"),
+      path.join(appPath, "node_modules", "samba-keychain-reader"),
     ),
   ]);
 }
@@ -456,14 +456,14 @@ function getResourcePaths(
     return {
       appResourcesPath: path.join(
         buildPath,
-        "dyad.app",
+        "samba.app",
         "Contents",
         "Resources",
       ),
       electronLocaleResourcePaths: [
         path.join(
           buildPath,
-          "dyad.app",
+          "samba.app",
           "Contents",
           "Frameworks",
           "Electron Framework.framework",

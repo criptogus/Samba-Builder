@@ -247,12 +247,12 @@ describe("proxy worker cookie rewriting", () => {
     const body = await getBody(await waitForStart());
 
     const escapedToken = "token&lt;&amp;&quot;boundary";
-    expect(body).toContain(`data-dyad-auth-token="${escapedToken}"`);
-    expect(body).toContain(`data-dyad-recorder-token="${escapedToken}"`);
-    expect(body).not.toContain(`data-dyad-auth-token="${authBootstrapToken}"`);
+    expect(body).toContain(`data-samba-auth-token="${escapedToken}"`);
+    expect(body).toContain(`data-samba-recorder-token="${escapedToken}"`);
+    expect(body).not.toContain(`data-samba-auth-token="${authBootstrapToken}"`);
     expect(body).not.toContain(
-      `data-dyad-recorder-token="${authBootstrapToken}"`,
+      `data-samba-recorder-token="${authBootstrapToken}"`,
     );
-    expect(body).toContain('data.type === "dyad-auth-login"');
+    expect(body).toContain('data.type === "samba-auth-login"');
   });
 });

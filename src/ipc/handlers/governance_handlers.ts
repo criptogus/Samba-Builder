@@ -1,8 +1,8 @@
 import path from "node:path";
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
-import { getDyadAppPath, getElectron } from "@/paths/paths";
-import { DyadError, DyadErrorKind } from "@/errors/dyad_error";
+import { getSambaAppPath, getElectron } from "@/paths/paths";
+import { SambaError, SambaErrorKind } from "@/errors/samba_error";
 import { createTypedHandler } from "./base";
 import {
   governanceContracts,
@@ -29,9 +29,9 @@ function resolveGateScript(): string {
   candidates.push(path.join(process.cwd(), "samba", "governance", "gate.py"));
   const found = resolveGovernanceGateScript(candidates);
   if (!found) {
-    throw new DyadError(
+    throw new SambaError(
       "gate.py de governança não encontrado — rode o Samba Builder a partir do repositório.",
-      DyadErrorKind.Precondition,
+      SambaErrorKind.Precondition,
     );
   }
   return found;
@@ -73,7 +73,7 @@ function assembleStatus(opts: {
 
 export function registerGovernanceHandlers(): void {
   createTypedHandler(governanceContracts.get, async (_, { appPath }) => {
-    const appDir = getDyadAppPath(appPath);
+    const appDir = getSambaAppPath(appPath);
     const actingAs = await resolveActingUser(appDir);
     return assembleStatus({ appDir, actingAs });
   });
@@ -81,7 +81,7 @@ export function registerGovernanceHandlers(): void {
   createTypedHandler(
     governanceContracts.run,
     async (_, { appPath, action, by }) => {
-      const appDir = getDyadAppPath(appPath);
+      const appDir = getSambaAppPath(appPath);
       const actingAs = by?.trim() ? by.trim() : await resolveActingUser(appDir);
       const result = await runGovernanceGate({
         gateScript: resolveGateScript(),

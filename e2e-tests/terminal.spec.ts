@@ -3,7 +3,7 @@ import { test, Timeout } from "./helpers/test_helper";
 
 async function terminalText(page: Page) {
   return page.evaluate(() => {
-    const terminal = (window as any).__DYAD_TERMINAL__;
+    const terminal = (window as any).__SAMBA_TERMINAL__;
     if (!terminal) return "";
     const buffer = terminal.buffer.active;
     const lines: string[] = [];
@@ -18,7 +18,7 @@ test("in-chat terminal runs commands, reopens previous session, and exits from t
   po,
 }) => {
   await po.page.evaluate(() => {
-    (window as any).__DYAD_E2E__ = true;
+    (window as any).__SAMBA_E2E__ = true;
   });
   await po.setUp({ autoApprove: true });
   await po.importApp("minimal");
@@ -39,12 +39,12 @@ test("in-chat terminal runs commands, reopens previous session, and exits from t
   expect(drawerBox!.y).toBeLessThanOrEqual(toggleBox!.y + 1);
   await expect(po.page.getByTestId("terminal-xterm")).toBeVisible();
 
-  await po.page.keyboard.type("echo hello dyad");
+  await po.page.keyboard.type("echo hello samba");
   await po.page.keyboard.press("Enter");
 
   await expect
     .poll(() => terminalText(po.page), { timeout: Timeout.MEDIUM })
-    .toContain("hello dyad");
+    .toContain("hello samba");
 
   await po.page.keyboard.press("Escape");
   await expect(po.page.getByText("Terminal", { exact: true })).toBeVisible();
@@ -57,5 +57,5 @@ test("in-chat terminal runs commands, reopens previous session, and exits from t
   await toggle.click();
   await expect
     .poll(() => terminalText(po.page), { timeout: Timeout.MEDIUM })
-    .toContain("hello dyad");
+    .toContain("hello samba");
 });

@@ -1,5 +1,5 @@
 import log from "electron-log";
-import { DyadError, DyadErrorKind } from "@/errors/dyad_error";
+import { SambaError, SambaErrorKind } from "@/errors/samba_error";
 
 import {
   ensureGitLineEndingPolicy,
@@ -77,9 +77,9 @@ async function runMessageHookPhase({
     result = await run({ path, message, signal });
   } catch (error) {
     const details = error instanceof Error ? error.message : String(error);
-    throw new DyadError(
+    throw new SambaError(
       `${label} could not start. ${details}`,
-      DyadErrorKind.External,
+      SambaErrorKind.External,
       { cause: error },
     );
   }
@@ -200,9 +200,9 @@ export class GitService {
         result = await runPreCommitHook({ path, signal });
       } catch (error) {
         const details = error instanceof Error ? error.message : String(error);
-        throw new DyadError(
+        throw new SambaError(
           `Pre-commit checks could not start. ${details}`,
-          DyadErrorKind.External,
+          SambaErrorKind.External,
           { cause: error },
         );
       }

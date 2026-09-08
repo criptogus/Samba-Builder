@@ -1,3 +1,3 @@
 Read the index page:
-<dyad-read path="src/pages/Index.tsx"></dyad-read>
+<samba-read path="src/pages/Index.tsx"></samba-read>
 Done.

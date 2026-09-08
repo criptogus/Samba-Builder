@@ -5,7 +5,7 @@ import path from "node:path";
 import { promisify } from "node:util";
 import { afterEach, describe, expect, it } from "vitest";
 
-import { DyadErrorKind } from "@/errors/dyad_error";
+import { SambaErrorKind } from "@/errors/samba_error";
 
 import {
   buildReviewTarget,
@@ -28,13 +28,13 @@ afterEach(async () => {
 describe("buildReviewTarget", () => {
   it("classifies a non-Git app as an unavailable review precondition", async () => {
     const appPath = await fs.mkdtemp(
-      path.join(os.tmpdir(), "dyad-review-non-git-"),
+      path.join(os.tmpdir(), "samba-review-non-git-"),
     );
     tempDirs.push(appPath);
 
     await expect(buildReviewTarget({ appPath })).rejects.toMatchObject({
-      name: "DyadError",
-      kind: DyadErrorKind.Precondition,
+      name: "SambaError",
+      kind: SambaErrorKind.Precondition,
       message: "This app has no Git history, so changes cannot be reviewed.",
     });
   });
@@ -101,8 +101,8 @@ describe("buildReviewTarget", () => {
         targetCommit: "missing-target",
       }),
     ).rejects.toMatchObject({
-      name: "DyadError",
-      kind: DyadErrorKind.Precondition,
+      name: "SambaError",
+      kind: SambaErrorKind.Precondition,
       message: expect.stringContaining(
         "Git could not resolve the requested review range",
       ),
@@ -165,7 +165,7 @@ describe("buildReviewTarget", () => {
       repo,
       "config",
       "diff.unsafe.textconv",
-      "dyad-textconv-must-not-run",
+      "samba-textconv-must-not-run",
     );
     await fs.writeFile(path.join(repo, "feature.txt"), "after\n");
     await git(repo, "commit", "-am", "change");
@@ -404,7 +404,7 @@ describe("buildReviewTarget", () => {
 });
 
 async function makeRepo(): Promise<string> {
-  const repo = await fs.mkdtemp(path.join(os.tmpdir(), "dyad-review-target-"));
+  const repo = await fs.mkdtemp(path.join(os.tmpdir(), "samba-review-target-"));
   tempDirs.push(repo);
   await git(repo, "init");
   await git(repo, "config", "user.email", "test@example.com");

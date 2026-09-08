@@ -11,7 +11,7 @@ const excluded = new Set([
   ".next",
   "coverage",
   ".turbo",
-  ".dyad",
+  ".samba",
   "test-results",
   "playwright-report",
 ]);

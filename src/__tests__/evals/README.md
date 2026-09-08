@@ -23,10 +23,10 @@ instruction.
 
 ## Prerequisites
 
-All models are routed through the Dyad Engine gateway, so you only need one
-credential: a Dyad Pro API key, exposed as `DYAD_PRO_API_KEY`.
+All models are routed through the Samba Engine gateway, so you only need one
+credential: a Samba Pro API key, exposed as `SAMBA_PRO_API_KEY`.
 
-The suite is skipped entirely when `DYAD_PRO_API_KEY` is unset — no tests will
+The suite is skipped entirely when `SAMBA_PRO_API_KEY` is unset — no tests will
 fail, they just won't run. This keeps regular `vitest run` safe for contributors
 without a key.
 
@@ -34,18 +34,18 @@ Export the key for the session (plus the two required filter vars — see
 [Running the suite](#running-the-suite)):
 
 ```bash
-export DYAD_PRO_API_KEY="..."
+export SAMBA_PRO_API_KEY="..."
 EVAL_SUITE=all EVAL_MODEL=all npm run eval
 ```
 
 Or set everything inline for a single command:
 
 ```bash
-DYAD_PRO_API_KEY="..." EVAL_SUITE=all EVAL_MODEL=all npm run eval
+SAMBA_PRO_API_KEY="..." EVAL_SUITE=all EVAL_MODEL=all npm run eval
 ```
 
-Optional: override the gateway URL with `DYAD_ENGINE_URL` (defaults to
-`https://engine.dyad.sh/v1`).
+Optional: override the gateway URL with `SAMBA_ENGINE_URL` (defaults to
+`https://engine.samba.sh/v1`).
 
 ## Running the suite
 
@@ -59,7 +59,7 @@ Use the special value `all` to mean "run everything":
 
 ```bash
 # Run every suite against every model against every case.
-EVAL_SUITE=all EVAL_MODEL=all DYAD_PRO_API_KEY="..." npm run eval
+EVAL_SUITE=all EVAL_MODEL=all SAMBA_PRO_API_KEY="..." npm run eval
 ```
 
 **Heads up — this is expensive.** A full `all`/`all` run issues one
@@ -76,13 +76,13 @@ list runs multiple suites:
 
 ```bash
 # Just the original search_replace-only suite
-EVAL_SUITE=search_replace EVAL_MODEL=all DYAD_PRO_API_KEY="..." npm run eval
+EVAL_SUITE=search_replace EVAL_MODEL=all SAMBA_PRO_API_KEY="..." npm run eval
 
 # The basic_agent suite (Basic agent prompt, search_replace + write_file)
-EVAL_SUITE=basic_agent EVAL_MODEL=all DYAD_PRO_API_KEY="..." npm run eval
+EVAL_SUITE=basic_agent EVAL_MODEL=all SAMBA_PRO_API_KEY="..." npm run eval
 
 # The pro_agent suite (Pro agent prompt, search_replace + write_file)
-EVAL_SUITE=pro_agent EVAL_MODEL=all DYAD_PRO_API_KEY="..." npm run eval
+EVAL_SUITE=pro_agent EVAL_MODEL=all SAMBA_PRO_API_KEY="..." npm run eval
 ```
 
 Note: `EVAL_SUITE` matches suite `name`s exactly (case-insensitive), and
@@ -96,14 +96,14 @@ Vitest's `-t` flag filters by test name. Case names are the `name` field in
 the `CASES` array of [tool_use.eval.ts](tool_use.eval.ts).
 
 ```bash
-EVAL_SUITE=all EVAL_MODEL=all DYAD_PRO_API_KEY="..." \
+EVAL_SUITE=all EVAL_MODEL=all SAMBA_PRO_API_KEY="..." \
   npm run eval -- -t "Extract a helper function"
 ```
 
 `-t` matches as a substring, so a short unique fragment works too:
 
 ```bash
-EVAL_SUITE=all EVAL_MODEL=all DYAD_PRO_API_KEY="..." npm run eval -- -t "zod"
+EVAL_SUITE=all EVAL_MODEL=all SAMBA_PRO_API_KEY="..." npm run eval -- -t "zod"
 ```
 
 ### Running against one model
@@ -113,7 +113,7 @@ model name. It matches against both, so short fragments like `sonnet`, `gpt`,
 or `gemini` work:
 
 ```bash
-EVAL_SUITE=all EVAL_MODEL=sonnet DYAD_PRO_API_KEY="..." npm run eval
+EVAL_SUITE=all EVAL_MODEL=sonnet SAMBA_PRO_API_KEY="..." npm run eval
 ```
 
 ### Combining filters
@@ -122,7 +122,7 @@ EVAL_SUITE=all EVAL_MODEL=sonnet DYAD_PRO_API_KEY="..." npm run eval
 
 ```bash
 EVAL_SUITE=search_replace EVAL_MODEL=sonnet \
-  DYAD_PRO_API_KEY="..." npm run eval -- -t "Extract a helper function"
+  SAMBA_PRO_API_KEY="..." npm run eval -- -t "Extract a helper function"
 ```
 
 Note: vitest's `-t` pattern is applied across the full describe/test
@@ -272,7 +272,7 @@ serialization and once with a counterfactual that trims the terminator.
 Divergence marks a call the defect fires on.
 
 ```bash
-DYAD_PRO_API_KEY="..." EVAL_SUITE=newline_probe EVAL_MODEL="GPT 5.6 Sol" npm run eval
+SAMBA_PRO_API_KEY="..." EVAL_SUITE=newline_probe EVAL_MODEL="GPT 5.6 Sol" npm run eval
 ```
 
 `EVAL_SKIP_JUDGE=1` skips the judge round-trip on any suite, which halves the
@@ -347,7 +347,7 @@ under that model in `manifest.json` with the fixture it starts from.
 The current processor no longer writes stray blank lines, so replaying these
 calls against it shows none. `helpers/legacy_search_replace.ts` is a frozen
 copy of the processor as it stood at `67c9ee7c`, the commit before
-[#4338](https://github.com/dyad-sh/dyad/pull/4338), kept so the recordings can
+[#4338](https://github.com/samba-sh/samba/pull/4338), kept so the recordings can
 still be replayed against the behavior they were captured from.
 
 The spec replays both by default and asserts each model's totals, so the

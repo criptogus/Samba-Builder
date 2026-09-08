@@ -4,7 +4,7 @@ import os from "node:os";
 import path from "node:path";
 
 import { apps } from "@/db/schema";
-import { DyadError, DyadErrorKind } from "@/errors/dyad_error";
+import { SambaError, SambaErrorKind } from "@/errors/samba_error";
 import { registerAppHandlers } from "@/ipc/handlers/app_handlers";
 import {
   setupHandlerTestHarness,
@@ -44,7 +44,7 @@ describe("get-app with unavailable Supabase metadata (integration)", () => {
 
   beforeEach(() => {
     appDirectory = fs.mkdtempSync(
-      path.join(os.tmpdir(), "dyad-get-app-supabase-"),
+      path.join(os.tmpdir(), "samba-get-app-supabase-"),
     );
     fs.writeFileSync(path.join(appDirectory, "index.ts"), "// app");
 
@@ -61,9 +61,9 @@ describe("get-app with unavailable Supabase metadata (integration)", () => {
       },
     });
     mocks.getSupabaseProjectName.mockRejectedValue(
-      new DyadError(
+      new SambaError(
         "Supabase token refresh failed. Error status: Not Found",
-        DyadErrorKind.External,
+        SambaErrorKind.External,
       ),
     );
 

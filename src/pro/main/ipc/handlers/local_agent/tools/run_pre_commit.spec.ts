@@ -59,7 +59,7 @@ async function makeRepo(options?: {
   executable?: boolean;
   hooksPath?: string;
 }): Promise<string> {
-  const repo = await mkdtemp(path.join(os.tmpdir(), "dyad-pre-commit-"));
+  const repo = await mkdtemp(path.join(os.tmpdir(), "samba-pre-commit-"));
   tempDirs.push(repo);
   const initialized = await exec(["init"], repo);
   expect(initialized.exitCode).toBe(0);

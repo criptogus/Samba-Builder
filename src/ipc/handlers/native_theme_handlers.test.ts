@@ -10,7 +10,7 @@ const h = vi.hoisted(() => ({
 
 vi.mock("electron", () => ({
   app: {
-    getPath: vi.fn(() => "/tmp/dyad-native-theme-test"),
+    getPath: vi.fn(() => "/tmp/samba-native-theme-test"),
     getAppPath: vi.fn(() => process.cwd()),
     isPackaged: false,
   },

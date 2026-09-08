@@ -184,7 +184,7 @@ describe("local-agent Git tool definitions", () => {
       toolCallId: "call-status",
       toolName: "git_status",
       status: "pending",
-      presentationXml: '<dyad-git operation="status">',
+      presentationXml: '<samba-git operation="status">',
       inputJson: {},
     });
     expect(onToolActivity).toHaveBeenLastCalledWith(
@@ -232,7 +232,7 @@ describe("local-agent Git tool definitions", () => {
         "supabase/functions/_shared/file.ts",
       );
       expect(ctx.onXmlComplete).toHaveBeenCalledWith(
-        '<dyad-git operation="restore_file" revision="HEAD" path="supabase/functions/_shared/file.ts" not_staged="true"></dyad-git>',
+        '<samba-git operation="restore_file" revision="HEAD" path="supabase/functions/_shared/file.ts" not_staged="true"></samba-git>',
       );
     } finally {
       await fs.promises.rm(appPath, { recursive: true, force: true });
@@ -267,7 +267,7 @@ describe("local-agent Git tool definitions", () => {
         false,
       ),
     ).toBe(
-      '<dyad-git operation="show_file" revision="HEAD" path="src/a&amp;b&quot;.ts">',
+      '<samba-git operation="show_file" revision="HEAD" path="src/a&amp;b&quot;.ts">',
     );
     expect(
       gitShowFileTool.buildXml!(
@@ -279,14 +279,14 @@ describe("local-agent Git tool definitions", () => {
 
   it("treats a dot path as the whole app for diff, log, and show commit", () => {
     expect(gitDiffTool.buildXml!({ path: "." }, false)).toBe(
-      '<dyad-git operation="diff" scope="all">',
+      '<samba-git operation="diff" scope="all">',
     );
     expect(gitLogTool.buildXml!({ path: "." }, false)).toBe(
-      '<dyad-git operation="log" revision="HEAD" max_count="20">',
+      '<samba-git operation="log" revision="HEAD" max_count="20">',
     );
     expect(
       gitShowCommitTool.buildXml!({ revision: "HEAD", path: "." }, false),
-    ).toBe('<dyad-git operation="show_commit" revision="HEAD">');
+    ).toBe('<samba-git operation="show_commit" revision="HEAD">');
     expect(gitDiffTool.getConsentPreview?.({ path: "." })).toBe(
       "Inspect all Git changes",
     );

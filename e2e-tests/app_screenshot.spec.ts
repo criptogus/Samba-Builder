@@ -13,7 +13,7 @@ test("captures an app screenshot after the first generated commit", async ({
   await po.previewPanel.expectPreviewIframeIsVisible();
 
   const appPath = await po.appManagement.getCurrentAppPath();
-  const screenshotDir = path.join(appPath, ".dyad", "screenshot");
+  const screenshotDir = path.join(appPath, ".samba", "screenshot");
 
   await expect(async () => {
     const entries = fs.existsSync(screenshotDir)

@@ -284,14 +284,14 @@ export function createReplayTraceObserver<
 
 declare global {
   interface Window {
-    __dyadMachines?: MachineTraceDevtools;
+    __sambaMachines?: MachineTraceDevtools;
   }
 }
 
 const isDebugBuild = process.env.NODE_ENV !== "production";
 
 if (typeof window !== "undefined" && isDebugBuild) {
-  window.__dyadMachines = {
+  window.__sambaMachines = {
     get index() {
       return [...machineIndex];
     },

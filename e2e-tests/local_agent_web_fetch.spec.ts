@@ -7,7 +7,7 @@ import { testSkipIfWindows } from "./helpers/test_helper";
  */
 
 testSkipIfWindows("local-agent - web fetch", async ({ po }) => {
-  await po.setUpDyadPro({ localAgent: true });
+  await po.setUpSambaPro({ localAgent: true });
   await po.importApp("minimal");
   await po.chatActions.selectLocalAgentMode();
 

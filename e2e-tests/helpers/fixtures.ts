@@ -44,13 +44,13 @@ export async function launchElectronApp({
 }): Promise<ElectronApplication> {
   const appInfo = eph.parseElectronApp(eph.findLatestBuild());
   process.env.FAKE_LLM_PORT = String(fakeLlmPort);
-  process.env.DYAD_E2E_PORT_BLOCK_INDEX = String(parallelIndex);
+  process.env.SAMBA_E2E_PORT_BLOCK_INDEX = String(parallelIndex);
   process.env.OLLAMA_HOST = `http://localhost:${fakeLlmPort}/ollama`;
   process.env.LM_STUDIO_BASE_URL_FOR_TESTING = `http://localhost:${fakeLlmPort}/lmstudio`;
-  process.env.DYAD_ENGINE_URL = `http://localhost:${fakeLlmPort}/engine/v1`;
-  process.env.DYAD_GATEWAY_URL = `http://localhost:${fakeLlmPort}/gateway/v1`;
-  process.env.DYAD_DEFAULT_APPROVE_BUILDS_URL = `http://localhost:${fakeLlmPort}/api/default-approve-builds.txt`;
-  process.env.DYAD_TEST_PNPM_VERSION ??= "11.1.2";
+  process.env.SAMBA_ENGINE_URL = `http://localhost:${fakeLlmPort}/engine/v1`;
+  process.env.SAMBA_GATEWAY_URL = `http://localhost:${fakeLlmPort}/gateway/v1`;
+  process.env.SAMBA_DEFAULT_APPROVE_BUILDS_URL = `http://localhost:${fakeLlmPort}/api/default-approve-builds.txt`;
+  process.env.SAMBA_TEST_PNPM_VERSION ??= "11.1.2";
   process.env.E2E_TEST_BUILD = "true";
   if (showSetupScreen) delete process.env.OPENAI_API_KEY;
   else process.env.OPENAI_API_KEY = "sk-test";
@@ -64,7 +64,7 @@ export async function launchElectronApp({
     ],
     executablePath: appInfo.executable,
   });
-  (electronApp as any).$dyadUserDataDir = userDataDir;
+  (electronApp as any).$sambaUserDataDir = userDataDir;
   (electronApp as any).$fakeLlmPort = fakeLlmPort;
   return electronApp;
 }
@@ -161,7 +161,7 @@ export const test = base.extend<{
       const page = await electronApp.firstWindow();
 
       const po = new PageObject(electronApp, page, {
-        userDataDir: (electronApp as any).$dyadUserDataDir,
+        userDataDir: (electronApp as any).$sambaUserDataDir,
         fakeLlmPort: (electronApp as any).$fakeLlmPort,
         testInfo,
       });
@@ -226,11 +226,11 @@ export const test = base.extend<{
       const baseTmpDir = os.tmpdir();
       const userDataDir = path.join(
         baseTmpDir,
-        `dyad-e2e-tests-worker-${testInfo.parallelIndex}-${Date.now()}`,
+        `samba-e2e-tests-worker-${testInfo.parallelIndex}-${Date.now()}`,
       );
       // Each launch starts from the supported default unless its own hook
       // selects another version. Do not inherit a previous scenario's value.
-      delete process.env.DYAD_TEST_PNPM_VERSION;
+      delete process.env.SAMBA_TEST_PNPM_VERSION;
       const sfwGitHubToken = process.env.SFW_GITHUB_TOKEN;
       let electronApp: ElectronApplication;
       try {
@@ -303,7 +303,7 @@ export const test = base.extend<{
           console.log(`[cleanup:end] Killed ${executableName}`);
         } catch (error) {
           console.warn(
-            "Failed to kill dyad.exe: (continuing with test cleanup)",
+            "Failed to kill samba.exe: (continuing with test cleanup)",
             error,
           );
         }

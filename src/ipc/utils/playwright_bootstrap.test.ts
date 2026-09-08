@@ -17,7 +17,7 @@ import {
   buildPreviewShimSource,
   configSetsTimeout,
   detectSystemBrowserChannel,
-  DYAD_CONFIG_FILENAME,
+  SAMBA_CONFIG_FILENAME,
   E2E_TSCONFIG_RELATIVE_PATH,
   ensurePlaywrightBootstrap,
   ensurePreviewShim,
@@ -35,7 +35,7 @@ import {
 const tempDirs: string[] = [];
 const BROWSER_MARKER = path.join(
   "node_modules",
-  ".dyad-playwright-chromium-installed",
+  ".samba-playwright-chromium-installed",
 );
 
 function makeAppWithBrowserMarker({
@@ -49,7 +49,7 @@ function makeAppWithBrowserMarker({
   executableExists?: boolean;
   markerText?: string;
 }): { appPath: string; executablePath: string } {
-  const appPath = fs.mkdtempSync(path.join(os.tmpdir(), "dyad-pw-"));
+  const appPath = fs.mkdtempSync(path.join(os.tmpdir(), "samba-pw-"));
   tempDirs.push(appPath);
   fs.mkdirSync(path.join(appPath, "node_modules", "@playwright", "test"), {
     recursive: true,
@@ -326,7 +326,7 @@ describe("preview shim fixtures", () => {
             await target.goto("https://example.com/elsewhere");
             await api.get("/api/health");
             await api.post("/api/auth/sign-in/email", {
-              data: { email: "test@dyad.test", password: "secret" },
+              data: { email: "test@samba.test", password: "secret" },
             });
             await api.fetch("https://example.com/api/health");
             result = {
@@ -392,7 +392,7 @@ describe("preview shim fixtures", () => {
     expect(browserAuthRequests).toEqual([
       {
         signInUrl: "http://localhost:32100/api/auth/sign-in/email",
-        data: { email: "test@dyad.test", password: "secret" },
+        data: { email: "test@samba.test", password: "secret" },
       },
     ]);
   });
@@ -421,7 +421,7 @@ describe("preview shim fixtures", () => {
 
 describe("ensurePreviewShim", () => {
   function makeApp(): string {
-    const appPath = fs.mkdtempSync(path.join(os.tmpdir(), "dyad-pw-shim-"));
+    const appPath = fs.mkdtempSync(path.join(os.tmpdir(), "samba-pw-shim-"));
     tempDirs.push(appPath);
     return appPath;
   }
@@ -444,7 +444,7 @@ describe("ensurePreviewShim", () => {
     const tsconfig = JSON.parse(fs.readFileSync(tsconfigAt(appPath), "utf8"));
     expect(tsconfig.compilerOptions.allowJs).toBe(true);
     expect(tsconfig.compilerOptions.paths["@playwright/test"]).toEqual([
-      "./fixtures/dyad/dyad-test.ts",
+      "./fixtures/samba/samba-test.ts",
     ]);
     // The mapping has to resolve to the file we actually wrote.
     expect(
@@ -521,7 +521,7 @@ describe("ensurePreviewShim", () => {
     const tsconfig = JSON.parse(fs.readFileSync(tsconfigAt(appPath), "utf8"));
     expect(tsconfig.compilerOptions.paths["~test/*"]).toEqual(["../testing/*"]);
     expect(tsconfig.compilerOptions.paths["@playwright/test"]).toEqual([
-      "./fixtures/dyad/dyad-test.ts",
+      "./fixtures/samba/samba-test.ts",
     ]);
   });
 
@@ -559,7 +559,7 @@ describe("ensurePreviewShim", () => {
     const tsconfig = JSON.parse(fs.readFileSync(tsconfigAt(appPath), "utf8"));
     expect(tsconfig.compilerOptions.paths["@/*"]).toEqual(["../src/*"]);
     expect(tsconfig.compilerOptions.paths["@playwright/test"]).toEqual([
-      "./fixtures/dyad/dyad-test.ts",
+      "./fixtures/samba/samba-test.ts",
     ]);
   });
 
@@ -730,7 +730,7 @@ describe("ensurePreviewShim", () => {
       appPath,
       "e2e-tests",
       "fixtures",
-      "dyad-test.ts",
+      "samba-test.ts",
     );
     fs.mkdirSync(path.dirname(legacyShimPath), { recursive: true });
     fs.writeFileSync(
@@ -753,7 +753,7 @@ describe("ensurePreviewShim", () => {
       appPath,
       "e2e-tests",
       "fixtures",
-      "dyad-test.ts",
+      "samba-test.ts",
     );
     fs.mkdirSync(path.dirname(legacyShimPath), { recursive: true });
     fs.writeFileSync(
@@ -765,7 +765,7 @@ describe("ensurePreviewShim", () => {
     // breaking every run in the app, not just preview ones.
     fs.writeFileSync(
       tsconfigAt(appPath),
-      '{ "compilerOptions": { "paths": { "@playwright/test": ["./fixtures/dyad-test.ts"] } } }',
+      '{ "compilerOptions": { "paths": { "@playwright/test": ["./fixtures/samba-test.ts"] } } }',
     );
 
     expect(ensurePreviewShim(appPath)).toEqual({});
@@ -774,7 +774,7 @@ describe("ensurePreviewShim", () => {
     // closest one above this file, so a copy's own "@playwright/test" import
     // would resolve straight back to itself. Relative imports aren't mapped.
     const forwarder = fs.readFileSync(legacyShimPath, "utf8");
-    expect(forwarder).toContain('export * from "./dyad/dyad-test"');
+    expect(forwarder).toContain('export * from "./samba/samba-test"');
     expect(forwarder).not.toContain('from "@playwright/test"');
     expect(forwarder).not.toContain("connectOverCDP");
   });
@@ -786,17 +786,17 @@ describe("ensurePreviewShim", () => {
     // the legacy shim" is what deletes the file the mapping resolves to.
     fs.writeFileSync(
       tsconfigAt(appPath),
-      '{ "compilerOptions": { "paths": { "@playwright/test": ["fixtures/dyad-test"] } } }',
+      '{ "compilerOptions": { "paths": { "@playwright/test": ["fixtures/samba-test"] } } }',
     );
 
     expect(ensurePreviewShim(appPath)).toEqual({});
 
     expect(
       fs.readFileSync(
-        path.join(appPath, "e2e-tests", "fixtures", "dyad-test.ts"),
+        path.join(appPath, "e2e-tests", "fixtures", "samba-test.ts"),
         "utf8",
       ),
-    ).toContain('export * from "./dyad/dyad-test"');
+    ).toContain('export * from "./samba/samba-test"');
     // And the real shim is where the forwarder points.
     expect(fs.existsSync(shimAt(appPath))).toBe(true);
   });
@@ -807,7 +807,7 @@ describe("ensurePreviewShim", () => {
       appPath,
       "e2e-tests",
       "fixtures",
-      "dyad-test.ts",
+      "samba-test.ts",
     );
     fs.mkdirSync(path.dirname(legacyShimPath), { recursive: true });
     fs.writeFileSync(legacyShimPath, "export const mine = true;\n");
@@ -854,9 +854,11 @@ describe("ensurePreviewShim", () => {
     expect(warning).toContain("separate browser");
     // The path it tells the user to map has to be the shim we actually wrote —
     // the one at the old location is deleted by this same call.
-    expect(warning).toContain("./fixtures/dyad/dyad-test.ts");
+    expect(warning).toContain("./fixtures/samba/samba-test.ts");
     expect(
-      fs.existsSync(path.join(appPath, "e2e-tests/fixtures/dyad/dyad-test.ts")),
+      fs.existsSync(
+        path.join(appPath, "e2e-tests/fixtures/samba/samba-test.ts"),
+      ),
     ).toBe(true);
     expect(fs.readFileSync(tsconfigAt(appPath), "utf8")).toBe(
       '{ "compilerOptions": {} }',
@@ -871,7 +873,7 @@ describe("ensurePreviewShim", () => {
     // the user watching an empty preview while a headless browser ran.
     fs.writeFileSync(
       tsconfigAt(appPath),
-      '{ "include": ["./fixtures/dyad/dyad-test.ts"], "compilerOptions": {} }',
+      '{ "include": ["./fixtures/samba/samba-test.ts"], "compilerOptions": {} }',
     );
 
     expect(ensurePreviewShim(appPath).warning).toContain("separate browser");
@@ -882,7 +884,7 @@ describe("ensurePreviewShim", () => {
     fs.mkdirSync(path.dirname(tsconfigAt(appPath)), { recursive: true });
     fs.writeFileSync(
       tsconfigAt(appPath),
-      '{ "compilerOptions": { "paths": { "@playwright/test": ["./fixtures/dyad/dyad-test.ts"] } } }',
+      '{ "compilerOptions": { "paths": { "@playwright/test": ["./fixtures/samba/samba-test.ts"] } } }',
     );
 
     expect(ensurePreviewShim(appPath)).toEqual({});
@@ -952,9 +954,9 @@ describe("ensurePlaywrightBootstrap", () => {
     await ensurePlaywrightBootstrap({ appPath });
 
     // Ours lands under its own name, wired to the env var.
-    const dyadConfigPath = path.join(appPath, DYAD_CONFIG_FILENAME);
-    expect(fs.existsSync(dyadConfigPath)).toBe(true);
-    expect(fs.readFileSync(dyadConfigPath, "utf8")).toContain(
+    const sambaConfigPath = path.join(appPath, SAMBA_CONFIG_FILENAME);
+    expect(fs.existsSync(sambaConfigPath)).toBe(true);
+    expect(fs.readFileSync(sambaConfigPath, "utf8")).toContain(
       TEST_BASE_URL_ENV,
     );
     // The user's config survives byte-for-byte, with no backup left behind —
@@ -968,7 +970,7 @@ describe("ensurePlaywrightBootstrap", () => {
       packageVersion: "1.2.3",
       executableExists: true,
     });
-    const configPath = path.join(appPath, DYAD_CONFIG_FILENAME);
+    const configPath = path.join(appPath, SAMBA_CONFIG_FILENAME);
     fs.writeFileSync(
       configPath,
       'import { defineConfig } from "@playwright/test";\n' +
@@ -992,7 +994,7 @@ describe("ensurePlaywrightBootstrap", () => {
       packageVersion: "1.2.3",
       executableExists: true,
     });
-    const configPath = path.join(appPath, DYAD_CONFIG_FILENAME);
+    const configPath = path.join(appPath, SAMBA_CONFIG_FILENAME);
     fs.writeFileSync(
       configPath,
       'import { defineConfig } from "@playwright/test";\n' +
@@ -1027,7 +1029,7 @@ describe("ensurePlaywrightBootstrap", () => {
       packageVersion: "1.2.3",
       executableExists: true,
     });
-    const configPath = path.join(appPath, DYAD_CONFIG_FILENAME);
+    const configPath = path.join(appPath, SAMBA_CONFIG_FILENAME);
     const handEdited =
       'import { defineConfig } from "@playwright/test";\n' +
       "// Generated by Samba Builder.\n" +
@@ -1052,7 +1054,7 @@ describe("ensurePlaywrightBootstrap", () => {
       packageVersion: "1.2.3",
       executableExists: true,
     });
-    const configPath = path.join(appPath, DYAD_CONFIG_FILENAME);
+    const configPath = path.join(appPath, SAMBA_CONFIG_FILENAME);
     // Written before the Tests panel had the toggle. Pins a channel so the
     // channel-upgrade path can't rewrite the whole file instead.
     fs.writeFileSync(
@@ -1125,7 +1127,7 @@ describe("ensurePlaywrightBootstrap", () => {
       executableExists: false,
     });
     fs.writeFileSync(
-      path.join(appPath, DYAD_CONFIG_FILENAME),
+      path.join(appPath, SAMBA_CONFIG_FILENAME),
       'export default { testDir: "./e2e-tests" };\n',
     );
 
@@ -1141,7 +1143,7 @@ describe("ensurePlaywrightBootstrap", () => {
       executableExists: false,
     });
     fs.writeFileSync(
-      path.join(appPath, DYAD_CONFIG_FILENAME),
+      path.join(appPath, SAMBA_CONFIG_FILENAME),
       'export default { testDir: "./e2e-tests" };\n',
     );
     const e2eTsconfigPath = path.join(appPath, E2E_TSCONFIG_RELATIVE_PATH);
@@ -1165,7 +1167,7 @@ describe("ensurePlaywrightBootstrap", () => {
       packageVersion: "1.2.3",
       executableExists: true,
     });
-    const configPath = path.join(appPath, DYAD_CONFIG_FILENAME);
+    const configPath = path.join(appPath, SAMBA_CONFIG_FILENAME);
     // No "Generated by Samba Builder" sentinel — the user has made this file their own.
     const userOwned =
       'import { defineConfig } from "@playwright/test";\n' +
@@ -1182,7 +1184,7 @@ describe("ensurePlaywrightBootstrap", () => {
       packageVersion: "1.2.3",
       executableExists: true,
     });
-    const configPath = path.join(appPath, DYAD_CONFIG_FILENAME);
+    const configPath = path.join(appPath, SAMBA_CONFIG_FILENAME);
     // Already current, and pins a channel so the channel-upgrade path is a
     // no-op too — the file must survive byte-for-byte.
     const current =
@@ -1214,7 +1216,7 @@ describe("ensurePlaywrightBootstrap", () => {
       fs.readFileSync(path.join(appPath, "package.json"), "utf8"),
     );
     expect(pkg.scripts.test).toBe(
-      `playwright test --config ${DYAD_CONFIG_FILENAME}`,
+      `playwright test --config ${SAMBA_CONFIG_FILENAME}`,
     );
   });
 
@@ -1234,7 +1236,7 @@ describe("ensurePlaywrightBootstrap", () => {
       fs.readFileSync(path.join(appPath, "package.json"), "utf8"),
     );
     expect(pkg.scripts.test).toBe(
-      `playwright test --config ${DYAD_CONFIG_FILENAME}`,
+      `playwright test --config ${SAMBA_CONFIG_FILENAME}`,
     );
   });
 
@@ -1362,7 +1364,7 @@ describe("isPlaywrightBrowserInstalled", () => {
 
 describe("preview gitignore entries", () => {
   function makeApp(): string {
-    const appPath = fs.mkdtempSync(path.join(os.tmpdir(), "dyad-pw-ignore-"));
+    const appPath = fs.mkdtempSync(path.join(os.tmpdir(), "samba-pw-ignore-"));
     tempDirs.push(appPath);
     return appPath;
   }
@@ -1399,13 +1401,13 @@ describe("preview gitignore entries", () => {
       `/${E2E_TSCONFIG_RELATIVE_PATH}`,
     );
     // The shim directory is Samba Builder's either way.
-    expect(gitignoreOf(appPath)).toContain("/e2e-tests/fixtures/dyad/");
+    expect(gitignoreOf(appPath)).toContain("/e2e-tests/fixtures/samba/");
   });
 });
 
 describe("app-owned tsconfig routing", () => {
   function makeApp(): string {
-    const appPath = fs.mkdtempSync(path.join(os.tmpdir(), "dyad-pw-extends-"));
+    const appPath = fs.mkdtempSync(path.join(os.tmpdir(), "samba-pw-extends-"));
     tempDirs.push(appPath);
     return appPath;
   }
@@ -1423,7 +1425,7 @@ describe("app-owned tsconfig routing", () => {
       path.join(e2eDir, "tsconfig.base.json"),
       JSON.stringify({
         compilerOptions: {
-          paths: { "@playwright/test": ["./fixtures/dyad/dyad-test.ts"] },
+          paths: { "@playwright/test": ["./fixtures/samba/samba-test.ts"] },
         },
       }),
     );
@@ -1454,9 +1456,9 @@ describe("app-owned tsconfig routing", () => {
 
 describe("configSetsTimeout", () => {
   function makeAppWithConfig(source: string): string {
-    const appPath = fs.mkdtempSync(path.join(os.tmpdir(), "dyad-pw-timeout-"));
+    const appPath = fs.mkdtempSync(path.join(os.tmpdir(), "samba-pw-timeout-"));
     tempDirs.push(appPath);
-    fs.writeFileSync(path.join(appPath, DYAD_CONFIG_FILENAME), source);
+    fs.writeFileSync(path.join(appPath, SAMBA_CONFIG_FILENAME), source);
     return appPath;
   }
 

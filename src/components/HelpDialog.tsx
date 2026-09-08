@@ -89,10 +89,10 @@ function openGitHubIssue(params: {
   title: string;
   labels: string[];
   body: string;
-  isDyadProUser: unknown;
+  isSambaProUser: unknown;
 }) {
   const labels = [...params.labels];
-  if (params.isDyadProUser) labels.push("pro");
+  if (params.isSambaProUser) labels.push("pro");
   const qs = new URLSearchParams({
     title: params.title,
     labels: labels.join(","),
@@ -269,7 +269,7 @@ export function HelpDialog() {
       }))
     : null;
   const { userBudget } = useUserBudgetInfo();
-  const isDyadProUser = settings?.providerSettings?.["auto"]?.apiKey?.value;
+  const isSambaProUser = settings?.providerSettings?.["auto"]?.apiKey?.value;
 
   // ---------------------------------------------------------------------------
   // Navigation
@@ -361,7 +361,7 @@ export function HelpDialog() {
         title: "[bug] <WRITE TITLE HERE>",
         labels: ["bug"],
         body,
-        isDyadProUser,
+        isSambaProUser,
       });
     } catch (error) {
       console.error("Failed to prepare bug report:", error);
@@ -369,7 +369,7 @@ export function HelpDialog() {
         title: "[bug] <WRITE TITLE HERE>",
         labels: ["bug"],
         body: buildBugReportFallbackBody({ screenshot }),
-        isDyadProUser,
+        isSambaProUser,
       });
     }
   };
@@ -396,7 +396,7 @@ export function HelpDialog() {
 
   const handleSubmitChatLogs = async () => {
     // Samba Builder: sem backend próprio — os logs NÃO são enviados a servidor
-    // externo (o upload para o servidor do Dyad foi removido). O suporte é
+    // externo (o upload para o servidor do Samba foi removido). O suporte é
     // acionado pelo contato da Samba.
     ipc.system.openExternalUrl("https://sambatech.com");
   };
@@ -426,7 +426,7 @@ export function HelpDialog() {
           screenshot,
           sessionId: reportedSessionId,
         }),
-        isDyadProUser,
+        isSambaProUser,
       });
     } catch (error) {
       console.error("Failed to prepare session report:", error);
@@ -438,7 +438,7 @@ export function HelpDialog() {
           screenshot,
           sessionId: reportedSessionId,
         }),
-        isDyadProUser,
+        isSambaProUser,
       });
     }
   };
@@ -505,7 +505,7 @@ export function HelpDialog() {
       </DialogDescription>
       <div className="flex flex-col w-full mt-4 space-y-5">
         {/* Suporte — sem backend próprio: o chat de ajuda (que falava com o
-            servidor do Dyad) foi substituído pelo contato da Samba */}
+            servidor do Samba) foi substituído pelo contato da Samba */}
         <Button
           variant="default"
           onClick={() => ipc.system.openExternalUrl("https://sambatech.com")}
@@ -627,7 +627,7 @@ export function HelpDialog() {
           )}
 
           <ReviewDetailsSection title="System Information" mono={false}>
-            <p>Samba Builder Version: {debugBundle.system.dyadVersion}</p>
+            <p>Samba Builder Version: {debugBundle.system.sambaVersion}</p>
             <p>Platform: {debugBundle.system.platform}</p>
             <p>Architecture: {debugBundle.system.architecture}</p>
             <p>

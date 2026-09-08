@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import type { ModelSelection, UserSettings } from "@/lib/schemas";
 import {
-  DYAD_INTERNAL_REQUEST_ID_HEADER,
+  SAMBA_INTERNAL_REQUEST_ID_HEADER,
   getAiHeaders,
   getProviderOptions,
 } from "./provider_options";
@@ -20,7 +20,7 @@ const optionsFor = (
   modelSelection = settings.selectedModel as ModelSelection,
 ) =>
   getProviderOptions({
-    dyadAppId: 1,
+    sambaAppId: 1,
     files: [],
     mentionedAppsCodebases: [],
     builtinProviderId,
@@ -102,10 +102,10 @@ describe("getAiHeaders", () => {
   it("forwards the Samba Builder request ID for fallback diagnostics", () => {
     expect(
       getAiHeaders({
-        builtinProviderId: "dyad-engine",
-        dyadRequestId: "request-123",
+        builtinProviderId: "samba-engine",
+        sambaRequestId: "request-123",
       }),
-    ).toEqual({ [DYAD_INTERNAL_REQUEST_ID_HEADER]: "request-123" });
+    ).toEqual({ [SAMBA_INTERNAL_REQUEST_ID_HEADER]: "request-123" });
   });
 
   it("omits headers when there is no request ID", () => {

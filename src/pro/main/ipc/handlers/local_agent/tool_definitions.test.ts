@@ -51,7 +51,7 @@ describe("Build mode tool profile", () => {
   it("accounts for serialized Build tool declarations", async () => {
     const baseOptions = {
       enableAppBlueprint: false,
-      isDyadPro: false,
+      isSambaPro: false,
       frameworkType: "vite" as const,
       supabaseProjectId: null,
       neonProjectId: null,
@@ -71,7 +71,7 @@ describe("Build mode tool profile", () => {
   it("accounts for tool declarations in every agent-backed mode", async () => {
     const baseOptions = {
       enableAppBlueprint: false,
-      isDyadPro: false,
+      isSambaPro: false,
       frameworkType: "vite" as const,
       supabaseProjectId: null,
       neonProjectId: null,
@@ -92,7 +92,7 @@ describe("Build mode tool profile", () => {
   it("accounts for connected MCP tool declarations in Agent mode", async () => {
     const baseOptions = {
       enableAppBlueprint: false,
-      isDyadPro: false,
+      isSambaPro: false,
       frameworkType: "vite" as const,
       supabaseProjectId: null,
       neonProjectId: null,
@@ -126,7 +126,7 @@ describe("Build mode tool profile", () => {
   it("uses runtime provider-tool availability when estimating declarations", async () => {
     const baseOptions = {
       enableAppBlueprint: false,
-      isDyadPro: false,
+      isSambaPro: false,
       frameworkType: "vite" as const,
       supabaseProjectId: "supabase-project",
       supabaseProviderToolsAvailable: true,

@@ -1,5 +1,5 @@
 import path from "node:path";
-import { DyadError, DyadErrorKind } from "@/errors/dyad_error";
+import { SambaError, SambaErrorKind } from "@/errors/samba_error";
 import type { AgentContext } from "./types";
 
 /**
@@ -26,62 +26,62 @@ export function resolveTargetAppPath(
   const available = [...ctx.referencedApps.keys()];
   const availableStr =
     available.length > 0 ? available.join(", ") : "(none available)";
-  throw new DyadError(
+  throw new SambaError(
     `Unknown app_name '${appName}'. Available referenced apps: ${availableStr}`,
-    DyadErrorKind.NotFound,
+    SambaErrorKind.NotFound,
   );
 }
 
 /**
- * Glob pattern for `.dyad/` internals, for use in the node `glob` library's
+ * Glob pattern for `.samba/` internals, for use in the node `glob` library's
  * ignore list.
  *
- * A referenced app's `.dyad/` folder (rules, chat history, snapshots, etc.) is
+ * A referenced app's `.samba/` folder (rules, chat history, snapshots, etc.) is
  * not part of the `@app:Name` reference contract and must not be exposed to
  * read-only tools when targeting another app.
  */
-export const DYAD_INTERNAL_GLOB = "**/.dyad/**";
+export const SAMBA_INTERNAL_GLOB = "**/.samba/**";
 
 /**
- * Negated glob for ripgrep's `--glob` flag, excluding `.dyad/` at the app root
+ * Negated glob for ripgrep's `--glob` flag, excluding `.samba/` at the app root
  * (ripgrep globs are relative to cwd, which is the target app path).
  */
-export const DYAD_INTERNAL_RIPGREP_EXCLUDE = "!.dyad/**";
+export const SAMBA_INTERNAL_RIPGREP_EXCLUDE = "!.samba/**";
 
 /**
- * Is `relativePath` inside a `.dyad/` folder at the app root?
+ * Is `relativePath` inside a `.samba/` folder at the app root?
  *
  * Accepts slashes in either direction and a leading `./`; callers should pass a
  * path already resolved relative to the app root (so traversal aliases like
- * `src/../.dyad/...` normalize correctly before being checked).
+ * `src/../.samba/...` normalize correctly before being checked).
  */
-export function isDyadInternalPath(relativePath: string): boolean {
+export function isSambaInternalPath(relativePath: string): boolean {
   const normalized = relativePath.replace(/\\/g, "/").replace(/^\.\//, "");
-  return normalized.split("/")[0] === ".dyad";
+  return normalized.split("/")[0] === ".samba";
 }
 
 /**
- * Strip `.dyad/` entries from a file list when targeting a referenced app.
- * No-op for the current app (`appName` omitted) — the user's own `.dyad/`
+ * Strip `.samba/` entries from a file list when targeting a referenced app.
+ * No-op for the current app (`appName` omitted) — the user's own `.samba/`
  * internals are always visible to them.
  */
-export function filterDyadInternalFiles<T extends { path: string }>(
+export function filterSambaInternalFiles<T extends { path: string }>(
   files: T[],
   appName: string | undefined,
 ): T[] {
   if (!appName) {
     return files;
   }
-  return files.filter((file) => !isDyadInternalPath(file.path));
+  return files.filter((file) => !isSambaInternalPath(file.path));
 }
 
 /**
- * Throw if a resolved path inside a referenced app points into its `.dyad/`
+ * Throw if a resolved path inside a referenced app points into its `.samba/`
  * folder. No-op when `appName` is omitted (current app). The relative path is
  * computed from the resolved `fullFilePath`, so normalized traversal aliases
- * (e.g. `src/../.dyad/...`) are caught.
+ * (e.g. `src/../.samba/...`) are caught.
  */
-export function assertDyadInternalAccessAllowed({
+export function assertSambaInternalAccessAllowed({
   targetAppPath,
   fullFilePath,
   appName,
@@ -94,10 +94,10 @@ export function assertDyadInternalAccessAllowed({
     return;
   }
   const relativeFromApp = path.relative(targetAppPath, fullFilePath);
-  if (isDyadInternalPath(relativeFromApp)) {
-    throw new DyadError(
-      `Cannot read .dyad/ paths from referenced apps — these files are not part of the @app reference contract.`,
-      DyadErrorKind.Validation,
+  if (isSambaInternalPath(relativeFromApp)) {
+    throw new SambaError(
+      `Cannot read .samba/ paths from referenced apps — these files are not part of the @app reference contract.`,
+      SambaErrorKind.Validation,
     );
   }
 }

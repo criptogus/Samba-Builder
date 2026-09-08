@@ -9,7 +9,7 @@ import {
   type TemplateDraft,
   type TeamTemplateEntry,
 } from "@/shared/project_templates";
-import { DyadError, DyadErrorKind } from "@/errors/dyad_error";
+import { SambaError, SambaErrorKind } from "@/errors/samba_error";
 import { digest, safeTemplatePath } from "./files";
 const Sha = z.string().regex(/^[a-f0-9]{40}$/);
 const ObjectResult = z.object({ sha: Sha });
@@ -47,11 +47,11 @@ export class TeamTemplatesGithub {
     }
     if (!response.ok) {
       await response.body?.cancel();
-      throw new DyadError(
+      throw new SambaError(
         `GitHub HTTP ${response.status}. ${response.status === 401 || response.status === 403 ? "Verifique a conexão GitHub e a permissão de escrita no repositório oficial." : response.status === 409 || response.status === 422 ? "O repositório mudou ou a branch exige revisão. Atualize o catálogo e tente novamente; nenhuma alteração será forçada." : "Não foi possível acessar os templates da equipe."}`,
         response.status === 401 || response.status === 403
-          ? DyadErrorKind.Auth
-          : DyadErrorKind.External,
+          ? SambaErrorKind.Auth
+          : SambaErrorKind.External,
       );
     }
     const reader = response.body?.getReader();
@@ -115,9 +115,9 @@ export class TeamTemplatesGithub {
     source: string,
   ): Promise<TeamTemplateEntry> {
     if (!this.token)
-      throw new DyadError(
+      throw new SambaError(
         "Conecte sua conta GitHub na integração GitHub do projeto antes de publicar.",
-        DyadErrorKind.Auth,
+        SambaErrorKind.Auth,
       );
     const head = await this.head();
     const index = await this.index(head.sha);

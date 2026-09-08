@@ -5,8 +5,8 @@
 
 import { readSettings } from "@/main/settings";
 import type { AgentContext } from "./types";
-import { DyadError, DyadErrorKind } from "@/errors/dyad_error";
-import { getDyadEngineBaseUrl } from "@/ipc/utils/dyad_engine_url";
+import { SambaError, SambaErrorKind } from "@/errors/samba_error";
+import { getSambaEngineBaseUrl } from "@/ipc/utils/samba_engine_url";
 
 export interface EngineFetchOptions extends Omit<RequestInit, "headers"> {
   /** Additional headers to include */
@@ -27,20 +27,20 @@ export interface EngineFetchResponse {
 
 export const DEFAULT_ENGINE_FETCH_TIMEOUT_MS = 300_000;
 
-export class EngineFetchTimeoutError extends DyadError {
+export class EngineFetchTimeoutError extends SambaError {
   constructor(endpoint: string, timeoutMs = DEFAULT_ENGINE_FETCH_TIMEOUT_MS) {
     super(
       `Samba Builder engine request to ${endpoint} timed out after ${timeoutMs}ms`,
-      DyadErrorKind.External,
+      SambaErrorKind.External,
     );
     this.name = "EngineFetchTimeoutError";
   }
 }
 
-function createCallerCancellationError(cause: unknown): DyadError {
-  return new DyadError(
+function createCallerCancellationError(cause: unknown): SambaError {
+  return new SambaError(
     "This agent run was cancelled.",
-    DyadErrorKind.UserCancelled,
+    SambaErrorKind.UserCancelled,
     { cause },
   );
 }
@@ -56,7 +56,7 @@ function createCallerCancellationError(cause: unknown): DyadError {
  * @throws Error if Samba Builder API key is not configured
  */
 export async function engineFetch(
-  ctx: Pick<AgentContext, "dyadRequestId" | "abortSignal">,
+  ctx: Pick<AgentContext, "sambaRequestId" | "abortSignal">,
   endpoint: string,
   options: EngineFetchOptions = {},
 ): Promise<EngineFetchResponse> {
@@ -72,9 +72,9 @@ export async function engineFetch(
   const apiKey = settings.providerSettings?.auto?.apiKey?.value;
 
   if (!apiKey) {
-    throw new DyadError(
+    throw new SambaError(
       "Samba Builder API key is required",
-      DyadErrorKind.Auth,
+      SambaErrorKind.Auth,
     );
   }
 
@@ -123,13 +123,13 @@ export async function engineFetch(
 
   try {
     requestController.signal.throwIfAborted();
-    const response = await fetch(`${getDyadEngineBaseUrl()}${endpoint}`, {
+    const response = await fetch(`${getSambaEngineBaseUrl()}${endpoint}`, {
       ...restOptions,
       signal: requestController.signal,
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${apiKey}`,
-        "X-Samba Builder-Request-Id": ctx.dyadRequestId,
+        "X-Samba Builder-Request-Id": ctx.sambaRequestId,
         ...extraHeaders,
       },
     });

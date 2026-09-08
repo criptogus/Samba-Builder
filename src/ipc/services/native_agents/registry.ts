@@ -1,7 +1,7 @@
 import { stripVTControlCharacters } from "node:util";
 import { randomUUID } from "node:crypto";
 import type { NativeRun, NativeAgent } from "@/shared/native_agents";
-import { DyadError, DyadErrorKind } from "@/errors/dyad_error";
+import { SambaError, SambaErrorKind } from "@/errors/samba_error";
 import { withLock } from "../../utils/lock_utils";
 import { nativeTransition, isNativeRunActive } from "./transition";
 import type { DriverContext } from "./drivers";
@@ -23,9 +23,9 @@ export class NativeAgentRegistry {
     ) => Promise<void>,
   ) {
     if (this.current && isNativeRunActive(this.current.state))
-      throw new DyadError(
+      throw new SambaError(
         "Já há um agente local em execução. Aguarde ou encerre a sessão atual.",
-        DyadErrorKind.Conflict,
+        SambaErrorKind.Conflict,
       );
     const record: RecordState = {
       owner,
@@ -116,9 +116,9 @@ export class NativeAgentRegistry {
       this.current.state.id !== id ||
       this.current.owner !== owner
     )
-      throw new DyadError(
+      throw new SambaError(
         "Sessão não pertence a esta janela ou já foi encerrada.",
-        DyadErrorKind.NotFound,
+        SambaErrorKind.NotFound,
       );
     return this.current;
   }
@@ -138,9 +138,9 @@ export class NativeAgentRegistry {
       record.state.approval?.id !== approvalId ||
       !record.answer
     )
-      throw new DyadError(
+      throw new SambaError(
         "Este pedido não está mais ativo.",
-        DyadErrorKind.Conflict,
+        SambaErrorKind.Conflict,
       );
     const answer = record.answer;
     record.answer = undefined;
@@ -149,9 +149,9 @@ export class NativeAgentRegistry {
   input(id: string, owner: number, text: string) {
     const record = this.owned(id, owner);
     if (record.state.kind !== "login" || !record.input)
-      throw new DyadError(
+      throw new SambaError(
         "O login não está aguardando entrada.",
-        DyadErrorKind.Precondition,
+        SambaErrorKind.Precondition,
       );
     record.input(text);
   }

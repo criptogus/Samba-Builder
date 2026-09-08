@@ -1,5 +1,5 @@
 import type { IpcMainInvokeEvent } from "electron";
-import { DyadError, DyadErrorKind } from "@/errors/dyad_error";
+import { SambaError, SambaErrorKind } from "@/errors/samba_error";
 import type { GithubOperation } from "@/github_ops/state";
 import {
   handleAbortRebase,
@@ -137,9 +137,9 @@ export class GithubOpsService {
 
   assertAcceptingOperations(appId: number): void {
     if (this.resetFenceCount > 0 || this.deletionFences.has(appId)) {
-      throw new DyadError(
+      throw new SambaError(
         "The app is being deleted",
-        DyadErrorKind.Precondition,
+        SambaErrorKind.Precondition,
       );
     }
   }

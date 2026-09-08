@@ -8,17 +8,17 @@ import {
   supportsAutomaticToken,
   tryAutomaticAccess,
 } from "./api_token";
-import { DyadErrorKind } from "@/errors/dyad_error";
+import { SambaErrorKind } from "@/errors/samba_error";
 import { SshError } from "@/ipc/utils/ssh_client";
 import type { SshSession } from "@/ipc/utils/ssh_client";
 
 /** Wraps a value the way a real tinker transcript carries it. */
 function transcript(output: string): string {
   return [
-    '> echo "__DYAD_OUT_START__" . PHP_EOL;',
-    "> __DYAD_OUT_START__",
+    '> echo "__SAMBA_OUT_START__" . PHP_EOL;',
+    "> __SAMBA_OUT_START__",
     output,
-    "__DYAD_OUT_END__",
+    "__SAMBA_OUT_END__",
   ].join("\n");
 }
 
@@ -111,7 +111,7 @@ describe("readCoolifyVersion", () => {
           // apart from a bound Samba Builder set on one command.
           "timeout",
           "the connection stopped answering",
-          DyadErrorKind.External,
+          SambaErrorKind.External,
         );
       }),
       end: vi.fn(),
@@ -129,7 +129,7 @@ describe("readCoolifyVersion", () => {
         throw new SshError(
           "command-timeout",
           "timed out",
-          DyadErrorKind.External,
+          SambaErrorKind.External,
         );
       }),
       end: vi.fn(),
@@ -220,7 +220,7 @@ describe("mintApiToken", () => {
     await mintApiToken(session, "admin@gmail.com");
     expect(session.scripts[0]).not.toContain("admin@gmail.com");
     expect(session.commands[0]).toContain(
-      "-e DYAD_ADMIN_EMAIL='admin@gmail.com'",
+      "-e SAMBA_ADMIN_EMAIL='admin@gmail.com'",
     );
   });
 

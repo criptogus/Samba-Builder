@@ -4,10 +4,10 @@ import { createMCPClient, type MCPClient } from "@ai-sdk/mcp";
 import { eq } from "drizzle-orm";
 
 import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
-import { DyadError, DyadErrorKind } from "@/errors/dyad_error";
+import { SambaError, SambaErrorKind } from "@/errors/samba_error";
 import {
   captureMcpOAuthWriteAuthority,
-  DyadOAuthClientProvider,
+  SambaOAuthClientProvider,
 } from "./mcp_oauth_provider";
 import {
   decryptFromString,
@@ -24,9 +24,9 @@ function requireReadableSecret(
   label: string,
 ): Record<string, string> | null {
   if (read.status === "unreadable") {
-    throw new DyadError(
+    throw new SambaError(
       `Could not decrypt the ${label} for "${serverName}". This usually means the OS keyring is unavailable. Fix the keyring and try again, or re-enter the values.`,
-      DyadErrorKind.Precondition,
+      SambaErrorKind.Precondition,
     );
   }
   return read.value;
@@ -70,9 +70,9 @@ export class McpManager {
       .then(async (client) => {
         if (initialization.cancelled) {
           await Promise.allSettled([this.closeClient(client)]);
-          throw new DyadError(
+          throw new SambaError(
             `MCP client initialization cancelled for server ${serverId}`,
-            DyadErrorKind.Precondition,
+            SambaErrorKind.Precondition,
           );
         }
 
@@ -125,7 +125,7 @@ export class McpManager {
     } else if (s.transport === "http") {
       if (!s.url) throw new Error(`http MCP requires url`);
       const authProvider = s.oauthEnabled
-        ? new DyadOAuthClientProvider({
+        ? new SambaOAuthClientProvider({
             serverId: s.id,
             callbackPort: s.oauthCallbackPort ?? undefined,
             scope: s.oauthScope ?? undefined,
@@ -150,9 +150,9 @@ export class McpManager {
         },
       });
     } else {
-      throw new DyadError(
+      throw new SambaError(
         `Unsupported MCP transport: ${s.transport}`,
-        DyadErrorKind.Validation,
+        SambaErrorKind.Validation,
       );
     }
 

@@ -10,9 +10,9 @@
 // compaction mid-turn and still finishes the same turn.
 //
 // The e2e asserted the compaction indicator/summary through the UI; the hybrid
-// conversion restores that surface (the <dyad-compaction> "Conversation
+// conversion restores that surface (the <samba-compaction> "Conversation
 // compacted" card rendered in the messages list) while keeping every
-// db-visible assertion (the <dyad-compaction> marker, the "Key Decisions Made"
+// db-visible assertion (the <samba-compaction> marker, the "Key Decisions Made"
 // summary, the follow-up response text) plus the masked [dump] transcript sent
 // to the LLM afterwards. Note the local-agent chat handler returns undefined
 // (not the chatId), so success is asserted via the stored messages / absence
@@ -77,10 +77,10 @@ describe("context compaction (integration)", () => {
       chatMode: "local-agent",
       settings: {
         isTestMode: true,
-        enableDyadPro: true,
+        enableSambaPro: true,
         providerSettings: {
           auto: {
-            apiKey: { value: "testdyadkey", encryptionType: "plaintext" },
+            apiKey: { value: "testsambakey", encryptionType: "plaintext" },
           },
         },
       },
@@ -147,7 +147,7 @@ describe("context compaction (integration)", () => {
     const secondMessages = await loadChatMessages(harness.chatId);
     const contents = secondMessages.map((m) => m.content).join("\n");
     expect(contents).toContain(
-      '<dyad-compaction title="Conversation compacted"',
+      '<samba-compaction title="Conversation compacted"',
     );
     expect(contents).toContain("Key Decisions Made");
     expect(contents).toContain(
@@ -265,7 +265,7 @@ describe("context compaction (integration)", () => {
     const messages = await loadChatMessages(chatId);
     const contents = messages.map((m) => m.content).join("\n");
     expect(contents).toContain(
-      '<dyad-compaction title="Conversation compacted"',
+      '<samba-compaction title="Conversation compacted"',
     );
     expect(contents).toContain("Key Decisions Made");
     // The agent still completes the response in the same turn.

@@ -19,7 +19,7 @@ vi.mock("@/db/schema", () => ({
 }));
 
 vi.mock("@/paths/paths", () => ({
-  getDyadAppPath: vi.fn((p: string) => path.join(appsBaseDir, p)),
+  getSambaAppPath: vi.fn((p: string) => path.join(appsBaseDir, p)),
 }));
 
 vi.mock("electron-log", () => ({
@@ -47,7 +47,9 @@ async function createAppWithGitConfig(
 
 describe("scrubGithubTokenFromRemotes", () => {
   beforeEach(async () => {
-    appsBaseDir = await fs.mkdtemp(path.join(os.tmpdir(), "dyad-token-scrub-"));
+    appsBaseDir = await fs.mkdtemp(
+      path.join(os.tmpdir(), "samba-token-scrub-"),
+    );
     appRows = [];
   });
 

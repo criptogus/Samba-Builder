@@ -10,8 +10,8 @@ import { eq } from "drizzle-orm";
 import { apps, chats } from "@/db/schema";
 import { writeSettings } from "@/main/settings";
 import {
-  getDyadAppPath,
-  invalidateDyadAppsBaseDirectoryCache,
+  getSambaAppPath,
+  invalidateSambaAppsBaseDirectoryCache,
 } from "@/paths/paths";
 import {
   setupHybridChatHarness,
@@ -69,7 +69,7 @@ describe("app details actions (integration)", () => {
     });
     appsRoot = path.dirname(harness.appDir);
     writeSettings({ customAppsFolder: appsRoot });
-    invalidateDyadAppsBaseDirectoryCache();
+    invalidateSambaAppsBaseDirectoryCache();
   }, 60_000);
 
   afterAll(async () => {
@@ -159,7 +159,7 @@ describe("app details actions (integration)", () => {
     });
     await screen.findByRole("heading", { name: copiedName });
 
-    const copiedPath = getDyadAppPath(copied.path);
+    const copiedPath = getSambaAppPath(copied.path);
     expect(copied.path).toBe(copiedName);
     expect(gitCommitCount(copiedPath)).toBe(2);
     expect(fs.existsSync(path.join(copiedPath, "history.txt"))).toBe(true);
@@ -203,7 +203,7 @@ describe("app details actions (integration)", () => {
     });
     await screen.findByRole("heading", { name: copiedName });
 
-    const copiedPath = getDyadAppPath(copied.path);
+    const copiedPath = getSambaAppPath(copied.path);
     expect(copied.path).toBe(copiedName);
     expect(gitCommitCount(copiedPath)).toBe(1);
     expect(fs.existsSync(path.join(copiedPath, "fresh.txt"))).toBe(true);
@@ -264,7 +264,7 @@ describe("app details actions (integration)", () => {
       });
       expect(row?.name).toBe(newName);
       expect(row?.path).toBe(newName);
-      expect(getDyadAppPath(row!.path)).toBe(newPath);
+      expect(getSambaAppPath(row!.path)).toBe(newPath);
     });
     expect(fs.existsSync(app.appDir)).toBe(false);
     expect(fs.existsSync(newPath)).toBe(true);
@@ -300,7 +300,7 @@ describe("app details actions (integration)", () => {
       });
       expect(row?.name).toBe(newName);
       expect(row?.path).toBe(app.dbPath);
-      expect(getDyadAppPath(row!.path)).toBe(app.appDir);
+      expect(getSambaAppPath(row!.path)).toBe(app.appDir);
     });
     expect(fs.existsSync(app.appDir)).toBe(true);
     await screen.findByText(app.appDir);

@@ -17,7 +17,7 @@ import {
   isSharedServerModule,
 } from "@/supabase_admin/supabase_utils";
 import { sendTelemetryEvent } from "@/ipc/utils/telemetry";
-import { DyadError, DyadErrorKind } from "@/errors/dyad_error";
+import { SambaError, SambaErrorKind } from "@/errors/samba_error";
 import { queueCloudSandboxSnapshotSync } from "@/ipc/utils/cloud_sandbox_provider";
 import { withLock, getFileWriteKey } from "@/ipc/utils/lock_utils";
 
@@ -74,7 +74,7 @@ CRITICAL REQUIREMENTS FOR USING THIS TOOL:
 
     const escapedOld = escapeSearchReplaceMarkers(args.old_string ?? "");
 
-    let xml = `<dyad-search-replace path="${escapeXmlAttr(args.file_path)}" description="">\n<<<<<<< SEARCH\n${escapeXmlContent(escapedOld)}`;
+    let xml = `<samba-search-replace path="${escapeXmlAttr(args.file_path)}" description="">\n<<<<<<< SEARCH\n${escapeXmlContent(escapedOld)}`;
 
     // Add separator and replace content if new_string has started
     if (args.new_string !== undefined) {
@@ -86,7 +86,7 @@ CRITICAL REQUIREMENTS FOR USING THIS TOOL:
       if (args.new_string === undefined) {
         xml += "\n=======\n";
       }
-      xml += "\n>>>>>>> REPLACE\n</dyad-search-replace>";
+      xml += "\n>>>>>>> REPLACE\n</samba-search-replace>";
     }
 
     return xml;
@@ -95,9 +95,9 @@ CRITICAL REQUIREMENTS FOR USING THIS TOOL:
   execute: async (args, ctx: AgentContext) => {
     // Validate old_string !== new_string
     if (args.old_string === args.new_string) {
-      throw new DyadError(
+      throw new SambaError(
         "old_string and new_string must be different",
-        DyadErrorKind.Validation,
+        SambaErrorKind.Validation,
       );
     }
 
@@ -116,9 +116,9 @@ CRITICAL REQUIREMENTS FOR USING THIS TOOL:
 
     await withLock(await getFileWriteKey(fullFilePath), async () => {
       if (!fs.existsSync(fullFilePath)) {
-        throw new DyadError(
+        throw new SambaError(
           `File does not exist: ${args.file_path}`,
-          DyadErrorKind.NotFound,
+          SambaErrorKind.NotFound,
         );
       }
 

@@ -308,13 +308,13 @@ All flagged during review and consciously deferred; close them here:
   cross-machine ordering is causal, not approximate (#4026).
 - Per-entity-key ring buffers (or key-aware capacity) so concurrent
   chats/apps stop evicting each other's trace entries (#4026).
-- Dev-gate `window.__dyadMachines`, and make `defaultDescription` refuse to
+- Dev-gate `window.__sambaMachines`, and make `defaultDescription` refuse to
   retain raw untagged objects (#4026 — retention/exposure hazard).
 - Freeze (or defensively clone) co-sim snapshots handed to caller
   callbacks so a mutation cannot corrupt the search (#4027); validate
   `result.state` eagerly (#4027).
 - Decide the `registerAtomWriter` production-throw question (#4045,
-  Dyadbot MEDIUM): the design doc scoped single-writer enforcement to a
+  Sambabot MEDIUM): the design doc scoped single-writer enforcement to a
   dev-mode assertion, but the guard throws unconditionally — a transient
   double-mount during an overlapping route transition would crash in prod.
   Either downgrade to dev-assert + prod-warn, or record the throw as a

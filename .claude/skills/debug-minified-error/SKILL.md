@@ -1,25 +1,25 @@
 ---
-name: dyad:debug-minified-error
-description: Map a minified error stack trace from a production Dyad build back to original source locations using source maps.
+name: samba:debug-minified-error
+description: Map a minified error stack trace from a production Samba build back to original source locations using source maps.
 ---
 
 # Debug Minified Error
 
-Given a minified error stack trace from a production Dyad build (referencing `app.asar/.vite/renderer/main_window/assets/index-*.js`), map each frame back to the original TypeScript source file, line, and column.
+Given a minified error stack trace from a production Samba build (referencing `app.asar/.vite/renderer/main_window/assets/index-*.js`), map each frame back to the original TypeScript source file, line, and column.
 
 ## Arguments
 
 - `$ARGUMENTS`: The full error message and stack trace from the minified production build. Should contain lines like:
   ```
   TypeError: Invalid URL
-      at FOt (file:///usr/lib/dyad/resources/app.asar/.vite/renderer/main_window/assets/index-XXXX.js:1432:7223)
+      at FOt (file:///usr/lib/samba/resources/app.asar/.vite/renderer/main_window/assets/index-XXXX.js:1432:7223)
   ```
 
 ## Instructions
 
-### 1. Determine the Dyad release version
+### 1. Determine the Samba release version
 
-You **must** know which Dyad release version this error occurred in. Check if the user provided it in `$ARGUMENTS` or in conversation context.
+You **must** know which Samba release version this error occurred in. Check if the user provided it in `$ARGUMENTS` or in conversation context.
 
 **If the version is not known, ASK THE USER.** Do not assume or guess the version.
 
@@ -28,7 +28,7 @@ You **must** know which Dyad release version this error occurred in. Check if th
 Look up the GitHub release for that version to find the exact commit hash:
 
 ```bash
-gh release view v<VERSION> --repo dyad-sh/dyad --json tagCommitish,targetCommitish
+gh release view v<VERSION> --repo samba-sh/samba --json tagCommitish,targetCommitish
 ```
 
 If the release tag doesn't resolve directly, find the commit from the tag:
@@ -61,7 +61,7 @@ find out/ -name "app.asar" -print -quit
 ```
 
 ```bash
-npx @electron/asar extract <path-to-app.asar> /tmp/dyad-asar-extracted
+npx @electron/asar extract <path-to-app.asar> /tmp/samba-asar-extracted
 ```
 
 If `out/` doesn't exist or has no `app.asar`, the build may have failed — check the build output for errors.
@@ -71,7 +71,7 @@ If `out/` doesn't exist or has no `app.asar`, the build may have failed — chec
 Look for `.js.map` files alongside the renderer bundle:
 
 ```bash
-find /tmp/dyad-asar-extracted/.vite/renderer/main_window/assets -name "*.map" 2>/dev/null
+find /tmp/samba-asar-extracted/.vite/renderer/main_window/assets -name "*.map" 2>/dev/null
 ```
 
 ### 6. Build with source maps if needed
@@ -79,10 +79,10 @@ find /tmp/dyad-asar-extracted/.vite/renderer/main_window/assets -name "*.map" 2>
 If no source maps exist in the extracted asar (which is typical for production builds), do a renderer-only build with source maps:
 
 ```bash
-npx vite build --config vite.renderer.config.mts --outDir /tmp/dyad-sourcemap-build --sourcemap
+npx vite build --config vite.renderer.config.mts --outDir /tmp/samba-sourcemap-build --sourcemap
 ```
 
-This produces an `index-*.js` and `index-*.js.map` in `/tmp/dyad-sourcemap-build/assets/`.
+This produces an `index-*.js` and `index-*.js.map` in `/tmp/samba-sourcemap-build/assets/`.
 
 **Important:** The build hash will differ from the error stack trace's hash. That's fine — we match by **minified function names**, not by line/column from the error directly.
 
@@ -94,7 +94,7 @@ For each function name in the error stack trace (e.g., `FOt`, `xO`, `PR`), find 
 // Search for each function name and record line:column positions
 node -e "
 const fs = require('fs');
-const content = fs.readFileSync('/tmp/dyad-sourcemap-build/assets/<index-file>.js', 'utf8');
+const content = fs.readFileSync('/tmp/samba-sourcemap-build/assets/<index-file>.js', 'utf8');
 const lines = content.split('\n');
 const names = ['FOt', 'xO', ...]; // from stack trace
 for (const name of names) {
@@ -124,7 +124,7 @@ const fs = require('fs');
 const { SourceMapConsumer } = require(require.resolve('source-map', {paths: [process.cwd()]}));
 
 async function main() {
-  const rawMap = JSON.parse(fs.readFileSync('/tmp/dyad-sourcemap-build/assets/<index-file>.js.map', 'utf8'));
+  const rawMap = JSON.parse(fs.readFileSync('/tmp/samba-sourcemap-build/assets/<index-file>.js.map', 'utf8'));
   const consumer = await new SourceMapConsumer(rawMap);
 
   const positions = [
@@ -189,5 +189,5 @@ After reporting, restore the repo and clean up temp files:
 ```bash
 git checkout -
 npm install
-rm -rf /tmp/dyad-asar-extracted /tmp/dyad-sourcemap-build
+rm -rf /tmp/samba-asar-extracted /tmp/samba-sourcemap-build
 ```

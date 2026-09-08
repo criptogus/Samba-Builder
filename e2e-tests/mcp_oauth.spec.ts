@@ -45,7 +45,7 @@ testSkipIfWindows("mcp - oauth connects and calls a tool", async ({ po }) => {
   });
 
   try {
-    await po.setUpDyadPro({ localAgent: true });
+    await po.setUpSambaPro({ localAgent: true });
 
     // Drive the OAuth authorize URL via fetch (redirect:follow) so
     // the test doesn't open the OS browser. The fake's /authorize
@@ -145,7 +145,7 @@ testSkipIfWindows(
     });
 
     try {
-      await po.setUpDyadPro({ localAgent: true });
+      await po.setUpSambaPro({ localAgent: true });
 
       await po.electronApp.evaluate(({ shell }) => {
         shell.openExternal = async (url) => {
@@ -242,7 +242,7 @@ testSkipIfWindows(
     });
 
     try {
-      await po.setUpDyadPro({ localAgent: true });
+      await po.setUpSambaPro({ localAgent: true });
       // Stub openExternal so an unintended browser pop is harmless; the
       // discovery 404 should bail before any redirect would happen.
       await po.electronApp.evaluate(({ shell }) => {
@@ -349,7 +349,7 @@ testSkipIfWindows(
     });
 
     try {
-      await po.setUpDyadPro({ localAgent: true });
+      await po.setUpSambaPro({ localAgent: true });
       await po.electronApp.evaluate(({ shell }) => {
         shell.openExternal = async (url) => {
           await fetch(url, { redirect: "follow" });

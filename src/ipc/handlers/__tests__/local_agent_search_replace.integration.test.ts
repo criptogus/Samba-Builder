@@ -1,7 +1,7 @@
 // Migrated from e2e-tests/local_agent_search_replace.spec.ts, then converted
 // from the node chat-flow harness to the HYBRID harness (real <ChatPanel> over
 // the real IPC stack). The e2e's core assertion was DOM-shaped
-// (`getByTestId("dyad-search-replace")` visible), which the hybrid harness lets
+// (`getByTestId("samba-search-replace")` visible), which the hybrid harness lets
 // us assert directly while keeping every original file/db/git assertion.
 //
 // Runs the local agent (Agent v2) tool loop against the fake LLM server's
@@ -29,9 +29,9 @@ describe("local agent search_replace (hybrid)", () => {
       chatMode: "local-agent",
       settings: {
         isTestMode: true,
-        enableDyadPro: true,
+        enableSambaPro: true,
         providerSettings: {
-          auto: { apiKey: { value: "testdyadkey" } },
+          auto: { apiKey: { value: "testsambakey" } },
         },
       },
     });
@@ -57,9 +57,9 @@ describe("local agent search_replace (hybrid)", () => {
 
     // The agent's search_replace tool call renders its card in the DOM — the
     // same surface the Playwright spec asserted with
-    // getByTestId("dyad-search-replace").
+    // getByTestId("samba-search-replace").
     await waitFor(
-      () => expect(screen.getByTestId("dyad-search-replace")).toBeTruthy(),
+      () => expect(screen.getByTestId("samba-search-replace")).toBeTruthy(),
       { timeout: 20_000 },
     );
     // The agent's final message text also renders.
@@ -97,7 +97,7 @@ export default App;`,
     // The assistant transcript includes the search-replace tool output.
     const messages = await harness.db.query.messages.findMany();
     const assistant = messages.find((m) => m.role === "assistant")!;
-    expect(assistant.content).toContain("dyad-search-replace");
+    expect(assistant.content).toContain("samba-search-replace");
 
     // The change was committed.
     expect(harness.gitLog().length).toBeGreaterThan(1);

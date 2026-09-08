@@ -296,7 +296,7 @@ function complete(
   state: "finished" | "warning" = "finished",
 ): string {
   ctx.onXmlComplete(
-    `<dyad-status title="${escapeXmlAttr(title)}" state="${state}">\n${escapeXmlContent(body)}\n</dyad-status>`,
+    `<samba-status title="${escapeXmlAttr(title)}" state="${state}">\n${escapeXmlContent(body)}\n</samba-status>`,
   );
   return body;
 }
@@ -490,7 +490,7 @@ export const runPreCommitTool: ToolDefinition<
         ctx.preCommitRunCount = previousRunCount + 1;
         ctx.preCommitFileMutationCountAtLastRun = fileMutationCount;
         ctx.onXmlStream(
-          `<dyad-status title="${escapeXmlAttr(`Running pre-commit (${ctx.preCommitRunCount}/${MAX_PRE_COMMIT_RUNS_PER_TURN})`)}"></dyad-status>`,
+          `<samba-status title="${escapeXmlAttr(`Running pre-commit (${ctx.preCommitRunCount}/${MAX_PRE_COMMIT_RUNS_PER_TURN})`)}"></samba-status>`,
         );
 
         let result: BufferedProcessResult;
@@ -563,7 +563,7 @@ export const runPreCommitTool: ToolDefinition<
         if (result.timedOut) {
           ctx.preCommitLastRunPassed = false;
           const fingerprintNote = fingerprintUnknown
-            ? "\n\nDyad could not determine whether the hook changed files. A follow-up run is allowed to verify any hook-generated changes."
+            ? "\n\nSamba could not determine whether the hook changed files. A follow-up run is allowed to verify any hook-generated changes."
             : "";
           return complete(
             ctx,
@@ -582,7 +582,7 @@ export const runPreCommitTool: ToolDefinition<
           const remaining =
             MAX_PRE_COMMIT_RUNS_PER_TURN - (ctx.preCommitRunCount ?? 0);
           const fingerprintNote = fingerprintUnknown
-            ? "\n\nDyad could not determine whether the hook changed files. A follow-up run is allowed to verify any hook-generated changes."
+            ? "\n\nSamba could not determine whether the hook changed files. A follow-up run is allowed to verify any hook-generated changes."
             : "";
           return complete(
             ctx,

@@ -6,11 +6,11 @@ import {
   getTypeCheckPreconditionGuidance,
   getTypeCheckPreconditionKind,
 } from "../processors/tsc";
-import { getDyadAppPath } from "@/paths/paths";
+import { getSambaAppPath } from "@/paths/paths";
 import log from "electron-log";
 import { createTypedHandler } from "./base";
 import { miscContracts } from "../types/misc";
-import { DyadError, DyadErrorKind } from "@/errors/dyad_error";
+import { SambaError, SambaErrorKind } from "@/errors/samba_error";
 
 const logger = log.scope("problems_handlers");
 
@@ -24,13 +24,13 @@ export function registerProblemsHandlers() {
       });
 
       if (!app) {
-        throw new DyadError(
+        throw new SambaError(
           `App not found: ${params.appId}`,
-          DyadErrorKind.NotFound,
+          SambaErrorKind.NotFound,
         );
       }
 
-      appPath = getDyadAppPath(app.path);
+      appPath = getSambaAppPath(app.path);
 
       const problemReport = await runTypeScriptCheck({ appPath });
 
@@ -47,7 +47,7 @@ export function registerProblemsHandlers() {
           appPath,
         });
         logger.info("Type checking precondition failed:", message);
-        throw new DyadError(message, DyadErrorKind.Precondition, {
+        throw new SambaError(message, SambaErrorKind.Precondition, {
           cause: error,
         });
       }

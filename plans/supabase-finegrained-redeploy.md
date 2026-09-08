@@ -8,7 +8,7 @@ The goal is to make common shared-module edits faster without risking stale depl
 
 ## Problem
 
-Dyad currently treats any `_shared` change as affecting all Supabase Edge Functions:
+Samba currently treats any `_shared` change as affecting all Supabase Edge Functions:
 
 - Agent tools set `ctx.isSharedModulesChanged = true` when editing `supabase/functions/_shared/**`.
 - Later, `deployAllFunctionsIfNeeded(...)` calls `deployAllSupabaseFunctions(...)`.
@@ -138,7 +138,7 @@ If no valid function directories exist, return `{ kind: "partial", functionNames
 
 Use the TypeScript compiler API rather than regex or Babel.
 
-**Load TypeScript from the target app, not from Dyad's own bundle.** Dyad does not ship `typescript` in the main-process bundle: it is a devDependency, and the existing main-process consumers (`tsc.ts`, `code_explorer.ts`) run the compiler in worker threads with `typescript` marked external and resolved from the app's `node_modules`. A direct `import ts from "typescript"` in `supabase_utils.ts` would either bloat the main bundle or fail to resolve at runtime.
+**Load TypeScript from the target app, not from Samba's own bundle.** Samba does not ship `typescript` in the main-process bundle: it is a devDependency, and the existing main-process consumers (`tsc.ts`, `code_explorer.ts`) run the compiler in worker threads with `typescript` marked external and resolved from the app's `node_modules`. A direct `import ts from "typescript"` in `supabase_utils.ts` would either bloat the main bundle or fail to resolve at runtime.
 
 Reuse the established pattern from `code_explorer.ts`:
 
@@ -198,7 +198,7 @@ Rules:
 - Standard ESM in `.js` and `.jsx` files is supported with the same rules as TypeScript files.
 - CommonJS `require(...)` is unsafe in the first pass and should trigger all-functions redeploy. Even literal `require("../_shared/foo")` is not worth partially supporting until there is a clear need, because computed and conditionally executed requires are easy to misread.
 - TypeScript `import foo = require("...")` syntax is unsafe in the first pass and should trigger all-functions redeploy.
-- Dyad's Supabase prompt encourages shared imports with explicit `.ts` specifiers, e.g. `../_shared/logger.ts`, so the first pass should optimize for exact TypeScript source imports.
+- Samba's Supabase prompt encourages shared imports with explicit `.ts` specifiers, e.g. `../_shared/logger.ts`, so the first pass should optimize for exact TypeScript source imports.
 - Bare external specifiers are ignored when clearly external, such as `npm:`, `jsr:`, `http://`, `https://`, `@supabase/...`.
 - Bare local aliases or unknown bare specifiers are unsafe unless support is intentionally added.
 
@@ -230,7 +230,7 @@ If a relative import cannot be resolved to an existing file, return `{ kind: "al
 
 If a relative import resolves outside `supabase/functions/**`, return `{ kind: "all", reason }`. The Supabase prompt tells agents not to import project code from Edge Functions, but existing user code may violate that rule. Falling back prevents stale deployments when a function depends on files outside the graph.
 
-Do not resolve `.js` specifiers to `.ts` source files in the first pass. For example, if a file imports `./foo.js` but only `foo.ts` exists, return `{ kind: "all", reason }`. Dyad-generated Supabase code is prompted to use explicit `.ts` shared-module specifiers, so this fallback should not affect the common path.
+Do not resolve `.js` specifiers to `.ts` source files in the first pass. For example, if a file imports `./foo.js` but only `foo.ts` exists, return `{ kind: "all", reason }`. Samba-generated Supabase code is prompted to use explicit `.ts` shared-module specifiers, so this fallback should not affect the common path.
 
 If a changed `_shared` path is not a TypeScript-like source file, return `{ kind: "all", reason }`. Initial supported extensions:
 
@@ -324,7 +324,7 @@ The optimization is acceptable only if uncertainty deploys too many functions, n
 
 This should be invisible except for faster deploys and clearer status text/logging.
 
-For streamed deploy progress, keep the existing `<dyad-status>` format. The `total` should reflect the number of functions being deployed in the current operation, so partial deploys show accurate progress.
+For streamed deploy progress, keep the existing `<samba-status>` format. The `total` should reflect the number of functions being deployed in the current operation, so partial deploys show accurate progress.
 
 No new user setting is needed. If the analysis cannot prove a smaller affected set, the user gets today's behavior.
 
@@ -417,7 +417,7 @@ npm run ts
 
 ## Premise
 
-Generated Dyad apps mostly reference `_shared` via relative path imports (`../_shared/foo.ts`), so the optimization fires in the common case. Import maps (`deno.json` / `import_map.json`) are the residual exception: any `_shared` reference through an import-map alias is treated as an unknown bare specifier and falls back to `kind: "all"`, which is safe. No further premise validation is needed before building.
+Generated Samba apps mostly reference `_shared` via relative path imports (`../_shared/foo.ts`), so the optimization fires in the common case. Import maps (`deno.json` / `import_map.json`) are the residual exception: any `_shared` reference through an import-map alias is treated as an unknown bare specifier and falls back to `kind: "all"`, which is safe. No further premise validation is needed before building.
 
 ## Open Questions
 

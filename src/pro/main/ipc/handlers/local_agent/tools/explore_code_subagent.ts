@@ -13,7 +13,7 @@ import {
 } from "@/ipc/utils/stream_text_utils";
 import { getMaxTokens, getTemperature } from "@/ipc/utils/token_utils";
 import type { UserSettings, ModelSelection } from "@/lib/schemas";
-import { DyadError, DyadErrorKind } from "@/errors/dyad_error";
+import { SambaError, SambaErrorKind } from "@/errors/samba_error";
 import { grepTool } from "./grep";
 import { listFilesTool } from "./list_files";
 import { readFileTool } from "./read_file";
@@ -125,7 +125,7 @@ export async function runExploreCodeSubagent({
   }) => void;
 }): Promise<string> {
   const storedSettings = readSettings();
-  assertDyadValueAvailable(storedSettings);
+  assertSambaValueAvailable(storedSettings);
   const requestedModel = modelSelection ?? SUBAGENT_MODEL;
   const selectedModel =
     modelSelection ??
@@ -205,9 +205,9 @@ export async function runExploreCodeSubagent({
         builtinProviderId: modelInfo.modelClient.builtinProviderId,
       }),
       providerOptions: getProviderOptions({
-        dyadAppId: ctx.appId,
-        dyadRequestId: ctx.dyadRequestId,
-        dyadDisableFiles: true,
+        sambaAppId: ctx.appId,
+        sambaRequestId: ctx.sambaRequestId,
+        sambaDisableFiles: true,
         files: [],
         mentionedAppsCodebases: [],
         builtinProviderId: modelInfo.modelClient.builtinProviderId,
@@ -393,11 +393,11 @@ function renderFinalReport({
   });
 }
 
-function assertDyadValueAvailable(settings: UserSettings): void {
-  if (!settings.enableDyadPro || !settings.providerSettings?.auto?.apiKey) {
-    throw new DyadError(
-      "explore_code sub-agent requires Samba Builder with an auto provider API key",
-      DyadErrorKind.Precondition,
+function assertSambaValueAvailable(settings: UserSettings): void {
+  if (!settings.providerSettings?.auto?.apiKey) {
+    throw new SambaError(
+      "explore_code sub-agent requires an auto provider API key",
+      SambaErrorKind.Precondition,
     );
   }
 }

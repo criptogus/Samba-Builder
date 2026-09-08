@@ -274,9 +274,9 @@ export default function TerminalPanel({
     const isDevelopment =
       (import.meta as { env?: { MODE?: string } }).env?.MODE === "development";
     const shouldExposeTerminalForDebug =
-      isDevelopment || (window as any).__DYAD_E2E__;
+      isDevelopment || (window as any).__SAMBA_E2E__;
     if (shouldExposeTerminalForDebug) {
-      (window as any).__DYAD_TERMINAL__ = terminal;
+      (window as any).__SAMBA_TERMINAL__ = terminal;
     }
 
     const dataDisposable = terminal.onData((data) => {
@@ -298,9 +298,9 @@ export default function TerminalPanel({
       searchAddonRef.current = null;
       if (
         shouldExposeTerminalForDebug &&
-        (window as any).__DYAD_TERMINAL__ === terminal
+        (window as any).__SAMBA_TERMINAL__ === terminal
       ) {
-        delete (window as any).__DYAD_TERMINAL__;
+        delete (window as any).__SAMBA_TERMINAL__;
       }
     };
   }, [appId]);

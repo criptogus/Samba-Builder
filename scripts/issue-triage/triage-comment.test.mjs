@@ -11,7 +11,7 @@ import {
 
 const context = {
   issueNumber: 4456,
-  repository: "dyad-sh/dyad",
+  repository: "samba-sh/samba",
   author: "reporter",
   releases: ["1.13.0", "1.13.0-beta.1", "1.12.0"],
 };
@@ -26,25 +26,25 @@ const baseTriage = {
 
 test("sanitizeText strips HTML, foreign mentions, and disallowed links", () => {
   const input =
-    "Hi <b>@reporter</b>, ping @wwwillchen and see https://evil.example/x and https://www.dyad.sh/download. Also [docs](https://example.com/docs) and [notes](https://www.dyad.sh/docs/releases/1.13.0) cc support@dyad.sh";
+    "Hi <b>@reporter</b>, ping @wwwillchen and see https://evil.example/x and https://www.samba.sh/download. Also [docs](https://example.com/docs) and [notes](https://www.samba.sh/docs/releases/1.13.0) cc support@samba.sh";
   const output = sanitizeText(input, {
     author: "reporter",
-    repository: "dyad-sh/dyad",
+    repository: "samba-sh/samba",
   });
   assert.equal(
     output,
-    "Hi @reporter, ping wwwillchen and see [link removed] and https://www.dyad.sh/download. Also docs and [notes](https://www.dyad.sh/docs/releases/1.13.0) cc support@dyad.sh",
+    "Hi @reporter, ping wwwillchen and see [link removed] and https://www.samba.sh/download. Also docs and [notes](https://www.samba.sh/docs/releases/1.13.0) cc support@samba.sh",
   );
 });
 
 test("sanitizeText only allows github links inside this repository", () => {
   const output = sanitizeText(
-    "See https://github.com/dyad-sh/dyad/issues/1 and https://github.com/other/repo/issues/2",
-    { repository: "dyad-sh/dyad" },
+    "See https://github.com/samba-sh/samba/issues/1 and https://github.com/other/repo/issues/2",
+    { repository: "samba-sh/samba" },
   );
   assert.equal(
     output,
-    "See https://github.com/dyad-sh/dyad/issues/1 and [link removed]",
+    "See https://github.com/samba-sh/samba/issues/1 and [link removed]",
   );
 });
 
@@ -97,7 +97,7 @@ test("normalizeTriage accepts a version-shaped fixedIn when releases are unknown
   );
   assert.deepEqual(triage.fixedIn, {
     version: "1.13.0",
-    url: "https://www.dyad.sh/docs/releases/1.13.0",
+    url: "https://www.samba.sh/docs/releases/1.13.0",
   });
 });
 
@@ -194,7 +194,7 @@ test("composeComment adds an update step when a release fixed it", () => {
   assert.match(comment, /^Hi @reporter, thanks for the report\./);
   assert.match(
     comment,
-    /1\. Update to Samba Builder 1\.13\.0 or newer from https:\/\/www\.dyad\.sh\/download, which includes the fix \(\[release notes\]\(https:\/\/www\.dyad\.sh\/docs\/releases\/1\.13\.0\)\)\.\n2\. Open a new chat after updating\./,
+    /1\. Update to Samba Builder 1\.13\.0 or newer from https:\/\/www\.samba\.sh\/download, which includes the fix \(\[release notes\]\(https:\/\/www\.samba\.sh\/docs\/releases\/1\.13\.0\)\)\.\n2\. Open a new chat after updating\./,
   );
   assert.match(comment, /Playbook: no match/);
 });
@@ -234,7 +234,7 @@ test("composeComment offers the existing route on feature requests", () => {
       labels: ["feature request"],
       assessment: "feature_request",
       steps: [
-        "You can add it today as a custom model: https://www.dyad.sh/docs/guides/ai-models/custom-models",
+        "You can add it today as a custom model: https://www.samba.sh/docs/guides/ai-models/custom-models",
       ],
       developerNotes: "- Third provider request this month.",
       playbookMatch: "model-missing-or-new-provider",

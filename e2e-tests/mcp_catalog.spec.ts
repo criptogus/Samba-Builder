@@ -68,7 +68,7 @@ testSkipIfWindows(
     await expect(stdioCard).toBeVisible();
     await expect(stdioCard.getByText("Local", { exact: true })).toBeVisible();
     await expect(
-      stdioCard.getByText("@dyad-sh/e2e-nonexistent-mcp@1.0.0"),
+      stdioCard.getByText("@samba-sh/e2e-nonexistent-mcp@1.0.0"),
     ).toBeVisible();
 
     await po.catalog.search("OAuth");
@@ -93,7 +93,7 @@ testSkipIfWindows(
     await expect(
       po.page
         .getByRole("alertdialog")
-        .getByText("npx -y @dyad-sh/e2e-nonexistent-mcp@1.0.0"),
+        .getByText("npx -y @samba-sh/e2e-nonexistent-mcp@1.0.0"),
     ).toBeVisible();
     await po.catalog.confirmStdioConsent();
     await po.catalog.expectAdded("E2E Stdio Server");

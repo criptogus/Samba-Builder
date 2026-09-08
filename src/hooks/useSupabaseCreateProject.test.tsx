@@ -39,7 +39,7 @@ vi.mock("@/app_run/AppRunRemoteProvider", () => ({
 }));
 
 import { isCreatedButUnlinkedError, useSupabase } from "./useSupabase";
-import { DyadError, DyadErrorKind } from "@/errors/dyad_error";
+import { SambaError, SambaErrorKind } from "@/errors/samba_error";
 
 function renderSupabase() {
   const queryClient = new QueryClient({
@@ -202,17 +202,17 @@ describe("isCreatedButUnlinkedError", () => {
   // The message tells the user a real project is sitting orphaned in their
   // Supabase account, so it must only fire for the failure that made one.
   it("matches the failure the handler marks, and nothing else", () => {
-    const unlinked = new DyadError(
+    const unlinked = new SambaError(
       "Created but not linked",
-      DyadErrorKind.Internal,
-    ) as DyadError & { code: string };
+      SambaErrorKind.Internal,
+    ) as SambaError & { code: string };
     unlinked.code = "supabase_project_created_but_unlinked";
 
     expect(isCreatedButUnlinkedError(unlinked)).toBe(true);
     // Same kind, no marker: nothing was created.
     expect(
       isCreatedButUnlinkedError(
-        new DyadError("Renderer is not trusted", DyadErrorKind.Internal),
+        new SambaError("Renderer is not trusted", SambaErrorKind.Internal),
       ),
     ).toBe(false);
     expect(isCreatedButUnlinkedError(new Error("offline"))).toBe(false);
@@ -249,10 +249,10 @@ describe("useSupabase — refetching the project list after a failed create", ()
     await act(async () => {});
     expect(mocks.listAllProjects).toHaveBeenCalledTimes(1);
 
-    const unlinked = new DyadError(
+    const unlinked = new SambaError(
       "Created but not linked",
-      DyadErrorKind.Internal,
-    ) as DyadError & { code: string };
+      SambaErrorKind.Internal,
+    ) as SambaError & { code: string };
     unlinked.code = "supabase_project_created_but_unlinked";
     mocks.createProject.mockRejectedValueOnce(unlinked);
     await act(async () => {

@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { z } from "zod";
-import { DyadError, DyadErrorKind } from "@/errors/dyad_error";
+import { SambaError, SambaErrorKind } from "@/errors/samba_error";
 import {
   createClient,
   createIpcErrorEnvelope,
@@ -88,45 +88,45 @@ describe("IPC invoke envelopes", () => {
     delete (window as any).electron;
   });
 
-  it("serializes and deserializes DyadError kind", () => {
+  it("serializes and deserializes SambaError kind", () => {
     const serialized = serializeIpcError(
-      new DyadError("Name already exists", DyadErrorKind.Conflict),
+      new SambaError("Name already exists", SambaErrorKind.Conflict),
     );
 
     const deserialized = deserializeIpcError(serialized);
 
-    expect(deserialized).toBeInstanceOf(DyadError);
-    expect((deserialized as DyadError).kind).toBe(DyadErrorKind.Conflict);
+    expect(deserialized).toBeInstanceOf(SambaError);
+    expect((deserialized as SambaError).kind).toBe(SambaErrorKind.Conflict);
     expect(deserialized.message).toBe("Name already exists");
   });
 
-  it("preserves custom DyadError names and codes through a round trip", () => {
-    const error = new DyadError(
+  it("preserves custom SambaError names and codes through a round trip", () => {
+    const error = new SambaError(
       "A rebase is already in progress",
-      DyadErrorKind.Precondition,
-    ) as DyadError & { code: string };
+      SambaErrorKind.Precondition,
+    ) as SambaError & { code: string };
     error.name = "GitStateError";
     error.code = "REBASE_IN_PROGRESS";
 
     const deserialized = deserializeIpcError(serializeIpcError(error));
 
-    expect(deserialized).toBeInstanceOf(DyadError);
+    expect(deserialized).toBeInstanceOf(SambaError);
     expect(deserialized).toMatchObject({
       name: "GitStateError",
       code: "REBASE_IN_PROGRESS",
-      kind: DyadErrorKind.Precondition,
+      kind: SambaErrorKind.Precondition,
       message: "A rebase is already in progress",
     });
   });
 
-  it("deserializes plain errors without treating them as DyadError", () => {
+  it("deserializes plain errors without treating them as SambaError", () => {
     const deserialized = deserializeIpcError({
       name: "TypeError",
       message: "Boom",
     });
 
     expect(deserialized).toBeInstanceOf(Error);
-    expect(deserialized).not.toBeInstanceOf(DyadError);
+    expect(deserialized).not.toBeInstanceOf(SambaError);
     expect(deserialized.name).toBe("TypeError");
     expect(deserialized.message).toBe("Boom");
   });
@@ -149,12 +149,12 @@ describe("IPC invoke envelopes", () => {
     expect(invokeEnvelope).toHaveBeenCalledWith("answer", {});
   });
 
-  it("rethrows DyadError envelopes from generated clients", async () => {
+  it("rethrows SambaError envelopes from generated clients", async () => {
     const invokeEnvelope = vi
       .fn()
       .mockResolvedValue(
         createIpcErrorEnvelope(
-          new DyadError("No matching app", DyadErrorKind.NotFound),
+          new SambaError("No matching app", SambaErrorKind.NotFound),
         ),
       );
     (window as any).electron = { ipcRenderer: { invokeEnvelope } };
@@ -168,8 +168,8 @@ describe("IPC invoke envelopes", () => {
     });
 
     await expect(client.load({})).rejects.toMatchObject({
-      name: "DyadError",
-      kind: DyadErrorKind.NotFound,
+      name: "SambaError",
+      kind: SambaErrorKind.NotFound,
       message: "No matching app",
     });
   });

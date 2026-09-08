@@ -381,7 +381,7 @@ describe("generate_test_assertions", () => {
 
     expect(result).toContain("doesn't match the recording");
     expect(result).toContain("draft-newer");
-    expect(committedXml(ctx)).toContain("dyad-output");
+    expect(committedXml(ctx)).toContain("samba-output");
     expect(registry.requests).toEqual([]);
   });
 
@@ -406,7 +406,7 @@ describe("generate_test_assertions", () => {
     expect(result).toContain("afterStep 5");
     expect(result).toContain(`1: await page.getByRole("button"`);
     // A rejected plan shows a warning, never a card.
-    expect(committedXml(ctx)).toContain("dyad-output");
+    expect(committedXml(ctx)).toContain("samba-output");
   });
 
   it("rejects assertion code that isn't a single expect statement", async () => {
@@ -426,6 +426,6 @@ describe("generate_test_assertions", () => {
     );
 
     expect(result).toContain("isn't a single");
-    expect(committedXml(ctx)).not.toContain("dyad-test-assertions");
+    expect(committedXml(ctx)).not.toContain("samba-test-assertions");
   });
 });

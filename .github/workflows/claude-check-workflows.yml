@@ -27,8 +27,8 @@ jobs:
         id: app-token
         uses: actions/create-github-app-token@v3
         with:
-          app-id: ${{ vars.DYAD_GITHUB_APP_ID }}
-          private-key: ${{ secrets.DYAD_GITHUB_APP_PRIVATE_KEY }}
+          app-id: ${{ vars.SAMBA_GITHUB_APP_ID }}
+          private-key: ${{ secrets.SAMBA_GITHUB_APP_PRIVATE_KEY }}
           permission-actions: read
           permission-issues: write
 
@@ -46,7 +46,7 @@ jobs:
           claude_args: --model claude-sonnet-4-5-20250929
           display_report: true
           prompt: |
-            /dyad:check-workflows ${{ inputs.hours || '24' }}
+            /samba:check-workflows ${{ inputs.hours || '24' }}
       - name: Cleanup (self-hosted macOS)
         if: always()
         run: bash scripts/ci-cleanup-macos.sh

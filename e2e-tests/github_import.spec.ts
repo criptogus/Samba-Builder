@@ -52,7 +52,7 @@ test("imports apps from the authenticated list and a GitHub URL", async ({
           fs.existsSync(packageJson) &&
           fs
             .readFileSync(packageJson, "utf8")
-            .includes("@dyad-sh/react-vite-component-tagger")
+            .includes("@samba-sh/react-vite-component-tagger")
         );
       },
       { timeout: Timeout.LONG },

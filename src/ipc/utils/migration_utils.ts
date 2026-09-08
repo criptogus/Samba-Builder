@@ -3,7 +3,7 @@ import {
   getConnectionUri,
   executeNeonSql,
 } from "../../neon_admin/neon_context";
-import { DyadError, DyadErrorKind } from "@/errors/dyad_error";
+import { SambaError, SambaErrorKind } from "@/errors/samba_error";
 import { IS_TEST_BUILD } from "../utils/test_utils";
 import { getAppWithNeonBranch, getProductionBranchId } from "./neon_utils";
 import type {
@@ -148,11 +148,11 @@ export async function generateNeonMigrationStatements({
     });
     return diff.statements;
   } catch (error) {
-    throw toMigrationDiffDyadError(error);
+    throw toMigrationDiffSambaError(error);
   }
 }
 
-function toMigrationDiffDyadError(error: unknown): DyadError {
+function toMigrationDiffSambaError(error: unknown): SambaError {
   const unsupportedChange = findErrorInCauseChain(
     error,
     (candidate) =>
@@ -160,9 +160,9 @@ function toMigrationDiffDyadError(error: unknown): DyadError {
       candidate.name === "NotImplementedMigrationError",
   );
   if (unsupportedChange) {
-    return new DyadError(
+    return new SambaError(
       `Unsupported schema change: ${unsupportedChange.message}`,
-      DyadErrorKind.Precondition,
+      SambaErrorKind.Precondition,
     );
   }
 
@@ -173,9 +173,9 @@ function toMigrationDiffDyadError(error: unknown): DyadError {
       candidate.name === "UnsupportedPostgresVersionError",
   );
   if (unsupportedVersion) {
-    return new DyadError(
+    return new SambaError(
       unsupportedVersion.message,
-      DyadErrorKind.Precondition,
+      SambaErrorKind.Precondition,
     );
   }
 
@@ -188,11 +188,11 @@ function toMigrationDiffDyadError(error: unknown): DyadError {
     formatErrorCauseChain(error),
   );
   const causeSummary = formatErrorCauseSummary(error);
-  return new DyadError(
+  return new SambaError(
     causeSummary
       ? `Failed to compute migration plan: ${message}: ${causeSummary}`
       : `Failed to compute migration plan: ${message}`,
-    DyadErrorKind.External,
+    SambaErrorKind.External,
   );
 }
 
@@ -289,9 +289,9 @@ export async function prepareMigrationContext({
   );
 
   if (devBranchId === prodBranchId) {
-    throw new DyadError(
+    throw new SambaError(
       "Active branch is the production branch. Create a development branch first.",
-      DyadErrorKind.Precondition,
+      SambaErrorKind.Precondition,
     );
   }
 
@@ -325,17 +325,17 @@ export async function prepareMigrationContext({
         }),
       );
     } catch {
-      throw new DyadError(
+      throw new SambaError(
         "Unable to verify development table count",
-        DyadErrorKind.Precondition,
+        SambaErrorKind.Precondition,
       );
     }
     tableCount = parseInt(parsed?.[0]?.cnt ?? "0", 10);
   }
   if (!tableCount || tableCount === 0) {
-    throw new DyadError(
+    throw new SambaError(
       "Development database has no tables. Create at least one table before migrating.",
-      DyadErrorKind.Precondition,
+      SambaErrorKind.Precondition,
     );
   }
 

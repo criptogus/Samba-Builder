@@ -4,11 +4,11 @@ import { usePostHog } from "posthog-js/react";
 import { useEffect, useRef, useState } from "react";
 
 import { selectedAppIdAtom } from "@/atoms/appAtoms";
-import { DyadProTrialDialog } from "@/components/DyadProTrialDialog";
+import { SambaProTrialDialog } from "@/components/SambaProTrialDialog";
 import { useSettings } from "@/hooks/useSettings";
 import { useUserBudgetInfo } from "@/hooks/useUserBudgetInfo";
 import { ipc, type UserBudgetInfo } from "@/ipc/types";
-import { hasDyadProKey, type UserSettings } from "@/lib/schemas";
+import { hasSambaProKey, type UserSettings } from "@/lib/schemas";
 import { cn } from "@/lib/utils";
 import { useChatMessageCount } from "@/hooks/useChatMessages";
 import { useChatStreamState } from "@/hooks/useChatStream";
@@ -85,14 +85,14 @@ export const PROMO_MESSAGES: PromoMessageConfig[] = [
   {
     id: "reddit",
     text: "Join 4000+ builders in the Samba Builder subreddit.",
-    cta: "Join r/dyadbuilders",
+    cta: "Join r/sambabuilders",
     target: { type: "url", url: "https://sambatech.com" },
     weight: 1,
   },
   {
     id: "follow-x",
     text: "Follow Samba Builder on X for build tips and release updates.",
-    cta: "Follow @dyad_sh",
+    cta: "Follow @samba_sh",
     target: { type: "url", url: "https://sambatech.com" },
     weight: 0.5,
   },
@@ -127,7 +127,7 @@ export function shouldShowPromoMessage({
   userBudget: UserBudgetInfo | undefined;
   messagesLength: number;
 }) {
-  const hasProKey = settings ? hasDyadProKey(settings) : false;
+  const hasProKey = settings ? hasSambaProKey(settings) : false;
   return (
     promoSeed !== null &&
     !settings?.isTestMode &&
@@ -266,7 +266,7 @@ export function PromoMessage({ seed }: { seed: number }) {
           </button>
         )}
       </div>
-      <DyadProTrialDialog
+      <SambaProTrialDialog
         isOpen={isTrialDialogOpen}
         onClose={() => setIsTrialDialogOpen(false)}
         utmCampaign={`streaming-promo-${message.id}`}

@@ -5,7 +5,7 @@ import { eq, and, like, desc } from "drizzle-orm";
 import { createTypedHandler } from "./base";
 import { securityContracts } from "../types/security";
 import type { SecurityFinding } from "../types/security";
-import { DyadError, DyadErrorKind } from "@/errors/dyad_error";
+import { SambaError, SambaErrorKind } from "@/errors/samba_error";
 import { createChatForApp } from "../utils/chat_creation_utils";
 import log from "electron-log";
 
@@ -16,7 +16,7 @@ export function registerSecurityHandlers() {
     securityContracts.getLatestSecurityReview,
     async (_, appId) => {
       if (!appId) {
-        throw new DyadError("App ID is required", DyadErrorKind.Validation);
+        throw new SambaError("App ID is required", SambaErrorKind.Validation);
       }
 
       // Query for the most recent message with security findings
@@ -33,16 +33,16 @@ export function registerSecurityHandlers() {
           and(
             eq(chats.appId, appId),
             eq(messages.role, "assistant"),
-            like(messages.content, "%<dyad-security-finding%"),
+            like(messages.content, "%<samba-security-finding%"),
           ),
         )
         .orderBy(desc(messages.createdAt), desc(messages.id))
         .limit(1);
 
       if (result.length === 0) {
-        throw new DyadError(
+        throw new SambaError(
           "No security review found for this app",
-          DyadErrorKind.NotFound,
+          SambaErrorKind.NotFound,
         );
       }
 
@@ -50,9 +50,9 @@ export function registerSecurityHandlers() {
       const findings = parseSecurityFindings(message.content);
 
       if (findings.length === 0) {
-        throw new DyadError(
+        throw new SambaError(
           "No security review found for this app",
-          DyadErrorKind.NotFound,
+          SambaErrorKind.NotFound,
         );
       }
 
@@ -90,9 +90,9 @@ export function registerSecurityHandlers() {
         columns: { id: true },
       });
       if (!reviewChat) {
-        throw new DyadError(
+        throw new SambaError(
           "Security review chat not found for this app",
-          DyadErrorKind.NotFound,
+          SambaErrorKind.NotFound,
         );
       }
 
@@ -148,9 +148,9 @@ export function registerSecurityHandlers() {
           columns: { id: true },
         });
         if (!currentReviewChat) {
-          throw new DyadError(
+          throw new SambaError(
             "Security review chat not found for this app",
-            DyadErrorKind.NotFound,
+            SambaErrorKind.NotFound,
           );
         }
         throw error;
@@ -161,9 +161,9 @@ export function registerSecurityHandlers() {
         await cleanupCreatedChat();
         const winner = await findExisting();
         if (!winner) {
-          throw new DyadError(
+          throw new SambaError(
             "Failed to create security fix chat",
-            DyadErrorKind.Internal,
+            SambaErrorKind.Internal,
           );
         }
         return { chatId: winner.fixChatId, created: false };
@@ -205,10 +205,10 @@ function computeFindingKey(findings: SecurityFinding[]): string {
 function parseSecurityFindings(content: string): SecurityFinding[] {
   const findings: SecurityFinding[] = [];
 
-  // Regex to match dyad-security-finding tags
+  // Regex to match samba-security-finding tags
   // Using lazy quantifier with proper boundaries to prevent catastrophic backtracking
   const regex =
-    /<dyad-security-finding\s+title="([^"]+)"\s+level="(critical|high|medium|low)">([\s\S]*?)<\/dyad-security-finding>/g;
+    /<samba-security-finding\s+title="([^"]+)"\s+level="(critical|high|medium|low)">([\s\S]*?)<\/samba-security-finding>/g;
 
   let match;
   while ((match = regex.exec(content)) !== null) {

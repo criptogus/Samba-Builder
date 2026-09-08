@@ -1,2 +1,2 @@
 Adding neon...
-<dyad-add-integration></dyad-add-integration>
+<samba-add-integration></samba-add-integration>

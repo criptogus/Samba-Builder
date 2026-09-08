@@ -179,7 +179,7 @@ export function truncateError(error: string): string {
  * dropped: it's precisely the case where a blanket safety claim would be false.
  *
  * The `mode` enum must never reach the text: this string is both the tool
- * result AND the body of the <dyad-status> card the user reads in chat, so it
+ * result AND the body of the <samba-status> card the user reads in chat, so it
  * says what happened in plain words instead of naming an internal identifier.
  */
 export function isolationLine(res: RunAppTestsResult): string {
@@ -200,7 +200,7 @@ export function completeWarning(
   body: string,
 ): void {
   ctx.onXmlComplete(
-    `<dyad-output type="warning" message="${escapeXmlAttr(title)}">\n${escapeXmlContent(body)}\n</dyad-output>`,
+    `<samba-output type="warning" message="${escapeXmlAttr(title)}">\n${escapeXmlContent(body)}\n</samba-output>`,
   );
 }
 
@@ -210,6 +210,6 @@ export function completeStatus(
   body: string,
 ): void {
   ctx.onXmlComplete(
-    `<dyad-status title="${escapeXmlAttr(title)}">\n${escapeXmlContent(body)}\n</dyad-status>`,
+    `<samba-status title="${escapeXmlAttr(title)}">\n${escapeXmlContent(body)}\n</samba-status>`,
   );
 }

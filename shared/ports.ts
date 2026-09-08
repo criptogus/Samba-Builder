@@ -13,7 +13,7 @@ function getE2ePortBlockBase(): number | null {
   const raw =
     typeof process === "undefined"
       ? undefined
-      : process.env.DYAD_E2E_PORT_BLOCK_INDEX;
+      : process.env.SAMBA_E2E_PORT_BLOCK_INDEX;
   if (raw == null || raw.trim() === "") {
     return null;
   }

@@ -4,7 +4,7 @@ import {
 } from "@/distributed_machines/operation_registry";
 import type { AppRunInvocationRef, RunErrorInfo } from "./state";
 import { z } from "zod";
-import { DyadErrorKind } from "@/errors/dyad_error";
+import { SambaErrorKind } from "@/errors/samba_error";
 
 export type AppRunOperationKind = "run" | "stop";
 
@@ -44,7 +44,7 @@ export const AppRunOperationOutcomeSchema = z.discriminatedUnion("kind", [
     operation: AppRunOperationKindSchema,
     error: z.object({
       message: z.string(),
-      kind: z.enum(DyadErrorKind).optional(),
+      kind: z.enum(SambaErrorKind).optional(),
     }),
   }),
   z.object({

@@ -32,7 +32,7 @@ const mocks = vi.hoisted(() => ({
   /** Null stands in for a dev server that isn't up. */
   appUrl: "http://localhost:32100" as string | null,
   previewUrl: "http://localhost:32100/" as string | null,
-  previewUrlSource: "dyad" as "none" | "dyad" | "app",
+  previewUrlSource: "samba" as "none" | "samba" | "app",
   updateSettings: vi.fn(),
   settings: {} as Record<string, unknown>,
 }));
@@ -137,7 +137,7 @@ describe("TestsPanel", () => {
     vi.clearAllMocks();
     mocks.appUrl = "http://localhost:32100";
     mocks.previewUrl = "http://localhost:32100/";
-    mocks.previewUrlSource = "dyad";
+    mocks.previewUrlSource = "samba";
     mocks.listAppTests.mockResolvedValue({
       specs: [
         {

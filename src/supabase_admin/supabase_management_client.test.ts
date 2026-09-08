@@ -9,7 +9,7 @@ import {
   refreshSupabaseToken,
 } from "./supabase_management_client";
 import { hasSupabaseCredentialsForOrganization } from "../lib/schemas";
-import { DyadError, DyadErrorKind, isDyadError } from "@/errors/dyad_error";
+import { SambaError, SambaErrorKind, isSambaError } from "@/errors/samba_error";
 import { readSettings } from "@/main/settings";
 import { SUPABASE_PROJECT_CREATED_BUT_UNLINKED } from "@/ipc/types/supabase";
 
@@ -99,7 +99,7 @@ describe("listSupabaseOrganizations", () => {
 describe("refreshSupabaseToken", () => {
   afterEach(() => vi.unstubAllGlobals());
 
-  it("is a no-op and never calls the retired Dyad refresh endpoint", async () => {
+  it("is a no-op and never calls the retired Samba refresh endpoint", async () => {
     vi.mocked(readSettings).mockReturnValue({
       supabase: {
         refreshToken: { value: "rotating-refresh-token" },
@@ -111,7 +111,7 @@ describe("refreshSupabaseToken", () => {
 
     await refreshSupabaseToken();
 
-    // Token refresh used to round-trip through the retired Dyad OAuth proxy.
+    // Token refresh used to round-trip through the retired Samba OAuth proxy.
     // Connections are now direct long-lived Personal Access Tokens, so
     // refreshing must never hit the network.
     expect(fetch).not.toHaveBeenCalled();
@@ -178,8 +178,8 @@ describe("getProjectApiKeys", () => {
       organizationSlug: "org-1",
     }).catch((thrown) => thrown);
 
-    expect(isDyadError(error)).toBe(true);
-    expect((error as DyadError).kind).toBe(DyadErrorKind.External);
+    expect(isSambaError(error)).toBe(true);
+    expect((error as SambaError).kind).toBe(SambaErrorKind.External);
   });
 
   // Without `reveal`, Supabase lists secret keys but withholds their values.
@@ -323,7 +323,7 @@ describe("getSupabaseProjectLogs", () => {
 });
 
 describe("classifyManagementApiError", () => {
-  it("maps a Management API 401/403 to an Auth DyadError", () => {
+  it("maps a Management API 401/403 to an Auth SambaError", () => {
     for (const status of [401, 403]) {
       const error = classifyManagementApiError(
         new SupabaseManagementAPIError(
@@ -338,15 +338,15 @@ describe("classifyManagementApiError", () => {
         "update this app's API key",
       );
 
-      expect(isDyadError(error)).toBe(true);
+      expect(isSambaError(error)).toBe(true);
       // Auth is telemetry-filtered and drives the reconnect path; an
       // unclassified error would be reported as a product exception instead.
-      expect((error as DyadError).kind).toBe(DyadErrorKind.Auth);
+      expect((error as SambaError).kind).toBe(SambaErrorKind.Auth);
     }
   });
 
-  it("preserves an already-classified DyadError", () => {
-    const original = new DyadError("nope", DyadErrorKind.Precondition);
+  it("preserves an already-classified SambaError", () => {
+    const original = new SambaError("nope", SambaErrorKind.Precondition);
 
     expect(classifyManagementApiError(original, "do a thing")).toBe(original);
   });

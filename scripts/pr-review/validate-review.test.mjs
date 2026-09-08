@@ -12,7 +12,7 @@ const validatorPath = path.join(scriptDirectory, "validate-review.mjs");
 
 test("accepts issue rows whose filenames contain Markdown separator text", () => {
   const fixtureDirectory = fs.mkdtempSync(
-    path.join(os.tmpdir(), "dyad-pr-review-validation-"),
+    path.join(os.tmpdir(), "samba-pr-review-validation-"),
   );
 
   try {

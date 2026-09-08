@@ -40,14 +40,14 @@ const authBootstrapToken = workerData?.authBootstrapToken;
 /* ---------- optional resources for HTML injection ---------------------- */
 
 let stacktraceJsContent = null;
-let dyadShimContent = null;
-let dyadComponentSelectorClientContent = null;
-let dyadRecorderClientContent = null;
-let dyadAuthBootstrapContent = null;
-let dyadScreenshotClientContent = null;
+let sambaShimContent = null;
+let sambaComponentSelectorClientContent = null;
+let sambaRecorderClientContent = null;
+let sambaAuthBootstrapContent = null;
+let sambaScreenshotClientContent = null;
 let htmlToImageContent = null;
-let dyadVisualEditorClientContent = null;
-let dyadLogsContent = null;
+let sambaVisualEditorClientContent = null;
+let sambaLogsContent = null;
 
 try {
   const htmlToImagePath = path.join(
@@ -86,121 +86,127 @@ try {
 }
 
 try {
-  const dyadShimPath = path.join(__dirname, "dyad-shim.js");
-  dyadShimContent = fs.readFileSync(dyadShimPath, "utf-8");
-  parentPort?.postMessage("[proxy-worker] dyad-shim.js loaded.");
+  const sambaShimPath = path.join(__dirname, "samba-shim.js");
+  sambaShimContent = fs.readFileSync(sambaShimPath, "utf-8");
+  parentPort?.postMessage("[proxy-worker] samba-shim.js loaded.");
 } catch (error) {
   parentPort?.postMessage(
-    `[proxy-worker] Failed to read dyad-shim.js: ${error.message}`,
+    `[proxy-worker] Failed to read samba-shim.js: ${error.message}`,
   );
 }
 
 try {
-  const dyadComponentSelectorClientPath = path.join(
+  const sambaComponentSelectorClientPath = path.join(
     __dirname,
-    "dyad-component-selector-client.js",
+    "samba-component-selector-client.js",
   );
-  dyadComponentSelectorClientContent = fs.readFileSync(
-    dyadComponentSelectorClientPath,
+  sambaComponentSelectorClientContent = fs.readFileSync(
+    sambaComponentSelectorClientPath,
     "utf-8",
   );
   parentPort?.postMessage(
-    "[proxy-worker] dyad-component-selector-client.js loaded.",
+    "[proxy-worker] samba-component-selector-client.js loaded.",
   );
 } catch (error) {
   parentPort?.postMessage(
-    `[proxy-worker] Failed to read dyad-component-selector-client.js: ${error.message}`,
+    `[proxy-worker] Failed to read samba-component-selector-client.js: ${error.message}`,
   );
 }
 
 try {
-  const dyadRecorderClientPath = path.join(
+  const sambaRecorderClientPath = path.join(
     __dirname,
-    "dyad-recorder-client.js",
+    "samba-recorder-client.js",
   );
-  dyadRecorderClientContent = fs.readFileSync(dyadRecorderClientPath, "utf-8");
-  parentPort?.postMessage("[proxy-worker] dyad-recorder-client.js loaded.");
-} catch (error) {
-  parentPort?.postMessage(
-    `[proxy-worker] Failed to read dyad-recorder-client.js: ${error.message}`,
-  );
-}
-
-try {
-  const dyadAuthBootstrapPath = path.join(__dirname, "dyad-auth-bootstrap.js");
-  dyadAuthBootstrapContent = fs.readFileSync(dyadAuthBootstrapPath, "utf-8");
-  parentPort?.postMessage("[proxy-worker] dyad-auth-bootstrap.js loaded.");
-} catch (error) {
-  parentPort?.postMessage(
-    `[proxy-worker] Failed to read dyad-auth-bootstrap.js: ${error.message}`,
-  );
-}
-
-try {
-  const dyadScreenshotClientPath = path.join(
-    __dirname,
-    "dyad-screenshot-client.js",
-  );
-  dyadScreenshotClientContent = fs.readFileSync(
-    dyadScreenshotClientPath,
+  sambaRecorderClientContent = fs.readFileSync(
+    sambaRecorderClientPath,
     "utf-8",
   );
-  parentPort?.postMessage("[proxy-worker] dyad-screenshot-client.js loaded.");
+  parentPort?.postMessage("[proxy-worker] samba-recorder-client.js loaded.");
 } catch (error) {
   parentPort?.postMessage(
-    `[proxy-worker] Failed to read dyad-screenshot-client.js: ${error.message}`,
+    `[proxy-worker] Failed to read samba-recorder-client.js: ${error.message}`,
   );
 }
 
 try {
-  const dyadVisualEditorClientPath = path.join(
+  const sambaAuthBootstrapPath = path.join(
     __dirname,
-    "dyad-visual-editor-client.js",
+    "samba-auth-bootstrap.js",
   );
-  dyadVisualEditorClientContent = fs.readFileSync(
-    dyadVisualEditorClientPath,
+  sambaAuthBootstrapContent = fs.readFileSync(sambaAuthBootstrapPath, "utf-8");
+  parentPort?.postMessage("[proxy-worker] samba-auth-bootstrap.js loaded.");
+} catch (error) {
+  parentPort?.postMessage(
+    `[proxy-worker] Failed to read samba-auth-bootstrap.js: ${error.message}`,
+  );
+}
+
+try {
+  const sambaScreenshotClientPath = path.join(
+    __dirname,
+    "samba-screenshot-client.js",
+  );
+  sambaScreenshotClientContent = fs.readFileSync(
+    sambaScreenshotClientPath,
+    "utf-8",
+  );
+  parentPort?.postMessage("[proxy-worker] samba-screenshot-client.js loaded.");
+} catch (error) {
+  parentPort?.postMessage(
+    `[proxy-worker] Failed to read samba-screenshot-client.js: ${error.message}`,
+  );
+}
+
+try {
+  const sambaVisualEditorClientPath = path.join(
+    __dirname,
+    "samba-visual-editor-client.js",
+  );
+  sambaVisualEditorClientContent = fs.readFileSync(
+    sambaVisualEditorClientPath,
     "utf-8",
   );
   parentPort?.postMessage(
-    "[proxy-worker] dyad-visual-editor-client.js loaded.",
+    "[proxy-worker] samba-visual-editor-client.js loaded.",
   );
 } catch (error) {
   parentPort?.postMessage(
-    `[proxy-worker] Failed to read dyad-visual-editor-client.js: ${error.message}`,
+    `[proxy-worker] Failed to read samba-visual-editor-client.js: ${error.message}`,
   );
 }
 
 try {
-  const dyadLogsPath = path.join(__dirname, "dyad_logs.js");
-  dyadLogsContent = fs.readFileSync(dyadLogsPath, "utf-8");
-  parentPort?.postMessage("[proxy-worker] dyad_logs.js loaded.");
+  const sambaLogsPath = path.join(__dirname, "samba_logs.js");
+  sambaLogsContent = fs.readFileSync(sambaLogsPath, "utf-8");
+  parentPort?.postMessage("[proxy-worker] samba_logs.js loaded.");
 } catch (error) {
   parentPort?.postMessage(
-    `[proxy-worker] Failed to read dyad_logs.js: ${error.message}`,
+    `[proxy-worker] Failed to read samba_logs.js: ${error.message}`,
   );
 }
 
 // Load Service Worker files
-let dyadSwContent = null;
-let dyadSwRegisterContent = null;
+let sambaSwContent = null;
+let sambaSwRegisterContent = null;
 
 try {
-  const dyadSwPath = path.join(__dirname, "dyad-sw.js");
-  dyadSwContent = fs.readFileSync(dyadSwPath, "utf-8");
-  parentPort?.postMessage("[proxy-worker] dyad-sw.js loaded.");
+  const sambaSwPath = path.join(__dirname, "samba-sw.js");
+  sambaSwContent = fs.readFileSync(sambaSwPath, "utf-8");
+  parentPort?.postMessage("[proxy-worker] samba-sw.js loaded.");
 } catch (error) {
   parentPort?.postMessage(
-    `[proxy-worker] Failed to read dyad-sw.js: ${error.message}`,
+    `[proxy-worker] Failed to read samba-sw.js: ${error.message}`,
   );
 }
 
 try {
-  const dyadSwRegisterPath = path.join(__dirname, "dyad-sw-register.js");
-  dyadSwRegisterContent = fs.readFileSync(dyadSwRegisterPath, "utf-8");
-  parentPort?.postMessage("[proxy-worker] dyad-sw-register.js loaded.");
+  const sambaSwRegisterPath = path.join(__dirname, "samba-sw-register.js");
+  sambaSwRegisterContent = fs.readFileSync(sambaSwRegisterPath, "utf-8");
+  parentPort?.postMessage("[proxy-worker] samba-sw-register.js loaded.");
 } catch (error) {
   parentPort?.postMessage(
-    `[proxy-worker] Failed to read dyad-sw-register.js: ${error.message}`,
+    `[proxy-worker] Failed to read samba-sw-register.js: ${error.message}`,
   );
 }
 
@@ -213,8 +219,8 @@ function needsInjection(pathname) {
 
 function injectHTML(buf) {
   let txt = buf.toString("utf8");
-  // These are strings that were used since the first version of the dyad shim.
-  // If the dyad shim is used from legacy apps which came pre-baked with the shim
+  // These are strings that were used since the first version of the samba shim.
+  // If the samba shim is used from legacy apps which came pre-baked with the shim
   // as a vite plugin, then do not inject the shim twice to avoid weird behaviors.
   const legacyAppWithShim =
     txt.includes("window-error") && txt.includes("unhandled-rejection");
@@ -238,37 +244,37 @@ function injectHTML(buf) {
       );
     }
 
-    if (dyadShimContent) {
-      scripts.push(`<script>${dyadShimContent}</script>`);
+    if (sambaShimContent) {
+      scripts.push(`<script>${sambaShimContent}</script>`);
     } else {
       scripts.push(
-        '<script>console.warn("[proxy-worker] dyad shim was not injected.");</script>',
+        '<script>console.warn("[proxy-worker] samba shim was not injected.");</script>',
       );
     }
   }
-  if (dyadComponentSelectorClientContent) {
-    scripts.push(`<script>${dyadComponentSelectorClientContent}</script>`);
+  if (sambaComponentSelectorClientContent) {
+    scripts.push(`<script>${sambaComponentSelectorClientContent}</script>`);
   } else {
     scripts.push(
-      '<script>console.warn("[proxy-worker] dyad component selector client was not injected.");</script>',
+      '<script>console.warn("[proxy-worker] samba component selector client was not injected.");</script>',
     );
   }
-  if (dyadRecorderClientContent) {
+  if (sambaRecorderClientContent) {
     scripts.push(
-      `<script data-dyad-recorder-token="${escapedProxyToken}">${dyadRecorderClientContent}</script>`,
+      `<script data-samba-recorder-token="${escapedProxyToken}">${sambaRecorderClientContent}</script>`,
     );
   } else {
     scripts.push(
-      '<script>console.warn("[proxy-worker] dyad recorder client was not injected.");</script>',
+      '<script>console.warn("[proxy-worker] samba recorder client was not injected.");</script>',
     );
   }
-  if (dyadAuthBootstrapContent) {
+  if (sambaAuthBootstrapContent) {
     scripts.push(
-      `<script data-dyad-auth-token="${escapedProxyToken}">${dyadAuthBootstrapContent}</script>`,
+      `<script data-samba-auth-token="${escapedProxyToken}">${sambaAuthBootstrapContent}</script>`,
     );
   } else {
     scripts.push(
-      '<script>console.warn("[proxy-worker] dyad auth bootstrap was not injected.");</script>',
+      '<script>console.warn("[proxy-worker] samba auth bootstrap was not injected.");</script>',
     );
   }
   if (htmlToImageContent) {
@@ -284,32 +290,32 @@ function injectHTML(buf) {
       "[proxy-worker] WARNING: html-to-image not injected!",
     );
   }
-  if (dyadScreenshotClientContent) {
-    scripts.push(`<script>${dyadScreenshotClientContent}</script>`);
+  if (sambaScreenshotClientContent) {
+    scripts.push(`<script>${sambaScreenshotClientContent}</script>`);
   } else {
     scripts.push(
-      '<script>console.warn("[proxy-worker] dyad screenshot client was not injected.");</script>',
+      '<script>console.warn("[proxy-worker] samba screenshot client was not injected.");</script>',
     );
   }
-  if (dyadVisualEditorClientContent) {
-    scripts.push(`<script>${dyadVisualEditorClientContent}</script>`);
+  if (sambaVisualEditorClientContent) {
+    scripts.push(`<script>${sambaVisualEditorClientContent}</script>`);
   } else {
     scripts.push(
-      '<script>console.warn("[proxy-worker] dyad visual editor client was not injected.");</script>',
+      '<script>console.warn("[proxy-worker] samba visual editor client was not injected.");</script>',
     );
   }
-  if (dyadLogsContent) {
-    scripts.push(`<script>${dyadLogsContent}</script>`);
+  if (sambaLogsContent) {
+    scripts.push(`<script>${sambaLogsContent}</script>`);
   } else {
     scripts.push(
-      '<script>console.warn("[proxy-worker] dyad_logs.js was not injected.");</script>',
+      '<script>console.warn("[proxy-worker] samba_logs.js was not injected.");</script>',
     );
   }
-  if (dyadSwRegisterContent) {
-    scripts.push(`<script>${dyadSwRegisterContent}</script>`);
+  if (sambaSwRegisterContent) {
+    scripts.push(`<script>${sambaSwRegisterContent}</script>`);
   } else {
     scripts.push(
-      '<script>console.warn("[proxy-worker] dyad-sw-register.js was not injected.");</script>',
+      '<script>console.warn("[proxy-worker] samba-sw-register.js was not injected.");</script>',
     );
   }
   const allScripts = scripts.join("\n");
@@ -435,14 +441,14 @@ function applyProxyFrameAncestorsCsp(headers) {
 
 const server = http.createServer((clientReq, clientRes) => {
   // Special handling for Service Worker file
-  if (clientReq.url === "/dyad-sw.js") {
-    if (dyadSwContent) {
+  if (clientReq.url === "/samba-sw.js") {
+    if (sambaSwContent) {
       clientRes.writeHead(200, {
         "content-type": "application/javascript",
         "service-worker-allowed": "/",
         "cache-control": "no-cache",
       });
-      clientRes.end(dyadSwContent);
+      clientRes.end(sambaSwContent);
       return;
     } else {
       clientRes.writeHead(404, { "content-type": "text/plain" });
@@ -526,7 +532,7 @@ const server = http.createServer((clientReq, clientRes) => {
         // Never cache an injected document. The scripts above are stamped with
         // this proxy instance's capability token, and a restart mints a new one
         // — so a cached copy carries a token the proxy no longer honors, and
-        // recorder control and `dyad-auth-login` messages sent with it are
+        // recorder control and `samba-auth-login` messages sent with it are
         // rejected with nothing on screen explaining why. `last-modified` and
         // `expires` go too: left behind they still permit heuristic freshness
         // and conditional revalidation into the same stale document.

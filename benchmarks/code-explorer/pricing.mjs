@@ -1,14 +1,14 @@
 export const MODEL_PRICING = {
   primary: {
     model: "gpt-5.5",
-    label: "Primary dyad/auto as GPT-5.5",
+    label: "Primary samba/auto as GPT-5.5",
     inputPerMillion: 5,
     cachedInputPerMillion: 0.5,
     outputPerMillion: 30,
   },
   value: {
     model: "gpt-5.4-mini",
-    label: "Value dyad/value as GPT-5.4 mini",
+    label: "Value samba/value as GPT-5.4 mini",
     inputPerMillion: 0.75,
     cachedInputPerMillion: 0.075,
     outputPerMillion: 4.5,

@@ -4,9 +4,9 @@
 
 ## Summary
 
-When a user installs a package whose build scripts are not in Dyad's curated allow-list (e.g. `core-js`), pnpm skips the build and — under pnpm 11's `strictDepBuilds: true` default — any later **fresh** `pnpm install` that lacks Dyad's `--config.strictDepBuilds=false` flag fails hard with `ERR_PNPM_IGNORED_BUILDS` (exit 1). Users get stuck on the install screen with no recoverable action, and exported repos fail on Vercel/Netlify/CI.
+When a user installs a package whose build scripts are not in Samba's curated allow-list (e.g. `core-js`), pnpm skips the build and — under pnpm 11's `strictDepBuilds: true` default — any later **fresh** `pnpm install` that lacks Samba's `--config.strictDepBuilds=false` flag fails hard with `ERR_PNPM_IGNORED_BUILDS` (exit 1). Users get stuck on the install screen with no recoverable action, and exported repos fail on Vercel/Netlify/CI.
 
-Fix: after every Dyad-run install, record an explicit `pkg: false` decision in `pnpm-workspace.yaml`'s `allowBuilds` map for each ignored build (outside the Dyad-managed block, with a Dyad marker), commit it, and emit telemetry so frequently-denied-but-legit packages can be promoted to the remote allow-list.
+Fix: after every Samba-run install, record an explicit `pkg: false` decision in `pnpm-workspace.yaml`'s `allowBuilds` map for each ignored build (outside the Samba-managed block, with a Samba marker), commit it, and emit telemetry so frequently-denied-but-legit packages can be promoted to the remote allow-list.
 
 ## Problem Statement
 
@@ -15,43 +15,43 @@ Fix: after every Dyad-run install, record an explicit `pkg: false` decision in `
 pnpm 11 defaults `strictDepBuilds` to `true`:
 
 - `pnpm install` with a dependency whose build was ignored → `ERR_PNPM_IGNORED_BUILDS`, **exit 1** — but only when pnpm actually (re)installs packages. An "Already up to date" no-op install exits 0 and never re-evaluates build scripts.
-- With `--config.strictDepBuilds=false` (Dyad's `PNPM_INSTALL_POLICY_ARGS`), the same install exits 0 with only a warning box.
+- With `--config.strictDepBuilds=false` (Samba's `PNPM_INSTALL_POLICY_ARGS`), the same install exits 0 with only a warning box.
 - An explicit `pkg: false` entry under `allowBuilds` in `pnpm-workspace.yaml` silences **both** the error and the warning, on pnpm 11.x and 10.x. Build behavior is unchanged (the build was already being skipped).
 - `node_modules/.modules.yaml` records **implicitly** ignored builds only: an unlisted package lands in `ignoredBuilds`, but once it is explicitly `false` it drops out. (Detection of auto-deny candidates therefore reads exactly the right set; promotion-time repair cannot rely on `ignoredBuilds` — see Promotion & repair.)
 - Flipping an entry `false` → `true` and re-running a plain `pnpm install` does **not** run the previously-skipped build ("Already up to date", no postinstall). Only a fresh install or an explicit `pnpm rebuild <pkg>` executes it; `pnpm rebuild <pkg>` was verified to run the skipped postinstall and exit 0.
-- Known pnpm quirk (out of scope): `allowBuilds` name-matching does not work for `file:` dependencies — even `pkg: true` fails a strict install with `ERR_PNPM_IGNORED_BUILDS: pkg@file:...`. Dyad apps use registry deps, so this is noted but unhandled.
+- Known pnpm quirk (out of scope): `allowBuilds` name-matching does not work for `file:` dependencies — even `pkg: true` fails a strict install with `ERR_PNPM_IGNORED_BUILDS: pkg@file:...`. Samba apps use registry deps, so this is noted but unhandled.
 
 ### Why users get stuck
 
-1. User asks for a feature; AI runs `<dyad-add-dependency packages="core-js">`. Install succeeds (Dyad passes the policy flags) with an "Ignored build scripts" warning. `node_modules/.modules.yaml` records `ignoredBuilds: ["core-js@3.49.0"]`. Nothing is recorded in the repo.
+1. User asks for a feature; AI runs `<samba-add-dependency packages="core-js">`. Install succeeds (Samba passes the policy flags) with an "Ignored build scripts" warning. `node_modules/.modules.yaml` records `ignoredBuilds: ["core-js@3.49.0"]`. Nothing is recorded in the repo.
 2. The app now works — until a **fresh install** happens through any path that doesn't carry `--config.strictDepBuilds=false`:
    - **Rebuild** (`restartApp({ removeNodeModules: true })`) on an app with a custom `installCommand` (custom commands run verbatim; `getCommand()` in `app_runtime_service.ts` skips `getPnpmInstallCommand()` entirely).
    - The Capacitor upgrade path (`app_upgrade_handlers.ts:109`, intentionally strict) and component-tagger add (`app_upgrade_utils.ts:132`).
-   - **Everything outside Dyad**: Vercel/Netlify deploys of the exported repo, GitHub Actions, the user's own terminal, other editors.
+   - **Everything outside Samba**: Vercel/Netlify deploys of the exported repo, GitHub Actions, the user's own terminal, other editors.
 3. In the run flow the command is a single `install && dev` chain, so exit 1 short-circuits: the dev server never starts, no preview URL ever appears, and the preview panel sits forever on the ignored-builds error. Retrying Rebuild fails identically. **Restart** appears to work (no-op install exits 0), which makes the failure look nondeterministic to users.
 
 ### Why this matters durably
 
-Once an unlisted-build package is in the lockfile, the repo is poisoned for every standard `pnpm install` consumer. The only official fix (`pnpm approve-builds`) is interactive and unreachable from Dyad's UI. Most Dyad users cannot evaluate "should this package run install scripts" — they just need the app to keep working with the same security posture Dyad already applies (builds skipped unless allow-listed).
+Once an unlisted-build package is in the lockfile, the repo is poisoned for every standard `pnpm install` consumer. The only official fix (`pnpm approve-builds`) is interactive and unreachable from Samba's UI. Most Samba users cannot evaluate "should this package run install scripts" — they just need the app to keep working with the same security posture Samba already applies (builds skipped unless allow-listed).
 
 ## Goals
 
 - A user who installs any package always gets back to a working preview — Rebuild included — with zero new prompts.
 - Exported repos install cleanly (`pnpm install`, no special flags) on CI/deploy platforms.
 - Preserve the supply-chain posture: never run a build script that isn't on the curated allow-list; never use `dangerouslyAllowAllBuilds`.
-- Feed telemetry so the remote allow-list (`https://api.dyad.sh/v1/default-approve-builds.txt`, 1h TTL) can be curated from real-world denial frequency.
+- Feed telemetry so the remote allow-list (`https://api.samba.sh/v1/default-approve-builds.txt`, 1h TTL) can be curated from real-world denial frequency.
 
 ## Non-Goals
 
 - An interactive per-package approval UI (possible phase 3; silent-deny + telemetry is the right default).
 - Changing which builds actually run today.
-- Removing `--config.strictDepBuilds=false` from existing Dyad paths (keep as belt-and-suspenders for the first install, before denials are recorded).
+- Removing `--config.strictDepBuilds=false` from existing Samba paths (keep as belt-and-suspenders for the first install, before denials are recorded).
 
 ## Design
 
 ### 1. Detection: read `.modules.yaml`, don't scrape output
 
-After every Dyad-run pnpm install/add that succeeds, read `node_modules/.modules.yaml` and parse `ignoredBuilds` (array of `name@version` strings; strip versions — `allowBuilds` keys are bare names). This is authoritative and avoids parsing ANSI-laden PTY output. (`pnpm ignored-builds` is a non-interactive fallback but spawning is unnecessary when the file is readable.)
+After every Samba-run pnpm install/add that succeeds, read `node_modules/.modules.yaml` and parse `ignoredBuilds` (array of `name@version` strings; strip versions — `allowBuilds` keys are bare names). This is authoritative and avoids parsing ANSI-laden PTY output. (`pnpm ignored-builds` is a non-interactive fallback but spawning is unnecessary when the file is readable.)
 
 Hook points (all already call or sit next to the allow-builds plumbing in `socket_firewall.ts`):
 
@@ -65,17 +65,17 @@ Write denial entries into the top-level `allowBuilds:` map in `pnpm-workspace.ya
 
 ```yaml
 allowBuilds:
-  core-js: false # dyad-auto-denied
-  # dyad-default-allow-builds begin
+  core-js: false # samba-auto-denied
+  # samba-default-allow-builds begin
   ...managed block, rewritten from local/remote list...
-  # dyad-default-allow-builds end
+  # samba-default-allow-builds end
 ```
 
 Rules:
 
 - **Never inside the managed block** — `buildAllowBuildsManagedBlock` rewrites it wholesale from the local/remote list on every `ensurePnpmAllowBuildsConfigured` call.
-- **Tag each auto-written line** with a trailing `# dyad-auto-denied` comment. This distinguishes Dyad's automatic decision from a human's deliberate `pkg: false`. Critical because `updatePnpmAllowBuildsConfigContentWithSource` filters managed entries that already exist outside the block — without the marker, a later remote-list promotion of that package to `true` would be permanently shadowed by our own auto-denial.
-- **Promotion**: when the resolved allow-list (remote or local) contains a package that currently has a `# dyad-auto-denied` entry, remove the denial so the managed `pkg: true` takes effect. Never touch untagged (user-authored) entries. See "Promotion & repair" below for how the skipped build then actually gets run.
+- **Tag each auto-written line** with a trailing `# samba-auto-denied` comment. This distinguishes Samba's automatic decision from a human's deliberate `pkg: false`. Critical because `updatePnpmAllowBuildsConfigContentWithSource` filters managed entries that already exist outside the block — without the marker, a later remote-list promotion of that package to `true` would be permanently shadowed by our own auto-denial.
+- **Promotion**: when the resolved allow-list (remote or local) contains a package that currently has a `# samba-auto-denied` entry, remove the denial so the managed `pkg: true` takes effect. Never touch untagged (user-authored) entries. See "Promotion & repair" below for how the skipped build then actually gets run.
 - Skip packages already `true` in the resolved allow-list or already present (any value) outside the block. Quote scoped names via the existing `quoteYamlMapKey`.
 - Idempotent and append-only per install: new ignores get added; existing entries untouched.
 
@@ -90,23 +90,23 @@ Editing YAML grants _permission_; it does not run the build. Verified: after a `
 
 #### Lifecycle walkthrough: deny → curate → promote
 
-1. **T0**: user installs `core-js-2` (unlisted, build genuinely needed). Install succeeds under Dyad flags; proactive pass writes `core-js-2: false # dyad-auto-denied` outside the managed block, commits, emits telemetry. App installs cleanly everywhere; if the build was load-bearing the package misbehaves at runtime (status quo today, but now visible in telemetry).
+1. **T0**: user installs `core-js-2` (unlisted, build genuinely needed). Install succeeds under Samba flags; proactive pass writes `core-js-2: false # samba-auto-denied` outside the managed block, commits, emits telemetry. App installs cleanly everywhere; if the build was load-bearing the package misbehaves at runtime (status quo today, but now visible in telemetry).
 2. **T1**: curation adds `core-js-2` to the remote allow-list (1h TTL, no release needed).
 3. **T2**: on each app's next start/add-dependency, the promotion pass deletes the tagged line, the managed rewrite emits `core-js-2: true`, the caller runs best-effort `pnpm rebuild core-js-2`, and the change is committed. The app self-heals with zero user interaction; later deploys/CI fresh-install and build it natively.
 
-Without the promotion pass this lifecycle **deadlocks at T2**: `parseAllowBuildsExistingKeys` filters any managed-list package that already exists outside the block, so Dyad's own T0 denial would shadow the curated `true` forever. The `# dyad-auto-denied` marker is what distinguishes revisable-by-Dyad entries from human decisions.
+Without the promotion pass this lifecycle **deadlocks at T2**: `parseAllowBuildsExistingKeys` filters any managed-list package that already exists outside the block, so Samba's own T0 denial would shadow the curated `true` forever. The `# samba-auto-denied` marker is what distinguishes revisable-by-Samba entries from human decisions.
 
 Ownership semantics for unmanaged entries when the curated list later adds the same package:
 
 | Unmanaged entry at T2                      | Outcome                                                                                            |
 | ------------------------------------------ | -------------------------------------------------------------------------------------------------- |
-| `pkg: false # dyad-auto-denied`            | Promoted: line removed, managed `true` takes over, `pnpm rebuild pkg` runs                         |
+| `pkg: false # samba-auto-denied`           | Promoted: line removed, managed `true` takes over, `pnpm rebuild pkg` runs                         |
 | `pkg: false` (user-authored)               | Untouched; existing-keys filter keeps `pkg` out of the managed block — the human deny durably wins |
 | `pkg: true` (user-authored/approve-builds) | Untouched; filter avoids a managed duplicate; build already allowed                                |
 
 Consistency invariant: promotion runs **before** the managed-block rewrite in the same transform, and the existing-keys filter is the backstop — no state can contain both an outside `false` and a managed `true` for the same key (YAML duplicate keys are parser-dependent; we never emit them).
 
-Caveat (accepted): a manual `pnpm approve-builds` run rewrites `pnpm-workspace.yaml` through a YAML serializer and strips all comments — managed-block markers and `# dyad-auto-denied` tags alike. Existing code already re-appends a fresh managed block when markers vanish; stripped denials simply become user-authored (never promoted, still correct and installable). Telemetry fired at deny time, so curation signal is not lost.
+Caveat (accepted): a manual `pnpm approve-builds` run rewrites `pnpm-workspace.yaml` through a YAML serializer and strips all comments — managed-block markers and `# samba-auto-denied` tags alike. Existing code already re-appends a fresh managed block when markers vanish; stripped denials simply become user-authored (never promoted, still correct and installable). Telemetry fired at deny time, so curation signal is not lost.
 
 ### 3. Commit
 
@@ -131,11 +131,11 @@ This fixes the Rebuild-stuck-forever loop without weakening the intentionally-st
 
 ### 6. Agent visibility
 
-Append a line to the install results written back into the `<dyad-add-dependency>` tag: `Note: build scripts for core-js were not run (Dyad security policy).` If the app later fails at runtime because a denied package genuinely needed its build (native addon → `Cannot find module '.../Release/*.node'`), the AI has the context to explain/react instead of flailing.
+Append a line to the install results written back into the `<samba-add-dependency>` tag: `Note: build scripts for core-js were not run (Samba security policy).` If the app later fails at runtime because a denied package genuinely needed its build (native addon → `Cannot find module '.../Release/*.node'`), the AI has the context to explain/react instead of flailing.
 
 ## Additional pnpm edge cases (considered)
 
-- **pnpm 10.x compat** — verified: pnpm 10.33 honors `allowBuilds` (both `true` and `false`). Caveat: Dyad's availability probe accepts any pnpm version (the 10.16 check only gates a warning), and pnpm 10 builds older than the `allowBuilds` map would silently ignore the managed block. Low priority; consider a version floor note if support tickets appear.
+- **pnpm 10.x compat** — verified: pnpm 10.33 honors `allowBuilds` (both `true` and `false`). Caveat: Samba's availability probe accepts any pnpm version (the 10.16 check only gates a warning), and pnpm 10 builds older than the `allowBuilds` map would silently ignore the managed block. Low priority; consider a version floor note if support tickets appear.
 - **Non-registry deps (`file:`, `git:`)** — verified asymmetry: `pkg: false` matches by bare name and suppresses the strict error, but `pkg: true` does **not** match (strict install fails even when "allowed"). Auto-deny therefore works on them; promotion cannot — acceptable, since the curated list never contains such names. Self-heal must not assume a denied non-registry package is later allowable by name.
 - **Transitive deps are the common case** — `ignoredBuilds` reports the whole tree (user installs A, native B arrives transitively). Auto-deny handles this naturally since we deny exactly what `.modules.yaml` reports; telemetry captures packages the user never chose.
 - **Stale denials** — if the dep tree later drops a denied package, its `false` entry remains. Inert cruft; garbage collection is a non-goal.
@@ -150,7 +150,7 @@ Append a line to the install results written back into the `<dyad-add-dependency
 | Risk                                                                                                | Mitigation                                                                                                                                                                                                                         |
 | --------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Package genuinely needs its build; auto-deny converts install-time error into obscure runtime error | No regression vs today (build already skipped by `strictDepBuilds=false`); telemetry → remote-list promotion loop; agent-visible note (§6); optional phase-3 UI ("X was blocked from running install scripts — Allow and rebuild") |
-| Denial shadows a future curated promotion                                                           | `# dyad-auto-denied` marker + promotion pass in §2                                                                                                                                                                                 |
+| Denial shadows a future curated promotion                                                           | `# samba-auto-denied` marker + promotion pass in §2                                                                                                                                                                                |
 | YAML corruption of user-edited workspace files                                                      | Reuse the existing line-based editing + marker approach in `socket_firewall.ts`, extend its unit tests; atomic temp-file write already exists                                                                                      |
 | Self-heal retry loops                                                                               | Retry exactly once per install invocation                                                                                                                                                                                          |
 | npm-based apps                                                                                      | Unaffected (no `pnpm-workspace.yaml` involvement)                                                                                                                                                                                  |

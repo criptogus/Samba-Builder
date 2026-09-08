@@ -100,7 +100,7 @@ describe("ImageGenerationPresentationService", () => {
             status: "success",
             result: {
               fileName: "generated.png",
-              filePath: "/private/app/.dyad/media/generated.png",
+              filePath: "/private/app/.samba/media/generated.png",
               appPath: "app",
               appId: 7,
               appName: "App",

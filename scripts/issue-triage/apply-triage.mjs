@@ -52,7 +52,7 @@ const api = async (pathname, options = {}, { allowNotFound = false } = {}) => {
       Accept: "application/vnd.github+json",
       Authorization: `Bearer ${token}`,
       "Content-Type": "application/json",
-      "User-Agent": "dyad-issue-triage",
+      "User-Agent": "samba-issue-triage",
       "X-GitHub-Api-Version": "2022-11-28",
       ...options.headers,
     },

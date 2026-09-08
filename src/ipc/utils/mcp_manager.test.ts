@@ -2,7 +2,7 @@
 
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { MCPClient } from "@ai-sdk/mcp";
-import { DyadError, DyadErrorKind } from "@/errors/dyad_error";
+import { SambaError, SambaErrorKind } from "@/errors/samba_error";
 
 const mocks = vi.hoisted(() => ({
   rows: new Map<number, Record<string, unknown>>(),
@@ -38,7 +38,7 @@ vi.mock("@modelcontextprotocol/sdk/client/stdio.js", () => ({
 }));
 
 vi.mock("./mcp_oauth_provider", () => ({
-  DyadOAuthClientProvider: class {},
+  SambaOAuthClientProvider: class {},
   captureMcpOAuthWriteAuthority: vi.fn(() => undefined),
 }));
 
@@ -168,11 +168,11 @@ describe("McpManager lifecycle", () => {
 
     await expect(disposal).resolves.toBeUndefined();
     await expect(initializationResult).resolves.toMatchObject({
-      name: "DyadError",
-      kind: DyadErrorKind.Precondition,
+      name: "SambaError",
+      kind: SambaErrorKind.Precondition,
       message: "MCP client initialization cancelled for server 3",
     });
-    await expect(initializationResult).resolves.toBeInstanceOf(DyadError);
+    await expect(initializationResult).resolves.toBeInstanceOf(SambaError);
     expect(close).toHaveBeenCalledTimes(1);
     await expect(manager.getClient(3)).resolves.toBe(replacement);
   });

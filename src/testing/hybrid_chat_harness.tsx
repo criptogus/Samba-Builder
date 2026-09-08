@@ -92,7 +92,6 @@ import { ChatPanel } from "@/components/ChatPanel";
 import { AppList } from "@/components/AppList";
 import { ChatList } from "@/components/ChatList";
 import { PrivacyBanner } from "@/components/TelemetryBanner";
-import { SubscriptionStatusBanner } from "@/components/SubscriptionStatusBanner";
 import { VersionPreviewProvider } from "@/version_preview/VersionPreviewProvider";
 import { PreviewIframeProvider } from "@/preview_iframe/PreviewIframeProvider";
 import { PreviewIframeManager } from "@/preview_iframe/manager";
@@ -172,7 +171,7 @@ type HybridRouter = {
   navigate: (opts: unknown) => unknown;
 };
 type HybridBridgeDiagnosticGlobal = typeof globalThis & {
-  __DYAD_HYBRID_BRIDGE__?: RendererIpcBridge;
+  __SAMBA_HYBRID_BRIDGE__?: RendererIpcBridge;
 };
 
 const LazyAppDetailsPage = lazy(() => import("@/pages/app-details"));
@@ -265,7 +264,6 @@ export interface MountOptions {
   /** Render the real telemetry privacy banner next to the mounted route. */
   withPrivacyBanner?: boolean;
   /** Render the real global subscription status banner. */
-  withSubscriptionStatusBanner?: boolean;
 }
 
 export interface MountSurfaceOptions extends MountOptions {
@@ -498,7 +496,7 @@ function eventPayload(e: { args: unknown[] }): unknown {
 }
 
 const HYBRID_EXTRA_ENV_KEYS = [
-  "DYAD_SKIP_MANAGED_PNPM_INSTALL",
+  "SAMBA_SKIP_MANAGED_PNPM_INSTALL",
   "E2E_TEST_BUILD",
   "FAKE_LLM_PORT",
 ] as const;
@@ -615,7 +613,7 @@ export async function setupHybridChatHarness(
   activeHybridChatHarness = true;
 
   const envSnapshot = snapshotHybridEnv();
-  process.env.DYAD_SKIP_MANAGED_PNPM_INSTALL = "true";
+  process.env.SAMBA_SKIP_MANAGED_PNPM_INSTALL = "true";
   if (options.testBuild) {
     if (!IS_TEST_BUILD) {
       // eslint-disable-next-line no-console
@@ -675,7 +673,7 @@ export async function setupHybridChatHarness(
           }
         : undefined,
     });
-    (globalThis as HybridBridgeDiagnosticGlobal).__DYAD_HYBRID_BRIDGE__ =
+    (globalThis as HybridBridgeDiagnosticGlobal).__SAMBA_HYBRID_BRIDGE__ =
       bridge;
 
     let activeStore: JotaiStore | undefined;
@@ -780,9 +778,6 @@ export async function setupHybridChatHarness(
               {opts.withAppList && <AppList show />}
               {opts.withChatList && <ChatList show />}
               {opts.withPrivacyBanner && <PrivacyBanner />}
-              {opts.withSubscriptionStatusBanner && (
-                <SubscriptionStatusBanner />
-              )}
               <Outlet />
             </div>
           </PlanHandoffProvider>
@@ -1638,8 +1633,8 @@ export async function setupHybridChatHarness(
         teardownError = error;
       } finally {
         const diagnosticGlobal = globalThis as HybridBridgeDiagnosticGlobal;
-        if (diagnosticGlobal.__DYAD_HYBRID_BRIDGE__ === bridge) {
-          delete diagnosticGlobal.__DYAD_HYBRID_BRIDGE__;
+        if (diagnosticGlobal.__SAMBA_HYBRID_BRIDGE__ === bridge) {
+          delete diagnosticGlobal.__SAMBA_HYBRID_BRIDGE__;
         }
         activeHybridChatHarness = false;
         setModelClientFetchForTesting(undefined);

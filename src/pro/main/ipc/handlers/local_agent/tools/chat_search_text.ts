@@ -44,16 +44,16 @@ const MAX_ATTR_CHARS = 200;
  * Tags whose body is conversational signal and stays searchable.
  */
 const PRESERVE_BODY_TAGS = new Set([
-  "dyad-chat-summary",
-  "dyad-compaction",
-  "dyad-write-plan",
-  "dyad-exit-plan",
-  "dyad-questionnaire",
-  "dyad-app-blueprint",
-  "dyad-security-finding",
-  "dyad-status",
-  "dyad-step-limit",
-  "dyad-output",
+  "samba-chat-summary",
+  "samba-compaction",
+  "samba-write-plan",
+  "samba-exit-plan",
+  "samba-questionnaire",
+  "samba-app-blueprint",
+  "samba-security-finding",
+  "samba-status",
+  "samba-step-limit",
+  "samba-output",
 ]);
 
 /**
@@ -63,8 +63,8 @@ const PRESERVE_BODY_TAGS = new Set([
  */
 const DROP_ENTIRELY_TAGS = new Set([
   "think",
-  "dyad-search-chats",
-  "dyad-read-chat",
+  "samba-search-chats",
+  "samba-read-chat",
 ]);
 
 /**
@@ -110,25 +110,25 @@ function metadataLineForTag(
       parts.push(value.slice(0, MAX_ATTR_CHARS));
     }
   }
-  const label = tag.replace(/^dyad-/, "").replace(/-/g, " ");
+  const label = tag.replace(/^samba-/, "").replace(/-/g, " ");
   return parts.length > 0 ? `[${label}: ${parts.join(" ")}]` : `[${label}]`;
 }
 
 /**
  * Defense-in-depth for tag text the block parser did NOT recognize (tags
- * absent from DYAD_CUSTOM_TAG_NAMES flow through as plain markdown). Removes
- * paired spans, then any stray opening/closing dyad tags, so an unrecognized
+ * absent from SAMBA_CUSTOM_TAG_NAMES flow through as plain markdown). Removes
+ * paired spans, then any stray opening/closing samba tags, so an unrecognized
  * payload tag cannot leak its body into the projection.
  */
-function scrubUnrecognizedDyadTags(markdown: string): string {
+function scrubUnrecognizedSambaTags(markdown: string): string {
   return (
     markdown
-      .replace(/<(dyad-[a-z0-9-]+)\b[^>]*>[\s\S]*?<\/\1\s*>/gi, " ")
+      .replace(/<(samba-[a-z0-9-]+)\b[^>]*>[\s\S]*?<\/\1\s*>/gi, " ")
       .replace(/<think\b[^>]*>[\s\S]*?<\/think\s*>/gi, " ")
       // An unclosed opening tag fails closed: drop everything after it
       // rather than risk leaking a payload body.
-      .replace(/<(?:dyad-[a-z0-9-]+|think)\b[^>]*>[\s\S]*$/gi, " ")
-      .replace(/<\/?(?:dyad-[a-z0-9-]+|think)\b[^>]*>/gi, " ")
+      .replace(/<(?:samba-[a-z0-9-]+|think)\b[^>]*>[\s\S]*$/gi, " ")
+      .replace(/<\/?(?:samba-[a-z0-9-]+|think)\b[^>]*>/gi, " ")
   );
 }
 
@@ -154,7 +154,7 @@ export function projectChatMessageForSearch(
   input: ChatSearchProjectionInput,
 ): ChatSearchProjection {
   if (input.role === "user") {
-    // User-authored text is preserved as-is. Literal <dyad-*> examples in a
+    // User-authored text is preserved as-is. Literal <samba-*> examples in a
     // user message are content the user typed (or attached), not trusted
     // tool markup, so they are not interpreted or stripped.
     return boundProjection(normalizeWhitespace(input.content));
@@ -165,7 +165,7 @@ export function projectChatMessageForSearch(
 
   for (const block of blocks) {
     if (block.kind === "markdown") {
-      const scrubbed = scrubUnrecognizedDyadTags(block.content);
+      const scrubbed = scrubUnrecognizedSambaTags(block.content);
       if (scrubbed.trim()) {
         parts.push(scrubbed);
       }
@@ -179,7 +179,7 @@ export function projectChatMessageForSearch(
     if (PRESERVE_BODY_TAGS.has(block.tag)) {
       // An unclosed preserve-body tag (crash mid-stream) still has usable
       // text; scrub in case a payload tag got swallowed into its content.
-      const body = scrubUnrecognizedDyadTags(block.content);
+      const body = scrubUnrecognizedSambaTags(block.content);
       if (body.trim()) {
         parts.push(body);
       }

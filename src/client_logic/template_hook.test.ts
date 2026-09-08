@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { DyadErrorKind } from "@/errors/dyad_error";
+import { SambaErrorKind } from "@/errors/samba_error";
 import { neonTemplateHook } from "./template_hook";
 
 const mocks = vi.hoisted(() => ({
@@ -40,7 +40,7 @@ describe("neonTemplateHook", () => {
           new Error(
             "This app already has a Neon project linked. Disconnect it first.",
           ),
-          { kind: DyadErrorKind.Precondition },
+          { kind: SambaErrorKind.Precondition },
         ),
       );
     mocks.setAppEnvVars
@@ -70,7 +70,7 @@ describe("neonTemplateHook", () => {
 
   it("does not hide unrelated Neon precondition failures", async () => {
     const error = Object.assign(new Error("Connect Supabase first"), {
-      kind: DyadErrorKind.Precondition,
+      kind: SambaErrorKind.Precondition,
     });
     mocks.createProject.mockRejectedValue(error);
 

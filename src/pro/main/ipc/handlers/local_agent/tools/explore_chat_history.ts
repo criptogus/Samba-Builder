@@ -56,7 +56,7 @@ export const exploreChatHistoryTool: ToolDefinition<ExploreChatHistoryArgs> = {
   defaultConsent: "always",
   usesEngineEndpoint: true,
 
-  isEnabled: (ctx) => ctx.isDyadPro && !ctx.subagentThreadId,
+  isEnabled: (ctx) => ctx.isSambaPro && !ctx.subagentThreadId,
 
   getConsentPreview: (args) =>
     `Research this app's chat history for "${args.query}" using the Samba Builder Engine and provide a summarized, cited report to the active AI model.`,
@@ -64,13 +64,13 @@ export const exploreChatHistoryTool: ToolDefinition<ExploreChatHistoryArgs> = {
   buildXml: (args, isComplete) => {
     if (isComplete) return undefined;
     if (!args.query) return undefined;
-    return `<dyad-explore-chat-history ${buildAttributes(args)}>Exploring chat history…`;
+    return `<samba-explore-chat-history ${buildAttributes(args)}>Exploring chat history…`;
   },
 
   execute: async (args, ctx: AgentContext) => {
     const streamProgress = (progressText: string) => {
       ctx.onXmlStream(
-        `<dyad-explore-chat-history ${buildAttributes(args)}>\n${escapeXmlContent(progressText)}`,
+        `<samba-explore-chat-history ${buildAttributes(args)}>\n${escapeXmlContent(progressText)}`,
       );
     };
     streamProgress("Exploring chat history…");
@@ -82,7 +82,7 @@ export const exploreChatHistoryTool: ToolDefinition<ExploreChatHistoryArgs> = {
     });
 
     ctx.onXmlComplete(
-      `<dyad-explore-chat-history ${buildAttributes(args, report.stats)}>\n${escapeXmlContent(report.text)}\n</dyad-explore-chat-history>`,
+      `<samba-explore-chat-history ${buildAttributes(args, report.stats)}>\n${escapeXmlContent(report.text)}\n</samba-explore-chat-history>`,
     );
     return report.text;
   },

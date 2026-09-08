@@ -5,8 +5,8 @@ import * as fs from "node:fs/promises";
 import { eq } from "drizzle-orm";
 import { db } from "@/db";
 import { apps } from "@/db/schema";
-import { getDyadAppPath } from "@/paths/paths";
-import { DyadError, DyadErrorKind } from "@/errors/dyad_error";
+import { getSambaAppPath } from "@/paths/paths";
+import { SambaError, SambaErrorKind } from "@/errors/samba_error";
 import { NATIVE_AGENTS, type NativeAgent } from "@/shared/native_agents";
 import { nativeAgentContracts } from "../types/native_agents";
 import { createTypedHandler } from "./base";
@@ -23,9 +23,9 @@ const registry = new NativeAgentRegistry();
 async function executable(provider: NativeAgent) {
   const result = await resolveExecutable(provider);
   if (!result)
-    throw new DyadError(
+    throw new SambaError(
       "Instale o programa oficial ou selecione seu executável antes de conectar.",
-      DyadErrorKind.Precondition,
+      SambaErrorKind.Precondition,
     );
   return result;
 }
@@ -112,15 +112,15 @@ export function registerNativeAgentHandlers() {
                 where: eq(apps.id, appId),
               });
               if (!project)
-                throw new DyadError(
+                throw new SambaError(
                   "Projeto não encontrado.",
-                  DyadErrorKind.NotFound,
+                  SambaErrorKind.NotFound,
                 );
-              const cwd = getDyadAppPath(project.path);
+              const cwd = getSambaAppPath(project.path);
               if (!(await gitCurrentBranch({ path: cwd })))
-                throw new DyadError(
+                throw new SambaError(
                   "Volte à versão atual do projeto antes de executar um agente local.",
-                  DyadErrorKind.Conflict,
+                  SambaErrorKind.Conflict,
                 );
               runtime.controller.signal.throwIfAborted();
               try {

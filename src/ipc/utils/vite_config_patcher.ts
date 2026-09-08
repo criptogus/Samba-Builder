@@ -3,7 +3,7 @@ import path from "node:path";
 import * as recast from "recast";
 import * as tsParser from "recast/parsers/babel-ts";
 
-import { DyadError, DyadErrorKind } from "@/errors/dyad_error";
+import { SambaError, SambaErrorKind } from "@/errors/samba_error";
 import { VITE_CONFIG_FILES } from "@/lib/framework_constants";
 
 const b = recast.types.builders;
@@ -18,9 +18,9 @@ export interface ViteConfigBackup {
   wasPatched: boolean;
 }
 
-export class ViteConfigPatchError extends DyadError {
+export class ViteConfigPatchError extends SambaError {
   constructor(message: string) {
-    super(message, DyadErrorKind.Precondition);
+    super(message, SambaErrorKind.Precondition);
     this.name = "ViteConfigPatchError";
   }
 }

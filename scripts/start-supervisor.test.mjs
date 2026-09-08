@@ -58,9 +58,9 @@ test("finds Electron main processes in the development process group", () => {
 
 test("finds detached Crashpad processes for this checkout", () => {
   const stdout = `
-  200  50 ${crashpadExecutable} --database=dyad
+  200  50 ${crashpadExecutable} --database=samba
   201  50 ${crashpadExecutable}
-  300  99 ${repoRoot}-zero/node_modules/electron/dist/Electron.app/Contents/Frameworks/Electron Framework.framework/Helpers/chrome_crashpad_handler --database=dyad-zero
+  300  99 ${repoRoot}-zero/node_modules/electron/dist/Electron.app/Contents/Frameworks/Electron Framework.framework/Helpers/chrome_crashpad_handler --database=samba-zero
 `;
 
   assert.deepEqual(

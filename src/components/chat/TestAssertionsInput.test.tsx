@@ -189,7 +189,7 @@ describe("TestAssertionsPlanCard", () => {
     parkTurn();
     renderCard();
 
-    screen.getByTestId("dyad-test-assertions-approve-button").click();
+    screen.getByTestId("samba-test-assertions-approve-button").click();
 
     await waitFor(() =>
       expect(mocks.respond).toHaveBeenCalledWith(REQUEST_ID, {
@@ -208,7 +208,7 @@ describe("TestAssertionsPlanCard", () => {
     parkTurn();
     renderCard();
 
-    screen.getByTestId("dyad-test-assertions-discard-button").click();
+    screen.getByTestId("samba-test-assertions-discard-button").click();
 
     await waitFor(() =>
       expect(mocks.respond).toHaveBeenCalledWith(REQUEST_ID, {
@@ -218,7 +218,7 @@ describe("TestAssertionsPlanCard", () => {
       }),
     );
     expect(mocks.applyTestAssertions).not.toHaveBeenCalled();
-    await screen.findByTestId("dyad-test-assertions-discarded-note");
+    await screen.findByTestId("samba-test-assertions-discarded-note");
   });
 
   it("latches the discard before answering the parked turn", async () => {
@@ -237,7 +237,7 @@ describe("TestAssertionsPlanCard", () => {
     parkTurn();
     renderCard();
 
-    screen.getByTestId("dyad-test-assertions-discard-button").click();
+    screen.getByTestId("samba-test-assertions-discard-button").click();
 
     await waitFor(() => expect(order).toEqual(["discard", "respond"]));
   });
@@ -249,7 +249,7 @@ describe("TestAssertionsPlanCard", () => {
     parkTurn();
     renderCard();
 
-    screen.getByTestId("dyad-test-assertions-discard-button").click();
+    screen.getByTestId("samba-test-assertions-discard-button").click();
 
     await waitFor(() =>
       expect(mocks.discardTestAssertions).toHaveBeenCalledTimes(1),
@@ -259,7 +259,7 @@ describe("TestAssertionsPlanCard", () => {
       expect.stringMatching(/couldn't close.*db down/i),
     );
     expect(
-      screen.queryByTestId("dyad-test-assertions-discarded-note"),
+      screen.queryByTestId("samba-test-assertions-discarded-note"),
     ).toBeNull();
   });
 
@@ -267,7 +267,7 @@ describe("TestAssertionsPlanCard", () => {
     // No live request: the app restarted, or the turn was stopped.
     renderCard();
 
-    screen.getByTestId("dyad-test-assertions-approve-button").click();
+    screen.getByTestId("samba-test-assertions-approve-button").click();
 
     await waitFor(() => expect(mocks.streamMessage).toHaveBeenCalledTimes(1));
     expect(mocks.streamMessage.mock.calls[0][0].prompt).toContain(SPEC_PATH);
@@ -285,7 +285,7 @@ describe("TestAssertionsPlanCard", () => {
     });
     renderCard();
 
-    screen.getByTestId("dyad-test-assertions-approve-button").click();
+    screen.getByTestId("samba-test-assertions-approve-button").click();
 
     await waitFor(() => expect(mocks.streamMessage).toHaveBeenCalledTimes(1));
     expect(mocks.respond).toHaveBeenCalledTimes(1);
@@ -299,10 +299,10 @@ describe("TestAssertionsPlanCard", () => {
     mocks.respond.mockResolvedValue(false);
     renderCard();
 
-    screen.getByTestId("dyad-test-assertions-approve-button").click();
+    screen.getByTestId("samba-test-assertions-approve-button").click();
 
     await waitFor(() => expect(mocks.respond).toHaveBeenCalledTimes(1));
-    await screen.findByTestId("dyad-test-assertions-open-file-button");
+    await screen.findByTestId("samba-test-assertions-open-file-button");
     expect(mocks.streamMessage).not.toHaveBeenCalled();
     expect(mocks.syncChatFromDb).not.toHaveBeenCalled();
   });
@@ -313,12 +313,12 @@ describe("TestAssertionsPlanCard", () => {
     // exit. The latch is the whole close; the resync is what unpins the card.
     renderCard();
 
-    screen.getByTestId("dyad-test-assertions-discard-button").click();
+    screen.getByTestId("samba-test-assertions-discard-button").click();
 
     await waitFor(() =>
       expect(mocks.discardTestAssertions).toHaveBeenCalledTimes(1),
     );
-    await screen.findByTestId("dyad-test-assertions-discarded-note");
+    await screen.findByTestId("samba-test-assertions-discarded-note");
     expect(mocks.respond).not.toHaveBeenCalled();
     expect(mocks.applyTestAssertions).not.toHaveBeenCalled();
     expect(mocks.syncChatFromDb).toHaveBeenCalledTimes(1);
@@ -343,10 +343,10 @@ describe("TestAssertionsInput", () => {
 
     render(<TestAssertionsInput />);
 
-    expect(screen.getByTestId("dyad-test-assertions-card")).toBeTruthy();
-    expect(screen.getByTestId("dyad-test-assertions-step-0")).toBeTruthy();
+    expect(screen.getByTestId("samba-test-assertions-card")).toBeTruthy();
+    expect(screen.getByTestId("samba-test-assertions-step-0")).toBeTruthy();
     expect(
-      screen.getByTestId("dyad-test-assertions-approve-button"),
+      screen.getByTestId("samba-test-assertions-approve-button"),
     ).toBeTruthy();
   });
 
@@ -360,7 +360,7 @@ describe("TestAssertionsInput", () => {
 
       render(<TestAssertionsInput />);
 
-      expect(screen.queryByTestId("dyad-test-assertions-card")).toBeNull();
+      expect(screen.queryByTestId("samba-test-assertions-card")).toBeNull();
     },
   );
 
@@ -374,7 +374,7 @@ describe("TestAssertionsInput", () => {
 
     render(<TestAssertionsInput />);
 
-    expect(screen.queryByTestId("dyad-test-assertions-card")).toBeNull();
+    expect(screen.queryByTestId("samba-test-assertions-card")).toBeNull();
   });
 
   it("shows nothing when the chat has no plan", () => {
@@ -382,7 +382,7 @@ describe("TestAssertionsInput", () => {
 
     render(<TestAssertionsInput />);
 
-    expect(screen.queryByTestId("dyad-test-assertions-card")).toBeNull();
+    expect(screen.queryByTestId("samba-test-assertions-card")).toBeNull();
   });
 
   it("keeps an unanswered plan reachable however far the chat has moved on", () => {
@@ -398,9 +398,9 @@ describe("TestAssertionsInput", () => {
 
     render(<TestAssertionsInput />);
 
-    expect(screen.getByTestId("dyad-test-assertions-card")).toBeTruthy();
+    expect(screen.getByTestId("samba-test-assertions-card")).toBeTruthy();
     expect(
-      screen.getByTestId("dyad-test-assertions-approve-button"),
+      screen.getByTestId("samba-test-assertions-approve-button"),
     ).toBeTruthy();
   });
 
@@ -421,7 +421,7 @@ describe("TestAssertionsInput", () => {
 
     render(<TestAssertionsInput />);
 
-    const card = screen.getByTestId("dyad-test-assertions-card");
+    const card = screen.getByTestId("samba-test-assertions-card");
     expect(card.textContent).toContain("the newer flow");
     expect(card.textContent).toContain("(1 of 2)");
   });

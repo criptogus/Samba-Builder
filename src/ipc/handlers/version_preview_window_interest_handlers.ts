@@ -1,7 +1,7 @@
 import { eq } from "drizzle-orm";
 import { db } from "@/db";
 import { apps } from "@/db/schema";
-import { DyadError, DyadErrorKind } from "@/errors/dyad_error";
+import { SambaError, SambaErrorKind } from "@/errors/samba_error";
 import { windowRegistry } from "@/window_infrastructure/main/window_registry";
 import { versionContracts } from "../types/version";
 import { versionPreviewActorService } from "../services/version_preview_actor_service";
@@ -20,7 +20,7 @@ export function registerVersionPreviewWindowInterestHandlers(): void {
         where: eq(apps.id, appId),
       });
       if (!app) {
-        throw new DyadError("App not found", DyadErrorKind.NotFound);
+        throw new SambaError("App not found", SambaErrorKind.NotFound);
       }
       if (event.sender.isDestroyed()) return { acquired: false };
       return {
@@ -42,7 +42,7 @@ export function registerVersionPreviewWindowInterestHandlers(): void {
         where: eq(apps.id, appId),
       });
       if (!app) {
-        throw new DyadError("App not found", DyadErrorKind.NotFound);
+        throw new SambaError("App not found", SambaErrorKind.NotFound);
       }
       if (event.sender.isDestroyed()) return { acquired: false };
       return {

@@ -48,7 +48,7 @@ export function fastTextOutput(): ReturnType<typeof Output.text> {
  *
  * The renderer reconstructs the full string as `current.slice(0, offset) + content`.
  * We use LCP rather than assuming pure appends because `cleanFullResponse` may
- * retroactively rewrite bytes inside in-progress dyad-tag attribute values.
+ * retroactively rewrite bytes inside in-progress samba-tag attribute values.
  */
 export function computeStreamingPatch(
   fullResponse: string,

@@ -1,7 +1,7 @@
 OK, I'm going to write an app with an image now...
 
-<dyad-write path="src/pages/Index.tsx" description="write-description">
-import { MadeWithDyad } from "@/components/made-with-dyad";
+<samba-write path="src/pages/Index.tsx" description="write-description">
+import { MadeWithSamba } from "@/components/made-with-samba";
 
 const Index = () => {
   return (
@@ -13,12 +13,12 @@ const Index = () => {
           Start building your amazing project here!
         </p>
       </div>
-      <MadeWithDyad />
+      <MadeWithSamba />
     </div>
   );
 };
 
 export default Index;
-</dyad-write>
+</samba-write>
 
 And it's done!

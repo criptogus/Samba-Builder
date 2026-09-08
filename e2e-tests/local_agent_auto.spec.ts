@@ -2,7 +2,7 @@ import { expect } from "@playwright/test";
 import { testSkipIfWindows } from "./helpers/test_helper";
 
 testSkipIfWindows("local-agent - auto model", async ({ po }) => {
-  await po.setUpDyadPro({
+  await po.setUpSambaPro({
     localAgent: true,
     localAgentUseAutoModel: true,
     autoApprove: true,

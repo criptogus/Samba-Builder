@@ -14,7 +14,7 @@ describe("MainAppRuntimeOutput", () => {
       type: "stdout",
       appId: 7,
       message:
-        "[dyad-proxy-server]started=[http://localhost:3210] original=[http://localhost:5173] mode=[host]",
+        "[samba-proxy-server]started=[http://localhost:3210] original=[http://localhost:5173] mode=[host]",
     });
     output.enqueue({
       type: "stdout",

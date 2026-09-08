@@ -9,7 +9,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import type { ChatMode } from "@/lib/schemas";
-import { isDyadProEnabled, getEffectiveDefaultChatMode } from "@/lib/schemas";
+import { isSambaProEnabled, getEffectiveDefaultChatMode } from "@/lib/schemas";
 import { useTranslation } from "react-i18next";
 import { useEffect } from "react";
 import {
@@ -40,8 +40,8 @@ export function DefaultChatModeSelector() {
     return null;
   }
 
-  const isProEnabled = isDyadProEnabled(settings);
-  const isDyadFreeSelected = isFreeProModel(settings.selectedModel);
+  const isProEnabled = isSambaProEnabled(settings);
+  const isSambaFreeSelected = isFreeProModel(settings.selectedModel);
   const effectiveDefault = getEffectiveDefaultChatMode(settings, envVars);
 
   const handleDefaultChatModeChange = (value: ChatMode) => {
@@ -98,11 +98,11 @@ export function DefaultChatModeSelector() {
               </span>
             </div>
           </SelectItem>
-          <SelectItem value="build" disabled={isDyadFreeSelected}>
+          <SelectItem value="build" disabled={isSambaFreeSelected}>
             <div className="flex flex-col items-start">
               <span className="font-medium">Build</span>
               <span className="text-xs text-muted-foreground">
-                {isDyadFreeSelected
+                {isSambaFreeSelected
                   ? "Use Agent with Samba Builder Free"
                   : "Generate and edit code"}
               </span>

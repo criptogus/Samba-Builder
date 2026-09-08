@@ -98,18 +98,18 @@ channels"; forced-timeout path exercised.
 
 ## 6. Harness env mutation never restored
 
-**Defect.** Setup overwrote `DYAD_DEV_USER_DATA_DIR`, `FAKE_LLM_*`,
-`DYAD_LANGUAGE_MODEL_CATALOG_URL`, `DYAD_ENGINE_URL`, `DYAD_GATEWAY_URL` (and
-the hybrid layer `DYAD_SKIP_MANAGED_PNPM_INSTALL`) and dispose restored none,
+**Defect.** Setup overwrote `SAMBA_DEV_USER_DATA_DIR`, `FAKE_LLM_*`,
+`SAMBA_LANGUAGE_MODEL_CATALOG_URL`, `SAMBA_ENGINE_URL`, `SAMBA_GATEWAY_URL` (and
+the hybrid layer `SAMBA_SKIP_MANAGED_PNPM_INSTALL`) and dispose restored none,
 so a sequential harness inherited stale URLs pointing at a closed port.
 
 **Fix.** Setup snapshots the prior value of every env var it touches; dispose
 (and the setup error path) restores or deletes them. The hybrid layer does the
-same for `DYAD_SKIP_MANAGED_PNPM_INSTALL` and the fetch override (already
+same for `SAMBA_SKIP_MANAGED_PNPM_INSTALL` and the fetch override (already
 reset).
 
 **Verify.** Guard test (sequential setups) green; scratch assertion that
-`DYAD_ENGINE_URL` is unset after an `engine: true` harness disposes.
+`SAMBA_ENGINE_URL` is unset after an `engine: true` harness disposes.
 
 ## 7. vitest project globs contradict the naming rule
 
@@ -132,8 +132,8 @@ before; unit project count unchanged.
 **Defect.** `setModelClientFetchForTesting`'s `NODE_ENV === "production"`
 guard is dead code (packaged builds never set NODE*ENV), leaving a
 fetch-interception seam armable in shipped binaries;
-`DYAD_SKIP_MANAGED_PNPM_INSTALL` was ungated (unlike the `IS_TEST_BUILD`-gated
-`DYAD_TEST*\*` escapes) and skipped silently.
+`SAMBA_SKIP_MANAGED_PNPM_INSTALL` was ungated (unlike the `IS_TEST_BUILD`-gated
+`SAMBA_TEST*\*` escapes) and skipped silently.
 
 **Fix.** The fetch seam moves to `src/ipc/utils/test_fetch_override.ts` and the
 setter throws unless running under vitest (`process.env.VITEST`) or an E2E
@@ -147,8 +147,8 @@ pnpm skip logs and only fires under test envs.
 
 **Defect.** The undici override reached only `get_model_client.ts` factories;
 `provider_api_key_validation_service.ts` (`createGoogle`,
-`createOpenAICompatible`, `createDyadEngine`), `help_bot_handlers.ts`
-(`createOpenAI`), and `transcribeWithDyadEngine` fell back to happy-dom's
+`createOpenAICompatible`, `createSambaEngine`), `help_bot_handlers.ts`
+(`createOpenAI`), and `transcribeWithSambaEngine` fell back to happy-dom's
 fetch — a hang-shaped trap for the first hybrid test that exercises them.
 
 **Fix.** With the seam in its own module (no import cycles), those sites spread

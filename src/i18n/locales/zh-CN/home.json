@@ -21,7 +21,7 @@
   "selectingFolder": "正在选择文件夹...",
   "selectedFolder": "已选择文件夹：",
   "clearSelection": "清除选择",
-  "copyToDyadApps": "复制到 samba-apps 文件夹",
+  "copyToSambaApps": "复制到 samba-apps 文件夹",
   "appNameExists": "此名称的应用已存在。请选择其他名称：",
   "appName": "应用名称",
   "appNameOptional": "应用名称（可选）",
@@ -70,16 +70,16 @@
   "deleteItemTitle": "删除{{itemType}}",
   "deleteItemConfirmation": "确定要删除「{{itemName}}」吗？此操作无法撤销。",
   "proBanner": {
-    "manageDyadPro": "管理 Samba Builder",
+    "manageSambaPro": "管理 Samba Builder",
     "alreadyHavePro": "已有 Samba Builder？添加您的密钥",
     "accessLeadingModels": "一个计划即可访问领先的 AI 模型",
-    "getDyadPro": "获取 Samba Builder",
+    "getSambaPro": "获取 Samba Builder",
     "upTo3xCheaper": "便宜高达 3 倍",
     "byUsingSmartContext": "通过使用智能上下文"
   },
   "setup": {
     "buildNewApp": "构建新应用",
-    "setupDyad": "设置 Samba Builder",
+    "setupSamba": "设置 Samba Builder",
     "installNodeJs": "1. 安装 Node.js（应用运行时）",
     "errorCheckingNode": "检查 Node.js 状态出错。请尝试安装 Node.js。",
     "nodeInstalled": "Node.js ({{version}}) 已安装。",
@@ -99,7 +99,7 @@
     "notSureWatchVideo": "不确定该怎么做？观看上方的入门视频",
     "setupGeminiApiKey": "设置 Google Gemini API 密钥",
     "setupOpenRouterApiKey": "设置 OpenRouter API 密钥",
-    "setupDyadPro": "设置 Samba Builder",
+    "setupSambaPro": "设置 Samba Builder",
     "accessAllModels": "一个计划即可访问所有 AI 模型",
     "setupOtherProviders": "设置其他 AI 提供商",
     "openAiAnthropicMore": "OpenAI、Anthropic 等",
@@ -177,7 +177,7 @@
     "assistant": "助手",
     "codebaseSnapshot": "代码库快照",
     "systemInformation": "系统信息",
-    "dyadVersion": "Samba Builder 版本：",
+    "sambaVersion": "Samba Builder 版本：",
     "platform": "平台：",
     "architecture": "架构：",
     "nodeVersion": "Node 版本：",
@@ -387,7 +387,7 @@
       "closeAnnotator": "关闭标注器",
       "proFeatureTitle": "标注器是 Pro 功能",
       "proFeatureDescription": "解锁截图标注功能，使用 Samba Builder 提升您的工作流程。",
-      "getDyadPro": "获取 Samba Builder"
+      "getSambaPro": "获取 Samba Builder"
     }
   },
   "integrations": {

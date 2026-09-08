@@ -2,13 +2,13 @@
 
 ## Summary
 
-When the user clicks **Undo** (or **Retry**, which reverts before re-streaming) on the last chat turn, and performing that revert would wipe out _more commits than the message's own commit_ — e.g. the user made manual commits via CLI/IDE, or Dyad created intermediate commits (dirty-tree checkpoints, commits from another chat on the same app) — show a confirmation `AlertDialog` (styled like the existing "Restore to this point?" dialog in `ChatMessage.tsx`) that lists the extra commits about to be reverted, with **Undo anyway / Cancel** actions. When the revert only covers the message's own commit (the overwhelmingly common case), behavior is unchanged: no dialog, immediate revert.
+When the user clicks **Undo** (or **Retry**, which reverts before re-streaming) on the last chat turn, and performing that revert would wipe out _more commits than the message's own commit_ — e.g. the user made manual commits via CLI/IDE, or Samba created intermediate commits (dirty-tree checkpoints, commits from another chat on the same app) — show a confirmation `AlertDialog` (styled like the existing "Restore to this point?" dialog in `ChatMessage.tsx`) that lists the extra commits about to be reverted, with **Undo anyway / Cancel** actions. When the revert only covers the message's own commit (the overwhelmingly common case), behavior is unchanged: no dialog, immediate revert.
 
 Decisions made with the user:
 
-- **Warn + confirm only.** No "surgically revert just this message's commit" mode — `git revert` of a single commit is a 3-way merge that can conflict with later commits, and Dyad has no conflict-resolution UI. (Possible follow-up: offer a surgical mode gated on a clean dry-run.)
+- **Warn + confirm only.** No "surgically revert just this message's commit" mode — `git revert` of a single commit is a 3-way merge that can conflict with later commits, and Samba has no conflict-resolution UI. (Possible follow-up: offer a surgical mode gated on a clean dry-run.)
 - **Scope: Undo + Retry.** Both footer actions that revert code. The Version pane's Restore button is left as-is.
-- **Trigger: any extra commit**, regardless of author (Dyad checkpoint or manual). Simple and predictable.
+- **Trigger: any extra commit**, regardless of author (Samba checkpoint or manual). Simple and predictable.
 - **UI: centered `AlertDialog`**, consistent with the restore-to-message UX.
 
 ## Background: how undo/retry work today
@@ -84,7 +84,7 @@ New file `src/components/chat/ExtraCommitsRevertDialog.tsx`, modeled directly on
 Between showing the dialog and the user clicking "Undo anyway", another commit could land (agent in another chat, CLI). Defense in depth, backward compatible:
 
 - Add optional `expectedHeadOid: z.string().optional()` to `RevertVersionParamsSchema` (`src/ipc/types/version.ts`).
-- In the `revertVersion` handler (`src/ipc/handlers/version_handlers.ts:782` → `revertCodebaseToVersion`), when `expectedHeadOid` is provided, compare against the current HEAD before staging the revert; on mismatch throw a `Conflict` `DyadError` ("The app's history changed since you confirmed — please retry the undo."). The renderer surfaces it via the existing error toast path and refreshes versions.
+- In the `revertVersion` handler (`src/ipc/handlers/version_handlers.ts:782` → `revertCodebaseToVersion`), when `expectedHeadOid` is provided, compare against the current HEAD before staging the revert; on mismatch throw a `Conflict` `SambaError` ("The app's history changed since you confirmed — please retry the undo."). The renderer surfaces it via the existing error toast path and refreshes versions.
 - The renderer passes `versions[0].oid` from the same fresh snapshot used for detection. Only wire this for the dialog-confirmed path initially (the fast path already has an inherent race today; unchanged).
 
 This phase is skippable for the MVP — the refresh-on-click in step 2 already covers the realistic staleness window.
@@ -116,4 +116,4 @@ No DB schema, no new IPC channels, no changes to `gitStageToRevert`.
 
 - Surgical "revert only this message's commit" via `git revert` with a clean-apply pre-check (`git merge-tree` dry run) — explicitly deferred per discussion, due to merge-conflict risk and no conflict UI.
 - Guarding the Version pane's Restore button the same way (it can also skip over many commits silently); the dialog component is built to be reusable if we extend it there later.
-- Distinguishing Dyad-authored checkpoint commits from user commits in the dialog copy (e.g. a subtle badge) — trigger logic treats all extras alike per discussion, but labeling could reduce alarm for checkpoint-only cases.
+- Distinguishing Samba-authored checkpoint commits from user commits in the dialog copy (e.g. a subtle badge) — trigger logic treats all extras alike per discussion, but labeling could reduce alarm for checkpoint-only cases.

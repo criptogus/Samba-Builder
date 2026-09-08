@@ -6,7 +6,7 @@ import { readFileTool } from "./read_file";
 import type { AgentContext } from "./types";
 import {
   appendAttachmentManifestEntries,
-  getDyadMediaDir,
+  getSambaMediaDir,
 } from "@/ipc/utils/media_path_utils";
 import {
   AGENT_READ_FILE_RESULT_LIMIT_BYTES,
@@ -57,7 +57,7 @@ line 5`;
       "line 1\nline 2\nline 3\n",
     );
 
-    const mediaDir = getDyadMediaDir(testDir);
+    const mediaDir = getSambaMediaDir(testDir);
     await fs.promises.mkdir(mediaDir, { recursive: true });
     await fs.promises.writeFile(
       path.join(mediaDir, "stored-attachment.txt"),
@@ -89,9 +89,9 @@ line 5`;
       isSharedModulesChanged: false,
       sharedServerModulePaths: [],
       pendingFunctionDeploys: [],
-      isDyadPro: false,
+      isSambaPro: false,
       todos: [],
-      dyadRequestId: "test-request",
+      sambaRequestId: "test-request",
       fileEditTracker: {},
       testingEnabled: true,
       testRunAttempts: new Map(),
@@ -576,7 +576,7 @@ line 5`;
 
     it("builds XML with path only", () => {
       const result = readFileTool.buildXml?.({ path: "src/App.tsx" }, false);
-      expect(result).toBe('<dyad-read path="src/App.tsx"></dyad-read>');
+      expect(result).toBe('<samba-read path="src/App.tsx"></samba-read>');
     });
 
     it("includes start_line attribute when provided", () => {
@@ -585,7 +585,7 @@ line 5`;
         false,
       );
       expect(result).toBe(
-        '<dyad-read path="src/App.tsx" start_line="10"></dyad-read>',
+        '<samba-read path="src/App.tsx" start_line="10"></samba-read>',
       );
     });
 
@@ -595,7 +595,7 @@ line 5`;
         false,
       );
       expect(result).toBe(
-        '<dyad-read path="src/App.tsx" end_line="50"></dyad-read>',
+        '<samba-read path="src/App.tsx" end_line="50"></samba-read>',
       );
     });
 
@@ -609,7 +609,7 @@ line 5`;
         false,
       );
       expect(result).toBe(
-        '<dyad-read path="src/App.tsx" start_line="10" end_line="50"></dyad-read>',
+        '<samba-read path="src/App.tsx" start_line="10" end_line="50"></samba-read>',
       );
     });
 
@@ -629,7 +629,7 @@ line 5`;
         false,
       );
       expect(result).toBe(
-        '<dyad-read path="src/App.tsx" app_name="other-app"></dyad-read>',
+        '<samba-read path="src/App.tsx" app_name="other-app"></samba-read>',
       );
     });
   });
@@ -709,22 +709,22 @@ line 5`;
       ).rejects.toThrow("File does not exist: missing.txt (in app: other-app)");
     });
 
-    it("blocks .dyad/ paths when targeting a referenced app", async () => {
+    it("blocks .samba/ paths when targeting a referenced app", async () => {
       mockContext.referencedApps.set("other-app", otherAppDir);
       await expect(
         readFileTool.execute(
-          { path: ".dyad/chats/secret.md", app_name: "other-app" },
+          { path: ".samba/chats/secret.md", app_name: "other-app" },
           mockContext,
         ),
-      ).rejects.toThrow(/Cannot read \.dyad\/ paths from referenced apps/);
+      ).rejects.toThrow(/Cannot read \.samba\/ paths from referenced apps/);
     });
 
-    it("blocks .dyad/ paths reached via traversal aliases (e.g. src/../.dyad/...)", async () => {
+    it("blocks .samba/ paths reached via traversal aliases (e.g. src/../.samba/...)", async () => {
       mockContext.referencedApps.set("other-app", otherAppDir);
-      const dyadDir = path.join(otherAppDir, ".dyad");
-      await fs.promises.mkdir(dyadDir, { recursive: true });
+      const sambaDir = path.join(otherAppDir, ".samba");
+      await fs.promises.mkdir(sambaDir, { recursive: true });
       await fs.promises.writeFile(
-        path.join(dyadDir, "secret.md"),
+        path.join(sambaDir, "secret.md"),
         "should not be exposed",
       );
       await fs.promises.mkdir(path.join(otherAppDir, "src"), {
@@ -733,19 +733,19 @@ line 5`;
 
       await expect(
         readFileTool.execute(
-          { path: "src/../.dyad/secret.md", app_name: "other-app" },
+          { path: "src/../.samba/secret.md", app_name: "other-app" },
           mockContext,
         ),
-      ).rejects.toThrow(/Cannot read \.dyad\/ paths from referenced apps/);
+      ).rejects.toThrow(/Cannot read \.samba\/ paths from referenced apps/);
     });
 
     it.runIf(process.platform !== "win32")(
-      "blocks symlinks into a referenced app's protected .dyad directory",
+      "blocks symlinks into a referenced app's protected .samba directory",
       async () => {
         mockContext.referencedApps.set("other-app", otherAppDir);
-        const dyadDir = path.join(otherAppDir, ".dyad");
-        await fs.promises.mkdir(dyadDir, { recursive: true });
-        const privateFile = path.join(dyadDir, "private.txt");
+        const sambaDir = path.join(otherAppDir, ".samba");
+        await fs.promises.mkdir(sambaDir, { recursive: true });
+        const privateFile = path.join(sambaDir, "private.txt");
         await fs.promises.writeFile(privateFile, "private");
         await fs.promises.symlink(
           privateFile,
@@ -757,22 +757,22 @@ line 5`;
             { path: "public-link.txt", app_name: "other-app" },
             mockContext,
           ),
-        ).rejects.toThrow(/Cannot read \.dyad\/ paths from referenced apps/);
+        ).rejects.toThrow(/Cannot read \.samba\/ paths from referenced apps/);
       },
     );
 
-    it("allows .dyad/ paths on the current app (no app_name)", async () => {
-      const dyadDir = path.join(testDir, ".dyad");
-      await fs.promises.mkdir(dyadDir, { recursive: true });
+    it("allows .samba/ paths on the current app (no app_name)", async () => {
+      const sambaDir = path.join(testDir, ".samba");
+      await fs.promises.mkdir(sambaDir, { recursive: true });
       await fs.promises.writeFile(
-        path.join(dyadDir, "notes.md"),
-        "local dyad metadata",
+        path.join(sambaDir, "notes.md"),
+        "local samba metadata",
       );
       const result = await readFileTool.execute(
-        { path: ".dyad/notes.md" },
+        { path: ".samba/notes.md" },
         mockContext,
       );
-      expect(result).toBe("local dyad metadata");
+      expect(result).toBe("local samba metadata");
     });
   });
 

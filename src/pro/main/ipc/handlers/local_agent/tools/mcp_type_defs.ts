@@ -11,7 +11,7 @@ import { eq } from "drizzle-orm";
 import { sanitizeMcpName } from "@/ipc/utils/mcp_tool_utils";
 import { requireMcpToolConsent } from "@/ipc/utils/mcp_consent";
 import { readSettings } from "@/main/settings";
-import { DyadError, DyadErrorKind } from "@/errors/dyad_error";
+import { SambaError, SambaErrorKind } from "@/errors/samba_error";
 import { AgentContext, escapeXmlAttr, escapeXmlContent } from "./types";
 import { jsonSchemaToTs } from "./json_schema_to_ts";
 import { buildMcpAutoApprove } from "../mcp_auto_consent";
@@ -154,7 +154,7 @@ export function buildMcpCapabilityMap(params: {
 
       const autoApprove = buildMcpAutoApprove({
         settings: readSettings(),
-        isDyadPro: params.ctx.isDyadPro,
+        isSambaPro: params.ctx.isSambaPro,
         freeModelMode: params.ctx.freeModelMode,
         chatId: params.ctx.chatId,
         serverName: def.serverName,
@@ -178,9 +178,9 @@ export function buildMcpCapabilityMap(params: {
         },
       );
       if (!approved) {
-        throw new DyadError(
+        throw new SambaError(
           `User declined running tool ${def.toolKey}`,
-          DyadErrorKind.UserCancelled,
+          SambaErrorKind.UserCancelled,
         );
       }
 
@@ -188,9 +188,9 @@ export function buildMcpCapabilityMap(params: {
       const toolSet = await client.tools();
       const mcpTool = toolSet[def.toolName];
       if (!mcpTool || typeof mcpTool.execute !== "function") {
-        throw new DyadError(
+        throw new SambaError(
           `MCP tool ${def.toolKey} not found at runtime`,
-          DyadErrorKind.NotFound,
+          SambaErrorKind.NotFound,
         );
       }
 
@@ -199,7 +199,7 @@ export function buildMcpCapabilityMap(params: {
         ? ` auto-approved-reason="${escapeXmlAttr(autoApprovedReason)}"`
         : "";
       params.ctx.onXmlComplete(
-        `<dyad-mcp-tool-call server="${escapeXmlAttr(def.serverName)}" tool="${escapeXmlAttr(def.toolName)}" call-id="${escapeXmlAttr(callId)}"${autoApprovedAttr}>\n${escapeXmlContent(contentPretty)}\n</dyad-mcp-tool-call>`,
+        `<samba-mcp-tool-call server="${escapeXmlAttr(def.serverName)}" tool="${escapeXmlAttr(def.toolName)}" call-id="${escapeXmlAttr(callId)}"${autoApprovedAttr}>\n${escapeXmlContent(contentPretty)}\n</samba-mcp-tool-call>`,
       );
 
       try {
@@ -219,7 +219,7 @@ export function buildMcpCapabilityMap(params: {
             : res;
         const safeResult = sanitizeMcpToolResult(normalized);
         params.ctx.onXmlComplete(
-          `<dyad-mcp-tool-result server="${escapeXmlAttr(def.serverName)}" tool="${escapeXmlAttr(def.toolName)}" call-id="${escapeXmlAttr(callId)}">\n${escapeXmlContent(safeResult.serialized)}\n</dyad-mcp-tool-result>`,
+          `<samba-mcp-tool-result server="${escapeXmlAttr(def.serverName)}" tool="${escapeXmlAttr(def.toolName)}" call-id="${escapeXmlAttr(callId)}">\n${escapeXmlContent(safeResult.serialized)}\n</samba-mcp-tool-result>`,
         );
         return safeResult.value;
       } catch (error) {
@@ -234,10 +234,10 @@ export function buildMcpCapabilityMap(params: {
         // Terminate the merged card in an error state instead of leaving it
         // stuck on "Running".
         params.ctx.onXmlComplete(
-          `<dyad-mcp-tool-result server="${escapeXmlAttr(def.serverName)}" tool="${escapeXmlAttr(def.toolName)}" call-id="${escapeXmlAttr(callId)}" is-error="true">\n${escapeXmlContent(safeErrorMessage)}\n</dyad-mcp-tool-result>`,
+          `<samba-mcp-tool-result server="${escapeXmlAttr(def.serverName)}" tool="${escapeXmlAttr(def.toolName)}" call-id="${escapeXmlAttr(callId)}" is-error="true">\n${escapeXmlContent(safeErrorMessage)}\n</samba-mcp-tool-result>`,
         );
         params.ctx.onXmlComplete(
-          `<dyad-output type="error" message="MCP tool '${escapeXmlAttr(def.toolKey)}' failed: ${escapeXmlAttr(safeErrorMessage)}">${escapeXmlContent(safeErrorDetails)}</dyad-output>`,
+          `<samba-output type="error" message="MCP tool '${escapeXmlAttr(def.toolKey)}' failed: ${escapeXmlAttr(safeErrorMessage)}">${escapeXmlContent(safeErrorDetails)}</samba-output>`,
         );
         throw error;
       }
@@ -295,7 +295,7 @@ export const MCP_INLINE_TOKEN_THRESHOLD = 20_000;
 // Overrides the threshold for tests. 0 forces search on any catalog; a large
 // value forces inline. Invalid values fall back to the default.
 export function getMcpInlineTokenThreshold(): number {
-  const raw = process.env.DYAD_MCP_INLINE_TOKEN_THRESHOLD;
+  const raw = process.env.SAMBA_MCP_INLINE_TOKEN_THRESHOLD;
   if (raw !== undefined) {
     const n = Number(raw);
     if (Number.isFinite(n) && n >= 0) return n;

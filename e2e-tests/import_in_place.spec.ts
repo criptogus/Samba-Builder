@@ -16,7 +16,7 @@ testSkipIfWindows(
       "import-app",
       "minimal",
     );
-    const tempDir = path.join(os.tmpdir(), `dyad-import-test-${Date.now()}`);
+    const tempDir = path.join(os.tmpdir(), `samba-import-test-${Date.now()}`);
     fs.cpSync(fixtureSource, tempDir, { recursive: true });
 
     await po.page.getByRole("button", { name: "Import App" }).click();

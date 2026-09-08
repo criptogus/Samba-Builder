@@ -11,7 +11,7 @@ import {
   defineCorrelatedEffectHandlers,
   runCorrelatedEffect,
 } from "@/distributed_machines/one_shot_effects";
-import { DyadError, DyadErrorKind, isDyadError } from "@/errors/dyad_error";
+import { SambaError, SambaErrorKind, isSambaError } from "@/errors/samba_error";
 import {
   IMAGE_GENERATION_MACHINE_ID,
   ImageGenerationIntentEventSchema,
@@ -90,8 +90,8 @@ const imageGenerationEffectHandlers = defineCorrelatedEffectHandlers<
       kind: "user_cancelled",
     }),
     classifyFailure: (error) => {
-      if (isDyadError(error)) {
-        if (error.kind === DyadErrorKind.UserCancelled) {
+      if (isSambaError(error)) {
+        if (error.kind === SambaErrorKind.UserCancelled) {
           return { kind: "cancelled" };
         }
         return {
@@ -268,7 +268,7 @@ export const imageGenerationDefinition = defineFrameworkCoveredRemoteMachine({
           intent.job.targetAppId,
         );
         if (!(await appExists(intent.job.targetAppId))) {
-          throw new DyadError("Target app not found", DyadErrorKind.NotFound);
+          throw new SambaError("Target app not found", SambaErrorKind.NotFound);
         }
         imageGenerationService.assertAcceptingGenerations(
           intent.job.targetAppId,
@@ -287,9 +287,9 @@ export const imageGenerationDefinition = defineFrameworkCoveredRemoteMachine({
           intent.activeInvocationRef,
         )
       ) {
-        throw new DyadError(
+        throw new SambaError(
           "Cancellation does not target the active image generation",
-          DyadErrorKind.Auth,
+          SambaErrorKind.Auth,
         );
       }
       if (
@@ -300,9 +300,9 @@ export const imageGenerationDefinition = defineFrameworkCoveredRemoteMachine({
           sender.windowSessionId,
         )
       ) {
-        throw new DyadError(
+        throw new SambaError(
           "Cancellation does not belong to the initiating window",
-          DyadErrorKind.Auth,
+          SambaErrorKind.Auth,
         );
       }
     },

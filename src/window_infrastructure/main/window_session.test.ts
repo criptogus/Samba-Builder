@@ -30,7 +30,7 @@ describe("window sessions", () => {
   });
 
   it("clears durable and temporary legacy window session files", async () => {
-    const directory = fs.mkdtempSync(path.join(os.tmpdir(), "dyad-windows-"));
+    const directory = fs.mkdtempSync(path.join(os.tmpdir(), "samba-windows-"));
     temporaryDirectories.push(directory);
     const filePath = path.join(directory, "window-sessions.json");
     fs.writeFileSync(filePath, "durable", "utf8");

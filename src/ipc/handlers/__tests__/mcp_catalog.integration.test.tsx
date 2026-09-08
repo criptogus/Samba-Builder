@@ -90,7 +90,7 @@ describe("Plugins catalog (integration)", () => {
     );
     const address = catalogServer.address();
     if (typeof address === "object" && address) {
-      process.env.DYAD_MCP_CATALOG_URL = `http://127.0.0.1:${address.port}/`;
+      process.env.SAMBA_MCP_CATALOG_URL = `http://127.0.0.1:${address.port}/`;
     }
 
     harness = await setupHybridChatHarness({
@@ -111,7 +111,7 @@ describe("Plugins catalog (integration)", () => {
   });
 
   afterAll(async () => {
-    delete process.env.DYAD_MCP_CATALOG_URL;
+    delete process.env.SAMBA_MCP_CATALOG_URL;
     await harness?.dispose();
     catalogServer?.close();
     mcpServerProcess?.kill();
@@ -218,11 +218,11 @@ describe("Plugins catalog (integration)", () => {
     await new Promise<void>((resolve) =>
       featuredServer.listen(0, "127.0.0.1", resolve),
     );
-    const previousUrl = process.env.DYAD_MCP_CATALOG_URL;
+    const previousUrl = process.env.SAMBA_MCP_CATALOG_URL;
     try {
       const address = featuredServer.address();
       if (typeof address === "object" && address) {
-        process.env.DYAD_MCP_CATALOG_URL = `http://127.0.0.1:${address.port}/`;
+        process.env.SAMBA_MCP_CATALOG_URL = `http://127.0.0.1:${address.port}/`;
       }
       clearMcpCatalogCacheForTests();
 
@@ -247,7 +247,7 @@ describe("Plugins catalog (integration)", () => {
       });
       expect(scope.getAllByText("Integration Plain Server")).toHaveLength(1);
     } finally {
-      process.env.DYAD_MCP_CATALOG_URL = previousUrl;
+      process.env.SAMBA_MCP_CATALOG_URL = previousUrl;
       featuredServer.close();
       clearMcpCatalogCacheForTests();
     }
@@ -263,7 +263,7 @@ describe("Plugins catalog (integration)", () => {
           category: "Testing",
           transport: "stdio",
           command: "npx",
-          args: ["-y", "@dyad-sh/e2e-nonexistent-mcp@1.0.0"],
+          args: ["-y", "@samba-sh/e2e-nonexistent-mcp@1.0.0"],
         },
       ],
     };
@@ -283,7 +283,7 @@ describe("Plugins catalog (integration)", () => {
           slug: "integration-stdio",
           expectedStdioConfig: {
             command: "npx",
-            args: ["-y", "@dyad-sh/e2e-nonexistent-mcp@2.0.0"],
+            args: ["-y", "@samba-sh/e2e-nonexistent-mcp@2.0.0"],
           },
         }),
       ).rejects.toThrow(/changed/i);
@@ -294,7 +294,7 @@ describe("Plugins catalog (integration)", () => {
         slug: "integration-stdio",
         expectedStdioConfig: {
           command: "npx",
-          args: ["-y", "@dyad-sh/e2e-nonexistent-mcp@1.0.0"],
+          args: ["-y", "@samba-sh/e2e-nonexistent-mcp@1.0.0"],
         },
       });
       expect(created.catalogSlug).toBe("integration-stdio");
@@ -361,7 +361,7 @@ describe("Plugins catalog (integration)", () => {
           category: "Testing",
           transport: "stdio",
           command: "npx",
-          args: ["-y", "@dyad-sh/e2e-nonexistent-mcp@1.0.0"],
+          args: ["-y", "@samba-sh/e2e-nonexistent-mcp@1.0.0"],
           inputs: [{ kind: "env", name: "API_TOKEN", label: "Token" }],
         },
       ],
@@ -374,7 +374,7 @@ describe("Plugins catalog (integration)", () => {
         slug: "integration-env",
         expectedStdioConfig: {
           command: "npx",
-          args: ["-y", "@dyad-sh/e2e-nonexistent-mcp@1.0.0"],
+          args: ["-y", "@samba-sh/e2e-nonexistent-mcp@1.0.0"],
         },
       });
       expect(created.enabled).toBe(false);

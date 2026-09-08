@@ -22,7 +22,7 @@ import {
 } from "@/main/settings";
 import { getUserDataPath } from "@/paths/paths";
 import { forgottenCoolify, UserSettings } from "@/lib/schemas";
-import { DyadError, DyadErrorKind } from "@/errors/dyad_error";
+import { SambaError, SambaErrorKind } from "@/errors/samba_error";
 import { getRemoteDesktopConfig } from "@/ipc/shared/remote_desktop_config";
 import {
   getRecoveryStats,
@@ -539,7 +539,7 @@ describe("readSettings", () => {
     it("should return default settings when file read fails", () => {
       mockFs.existsSync.mockReturnValue(true);
       mockFs.readFileSync.mockImplementation(() => {
-        throw new DyadError("File read error", DyadErrorKind.External);
+        throw new SambaError("File read error", SambaErrorKind.External);
       });
 
       const result = readSettings();
@@ -650,7 +650,7 @@ describe("readSettings", () => {
       mockFs.existsSync.mockReturnValue(true);
       mockFs.readFileSync.mockReturnValue(JSON.stringify(mockFileContent));
       mockSafeStorage.decryptString.mockImplementation(() => {
-        throw new DyadError("Decryption failed", DyadErrorKind.External);
+        throw new SambaError("Decryption failed", SambaErrorKind.External);
       });
 
       const result = readSettings();
@@ -720,7 +720,7 @@ describe("readSettings", () => {
       mockFs.existsSync.mockReturnValue(true);
       mockFs.readFileSync.mockReturnValue(JSON.stringify(mockFileContent));
       mockSafeStorage.decryptString.mockImplementationOnce(() => {
-        throw new DyadError("Decryption failed", DyadErrorKind.External);
+        throw new SambaError("Decryption failed", SambaErrorKind.External);
       });
 
       const result = readSettings();
@@ -813,7 +813,7 @@ describe("writeSettings", () => {
       expect.objectContaining({
         action: {
           label: "Read restore docs",
-          url: "https://www.dyad.sh/docs/guides/migrate-restore#restoring-settings-from-backup",
+          url: "https://www.samba.sh/docs/guides/migrate-restore#restoring-settings-from-backup",
         },
         message: expect.not.stringContaining("https://"),
       }),
@@ -908,9 +908,9 @@ describe("writeSettings", () => {
       thrown = error;
     }
 
-    expect(thrown).toBeInstanceOf(DyadError);
-    expect((thrown as DyadError).kind).toBe(DyadErrorKind.External);
-    expect((thrown as DyadError).cause).toBeInstanceOf(Error);
+    expect(thrown).toBeInstanceOf(SambaError);
+    expect((thrown as SambaError).kind).toBe(SambaErrorKind.External);
+    expect((thrown as SambaError).cause).toBeInstanceOf(Error);
     expect((thrown as Error).message).toContain(
       "Failed to write settings: disk full",
     );
@@ -929,9 +929,9 @@ describe("writeSettings", () => {
       thrown = error;
     }
 
-    expect(thrown).toBeInstanceOf(DyadError);
-    expect((thrown as DyadError).kind).toBe(DyadErrorKind.Validation);
-    expect((thrown as DyadError).cause).toBeInstanceOf(ZodError);
+    expect(thrown).toBeInstanceOf(SambaError);
+    expect((thrown as SambaError).kind).toBe(SambaErrorKind.Validation);
+    expect((thrown as SambaError).cause).toBeInstanceOf(ZodError);
   });
 
   it("returns false instead of throwing for best-effort settings writes", () => {

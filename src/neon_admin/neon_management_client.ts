@@ -3,7 +3,7 @@ import { readSettings } from "../main/settings";
 import { Api, createApiClient } from "@neondatabase/api-client";
 import log from "electron-log";
 import { IS_TEST_BUILD } from "../ipc/utils/test_utils";
-import { DyadError, DyadErrorKind } from "@/errors/dyad_error";
+import { SambaError, SambaErrorKind } from "@/errors/samba_error";
 import { getNeonErrorMessage } from "./neon_errors";
 
 const logger = log.scope("neon_management_client");
@@ -35,7 +35,7 @@ function isTokenExpired(expiresIn?: number): boolean {
 let refreshNeonTokenPromise: Promise<void> | null = null;
 
 async function refreshNeonTokenOnce(): Promise<void> {
-  // Neon token refresh used to round-trip through the retired Dyad OAuth
+  // Neon token refresh used to round-trip through the retired Samba OAuth
   // proxy. Connections are now made directly with a long-lived Neon API key
   // that never expires, so there is nothing to refresh — this is a deliberate
   // no-op and never makes a network request.
@@ -313,9 +313,9 @@ export async function getNeonClient(): Promise<Api<unknown>> {
   const expiresIn = settings.neon?.expiresIn;
 
   if (!neonAccessToken) {
-    throw new DyadError(
+    throw new SambaError(
       "Neon access token not found. Please authenticate first.",
-      DyadErrorKind.Auth,
+      SambaErrorKind.Auth,
     );
   }
 
@@ -327,9 +327,9 @@ export async function getNeonClient(): Promise<Api<unknown>> {
     const newAccessToken = updatedSettings.neon?.accessToken?.value;
 
     if (!newAccessToken) {
-      throw new DyadError(
+      throw new SambaError(
         "Failed to refresh Neon access token",
-        DyadErrorKind.Auth,
+        SambaErrorKind.Auth,
       );
     }
 
@@ -360,9 +360,9 @@ export async function getNeonOrganizationId(): Promise<string> {
       !response.data?.organizations ||
       response.data.organizations.length === 0
     ) {
-      throw new DyadError(
+      throw new SambaError(
         "No organizations found for this Neon account",
-        DyadErrorKind.NotFound,
+        SambaErrorKind.NotFound,
       );
     }
 
@@ -370,9 +370,9 @@ export async function getNeonOrganizationId(): Promise<string> {
     return response.data.organizations[0].id;
   } catch (error) {
     logger.error("Error fetching Neon organizations:", error);
-    throw new DyadError(
+    throw new SambaError(
       "Failed to fetch Neon organizations",
-      DyadErrorKind.External,
+      SambaErrorKind.External,
     );
   }
 }

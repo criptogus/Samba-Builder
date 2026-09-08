@@ -12,13 +12,13 @@ The driver now keeps the normal `HOME` and only isolates benchmark-specific conf
 - `GIT_CONFIG_GLOBAL=<trial user-data-dir>/.gitconfig`
 - `--user-data-dir=<trial user-data-dir>`
 
-This fixes packaged Dyad startup. The benchmark now reaches app import and real Dyad Engine local-agent runs using `DYAD_PRO_KEY` from `.env`.
+This fixes packaged Samba startup. The benchmark now reaches app import and real Samba Engine local-agent runs using `SAMBA_PRO_KEY` from `.env`.
 
 Benchmark authentication modes:
 
-- Default runs use `DYAD_PRO_KEY` and Dyad Engine: `--auth dyad-pro`.
+- Default runs use `SAMBA_PRO_KEY` and Samba Engine: `--auth samba-pro`.
 - Benchmark-only Codex auth runs use `~/.codex/auth.json` through a loopback proxy: `--auth codex`.
-- In Codex auth mode the proxy rewrites engine model IDs to `--codex-model` (default `gpt-5.5`), forwards `/v1/responses`, and adapts `/v1/chat/completions` for the value sub-agent through the ChatGPT Codex backend. This is for benchmark transport experiments only, not normal app runtime and not a true `dyad/value` pricing comparison.
+- In Codex auth mode the proxy rewrites engine model IDs to `--codex-model` (default `gpt-5.5`), forwards `/v1/responses`, and adapts `/v1/chat/completions` for the value sub-agent through the ChatGPT Codex backend. This is for benchmark transport experiments only, not normal app runtime and not a true `samba/value` pricing comparison.
 
 ## Commands Run
 
@@ -124,7 +124,7 @@ Run evaluated:
 benchmark-results/code-explorer/run-2026-06-06T21-26-47-812Z
 ```
 
-The latest full suite covered 7 repos and 24 tasks: Excalidraw, Mattermost, Cal.com, Supabase, Dub, Twenty, and Midday. It used the packaged app from a fresh `npm run build`, `DYAD_PRO_KEY`, `--repeats 1`, `--concurrency 2`, and the 10-minute per-chat timeout.
+The latest full suite covered 7 repos and 24 tasks: Excalidraw, Mattermost, Cal.com, Supabase, Dub, Twenty, and Midday. It used the packaged app from a fresh `npm run build`, `SAMBA_PRO_KEY`, `--repeats 1`, `--concurrency 2`, and the 10-minute per-chat timeout.
 
 Aggregate result:
 
@@ -234,8 +234,8 @@ Post sub-agent action-contract hill climb:
   accepted unrelated side-panel `pages/*` files as record-detail route coverage. Route coverage now
   receives query terms and, for record-detail flows, requires detail/show/object-record/record-page
   identity in the path or symbol name rather than evidence-only imports.
-- A Dyad Pro rerun after that route-domain tightening (`run-2026-06-07T04-29-44-888Z`) could not
-  complete because Dyad Engine returned `ExceededBudget` at spend/budget 465.0. That exposed a
+- A Samba Pro rerun after that route-domain tightening (`run-2026-06-07T04-29-44-888Z`) could not
+  complete because Samba Engine returned `ExceededBudget` at spend/budget 465.0. That exposed a
   benchmark-runner bug: failed trials referenced `contextPaths` from the success-only scope. The
   runner now initializes `contextPaths` before the try/catch so future model/budget failures are
   recorded as error rows instead of crashing the whole run.
@@ -280,7 +280,7 @@ npm run benchmark:code-explorer:suite -- --mode smoke --skip-build --auth codex
 
 Note: `run-2026-06-06T17-20-42-387Z` was the successful Codex-auth smoke used to verify the proxy after adding `/v1/chat/completions` adaptation. It completed before the final chat-stream usage propagation patch, so that run shows sub-agent tool calls but zero value-model tokens.
 
-Use `--concurrency 2` as the starting point. Higher values will run more packaged Electron instances and real Dyad Engine streams at once, which can distort elapsed-time comparisons through local CPU/memory pressure or remote rate limiting. Dependency installation is opt-in with `--install`; it is disabled by default because Mattermost's install currently fails under the benchmark environment's npm options.
+Use `--concurrency 2` as the starting point. Higher values will run more packaged Electron instances and real Samba Engine streams at once, which can distort elapsed-time comparisons through local CPU/memory pressure or remote rate limiting. Dependency installation is opt-in with `--install`; it is disabled by default because Mattermost's install currently fails under the benchmark environment's npm options.
 
 ## Interrupted Focused Rerun After Non-Twenty Trace QA
 

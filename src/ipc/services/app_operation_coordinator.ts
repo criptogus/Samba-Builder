@@ -1,4 +1,4 @@
-import { DyadError, DyadErrorKind } from "@/errors/dyad_error";
+import { SambaError, SambaErrorKind } from "@/errors/samba_error";
 import { assertNoActiveRecording } from "./recording_registry";
 
 export const APP_OPERATION_RESOURCES = [
@@ -24,7 +24,7 @@ export type AppOperationAccessMode = "read" | "write";
  *
  * A named class rather than a bare `Error`, because the delete handler has to
  * recognise it to report "already being deleted" as a Precondition rather than
- * an unclassified product exception (`rules/dyad-errors.md`). Matching on the
+ * an unclassified product exception (`rules/samba-errors.md`). Matching on the
  * message text coupled the two files through a string nothing checks.
  */
 export class AppDeletionInProgressError extends Error {
@@ -206,9 +206,9 @@ export class AppOperationCoordinator {
     const state = this.getOrCreateState(request.appId);
     if (state.deletion) {
       return Promise.reject(
-        new DyadError(
+        new SambaError(
           "App is temporarily unavailable",
-          DyadErrorKind.Precondition,
+          SambaErrorKind.Precondition,
         ),
       );
     }

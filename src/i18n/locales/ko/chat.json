@@ -76,7 +76,7 @@
     }
   },
   "dismissError": "오류 무시",
-  "askDyadToBuild": "Dyad에게 빌드 요청하기...",
+  "askSambaToBuild": "Samba에게 빌드 요청하기...",
   "cancelGeneration": "생성 취소",
   "stoppingGeneration": "중지하는 중…",
   "cancellationEndingTestRun": "테스트 실행을 종료하는 중입니다.",
@@ -256,7 +256,7 @@
   "total": "합계",
   "failedCountTokens": "토큰 계산 실패",
   "optimizeTokens": "다음으로 토큰을 최적화하세요:",
-  "dyadProSmartContext": "Samba Builder의 스마트 컨텍스트",
+  "sambaProSmartContext": "Samba Builder의 스마트 컨텍스트",
   "attachFiles": "파일 첨부",
   "themes": "테마",
   "noTheme": "테마 없음",
@@ -332,9 +332,9 @@
     "versionCount": "버전 {{count}}"
   },
   "errorBox": {
-    "accessWithDyadPro": "Samba Builder로 이용하기",
+    "accessWithSambaPro": "Samba Builder로 이용하기",
     "orSwitchModel": "또는 다른 모델로 전환하세요.",
-    "upgradeToDyadPro": "Samba Builder로 업그레이드",
+    "upgradeToSambaPro": "Samba Builder로 업그레이드",
     "troubleshootingGuide": "문제 해결 가이드",
     "invalidProKey": "유효한 Samba Builder 키가 없는 것 같습니다.",
     "today": "오늘.",
@@ -345,12 +345,12 @@
   },
   "promo": {
     "tiredOfWaiting": "AI를 기다리는 데 지치셨나요?",
-    "getDyadPro": "Samba Builder 받기",
+    "getSambaPro": "Samba Builder 받기",
     "fasterEdits": "Turbo Edits로 더 빠른 편집을 경험하세요.",
     "saveOnCosts": "다음으로 AI 비용을 최대 3배 절약하세요:",
     "debuggingLoop": "디버깅 루프에 갇히셨나요? 다른 모델을 시도해보세요.",
     "joinBuilders": "600명 이상의 빌더가 참여 중인",
-    "dyadSubreddit": "Samba Builder 서브레딧에 참여하세요",
+    "sambaSubreddit": "Samba Builder 서브레딧에 참여하세요",
     "foundBug": "버그를 발견하셨나요? 도움말 > 버그 신고를 클릭하세요",
     "reportBadResponse": "잘못된 AI 응답을 신고하고 싶으신가요? 도움말을 클릭하여 채팅을 업로드하세요",
     "watch": "시청하기",
@@ -362,7 +362,7 @@
     "keepFocused": "AI가 계속 집중하기를 원하시나요? 새 채팅을 시작하세요.",
     "whatsNext": "다음에 무엇이 있는지 궁금하신가요? 다음을 확인하세요:",
     "roadmap": "로드맵",
-    "likeDyad": "Dyad가 마음에 드시나요? 다음에서 스타를 눌러주세요:",
+    "likeSamba": "Samba가 마음에 드시나요? 다음에서 스타를 눌러주세요:",
     "gitHub": "GitHub"
   },
   "consent": {

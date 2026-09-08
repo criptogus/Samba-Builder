@@ -1,5 +1,5 @@
 import log from "electron-log";
-import { DyadError, DyadErrorKind } from "@/errors/dyad_error";
+import { SambaError, SambaErrorKind } from "@/errors/samba_error";
 
 const logger = log.scope("coolify_client");
 
@@ -39,10 +39,10 @@ export interface CoolifyDeployment {
 }
 
 /** Carries the HTTP status so callers can branch on 404 and 409. */
-class CoolifyRequestError extends DyadError {
+class CoolifyRequestError extends SambaError {
   readonly status: number;
 
-  constructor(message: string, kind: DyadErrorKind, status: number) {
+  constructor(message: string, kind: SambaErrorKind, status: number) {
     super(message, kind);
     this.name = COOLIFY_REQUEST_ERROR_NAME;
     this.status = status;
@@ -132,20 +132,20 @@ export class CoolifyClient {
       // A proxy or login page answering 200 with HTML would otherwise be cast
       // to the expected type, and the caller would read undefined fields
       // instead of learning the instance is not answering as Coolify.
-      throw new DyadError(
+      throw new SambaError(
         `Coolify returned a response that is not JSON for ${path}. The address ` +
           `may be reaching something else, such as a proxy or a login page.`,
-        DyadErrorKind.External,
+        SambaErrorKind.External,
       );
     }
   }
 
   /** Cancellation, timeout and unreachable-host failures, classified alike. */
-  private transportError(err: unknown): DyadError {
+  private transportError(err: unknown): SambaError {
     if (this.options.signal?.aborted) {
-      return new DyadError(
+      return new SambaError(
         "Deployment cancelled.",
-        DyadErrorKind.UserCancelled,
+        SambaErrorKind.UserCancelled,
       );
     }
     const timedOut = err instanceof Error && err.name === "TimeoutError";
@@ -161,10 +161,10 @@ export class CoolifyClient {
     // is what stops it being reported. The address is logged locally, where
     // diagnosing a typo still needs it.
     logger.error(`Coolify unreachable at ${this.base}: ${detail}`);
-    const error = new DyadError(
+    const error = new SambaError(
       `Could not reach your Coolify instance: ${detail}. Check the address ` +
         `and that the instance is running.`,
-      DyadErrorKind.External,
+      SambaErrorKind.External,
     );
     error.name = COOLIFY_TRANSPORT_ERROR_NAME;
     return error;
@@ -180,7 +180,7 @@ export class CoolifyClient {
     path: string,
     status: number,
     text: string,
-  ): DyadError {
+  ): SambaError {
     const detail = text.slice(0, 300);
     if (/Header Or Cookie Too Large/i.test(text)) {
       // Log the sizes rather than the values so this is diagnosable.
@@ -193,14 +193,14 @@ export class CoolifyClient {
           (this.tokenLooksWrong()
             ? `. The stored API token is ${this.options.token.length} characters, which is far longer than a Coolify token — try disconnecting and pasting it again.`
             : `. The API token looks a normal length (${this.options.token.length} characters), so the request is being enlarged elsewhere; check whether the instance sits behind a proxy that adds headers.`),
-        DyadErrorKind.External,
+        SambaErrorKind.External,
         status,
       );
     }
     if (status === 401) {
       return new CoolifyRequestError(
         "Coolify rejected the API token. Check that it is correct and has not been revoked.",
-        DyadErrorKind.Auth,
+        SambaErrorKind.Auth,
         status,
       );
     }
@@ -211,7 +211,7 @@ export class CoolifyClient {
         return new CoolifyRequestError(
           "This Coolify instance has its API switched off. Enable it in Coolify " +
             "under Settings → Advanced → API Access, then try again.",
-          DyadErrorKind.Precondition,
+          SambaErrorKind.Precondition,
           status,
         );
       }
@@ -219,14 +219,14 @@ export class CoolifyClient {
         `Coolify rejected the request for lack of permissions. The API token ` +
           `needs all of: ${COOLIFY_REQUIRED_SCOPES}. Scopes are fixed when a token is ` +
           `created, so create a new token with all of them.`,
-        DyadErrorKind.Auth,
+        SambaErrorKind.Auth,
         status,
       );
     }
     if (status === 404) {
       return new CoolifyRequestError(
         `Coolify could not find the requested resource (${path}).`,
-        DyadErrorKind.NotFound,
+        SambaErrorKind.NotFound,
         status,
       );
     }
@@ -234,7 +234,7 @@ export class CoolifyClient {
       // Throttling is the user's instance asking for a pause, not a crash.
       return new CoolifyRequestError(
         "Coolify is rate limiting requests. Wait a moment and try again.",
-        DyadErrorKind.RateLimited,
+        SambaErrorKind.RateLimited,
         status,
       );
     }
@@ -264,7 +264,7 @@ export class CoolifyClient {
         : `Coolify request failed (${status}) and did not explain why. If ` +
             `something sits in front of the instance it may be answering ` +
             `instead. The response is in the log.`,
-      DyadErrorKind.External,
+      SambaErrorKind.External,
       status,
     );
   }
@@ -293,10 +293,10 @@ export class CoolifyClient {
   ): Promise<T[]> {
     const body = await this.request<unknown>("GET", path);
     if (!Array.isArray(body)) {
-      throw new DyadError(
+      throw new SambaError(
         `Coolify did not return a list of ${what}. This instance may be a ` +
           `version Samba Builder does not understand.`,
-        DyadErrorKind.External,
+        SambaErrorKind.External,
       );
     }
     const parsed: T[] = [];
@@ -312,10 +312,10 @@ export class CoolifyClient {
       parsed.push(result.data);
     }
     if (parsed.length === 0 && body.length > 0) {
-      throw new DyadError(
+      throw new SambaError(
         `Coolify returned ${what} in an unexpected shape. This instance may ` +
           `be a version Samba Builder does not understand.`,
-        DyadErrorKind.External,
+        SambaErrorKind.External,
       );
     }
     return parsed;

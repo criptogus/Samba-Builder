@@ -1,4 +1,4 @@
-import { isDyadProEnabled, type LargeLanguageModel } from "@/lib/schemas";
+import { isSambaProEnabled, type LargeLanguageModel } from "@/lib/schemas";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -257,7 +257,7 @@ export function ModelPicker() {
     setOpen(nextOpen);
     if (nextOpen) {
       posthog.capture("model-picker:open", {
-        isDyadPro: settings ? isDyadProEnabled(settings) : false,
+        isSambaPro: settings ? isSambaProEnabled(settings) : false,
       });
     }
   };
@@ -277,7 +277,7 @@ export function ModelPicker() {
   } = useLanguageModelProviders();
 
   const loading = modelsByProvidersLoading || providersLoading;
-  const dyadProEnabled = settings ? isDyadProEnabled(settings) : false;
+  const sambaProEnabled = settings ? isSambaProEnabled(settings) : false;
   // Ollama Models Hook
   const {
     models: ollamaModels,
@@ -390,7 +390,7 @@ export function ModelPicker() {
   );
   const autoModels = regularAutoModel
     ? catalogAutoModels.flatMap((model) =>
-        model.apiName === "auto" && dyadProEnabled
+        model.apiName === "auto" && sambaProEnabled
           ? [
               model,
               {
@@ -458,7 +458,7 @@ export function ModelPicker() {
       : [];
   const isVisibleCatalogModel = (providerId: string, model: LanguageModel) =>
     !(
-      dyadProEnabled &&
+      sambaProEnabled &&
       providerId === "openrouter" &&
       isFreeOpenRouterModelName(model.apiName)
     );
@@ -733,7 +733,7 @@ export function ModelPicker() {
       isAutoOpenRouterFreeRow ||
       (isAutoProviderRow &&
         model.apiName === "auto" &&
-        !dyadProEnabled &&
+        !sambaProEnabled &&
         isProviderSetup("openrouter"));
     const freeProResetTimeLabel = freeModelQuota.resetTime
       ? new Intl.DateTimeFormat(undefined, {
@@ -983,7 +983,7 @@ export function ModelPicker() {
     const providerState =
       provider?.type === "custom"
         ? "Custom provider"
-        : provider?.type === "cloud" && !provider.secondary && dyadProEnabled
+        : provider?.type === "cloud" && !provider.secondary && sambaProEnabled
           ? "Pro"
           : null;
 
@@ -1007,7 +1007,7 @@ export function ModelPicker() {
               <span>{providerDisplayName}</span>
               {provider?.type === "cloud" &&
                 !provider?.secondary &&
-                dyadProEnabled && <span className={PRO_PILL_CLASS}>Pro</span>}
+                sambaProEnabled && <span className={PRO_PILL_CLASS}>Pro</span>}
               {provider?.type === "custom" && (
                 <span className={cn(PILL_CLASS, "bg-amber-500 text-white")}>
                   Custom

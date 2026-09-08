@@ -15,7 +15,7 @@ export type RecorderAuthMode =
  * user's own" — an app that moved between Neon and Supabase needs a new file.
  */
 export function fixtureMarker(mode: Exclude<RecorderAuthMode, "none">): string {
-  return `// dyad-generated-fixture: ${mode}`;
+  return `// samba-generated-fixture: ${mode}`;
 }
 
 /** The auth mode a fixture declares, or null when it isn't Samba Builder-generated. */
@@ -39,18 +39,18 @@ const NEON_BETTER_AUTH_FIXTURE: string[] = [
   ` * cookie exactly as it does for an interactive sign-in.`,
   ` *`,
   ` * Samba Builder provisions an isolated user per test run and injects its credentials`,
-  ` * via DYAD_TEST_USER_EMAIL / DYAD_TEST_USER_PASSWORD.`,
+  ` * via SAMBA_TEST_USER_EMAIL / SAMBA_TEST_USER_PASSWORD.`,
   ` */`,
   `export async function signIn(page: Page): Promise<void> {`,
-  `  const email = process.env.DYAD_TEST_USER_EMAIL;`,
-  `  const password = process.env.DYAD_TEST_USER_PASSWORD;`,
+  `  const email = process.env.SAMBA_TEST_USER_EMAIL;`,
+  `  const password = process.env.SAMBA_TEST_USER_PASSWORD;`,
   `  if (!email || !password) {`,
   `    throw new Error(`,
-  `      "DYAD_TEST_USER_EMAIL / DYAD_TEST_USER_PASSWORD are not set. Run this test from Samba Builder's Tests panel so an isolated user is provisioned.",`,
+  `      "SAMBA_TEST_USER_EMAIL / SAMBA_TEST_USER_PASSWORD are not set. Run this test from Samba Builder's Tests panel so an isolated user is provisioned.",`,
   `    );`,
   `  }`,
   `  const origin = new URL(`,
-  `    process.env.DYAD_TEST_BASE_URL || "http://localhost:32100",`,
+  `    process.env.SAMBA_TEST_BASE_URL || "http://localhost:32100",`,
   `  ).origin;`,
   `  if (page.url() === "about:blank" || new URL(page.url()).origin !== origin) {`,
   `    await page.goto(origin);`,
@@ -85,10 +85,10 @@ const SUPABASE_PASSWORD_FIXTURE: string[] = [
   ` * isolated user's credentials.`,
   ` */`,
   `export async function signIn(page: Page): Promise<void> {`,
-  `  const url = process.env.DYAD_TEST_SUPABASE_URL;`,
-  `  const anonKey = process.env.DYAD_TEST_SUPABASE_ANON_KEY;`,
-  `  const email = process.env.DYAD_TEST_USER_EMAIL;`,
-  `  const password = process.env.DYAD_TEST_USER_PASSWORD;`,
+  `  const url = process.env.SAMBA_TEST_SUPABASE_URL;`,
+  `  const anonKey = process.env.SAMBA_TEST_SUPABASE_ANON_KEY;`,
+  `  const email = process.env.SAMBA_TEST_USER_EMAIL;`,
+  `  const password = process.env.SAMBA_TEST_USER_PASSWORD;`,
   `  if (!url || !anonKey || !email || !password) {`,
   `    throw new Error(`,
   `      "Supabase test credentials are not set. Run this test from Samba Builder's Tests panel so an isolated user is provisioned.",`,

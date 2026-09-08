@@ -31,7 +31,7 @@ export function useUnsavedFiles(appId: number | null): ReadonlySet<string> {
  * edit) and switching files in place both clear the previous entry rather than
  * leaving a stale marker behind.
  *
- * Collapsing a chat write card does NOT clear it: DyadCardContent keeps its
+ * Collapsing a chat write card does NOT clear it: SambaCardContent keeps its
  * children mounted once expanded, so that editor's buffer is still live and
  * still dirty, and the marker still reports the truth. The card's Cancel
  * button, which stays reachable in the collapsed header, is what unmounts it.

@@ -5,7 +5,7 @@ describe("resolvePreviewBrowserUrl", () => {
   it("returns a cloud share link instead of the raw preview URL", async () => {
     const createCloudSandboxShareLink = vi
       .fn()
-      .mockResolvedValue({ url: "https://dyad.sh/share/sandbox-1" });
+      .mockResolvedValue({ url: "https://sambatech.com/share/sandbox-1" });
 
     await expect(
       resolvePreviewBrowserUrl({
@@ -14,7 +14,7 @@ describe("resolvePreviewBrowserUrl", () => {
         originalUrl: "https://preview.internal.test",
         createCloudSandboxShareLink,
       }),
-    ).resolves.toBe("https://dyad.sh/share/sandbox-1");
+    ).resolves.toBe("https://sambatech.com/share/sandbox-1");
 
     expect(createCloudSandboxShareLink).toHaveBeenCalledWith({
       appId: 42,

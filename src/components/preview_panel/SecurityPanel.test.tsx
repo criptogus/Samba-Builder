@@ -113,7 +113,7 @@ vi.mock("@/lib/toast", () => ({
   },
 }));
 
-vi.mock("@/components/chat/DyadMarkdownParser", () => ({
+vi.mock("@/components/chat/SambaMarkdownParser", () => ({
   VanillaMarkdownParser: ({ content }: { content: string }) => (
     <span>{content}</span>
   ),

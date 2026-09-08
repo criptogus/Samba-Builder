@@ -65,7 +65,7 @@ type ParsedMultipartUpload = {
 async function parseMultipartUpload(
   init: RequestInit | undefined,
 ): Promise<ParsedMultipartUpload> {
-  const request = new Request("https://dyad.test/upload", {
+  const request = new Request("https://samba.test/upload", {
     method: "POST",
     body: init?.body as BodyInit,
     headers: init?.headers,
@@ -106,7 +106,7 @@ describe("cloud_sandbox_provider incremental sync", () => {
 
   beforeEach(async () => {
     vi.useFakeTimers();
-    appPath = await fs.mkdtemp(path.join(os.tmpdir(), "dyad-cloud-sync-"));
+    appPath = await fs.mkdtemp(path.join(os.tmpdir(), "samba-cloud-sync-"));
     fetchMock = vi.fn(async () => {
       return new Response(
         JSON.stringify({

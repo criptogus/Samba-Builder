@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { buildFrontmatter, parsePlanFile, validatePlanId } from "./planUtils";
-import { ensureDyadGitignored } from "./gitignoreUtils";
+import { ensureSambaGitignored } from "./gitignoreUtils";
 
 export type PlanStatus = "draft" | "accepted";
 
@@ -18,7 +18,7 @@ export function normalizePlanStatus(raw: string | undefined): PlanStatus {
 }
 
 export function planDirForAppPath(appPath: string): string {
-  return path.join(appPath, ".dyad", "plans");
+  return path.join(appPath, ".samba", "plans");
 }
 
 /**
@@ -50,7 +50,7 @@ export async function readPlanFromDisk(params: {
 }
 
 /**
- * Upserts the plan file for a chat under `.dyad/plans/`. Returns the plan slug.
+ * Upserts the plan file for a chat under `.samba/plans/`. Returns the plan slug.
  *
  * Used when a plan is drafted and accepted. Preserves the original `createdAt`
  * when a file already exists so status promotion doesn't reset it.
@@ -66,7 +66,7 @@ export async function savePlanToDisk(params: {
   const { appPath, chatId, title, summary, content, status } = params;
   const planDir = planDirForAppPath(appPath);
   await fs.promises.mkdir(planDir, { recursive: true });
-  await ensureDyadGitignored(appPath);
+  await ensureSambaGitignored(appPath);
 
   const slug = planSlugForChat(chatId);
   const filePath = path.join(planDir, `${slug}.md`);

@@ -16,7 +16,7 @@ import {
 } from "@/distributed_machines/prepared_request";
 import { IpcRemoteMachineConnection } from "@/distributed_machines/ipc_connection";
 import { PreviewConsoleStore } from "@/preview_console/store";
-import { DyadError } from "@/errors/dyad_error";
+import { SambaError } from "@/errors/samba_error";
 import {
   appRunKey,
   projectAppRunRemoteSnapshot,
@@ -312,7 +312,7 @@ export class AppRunRemoteManager {
     if (result.outcome.kind === "cancelled") return;
     if (result.outcome.kind === "failed") {
       const error = result.outcome.error;
-      if (error.kind) throw new DyadError(error.message, error.kind);
+      if (error.kind) throw new SambaError(error.message, error.kind);
       throw new Error(error.message);
     }
   }

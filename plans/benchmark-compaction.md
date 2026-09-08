@@ -1,6 +1,6 @@
 # Compaction Quality Benchmark
 
-> Goal: measure the quality of Dyad's context-compaction summaries across candidate models
+> Goal: measure the quality of Samba's context-compaction summaries across candidate models
 > (initially `gpt-5.6-sol` vs `gpt-5.6-luna`), on realistic long AI-coding chats, so we can
 > decide whether to pin a dedicated compaction model instead of reusing the user's chat model.
 
@@ -14,7 +14,7 @@
   `TOOL_RESULT_TRUNCATION_LIMIT = 1000` chars), sends it with `COMPACTION_SYSTEM_PROMPT`
   (`src/prompts/compaction_system_prompt.ts`) and the user message
   `"Please summarize the following conversation:\n\n${conversationText}"`, and inserts the
-  streamed summary as a `<dyad-compaction>` assistant message.
+  streamed summary as a `<samba-compaction>` assistant message.
 - **Model selection today**: `compaction_handler.ts:202` — always
   `getModelClient(settings.selectedModel, …)`. Not configurable. Sub-agents by contrast pin a
   model (`explore_code_subagent.ts:63` — `{ provider: "openai", name: "gpt-5.6-luna" }`), which
@@ -23,14 +23,14 @@
   filtering, orchestration mocks). Nothing exercises `COMPACTION_SYSTEM_PROMPT` output quality.
 - **Reusable eval harness** (`src/__tests__/evals/`, `npm run eval`): the chat-history benchmark
   (PR #4007) established the machinery we reuse wholesale —
-  `get_eval_model.ts` (Dyad Engine gateway adapter; forces `stream: true` + SSE reassembly
-  because the engine 500s on non-streaming), `DYAD_PRO_API_KEY` gating (bridged from
-  `DYAD_PRO_KEY`), concurrency gate (engine 429s above ~4), `*_RESUME`/`*_SMOKE`/`*_ONLY` env
+  `get_eval_model.ts` (Samba Engine gateway adapter; forces `stream: true` + SSE reassembly
+  because the engine 500s on non-streaming), `SAMBA_PRO_API_KEY` gating (bridged from
+  `SAMBA_PRO_KEY`), concurrency gate (engine 429s above ~4), `*_RESUME`/`*_SMOKE`/`*_ONLY` env
   filters, results appended to `benchmark-results/<name>/<run>/results.jsonl` + `summary.md`,
   never failing vitest on wrong answers.
 - **Model availability**: confirmed by smoke test (2026-07-28) — both `gpt-5.6-sol` and
-  `gpt-5.6-luna` return valid streamed completions from `https://engine.dyad.sh/v1` with the
-  Dyad Pro key. (`gpt-5.6-luna` is also already the production sub-agent model.)
+  `gpt-5.6-luna` return valid streamed completions from `https://engine.samba.sh/v1` with the
+  Samba Pro key. (`gpt-5.6-luna` is also already the production sub-agent model.)
 
 ## What "compaction quality" means
 
@@ -53,20 +53,20 @@ A compaction summary is good iff the agent can **keep working** after the swap. 
 | Option                                                                             | Pros                                                                                                                                                                                                                            | Cons                                                                                                            |
 | ---------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------- |
 | **(a) LLM-authored synthetic transcripts with a planted ground-truth manifest** ✅ | Controlled ground truth (each planted fact is scoreable); can deliberately plant hazards (superseded decisions, mid-chat pivots, errors-then-fixes, distractor detours); reproducible; same pattern as `fixtures/chat_history/` | Risk of "too clean" — real transcripts are messier; authoring effort                                            |
-| (b) Real captured Dyad sessions                                                    | Maximum realism                                                                                                                                                                                                                 | No ground truth without expensive manual labeling; privacy; hard to share in-repo; not reproducible across runs |
+| (b) Real captured Samba sessions                                                   | Maximum realism                                                                                                                                                                                                                 | No ground truth without expensive manual labeling; privacy; hard to share in-repo; not reproducible across runs |
 | (c) Replay eval artifacts (`eval-results/` tool-call logs) as transcripts          | Real tool-call texture for free                                                                                                                                                                                                 | Short, single-file edits — nothing like a 200k-token session; no narrative arc to summarize                     |
 
 **Decision: (a)** (approved 2026-07-28), with realism enforced by construction: each scenario
-is generated as a turn-by-turn AI-coding session **in Dyad's actual transcript format** (user
+is generated as a turn-by-turn AI-coding session **in Samba's actual transcript format** (user
 turns, assistant turns with `<tool-use>` blocks, truncated tool results,
-`<dyad-write>`/`<dyad-edit>` tags), **authored by `gpt-5.6-sol`** from a scenario brief, then
+`<samba-write>`/`<samba-edit>` tags), **authored by `gpt-5.6-sol`** from a scenario brief, then
 mechanically validated. (Authoring ≠ summarizing, so self-preference contamination risk is
 low; both candidates summarize the same fixed transcripts either way.) Each fixture ships with a
 `manifest`: a list of ground-truth facts, each tagged with a category and an importance tier
 (see D3), plus a list of "trap" facts (superseded decisions, abandoned approaches) whose
 _current-state_ form is what must survive.
 
-Scenario briefs (8 scenarios, mirroring real Dyad usage):
+Scenario briefs (8 scenarios, mirroring real Samba usage):
 
 1. **feature-marathon** — long feature build (auth + profile page) across many files; several
    user requirement changes mid-way.
@@ -102,8 +102,8 @@ splits authorship from materialization:
    sequential segments (~10–15 calls/scenario) so the story stays coherent and facts/traps
    land where the manifest says.
 2. A deterministic materializer replays the script: applies each edit spec, inlines the
-   **full current file content** into `<dyad-write>` tags at every write (exactly how Dyad
-   agents rewrite whole files), emits the Dyad message list, and runs the production
+   **full current file content** into `<samba-write>` tags at every write (exactly how Samba
+   agents rewrite whole files), emits the Samba message list, and runs the production
    `formatAsTranscript` over it. Repeated full-file writes amplify a modest authored core to
    ~200k tokens with realistic (not padded) structure.
 3. Mechanical validation: token length within 180–220k, every manifest fact string-locatable
@@ -150,7 +150,7 @@ dropped.
 - `gpt-5.6-sol` (candidate)
 - `gpt-5.6-luna` (candidate; already the sub-agent model)
 
-Both via Dyad Engine gateway with `DYAD_PRO_API_KEY` (mapped from env `DYAD_PRO_KEY`), openai
+Both via Samba Engine gateway with `SAMBA_PRO_API_KEY` (mapped from env `SAMBA_PRO_KEY`), openai
 gateway prefix `""` per `language_model_constants.ts`. The production prompt
 (`COMPACTION_SYSTEM_PROMPT`) and production formatting (`formatAsTranscript`, 1000-char tool
 truncation) are imported directly — the benchmark tests models, not prompt variants.

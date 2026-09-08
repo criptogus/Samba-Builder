@@ -73,7 +73,7 @@ vi.mock("@/hooks/useFreeAgentQuota", () => ({
 vi.mock("@/lib/schemas", async (importOriginal) => ({
   ...(await importOriginal<typeof import("@/lib/schemas")>()),
   getEffectiveDefaultChatMode: () => mocks.effectiveDefaultChatMode,
-  hasDyadProKey: () => false,
+  hasSambaProKey: () => false,
 }));
 vi.mock("@/lib/homeChatMode", () => ({
   getHomeDefaultChatMode: () => mocks.effectiveDefaultChatMode,

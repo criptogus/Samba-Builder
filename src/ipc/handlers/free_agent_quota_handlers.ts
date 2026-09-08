@@ -18,8 +18,8 @@ let nextQuotaReservationId = 1;
 
 /**
  * Retorna o tempo atual para a quota do Basic Agent.
- * Samba Builder: zero backend do Dyad — o relógio do servidor
- * (api.dyad.sh/health) não é consultado; usa o relógio local.
+ * Samba Builder: zero backend do Samba — o relógio do servidor
+ * (api.samba.sh/health) não é consultado; usa o relógio local.
  */
 async function getServerTime(): Promise<number> {
   return Date.now();

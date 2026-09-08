@@ -6,7 +6,7 @@ import { glob } from "glob";
 import { parse as parseYaml } from "yaml";
 import { z } from "zod";
 
-import { DyadError, DyadErrorKind } from "@/errors/dyad_error";
+import { SambaError, SambaErrorKind } from "@/errors/samba_error";
 import {
   appOperationCoordinator,
   readAppResource,
@@ -38,10 +38,10 @@ const MAX_RESULT_OUTPUT_CHARS = 16_000;
 const BUILD_OUTPUT_PREVIEW_INTERVAL_MS = 250;
 const WINDOWS_SNAPSHOT_COPY_CONCURRENCY = 32;
 const STALE_SNAPSHOT_AGE_MS = 60 * 60_000;
-const SNAPSHOT_PREFIX = ".dyad-build-";
-const SNAPSHOT_NAME_PATTERN = /^\.dyad-build-[A-Za-z0-9]{6}$/;
+const SNAPSHOT_PREFIX = ".samba-build-";
+const SNAPSHOT_NAME_PATTERN = /^\.samba-build-[A-Za-z0-9]{6}$/;
 const SNAPSHOT_MARKER_SUFFIX = ".owner.json";
-const SNAPSHOT_MARKER_SCHEMA = "dyad-build-worktree-v1";
+const SNAPSHOT_MARKER_SCHEMA = "samba-build-worktree-v1";
 const SNAPSHOT_ROOT_NAME = "build-snapshots";
 const MAX_GIT_OUTPUT_BYTES = 4 * 1024 * 1024;
 const SNAPSHOT_EXCLUDED_NAMES = new Set([
@@ -140,7 +140,7 @@ function completeStatus(
   state: "finished" | "warning" = "finished",
 ): void {
   ctx.onXmlComplete(
-    `<dyad-status title="${escapeXmlAttr(title)}" state="${state}">\n${escapeXmlContent(body)}\n</dyad-status>`,
+    `<samba-status title="${escapeXmlAttr(title)}" state="${state}">\n${escapeXmlContent(body)}\n</samba-status>`,
   );
 }
 
@@ -150,9 +150,9 @@ async function readPackageJson(appPath: string): Promise<PackageJson> {
       await fs.readFile(path.join(appPath, "package.json"), "utf8"),
     ) as PackageJson;
   } catch (error) {
-    throw new DyadError(
+    throw new SambaError(
       `Could not read package.json: ${error instanceof Error ? error.message : String(error)}`,
-      DyadErrorKind.Precondition,
+      SambaErrorKind.Precondition,
     );
   }
 }
@@ -187,7 +187,7 @@ export async function gatherBuildProjectFacts(
 
 function throwIfBuildCancelled(signal?: AbortSignal): void {
   if (signal?.aborted) {
-    throw new DyadError("Build cancelled.", DyadErrorKind.UserCancelled);
+    throw new SambaError("Build cancelled.", SambaErrorKind.UserCancelled);
   }
 }
 
@@ -207,7 +207,7 @@ async function runSnapshotGit(
     maxOutputBytes: MAX_GIT_OUTPUT_BYTES,
   });
   if (result.aborted) {
-    throw new DyadError("Build cancelled.", DyadErrorKind.UserCancelled);
+    throw new SambaError("Build cancelled.", SambaErrorKind.UserCancelled);
   }
   if (result.timedOut) {
     throw new Error(`Git command timed out: git ${args.join(" ")}`);
@@ -498,10 +498,10 @@ function pathIsInside(rootPath: string, candidatePath: string): boolean {
   );
 }
 
-function externalSnapshotLinkError(relativePath: string): DyadError {
-  return new DyadError(
+function externalSnapshotLinkError(relativePath: string): SambaError {
+  return new SambaError(
     `Cannot isolate the linked path ${relativePath} because it points outside the Git repository. Replace the external link with a repository-local dependency before running a production build.`,
-    DyadErrorKind.Precondition,
+    SambaErrorKind.Precondition,
   );
 }
 
@@ -579,9 +579,9 @@ export async function secureSnapshotSymlinks(
           await fs.unlink(entry.entryPath);
           continue;
         }
-        throw new DyadError(
+        throw new SambaError(
           `Cannot isolate the linked path ${path.relative(snapshotRoot, entry.entryPath)} because its target is unavailable.`,
-          DyadErrorKind.Precondition,
+          SambaErrorKind.Precondition,
         );
       }
       if (pathIsInside(realSnapshotRoot, realTarget)) continue;
@@ -895,10 +895,10 @@ export async function createBuildWorktree(
     };
   } catch (error) {
     if (tempRoot) void removeSnapshot(tempRoot, sourceRepoPath ?? appPath);
-    if (error instanceof DyadError) throw error;
-    throw new DyadError(
+    if (error instanceof SambaError) throw error;
+    throw new SambaError(
       `Could not prepare the isolated build workspace: ${error instanceof Error ? error.message : String(error)}`,
-      DyadErrorKind.Precondition,
+      SambaErrorKind.Precondition,
     );
   }
 }
@@ -1290,7 +1290,7 @@ function streamBuildOutput(ctx: AgentContext, accumulatedOutput: string): void {
   const output = accumulatedOutput.trim();
   if (!output) return;
   ctx.onXmlStream(
-    `<dyad-status title="Production build output">\n${escapeXmlContent(output)}\n</dyad-status>`,
+    `<samba-status title="Production build output">\n${escapeXmlContent(output)}\n</samba-status>`,
   );
 }
 
@@ -1312,7 +1312,7 @@ export const runBuildTool: ToolDefinition<z.infer<typeof runBuildSchema>> = {
   buildXml: (_args, isComplete) =>
     isComplete
       ? undefined
-      : '<dyad-status title="Running production build"></dyad-status>',
+      : '<samba-status title="Running production build"></samba-status>',
 
   execute: async (_args, ctx) => {
     if (activeBuilds.has(ctx.appId)) {
@@ -1341,9 +1341,9 @@ export const runBuildTool: ToolDefinition<z.infer<typeof runBuildSchema>> = {
           } satisfies BuildAttemptState);
           const currentMutationCount = ctx.mutationCount ?? 0;
           if (runningApps.get(ctx.appId)?.mode === "cloud") {
-            throw new DyadError(
+            throw new SambaError(
               "Production build verification is unavailable while this app is running in a cloud sandbox because the build would run on the host instead of inside that sandbox. Switch the app runtime to Host and try again.",
-              DyadErrorKind.Precondition,
+              SambaErrorKind.Precondition,
             );
           }
           if (state.count >= MAX_BUILD_RUNS_PER_TURN) {
@@ -1370,9 +1370,9 @@ export const runBuildTool: ToolDefinition<z.infer<typeof runBuildSchema>> = {
           const packageJson = await readPackageJson(ctx.appPath);
           const buildScript = getScript(packageJson, "build");
           if (!buildScript) {
-            throw new DyadError(
+            throw new SambaError(
               "This app does not define a package.json scripts.build command, so production build verification is unavailable.",
-              DyadErrorKind.Precondition,
+              SambaErrorKind.Precondition,
             );
           }
           const facts = await gatherBuildProjectFacts(
@@ -1386,7 +1386,7 @@ export const runBuildTool: ToolDefinition<z.infer<typeof runBuildSchema>> = {
           const mode = selectBuildExecutionMode(facts);
 
           ctx.onXmlStream(
-            `<dyad-status title="${escapeXmlAttr(mode === "in-place" ? "Building beside preview" : "Preparing isolated build")}"></dyad-status>`,
+            `<samba-status title="${escapeXmlAttr(mode === "in-place" ? "Building beside preview" : "Preparing isolated build")}"></samba-status>`,
           );
           const abortScope = createBuildAbortScope(ctx.abortSignal);
           const operationStartedAt = Date.now();
@@ -1412,7 +1412,7 @@ export const runBuildTool: ToolDefinition<z.infer<typeof runBuildSchema>> = {
               );
               phase = "dependency installation";
               ctx.onXmlStream(
-                '<dyad-status title="Installing isolated build dependencies"></dyad-status>',
+                '<samba-status title="Installing isolated build dependencies"></samba-status>',
               );
               const installOutputPreview = createBuildOutputPreview((output) =>
                 streamBuildOutput(ctx, output),
@@ -1438,9 +1438,9 @@ export const runBuildTool: ToolDefinition<z.infer<typeof runBuildSchema>> = {
                 return body;
               }
               if (installResult.aborted) {
-                throw new DyadError(
+                throw new SambaError(
                   "Build cancelled.",
-                  DyadErrorKind.UserCancelled,
+                  SambaErrorKind.UserCancelled,
                 );
               }
               if (installResult.code !== 0) {
@@ -1463,7 +1463,7 @@ export const runBuildTool: ToolDefinition<z.infer<typeof runBuildSchema>> = {
             state.count += 1;
             state.mutationCountAtLastRun = currentMutationCount;
             ctx.onXmlStream(
-              '<dyad-status title="Running production build"></dyad-status>',
+              '<samba-status title="Running production build"></samba-status>',
             );
             const buildStartedAt = Date.now();
             const buildOutputPreview = createBuildOutputPreview((output) =>
@@ -1490,9 +1490,9 @@ export const runBuildTool: ToolDefinition<z.infer<typeof runBuildSchema>> = {
               return body;
             }
             if (result.aborted) {
-              throw new DyadError(
+              throw new SambaError(
                 "Build cancelled.",
-                DyadErrorKind.UserCancelled,
+                SambaErrorKind.UserCancelled,
               );
             }
             if (result.code !== 0) {

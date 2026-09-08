@@ -2,7 +2,7 @@ import * as fs from "node:fs";
 import * as path from "node:path";
 import { utilityProcess, type UtilityProcess } from "electron";
 
-import { DyadError, DyadErrorKind } from "@/errors/dyad_error";
+import { SambaError, SambaErrorKind } from "@/errors/samba_error";
 import type {
   CodeExplorerHostResponse,
   CodeExplorerResult,
@@ -181,7 +181,7 @@ function workspaceConfigChildScore(child: string): number {
 }
 
 export function toCodeExplorerError(error: unknown): Error {
-  if (error instanceof DyadError) {
+  if (error instanceof SambaError) {
     return error;
   }
 
@@ -195,7 +195,7 @@ export function toCodeExplorerError(error: unknown): Error {
     message.startsWith("No TypeScript source files found") ||
     message.startsWith("TypeScript config error")
   ) {
-    return new DyadError(message, DyadErrorKind.Precondition);
+    return new SambaError(message, SambaErrorKind.Precondition);
   }
 
   if (
@@ -203,7 +203,7 @@ export function toCodeExplorerError(error: unknown): Error {
     message.includes("escapes app") ||
     message.includes("escapes project root")
   ) {
-    return new DyadError(message, DyadErrorKind.Validation);
+    return new SambaError(message, SambaErrorKind.Validation);
   }
 
   return error instanceof Error ? error : new Error(message);
@@ -337,10 +337,10 @@ function explorerKey(input: CodeExplorerWorkerInput): string {
   return `${path.resolve(input.appPath)}\0${input.tsconfigPath ?? ""}`;
 }
 
-function keyUnavailableError(): DyadError {
-  return new DyadError(
+function keyUnavailableError(): SambaError {
+  return new SambaError(
     "Code explorer is unavailable for this project in this session: the indexing process crashed repeatedly while building its index (the project is likely too large to index).",
-    DyadErrorKind.Precondition,
+    SambaErrorKind.Precondition,
   );
 }
 
@@ -407,7 +407,7 @@ function getHost(): CodeExplorerHost {
   // acquires a gc handle at runtime itself and the heap ceiling stays at the
   // cage default; the flags are kept for Electron versions that honor them.
   const child = utilityProcess.fork(workerPath, [], {
-    serviceName: "dyad-code-explorer",
+    serviceName: "samba-code-explorer",
     execArgv: ["--expose-gc", "--max-old-space-size=3584"],
   });
   let fatalError: { type: string; location: string } | null = null;

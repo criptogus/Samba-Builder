@@ -6,7 +6,11 @@ import {
   type InvocationRef,
   type InvocationClaim,
 } from "../../state_machines/invocation_ref";
-import { DyadError, DyadErrorKind, isDyadError } from "../../errors/dyad_error";
+import {
+  SambaError,
+  SambaErrorKind,
+  isSambaError,
+} from "../../errors/samba_error";
 import type { QueryInvalidationScope } from "../../window_infrastructure/types";
 
 // =============================================================================
@@ -186,31 +190,31 @@ export type EventChannel<T> = T extends EventContract<infer C, any> ? C : never;
 // Client Generators
 // =============================================================================
 
-const IPC_ENVELOPE_MARKER = "dyad-ipc-envelope-v1";
+const IPC_ENVELOPE_MARKER = "samba-ipc-envelope-v1";
 
 export interface SerializedIpcError {
   name?: string;
   message: string;
-  kind?: DyadErrorKind;
+  kind?: SambaErrorKind;
   code?: string;
   stack?: string;
 }
 
 export type IpcInvokeEnvelope<T = unknown> =
   | {
-      __dyadIpcEnvelope: typeof IPC_ENVELOPE_MARKER;
+      __sambaIpcEnvelope: typeof IPC_ENVELOPE_MARKER;
       ok: true;
       value: T;
     }
   | {
-      __dyadIpcEnvelope: typeof IPC_ENVELOPE_MARKER;
+      __sambaIpcEnvelope: typeof IPC_ENVELOPE_MARKER;
       ok: false;
       error: SerializedIpcError;
     };
 
 export function createIpcSuccessEnvelope<T>(value: T): IpcInvokeEnvelope<T> {
   return {
-    __dyadIpcEnvelope: IPC_ENVELOPE_MARKER,
+    __sambaIpcEnvelope: IPC_ENVELOPE_MARKER,
     ok: true,
     value,
   };
@@ -218,7 +222,7 @@ export function createIpcSuccessEnvelope<T>(value: T): IpcInvokeEnvelope<T> {
 
 export function createIpcErrorEnvelope(error: unknown): IpcInvokeEnvelope {
   return {
-    __dyadIpcEnvelope: IPC_ENVELOPE_MARKER,
+    __sambaIpcEnvelope: IPC_ENVELOPE_MARKER,
     ok: false,
     error: serializeIpcError(error),
   };
@@ -230,7 +234,7 @@ export function isIpcInvokeEnvelope(
   return (
     typeof value === "object" &&
     value !== null &&
-    (value as { __dyadIpcEnvelope?: unknown }).__dyadIpcEnvelope ===
+    (value as { __sambaIpcEnvelope?: unknown }).__sambaIpcEnvelope ===
       IPC_ENVELOPE_MARKER &&
     typeof (value as { ok?: unknown }).ok === "boolean"
   );
@@ -244,7 +248,7 @@ export function serializeIpcError(error: unknown): SerializedIpcError {
       ? (error as { code: string }).code
       : undefined;
 
-  if (isDyadError(error)) {
+  if (isSambaError(error)) {
     return {
       name: error.name,
       message: error.message,
@@ -266,22 +270,22 @@ export function serializeIpcError(error: unknown): SerializedIpcError {
   return { message: String(error), code };
 }
 
-function isDyadErrorKind(value: unknown): value is DyadErrorKind {
+function isSambaErrorKind(value: unknown): value is SambaErrorKind {
   return (
     typeof value === "string" &&
-    Object.values(DyadErrorKind).includes(value as DyadErrorKind)
+    Object.values(SambaErrorKind).includes(value as SambaErrorKind)
   );
 }
 
 export function deserializeIpcError(error: SerializedIpcError): Error {
-  if (isDyadErrorKind(error.kind)) {
-    const dyadError = new DyadError(error.message, error.kind);
-    dyadError.name = error.name ?? dyadError.name;
+  if (isSambaErrorKind(error.kind)) {
+    const sambaError = new SambaError(error.message, error.kind);
+    sambaError.name = error.name ?? sambaError.name;
     if (error.code !== undefined) {
-      (dyadError as DyadError & { code: string }).code = error.code;
+      (sambaError as SambaError & { code: string }).code = error.code;
     }
-    dyadError.stack = error.stack;
-    return dyadError;
+    sambaError.stack = error.stack;
+    return sambaError;
   }
 
   const genericError = new Error(error.message);

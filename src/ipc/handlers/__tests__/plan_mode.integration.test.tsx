@@ -35,8 +35,8 @@ describe("plan mode (integration)", () => {
       engine: true,
       settings: {
         isTestMode: true,
-        enableDyadPro: true,
-        providerSettings: { auto: { apiKey: { value: "testdyadkey" } } },
+        enableSambaPro: true,
+        providerSettings: { auto: { apiKey: { value: "testsambakey" } } },
       },
     });
   }, 60_000);
@@ -115,7 +115,7 @@ describe("plan mode (integration)", () => {
   }
 
   async function waitForPlanFile(appDir: string) {
-    const planDir = path.join(appDir, ".dyad", "plans");
+    const planDir = path.join(appDir, ".samba", "plans");
     await waitFor(() => {
       const mdFiles = fs.readdirSync(planDir).filter((f) => f.endsWith(".md"));
       expect(mdFiles.length).toBeGreaterThan(0);
@@ -341,7 +341,7 @@ describe("plan mode (integration)", () => {
     expect(implementationChat?.appId).toBe(source.appId);
     expect(implementationChat?.appId).not.toBe(stale.appId);
     await waitForPlanFile(source.appDir);
-    const stalePlanDir = path.join(stale.appDir, ".dyad", "plans");
+    const stalePlanDir = path.join(stale.appDir, ".samba", "plans");
     const stalePlanFiles = fs.existsSync(stalePlanDir)
       ? fs.readdirSync(stalePlanDir).filter((f) => f.endsWith(".md"))
       : [];

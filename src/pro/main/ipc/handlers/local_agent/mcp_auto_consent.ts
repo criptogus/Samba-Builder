@@ -135,7 +135,7 @@ export async function classifyMcpToolConsent(
 // auto-approval behaves the same regardless of how the tool is plumbed.
 export function buildMcpAutoApprove(params: {
   settings: UserSettings;
-  isDyadPro: boolean;
+  isSambaPro: boolean;
   freeModelMode?: boolean;
   chatId: number;
   serverName: string;
@@ -146,7 +146,7 @@ export function buildMcpAutoApprove(params: {
 }): (() => Promise<McpAutoApproveResult>) | undefined {
   if (
     !params.settings.autoApproveSafeMcpTools ||
-    !params.isDyadPro ||
+    !params.isSambaPro ||
     params.freeModelMode
   ) {
     return undefined;

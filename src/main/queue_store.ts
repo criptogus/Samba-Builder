@@ -2,7 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import log from "electron-log";
 import { z } from "zod";
-import { getDyadAppPath } from "../paths/paths";
+import { getSambaAppPath } from "../paths/paths";
 import { getDb } from "../db";
 import { apps, chats } from "../db/schema";
 import {
@@ -15,15 +15,15 @@ const logger = log.scope("queue_store");
 const ChatQueueSchema = z.array(PersistedQueuedMessageSchema);
 
 /**
- * Per-chat queued-prompt files live inside the app's Samba Builder-managed `.dyad/`
+ * Per-chat queued-prompt files live inside the app's Samba Builder-managed `.samba/`
  * folder, mirroring how agent todos are persisted
- * (`<appPath>/.dyad/todos/<chatId>.json`). Keeping them here means they are
+ * (`<appPath>/.samba/todos/<chatId>.json`). Keeping them here means they are
  * scoped to their app and cleaned up automatically when the app is deleted.
  *
- * Layout: `<appPath>/.dyad/queue/<chatId>.json`
+ * Layout: `<appPath>/.samba/queue/<chatId>.json`
  */
 function getChatQueueDir(appPath: string): string {
-  return path.join(appPath, ".dyad", "queue");
+  return path.join(appPath, ".samba", "queue");
 }
 
 interface QueueFileRef {
@@ -37,7 +37,7 @@ function listAppPaths(): string[] {
     .select({ path: apps.path })
     .from(apps)
     .all()
-    .map((row) => getDyadAppPath(row.path));
+    .map((row) => getSambaAppPath(row.path));
 }
 
 /** Enumerate every existing per-chat queue file across all apps. */

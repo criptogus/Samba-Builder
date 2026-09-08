@@ -2,9 +2,9 @@
 
 ## Summary
 
-When a user clicks `Fix Issue` or `Fix N Issues` in the Security panel, Dyad should reopen the existing fix chat for that security finding instead of creating duplicate chats. If no fix chat exists yet, Dyad should create one, show it immediately, run the fix prompt, and record the association for future clicks.
+When a user clicks `Fix Issue` or `Fix N Issues` in the Security panel, Samba should reopen the existing fix chat for that security finding instead of creating duplicate chats. If no fix chat exists yet, Samba should create one, show it immediately, run the fix prompt, and record the association for future clicks.
 
-When an existing fix chat is reopened, Dyad does not automatically resend the prompt; instead it shows a toast with a `Re-run fix` action so the user can explicitly send the fix prompt again into the same chat. This also covers the recovery case where the fix chat was created but the original prompt never ran (stream failure, app quit).
+When an existing fix chat is reopened, Samba does not automatically resend the prompt; instead it shows a toast with a `Re-run fix` action so the user can explicitly send the fix prompt again into the same chat. This also covers the recovery case where the fix chat was created but the original prompt never ran (stream failure, app quit).
 
 The Security panel should remain visible on the right. The chat pane should be forced open so the user can see the fix run or review the prior fix chat.
 

@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import { CoolifySetupController } from "./controller";
 import type { CoolifySetupState } from "./state";
-import { DyadError, DyadErrorKind } from "@/errors/dyad_error";
+import { SambaError, SambaErrorKind } from "@/errors/samba_error";
 import type { SetupResult, SetupStep, SetupTarget } from "@/ipc/types";
 
 const TARGET: SetupTarget = {
@@ -124,7 +124,7 @@ describe("finishing", () => {
   it("keeps a failure and the output that explains it", async () => {
     const { controller } = harness(async (_t, hooks) => {
       hooks.onProgress("installing", "3/6 Pulling...");
-      throw new DyadError("exit 1", DyadErrorKind.External);
+      throw new SambaError("exit 1", SambaErrorKind.External);
     });
 
     await expect(controller.start(TARGET).result).rejects.toThrow("exit 1");
@@ -141,7 +141,7 @@ describe("finishing", () => {
       await new Promise<void>((resolve) =>
         hooks.signal.addEventListener("abort", () => resolve()),
       );
-      throw new DyadError("Cancelled.", DyadErrorKind.UserCancelled);
+      throw new SambaError("Cancelled.", SambaErrorKind.UserCancelled);
     });
 
     const run = controller.start(TARGET);
@@ -211,7 +211,7 @@ describe("answers from a run nobody is watching any more", () => {
 
     const stale = controller.start(TARGET);
     controller.cancel();
-    first.reject(new DyadError("Cancelled.", DyadErrorKind.UserCancelled));
+    first.reject(new SambaError("Cancelled.", SambaErrorKind.UserCancelled));
     await expect(stale.result).rejects.toThrow();
     controller.dismiss();
 
@@ -230,7 +230,7 @@ describe("what a run could not put back", () => {
     // happened.
     const { controller } = harness(async () => {
       throw Object.assign(
-        new DyadError("Cancelled.", DyadErrorKind.UserCancelled),
+        new SambaError("Cancelled.", SambaErrorKind.UserCancelled),
         { warning: "Coolify may still be configured for x.sslip.io." },
       );
     });
@@ -246,7 +246,7 @@ describe("what a run could not put back", () => {
 
   it("says nothing when a run had nothing to put back", async () => {
     const { controller } = harness(async () => {
-      throw new DyadError("boom", DyadErrorKind.External);
+      throw new SambaError("boom", SambaErrorKind.External);
     });
 
     await controller.start(TARGET).result.catch(() => {});

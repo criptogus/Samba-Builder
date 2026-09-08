@@ -1,7 +1,7 @@
 import { unescapeXmlAttr, unescapeXmlContent } from "../../shared/xmlEscape";
 
 /**
- * Incremental dyad-tag parser.
+ * Incremental samba-tag parser.
  *
  * Feed the message content as it grows; emit a list of stable Block
  * objects for the renderer. Committed Block objects keep referential
@@ -20,70 +20,70 @@ import { unescapeXmlAttr, unescapeXmlContent } from "../../shared/xmlEscape";
  * only mark blocks as `complete` (closing tag seen) vs not.
  */
 
-// Recognised dyad custom-tag names. Anything outside this set with a
+// Recognised samba custom-tag names. Anything outside this set with a
 // leading "<NAME" is treated as markdown text, matching the rendering
-// behavior in DyadMarkdownParser.
-const DYAD_CUSTOM_TAG_NAMES = [
-  "dyad-write",
-  "dyad-rename",
-  "dyad-delete",
-  "dyad-add-dependency",
-  "dyad-execute-sql",
-  "dyad-read-logs",
-  "dyad-add-integration",
-  "dyad-enable-nitro",
-  "dyad-output",
-  "dyad-problem-report",
-  "dyad-chat-summary",
-  "dyad-edit",
-  "dyad-grep",
-  "dyad-explore-code",
-  "dyad-search-replace",
-  "dyad-codebase-context",
-  "dyad-web-search-result",
-  "dyad-web-search",
-  "dyad-web-crawl",
-  "dyad-web-fetch",
-  "dyad-code-search-result",
-  "dyad-code-search",
-  "dyad-read",
-  "dyad-git",
+// behavior in SambaMarkdownParser.
+const SAMBA_CUSTOM_TAG_NAMES = [
+  "samba-write",
+  "samba-rename",
+  "samba-delete",
+  "samba-add-dependency",
+  "samba-execute-sql",
+  "samba-read-logs",
+  "samba-add-integration",
+  "samba-enable-nitro",
+  "samba-output",
+  "samba-problem-report",
+  "samba-chat-summary",
+  "samba-edit",
+  "samba-grep",
+  "samba-explore-code",
+  "samba-search-replace",
+  "samba-codebase-context",
+  "samba-web-search-result",
+  "samba-web-search",
+  "samba-web-crawl",
+  "samba-web-fetch",
+  "samba-code-search-result",
+  "samba-code-search",
+  "samba-read",
+  "samba-git",
   "think",
-  "dyad-command",
-  "dyad-mcp-tool-call",
-  "dyad-mcp-tool-result",
-  "dyad-mcp-tool-search",
-  "dyad-mcp-tool-schema",
-  "dyad-list-files",
-  "dyad-database-schema",
-  "dyad-db-table-schema",
-  "dyad-supabase-table-schema",
-  "dyad-supabase-project-info",
-  "dyad-neon-project-info",
-  "dyad-neon-table-schema",
-  "dyad-read-guide",
-  "dyad-status",
-  "dyad-compaction",
-  "dyad-copy",
-  "dyad-image-generation",
-  "dyad-write-plan",
-  "dyad-exit-plan",
-  "dyad-questionnaire",
-  "dyad-step-limit",
-  "dyad-script",
-  "dyad-app-blueprint",
-  "dyad-security-finding",
-  "dyad-test-assertions",
+  "samba-command",
+  "samba-mcp-tool-call",
+  "samba-mcp-tool-result",
+  "samba-mcp-tool-search",
+  "samba-mcp-tool-schema",
+  "samba-list-files",
+  "samba-database-schema",
+  "samba-db-table-schema",
+  "samba-supabase-table-schema",
+  "samba-supabase-project-info",
+  "samba-neon-project-info",
+  "samba-neon-table-schema",
+  "samba-read-guide",
+  "samba-status",
+  "samba-compaction",
+  "samba-copy",
+  "samba-image-generation",
+  "samba-write-plan",
+  "samba-exit-plan",
+  "samba-questionnaire",
+  "samba-step-limit",
+  "samba-script",
+  "samba-app-blueprint",
+  "samba-security-finding",
+  "samba-test-assertions",
   // Legacy: no longer emitted (test writing moved to the agent's write_file /
   // run_tests tools), but historical chats still contain it and must render as
   // a file-write card rather than raw markup.
-  "dyad-generate-test",
-  "dyad-search-chats",
-  "dyad-read-chat",
-  "dyad-explore-chat-history",
-  "dyad-subagent",
+  "samba-generate-test",
+  "samba-search-chats",
+  "samba-read-chat",
+  "samba-explore-chat-history",
+  "samba-subagent",
 ];
-const DYAD_CUSTOM_TAG_SET = new Set(DYAD_CUSTOM_TAG_NAMES);
+const SAMBA_CUSTOM_TAG_SET = new Set(SAMBA_CUSTOM_TAG_NAMES);
 
 export type Block =
   | {
@@ -124,7 +124,7 @@ export interface ParserState {
   /** Bytes from `content` already consumed. */
   cursor: number;
   mode: Mode;
-  /** Bytes seen but not yet committed (e.g. partial "<dyad-..."). */
+  /** Bytes seen but not yet committed (e.g. partial "<samba-..."). */
   pending: string;
   /** While in tag-attrs, the tag name. */
   pendingTagName: string;
@@ -277,7 +277,7 @@ export function advanceParser(prev: ParserState, content: string): ParserState {
       // tag, NAME must be in the set AND the next char must be ws or '>'.
       const name = state.pending.slice(1);
       if (
-        DYAD_CUSTOM_TAG_SET.has(name) &&
+        SAMBA_CUSTOM_TAG_SET.has(name) &&
         (ch === " " || ch === "\t" || ch === "\n" || ch === "\r" || ch === ">")
       ) {
         state.pendingTagName = name;

@@ -60,7 +60,7 @@ export const writePlanTool: ToolDefinition<z.infer<typeof writePlanSchema>> = {
     const title = escapeXmlAttr(args.title);
     const summary = args.summary ? escapeXmlAttr(args.summary) : "";
 
-    return `<dyad-write-plan title="${title}" summary="${summary}" complete="${isComplete}"></dyad-write-plan>`;
+    return `<samba-write-plan title="${title}" summary="${summary}" complete="${isComplete}"></samba-write-plan>`;
   },
 
   execute: async (args, ctx: AgentContext) => {

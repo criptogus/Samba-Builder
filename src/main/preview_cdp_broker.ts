@@ -18,9 +18,9 @@ const logger = log.scope("preview_cdp_broker");
 
 const LOOPBACK_HOST = "127.0.0.1";
 const MAX_CDP_MESSAGE_BYTES = 4 * 1024 * 1024;
-const PREVIEW_PAGE_SESSION_ID = "dyad-preview-page";
-const PREVIEW_BROWSER_CONTEXT_ID = "dyad-preview-context";
-const PREVIEW_BROWSER_TARGET_ID = "dyad-preview-browser";
+const PREVIEW_PAGE_SESSION_ID = "samba-preview-page";
+const PREVIEW_BROWSER_CONTEXT_ID = "samba-preview-context";
+const PREVIEW_BROWSER_TARGET_ID = "samba-preview-browser";
 
 type CdpId = number;
 
@@ -254,7 +254,7 @@ export class PreviewCdpBroker {
       });
       response.end(
         JSON.stringify({
-          Browser: "DyadPreview/1.0",
+          Browser: "SambaPreview/1.0",
           "Protocol-Version": "1.3",
           webSocketDebuggerUrl: `ws://${LOOPBACK_HOST}:${address.port}${this.websocketPath}`,
         }),
@@ -526,7 +526,7 @@ export class PreviewCdpBroker {
         protocolVersion: version.protocolVersion ?? "1.3",
         product: version.product ?? "Chrome/0",
         revision: version.revision ?? "",
-        userAgent: version.userAgent ?? "DyadPreview",
+        userAgent: version.userAgent ?? "SambaPreview",
         jsVersion: version.jsVersion ?? "",
       };
     }

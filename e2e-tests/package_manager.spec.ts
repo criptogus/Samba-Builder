@@ -13,11 +13,11 @@ const originalNpmCache = process.env.npm_config_cache;
 const originalNpmStoreDir = process.env.npm_config_store_dir;
 const originalPnpmStoreDir = process.env.pnpm_config_store_dir;
 const originalPath = process.env.PATH;
-const originalTestPnpmVersion = process.env.DYAD_TEST_PNPM_VERSION;
+const originalTestPnpmVersion = process.env.SAMBA_TEST_PNPM_VERSION;
 const originalTestInstallPnpmVersion =
-  process.env.DYAD_TEST_INSTALL_PNPM_VERSION;
+  process.env.SAMBA_TEST_INSTALL_PNPM_VERSION;
 const originalDefaultApproveBuildsUrl =
-  process.env.DYAD_DEFAULT_APPROVE_BUILDS_URL;
+  process.env.SAMBA_DEFAULT_APPROVE_BUILDS_URL;
 const SOCKET_FIREWALL_VERDICT_TIMEOUT = process.env.CI
   ? 240_000
   : Timeout.EXTRA_LONG;
@@ -82,7 +82,7 @@ async function createUpgradeablePnpmShim(userDataDir: string) {
       "#!/bin/sh",
       'for arg in "$@"; do',
       '  if [ "$arg" = "--version" ]; then',
-      '    echo "${DYAD_TEST_PNPM_VERSION:-10.15.0}"',
+      '    echo "${SAMBA_TEST_PNPM_VERSION:-10.15.0}"',
       "    exit 0",
       "  fi",
       "done",
@@ -192,21 +192,22 @@ async function restorePackageManagerCache() {
   }
 
   if (originalTestPnpmVersion === undefined) {
-    delete process.env.DYAD_TEST_PNPM_VERSION;
+    delete process.env.SAMBA_TEST_PNPM_VERSION;
   } else {
-    process.env.DYAD_TEST_PNPM_VERSION = originalTestPnpmVersion;
+    process.env.SAMBA_TEST_PNPM_VERSION = originalTestPnpmVersion;
   }
 
   if (originalTestInstallPnpmVersion === undefined) {
-    delete process.env.DYAD_TEST_INSTALL_PNPM_VERSION;
+    delete process.env.SAMBA_TEST_INSTALL_PNPM_VERSION;
   } else {
-    process.env.DYAD_TEST_INSTALL_PNPM_VERSION = originalTestInstallPnpmVersion;
+    process.env.SAMBA_TEST_INSTALL_PNPM_VERSION =
+      originalTestInstallPnpmVersion;
   }
 
   if (originalDefaultApproveBuildsUrl === undefined) {
-    delete process.env.DYAD_DEFAULT_APPROVE_BUILDS_URL;
+    delete process.env.SAMBA_DEFAULT_APPROVE_BUILDS_URL;
   } else {
-    process.env.DYAD_DEFAULT_APPROVE_BUILDS_URL =
+    process.env.SAMBA_DEFAULT_APPROVE_BUILDS_URL =
       originalDefaultApproveBuildsUrl;
   }
 }
@@ -216,8 +217,8 @@ const testSkipIfWindows = testWithConfigSkipIfWindows({
   preLaunchHook: async ({ userDataDir, fakeLlmPort }) => {
     await configurePackageManagerCache(userDataDir, { isolateNpmCache: false });
     await createSupportedPnpmShim(userDataDir);
-    process.env.DYAD_TEST_PNPM_VERSION = "11.1.2";
-    process.env.DYAD_DEFAULT_APPROVE_BUILDS_URL = `http://localhost:${fakeLlmPort}/api/default-approve-builds.txt`;
+    process.env.SAMBA_TEST_PNPM_VERSION = "11.1.2";
+    process.env.SAMBA_DEFAULT_APPROVE_BUILDS_URL = `http://localhost:${fakeLlmPort}/api/default-approve-builds.txt`;
     warmSocketFirewallCache(path.join(userDataDir, "sfw-github-authenticated"));
   },
   postLaunchHook: restorePackageManagerCache,
@@ -228,8 +229,8 @@ const oldPnpmTestSkipIfWindows = testWithConfigSkipIfWindows({
   preLaunchHook: async ({ userDataDir, fakeLlmPort }) => {
     await configurePackageManagerCache(userDataDir);
     await createOldPnpmShim(userDataDir);
-    process.env.DYAD_TEST_PNPM_VERSION = "10.15.0";
-    process.env.DYAD_DEFAULT_APPROVE_BUILDS_URL = `http://localhost:${fakeLlmPort}/api/default-approve-builds.txt`;
+    process.env.SAMBA_TEST_PNPM_VERSION = "10.15.0";
+    process.env.SAMBA_DEFAULT_APPROVE_BUILDS_URL = `http://localhost:${fakeLlmPort}/api/default-approve-builds.txt`;
   },
   postLaunchHook: restorePackageManagerCache,
 });
@@ -239,9 +240,9 @@ const upgradePnpmTestSkipIfWindows = testWithConfigSkipIfWindows({
   preLaunchHook: async ({ userDataDir, fakeLlmPort }) => {
     await configurePackageManagerCache(userDataDir);
     await createUpgradeablePnpmShim(userDataDir);
-    process.env.DYAD_TEST_PNPM_VERSION = "10.15.0";
-    process.env.DYAD_TEST_INSTALL_PNPM_VERSION = "11.1.2";
-    process.env.DYAD_DEFAULT_APPROVE_BUILDS_URL = `http://localhost:${fakeLlmPort}/api/default-approve-builds.txt`;
+    process.env.SAMBA_TEST_PNPM_VERSION = "10.15.0";
+    process.env.SAMBA_TEST_INSTALL_PNPM_VERSION = "11.1.2";
+    process.env.SAMBA_DEFAULT_APPROVE_BUILDS_URL = `http://localhost:${fakeLlmPort}/api/default-approve-builds.txt`;
   },
   postLaunchHook: restorePackageManagerCache,
 });
@@ -250,7 +251,7 @@ const realPnpmStrictBuildsTestSkipIfWindows = testWithConfigSkipIfWindows({
   preLaunchHook: async ({ userDataDir, fakeLlmPort }) => {
     execFileSync("pnpm", ["--version"], { encoding: "utf8" });
     await configurePackageManagerCache(userDataDir);
-    process.env.DYAD_DEFAULT_APPROVE_BUILDS_URL = `http://localhost:${fakeLlmPort}/api/default-approve-builds.txt`;
+    process.env.SAMBA_DEFAULT_APPROVE_BUILDS_URL = `http://localhost:${fakeLlmPort}/api/default-approve-builds.txt`;
   },
   postLaunchHook: restorePackageManagerCache,
 });
@@ -369,17 +370,17 @@ testSkipIfWindows(
     });
     const pnpmWorkspaceConfig = await fs.readFile(pnpmWorkspacePath, "utf8");
     expect(pnpmWorkspaceConfig).toContain("minimumReleaseAge: 1440");
-    expect(pnpmWorkspaceConfig).toContain("# dyad-default-allow-builds begin");
+    expect(pnpmWorkspaceConfig).toContain("# samba-default-allow-builds begin");
     expect(pnpmWorkspaceConfig).toContain(
-      "# dyad-default-allow-builds-schema=v1",
+      "# samba-default-allow-builds-schema=v1",
     );
     expect(pnpmWorkspaceConfig).toContain(
-      "# dyad-default-allow-builds-data-version=2026-05-21.2",
+      "# samba-default-allow-builds-data-version=2026-05-21.2",
     );
     expect(pnpmWorkspaceConfig).toContain(
-      "# dyad-default-allow-builds-channel=remote",
+      "# samba-default-allow-builds-channel=remote",
     );
-    expect(pnpmWorkspaceConfig).toContain("# dyad-default-allow-builds end");
+    expect(pnpmWorkspaceConfig).toContain("# samba-default-allow-builds end");
 
     await expect(
       po.page.getByText(/Failed to add dependencies:/),
@@ -593,7 +594,7 @@ realPnpmStrictBuildsTestSkipIfWindows(
       "utf8",
     );
     expect(pnpmWorkspaceConfig).toContain(
-      "fake-build-dep: false # dyad-auto-denied",
+      "fake-build-dep: false # samba-auto-denied",
     );
     await expect(async () => {
       const modulesConfig = await fs.readFile(

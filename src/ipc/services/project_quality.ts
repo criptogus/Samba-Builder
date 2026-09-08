@@ -5,7 +5,7 @@ import { createHash, randomUUID } from "node:crypto";
 import { eq, desc } from "drizzle-orm";
 import { db } from "@/db";
 import { apps, projectQualityRuns } from "@/db/schema";
-import { getDyadAppPath } from "@/paths/paths";
+import { getSambaAppPath } from "@/paths/paths";
 import { QualityReportSchema, type QualityKind } from "@/delivery/quality";
 import { spawnStreaming } from "../utils/spawn_streaming";
 import {
@@ -127,7 +127,7 @@ export async function runQuality(
   active = new AbortController();
   const id = randomUUID(),
     createdAt = Date.now(),
-    root = getDyadAppPath(record.path);
+    root = getSambaAppPath(record.path);
   const artifactDir = path.join(home(), String(appId), id);
   let commit: string | null = null;
   let report = QualityReportSchema.parse({
@@ -230,7 +230,7 @@ export async function qualityArtifacts(
   if (
     !project ||
     !row.commit ||
-    row.commit !== (await readDeliveryCommit(getDyadAppPath(project.path)))
+    row.commit !== (await readDeliveryCommit(getSambaAppPath(project.path)))
   )
     throw new Error("A captura precisa corresponder à versão salva atual.");
   await fs.copyFile(

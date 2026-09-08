@@ -40,7 +40,7 @@ vi.mock("@/db", () => ({
   db: { query: { apps: { findFirst: database.findFirst } } },
 }));
 vi.mock("@/db/schema", () => ({ apps: { id: "id" } }));
-vi.mock("@/paths/paths", () => ({ getDyadAppPath: () => "/test/app" }));
+vi.mock("@/paths/paths", () => ({ getSambaAppPath: () => "/test/app" }));
 vi.mock("node:fs", () => ({
   default: { existsSync: vi.fn(() => true) },
 }));

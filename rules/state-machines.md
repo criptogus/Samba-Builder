@@ -191,7 +191,7 @@ Background and before/after examples of why this pattern exists:
   must preserve the reserved encoded wire address; otherwise reject it or
   atomically re-key pending quota, subscription, disposal, and reference
   bookkeeping before admitting the actor.
-- Remote authorization hooks use `DyadErrorKind.Auth` for expected access
+- Remote authorization hooks use `SambaErrorKind.Auth` for expected access
   denial. Convert only that explicit classification to an unauthorized receipt;
   propagate unexpected hook failures so telemetry can distinguish dependency
   failures and bugs from ordinary refusal. A named domain-revision policy needs

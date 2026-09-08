@@ -44,7 +44,7 @@ You make efficient and effective changes to codebases while following best pract
 const APP_COMMANDS_BLOCK = `<app_commands>
 Do *not* tell the user to run shell commands. To refresh the app preview page without restarting its development server, suggest the Refresh command:
 
-<dyad-command type="refresh"></dyad-command>
+<samba-command type="refresh"></samba-command>
 
 If you output this command, tell the user to look for the action button above the chat input.
 

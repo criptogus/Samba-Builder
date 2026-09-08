@@ -1,5 +1,5 @@
 import log from "electron-log/main";
-import { DyadError, DyadErrorKind } from "@/errors/dyad_error";
+import { SambaError, SambaErrorKind } from "@/errors/samba_error";
 import {
   BufferedProcessSpawnError,
   DEFAULT_BUFFERED_PROCESS_TIMEOUT_MS,
@@ -49,9 +49,9 @@ export async function simpleSpawn({
   } catch (error) {
     if (error instanceof BufferedProcessSpawnError) {
       logger.error(`Failed to spawn command: ${command}`, error);
-      throw new DyadError(
+      throw new SambaError(
         `Failed to spawn command: ${error.message}\n\nSTDOUT:\n${error.stdout}\n\nSTDERR:\n${error.stderr}`,
-        DyadErrorKind.External,
+        SambaErrorKind.External,
         { cause: error },
       );
     }
@@ -75,10 +75,10 @@ export async function simpleSpawn({
   }
 
   logger.error(`${errorPrefix}, ${failureReason}`);
-  throw new DyadError(
+  throw new SambaError(
     `${errorPrefix} (${failureReason})\n\nSTDOUT:\n${result.stdout}\n\nSTDERR:\n${result.stderr}`,
     // An abort comes from the caller's AbortSignal, so it is not an upstream
     // failure worth reporting to telemetry.
-    result.aborted ? DyadErrorKind.UserCancelled : DyadErrorKind.External,
+    result.aborted ? SambaErrorKind.UserCancelled : SambaErrorKind.External,
   );
 }

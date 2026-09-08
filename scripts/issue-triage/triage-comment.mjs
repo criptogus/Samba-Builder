@@ -10,7 +10,7 @@ export const ALLOWED_LABELS = [
   "issue/incomplete",
 ];
 export const ASSESSMENTS = [
-  "likely_dyad_bug",
+  "likely_samba_bug",
   "fixed_in_release",
   "external_service",
   "user_app_issue",
@@ -51,9 +51,9 @@ const LIMITS = {
 };
 
 const ALLOWED_HOSTS = new Set([
-  "www.dyad.sh",
-  "dyad.sh",
-  "academy.dyad.sh",
+  "www.samba.sh",
+  "samba.sh",
+  "academy.samba.sh",
   "nodejs.org",
   "www.githubstatus.com",
   "githubstatus.com",
@@ -241,7 +241,7 @@ export function normalizeTriage(
     }
     fixedIn = {
       version,
-      url: `https://www.dyad.sh/docs/releases/${version}`,
+      url: `https://www.samba.sh/docs/releases/${version}`,
     };
   }
   if (assessment === "fixed_in_release" && !fixedIn) {
@@ -323,10 +323,10 @@ function renderSteps(label, steps) {
 function stepsWithUpdate(triage) {
   if (!triage.fixedIn) return triage.steps;
   const alreadyMentionsDownload = triage.steps.some((step) =>
-    /dyad\.sh\/download/i.test(step),
+    /samba\.sh\/download/i.test(step),
   );
   if (alreadyMentionsDownload) return triage.steps;
-  const update = `Update to Samba Builder ${triage.fixedIn.version} or newer from https://www.dyad.sh/download, which includes the fix ([release notes](${triage.fixedIn.url})).`;
+  const update = `Update to Samba Builder ${triage.fixedIn.version} or newer from https://www.samba.sh/download, which includes the fix ([release notes](${triage.fixedIn.url})).`;
   return [update, ...triage.steps].slice(0, LIMITS.steps);
 }
 

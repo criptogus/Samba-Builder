@@ -207,7 +207,7 @@ describe("github_ops capabilities", () => {
                 request({
                   type: "connect-repo",
                   mode: "existing",
-                  owner: "dyad",
+                  owner: "samba",
                   repo: "app",
                   branch: "main",
                   thenAutoPush: true,
@@ -215,7 +215,7 @@ describe("github_ops capabilities", () => {
                 request({
                   type: "connect-repo",
                   mode: "create",
-                  org: "dyad",
+                  org: "samba",
                   repo: "app",
                   thenAutoPush: true,
                 }),

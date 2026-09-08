@@ -166,7 +166,7 @@ When a replayed renderer event mutates persisted session state, do not consume
 it until the session's derived atoms have hydrated. Persisting from empty
 pre-hydration atoms can erase unrelated restored entities.
 
-**Custom-protocol debugging:** Before using `git bisect` on a `dyad://` flow, quit every dev and packaged Dyad instance and verify which build owns the protocol registration. macOS may route the link to a different running/registered build, producing a convincing but false good/bad result.
+**Custom-protocol debugging:** Before using `git bisect` on a `samba://` flow, quit every dev and packaged Samba instance and verify which build owns the protocol registration. macOS may route the link to a different running/registered build, producing a convincing but false good/bad result.
 
 ## Handler expectations
 
@@ -176,7 +176,7 @@ pre-hydration atoms can erase unrelated restored entities.
   once and is never retried.
 - Handlers should `throw new Error("...")` on failure instead of returning `{ success: false }` style payloads.
 - Entity-loading handlers that enrich a valid local row with optional external metadata must catch enrichment failures and return the base entity with nullable enrichment fields. Letting an OAuth/API failure reject the whole load can make renderer queries misreport an existing entity as missing.
-- For **non-bug** failures (validation, not found, auth, user refusal, etc.), prefer `DyadError` with the right `DyadErrorKind` so PostHog does not flood with `$exception` events — see [rules/dyad-errors.md](dyad-errors.md).
+- For **non-bug** failures (validation, not found, auth, user refusal, etc.), prefer `SambaError` with the right `SambaErrorKind` so PostHog does not flood with `$exception` events — see [rules/samba-errors.md](samba-errors.md).
 - Use `createTypedHandler(contract, handler)` which validates inputs at runtime via Zod.
 - Production invoke handlers must register through `createTypedHandler`, `createLoggedHandler`, or `registerTrustedIpcHandler`; never call `ipcMain.handle` or `ipcMain.handleOnce` directly outside `trusted_handle.ts`. The facade enforces the trusted-main-frame policy for both contract and legacy channels.
 - When migrating a large inline `ipcMain.handle` callback to the trusted facade, extract a named local handler first. Adding another wrapper level around the inline callback makes the formatter reindent the entire body and obscures the security-only diff.
@@ -264,7 +264,7 @@ When an IPC event can fire at very high frequency (e.g., stdout/stderr from chil
 The `chat:response:chunk` event supports two modes:
 
 1. **Full update** — `messages` field contains the complete messages array. Used for initial message load, post-compaction refresh, and lazy-edit completions.
-2. **Tail-only patch** — `streamingMessageId` + `streamingPatch: { offset, content }` fields. The renderer reconstructs the full content as `current.slice(0, offset) + content`. `offset` is the longest-common-prefix length between the previously sent content and the new full response (not simply the old length), because `cleanFullResponse` may retroactively rewrite bytes inside in-progress dyad-tag attribute values. Used for all normal high-frequency text-delta streaming. Implemented via `computeStreamingPatch` in `src/ipc/utils/stream_text_utils.ts`.
+2. **Tail-only patch** — `streamingMessageId` + `streamingPatch: { offset, content }` fields. The renderer reconstructs the full content as `current.slice(0, offset) + content`. `offset` is the longest-common-prefix length between the previously sent content and the new full response (not simply the old length), because `cleanFullResponse` may retroactively rewrite bytes inside in-progress samba-tag attribute values. Used for all normal high-frequency text-delta streaming. Implemented via `computeStreamingPatch` in `src/ipc/utils/stream_text_utils.ts`.
 
 When modifying `ChatResponseChunkSchema` or adding new `safeSend("chat:response:chunk", ...)` call sites, decide which mode is appropriate. All frontend consumers (`useStreamChat`, `usePlanImplementation`, `useResolveMergeConflictsWithAI`) must handle both modes.
 
@@ -294,13 +294,13 @@ When changing install-policy constants or helpers in `src/ipc/utils/socket_firew
 
 Do not treat "pnpm is available but older than the minimumReleaseAge-supporting version" the same as "pnpm is unavailable." `PNPM_INSTALL_POLICY_ARGS` currently use `--config.*` flags, which pnpm 10.15.0 and 9.0.0 accept on `pnpm install`; keep using pnpm with those flags when it is present, and only fall back to npm when the pnpm binary cannot be run.
 
-When validating pnpm flag compatibility, test real subcommands such as `pnpm install`, `pnpm run`, and `pnpm add`, AND `pnpm --version` separately — the failure modes differ. Empirically (tested 8.15.9, 9.0.0, 9.15.4): older pnpm accepts arbitrary `--config.*` flags on real subcommands but rejects them on `--version` (`ERROR Unknown option: 'version'`). Keep availability probes flag-free (`pnpm --version` with `getPackageManagerCommandEnv()`, which delivers the same settings via `npm_config_*` env vars), or a working pnpm gets misreported as unavailable and Dyad silently falls back to npm.
+When validating pnpm flag compatibility, test real subcommands such as `pnpm install`, `pnpm run`, and `pnpm add`, AND `pnpm --version` separately — the failure modes differ. Empirically (tested 8.15.9, 9.0.0, 9.15.4): older pnpm accepts arbitrary `--config.*` flags on real subcommands but rejects them on `--version` (`ERROR Unknown option: 'version'`). Keep availability probes flag-free (`pnpm --version` with `getPackageManagerCommandEnv()`, which delivers the same settings via `npm_config_*` env vars), or a working pnpm gets misreported as unavailable and Samba silently falls back to npm.
 
-When running Dyad-managed package-manager install/add/probe commands from inside an app directory, use `getPackageManagerCommandEnv()` so Corepack ignores stale project `packageManager` pins via `COREPACK_ENABLE_PROJECT_SPEC=0`. Apply this to `pnpm --version` probes and `npx sfw ...` wrappers too, since the wrapped package manager inherits the parent env; avoid forcing it onto user-authored custom commands unless intentionally changing their package-manager semantics.
+When running Samba-managed package-manager install/add/probe commands from inside an app directory, use `getPackageManagerCommandEnv()` so Corepack ignores stale project `packageManager` pins via `COREPACK_ENABLE_PROJECT_SPEC=0`. Apply this to `pnpm --version` probes and `npx sfw ...` wrappers too, since the wrapped package manager inherits the parent env; avoid forcing it onto user-authored custom commands unless intentionally changing their package-manager semantics.
 
 When generating `pnpm-workspace.yaml` for install policy (`allowBuilds`, `minimumReleaseAge`), include a top-level `packages:` block such as `packages: ["." ]` if one does not already exist. pnpm 9 treats `pnpm-workspace.yaml` as a workspace manifest and fails with `packages field missing or empty` when the file only contains config keys.
 
-Automated `pnpm add` commands that run in an app root with a generated `pnpm-workspace.yaml` must pass `--ignore-workspace-root-check`. Otherwise older pnpm versions can fail with `ERR_PNPM_ADDING_TO_ROOT` even though Dyad intentionally installs into that app root.
+Automated `pnpm add` commands that run in an app root with a generated `pnpm-workspace.yaml` must pass `--ignore-workspace-root-check`. Otherwise older pnpm versions can fail with `ERR_PNPM_ADDING_TO_ROOT` even though Samba intentionally installs into that app root.
 
 ## React + IPC integration pattern
 
@@ -375,7 +375,7 @@ When creating hooks/components that call IPC handlers:
 
 ## Unit-testing IPC handlers with the harness
 
-`src/testing/handler_test_harness.ts` (`setupHandlerTestHarness` + `harness.invokeHandler("channel", input)`) gives you a real in-memory DB and works even for heavyweight modules: `registerAppHandlers` loads in vitest with just `vi.mock("electron")` plus module mocks for `@/paths/paths` (point `getDyadAppPath` at a temp dir), `@/ipc/services/git_service`, `createFromTemplate`, `gitignoreUtils`, and `chat_mode_resolution`.
+`src/testing/handler_test_harness.ts` (`setupHandlerTestHarness` + `harness.invokeHandler("channel", input)`) gives you a real in-memory DB and works even for heavyweight modules: `registerAppHandlers` loads in vitest with just `vi.mock("electron")` plus module mocks for `@/paths/paths` (point `getSambaAppPath` at a temp dir), `@/ipc/services/git_service`, `createFromTemplate`, `gitignoreUtils`, and `chat_mode_resolution`.
 
 - Preserve async helper contracts used by IPC handlers unless every caller and
   test mock is migrated together. A still-async mock consumed without `await`

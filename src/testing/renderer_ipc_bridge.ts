@@ -9,7 +9,7 @@
  * Node process, and receive the real streamed events back.
  *
  * Shape notes (mirrors preload.ts exactly):
- *  - `invoke(channel, ...args)` unwraps the dyad IPC envelope, like preload.
+ *  - `invoke(channel, ...args)` unwraps the samba IPC envelope, like preload.
  *  - `invokeEnvelope(channel, ...args)` returns the raw envelope (the
  *    contract-generated clients prefer this and unwrap themselves).
  *  - `on(channel, listener)` returns an unsubscribe fn, and the listener is

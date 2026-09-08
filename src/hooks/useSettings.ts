@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { ipc } from "@/ipc/types";
-import { type UserSettings, hasDyadProKey } from "@/lib/schemas";
+import { type UserSettings, hasSambaProKey } from "@/lib/schemas";
 import {
   getInitialLoadTelemetryProperties,
   getSettingsPersonTelemetryProperties,
@@ -10,9 +10,9 @@ import { usePostHog } from "posthog-js/react";
 import { useAppVersion } from "./useAppVersion";
 import { queryKeys } from "@/lib/queryKeys";
 
-const TELEMETRY_CONSENT_KEY = "dyadTelemetryConsent";
-const TELEMETRY_USER_ID_KEY = "dyadTelemetryUserId";
-const DYAD_PRO_STATUS_KEY = "dyadProStatus";
+const TELEMETRY_CONSENT_KEY = "sambaTelemetryConsent";
+const TELEMETRY_USER_ID_KEY = "sambaTelemetryUserId";
+const SAMBA_PRO_STATUS_KEY = "sambaProStatus";
 
 export function isTelemetryOptedIn() {
   return window.localStorage.getItem(TELEMETRY_CONSENT_KEY) === "opted_in";
@@ -22,8 +22,8 @@ export function getTelemetryUserId(): string | null {
   return window.localStorage.getItem(TELEMETRY_USER_ID_KEY);
 }
 
-export function isDyadProUser(): boolean {
-  return window.localStorage.getItem(DYAD_PRO_STATUS_KEY) === "true";
+export function isSambaProUser(): boolean {
+  return window.localStorage.getItem(SAMBA_PRO_STATUS_KEY) === "true";
 }
 
 let initialLoadTelemetryState: "idle" | "sent" = "idle";
@@ -176,7 +176,7 @@ function processSettingsForTelemetry(settings: UserSettings) {
     window.localStorage.removeItem(TELEMETRY_USER_ID_KEY);
   }
   window.localStorage.setItem(
-    DYAD_PRO_STATUS_KEY,
-    hasDyadProKey(settings) ? "true" : "false",
+    SAMBA_PRO_STATUS_KEY,
+    hasSambaProKey(settings) ? "true" : "false",
   );
 }

@@ -18,7 +18,7 @@ Documentação oficial consultada em 05/09/2026: [Granola MCP](https://docs.gran
 
 ## Áudio de qualquer gravador
 
-Na origem Áudio ou transcrição exportada, clique Selecionar áudio e transcrever. O diálogo nativo seleciona o arquivo e o main process faz o upload diretamente para a OpenAI. É necessário configurar a própria chave OpenAI em Settings → AI Providers → OpenAI; o uso é cobrado nessa conta. Não depende da assinatura Dyad Pro.
+Na origem Áudio ou transcrição exportada, clique Selecionar áudio e transcrever. O diálogo nativo seleciona o arquivo e o main process faz o upload diretamente para a OpenAI. É necessário configurar a própria chave OpenAI em Settings → AI Providers → OpenAI; o uso é cobrado nessa conta. Não depende da assinatura Samba Pro.
 
 São aceitos MP3, MP4, MPEG, MPGA, M4A, WAV e WEBM, até 24 MB. Usa `whisper-1` e `verbose_json` para preservar timestamps de segmentos quando retornados. Falantes não são identificados automaticamente. A resposta aparece em uma área editável, junto ao nome do arquivo. Revise o texto, clique Usar no chat e envie quando estiver pronto.
 

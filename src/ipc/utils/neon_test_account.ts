@@ -1,7 +1,7 @@
 import crypto from "node:crypto";
 import log from "electron-log";
 
-import { DyadError, DyadErrorKind } from "@/errors/dyad_error";
+import { SambaError, SambaErrorKind } from "@/errors/samba_error";
 import { IS_TEST_BUILD } from "@/ipc/utils/test_utils";
 import { fetchWithRetry } from "@/ipc/utils/retryWithRateLimit";
 
@@ -23,7 +23,7 @@ export interface NeonTestAccount {
  * Auth's own signup endpoint — never by inserting into auth tables, which
  * commonly produces a user that exists but cannot log in.
  *
- * Throws `DyadError` when signup is rejected, and when it succeeds but produces
+ * Throws `SambaError` when signup is rejected, and when it succeeds but produces
  * an account that can't sign in (email verification required); callers treat
  * either as "auth unavailable" and record/run unauthenticated rather than
  * failing the whole flow.
@@ -35,7 +35,7 @@ export async function createNeonTestAccount({
   neonAuthBaseUrl: string;
   appId: number;
 }): Promise<NeonTestAccount> {
-  const email = `dyad-test+${appId}-${Date.now()}@dyad.test`;
+  const email = `samba-test+${appId}-${Date.now()}@samba.test`;
   const password = crypto.randomBytes(24).toString("base64url");
 
   if (IS_TEST_BUILD) {
@@ -73,9 +73,9 @@ export async function createNeonTestAccount({
       .text()
       .then((body) => body.slice(0, 500))
       .catch(() => "");
-    throw new DyadError(
+    throw new SambaError(
       `Better Auth rejected the test-account signup (${response.status}). ${detail}`.trim(),
-      DyadErrorKind.External,
+      SambaErrorKind.External,
     );
   }
   await assertAccountCanSignIn(response);
@@ -107,8 +107,8 @@ async function assertAccountCanSignIn(response: Response): Promise<void> {
   if (payload.token) return;
   if (payload.user?.emailVerified !== false) return;
 
-  throw new DyadError(
+  throw new SambaError(
     "Neon Auth requires email verification, so the throwaway test account can't sign in. Recording and generated tests will run signed out.",
-    DyadErrorKind.External,
+    SambaErrorKind.External,
   );
 }

@@ -58,7 +58,7 @@ const PROJECT_API_KEYS = [
 const appDirs: string[] = [];
 
 function makeApp(key: string | null): string {
-  const appPath = fs.mkdtempSync(path.join(os.tmpdir(), "dyad-app-key-"));
+  const appPath = fs.mkdtempSync(path.join(os.tmpdir(), "samba-app-key-"));
   appDirs.push(appPath);
   if (key !== null) {
     const clientDir = path.join(appPath, "src", "integrations", "supabase");
@@ -359,7 +359,7 @@ describe("switchAppToPublishableKey", () => {
     // An imported app can carry a symlinked client.ts; following it would land
     // the rewrite on a file outside the app directory.
     const outside = path.join(
-      fs.mkdtempSync(path.join(os.tmpdir(), "dyad-outside-")),
+      fs.mkdtempSync(path.join(os.tmpdir(), "samba-outside-")),
       "client.ts",
     );
     appDirs.push(path.dirname(outside));

@@ -7,7 +7,7 @@ vi.mock("@/db", () => ({
 }));
 
 vi.mock("@/paths/paths", () => ({
-  getDyadAppPath: vi.fn((appPath: string) => `/mock/apps/${appPath}`),
+  getSambaAppPath: vi.fn((appPath: string) => `/mock/apps/${appPath}`),
   isAppLocationAccessible: vi.fn(),
 }));
 

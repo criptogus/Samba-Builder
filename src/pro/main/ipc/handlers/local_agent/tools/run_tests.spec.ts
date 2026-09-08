@@ -49,7 +49,7 @@ function makeCtx(): AgentContext {
   } as unknown as AgentContext;
 }
 
-/** All user-facing XML the tool emitted (dyad-status/dyad-output titles + bodies). */
+/** All user-facing XML the tool emitted (samba-status/samba-output titles + bodies). */
 function emittedXml(ctx: AgentContext): string {
   return [
     ...vi.mocked(ctx.onXmlStream).mock.calls,

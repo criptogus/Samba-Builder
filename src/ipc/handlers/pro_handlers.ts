@@ -1,9 +1,8 @@
-import { shell } from "electron";
 import log from "electron-log";
 import { createLoggedHandler } from "./safe_handle";
 import { createLoggedTypedHandler } from "./base";
 import { readSettings } from "../../main/settings"; // Assuming settings are read this way
-import { systemContracts, UserBudgetInfo } from "@/ipc/types";
+import { UserBudgetInfo } from "@/ipc/types";
 import { IS_TEST_BUILD } from "../utils/test_utils";
 import { z } from "zod";
 import {
@@ -14,9 +13,9 @@ import {
   MAX_AUDIO_REQUEST_ID_LENGTH,
 } from "../types/audio";
 import type { TranscribeAudioParams } from "../types/audio";
-import { transcribeWithDyadEngine } from "../utils/llm_engine_provider";
-import { getDyadEngineBaseUrl } from "../utils/dyad_engine_url";
-import { DyadError, DyadErrorKind } from "@/errors/dyad_error";
+import { transcribeWithSambaEngine } from "../utils/llm_engine_provider";
+import { getSambaEngineBaseUrl } from "../utils/samba_engine_url";
+import { SambaError, SambaErrorKind } from "@/errors/samba_error";
 
 export const UserInfoResponseSchema = z.object({
   usedCredits: z.number(),
@@ -36,9 +35,9 @@ function validateAudioTranscriptionRequest(input: TranscribeAudioParams) {
     input.audioData.byteLength === 0 ||
     input.audioData.byteLength > MAX_AUDIO_RECORDING_BYTES
   ) {
-    throw new DyadError(
+    throw new SambaError(
       `Audio data must be between 1 and ${MAX_AUDIO_RECORDING_BYTES} bytes`,
-      DyadErrorKind.Validation,
+      SambaErrorKind.Validation,
     );
   }
 
@@ -51,7 +50,7 @@ function validateAudioTranscriptionRequest(input: TranscribeAudioParams) {
     trimmedFilename === "." ||
     trimmedFilename === ".."
   ) {
-    throw new DyadError("Invalid audio filename", DyadErrorKind.Validation);
+    throw new SambaError("Invalid audio filename", SambaErrorKind.Validation);
   }
 
   if (
@@ -59,54 +58,11 @@ function validateAudioTranscriptionRequest(input: TranscribeAudioParams) {
     input.requestId.length > MAX_AUDIO_REQUEST_ID_LENGTH ||
     !AUDIO_REQUEST_ID_PATTERN.test(input.requestId)
   ) {
-    throw new DyadError(
+    throw new SambaError(
       "Invalid transcription request ID",
-      DyadErrorKind.Validation,
+      SambaErrorKind.Validation,
     );
   }
-}
-
-function getSubscriptionStatusUrl() {
-  return process.env.DYAD_SUBSCRIPTION_STATUS_URL ?? "https://sambatech.com";
-}
-
-function getSubscriptionStatusApiKey() {
-  const url = getSubscriptionStatusUrl();
-  const fixtureApiKey = process.env.DYAD_SUBSCRIPTION_STATUS_FIXTURE_API_KEY;
-  if (fixtureApiKey) {
-    try {
-      const hostname = new URL(url).hostname;
-      if (
-        hostname === "127.0.0.1" ||
-        hostname === "localhost" ||
-        hostname === "[::1]"
-      ) {
-        return fixtureApiKey;
-      }
-    } catch {
-      // The request path below will log and safely ignore an invalid URL.
-    }
-  }
-  return readSettings().providerSettings?.auto?.apiKey?.value;
-}
-
-export function parseBillingActionUrl(value: string) {
-  let url: URL;
-  try {
-    url = new URL(value);
-  } catch {
-    throw new DyadError("Invalid billing action URL", DyadErrorKind.Validation);
-  }
-  if (
-    url.protocol !== "https:" ||
-    url.hostname !== "academy.dyad.sh" ||
-    url.username !== "" ||
-    url.password !== "" ||
-    url.port !== ""
-  ) {
-    throw new DyadError("Invalid billing action URL", DyadErrorKind.Validation);
-  }
-  return url.toString();
 }
 
 export function registerProHandlers() {
@@ -137,28 +93,8 @@ export function registerProHandlers() {
       return null;
     }
 
-    // Samba Builder: zero backend do Dyad — o user/budget (api.dyad.sh) não é
-    // consultado. Sem assinatura/backend, não há budget a buscar.
+    // Samba Builder: zero backend — o user/budget não é consultado. Sem assinatura/backend, não há budget a buscar.
     return null;
-  });
-
-  typedHandle(systemContracts.getSubscriptionStatus, async () => {
-    const apiKey = getSubscriptionStatusApiKey();
-    if (!apiKey) {
-      return null;
-    }
-    // Samba Builder: zero backend do Dyad — o subscription status não é
-    // consultado (sem assinatura/backend, o status é sempre null).
-    return null;
-  });
-
-  typedHandle(systemContracts.openBillingAction, async (_event, value) => {
-    const url = parseBillingActionUrl(value);
-    if (IS_TEST_BUILD) {
-      logger.debug("E2E test mode: skipped opening billing action URL", url);
-      return;
-    }
-    await shell.openExternal(url);
   });
 
   typedHandle(
@@ -167,10 +103,10 @@ export function registerProHandlers() {
       const settings = readSettings();
       const apiKey = settings.providerSettings?.auto?.apiKey?.value;
 
-      if (!apiKey || !settings.enableDyadPro) {
-        throw new DyadError(
-          "Samba Builder is not enabled. Voice-to-text requires a Pro subscription.",
-          DyadErrorKind.Auth,
+      if (!apiKey) {
+        throw new SambaError(
+          "Voice-to-text requires a configured provider API key.",
+          SambaErrorKind.Auth,
         );
       }
 
@@ -182,14 +118,14 @@ export function registerProHandlers() {
         input.audioData.byteLength,
       );
 
-      const text = await transcribeWithDyadEngine(
+      const text = await transcribeWithSambaEngine(
         audioBuffer,
         input.filename,
         input.requestId,
         {
           apiKey,
-          baseURL: getDyadEngineBaseUrl(),
-          dyadOptions: {},
+          baseURL: getSambaEngineBaseUrl(),
+          sambaOptions: {},
           settings,
         },
       );

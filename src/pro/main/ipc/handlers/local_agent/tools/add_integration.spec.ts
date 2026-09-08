@@ -111,7 +111,7 @@ describe("addIntegrationTool Git-visible mutation tracking", () => {
       addIntegrationTool.shouldTrackMutation?.({}, result, {} as AgentContext),
     ).toBe(false);
     expect(onXmlComplete).toHaveBeenCalledWith(
-      '<dyad-add-integration outcome="skipped"></dyad-add-integration>',
+      '<samba-add-integration outcome="skipped"></samba-add-integration>',
     );
     expect(
       addIntegrationTool.shouldTrackFileMutation?.(
@@ -178,10 +178,10 @@ describe("addIntegrationTool Git-visible mutation tracking", () => {
 
   it("persists the pending card before execute parks", () => {
     expect(addIntegrationTool.buildXml?.({}, false)).toBe(
-      '<dyad-add-integration outcome="pending"></dyad-add-integration>',
+      '<samba-add-integration outcome="pending"></samba-add-integration>',
     );
     expect(addIntegrationTool.buildXml?.({}, true)).toBe(
-      '<dyad-add-integration outcome="pending"></dyad-add-integration>',
+      '<samba-add-integration outcome="pending"></samba-add-integration>',
     );
   });
 });

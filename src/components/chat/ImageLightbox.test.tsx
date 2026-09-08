@@ -19,7 +19,7 @@ describe("ImageLightbox", () => {
   it("opens a projected media result without exposing an absolute path", () => {
     render(
       <ImageLightbox
-        imageUrl="dyad-media://generated.png"
+        imageUrl="samba-media://generated.png"
         alt="Generated lighthouse"
         mediaFile={{ appId: 7, fileName: "generated.png" }}
         onClose={() => undefined}

@@ -213,7 +213,7 @@ export const PreviewIframe = ({
     // from.
     // Asks first — setup clears the preview's cookies and local storage.
     recorder.requestStartRecording(
-      iframeState.currentUrlSource === "dyad"
+      iframeState.currentUrlSource === "samba"
         ? sameOriginStartPath(currentHistoryUrl, appUrl)
         : undefined,
     );
@@ -311,7 +311,7 @@ export const PreviewIframe = ({
 
     const requestId = crypto.randomUUID();
     pendingAnnotatorScreenshotRequestIdRef.current = requestId;
-    postPreviewMessage({ type: "dyad-take-screenshot", requestId });
+    postPreviewMessage({ type: "samba-take-screenshot", requestId });
   };
 
   // AST Analysis State
@@ -393,7 +393,7 @@ export const PreviewIframe = ({
           : cloudSandboxStatus.terminationReason === "credits_exhausted"
             ? "This cloud sandbox was stopped because your Samba Builder credits ran out. Add credits and start it again."
             : "This cloud sandbox was stopped because Samba Builder could not confirm billing. Please try starting it again.",
-        source: "dyad-app",
+        source: "samba-app",
       });
     }
   }, [cloudSandboxStatus, isCloudMode, sendIframeEvent]);
@@ -449,7 +449,7 @@ export const PreviewIframe = ({
       if (result.hasStaticText && iframeRef.current?.contentWindow) {
         iframeRef.current.contentWindow.postMessage(
           {
-            type: "enable-dyad-text-editing",
+            type: "enable-samba-text-editing",
             data: {
               componentId: componentId,
               runtimeId: visualEditingSelectedComponent?.runtimeId,
@@ -513,7 +513,7 @@ export const PreviewIframe = ({
       // Send message to iframe to get current styles
       iframeRef.current.contentWindow.postMessage(
         {
-          type: "get-dyad-component-styles",
+          type: "get-samba-component-styles",
           data: {
             elementId: visualEditingSelectedComponent.id,
             runtimeId: visualEditingSelectedComponent.runtimeId,
@@ -539,7 +539,7 @@ export const PreviewIframe = ({
   useEffect(() => {
     if (iframeRef.current?.contentWindow && isComponentSelectorInitialized) {
       iframeRef.current.contentWindow.postMessage(
-        { type: "dyad-pro-mode", enabled: isProMode },
+        { type: "samba-pro-mode", enabled: isProMode },
         "*",
       );
     }
@@ -674,30 +674,30 @@ export const PreviewIframe = ({
         return;
       }
 
-      if (event.data?.type === "dyad-component-selector-initialized") {
+      if (event.data?.type === "samba-component-selector-initialized") {
         iframeRef.current?.contentWindow?.postMessage(
-          { type: "dyad-pro-mode", enabled: isProMode },
+          { type: "samba-pro-mode", enabled: isProMode },
           "*",
         );
         return;
       }
 
-      if (event.data?.type === "dyad-preview-reload-shortcut") {
+      if (event.data?.type === "samba-preview-reload-shortcut") {
         handleReload();
         return;
       }
 
-      if (event.data?.type === "dyad-text-updated") {
+      if (event.data?.type === "samba-text-updated") {
         handleTextUpdated(event.data);
         return;
       }
 
-      if (event.data?.type === "dyad-text-finalized") {
+      if (event.data?.type === "samba-text-finalized") {
         handleTextUpdated(event.data);
         return;
       }
 
-      if (event.data?.type === "dyad-component-selected") {
+      if (event.data?.type === "samba-component-selected") {
         console.log("Component picked:", event.data);
 
         const component = parseComponentSelection(event.data);
@@ -735,14 +735,14 @@ export const PreviewIframe = ({
         return;
       }
 
-      if (event.data?.type === "dyad-component-deselected") {
+      if (event.data?.type === "samba-component-deselected") {
         const componentId = event.data.componentId;
         if (componentId) {
           // Disable text editing for the deselected component
           if (iframeRef.current?.contentWindow) {
             iframeRef.current.contentWindow.postMessage(
               {
-                type: "disable-dyad-text-editing",
+                type: "disable-samba-text-editing",
                 data: { componentId },
               },
               "*",
@@ -763,7 +763,7 @@ export const PreviewIframe = ({
         return;
       }
 
-      if (event.data?.type === "dyad-image-load-error") {
+      if (event.data?.type === "samba-image-load-error") {
         showError("Image failed to load. Please check the URL and try again.");
         // Remove the broken image from pending changes
         const { elementId } = event.data;
@@ -792,14 +792,14 @@ export const PreviewIframe = ({
         return;
       }
 
-      if (event.data?.type === "dyad-component-coordinates-updated") {
+      if (event.data?.type === "samba-component-coordinates-updated") {
         if (event.data.coordinates) {
           setCurrentComponentCoordinates(event.data.coordinates);
         }
         return;
       }
 
-      if (event.data?.type === "dyad-screenshot-response") {
+      if (event.data?.type === "samba-screenshot-response") {
         const requestId =
           typeof event.data.requestId === "string"
             ? event.data.requestId
@@ -1607,7 +1607,7 @@ export const PreviewIframe = ({
         <PreviewLoadingScreen
           loading={loading}
           isAppUrlReady={!!appUrl}
-          hasStartupError={!loading && errorMessage?.source === "dyad-app"}
+          hasStartupError={!loading && errorMessage?.source === "samba-app"}
         />
         {!loading && appUrl && (
           <div
@@ -1734,7 +1734,7 @@ function RecordingSetupOverlay({
 }
 
 function parseComponentSelection(data: any): ComponentSelection | null {
-  if (!data || data.type !== "dyad-component-selected") {
+  if (!data || data.type !== "samba-component-selected") {
     return null;
   }
 

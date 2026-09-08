@@ -67,7 +67,7 @@ testSkipIfWindows(
 
     // The agent names the test, describes the steps and proposes checks; all of
     // it lands in the card.
-    const card = po.page.getByTestId("dyad-test-assertions-card");
+    const card = po.page.getByTestId("samba-test-assertions-card");
     await expect(card).toBeVisible({ timeout: Timeout.LONG });
     // Named by the AI, not a path — nothing has been written yet. The fake
     // model names the flow from its last statement, and the recorder's
@@ -75,11 +75,11 @@ testSkipIfWindows(
     // accessible name.
     await expect(card).toContainText(`Type "Ada" into the Name`);
     await expect(
-      card.locator('[data-testid^="dyad-test-assertions-step-"]').first(),
+      card.locator('[data-testid^="samba-test-assertions-step-"]').first(),
     ).toBeVisible();
 
     const assertions = card.locator(
-      '[data-testid^="dyad-test-assertions-assertion-"]',
+      '[data-testid^="samba-test-assertions-assertion-"]',
     );
     await expect(assertions.first()).toBeVisible();
 
@@ -90,30 +90,30 @@ testSkipIfWindows(
       "Samba Builder is waiting on this before it",
     );
     await expect(
-      po.page.getByTestId("dyad-test-assertions-discard-button"),
+      po.page.getByTestId("samba-test-assertions-discard-button"),
     ).toBeVisible();
 
     // Editing an assertion marks it for code regeneration on approve.
     await card
-      .locator('[data-testid^="dyad-test-assertions-text-"]')
+      .locator('[data-testid^="samba-test-assertions-text-"]')
       .first()
       .click();
-    const editor = card.locator('[data-testid^="dyad-test-assertions-edit-"]');
+    const editor = card.locator('[data-testid^="samba-test-assertions-edit-"]');
     await editor.fill("The name field keeps the typed value");
     await editor.press("Enter");
     await expect(assertions.first()).toContainText("Code written on approve");
 
     // Approve: this is what creates the spec.
-    await po.page.getByTestId("dyad-test-assertions-approve-button").click();
+    await po.page.getByTestId("samba-test-assertions-approve-button").click();
     await expect(
-      po.page.getByTestId("dyad-test-assertions-approved-badge"),
+      po.page.getByTestId("samba-test-assertions-approved-badge"),
     ).toBeVisible({ timeout: Timeout.LONG });
 
     // The card's own link opens the generated spec in the Code tab, which has
     // the recorded steps and an assertion. Its filename comes from the name the
     // AI proposed, slugified — no "recorded test" placeholder anywhere.
     const specFileName = "recorded-type-ada-into-the-name.spec.ts";
-    await po.page.getByTestId("dyad-test-assertions-open-file-button").click();
+    await po.page.getByTestId("samba-test-assertions-open-file-button").click();
     // The spec shows up twice in the Code tab (file tree + editor breadcrumb),
     // so pin to the first rather than tripping strict mode.
     await expect(
@@ -146,7 +146,7 @@ testSkipIfWindows(
     await po.previewPanel.selectPreviewMode("preview");
     await po.previewPanel.selectPreviewMode("tests");
     await expect(
-      po.page.getByTestId("dyad-test-assertions-approved-badge"),
+      po.page.getByTestId("samba-test-assertions-approved-badge"),
     ).toBeVisible();
   },
 );
@@ -176,12 +176,14 @@ testSkipIfWindows(
     // Close the card without generating anything. The tool is parked on it, so
     // this resumes the turn, which says its piece and ends — no test file, and
     // nothing left to wait for.
-    await expect(po.page.getByTestId("dyad-test-assertions-card")).toBeVisible({
-      timeout: Timeout.LONG,
-    });
-    await po.page.getByTestId("dyad-test-assertions-discard-button").click();
+    await expect(po.page.getByTestId("samba-test-assertions-card")).toBeVisible(
+      {
+        timeout: Timeout.LONG,
+      },
+    );
+    await po.page.getByTestId("samba-test-assertions-discard-button").click();
     await expect(
-      po.page.getByTestId("dyad-test-assertions-discarded-note"),
+      po.page.getByTestId("samba-test-assertions-discarded-note"),
     ).toBeVisible({ timeout: Timeout.LONG });
 
     // The bar drops back to the review, where the recording can still be asked

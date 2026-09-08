@@ -36,7 +36,7 @@ vi.mock("@/ipc/utils/query_invalidation_delivery", () => ({
 }));
 
 vi.mock("@/paths/paths", () => ({
-  getDyadAppPath: vi.fn((appPath: string) => `/samba-apps/${appPath}`),
+  getSambaAppPath: vi.fn((appPath: string) => `/samba-apps/${appPath}`),
 }));
 
 vi.mock("@/utils/codebase", () => ({

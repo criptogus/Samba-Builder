@@ -4,7 +4,7 @@
 
 ## Summary
 
-Fix the `Stop generation -> Undo` workflow so Dyad durably remembers that the target turn was cancelled, preserves its partial working-tree changes in a recoverable checkpoint commit, and completes Undo without losing work. Also narrow `restore-recovery-required` to genuinely ambiguous Git states and add validated **Use current version** and **Save changes & use current version** paths for stale recovery checkpoints.
+Fix the `Stop generation -> Undo` workflow so Samba durably remembers that the target turn was cancelled, preserves its partial working-tree changes in a recoverable checkpoint commit, and completes Undo without losing work. Also narrow `restore-recovery-required` to genuinely ambiguous Git states and add validated **Use current version** and **Save changes & use current version** paths for stale recovery checkpoints.
 
 Ship all three changes in one PR because they form one recovery contract: prevent the common false-positive, classify failures correctly, and provide an escape hatch for checkpoints that still cannot be reconciled automatically.
 
@@ -37,7 +37,7 @@ The Git dirty-tree refusal is a valid data-loss guard. The bugs are losing the c
 ## Non-goals
 
 - Automatically discard dirty files.
-- Attribute individual dirty files to the agent with certainty; Dyad already cannot distinguish partial generation writes from simultaneous manual edits.
+- Attribute individual dirty files to the agent with certainty; Samba already cannot distinguish partial generation writes from simultaneous manual edits.
 - Add general Git repair tooling, conflict resolution, reset, or force-checkout actions.
 - Add a guided conflict-resolution panel, automatically continue/abort an in-progress Git operation, or create special backups for those operations.
 - Redesign Version History beyond the recovery toast/action.
@@ -98,7 +98,7 @@ The action must not modify Git. Before accepting, main must verify under a coord
 - no merge, rebase, cherry-pick, revert, or bisect operation is in progress; and
 - the working tree is clean.
 
-On success, return authoritative `appId`, branch, accepted HEAD, and optional saved-version ID; transition to `closed`; remove the checkpoint through the existing persistence observer; reset historical-preview presentation; refresh repository, version, file, and chat data; dismiss the recovery toast; and restore normal Version History capabilities. On failure, remain in `restore-recovery-required` and replace the description with an actionable `DyadErrorKind.Conflict` or `Precondition` message.
+On success, return authoritative `appId`, branch, accepted HEAD, and optional saved-version ID; transition to `closed`; remove the checkpoint through the existing persistence observer; reset historical-preview presentation; refresh repository, version, file, and chat data; dismiss the recovery toast; and restore normal Version History capabilities. On failure, remain in `restore-recovery-required` and replace the description with an actionable `SambaErrorKind.Conflict` or `Precondition` message.
 
 #### Dirty-tree recovery
 
@@ -107,14 +107,14 @@ A dirty tree is recoverable without asking the user to understand Git. If read-o
 This is a separate, explicitly mutating action. Under a coordinated repository write claim it must:
 
 1. revalidate that HEAD is attached, the index has no unresolved entries, and no Git operation is in progress;
-2. stage the same user-visible files covered by Dyad's existing whole-tree checkpoint behavior;
+2. stage the same user-visible files covered by Samba's existing whole-tree checkpoint behavior;
 3. create the canonical checkpoint commit **`[Recovery] Saved current changes before continuing Version History`** so this distinct, user-initiated recovery save is also recognizable as an ordinary version;
 4. re-run the repository-health probe and require a clean attached HEAD; and
 5. only then transition to `closed` and remove the stale restore checkpoint.
 
-If staging, committing, or final validation fails, leave `restore-recovery-required` in place and show the specific error. Never reset, discard, force-checkout, or clear recovery on a partial failure. If Dyad crashes after the commit but before acknowledgement, restart reconciliation sees a clean repository and the user can safely choose **Use current version**.
+If staging, committing, or final validation fails, leave `restore-recovery-required` in place and show the specific error. Never reset, discard, force-checkout, or clear recovery on a partial failure. If Samba crashes after the commit but before acknowledgement, restart reconciliation sees a clean repository and the user can safely choose **Use current version**.
 
-Detached HEAD, unresolved index entries, missing repositories, and active merge/rebase/cherry-pick/revert/bisect operations do not offer the save action. Dyad does not attempt to repair, continue, abort, reset, or back up these states in this feature. The toast explains the detected blocker in plain language and offers only the read-only **Check again** action after the user resolves it outside Dyad.
+Detached HEAD, unresolved index entries, missing repositories, and active merge/rebase/cherry-pick/revert/bisect operations do not offer the save action. Samba does not attempt to repair, continue, abort, reset, or back up these states in this feature. The toast explains the detected blocker in plain language and offers only the read-only **Check again** action after the user resolves it outside Samba.
 
 ## User Experience
 
@@ -123,8 +123,8 @@ Detached HEAD, unresolved index entries, missing repositories, and active merge/
 1. The user stops a generation after it has edited files.
 2. The cancelled outcome is persisted before the turn is considered settled.
 3. The user clicks Undo on that user message.
-4. Dyad recognizes the target turn as cancelled.
-5. If the tree is dirty, Dyad creates `[Interrupted] Saved partial changes before restoring to an earlier version` and then completes the requested Undo or restore/fork flow.
+4. Samba recognizes the target turn as cancelled.
+5. If the tree is dirty, Samba creates `[Interrupted] Saved partial changes before restoring to an earlier version` and then completes the requested Undo or restore/fork flow.
 6. The result toast explains that partial changes were saved as an **Interrupted** entry in Version History and that the prompt can be resubmitted if desired.
 
 No additional confirmation is required because the operation is lossless and the user already confirmed Undo. If checkpoint creation fails, leave the tree untouched and show the ordinary Git conflict; do not continue to reset.
@@ -138,7 +138,7 @@ If the target turn is completed/unknown and the tree is dirty, Undo fails with t
 Show the existing persistent toast with one primary action:
 
 > **Version restore needs attention**  
-> Dyad could not verify an earlier restore. If this project is clean, you can continue from its current version.  
+> Samba could not verify an earlier restore. If this project is clean, you can continue from its current version.  
 > **Use current version**
 
 While validation runs, update the toast description to “Checking the current repository…” and suppress duplicate clicks. If validation fails, retain the toast and render the next action from the authoritative blocker classification.
@@ -146,7 +146,7 @@ While validation runs, update the toast description to “Checking the current r
 If the only validation failure is a dirty working tree, do not tell the user to open a terminal, commit, or stash. Update the same toast in place:
 
 > **Your current changes need to be saved**  
-> Dyad found changes that are not part of a saved version. Save them as the current version to continue using Version History.  
+> Samba found changes that are not part of a saved version. Save them as the current version to continue using Version History.  
 > **Save changes & use current version**
 
 While saving, show “Saving the current version…” and disable duplicate activation. On success, dismiss the toast and restore Version History. On failure, keep the toast open with the concrete error and a retry action.
@@ -172,13 +172,13 @@ Both success toasts use the normal finite duration. Do not include **Open Versio
 For unresolved file conflicts, use blocker-specific copy:
 
 > **Version History is unavailable**  
-> This project has unresolved file conflicts. Resolve them outside Dyad, then check again.  
+> This project has unresolved file conflicts. Resolve them outside Samba, then check again.  
 > **Check again**
 
 For an in-progress Git operation, name the operation when known:
 
 > **Version History is unavailable**  
-> A Git rebase is still in progress. Finish or cancel it outside Dyad, then check again.  
+> A Git rebase is still in progress. Finish or cancel it outside Samba, then check again.  
 > **Check again**
 
 Use the same pattern for merge, cherry-pick, revert, and bisect. **Check again** only reruns the read-only repository-health probe; it never continues, aborts, resets, commits, or otherwise changes Git. If the blocker remains, keep the toast and recovery checkpoint unchanged. Do not add a recovery panel for these states in this PR.
@@ -268,7 +268,7 @@ Changes:
 4. On error, inspect branch and HEAD while the repository claim is still held and produce a structured internal failure disposition:
    - ordinary conflict; or
    - recovery required with durable recovery facts.
-5. Preserve `DyadError` classification and original user-facing messages. A dirty tree remains `DyadErrorKind.Conflict` and should be filtered from exception telemetry.
+5. Preserve `SambaError` classification and original user-facing messages. A dirty tree remains `SambaErrorKind.Conflict` and should be filtered from exception telemetry.
 6. Make the command runner emit `RESTORE_FAILED` or `RESTORE_RECOVERY_REQUIRED` from that disposition. Remove the current heuristic that treats every progress value other than `preparing`/`completed` as recovery-required.
 7. Keep restart reconciliation conservative for hard-reset-and-later checkpoints.
 
@@ -416,7 +416,7 @@ The phases may be separate commits but should ship in one PR.
   - returns it from `listVersions` with the exact `[Interrupted]` label so it can be selected, previewed, and restored, and
   - reports the interrupted-generation warning.
 - Cancelled target turn + untracked file preserves that file in the checkpoint.
-- Completed/unknown target turn + dirty tree returns `DyadErrorKind.Conflict`, leaves branch/HEAD/index/tree unchanged, and does not create a fork chat.
+- Completed/unknown target turn + dirty tree returns `SambaErrorKind.Conflict`, leaves branch/HEAD/index/tree unchanged, and does not create a fork chat.
 - Active generation cancelled by Undo retains the existing behavior.
 - Phase-1 and phase-3 outcome disagreement uses the fresh phase-3 result.
 - A recording refusal occurs before cancellation/preservation work.
@@ -476,14 +476,14 @@ Prefer Vitest integration tests over Playwright because the behavior can be prov
 
 ## Acceptance Criteria
 
-- Stop a generation after a file write, then click Undo: Dyad saves partial work and successfully restores/forks without a dirty-tree error.
+- Stop a generation after a file write, then click Undo: Samba saves partial work and successfully restores/forks without a dirty-tree error.
 - The saved partial work is a reachable, ordinary Version History entry labeled `[Interrupted]`; it can be selected, previewed, and restored without Git knowledge, and no user-visible file is lost.
 - A dirty tree unrelated to a cancelled target turn is never silently committed or discarded.
 - A pre-destructive dirty-tree conflict does not enter `restore-recovery-required` and does not permanently disable Version History.
 - Failures after a potentially destructive reset remain fail-closed.
 - A user with a stale recovery checkpoint can choose **Use current version** when the repository is healthy.
 - Read-only acceptance never mutates Git.
-- A user whose only blocker is a dirty tree can choose **Save changes & use current version** without opening a terminal; Dyad creates a recoverable commit before clearing recovery.
+- A user whose only blocker is a dirty tree can choose **Save changes & use current version** without opening a terminal; Samba creates a recoverable commit before clearing recovery.
 - Neither acceptance path can clear recovery for a detached, conflicted, missing, or mid-operation repository.
 - Conflicted and mid-operation repositories receive a state-specific error plus read-only **Check again**; this PR provides no guided repair, continue, abort, reset, or backup action for them.
 - Recovery state survives reload/shutdown until authoritative acceptance succeeds.
@@ -518,7 +518,7 @@ Add structured, non-content logs for:
 - repository acceptance success/rejection reason; and
 - checkpoint removal after acceptance.
 
-Never log prompts, file contents, tokens, or remote URLs. Expected dirty-tree and repository-health refusals remain classified `DyadError`s rather than exception telemetry.
+Never log prompts, file contents, tokens, or remote URLs. Expected dirty-tree and repository-health refusals remain classified `SambaError`s rather than exception telemetry.
 
 ## Decision Log
 

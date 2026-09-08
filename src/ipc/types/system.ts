@@ -61,7 +61,7 @@ export const SystemDebugInfoSchema = z.object({
   telemetryId: z.string(),
   telemetryConsent: z.string(),
   telemetryUrl: z.string(),
-  dyadVersion: z.string(),
+  sambaVersion: z.string(),
   platform: z.string(),
   architecture: z.string(),
   logs: z.string(),
@@ -386,18 +386,6 @@ export const systemContracts = {
     output: UserBudgetInfoSchema,
   }),
 
-  getSubscriptionStatus: defineContract({
-    channel: "get-subscription-status",
-    input: z.void(),
-    output: SubscriptionStatusSchema.nullable(),
-  }),
-
-  openBillingAction: defineContract({
-    channel: "open-billing-action",
-    input: z.string(),
-    output: z.void(),
-  }),
-
   // Upload
   uploadToSignedUrl: defineContract({
     channel: "upload-to-signed-url",
@@ -417,8 +405,8 @@ export const systemContracts = {
   }),
 
   // Restart
-  restartDyad: defineContract({
-    channel: "restart-dyad",
+  restartSamba: defineContract({
+    channel: "restart-samba",
     input: z.void(),
     output: z.void(),
   }),

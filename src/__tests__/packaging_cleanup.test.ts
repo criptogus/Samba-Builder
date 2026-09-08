@@ -29,7 +29,7 @@ afterEach(async () => {
 describe("removeUnusedAppPackageFiles", () => {
   it("keeps target node-pty binaries and removes incompatible/debug artifacts", async () => {
     const buildPath = await fs.mkdtemp(
-      path.join(os.tmpdir(), "dyad-package-cleanup-app-"),
+      path.join(os.tmpdir(), "samba-package-cleanup-app-"),
     );
     tempDirectories.push(buildPath);
 
@@ -92,7 +92,7 @@ describe("removeUnusedAppPackageFiles", () => {
 
   it("keeps better-sqlite3 runtime files and removes build intermediates", async () => {
     const buildPath = await fs.mkdtemp(
-      path.join(os.tmpdir(), "dyad-package-cleanup-sqlite-"),
+      path.join(os.tmpdir(), "samba-package-cleanup-sqlite-"),
     );
     tempDirectories.push(buildPath);
 
@@ -146,13 +146,13 @@ describe("removeUnusedAppPackageFiles", () => {
 
   it("keeps keychain reader runtime files and removes build intermediates", async () => {
     const buildPath = await fs.mkdtemp(
-      path.join(os.tmpdir(), "dyad-package-cleanup-keychain-"),
+      path.join(os.tmpdir(), "samba-package-cleanup-keychain-"),
     );
     tempDirectories.push(buildPath);
 
     const keychainReaderPath = path.join(
       buildPath,
-      "node_modules/dyad-keychain-reader",
+      "node_modules/samba-keychain-reader",
     );
     const runtimeJs = path.join(keychainReaderPath, "index.js");
     const runtimeBinary = path.join(
@@ -192,17 +192,17 @@ describe("removeUnusedAppPackageFiles", () => {
 describe("removeUnusedCopiedResources", () => {
   it("keeps active Samba Builder Electron locales and removes git-lfs", async () => {
     const buildPath = await fs.mkdtemp(
-      path.join(os.tmpdir(), "dyad-package-cleanup-resources-"),
+      path.join(os.tmpdir(), "samba-package-cleanup-resources-"),
     );
     tempDirectories.push(buildPath);
 
     const appResourcesPath = path.join(
       buildPath,
-      "dyad.app/Contents/Resources",
+      "samba.app/Contents/Resources",
     );
     const electronResourcesPath = path.join(
       buildPath,
-      "dyad.app/Contents/Frameworks/Electron Framework.framework/Versions/A/Resources",
+      "samba.app/Contents/Frameworks/Electron Framework.framework/Versions/A/Resources",
     );
     const keptLocale = path.join(
       electronResourcesPath,
@@ -229,13 +229,13 @@ describe("removeUnusedCopiedResources", () => {
 
   it("removes Git Credential Manager from the Unix git distribution but keeps git's own files", async () => {
     const buildPath = await fs.mkdtemp(
-      path.join(os.tmpdir(), "dyad-package-cleanup-gcm-unix-"),
+      path.join(os.tmpdir(), "samba-package-cleanup-gcm-unix-"),
     );
     tempDirectories.push(buildPath);
 
     const gitCorePath = path.join(
       buildPath,
-      "dyad.app/Contents/Resources/git/libexec/git-core",
+      "samba.app/Contents/Resources/git/libexec/git-core",
     );
 
     const removedFiles = [
@@ -278,13 +278,13 @@ describe("removeUnusedCopiedResources", () => {
 
   it("surfaces unexpected errors when removing empty Unix GCM locale directories", async () => {
     const buildPath = await fs.mkdtemp(
-      path.join(os.tmpdir(), "dyad-package-cleanup-gcm-rmdir-"),
+      path.join(os.tmpdir(), "samba-package-cleanup-gcm-rmdir-"),
     );
     tempDirectories.push(buildPath);
 
     const gitCorePath = path.join(
       buildPath,
-      "dyad.app/Contents/Resources/git/libexec/git-core",
+      "samba.app/Contents/Resources/git/libexec/git-core",
     );
     await writeFixtureFile(
       path.join(gitCorePath, "ja/System.CommandLine.resources.dll"),
@@ -304,7 +304,7 @@ describe("removeUnusedCopiedResources", () => {
 
   it("removes Git Credential Manager and git-lfs from the Windows git distribution but keeps git's DLLs", async () => {
     const buildPath = await fs.mkdtemp(
-      path.join(os.tmpdir(), "dyad-package-cleanup-gcm-win-"),
+      path.join(os.tmpdir(), "samba-package-cleanup-gcm-win-"),
     );
     tempDirectories.push(buildPath);
 
@@ -370,7 +370,7 @@ describe("removeUnusedCopiedResources", () => {
 
   it("removes unsupported top-level Electron locale paks on non-mac targets", async () => {
     const buildPath = await fs.mkdtemp(
-      path.join(os.tmpdir(), "dyad-package-cleanup-locale-paks-"),
+      path.join(os.tmpdir(), "samba-package-cleanup-locale-paks-"),
     );
     tempDirectories.push(buildPath);
 

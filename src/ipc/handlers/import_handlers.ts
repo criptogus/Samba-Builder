@@ -3,7 +3,7 @@ import fs from "fs/promises";
 import path from "path";
 import { createLoggedHandler } from "./safe_handle";
 import log from "electron-log";
-import { getDyadAppPath, isAppLocationAccessible } from "../../paths/paths";
+import { getSambaAppPath, isAppLocationAccessible } from "../../paths/paths";
 import { apps } from "@/db/schema";
 import { db } from "@/db";
 import { chats } from "@/db/schema";
@@ -12,7 +12,7 @@ import { eq } from "drizzle-orm";
 import { ImportAppParams, ImportAppResult } from "@/ipc/types";
 import { copyDirectoryRecursive } from "../utils/file_utils";
 import { gitService } from "../services/git_service";
-import { DyadError, DyadErrorKind } from "@/errors/dyad_error";
+import { SambaError, SambaErrorKind } from "@/errors/samba_error";
 import { getInitialChatModeForNewChat } from "./chat_mode_resolution";
 import {
   sanitizeAppDisplayName,
@@ -81,9 +81,9 @@ export function registerImportHandlers() {
       try {
         await fs.access(sourcePath);
       } catch {
-        throw new DyadError(
+        throw new SambaError(
           "Source folder does not exist",
-          DyadErrorKind.NotFound,
+          SambaErrorKind.NotFound,
         );
       }
 
@@ -93,9 +93,9 @@ export function registerImportHandlers() {
         where: eq(apps.name, appName),
       });
       if (existingApp) {
-        throw new DyadError(
+        throw new SambaError(
           "An app with this name already exists",
-          DyadErrorKind.Conflict,
+          SambaErrorKind.Conflict,
         );
       }
 
@@ -106,7 +106,7 @@ export function registerImportHandlers() {
           slugifyAppFolderName(appName),
         );
       }
-      const appPath = skipCopy ? sourcePath : getDyadAppPath(folderName!);
+      const appPath = skipCopy ? sourcePath : getSambaAppPath(folderName!);
 
       if (!skipCopy) {
         if (!isAppLocationAccessible(appPath)) {

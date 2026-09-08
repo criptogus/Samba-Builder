@@ -54,13 +54,13 @@ export const getMcpToolSchemaTool: ToolDefinition<GetMcpToolSchemaArgs> = {
     // an array yet, so guard before joining.
     const tools = Array.isArray(args.tools) ? args.tools : [];
     if (tools.length === 0) return undefined;
-    return `<dyad-mcp-tool-schema tools="${escapeXmlAttr(tools.join(", "))}">Loading...`;
+    return `<samba-mcp-tool-schema tools="${escapeXmlAttr(tools.join(", "))}">Loading...`;
   },
 
   execute: async (args: GetMcpToolSchemaArgs, ctx: AgentContext) => {
     const finish = (result: string) => {
       ctx.onXmlComplete(
-        `<dyad-mcp-tool-schema tools="${escapeXmlAttr(args.tools.join(", "))}">${escapeXmlContent(result)}</dyad-mcp-tool-schema>`,
+        `<samba-mcp-tool-schema tools="${escapeXmlAttr(args.tools.join(", "))}">${escapeXmlContent(result)}</samba-mcp-tool-schema>`,
       );
       return result;
     };

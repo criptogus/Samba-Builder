@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 import { runServerSetup, type SetupStep } from "./setup_flow";
 import { waitForAdminSeeded } from "./install";
 import { tryEnableHttps } from "./https_setup";
-import { DyadError, DyadErrorKind } from "@/errors/dyad_error";
+import { SambaError, SambaErrorKind } from "@/errors/samba_error";
 import { SshError } from "@/ipc/utils/ssh_client";
 import type { SshSession } from "@/ipc/utils/ssh_client";
 
@@ -10,10 +10,10 @@ const REAL_TOKEN = "1|EcaUxT43T5fgdLJmnYj0702tEUC6viy5jEhO3Ujk2298db95";
 
 function transcript(output: string): string {
   return [
-    '> echo "__DYAD_OUT_START__" . PHP_EOL;',
-    "> __DYAD_OUT_START__",
+    '> echo "__SAMBA_OUT_START__" . PHP_EOL;',
+    "> __SAMBA_OUT_START__",
     output,
-    "__DYAD_OUT_END__",
+    "__SAMBA_OUT_END__",
   ].join("\n");
 }
 
@@ -269,7 +269,7 @@ describe("runServerSetup", () => {
         throw new SshError(
           "command-timeout",
           "timed out",
-          DyadErrorKind.External,
+          SambaErrorKind.External,
         );
       }
       return answering(command, options);
@@ -312,7 +312,7 @@ describe("runServerSetup", () => {
         throw new SshError(
           "timeout",
           "the connection stopped answering",
-          DyadErrorKind.External,
+          SambaErrorKind.External,
         );
       }
       return original(command, options);
@@ -692,7 +692,7 @@ describe("runServerSetup", () => {
     await expect(
       run(server, {
         onCredentialsBuilt: () => {
-          throw new DyadError("nowhere to keep it", DyadErrorKind.External);
+          throw new SambaError("nowhere to keep it", SambaErrorKind.External);
         },
       }).promise,
     ).rejects.toThrow(/nowhere to keep it/);
@@ -712,7 +712,7 @@ describe("runServerSetup", () => {
           throw new SshError(
             "timeout",
             "the connection stopped answering",
-            DyadErrorKind.External,
+            SambaErrorKind.External,
           );
         }
         if (command.includes("MemTotal")) {

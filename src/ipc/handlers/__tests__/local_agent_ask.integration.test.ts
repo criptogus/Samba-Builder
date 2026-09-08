@@ -4,8 +4,8 @@
 //
 // Ask mode for Pro users routes through the local agent in read-only mode.
 // Part 1: the ask-read-file fixture runs a read-only sandbox script
-// (execute_sandbox_script) that reads src/App.tsx; the completed <dyad-script>
-// card renders in the DOM (data-testid="dyad-script-card") and the XML lands
+// (execute_sandbox_script) that reads src/App.tsx; the completed <samba-script>
+// card renders in the DOM (data-testid="samba-script-card") and the XML lands
 // in the assistant message. Part 2: a fresh chat sends [dump] and the request
 // payload must contain ONLY the read-only toolset and preserve the engine auth
 // header through the hybrid harness's Node fetch seam.
@@ -37,9 +37,9 @@ describe("local-agent ask mode (integration)", () => {
       chatMode: "ask",
       settings: {
         isTestMode: true,
-        enableDyadPro: true,
+        enableSambaPro: true,
         enableImplementerSubagent: true,
-        providerSettings: { auto: { apiKey: { value: "testdyadkey" } } },
+        providerSettings: { auto: { apiKey: { value: "testsambakey" } } },
         enableCodeExplorer: false,
       },
     });
@@ -69,10 +69,10 @@ describe("local-agent ask mode (integration)", () => {
     const { send } = await harness.typeInChat("tc=local-agent/ask-read-file");
     send();
 
-    // The execute_sandbox_script tool call renders its dyad-script card in the
+    // The execute_sandbox_script tool call renders its samba-script card in the
     // DOM — the same surface the e2e asserted.
     await waitFor(
-      () => expect(screen.getByTestId("dyad-script-card")).toBeTruthy(),
+      () => expect(screen.getByTestId("samba-script-card")).toBeTruthy(),
       { timeout: 20_000 },
     );
     // The card header shows the script description, and the agent's final
@@ -116,7 +116,7 @@ describe("local-agent ask mode (integration)", () => {
 
     // Completed sandbox-script XML (duration varies, so match loosely).
     expect(content).toMatch(
-      /<dyad-script description="Check App\.tsx length" state="finished" truncated="false" execution-ms="\d+">/,
+      /<samba-script description="Check App\.tsx length" state="finished" truncated="false" execution-ms="\d+">/,
     );
     // The script output is App.tsx's length — verify against the real file.
     const appTsxLength = fs.readFileSync(
@@ -124,7 +124,7 @@ describe("local-agent ask mode (integration)", () => {
       "utf8",
     ).length;
     const payloadMatch = content.match(
-      /<dyad-script [^>]*>([\s\S]*?)<\/dyad-script>/,
+      /<samba-script [^>]*>([\s\S]*?)<\/samba-script>/,
     );
     expect(payloadMatch).not.toBeNull();
     expect(payloadMatch![1]).toContain(String(appTsxLength));
@@ -159,7 +159,7 @@ describe("local-agent ask mode (integration)", () => {
 
     // The dump-path marker streams back and renders as the assistant message.
     await waitFor(
-      () => expect(screen.getByText(/dyad-dump-path/)).toBeTruthy(),
+      () => expect(screen.getByText(/samba-dump-path/)).toBeTruthy(),
       { timeout: 20_000 },
     );
 
@@ -198,7 +198,7 @@ describe("local-agent ask mode (integration)", () => {
       "run_type_checks",
       "set_chat_summary",
       "spawn_agent",
-      // Samba Builder: tools do backend cloud do Dyad removidas (sem
+      // Samba Builder: tools do backend cloud do Samba removidas (sem
       // web_crawl/web_fetch/web_search) — a lista read-only termina aqui.
     ]);
     const spawnAgent = tools.find(
@@ -237,7 +237,7 @@ describe("local-agent ask mode (integration)", () => {
     send();
 
     await waitFor(
-      () => expect(screen.getByText(/dyad-dump-path/)).toBeTruthy(),
+      () => expect(screen.getByText(/samba-dump-path/)).toBeTruthy(),
       { timeout: 20_000 },
     );
     await streamEnd;

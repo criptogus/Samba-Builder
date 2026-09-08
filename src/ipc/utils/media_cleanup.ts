@@ -1,10 +1,10 @@
 import log from "electron-log";
 import fs from "node:fs/promises";
 import path from "node:path";
-import { getDyadAppPath } from "@/paths/paths";
+import { getSambaAppPath } from "@/paths/paths";
 import {
   ATTACHMENTS_MANIFEST_FILE,
-  DYAD_MEDIA_DIR_NAME,
+  SAMBA_MEDIA_DIR_NAME,
   pruneAttachmentManifest,
 } from "@/ipc/utils/media_path_utils";
 import { db } from "@/db";
@@ -22,7 +22,7 @@ function isPathWithinDirectory(filePath: string, directoryPath: string) {
 async function getSafeMediaDirectory(
   appPath: string,
 ): Promise<{ path: string } | null> {
-  const mediaDir = path.join(appPath, DYAD_MEDIA_DIR_NAME);
+  const mediaDir = path.join(appPath, SAMBA_MEDIA_DIR_NAME);
   try {
     const appRealPath = await fs.realpath(appPath);
     const mediaDirStat = await fs.lstat(mediaDir);
@@ -31,7 +31,7 @@ async function getSafeMediaDirectory(
     }
 
     const realMediaDir = await fs.realpath(mediaDir);
-    const expectedMediaDir = path.join(appRealPath, DYAD_MEDIA_DIR_NAME);
+    const expectedMediaDir = path.join(appRealPath, SAMBA_MEDIA_DIR_NAME);
     if (
       realMediaDir !== expectedMediaDir ||
       !isPathWithinDirectory(realMediaDir, appRealPath)
@@ -58,7 +58,7 @@ async function getSafeMediaDirectory(
 }
 
 /**
- * Delete media files older than TTL from all app .dyad/media directories.
+ * Delete media files older than TTL from all app .samba/media directories.
  * Run on app startup to reclaim disk space.
  */
 export async function cleanupOldMediaFiles(): Promise<void> {
@@ -69,7 +69,7 @@ export async function cleanupOldMediaFiles(): Promise<void> {
 
     const counts = await Promise.all(
       allApps.map(async (app) => {
-        const appPath = getDyadAppPath(app.path);
+        const appPath = getSambaAppPath(app.path);
         const safeMediaDir = await getSafeMediaDirectory(appPath);
         if (!safeMediaDir) {
           return 0;

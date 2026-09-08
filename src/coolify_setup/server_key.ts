@@ -1,6 +1,6 @@
 import * as fs from "fs";
 import * as path from "path";
-import { DyadError, DyadErrorKind } from "@/errors/dyad_error";
+import { SambaError, SambaErrorKind } from "@/errors/samba_error";
 import { getUserDataPath } from "@/paths/paths";
 import {
   generateDeployKeyPair,
@@ -22,7 +22,7 @@ import {
  */
 
 const KEY_NAME = "server_access";
-const KEY_COMMENT = "dyad-server-access";
+const KEY_COMMENT = "samba-server-access";
 
 export function serverKeyDirPath(): string {
   return path.join(getUserDataPath(), "coolify_server_key");
@@ -82,11 +82,11 @@ export function ensureServerKey(): ServerKey {
     }
     // A file that cannot be read as a key is worse than none: it would fail at
     // connect time with something about the wire format. Say so here instead.
-    throw new DyadError(
+    throw new SambaError(
       `The server key at ${keyPath} could not be read. Delete it and Samba Builder will ` +
         `generate a new one — you will need to add the new public key to your ` +
         `server.`,
-      DyadErrorKind.Precondition,
+      SambaErrorKind.Precondition,
     );
   }
 

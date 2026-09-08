@@ -79,7 +79,7 @@ const mocks = vi.hoisted(() => ({
     resetTime: new Date("2026-06-26T00:00:00Z").getTime(),
   },
   settings: {
-    enableDyadPro: true,
+    enableSambaPro: true,
     providerSettings: {
       // Samba Builder (BYOK): so providers conectados (com chave salva ou env
       // var) aparecem na lista. "auto" existe no schema mas nao tem chave
@@ -580,7 +580,7 @@ describe("ModelPicker", () => {
     mocks.ollamaError = null;
     mocks.lmStudioModels = [];
     mocks.lmStudioError = null;
-    mocks.settings.enableDyadPro = true;
+    mocks.settings.enableSambaPro = true;
     mocks.settings.providerSettings.auto.apiKey.value = "";
     mocks.settings.providerSettings.openai.apiKey.value = "openai-key";
     mocks.settings.providerSettings.google.apiKey.value = "google-key";
@@ -1300,7 +1300,7 @@ describe("ModelPicker", () => {
     expect(mocks.openExternalUrl).not.toHaveBeenCalled();
   });
   it("lets non-Pro users select models from providers with their own key", () => {
-    mocks.settings.enableDyadPro = false;
+    mocks.settings.enableSambaPro = false;
     mocks.settings.providerSettings.auto.apiKey.value = "";
     mocks.settings.providerSettings.openrouter.apiKey.value = "openrouter-key";
     mocks.renderSubContent = true;
@@ -1326,7 +1326,7 @@ describe("ModelPicker", () => {
   });
 
   it("does not lock models while settings and env vars are still loading", () => {
-    mocks.settings.enableDyadPro = false;
+    mocks.settings.enableSambaPro = false;
     mocks.settings.providerSettings.auto.apiKey.value = "";
     mocks.settingsLoading = true;
     mocks.renderSubContent = true;

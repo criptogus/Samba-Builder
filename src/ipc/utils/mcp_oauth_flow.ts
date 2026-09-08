@@ -10,14 +10,14 @@ import { eq } from "drizzle-orm";
 import { db } from "../../db";
 import { mcpServers } from "../../db/schema";
 import {
-  DyadOAuthClientProvider,
+  SambaOAuthClientProvider,
   decryptFromString,
   issueMcpOAuthWriteAuthority,
   revokeMcpOAuthWriteAuthority,
 } from "./mcp_oauth_provider";
 import { DEFAULT_OAUTH_CALLBACK_PORT } from "../types/mcp";
 import { mcpManager } from "./mcp_manager";
-import { DyadError, DyadErrorKind } from "../../errors/dyad_error";
+import { SambaError, SambaErrorKind } from "../../errors/samba_error";
 import {
   createMcpOAuthRegistry,
   type McpOAuthListenerHandle,
@@ -68,7 +68,7 @@ function renderCallbackPage(options: {
   const accent = isSuccess ? "#10b981" : "#ef4444";
   const safeTitle = escapeHtml(options.title);
   const safeMessage = escapeHtml(options.message);
-  const returnUrl = "dyad://mcp-oauth-return";
+  const returnUrl = "sambabuilder://mcp-oauth-return";
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -436,7 +436,7 @@ async function prepareAndRunOAuthFlow(
     : undefined;
   const expectedState = generateState();
   const writeAuthority = issueMcpOAuthWriteAuthority(server.id);
-  const provider = new DyadOAuthClientProvider({
+  const provider = new SambaOAuthClientProvider({
     serverId: server.id,
     callbackPort,
     scope,
@@ -491,12 +491,12 @@ export async function disconnectOAuth(
         .from(mcpServers)
         .where(eq(mcpServers.id, serverId));
       if (!rows[0]) {
-        throw new DyadError(
+        throw new SambaError(
           `MCP server not found: ${serverId}`,
-          DyadErrorKind.NotFound,
+          SambaErrorKind.NotFound,
         );
       }
-      const provider = new DyadOAuthClientProvider({
+      const provider = new SambaOAuthClientProvider({
         serverId,
         allowInteractive: true,
       });

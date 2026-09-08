@@ -29,7 +29,7 @@ async function expectFileContent(
 
 test("edit code", async ({ po }) => {
   await po.setUp({ autoApprove: true });
-  const editedFilePath = path.join("src", "components", "made-with-dyad.tsx");
+  const editedFilePath = path.join("src", "components", "made-with-samba.tsx");
   await po.sendPrompt("foo");
   const appPath = await po.appManagement.getCurrentAppPath();
 
@@ -44,10 +44,10 @@ test("edit code", async ({ po }) => {
 
   await selectFileAndWaitForEditor(
     po.page,
-    "made-with-dyad.tsx",
+    "made-with-samba.tsx",
     editedFilePath,
   );
-  await replaceEditorContent(po.page, "export const MadeWithDyad = ;");
+  await replaceEditorContent(po.page, "export const MadeWithSamba = ;");
 
   // Save the file
   await po.page.getByTestId("save-file-button").click();
@@ -57,13 +57,13 @@ test("edit code", async ({ po }) => {
   await expectFileContent(
     appPath,
     editedFilePath,
-    "export const MadeWithDyad = ;",
+    "export const MadeWithSamba = ;",
   );
   const editedFile = fs.readFileSync(
     path.join(appPath, editedFilePath),
     "utf8",
   );
-  expect(editedFile).toContain("export const MadeWithDyad = ;");
+  expect(editedFile).toContain("export const MadeWithSamba = ;");
 });
 
 test("edit code edits the right file during rapid switches", async ({ po }) => {
@@ -71,7 +71,7 @@ test("edit code edits the right file during rapid switches", async ({ po }) => {
   const firstOpenedFilePath = path.join(
     "src",
     "components",
-    "made-with-dyad.tsx",
+    "made-with-samba.tsx",
   );
   const robotsFilePath = path.join("public", "robots.txt");
   await po.sendPrompt("foo");
@@ -90,11 +90,11 @@ test("edit code edits the right file during rapid switches", async ({ po }) => {
 
   await selectFileAndWaitForEditor(
     po.page,
-    "made-with-dyad.tsx",
+    "made-with-samba.tsx",
     firstOpenedFilePath,
   );
   for (const round of [1, 2, 3]) {
-    firstFileEdit = `export const MadeWithDyad = "round-${round}";\n`;
+    firstFileEdit = `export const MadeWithSamba = "round-${round}";\n`;
     updatedRobotsFile = `User-agent: *\nDisallow: /round-${round}\n`;
 
     await replaceEditorContent(po.page, firstFileEdit);
@@ -102,7 +102,7 @@ test("edit code edits the right file during rapid switches", async ({ po }) => {
     await replaceEditorContent(po.page, updatedRobotsFile);
     await selectFileAndWaitForEditor(
       po.page,
-      "made-with-dyad.tsx",
+      "made-with-samba.tsx",
       firstOpenedFilePath,
     );
   }

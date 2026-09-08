@@ -51,7 +51,7 @@ describe("hybrid chat harness (smoke)", () => {
       { timeout: 15_000 },
     );
 
-    const prompt = "tc=local-agent/dyad-write-angle";
+    const prompt = "tc=local-agent/samba-write-angle";
     const { send } = await harness.typeInChat(prompt);
     send();
 

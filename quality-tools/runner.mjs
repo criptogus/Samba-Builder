@@ -10,7 +10,7 @@ const excluded = new Set([
   ".next",
   "coverage",
   "test-results",
-  ".dyad",
+  ".samba",
 ]);
 export async function sourceFiles(root) {
   const files = [];

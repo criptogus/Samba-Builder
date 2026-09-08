@@ -14,7 +14,7 @@ function buildLargeLog(): string {
   const lines = Array.from(
     { length: 6_000 },
     (_, index) =>
-      `line-${index.toString().padStart(4, "0")} DYAD_LARGE_ATTACHMENT_MARKER payload ${"x".repeat(80)}`,
+      `line-${index.toString().padStart(4, "0")} SAMBA_LARGE_ATTACHMENT_MARKER payload ${"x".repeat(80)}`,
   );
   lines.push("TAIL_SENTINEL_98765");
   return `${lines.join("\n")}\n`;
@@ -30,8 +30,8 @@ describe("local-agent large attachment (integration)", () => {
       chatMode: "local-agent",
       settings: {
         isTestMode: true,
-        enableDyadPro: true,
-        providerSettings: { auto: { apiKey: { value: "testdyadkey" } } },
+        enableSambaPro: true,
+        providerSettings: { auto: { apiKey: { value: "testsambakey" } } },
       },
     });
   }, 60_000);
@@ -64,7 +64,7 @@ describe("local-agent large attachment (integration)", () => {
     send();
 
     const scriptCard = await screen.findByTestId(
-      "dyad-script-card",
+      "samba-script-card",
       undefined,
       { timeout: 20_000 },
     );
@@ -86,7 +86,7 @@ describe("local-agent large attachment (integration)", () => {
 
     const manifestPath = path.join(
       harness.appDir,
-      ".dyad",
+      ".samba",
       "media",
       "attachments-manifest.json",
     );

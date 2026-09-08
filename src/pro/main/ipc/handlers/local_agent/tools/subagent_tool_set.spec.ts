@@ -19,7 +19,7 @@ import type { AgentContext } from "./types";
 // and makes buildAgentToolSet unusable. These assertions need the real registry.
 function rootContext(): AgentContext {
   return {
-    isDyadPro: true,
+    isSambaPro: true,
     canUseAdvancedSubagentTools: true,
     sharedServerModulePaths: [],
     pendingFunctionDeploys: [],

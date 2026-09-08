@@ -2,7 +2,7 @@ import { createHash } from "node:crypto";
 import * as path from "node:path";
 import * as fs from "node:fs/promises";
 
-import { DyadError, DyadErrorKind } from "@/errors/dyad_error";
+import { SambaError, SambaErrorKind } from "@/errors/samba_error";
 import type { Problem, ProblemReport } from "@/ipc/types";
 import log from "electron-log";
 import { getTypeScriptCachePath } from "@/paths/paths";
@@ -26,7 +26,7 @@ export type TypeCheckPreconditionKind =
   | "typescript-not-found"
   | "tsconfig-not-found";
 
-export class TypeCheckPreconditionError extends DyadError {
+export class TypeCheckPreconditionError extends SambaError {
   readonly typeCheckKind: TypeCheckPreconditionKind;
 
   constructor(
@@ -34,7 +34,7 @@ export class TypeCheckPreconditionError extends DyadError {
     message: string,
     options?: { cause?: unknown },
   ) {
-    super(message, DyadErrorKind.Precondition, options);
+    super(message, SambaErrorKind.Precondition, options);
     this.name = "TypeCheckPreconditionError";
     this.typeCheckKind = typeCheckKind;
   }
@@ -97,7 +97,7 @@ export async function getTypeCheckPreconditionGuidance({
 }: {
   kind: TypeCheckPreconditionKind;
   appPath: string;
-  agentInstructionMode?: "dyad-command" | "local-agent-tool";
+  agentInstructionMode?: "samba-command" | "local-agent-tool";
 }): Promise<string> {
   if (kind === "tsconfig-not-found") {
     return "Type checking could not run: TypeScript is installed but no tsconfig was found (expected `tsconfig.app.json` or `tsconfig.json`). You can create a suitable tsconfig for this project and retry.";
@@ -114,11 +114,11 @@ export async function getTypeCheckPreconditionGuidance({
       return "Type checking could not run: TypeScript is listed in package.json but is not installed (node_modules is missing or incomplete). Call `reinstall_and_restart_app` to reinstall dependencies, then retry `run_type_checks`.";
     }
 
-    return 'Type checking could not run: TypeScript is listed in package.json but is not installed (node_modules is missing or incomplete). Tell the user to use Rebuild to reinstall dependencies, include `<dyad-command type="rebuild"></dyad-command>` so they can accept with one click, then retry `run_type_checks`.';
+    return 'Type checking could not run: TypeScript is listed in package.json but is not installed (node_modules is missing or incomplete). Tell the user to use Rebuild to reinstall dependencies, include `<samba-command type="rebuild"></samba-command>` so they can accept with one click, then retry `run_type_checks`.';
   }
 
   return agentInstructionMode
-    ? 'Type checking is unavailable: this project does not use TypeScript (no `typescript` entry in package.json). Do not call `run_type_checks` again in this conversation. Verify your changes by reading the files instead. At the end of your reply, recommend that the user add TypeScript to the project so you can automatically catch and fix type errors, and include `<dyad-command type="add-typescript"></dyad-command>` so they can accept with one click.'
+    ? 'Type checking is unavailable: this project does not use TypeScript (no `typescript` entry in package.json). Do not call `run_type_checks` again in this conversation. Verify your changes by reading the files instead. At the end of your reply, recommend that the user add TypeScript to the project so you can automatically catch and fix type errors, and include `<samba-command type="add-typescript"></samba-command>` so they can accept with one click.'
     : "Type checking is unavailable: this project does not use TypeScript (no `typescript` entry in package.json). Add TypeScript to enable type checking.";
 }
 
@@ -126,7 +126,7 @@ export function toProblemReportError(
   error: unknown,
   errorKind?: TypeCheckPreconditionKind,
 ): Error {
-  if (error instanceof DyadError) {
+  if (error instanceof SambaError) {
     return error;
   }
 

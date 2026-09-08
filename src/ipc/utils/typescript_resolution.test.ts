@@ -45,7 +45,7 @@ afterEach(async () => {
 describe("TypeScript package resolution", () => {
   it("observes a pnpm-style symlink replacement in the same process", async () => {
     const appPath = await fs.mkdtemp(
-      path.join(os.tmpdir(), "dyad-typescript-resolution-"),
+      path.join(os.tmpdir(), "samba-typescript-resolution-"),
     );
     tempDirs.push(appPath);
     const nodeModulesPath = path.join(appPath, "node_modules");
@@ -72,7 +72,7 @@ describe("TypeScript package resolution", () => {
 
   it("supports TypeScript hoisted above the app directory", async () => {
     const workspacePath = await fs.mkdtemp(
-      path.join(os.tmpdir(), "dyad-typescript-hoist-"),
+      path.join(os.tmpdir(), "samba-typescript-hoist-"),
     );
     tempDirs.push(workspacePath);
     const appPath = path.join(workspacePath, "packages", "web");
@@ -93,7 +93,7 @@ describe("TypeScript package resolution", () => {
 
   it("uses the compiler entry declared by the package", async () => {
     const appPath = await fs.mkdtemp(
-      path.join(os.tmpdir(), "dyad-typescript-main-"),
+      path.join(os.tmpdir(), "samba-typescript-main-"),
     );
     tempDirs.push(appPath);
     const packageJsonPath = path.join(

@@ -494,7 +494,7 @@ tell them that they need to add a database to their app.
 
 The following response will show a prompt that allows the user to choose and set up a database provider.
 
-<dyad-add-integration></dyad-add-integration>
+<samba-add-integration></samba-add-integration>
 
 # Examples
 
@@ -508,7 +508,7 @@ I want to use a database in my app.
 
 You need to first add a database to your app.
 
-<dyad-add-integration></dyad-add-integration>
+<samba-add-integration></samba-add-integration>
 
 ## Example 2: User wants to add auth to their app
 
@@ -520,5 +520,5 @@ I want to add auth to my app.
 
 You need to first add a database to your app and then we can add auth.
 
-<dyad-add-integration></dyad-add-integration>
+<samba-add-integration></samba-add-integration>
 `;

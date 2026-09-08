@@ -16,7 +16,7 @@ A dedicated sub-agent can reformulate searches, inspect only the most relevant b
 
 ## Product Principles
 
-- **Backend-flexible:** use the existing Dyad Engine model-client abstraction; do not introduce provider-specific APIs into the tool contract.
+- **Backend-flexible:** use the existing Samba Engine model-client abstraction; do not introduce provider-specific APIs into the tool contract.
 - **Productionizable:** preserve stable same-app authorization, bounded resource use, cancellation, classified failures, and deterministic source attribution.
 - **Intuitive but power-user friendly:** broad recall uses one high-level tool; targeted verification remains possible through `read_chat`.
 - **Transparent over magical:** show visible progress and consulted evidence because the explorer runs without a prompt-time consent dialog by default.
@@ -89,13 +89,13 @@ A dedicated sub-agent can reformulate searches, inspect only the most relevant b
 
 Implementation requirements:
 
-- Add `isEnabled: (ctx) => ctx.isDyadPro` to all three ToolDefinitions.
+- Add `isEnabled: (ctx) => ctx.isSambaPro` to all three ToolDefinitions.
 - Add all three names to `PRO_AGENT_ONLY_TOOLS` so basic-agent filtering is explicit and testable.
 - Mark `explore_chat_history` with `usesEngineEndpoint: true`; free-model filtering must remove the whole history surface, including direct `read_chat`, per the product requirement.
-- Remove `searchChatsTool` from the primary `TOOL_DEFINITIONS` array, but retain its implementation and historical `<dyad-search-chats>` renderer support.
+- Remove `searchChatsTool` from the primary `TOOL_DEFINITIONS` array, but retain its implementation and historical `<samba-search-chats>` renderer support.
 - Add `exploreChatHistoryTool` to `TOOL_DEFINITIONS`; retain `readChatTool` there.
-- Re-check `ctx.isDyadPro` inside the explorer runner and internal adapters. Toolset exclusion is not an execution-time security boundary.
-- Fail with a classified `DyadErrorKind.Precondition` when Pro or Engine/model prerequisites are unavailable. Never fall back to the parent provider or expose the hidden low-level search tool.
+- Re-check `ctx.isSambaPro` inside the explorer runner and internal adapters. Toolset exclusion is not an execution-time security boundary.
+- Fail with a classified `SambaErrorKind.Precondition` when Pro or Engine/model prerequisites are unavailable. Never fall back to the parent provider or expose the hidden low-level search tool.
 
 ## Consent and Privacy
 
@@ -104,7 +104,7 @@ Implementation requirements:
 - Internal sub-agent search/read calls are covered by the explorer invocation and must never trigger nested consent prompts.
 - Create an independent consent key for `explore_chat_history`; do not inherit or migrate stored `search_chats`/`read_chat` choices.
 - Preserve legacy search/read consent values in settings for reversibility, but do not render an unusable `search_chats` permission row when it is internal-only.
-- Permission copy must state that bounded same-app historical chat text may be sent to the Dyad Engine for synthesis.
+- Permission copy must state that bounded same-app historical chat text may be sent to the Samba Engine for synthesis.
 - Direct `read_chat` copy must separately state that selected historical text is sent to the active model.
 - Telemetry may contain duration, step/tool counts, observation bytes, index status, confidence, truncation, and outcome. It must never contain query text, chat titles/IDs, message IDs, excerpts, quotes, or transcript content.
 
@@ -115,7 +115,7 @@ This consent asymmetry is deliberate: the explorer is a visible, bounded product
 ### Primary Flow
 
 1. The primary agent recognizes a broad or uncertain history question and calls `explore_chat_history` with a concise research question.
-2. A `<dyad-explore-chat-history>` card appears before retrieval and expands while work is in progress.
+2. A `<samba-explore-chat-history>` card appears before retrieval and expands while work is in progress.
 3. The card streams action-level phases without exposing chain-of-thought or private excerpts:
    - “Searching prior chats…”
    - “Reading 2 relevant discussions…”
@@ -169,7 +169,7 @@ Tool properties:
   name: "explore_chat_history",
   defaultConsent: "always",
   usesEngineEndpoint: true,
-  isEnabled: (ctx) => ctx.isDyadPro,
+  isEnabled: (ctx) => ctx.isSambaPro,
   // No modifiesState flag: this is read-only.
 }
 ```
@@ -318,8 +318,8 @@ Add privacy-safe measurements for drain duration, dirty-queue size, and index si
 - `src/pro/main/ipc/handlers/local_agent/tools/read_chat.ts` — Pro gate and description updated for explorer evidence drill-down.
 - `src/pro/main/ipc/handlers/local_agent/tool_definitions.ts` — entitlement/exposure matrix and new tool registration.
 - `src/prompts/local_agent_prompt.ts` — route broad historical recall to explorer and targeted evidence inspection to `read_chat`.
-- `src/components/chat/DyadExploreChatHistory.tsx` — new progress/report card.
-- `src/components/chat/DyadMarkdownParser.tsx` — parse `<dyad-explore-chat-history>` while retaining legacy search/read tags.
+- `src/components/chat/SambaExploreChatHistory.tsx` — new progress/report card.
+- `src/components/chat/SambaMarkdownParser.tsx` — parse `<samba-explore-chat-history>` while retaining legacy search/read tags.
 - `src/i18n/locales/*/chat.json` — card labels, states, warnings, and accessibility text for every locale.
 - Local-agent integration tests and E2E request snapshots — exact eligible/ineligible tool surfaces and updated descriptions.
 - Fake Engine/LLM fixtures — deterministic multi-search/read sub-agent scenarios.
@@ -330,7 +330,7 @@ No database migration is expected.
 
 ### Phase 1: Entitlement and Internal Retrieval Seams
 
-- [ ] Add execution-time and `isEnabled(ctx.isDyadPro)` gates to search/read.
+- [ ] Add execution-time and `isEnabled(ctx.isSambaPro)` gates to search/read.
 - [ ] Add all history tools to explicit Pro-only filtering.
 - [ ] Refactor search/read only enough to expose typed, bounded internal operations without renderer/consent side effects.
 - [ ] Remove `search_chats` from the primary toolset while preserving its implementation, tests, stored transcript rendering, and legacy consent value.
@@ -360,12 +360,12 @@ No database migration is expected.
 
 ### Phase 5: Renderer and Accessibility
 
-- [ ] Add the new history explorer card using existing Dyad card primitives and explore-code lifecycle conventions.
+- [ ] Add the new history explorer card using existing Samba card primitives and explore-code lifecycle conventions.
 - [ ] Implement pending, complete, empty, indexing/partial, conflict, cancelled, failed, and evidence-only states.
 - [ ] Keep partial/conflict/low-confidence states expanded; collapse only complete high-confidence results.
 - [ ] Render host-provided title/date/role/excerpt/IDs as selectable evidence targets.
 - [ ] Add keyboard, accessible-name, polite-live-region, truncation, and non-color status coverage.
-- [ ] Preserve rendering of historical `dyad-search-chats` and `dyad-read-chat` messages.
+- [ ] Preserve rendering of historical `samba-search-chats` and `samba-read-chat` messages.
 
 ### Phase 6: Evaluation, Snapshots, and Rollout
 
@@ -420,7 +420,7 @@ No database migration is expected.
 - Index waits and all model/tool/byte budgets are hard-bounded.
 - A seeded large-history evaluation establishes acceptable p95 latency and Engine input/cost before release.
 - Telemetry contains no query, title, ID, excerpt, quote, or transcript content.
-- Permission and pending-card copy plainly disclose that bounded same-app history is sent to the Dyad Engine.
+- Permission and pending-card copy plainly disclose that bounded same-app history is sent to the Samba Engine.
 
 ## Risks and Mitigations
 
@@ -461,4 +461,4 @@ No blocking product questions remain for MVP. During implementation/evaluation, 
 
 ---
 
-_Generated by dyad:swarm-to-plan_
+_Generated by samba:swarm-to-plan_

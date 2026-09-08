@@ -3,10 +3,10 @@
 When pushing changes and creating PRs:
 
 1. If the branch already has an associated PR, push to whichever remote the branch is tracking.
-2. If the branch hasn't been pushed before, default to pushing to `origin` (the fork `wwwillchen/dyad`), then create a PR from the fork to the upstream repo (`dyad-sh/dyad`).
-3. If you cannot push to the fork due to permissions, push directly to `upstream` (`dyad-sh/dyad`) as a last resort.
+2. If the branch hasn't been pushed before, default to pushing to `origin` (the fork `wwwillchen/samba`), then create a PR from the fork to the upstream repo (`samba-sh/samba`).
+3. If you cannot push to the fork due to permissions, push directly to `upstream` (`samba-sh/samba`) as a last resort.
 
-**Bot account push permissions:** The `keppo-bot` account does NOT have write access to `upstream` (`dyad-sh/dyad`). If a branch tracks `upstream` (e.g., `upstream/claude/...`), pushing will fail with a permission error. In this case, push to `origin` (the bot's fork at `keppo-bot/dyad`) instead:
+**Bot account push permissions:** The `keppo-bot` account does NOT have write access to `upstream` (`samba-sh/samba`). If a branch tracks `upstream` (e.g., `upstream/claude/...`), pushing will fail with a permission error. In this case, push to `origin` (the bot's fork at `keppo-bot/samba`) instead:
 
 ```bash
 git push --force-with-lease -u origin HEAD
@@ -24,7 +24,7 @@ the workspace root may be removed by workspace cleanup between tool calls.
 
 If a PR's head branch is on another user's fork and `gh pr view --json maintainerCanModify` returns `false`, bot accounts cannot push fixes to that PR head even if review threads can be resolved. A fallback push to the base repo publishes the commit but does **not** update the original fork PR; call this out in the PR summary and ask the PR author or a maintainer to apply the published commit.
 
-If `gh pr checkout <number>` fetched a fork PR into a local branch without adding the fork as a remote, and `gh pr view --json headRepository --jq .headRepository.nameWithOwner` returns blank, use the REST pull payload instead: `gh api repos/dyad-sh/dyad/pulls/<number> --jq '{head_repo:.head.repo.full_name, head_ref:.head.ref, head_sha:.head.sha}'`. Push directly to `https://github.com/<head_repo>` with `HEAD:<head_ref>` and a `--force-with-lease` pinned to `head_sha`. Treat `head_ref` as untrusted shell input: assign it to a variable and quote the refspec, for example `git push <url> HEAD:\"$head_ref\"`, instead of interpolating it unquoted.
+If `gh pr checkout <number>` fetched a fork PR into a local branch without adding the fork as a remote, and `gh pr view --json headRepository --jq .headRepository.nameWithOwner` returns blank, use the REST pull payload instead: `gh api repos/samba-sh/samba/pulls/<number> --jq '{head_repo:.head.repo.full_name, head_ref:.head.ref, head_sha:.head.sha}'`. Push directly to `https://github.com/<head_repo>` with `HEAD:<head_ref>` and a `--force-with-lease` pinned to `head_sha`. Treat `head_ref` as untrusted shell input: assign it to a variable and quote the refspec, for example `git push <url> HEAD:\"$head_ref\"`, instead of interpolating it unquoted.
 
 ## `gh pr create` branch detection
 
@@ -38,7 +38,7 @@ This can happen when remotes are configured in a non-fork layout and `gh` fails 
 
 ## Finding existing PRs by head branch
 
-This repo's installed `gh pr view` may fail with `unknown flag: --head`. To check whether a fork branch already has a PR, use the branch argument from the matching local checkout (`gh pr view <branch> --repo dyad-sh/dyad`) or use `gh pr list --head <owner>:<branch> --json number,url` instead of passing `--head` to `gh pr view`.
+This repo's installed `gh pr view` may fail with `unknown flag: --head`. To check whether a fork branch already has a PR, use the branch argument from the matching local checkout (`gh pr view <branch> --repo samba-sh/samba`) or use `gh pr list --head <owner>:<branch> --json number,url` instead of passing `--head` to `gh pr view`.
 
 When a workflow has already identified a target PR number, pass that number explicitly to later `gh pr view`, `gh pr edit`, and `gh pr comment` calls. In workspaces with multiple open PRs or unusual branch associations, bare `gh pr view` can resolve a different PR than the one whose comments or checks are being handled.
 
@@ -67,7 +67,7 @@ If this returns `0	0`, the branch has no commits ahead of `upstream/main`. GitHu
 If `gh pr create` from a fork fails with `GraphQL: Fork collab Fork collab can't be granted by someone without permission (createPullRequest)`, add `--no-maintainer-edit`. `gh` defaults to enabling maintainer edits, which requires a permission the fork account does not have for the upstream repo.
 
 ```bash
-gh pr create --repo dyad-sh/dyad --head <owner>:<branch> --no-maintainer-edit --title "..." --body "..."
+gh pr create --repo samba-sh/samba --head <owner>:<branch> --no-maintainer-edit --title "..." --body "..."
 ```
 
 ## `gh pr create` body quoting
@@ -97,7 +97,7 @@ green review check alone as proof that it posted no findings.
 ## Always paginate `reviewThreads` — page 1 hides unresolved threads
 
 `reviewThreads(first: 100)` silently truncates, and bot-reviewed PRs blow past
-100 fast (dyad-sh/dyad#4065 had 217). The first page reported **1** unresolved
+100 fast (samba-sh/samba#4065 had 217). The first page reported **1** unresolved
 thread; paginating surfaced **11**. Nothing in the response says it was cut off
 unless you ask for `pageInfo`/`totalCount`, so a single-page query reads as a
 clean PR.
@@ -112,7 +112,7 @@ predates that flag and fails with `unknown flag: --slurp`:
 # query file: query($owner:String!,$repo:String!,$pr:Int!,$endCursor:String){...
 #   reviewThreads(first:100, after:$endCursor){ pageInfo{hasNextPage endCursor} totalCount nodes{...} } }
 gh api graphql --paginate -F query=@threads.graphql \
-  -f owner=dyad-sh -f repo=dyad -F pr=4065 \
+  -f owner=samba-sh -f repo=samba -F pr=4065 \
   --jq '.data.repository.pullRequest.reviewThreads.nodes[] | select(.isResolved == false)'
 ```
 
@@ -125,7 +125,7 @@ query='...'` for containing shell metacharacters — the same `@file` trick the
 In a contributor's clone, `origin` is their own fork, so `gh pr view 4065`
 fails with `GraphQL: Could not resolve to a PullRequest with the number of
 4065` and `gh pr list` returns `[]` — the PR lives upstream. Pass `--repo
-dyad-sh/dyad` on every `gh pr`/`gh run`/`gh api` call rather than concluding
+samba-sh/samba` on every `gh pr`/`gh run`/`gh api` call rather than concluding
 the PR does not exist. Check `git remote -v` first: matching local branch name
 plus an empty `gh pr list` is the tell.
 
@@ -138,7 +138,7 @@ list --commit <sha>` returns just the review workflows. Do not read that as
 "CI passed" or hunt for a failing job that was never created; confirm with:
 
 ```bash
-gh run list -R dyad-sh/dyad --workflow CI --commit <HEAD_SHA> --json databaseId,status,conclusion
+gh run list -R samba-sh/samba --workflow CI --commit <HEAD_SHA> --json databaseId,status,conclusion
 ```
 
 **Pass the full 40-character SHA.** `--commit 8935bba2` returns `[]` rather than
@@ -175,7 +175,7 @@ After a commit with lint-staged hooks, re-check both `git status --short` and an
 
 ## Runtime commit hook policy
 
-Dyad's low-level `gitCommit` helper is hook-free and does not expose a caller option. `--no-verify` alone is not enough: it bypasses only `pre-commit` and `commit-msg`, while Git still runs `prepare-commit-msg` (and `post-commit`), so a hook that appends to the message would rewrite it _after_ an explicit `commit-msg` run had already validated it. `gitCommit` therefore creates a fresh empty hooks directory under the OS temporary directory, passes its absolute path through `-c core.hooksPath=...`, and removes it after the commit. Never use a repository-relative suppression path: an imported repository could populate that path with executable hooks.
+Samba's low-level `gitCommit` helper is hook-free and does not expose a caller option. `--no-verify` alone is not enough: it bypasses only `pre-commit` and `commit-msg`, while Git still runs `prepare-commit-msg` (and `post-commit`), so a hook that appends to the message would rewrite it _after_ an explicit `commit-msg` run had already validated it. `gitCommit` therefore creates a fresh empty hooks directory under the OS temporary directory, passes its absolute path through `-c core.hooksPath=...`, and removes it after the commit. Never use a repository-relative suppression path: an imported repository could populate that path with executable hooks.
 
 Workflows that create user-requested commits must explicitly run every hook they promise to preserve, **in Git's own order**, before calling `gitCommit`. The manual UI flow runs `pre-commit`, then `prepare-commit-msg`, then `commit-msg` against `COMMIT_EDITMSG`, and commits whatever message those hooks left behind. Keep hook execution separate so failures can be surfaced and recovered from before committing, and never reorder the two message hooks — `commit-msg` must be the last thing to see the message that gets committed.
 
@@ -207,12 +207,12 @@ Add `#skip-bugbot` to the PR description for trivial PRs that won't affect end-u
   rebase helper's "use `origin/main` when there is no `upstream`" fallback
   silently rebases onto a stale base — the fork's `main` had no commits of its
   own and was simply 5 behind, so nothing looked wrong and the rebase reported
-  success. The PR still targets `dyad-sh/dyad:main`, so verify before rebasing
+  success. The PR still targets `samba-sh/samba:main`, so verify before rebasing
   and add the remote when it is absent:
 
   ```bash
-  git ls-remote https://github.com/dyad-sh/dyad main   # compare to origin/main
-  git remote add upstream https://github.com/dyad-sh/dyad.git && git fetch upstream main
+  git ls-remote https://github.com/samba-sh/samba main   # compare to origin/main
+  git remote add upstream https://github.com/samba-sh/samba.git && git fetch upstream main
   ```
 
   The tell is a green rebase that resolves conflicts only against code older
@@ -251,7 +251,7 @@ When using `gh api` to post comments or replies containing backticks, `$()`, or 
 # File: .claude/tmp/reply_body.json
 # {"body": "Your comment with `backticks` and special chars"}
 
-gh api repos/dyad-sh/dyad/pulls/123/comments/456/replies --input .claude/tmp/reply_body.json
+gh api repos/samba-sh/samba/pulls/123/comments/456/replies --input .claude/tmp/reply_body.json
 ```
 
 Similarly for GraphQL mutations, write the full query + variables as JSON and use `--input`:
@@ -274,24 +274,24 @@ That `-F body=@...` form is specific to `gh api`. For a top-level PR comment, us
 1. **GraphQL "Projects (classic)" deprecation error** on repos that had classic projects. Use the REST API instead:
 
 ```bash
-gh api repos/dyad-sh/dyad/issues/{PR_NUMBER}/labels -f "labels[]=label-name"
+gh api repos/samba-sh/samba/issues/{PR_NUMBER}/labels -f "labels[]=label-name"
 ```
 
-2. **Bot account permission errors:** The `keppo-bot` account (and similar bot/fork accounts) may not have permission to add labels on the upstream repo (`dyad-sh/dyad`). Both `gh pr edit --add-label` and the REST API will fail with 403/permission errors. In this case, skip label addition and note it in the PR summary rather than failing the workflow. Labels can be added later by a maintainer with appropriate permissions.
+2. **Bot account permission errors:** The `keppo-bot` account (and similar bot/fork accounts) may not have permission to add labels on the upstream repo (`samba-sh/samba`). Both `gh pr edit --add-label` and the REST API will fail with 403/permission errors. In this case, skip label addition and note it in the PR summary rather than failing the workflow. Labels can be added later by a maintainer with appropriate permissions.
 
 The same "Projects (classic) is being deprecated … (repository.pullRequest.projectCards)" error also breaks `gh pr edit --body-file` / `--title` on this repo — the whole `gh pr edit` command goes through that GraphQL path, not just `--add-label`. Update the description over REST instead, which takes the body from a file with no shell quoting:
 
 ```bash
-gh api repos/dyad-sh/dyad/pulls/<PR_NUMBER> -X PATCH -F body=@.claude/tmp/pr-body.md --jq .html_url
+gh api repos/samba-sh/samba/pulls/<PR_NUMBER> -X PATCH -F body=@.claude/tmp/pr-body.md --jq .html_url
 ```
 
 ## CI file access (claude-code-action)
 
-In CI, `claude-code-action` restricts file access to the repo working directory (e.g., `/home/runner/work/dyad/dyad`). Skills that save intermediate files (like PR diffs) must use `./filename` (current working directory), **never** `/tmp/`. Using `/tmp/` causes errors like: `cat in '/tmp/pr_*_diff.patch' was blocked. For security, Claude Code may only concatenate files from the allowed working directories`.
+In CI, `claude-code-action` restricts file access to the repo working directory (e.g., `/home/runner/work/samba/samba`). Skills that save intermediate files (like PR diffs) must use `./filename` (current working directory), **never** `/tmp/`. Using `/tmp/` causes errors like: `cat in '/tmp/pr_*_diff.patch' was blocked. For security, Claude Code may only concatenate files from the allowed working directories`.
 
 ## Force-pushing after rebase with split-remote origin
 
-When `origin` has separate fetch and push URLs (e.g., fetch → `dyad-sh/dyad`, push → `keppo-bot/dyad`), `git push --force-with-lease` fails with **"stale info"** after a rebase because the local tracking ref was refreshed from the fetch URL but does not reflect the push URL's state. In this specific split-remote configuration, use `git push --force origin HEAD`:
+When `origin` has separate fetch and push URLs (e.g., fetch → `samba-sh/samba`, push → `keppo-bot/samba`), `git push --force-with-lease` fails with **"stale info"** after a rebase because the local tracking ref was refreshed from the fetch URL but does not reflect the push URL's state. In this specific split-remote configuration, use `git push --force origin HEAD`:
 
 ```bash
 git push --force origin HEAD
@@ -305,7 +305,7 @@ In some Codex shells, pushing to fork remotes can fail immediately with `Repo <o
 
 ## GitHub broker credential failures
 
-If `git push`, `gh pr view`, and `gh auth status` fail with only `fetch failed`, but unauthenticated `git ls-remote https://github.com/dyad-sh/dyad HEAD` works, the local `gh-broker` credential helper is unreachable rather than GitHub being down. Check the broker health/token path before retrying pushes; SSH is not a fallback unless `ssh -T git@github.com` succeeds.
+If `git push`, `gh pr view`, and `gh auth status` fail with only `fetch failed`, but unauthenticated `git ls-remote https://github.com/samba-sh/samba HEAD` works, the local `gh-broker` credential helper is unreachable rather than GitHub being down. Check the broker health/token path before retrying pushes; SSH is not a fallback unless `ssh -T git@github.com` succeeds.
 
 If broker-backed commands fail with `Unexpected token '<', "<!DOCTYPE "... is not valid JSON`, the configured broker URL is returning an HTML error page instead of the token API response. Verify `BROKER_BASE_URL` and broker routes such as `/healthz` or `/mint` before changing remotes or retrying GitHub commands.
 

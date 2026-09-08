@@ -74,7 +74,11 @@ export function GovernancePanel({ appPath }: { appPath: string }) {
     return (
       <div role="alert" className="text-sm text-destructive">
         Could not load governance.{" "}
-        <Button variant="outline" size="sm" onClick={() => void statusQuery.refetch()}>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => void statusQuery.refetch()}
+        >
           Retry
         </Button>
       </div>
@@ -114,7 +118,9 @@ export function GovernancePanel({ appPath }: { appPath: string }) {
                 <Input
                   aria-label="Acting as"
                   placeholder={
-                    status.actingAs ? `Acting as ${status.actingAs}` : "Acting as (email)"
+                    status.actingAs
+                      ? `Acting as ${status.actingAs}`
+                      : "Acting as (email)"
                   }
                   value={actor}
                   onChange={(e) => setActor(e.target.value)}
@@ -141,7 +147,8 @@ export function GovernancePanel({ appPath }: { appPath: string }) {
                     variant="secondary"
                     disabled={
                       busy ||
-                      (status.stage !== "in_review" && status.stage !== "approved")
+                      (status.stage !== "in_review" &&
+                        status.stage !== "approved")
                     }
                     onClick={() => runMutation.mutate("veto")}
                   >
@@ -149,7 +156,11 @@ export function GovernancePanel({ appPath }: { appPath: string }) {
                   </Button>
                 </div>
               </div>
-              {busy && <p className="mt-2 text-xs text-muted-foreground">Running gate…</p>}
+              {busy && (
+                <p className="mt-2 text-xs text-muted-foreground">
+                  Running gate…
+                </p>
+              )}
               {result && (
                 <p
                   role={result.ok ? "status" : "alert"}
@@ -222,7 +233,9 @@ function auditLabel(status: GovernanceStatus): string {
   if (!status.lastAudit) return "No audit trail yet";
   const ev = status.lastAudit.event || "event";
   const by = status.lastAudit.by ? ` · by ${status.lastAudit.by}` : "";
-  const ts = status.lastAudit.ts ? ` · ${status.lastAudit.ts.slice(0, 19).replace("T", " ")}` : "";
+  const ts = status.lastAudit.ts
+    ? ` · ${status.lastAudit.ts.slice(0, 19).replace("T", " ")}`
+    : "";
   return `${ev}${by}${ts}`;
 }
 

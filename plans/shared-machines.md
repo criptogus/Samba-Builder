@@ -163,7 +163,7 @@ Hold until mcp_oauth merges, then extract ONLY the identical slices:
 ## Proposal 5: testing-kit additions (small, opportunistic)
 
 - **Trace replay helper**: `replayTrace(transition, capturedEntries)` — the
-  documented technique (replay a `window.__dyadMachines` capture through a
+  documented technique (replay a `window.__sambaMachines` capture through a
   pure transition) exists only as a hand-written test in trace.test.ts.
   Promote it so bug reports carrying a trace dump become regression tests
   in one line. Three immediate uses: any machine with a trace observer.
@@ -181,7 +181,7 @@ Hold until mcp_oauth merges, then extract ONLY the identical slices:
 - **Persistence/hydration helper** — the rules section exists, but the
   candidate machines (queue persistence, tab session) are deferred with
   triggers. No consumer, no extraction.
-- **Devtools panel over `window.__dyadMachines`** — plausible, zero pull so
+- **Devtools panel over `window.__sambaMachines`** — plausible, zero pull so
   far. Trigger: the first debugging session that wishes it existed.
 - **Re-evaluating XState** — no. Eight machines have produced no need for
   hierarchy, parallel regions, or actor trees; the decision record stands.

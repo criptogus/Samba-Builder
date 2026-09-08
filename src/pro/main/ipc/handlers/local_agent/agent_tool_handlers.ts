@@ -13,7 +13,7 @@ import { createLoggedTypedHandler } from "@/ipc/handlers/base";
 import log from "electron-log";
 import type { AgentTool, SetAgentToolConsentParams } from "@/ipc/types";
 import { agentContracts } from "@/ipc/types/agent";
-import { isDyadProEnabled } from "@/lib/schemas";
+import { isSambaProEnabled } from "@/lib/schemas";
 import { readSettings } from "@/main/settings";
 import { resolveToolDescription } from "./tools/types";
 import {
@@ -46,7 +46,7 @@ export function registerAgentToolHandlers() {
         settings.runTypeScriptForWholeProject === true,
     };
     return TOOL_DEFINITIONS.filter(
-      (tool) => isDyadProEnabled(settings) || !tool.subagentOnly,
+      (tool) => isSambaProEnabled(settings) || !tool.subagentOnly,
     ).map((tool) => ({
       name: tool.name,
       description: resolveToolDescription(tool, descriptionContext),

@@ -284,7 +284,7 @@ test("group by app: new chat joins its app's group (grouping sticks)", async ({
 
   // Imported apps are named after their fixture folder (see import_handlers).
   const appA = "minimal";
-  const appB = "minimal-with-dyad";
+  const appB = "minimal-with-samba";
 
   // Reads the app-name line (top line of each tab) in left-to-right order.
   const readTabAppNames = async () => {

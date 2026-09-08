@@ -18,7 +18,7 @@ import {
   type Metrics,
 } from "@/management/model";
 import { DeliveryPlanSchema, emptyDeliveryPlan } from "@/delivery/model";
-import { getDyadAppPath } from "@/paths/paths";
+import { getSambaAppPath } from "@/paths/paths";
 import {
   appOperationCoordinator,
   readAppResource,
@@ -27,9 +27,9 @@ import {
   readCodeMetrics,
   assertCodeCommitted,
 } from "../services/project_code_metrics";
-import { DyadError, DyadErrorKind } from "@/errors/dyad_error";
+import { SambaError, SambaErrorKind } from "@/errors/samba_error";
 const fail = (message: string): never => {
-  throw new DyadError(message, DyadErrorKind.Precondition);
+  throw new SambaError(message, SambaErrorKind.Precondition);
 };
 function project(appId: number) {
   const row = getHandlerContext()
@@ -38,7 +38,7 @@ function project(appId: number) {
     .where(eq(apps.id, appId))
     .get();
   if (!row)
-    throw new DyadError("Projeto não encontrado", DyadErrorKind.NotFound);
+    throw new SambaError("Projeto não encontrado", SambaErrorKind.NotFound);
   return row;
 }
 function record(appId: number) {
@@ -73,9 +73,9 @@ function persist(appId: number, revision: number, data: Management) {
       .where(eq(projectManagement.appId, appId))
       .get();
     if ((row?.revision ?? 0) !== revision)
-      throw new DyadError(
+      throw new SambaError(
         "A gestão mudou em outra janela. Recarregue antes de salvar; copie seu rascunho se necessário.",
-        DyadErrorKind.Conflict,
+        SambaErrorKind.Conflict,
       );
     const valid = ManagementSchema.parse(data);
     const next = { appId, revision: revision + 1, data: JSON.stringify(valid) };
@@ -98,7 +98,7 @@ async function metrics(
   if (sprintId && !sprint) return fail("Sprint não encontrada");
   if (sprint?.report) return sprint.report;
   const code = await readCodeMetrics(
-    getDyadAppPath(project(appId).path),
+    getSambaAppPath(project(appId).path),
     sprint?.baseCommit,
   );
   const groups = getHandlerContext()
@@ -199,8 +199,10 @@ export function registerManagementHandlers() {
         const { data } = record(appId);
         if (data.sprints.some((s) => s.endedAt === null))
           return fail("Encerre a sprint atual antes de iniciar outra.");
-        await assertCodeCommitted(getDyadAppPath(project(appId).path));
-        const code = await readCodeMetrics(getDyadAppPath(project(appId).path));
+        await assertCodeCommitted(getSambaAppPath(project(appId).path));
+        const code = await readCodeMetrics(
+          getSambaAppPath(project(appId).path),
+        );
         data.sprints.push({
           id: crypto.randomUUID(),
           name,
@@ -223,7 +225,7 @@ export function registerManagementHandlers() {
         const sprint = data.sprints.find((s) => s.id === sprintId);
         if (!sprint || sprint.endedAt !== null)
           return fail("Sprint não está aberta.");
-        await assertCodeCommitted(getDyadAppPath(project(appId).path));
+        await assertCodeCommitted(getSambaAppPath(project(appId).path));
         const end = Date.now();
         sprint.report = await metrics(appId, data, sprintId, end);
         sprint.endedAt = end;

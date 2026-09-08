@@ -11,7 +11,7 @@ permission prompt (likely the password-entry variant) on a frozen main process.
 
 On macOS, Electron `safeStorage` ciphertext ("v10"-prefixed) can become
 undecryptable when the Keychain identity a session resolves flips between
-"dyad Safe Storage" (post-`ready`) and "Chromium Safe Storage" (pre-`ready`
+"samba Safe Storage" (post-`ready`) and "Chromium Safe Storage" (pre-`ready`
 race on Electron 40). `src/main/safe_storage_legacy.ts` recovers such secrets
 by reading the Keychain password of both identities itself and running
 Chromium's frozen os_crypt scheme (PBKDF2-HMAC-SHA1 · "saltysalt" · 1003
@@ -22,7 +22,7 @@ The module was deliberately layered so this project only swaps one seam:
 - `KeychainPasswordReader` (interface): `readPassword(service, account):
 string | null`. **Synchronous. Never throws. Never shows UI. Returns null on
   any failure.** All crypto, identity fallback order, plausibility checking,
-  per-ciphertext caching, stats, and the `DYAD_DISABLE_SAFE_STORAGE_RECOVERY`
+  per-ciphertext caching, stats, and the `SAMBA_DISABLE_SAFE_STORAGE_RECOVERY`
   kill switch live in `recoverLegacySafeStorageSecret()` and must NOT change.
 - `SecurityCliKeychainPasswordReader` (current v1 impl): shells out to
   `security find-generic-password -s <service> -a <account> -w` with a 5s
@@ -38,23 +38,23 @@ Identities queried, in order (see `LEGACY_IDENTITIES`):
 
 | service                 | account        |
 | ----------------------- | -------------- |
-| `dyad Safe Storage`     | `dyad Key`     |
+| `samba Safe Storage`    | `samba Key`    |
 | `Chromium Safe Storage` | `Chromium Key` |
 
 ### Why the CLI reader prompts and the in-process reader shouldn't
 
 Keychain item ACLs are per-application. Both Safe Storage items on an affected
-user's machine were created **by the Dyad binary itself** (safeStorage created
+user's machine were created **by the Samba binary itself** (safeStorage created
 the "Chromium"-named item too — the pre-ready race changes the _service name_,
-not the creating app). So the signed Dyad binary is the trusted app in both
+not the creating app). So the signed Samba binary is the trusted app in both
 items' ACLs and can read them silently via `SecItemCopyMatching`. The
 `security` CLI is an Apple-signed, different program → outside the ACL → macOS
 raises a confirmation dialog, very likely the variant requiring the user's
-login-keychain password, while Dyad's main process is blocked in
+login-keychain password, while Samba's main process is blocked in
 `execFileSync`.
 
 Corner case to keep in mind: a "Chromium Safe Storage" item created by some
-_other_ app (e.g. an unbranded Chromium/Electron dev build) is NOT in Dyad's
+_other_ app (e.g. an unbranded Chromium/Electron dev build) is NOT in Samba's
 ACL. Reading it in-process would prompt unless we suppress UI. Hence the hard
 requirement below.
 
@@ -149,17 +149,17 @@ In `recoverLegacySafeStorageSecret()`:
 
 ```
 defaultReader ??=
-  process.env.DYAD_SAFE_STORAGE_READER === "cli"
+  process.env.SAMBA_SAFE_STORAGE_READER === "cli"
     ? new SecurityCliKeychainPasswordReader()
     : new InProcessKeychainPasswordReader();
 ```
 
-- `DYAD_SAFE_STORAGE_READER=cli` reverts to v1 behavior (support escape hatch
+- `SAMBA_SAFE_STORAGE_READER=cli` reverts to v1 behavior (support escape hatch
   if the addon misbehaves on some macOS version).
 - Decision: **no automatic CLI fallback** when the in-process reader returns
   null. A fallback would reintroduce the prompt we're removing; null means
   "preserve and wait" by design.
-- `DYAD_DISABLE_SAFE_STORAGE_RECOVERY=1` still short-circuits everything
+- `SAMBA_DISABLE_SAFE_STORAGE_RECOVERY=1` still short-circuits everything
   before any reader is constructed (unchanged).
 - Keep `SecurityCliKeychainPasswordReader` in the codebase (escape hatch +
   existing integration tests keep running).
@@ -172,7 +172,7 @@ defaultReader ??=
   Security framework. **Verify all three platform CI builds stay green** —
   cross-platform gyp no-op targets are a known annoyance; if it fights back,
   consider a darwin-only `optionalDependencies` local package instead.
-- Respect `DYAD_SKIP_NATIVE_REBUILD` (`forge.config.ts:114`) the same way
+- Respect `SAMBA_SKIP_NATIVE_REBUILD` (`forge.config.ts:114`) the same way
   existing native modules do.
 - asar: the `.node` binary must be loadable at runtime. Follow the node-pty
   pattern — add the addon's directory to `packagerConfig.asar.unpackDir` in
@@ -222,7 +222,7 @@ Re-run the notarized-build procedure used for the CLI reader (mismatch state:
 fresh profile → connect GitHub → quit → relaunch): expect **no prompt at
 all**, GitHub still connected, and the
 `Recovered ... using a legacy safeStorage Keychain identity.` log line in
-`~/Library/Logs/dyad/main.log`. Also verify the `DYAD_SAFE_STORAGE_READER=cli`
+`~/Library/Logs/samba/main.log`. Also verify the `SAMBA_SAFE_STORAGE_READER=cli`
 escape hatch still exhibits the old behavior.
 
 ## Risks / open questions
@@ -238,7 +238,7 @@ escape hatch still exhibits the old behavior.
 - **Locked login keychain**: returns `errSecInteractionNotAllowed` with UI
   suppressed → null → preservation holds. No hang (this replaces the CLI's 5s
   timeout concern entirely).
-- **Per-arch builds**: forge builds per-arch (`dyad-darwin-arm64`); the addon
+- **Per-arch builds**: forge builds per-arch (`samba-darwin-arm64`); the addon
   compiles per-arch in the same pass. No universal-binary handling needed
   unless the release pipeline changes.
 

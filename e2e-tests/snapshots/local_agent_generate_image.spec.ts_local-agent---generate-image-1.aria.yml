@@ -9,7 +9,7 @@
 - paragraph: tc=local-agent/generate-image
 - paragraph: I'll generate a hero image for your landing page.
 - button "Image Generation A modern, minimal hero illustration of a rocket launching from a laptop screen, flat design style, blue and purple gradient background, clean lines View generated image"
-- paragraph: I've generated the hero image and saved it to your project. You can find it in the .dyad/media directory.
+- paragraph: I've generated the hero image and saved it to your project. You can find it in the .samba/media directory.
 - button "Copy"
 - button "Copy Request ID"
 - button "Undo"

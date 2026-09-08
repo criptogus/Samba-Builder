@@ -136,8 +136,8 @@ jobs:
         id: app-token
         uses: actions/create-github-app-token@v3
         with:
-          app-id: ${{ vars.DYAD_GITHUB_APP_ID }}
-          private-key: ${{ secrets.DYAD_GITHUB_APP_PRIVATE_KEY }}
+          app-id: ${{ vars.SAMBA_GITHUB_APP_ID }}
+          private-key: ${{ secrets.SAMBA_GITHUB_APP_PRIVATE_KEY }}
           permission-issues: write
 
       - name: Re-open issue and post response
@@ -177,8 +177,8 @@ jobs:
         id: app-token
         uses: actions/create-github-app-token@v3
         with:
-          app-id: ${{ vars.DYAD_GITHUB_APP_ID }}
-          private-key: ${{ secrets.DYAD_GITHUB_APP_PRIVATE_KEY }}
+          app-id: ${{ vars.SAMBA_GITHUB_APP_ID }}
+          private-key: ${{ secrets.SAMBA_GITHUB_APP_PRIVATE_KEY }}
           permission-issues: write
 
       - name: Post redirect comment

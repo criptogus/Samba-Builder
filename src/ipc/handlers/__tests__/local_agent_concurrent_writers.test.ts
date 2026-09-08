@@ -34,11 +34,11 @@ describe("concurrent Local Agent writers (integration)", () => {
       autoApprove: true,
       settings: {
         isTestMode: true,
-        enableDyadPro: true,
+        enableSambaPro: true,
         enableImplementerSubagent: true,
         enableCodeExplorer: false,
         providerSettings: {
-          auto: { apiKey: { value: "testdyadkey" } },
+          auto: { apiKey: { value: "testsambakey" } },
         },
       },
     });

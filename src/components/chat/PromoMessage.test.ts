@@ -61,7 +61,7 @@ describe("shouldShowPromoMessage", () => {
   it("shows for a non-Pro user even when the Samba Builder toggle is enabled", () => {
     const settings = {
       ...settingsWithAutoKey(),
-      enableDyadPro: true,
+      enableSambaPro: true,
     };
 
     expect(
@@ -78,7 +78,7 @@ describe("shouldShowPromoMessage", () => {
     expect(
       shouldShowPromoMessage({
         promoSeed: 123,
-        settings: settingsWithAutoKey("dyad-pro-key"),
+        settings: settingsWithAutoKey("samba-pro-key"),
         userBudget: null,
         messagesLength: 2,
       }),

@@ -2,7 +2,10 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { GovernancePanel } from "./GovernancePanel";
-import type { GovernanceRunResult, GovernanceStatus } from "@/ipc/types/governance";
+import type {
+  GovernanceRunResult,
+  GovernanceStatus,
+} from "@/ipc/types/governance";
 
 const mocks = vi.hoisted(() => ({
   get: vi.fn(),
@@ -12,7 +15,9 @@ vi.mock("@/ipc/types", () => ({
   governanceClient: { get: mocks.get, run: mocks.run },
 }));
 
-const governedDraft = (overrides: Partial<GovernanceStatus> = {}): GovernanceStatus => ({
+const governedDraft = (
+  overrides: Partial<GovernanceStatus> = {},
+): GovernanceStatus => ({
   mode: "governed",
   stage: "draft",
   vetos: 0,
@@ -52,9 +57,13 @@ describe("GovernancePanel", () => {
     expect(screen.getByText(/In review/)).toBeTruthy();
     expect(screen.getByText(/1 veto/)).toBeTruthy();
 
-    const approve = screen.getByRole("button", { name: "Approve" }) as HTMLButtonElement;
+    const approve = screen.getByRole("button", {
+      name: "Approve",
+    }) as HTMLButtonElement;
     expect(approve.disabled).toBe(false);
-    const submit = screen.getByRole("button", { name: "Submit" }) as HTMLButtonElement;
+    const submit = screen.getByRole("button", {
+      name: "Submit",
+    }) as HTMLButtonElement;
     expect(submit.disabled).toBe(true);
   });
 
@@ -69,9 +78,7 @@ describe("GovernancePanel", () => {
     mocks.run.mockResolvedValue(runResult);
     renderPanel(makeQueryClient());
 
-    fireEvent.click(
-      await screen.findByRole("button", { name: "Submit" }),
-    );
+    fireEvent.click(await screen.findByRole("button", { name: "Submit" }));
 
     await vi.waitFor(() =>
       expect(mocks.run).toHaveBeenCalledWith({

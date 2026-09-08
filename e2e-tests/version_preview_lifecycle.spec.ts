@@ -11,7 +11,7 @@ function git(cwd: string, ...args: string[]) {
 }
 
 async function makeRuntimeTreeClean(po: PageObject, appPath: string) {
-  const screenshotDir = path.join(appPath, ".dyad", "screenshot");
+  const screenshotDir = path.join(appPath, ".samba", "screenshot");
   await expect(async () => {
     const entries = fs.existsSync(screenshotDir)
       ? fs.readdirSync(screenshotDir)

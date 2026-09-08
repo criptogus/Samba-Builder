@@ -36,8 +36,8 @@ describe("local-agent grep cards (integration)", () => {
       chatMode: "local-agent",
       settings: {
         isTestMode: true,
-        enableDyadPro: true,
-        providerSettings: { auto: { apiKey: { value: "testdyadkey" } } },
+        enableSambaPro: true,
+        providerSettings: { auto: { apiKey: { value: "testsambakey" } } },
       },
     });
   }, 60_000);
@@ -54,10 +54,10 @@ describe("local-agent grep cards (integration)", () => {
     send();
 
     await waitFor(
-      () => expect(screen.getAllByTestId("dyad-grep")).toHaveLength(2),
+      () => expect(screen.getAllByTestId("samba-grep")).toHaveLength(2),
       { timeout: 20_000 },
     );
-    const cards = screen.getAllByTestId("dyad-grep");
+    const cards = screen.getAllByTestId("samba-grep");
     expect(cards[0].textContent).toContain('"createRoot"');
     expect(cards[1].textContent).toContain('"App"');
 
@@ -74,7 +74,7 @@ describe("local-agent grep cards (integration)", () => {
       orderBy: (messages, { asc }) => [asc(messages.id)],
     });
     const assistantContent = storedMessages.at(-1)?.content;
-    expect(assistantContent).toContain("<dyad-grep");
+    expect(assistantContent).toContain("<samba-grep");
     expect(assistantContent).toContain("src/main.tsx");
     expect(assistantContent).toContain("src/App.tsx");
   }, 60_000);
@@ -101,7 +101,7 @@ describe("local-agent grep cards (integration)", () => {
     );
     send();
 
-    const grepCard = await screen.findByTestId("dyad-grep", undefined, {
+    const grepCard = await screen.findByTestId("samba-grep", undefined, {
       timeout: 20_000,
     });
     await waitFor(() =>

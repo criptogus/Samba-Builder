@@ -44,7 +44,7 @@ vi.mock("@/hooks/useStreamChat", () => ({
 
 vi.mock("@/lib/schemas", async (importOriginal) => ({
   ...(await importOriginal<typeof import("@/lib/schemas")>()),
-  isDyadProEnabled: () => true,
+  isSambaProEnabled: () => true,
 }));
 
 vi.mock("@/lib/toast", () => ({ showError: mocks.showError }));

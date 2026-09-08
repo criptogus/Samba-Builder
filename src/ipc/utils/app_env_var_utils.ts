@@ -3,14 +3,14 @@
  * Environment variables are sensitive and should not be logged.
  */
 
-import { getDyadAppPath } from "@/paths/paths";
+import { getSambaAppPath } from "@/paths/paths";
 import { EnvVar } from "@/ipc/types";
 import type { AppFrameworkType } from "@/lib/framework_constants";
 import path from "path";
 import fs from "fs";
 import crypto from "crypto";
 import log from "electron-log";
-import { DyadError, DyadErrorKind } from "@/errors/dyad_error";
+import { SambaError, SambaErrorKind } from "@/errors/samba_error";
 import { queueCloudSandboxSnapshotSync } from "./cloud_sandbox_provider";
 
 const logger = log.scope("app_env_var_utils");
@@ -18,7 +18,7 @@ const logger = log.scope("app_env_var_utils");
 export const ENV_FILE_NAME = ".env.local";
 
 export function getEnvFilePath({ appPath }: { appPath: string }): string {
-  return path.join(getDyadAppPath(appPath), ENV_FILE_NAME);
+  return path.join(getSambaAppPath(appPath), ENV_FILE_NAME);
 }
 
 export async function updatePostgresUrlEnvVar({
@@ -47,7 +47,7 @@ export async function updatePostgresUrlEnvVar({
   const envFileContents = serializeEnvFile(envVars);
   await fs.promises.writeFile(getEnvFilePath({ appPath }), envFileContents);
   queueCloudSandboxSnapshotSync({
-    appPath: getDyadAppPath(appPath),
+    appPath: getSambaAppPath(appPath),
     changedPaths: [ENV_FILE_NAME],
   });
 }
@@ -62,15 +62,15 @@ export async function updateDbPushEnvVar({
   try {
     const envVars = await readEnvVarsOrEmpty({ appPath });
 
-    // Update or add DYAD_DISABLE_DB_PUSH
+    // Update or add SAMBA_DISABLE_DB_PUSH
     const existingVar = envVars.find(
-      (envVar) => envVar.key === "DYAD_DISABLE_DB_PUSH",
+      (envVar) => envVar.key === "SAMBA_DISABLE_DB_PUSH",
     );
     if (existingVar) {
       existingVar.value = disabled ? "true" : "false";
     } else {
       envVars.push({
-        key: "DYAD_DISABLE_DB_PUSH",
+        key: "SAMBA_DISABLE_DB_PUSH",
         value: disabled ? "true" : "false",
       });
     }
@@ -78,7 +78,7 @@ export async function updateDbPushEnvVar({
     const envFileContents = serializeEnvFile(envVars);
     await fs.promises.writeFile(getEnvFilePath({ appPath }), envFileContents);
     queueCloudSandboxSnapshotSync({
-      appPath: getDyadAppPath(appPath),
+      appPath: getSambaAppPath(appPath),
       changedPaths: [ENV_FILE_NAME],
     });
   } catch (error) {
@@ -100,9 +100,9 @@ export async function readPostgresUrlFromEnvFile({
     (envVar) => envVar.key === "POSTGRES_URL",
   )?.value;
   if (!postgresUrl) {
-    throw new DyadError(
+    throw new SambaError(
       "POSTGRES_URL not found in .env.local",
-      DyadErrorKind.NotFound,
+      SambaErrorKind.NotFound,
     );
   }
   return postgresUrl;
@@ -260,7 +260,7 @@ export async function updateNeonEnvVars({
   const envFileContents = serializeEnvFile(envVars);
   await fs.promises.writeFile(getEnvFilePath({ appPath }), envFileContents);
   queueCloudSandboxSnapshotSync({
-    appPath: getDyadAppPath(appPath),
+    appPath: getSambaAppPath(appPath),
     changedPaths: [ENV_FILE_NAME],
   });
 }
@@ -300,7 +300,7 @@ export async function removeNeonEnvVars({
   const envFileContents = serializeEnvFile(filtered);
   await fs.promises.writeFile(getEnvFilePath({ appPath }), envFileContents);
   queueCloudSandboxSnapshotSync({
-    appPath: getDyadAppPath(appPath),
+    appPath: getSambaAppPath(appPath),
     changedPaths: [ENV_FILE_NAME],
   });
 }

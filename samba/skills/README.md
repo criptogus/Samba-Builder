@@ -7,14 +7,14 @@ loop que os **evolui automaticamente** com o feedback dos devs.
 
 ## Arquitetura: como um skill vira "nativo"
 
-O fork do Dyad monta o system prompt do agente em `src/prompts/` (system_prompt,
+O fork do Samba monta o system prompt do agente em `src/prompts/` (system_prompt,
 local_agent_prompt, guides por framework). Dois pontos de injeção nativa:
 
 1. **Diretrizes sempre ativas** — seção de "princípios Samba" no prompt montado do
    fork (ex: `samba/prompts/` interpolado no local_agent_prompt). É onde entram os
    skills de processo/qualidade que valem para TODO build (curadoria abaixo).
 2. **Contexto por app** — `AGENTS.md`/`DESIGN.md` gravados na raiz de cada app
-   gerado (o agente do Dyad já respeita AI rules do projeto). É onde entram o
+   gerado (o agente do Samba já respeita AI rules do projeto). É onde entram o
    design system do cliente (vindo do Córtex) e refs de DESIGN.md.
 3. **Ferramentas** — via MCP (Córtex, Composio, markitdown) para contexto e ações.
 
@@ -39,19 +39,19 @@ pontos 1-2 é a fase "integrar skills" (próxima do roadmap).
 | ----------------------- | ----------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
 | **Understand-Anything** | Egonex-AI (MIT, 80k★)         | Quando o cliente pede evoluir app EXISTENTE: grafo de conhecimento do código antes de mexer (Hermes é plataforma suportada) |
 | **markitdown**          | microsoft (MIT, 178k★)        | Ingestão de material do cliente (PDF/PPT/docs → markdown p/ o Córtex). Já roda no seu stack (venv) — expor via MCP          |
-| **spec-kit**            | github/spec-kit (MIT, 134k★)  | Fluxo spec→plan→tasks→converge para projetos grandes/multifase; o Dyad já tem Plan mode, então só para contratos complexos  |
+| **spec-kit**            | github/spec-kit (MIT, 134k★)  | Fluxo spec→plan→tasks→converge para projetos grandes/multifase; o Samba já tem Plan mode, então só para contratos complexos |
 | **superpowers**         | obra/superpowers (MIT, 282k★) | Metodologia TDD/worktrees/review — ótima p/ o DEV do próprio Samba Builder (Hermes tem plugin), pesada p/ dentro do produto |
 | **mattpocock/skills**   | mattpocock (AI Hero)          | grill-me/to-spec/domain-modeling p/ refinar requisito com o cliente — útil no kickoff de projeto grande                     |
 
 ### 🔴 Não levar agora (decisões conscientes)
 
-| Repo                                                           | Motivo                                                                                                                                     |
-| -------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
-| affaan-m/ECC (246k★)                                           | Sistema de "performance do harness" p/ Claude Code — pesado, sobrepõe o que o Dyad já faz; avaliar se o produto crescer p/ equipes grandes |
-| msitarzewski/agency-agents                                     | Personae de especialistas: o Samba Builder é um agente de build, não um "agency" — o Córtex já tem os workers da Samba                     |
-| ComposioHQ/awesome-claude-skills                               | Skills "X Automation" duplicam as tools que o Composio já entrega via MCP (conectado) — seria bloat de prompt                              |
-| punkpeye/awesome-mcp-servers                                   | Catálogo de referência (não skills) — usar para escolher MCPs pontuais                                                                     |
-| anthropics/claude-code, lobehub/lobehub, remotion-dev/remotion | Produtos/frameworks, não skills de build (remotion: só se o Samba Builder passar a gerar vídeo)                                            |
+| Repo                                                           | Motivo                                                                                                                                      |
+| -------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| affaan-m/ECC (246k★)                                           | Sistema de "performance do harness" p/ Claude Code — pesado, sobrepõe o que o Samba já faz; avaliar se o produto crescer p/ equipes grandes |
+| msitarzewski/agency-agents                                     | Personae de especialistas: o Samba Builder é um agente de build, não um "agency" — o Córtex já tem os workers da Samba                      |
+| ComposioHQ/awesome-claude-skills                               | Skills "X Automation" duplicam as tools que o Composio já entrega via MCP (conectado) — seria bloat de prompt                               |
+| punkpeye/awesome-mcp-servers                                   | Catálogo de referência (não skills) — usar para escolher MCPs pontuais                                                                      |
+| anthropics/claude-code, lobehub/lobehub, remotion-dev/remotion | Produtos/frameworks, não skills de build (remotion: só se o Samba Builder passar a gerar vídeo)                                             |
 
 ## Estrutura
 

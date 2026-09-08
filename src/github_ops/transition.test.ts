@@ -41,7 +41,7 @@ const REPRESENTATIVE_OPS: readonly GithubOperation[] = [
   {
     type: "connect-repo",
     mode: "existing",
-    owner: "dyad",
+    owner: "samba",
     repo: "app",
     branch: "main",
     thenAutoPush: true,

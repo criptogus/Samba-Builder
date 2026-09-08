@@ -23,14 +23,14 @@ import {
   deliveryBlockers,
   emptyDeliveryPlan,
 } from "@/delivery/model";
-import { DyadError, DyadErrorKind } from "@/errors/dyad_error";
+import { SambaError, SambaErrorKind } from "@/errors/samba_error";
 import {
   appOperationCoordinator,
   readAppResource,
 } from "../services/app_operation_coordinator";
-import { getDyadAppPath } from "@/paths/paths";
-const fail = (message: string, kind = DyadErrorKind.Validation): never => {
-  throw new DyadError(message, kind);
+import { getSambaAppPath } from "@/paths/paths";
+const fail = (message: string, kind = SambaErrorKind.Validation): never => {
+  throw new SambaError(message, kind);
 };
 function appRow(appId: number) {
   const row = getHandlerContext()
@@ -38,11 +38,11 @@ function appRow(appId: number) {
     .from(apps)
     .where(eq(apps.id, appId))
     .get();
-  if (!row) return fail("Projeto não encontrado.", DyadErrorKind.NotFound);
+  if (!row) return fail("Projeto não encontrado.", SambaErrorKind.NotFound);
   return row;
 }
 async function currentCommit(appId: number) {
-  return readDeliveryCommit(getDyadAppPath(appRow(appId).path));
+  return readDeliveryCommit(getSambaAppPath(appRow(appId).path));
 }
 
 export function registerDeliveryHandlers() {
@@ -115,7 +115,7 @@ export function registerDeliveryHandlers() {
         operation: "inspect-foundation",
         resources: [readAppResource("app-path"), readAppResource("repository")],
       },
-      () => inspectFoundation(getDyadAppPath(appRow(appId).path)),
+      () => inspectFoundation(getSambaAppPath(appRow(appId).path)),
     ),
   );
   createTypedHandler(deliveryContracts.approvals, async (_, { appId }) => {
@@ -212,7 +212,7 @@ export function registerDeliveryHandlers() {
           )
             return fail(
               "A revisão da base é obrigatória para este projeto.",
-              DyadErrorKind.Precondition,
+              SambaErrorKind.Precondition,
             );
           if (
             saved &&
@@ -221,18 +221,18 @@ export function registerDeliveryHandlers() {
           )
             return fail(
               "A política de engenharia é obrigatória para este projeto.",
-              DyadErrorKind.Precondition,
+              SambaErrorKind.Precondition,
             );
           if (plan.stage === "approved" || plan.stage === "delivered") {
             const blockers = deliveryBlockers(plan);
             if (blockers.length)
-              return fail(blockers.join("\n"), DyadErrorKind.Precondition);
+              return fail(blockers.join("\n"), SambaErrorKind.Precondition);
             if (!plan.reviewer.trim() || !plan.approvalNote.trim())
               return fail(
                 "Registre quem aprovou e a evidência da aprovação recebida.",
               );
             await assertFoundationReviewed(
-              getDyadAppPath(appRow(appId).path),
+              getSambaAppPath(appRow(appId).path),
               plan,
             );
             const head = await currentCommit(appId);
@@ -240,12 +240,12 @@ export function registerDeliveryHandlers() {
               appId,
               plan,
               head,
-              getDyadAppPath(appRow(appId).path),
+              getSambaAppPath(appRow(appId).path),
             );
             if (head !== plan.reviewCommit || head !== plan.approvalCommit)
               return fail(
                 "A aprovação não corresponde à versão atual. Faça uma nova revisão.",
-                DyadErrorKind.Precondition,
+                SambaErrorKind.Precondition,
               );
           }
           const { db } = getHandlerContext();
@@ -258,7 +258,7 @@ export function registerDeliveryHandlers() {
             if ((previous?.revision ?? 0) !== revision)
               return fail(
                 "A entrega foi alterada em outra janela. Recarregue antes de salvar; seu rascunho permanece na tela.",
-                DyadErrorKind.Conflict,
+                SambaErrorKind.Conflict,
               );
             const previousPlan = previous
               ? DeliveryPlanSchema.parse(JSON.parse(previous.data))

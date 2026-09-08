@@ -8,7 +8,7 @@ Today the triage bot posts up to three canned comments on a new issue: "please w
 
 Proposal: replace the three comments with **one reply** that
 
-1. says plainly what we think is going on (a bug in Dyad, already fixed, an outside service, a setup problem, a problem in the app they built, or "we can't tell yet"),
+1. says plainly what we think is going on (a bug in Samba, already fixed, an outside service, a setup problem, a problem in the app they built, or "we can't tell yet"),
 2. gives steps in product terms when there is a known fix or workaround,
 3. points to the one or two existing reports worth following, with their outcome,
 4. asks for exactly the missing information,
@@ -44,7 +44,7 @@ There is a real question hiding in there (why does the Windows update check 404 
 
 73 of 300 issues have a blank or placeholder title or description. The bot says "Please fill in all the fields in the issue so we can help you. A screenshot is very helpful!" The maintainer then re-asks in about 30 threads, in a friendlier way ("could you let us know what issue you're having? a screenshot would be very helpful").
 
-But the report body already has the Dyad version, OS, model, chat mode, Node path, the last 3.5 KB of logs, and a `Screenshot status:` line whose text literally says "if no image is attached, ask them to paste it". Sometimes the logs alone tell the story: #4456 (Node.js not found), #4432 (no space left on disk), #3848 (the maintainer read the log, found the decrypt error, and shipped 1.6.2 the next day). The bot should do the reading and say what it found.
+But the report body already has the Samba version, OS, model, chat mode, Node path, the last 3.5 KB of logs, and a `Screenshot status:` line whose text literally says "if no image is attached, ask them to paste it". Sometimes the logs alone tell the story: #4456 (Node.js not found), #4432 (no space left on disk), #3848 (the maintainer read the log, found the decrypt error, and shipped 1.6.2 the next day). The bot should do the reading and say what it found.
 
 ### 3. The bot never says what it thinks is going on; the maintainer always does
 
@@ -56,7 +56,7 @@ Rough sort of the 205 maintainer replies:
 | "Fixed in release X" or "please update"                            |      25 | #4295, #4355, #3837, #4267        | Yes, with release notes and a version check           |
 | Concrete workaround in product terms                               |      25 | #4316, #4392, #4241, #4172        | Yes, from a playbook                                  |
 | Confirm the bug, say a fix is coming                               |      20 | #4396, #4264, #3714               | Confirm yes; never promise a date                     |
-| Not a Dyad problem (outage, provider, OS, the user's own app)      |      10 | #3959, #4172, #4250, #4359, #3974 | Partly (status feeds and playbook)                    |
+| Not a Samba problem (outage, provider, OS, the user's own app)     |      10 | #3959, #4172, #4250, #4359, #3974 | Partly (status feeds and playbook)                    |
 | Clarifying question                                                |      15 | #4455, #4418, #3391               | Yes                                                   |
 | Credits, billing, refunds                                          |      10 | #3394, #3658, #4140, #4354        | No. Hand to a person, explicitly                      |
 | Feature request response                                           |      20 | #4322, #4425, #4178               | Partly (offer the existing route, e.g. custom models) |
@@ -94,12 +94,12 @@ Hi @reporter, thanks for the report.
 
 **To help us fix it:** {only what's missing: a screenshot, what you were doing, or Help > Upload Chat Session and paste the session id}
 
-Someone from the Dyad team will follow up here.
+Someone from the Samba team will follow up here.
 
 <details>
-<summary>Notes for the Dyad team</summary>
+<summary>Notes for the Samba team</summary>
 
-- Dyad 1.9.0 (current 1.13.0), Windows, model auto:auto, Build mode
+- Samba 1.9.0 (current 1.13.0), Windows, model auto:auto, Build mode
 - Log signature: ...
 - Likely area: ...; related: #..., PR #...
 - Playbook: matched "..." / no match
@@ -123,19 +123,19 @@ Writing rules the prompt will carry:
 
 Today: title rewritten to "Squirrel auto-update 404 error on Windows"; comment lists #4181 and #4185 as high-confidence duplicates (both also empty). Maintainer later asks what the issue is. No reply.
 
-Proposed title: `[session report] No description (Dyad 1.9.0, Windows)`
+Proposed title: `[session report] No description (Samba 1.9.0, Windows)`
 
-> Hi @reporter, thanks for sending this from Dyad.
+> Hi @reporter, thanks for sending this from Samba.
 >
-> **What's going on:** Your report came through without a description, so we can't tell yet what went wrong. The logs show that Dyad's automatic update check failed, which is probably not what you noticed, but it does mean you're on an older version.
+> **What's going on:** Your report came through without a description, so we can't tell yet what went wrong. The logs show that Samba's automatic update check failed, which is probably not what you noticed, but it does mean you're on an older version.
 >
-> **What you can do now:** Download the latest version from https://www.dyad.sh/download and try again. A lot has been fixed since 1.9.0.
+> **What you can do now:** Download the latest version from https://www.samba.sh/download and try again. A lot has been fixed since 1.9.0.
 >
 > **To help us fix it:** Reply with what you were doing and what you saw instead. A screenshot of the error is the fastest way for us to help.
 >
-> Someone from the Dyad team will follow up here.
+> Someone from the Samba team will follow up here.
 >
-> <details><summary>Notes for the Dyad team</summary>
+> <details><summary>Notes for the Samba team</summary>
 >
 > - Empty session report. 1.9.0 (current 1.13.0), win32, auto:auto, Build mode. Screenshot status: none.
 > - Only error in logs: Squirrel Update.exe CheckForUpdate returned HTTP 404. Same signature in #4181, #4185, #4174 and 20 others, all empty reports on old versions. Treated as background noise for the reporter; tracked for the team in the Windows updater issue.
@@ -146,21 +146,21 @@ Proposed title: `[session report] No description (Dyad 1.9.0, Windows)`
 
 Today: title rewritten well ("Node.js/pnpm not recognized on Windows"), but the comment is a three-item duplicate list with the double-"try" workaround.
 
-> Hi @reporter, thanks for sending this from Dyad.
+> Hi @reporter, thanks for sending this from Samba.
 >
-> **What's going on:** Dyad can't find Node.js on your computer, which it needs to run your app. This is a setup problem rather than something wrong with your app, and it has a known fix.
+> **What's going on:** Samba can't find Node.js on your computer, which it needs to run your app. This is a setup problem rather than something wrong with your app, and it has a known fix.
 >
 > **What you can do now:**
 >
 > 1. Install Node.js from https://nodejs.org (pick the LTS version).
-> 2. Quit Dyad completely and open it again.
-> 3. If it still doesn't work, open **Settings**, find **Node.js Path Configuration**, and click **Browse for Node.js** to point Dyad at the folder where you installed it.
+> 2. Quit Samba completely and open it again.
+> 3. If it still doesn't work, open **Settings**, find **Node.js Path Configuration**, and click **Browse for Node.js** to point Samba at the folder where you installed it.
 >
 > **Others with the same problem:** #3665 and #3348. The steps above resolved it there.
 >
-> Someone from the Dyad team will follow up here.
+> Someone from the Samba team will follow up here.
 >
-> <details><summary>Notes for the Dyad team</summary>
+> <details><summary>Notes for the Samba team</summary>
 >
 > - 1.13.0 (current), win32, auto:free, Ask mode. Screenshot status: captured, no image attached.
 > - Log: `'node' is not recognized as an internal or external command` from runShellCommand; managed pnpm install exited 1. Node Path reports `C:\Program Files\nodejs\node.exe`, so Node is installed but not on PATH (compare #3612, corrupted PATH entry).
@@ -173,13 +173,13 @@ Today: comment links #4388 as a low-confidence duplicate. Maintainer answers by 
 
 > Hi @reporter, thanks for the report.
 >
-> **What's going on:** When your Dyad Pro credits run out, Dyad keeps trying to use Pro rather than switching to your own Anthropic key. That's how it works today, so nothing is wrong with your setup, and you can switch it yourself.
+> **What's going on:** When your Samba Pro credits run out, Samba keeps trying to use Pro rather than switching to your own Anthropic key. That's how it works today, so nothing is wrong with your setup, and you can switch it yourself.
 >
-> **What you can do now:** Click the **Pro** button next to the model picker and turn off **Enable Dyad Pro**. Dyad will use your own API key until you turn it back on.
+> **What you can do now:** Click the **Pro** button next to the model picker and turn off **Enable Samba Pro**. Samba will use your own API key until you turn it back on.
 >
-> Someone from the Dyad team will follow up here.
+> Someone from the Samba team will follow up here.
 >
-> <details><summary>Notes for the Dyad team</summary>
+> <details><summary>Notes for the Samba team</summary>
 >
 > - Pro user, 1.12.0. "Failed to verify" on Anthropic BYOK after credits hit 0.
 > - Same answer given by hand in #4388 (daily chat limit). Two reports in one week; consider falling back to the user's own key automatically when credits are 0, or a clearer message.
@@ -190,30 +190,30 @@ Today: comment links #4388 as a low-confidence duplicate. Maintainer answers by 
 
 A new file, `.github/prompts/triage-playbook.md`, injected into the prompt. Each entry names the situation, what to tell the reporter (in product words), and the issues it came from. Seed entries, all taken from replies the maintainer has already written:
 
-| Situation (what the bot sees)                                                    | What to tell the reporter                                                                                                                                                                                                                       | Source                                   |
-| -------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------- |
-| Report has no description                                                        | Ask what they were doing and what they saw, plus a screenshot. Title it `[session report] No description (Dyad X, OS)`. Ignore the Auto-Updater Logs section unless the reporter mentions updating. If the version is behind, suggest updating. | 73 issues; #4408, #4393, #4263           |
-| "node is not recognized" or pnpm not found (Windows)                             | Install Node.js from nodejs.org (LTS), quit and reopen Dyad; else **Settings** > **Node.js Path Configuration** > **Browse for Node.js**.                                                                                                       | #3665, #3348, #4188, #4189, #3612, #4456 |
-| `ERR_PNPM_UNSUPPORTED_ENGINE` or dependency install fails on an imported project | Paste the maintainer's fix-it prompt into the chat (see #4455). Ask whether the project was imported from another tool.                                                                                                                         | #4455, #3497                             |
-| "maximum context length" or "too many tokens"                                    | Start a new chat; check the model's max output tokens setting isn't set very high; update to 1.13.0 or newer.                                                                                                                                   | #4421, #4355, #1558, #1827               |
-| Pro credits ran out, daily chat limit, or wants to use own key                   | **Pro** button > turn off **Enable Dyad Pro**.                                                                                                                                                                                                  | #4392, #4388                             |
-| Credits consumed by errors, not refreshed, or charged more than expected         | Say a person will check the account. Ask for the session id (**Help** > **Upload Chat Session**) and roughly how many credits. Never promise a refund.                                                                                          | #3394, #3611, #3658, #4140, #4354, #3610 |
-| Neon "Token refresh failed"                                                      | **Settings** > Integrations > **Disconnect from Neon**, then **Manage app** and reconnect.                                                                                                                                                      | #4316                                    |
-| GitHub push or connect fails, "invalid JSON (HTML)"                              | Check githubstatus.com. If there are uncommitted changes, click **Review & commit** first. Link the GitHub troubleshooting docs.                                                                                                                | #3959, #4318, #3406, #3398               |
-| Supabase deploy stuck, or every edge function redeploys                          | Check status.supabase.com. Restoring an earlier version from **Versions** redeploys functions. 1.11.0 added a manual push button.                                                                                                               | #4172, #3635                             |
-| "Not a git repository", "Failed to resolve ref HEAD", git corrupted              | **Manage app** > overflow menu > **Copy app** (without history), or re-import with **Import App**.                                                                                                                                              | #4241, #3657, #3552                      |
-| Import fails after a crash, folder already exists                                | Delete or rename the folder in `dyad-apps`, then import again. Fixed in 1.10.0-beta.3.                                                                                                                                                          | #4217                                    |
-| App name with a trailing dot, or spaces, breaks paths or @-mentions              | Rename the app to letters, numbers, and dashes.                                                                                                                                                                                                 | #3782, #4168                             |
-| "TypeError: terminated", AI request fails, DNS errors                            | Try another network or turn off VPN.                                                                                                                                                                                                            | #4167, #4165, #3653, #4107               |
-| Claude Fable refuses, or `tool_use` block error on security tasks                | Use Opus or GPT for security reviews. A warning shows in the UI since 1.8.0-beta.1.                                                                                                                                                             | #3747, #3922                             |
-| Dyad crashes or force closes                                                     | Update (stability work landed in 1.7.0). **Help** > **Upload Chat Session**. If logs are trimmed, email the `main` log from `%APPDATA%\dyad\logs`.                                                                                              | #3490, #4294, #3863, #3980               |
-| macOS older than supported                                                       | Upgrade macOS.                                                                                                                                                                                                                                  | #4250                                    |
-| A model disappeared from the list, or add provider X                             | Add it as a custom model (docs link). Providers are only added with clear demand.                                                                                                                                                               | #4425, #4322, #4293                      |
-| Network loop or error inside the app the user built                              | That's the app, not Dyad. Switch to Agent mode and ask Dyad to find the cause.                                                                                                                                                                  | #4359                                    |
-| Reporter is on an old version                                                    | Link the download page. Check release notes for a fix mention and name the version.                                                                                                                                                             | #3837, #3859, #3513, #4287, #4295        |
-| Build mode struggling on a large app, or a weak model                            | Use Agent mode; suggest a stronger model.                                                                                                                                                                                                       | #3815, #3773                             |
-| Windows CRLF warnings block git staging                                          | Fixed by PR #3683; terminal commands as fallback.                                                                                                                                                                                               | #3682                                    |
-| Balance shown by a third-party router                                            | Contact that provider.                                                                                                                                                                                                                          | #3974                                    |
+| Situation (what the bot sees)                                                    | What to tell the reporter                                                                                                                                                                                                                        | Source                                   |
+| -------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------- |
+| Report has no description                                                        | Ask what they were doing and what they saw, plus a screenshot. Title it `[session report] No description (Samba X, OS)`. Ignore the Auto-Updater Logs section unless the reporter mentions updating. If the version is behind, suggest updating. | 73 issues; #4408, #4393, #4263           |
+| "node is not recognized" or pnpm not found (Windows)                             | Install Node.js from nodejs.org (LTS), quit and reopen Samba; else **Settings** > **Node.js Path Configuration** > **Browse for Node.js**.                                                                                                       | #3665, #3348, #4188, #4189, #3612, #4456 |
+| `ERR_PNPM_UNSUPPORTED_ENGINE` or dependency install fails on an imported project | Paste the maintainer's fix-it prompt into the chat (see #4455). Ask whether the project was imported from another tool.                                                                                                                          | #4455, #3497                             |
+| "maximum context length" or "too many tokens"                                    | Start a new chat; check the model's max output tokens setting isn't set very high; update to 1.13.0 or newer.                                                                                                                                    | #4421, #4355, #1558, #1827               |
+| Pro credits ran out, daily chat limit, or wants to use own key                   | **Pro** button > turn off **Enable Samba Pro**.                                                                                                                                                                                                  | #4392, #4388                             |
+| Credits consumed by errors, not refreshed, or charged more than expected         | Say a person will check the account. Ask for the session id (**Help** > **Upload Chat Session**) and roughly how many credits. Never promise a refund.                                                                                           | #3394, #3611, #3658, #4140, #4354, #3610 |
+| Neon "Token refresh failed"                                                      | **Settings** > Integrations > **Disconnect from Neon**, then **Manage app** and reconnect.                                                                                                                                                       | #4316                                    |
+| GitHub push or connect fails, "invalid JSON (HTML)"                              | Check githubstatus.com. If there are uncommitted changes, click **Review & commit** first. Link the GitHub troubleshooting docs.                                                                                                                 | #3959, #4318, #3406, #3398               |
+| Supabase deploy stuck, or every edge function redeploys                          | Check status.supabase.com. Restoring an earlier version from **Versions** redeploys functions. 1.11.0 added a manual push button.                                                                                                                | #4172, #3635                             |
+| "Not a git repository", "Failed to resolve ref HEAD", git corrupted              | **Manage app** > overflow menu > **Copy app** (without history), or re-import with **Import App**.                                                                                                                                               | #4241, #3657, #3552                      |
+| Import fails after a crash, folder already exists                                | Delete or rename the folder in `samba-apps`, then import again. Fixed in 1.10.0-beta.3.                                                                                                                                                          | #4217                                    |
+| App name with a trailing dot, or spaces, breaks paths or @-mentions              | Rename the app to letters, numbers, and dashes.                                                                                                                                                                                                  | #3782, #4168                             |
+| "TypeError: terminated", AI request fails, DNS errors                            | Try another network or turn off VPN.                                                                                                                                                                                                             | #4167, #4165, #3653, #4107               |
+| Claude Fable refuses, or `tool_use` block error on security tasks                | Use Opus or GPT for security reviews. A warning shows in the UI since 1.8.0-beta.1.                                                                                                                                                              | #3747, #3922                             |
+| Samba crashes or force closes                                                    | Update (stability work landed in 1.7.0). **Help** > **Upload Chat Session**. If logs are trimmed, email the `main` log from `%APPDATA%\samba\logs`.                                                                                              | #3490, #4294, #3863, #3980               |
+| macOS older than supported                                                       | Upgrade macOS.                                                                                                                                                                                                                                   | #4250                                    |
+| A model disappeared from the list, or add provider X                             | Add it as a custom model (docs link). Providers are only added with clear demand.                                                                                                                                                                | #4425, #4322, #4293                      |
+| Network loop or error inside the app the user built                              | That's the app, not Samba. Switch to Agent mode and ask Samba to find the cause.                                                                                                                                                                 | #4359                                    |
+| Reporter is on an old version                                                    | Link the download page. Check release notes for a fix mention and name the version.                                                                                                                                                              | #3837, #3859, #3513, #4287, #4295        |
+| Build mode struggling on a large app, or a weak model                            | Use Agent mode; suggest a stronger model.                                                                                                                                                                                                        | #3815, #3773                             |
+| Windows CRLF warnings block git staging                                          | Fixed by PR #3683; terminal commands as fallback.                                                                                                                                                                                                | #3682                                    |
+| Balance shown by a third-party router                                            | Contact that provider.                                                                                                                                                                                                                           | #3974                                    |
 
 Each entry gets a "verified on version" field. When the bot can't match an entry it writes "Playbook: no match" in the team notes, which is the signal to add one. Keep it around 20 to 30 entries; if it grows past that, move the long tail to docs.
 
@@ -223,8 +223,8 @@ Each entry gets a "verified on version" field. When the bot can't match an entry
 
 - **Labels**: unchanged.
 - **Related reports** (was "duplicates"): require an outcome per match (fixed in X, open, closed without fix). Only high-confidence matches reach the reporter, at most two. Medium go in the team notes. Drop low entirely.
-- **Title**: when the description is empty, never derive a title from the Auto-Updater Logs section. Default to `[session report] No description (Dyad X, OS)` unless the main Logs show one clear user-facing failure (like Node.js missing), in which case name that.
-- **Assessment** (new): one of `likely_dyad_bug`, `fixed_in_release`, `external_service`, `user_app_issue`, `environment_setup`, `needs_info`, `feature_request`, `question`, `needs_human`. Must cite evidence: a log line, a playbook entry, a release note, or a maintainer comment. No evidence means `needs_info`.
+- **Title**: when the description is empty, never derive a title from the Auto-Updater Logs section. Default to `[session report] No description (Samba X, OS)` unless the main Logs show one clear user-facing failure (like Node.js missing), in which case name that.
+- **Assessment** (new): one of `likely_samba_bug`, `fixed_in_release`, `external_service`, `user_app_issue`, `environment_setup`, `needs_info`, `feature_request`, `question`, `needs_human`. Must cite evidence: a log line, a playbook entry, a release note, or a maintainer comment. No evidence means `needs_info`.
 - **Steps** (new): product words only, bold UI labels, at most four. Only from the playbook, release notes, or a maintainer comment on a linked issue.
 - **Info needed** (new): from a fixed list: description, screenshot (when `Screenshot status: captured` but no image is attached, ask them to paste it), session id via **Help** > **Upload Chat Session**, version.
 - **Team notes** (new): markdown, about 120 words: environment line, log signature, likely area or file, related issues and PRs, playbook match or miss, confidence.
@@ -250,10 +250,10 @@ The agent keeps no network access. Give it read-only `Read`, `Grep`, and `Glob` 
   "incomplete": false,
   "title": null,
   "assessment": "environment_setup",
-  "summary": "Dyad can't find Node.js on your computer, which it needs to run your app.",
+  "summary": "Samba can't find Node.js on your computer, which it needs to run your app.",
   "steps": [
     "Install Node.js from https://nodejs.org (pick the LTS version).",
-    "Quit Dyad completely and open it again."
+    "Quit Samba completely and open it again."
   ],
   "fixedIn": null,
   "related": [
@@ -272,13 +272,13 @@ The agent keeps no network access. Give it read-only `Read`, `Grep`, and `Glob` 
 ### Apply script (`scripts/issue-triage/apply-triage.mjs`)
 
 - Compose the single comment from the fields, omitting empty sections, always appending the sign-off.
-- Sanitize all free text: strip HTML, strip @-mentions other than the reporter, allow links only to `github.com/dyad-sh/dyad`, `www.dyad.sh`, `nodejs.org`, `githubstatus.com`, `status.supabase.com`; cap lengths (summary 400 chars, each step 200, notes 1200).
+- Sanitize all free text: strip HTML, strip @-mentions other than the reporter, allow links only to `github.com/samba-sh/samba`, `www.samba.sh`, `nodejs.org`, `githubstatus.com`, `status.supabase.com`; cap lengths (summary 400 chars, each step 200, notes 1200).
 - Validate `fixedIn.version` against `RELEASE_INDEX` and `related[].number` against the repo.
 - On `needs_human` (credits, crashes we can't read, anything the bot can't answer), add a `triage/needs-human` label so the team can filter to the issues where the bot had nothing to offer.
 
 ### Workflow (`.github/workflows/claude-triage.yml`)
 
-- If `triage.json` is missing, post a minimal safe comment ("Thanks for the report, someone from the Dyad team will take a look") and add a `triage/failed` label, so failures are visible on the issue instead of only in the daily health check.
+- If `triage.json` is missing, post a minimal safe comment ("Thanks for the report, someone from the Samba team will take a look") and add a `triage/failed` label, so failures are visible on the issue instead of only in the daily health check.
 
 ### Rollout
 

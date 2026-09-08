@@ -38,7 +38,7 @@ import {
 } from "../services/recorded_test_drafts";
 import { isTestRunActive } from "./tests_handlers";
 import { readSettings } from "@/main/settings";
-import { DyadError, DyadErrorKind } from "@/errors/dyad_error";
+import { SambaError, SambaErrorKind } from "@/errors/samba_error";
 import {
   isTestBranchCleanupOnly,
   restoreAppFromTestBranch,
@@ -67,9 +67,9 @@ function deferred<T>() {
 async function getApp(appId: number) {
   const app = await db.query.apps.findFirst({ where: eq(apps.id, appId) });
   if (!app) {
-    throw new DyadError(
+    throw new SambaError(
       `App with id ${appId} not found`,
-      DyadErrorKind.NotFound,
+      SambaErrorKind.NotFound,
     );
   }
   return app;

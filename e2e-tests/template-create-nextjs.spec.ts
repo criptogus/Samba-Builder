@@ -15,7 +15,7 @@ test("create next.js app", async ({ po }, testInfo) => {
   po.settings.snapshotSettingsDelta(beforeSettings);
 
   // Create an app
-  await po.sendPrompt("tc=edit-made-with-dyad");
+  await po.sendPrompt("tc=edit-made-with-samba");
 
   await po.clickRestart();
 

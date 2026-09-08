@@ -104,10 +104,10 @@ function createManagedNodeFixtureArchive(userDataDir: string) {
     .update(fs.readFileSync(archivePath))
     .digest("hex");
 
-  process.env.DYAD_TEST_MANAGED_NODE_ARCHIVE_URL =
+  process.env.SAMBA_TEST_MANAGED_NODE_ARCHIVE_URL =
     pathToFileURL(archivePath).toString();
-  process.env.DYAD_TEST_MANAGED_NODE_SHA256 = sha256;
-  process.env.DYAD_TEST_MANAGED_NODE_EXPECTED_VERSION = isWindows
+  process.env.SAMBA_TEST_MANAGED_NODE_SHA256 = sha256;
+  process.env.SAMBA_TEST_MANAGED_NODE_EXPECTED_VERSION = isWindows
     ? process.version
     : MANAGED_NODE_VERSION;
 }
@@ -117,9 +117,9 @@ const test = testWithConfig({
     createManagedNodeFixtureArchive(userDataDir);
   },
   postLaunchHook: async () => {
-    delete process.env.DYAD_TEST_MANAGED_NODE_ARCHIVE_URL;
-    delete process.env.DYAD_TEST_MANAGED_NODE_SHA256;
-    delete process.env.DYAD_TEST_MANAGED_NODE_EXPECTED_VERSION;
+    delete process.env.SAMBA_TEST_MANAGED_NODE_ARCHIVE_URL;
+    delete process.env.SAMBA_TEST_MANAGED_NODE_SHA256;
+    delete process.env.SAMBA_TEST_MANAGED_NODE_EXPECTED_VERSION;
   },
 });
 

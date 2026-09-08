@@ -253,16 +253,16 @@ describe("agent Git utilities", () => {
   });
 
   it("includes pnpm workspace patches while omitting Samba Builder-internal patches", async () => {
-    await fs.promises.mkdir(path.join(repo, ".dyad"));
+    await fs.promises.mkdir(path.join(repo, ".samba"));
     await fs.promises.writeFile(
       path.join(repo, "pnpm-workspace.yaml"),
       'packages:\n  - "app"\n',
     );
     await fs.promises.writeFile(
-      path.join(repo, ".dyad", "internal.json"),
+      path.join(repo, ".samba", "internal.json"),
       '{"version":1}\n',
     );
-    await git(repo, "add", "pnpm-workspace.yaml", ".dyad/internal.json");
+    await git(repo, "add", "pnpm-workspace.yaml", ".samba/internal.json");
     await git(repo, "commit", "-m", "add workspace metadata");
 
     await fs.promises.writeFile(
@@ -270,7 +270,7 @@ describe("agent Git utilities", () => {
       'packages:\n  - "app"\n  - "packages/*"\n',
     );
     await fs.promises.writeFile(
-      path.join(repo, ".dyad", "internal.json"),
+      path.join(repo, ".samba", "internal.json"),
       '{"version":2}\n',
     );
 

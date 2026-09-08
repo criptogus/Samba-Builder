@@ -11,19 +11,19 @@ const ProviderIdSchema = z.enum([
 ]);
 
 const ThemeGenerationAliasIdSchema = z.enum([
-  "dyad/theme-generator/google",
-  "dyad/theme-generator/anthropic",
-  "dyad/theme-generator/openai",
+  "samba/theme-generator/google",
+  "samba/theme-generator/anthropic",
+  "samba/theme-generator/openai",
 ]);
 
 const AliasIdSchema = z.enum([
-  "dyad/theme-generator/google",
-  "dyad/theme-generator/anthropic",
-  "dyad/theme-generator/openai",
-  "dyad/auto/openai",
-  "dyad/auto/anthropic",
-  "dyad/auto/google",
-  "dyad/help-bot/default",
+  "samba/theme-generator/google",
+  "samba/theme-generator/anthropic",
+  "samba/theme-generator/openai",
+  "samba/auto/openai",
+  "samba/auto/anthropic",
+  "samba/auto/google",
+  "samba/help-bot/default",
 ]);
 
 const LanguageModelCatalogResponseSchema = z.object({
@@ -273,7 +273,7 @@ function buildCatalogResponse(now = new Date()) {
     },
     aliases: [
       {
-        id: "dyad/theme-generator/google",
+        id: "samba/theme-generator/google",
         resolvedModel: {
           providerId: "google",
           apiName: "gemini-3.1-pro-preview",
@@ -282,7 +282,7 @@ function buildCatalogResponse(now = new Date()) {
         purpose: "theme-generation",
       },
       {
-        id: "dyad/theme-generator/anthropic",
+        id: "samba/theme-generator/anthropic",
         resolvedModel: {
           providerId: "anthropic",
           apiName: "claude-opus-4-6",
@@ -291,7 +291,7 @@ function buildCatalogResponse(now = new Date()) {
         purpose: "theme-generation",
       },
       {
-        id: "dyad/theme-generator/openai",
+        id: "samba/theme-generator/openai",
         resolvedModel: {
           providerId: "openai",
           apiName: "gpt-5.2",
@@ -300,7 +300,7 @@ function buildCatalogResponse(now = new Date()) {
         purpose: "theme-generation",
       },
       {
-        id: "dyad/auto/openai",
+        id: "samba/auto/openai",
         resolvedModel: {
           providerId: "openai",
           apiName: "gpt-5.2",
@@ -309,7 +309,7 @@ function buildCatalogResponse(now = new Date()) {
         purpose: "auto-mode",
       },
       {
-        id: "dyad/auto/anthropic",
+        id: "samba/auto/anthropic",
         resolvedModel: {
           providerId: "anthropic",
           apiName: "claude-sonnet-4-6",
@@ -318,7 +318,7 @@ function buildCatalogResponse(now = new Date()) {
         purpose: "auto-mode",
       },
       {
-        id: "dyad/auto/google",
+        id: "samba/auto/google",
         resolvedModel: {
           providerId: "google",
           apiName: "gemini-3-flash-preview",
@@ -327,7 +327,7 @@ function buildCatalogResponse(now = new Date()) {
         purpose: "auto-mode",
       },
       {
-        id: "dyad/help-bot/default",
+        id: "samba/help-bot/default",
         resolvedModel: {
           providerId: "openai",
           apiName: "gpt-5-nano",
@@ -339,15 +339,15 @@ function buildCatalogResponse(now = new Date()) {
     curatedSelections: {
       themeGenerationOptions: [
         {
-          id: "dyad/theme-generator/google",
+          id: "samba/theme-generator/google",
           label: "Google",
         },
         {
-          id: "dyad/theme-generator/anthropic",
+          id: "samba/theme-generator/anthropic",
           label: "Anthropic",
         },
         {
-          id: "dyad/theme-generator/openai",
+          id: "samba/theme-generator/openai",
           label: "OpenAI",
         },
       ],

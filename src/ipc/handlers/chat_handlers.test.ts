@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { eq } from "drizzle-orm";
 import { apps, chats, messages } from "@/db/schema";
-import { DyadErrorKind } from "@/errors/dyad_error";
+import { SambaErrorKind } from "@/errors/samba_error";
 import {
   type HandlerTestHarness,
   setupHandlerTestHarness,
@@ -197,7 +197,7 @@ describe("registerChatHandlers", () => {
         isFavorite: true,
       }),
     ).rejects.toMatchObject({
-      kind: DyadErrorKind.NotFound,
+      kind: SambaErrorKind.NotFound,
       message: "Chat not found",
     });
   });
@@ -364,7 +364,7 @@ describe("registerChatHandlers", () => {
         appId: 1,
       }),
     ).rejects.toMatchObject({
-      kind: DyadErrorKind.NotFound,
+      kind: SambaErrorKind.NotFound,
       message: "Chat not found",
     });
   });

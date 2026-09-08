@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import log from "electron-log";
-import { DyadError, DyadErrorKind } from "@/errors/dyad_error";
+import { SambaError, SambaErrorKind } from "@/errors/samba_error";
 import { gitAdd, gitCommit } from "@/ipc/utils/git_utils";
 import {
   ensurePnpmAllowBuildsConfigured,
@@ -150,9 +150,9 @@ export async function applyPnpmVersionMigration({
 }): Promise<void> {
   const pnpmSupport = await getPnpmMinimumReleaseAgeSupport();
   if (!pnpmSupport.available || !pnpmSupport.version) {
-    throw new DyadError(
+    throw new SambaError(
       "pnpm is not available, so the project cannot be migrated. Restart Samba Builder and try again.",
-      DyadErrorKind.External,
+      SambaErrorKind.External,
     );
   }
   // If PATH fell back to an old system pnpm (e.g. the managed install is
@@ -164,9 +164,9 @@ export async function applyPnpmVersionMigration({
       `${COMPATIBLE_PNPM_LOCKFILE_MAJOR}.0.0`,
     )
   ) {
-    throw new DyadError(
+    throw new SambaError(
       `The available pnpm (${pnpmSupport.version}) is older than pnpm ${COMPATIBLE_PNPM_LOCKFILE_MAJOR}, so the project cannot be migrated. Restart Samba Builder and try again.`,
-      DyadErrorKind.External,
+      SambaErrorKind.External,
     );
   }
 
@@ -184,9 +184,9 @@ export async function applyPnpmVersionMigration({
     );
   } catch (error) {
     logger.warn("Failed to update packageManager pin:", error);
-    throw new DyadError(
+    throw new SambaError(
       "The packageManager pin could not be updated. Please update package.json manually.",
-      DyadErrorKind.External,
+      SambaErrorKind.External,
     );
   }
 
@@ -233,9 +233,9 @@ export async function applyPnpmVersionMigration({
     });
   } catch (error) {
     logger.warn("Failed to commit pnpm migration changes:", error);
-    throw new DyadError(
+    throw new SambaError(
       "The migration ran but the changes could not be committed. Please commit package.json and pnpm-lock.yaml manually.",
-      DyadErrorKind.External,
+      SambaErrorKind.External,
     );
   }
 

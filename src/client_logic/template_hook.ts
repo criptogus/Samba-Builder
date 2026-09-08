@@ -1,5 +1,5 @@
 import { ipc } from "@/ipc/types";
-import { DyadErrorKind } from "@/errors/dyad_error";
+import { SambaErrorKind } from "@/errors/samba_error";
 import { getAppPort } from "../../shared/ports";
 
 import { v4 as uuidv4 } from "uuid";
@@ -8,7 +8,7 @@ function isAlreadyLinkedNeonProjectError(error: unknown): boolean {
   return (
     typeof error === "object" &&
     error !== null &&
-    (error as { kind?: unknown }).kind === DyadErrorKind.Precondition &&
+    (error as { kind?: unknown }).kind === SambaErrorKind.Precondition &&
     (error as { message?: unknown }).message ===
       "This app already has a Neon project linked. Disconnect it first."
   );

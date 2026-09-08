@@ -113,7 +113,7 @@ const debugInfo = {
   telemetryId: "telemetry-id",
   telemetryConsent: "opted_in",
   telemetryUrl: "https://example.test",
-  dyadVersion: "1.2.3",
+  sambaVersion: "1.2.3",
   platform: "linux",
   architecture: "x64",
   logs: "logs",

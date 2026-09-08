@@ -85,14 +85,14 @@ vi.mock("drizzle-orm", () => ({
 const electronImport = await import("electron");
 const providerImport = await import("@/ipc/utils/mcp_oauth_provider");
 const {
-  DyadOAuthClientProvider,
+  SambaOAuthClientProvider,
   issueMcpOAuthWriteAuthority,
   oauthStateHasTokens,
   revokeMcpOAuthWriteAuthority,
 } = providerImport;
 const { shell, safeStorage } = electronImport;
 
-describe("DyadOAuthClientProvider", () => {
+describe("SambaOAuthClientProvider", () => {
   beforeEach(() => {
     dbStore.clear();
     vi.clearAllMocks();
@@ -100,7 +100,7 @@ describe("DyadOAuthClientProvider", () => {
   });
 
   it("computes redirectUrl from the configured callback port", () => {
-    const p = new DyadOAuthClientProvider({
+    const p = new SambaOAuthClientProvider({
       serverId: 1,
       callbackPort: 12345,
     });
@@ -108,7 +108,7 @@ describe("DyadOAuthClientProvider", () => {
   });
 
   it("round-trips tokens through encrypted storage", async () => {
-    const p = new DyadOAuthClientProvider({ serverId: 7 });
+    const p = new SambaOAuthClientProvider({ serverId: 7 });
     expect(await p.tokens()).toBeUndefined();
     await p.saveTokens({
       access_token: "tok",
@@ -132,7 +132,7 @@ describe("DyadOAuthClientProvider", () => {
 
   it("rejects writes from a revoked OAuth flow authority", async () => {
     const authority = issueMcpOAuthWriteAuthority(71);
-    const staleProvider = new DyadOAuthClientProvider({
+    const staleProvider = new SambaOAuthClientProvider({
       serverId: 71,
       allowInteractive: true,
       writeAuthority: authority,
@@ -151,7 +151,7 @@ describe("DyadOAuthClientProvider", () => {
     expect(dbStore.get(71)).toBe(before);
 
     const replacementAuthority = issueMcpOAuthWriteAuthority(71);
-    const replacement = new DyadOAuthClientProvider({
+    const replacement = new SambaOAuthClientProvider({
       serverId: 71,
       allowInteractive: true,
       writeAuthority: replacementAuthority,
@@ -166,7 +166,7 @@ describe("DyadOAuthClientProvider", () => {
   });
 
   it("also revokes background providers that captured the prior epoch", async () => {
-    const background = new DyadOAuthClientProvider({
+    const background = new SambaOAuthClientProvider({
       serverId: 72,
       allowInteractive: false,
     });
@@ -185,7 +185,7 @@ describe("DyadOAuthClientProvider", () => {
   });
 
   it("seeds clientInformation from preregisteredClientId on first read", async () => {
-    const p = new DyadOAuthClientProvider({
+    const p = new SambaOAuthClientProvider({
       serverId: 9,
       preregisteredClientId: "client-xyz",
     });
@@ -202,7 +202,7 @@ describe("DyadOAuthClientProvider", () => {
     // client_id and client_secret on the token exchange. The seeded
     // clientInformation must carry both so addClientAuthentication
     // can post them when the SDK builds the request.
-    const p = new DyadOAuthClientProvider({
+    const p = new SambaOAuthClientProvider({
       serverId: 91,
       preregisteredClientId: "confidential-id",
       preregisteredClientSecret: "confidential-secret",
@@ -215,7 +215,7 @@ describe("DyadOAuthClientProvider", () => {
   it("emits clientMetadata.token_endpoint_auth_method matching the auth method actually used", async () => {
     // Aligns with `addClientAuthentication` below: Basic for
     // confidential clients (RFC 6749 §2.3.1), `none` for public.
-    const publicProvider = new DyadOAuthClientProvider({
+    const publicProvider = new SambaOAuthClientProvider({
       serverId: 92,
       preregisteredClientId: "id-only",
     });
@@ -223,7 +223,7 @@ describe("DyadOAuthClientProvider", () => {
       "none",
     );
 
-    const confidentialProvider = new DyadOAuthClientProvider({
+    const confidentialProvider = new SambaOAuthClientProvider({
       serverId: 93,
       preregisteredClientId: "id",
       preregisteredClientSecret: "sec",
@@ -234,7 +234,7 @@ describe("DyadOAuthClientProvider", () => {
   });
 
   it("persists saveClientInformation and skips reseeding from preregistered id", async () => {
-    const p = new DyadOAuthClientProvider({
+    const p = new SambaOAuthClientProvider({
       serverId: 11,
       preregisteredClientId: "from-config",
       allowInteractive: true,
@@ -249,7 +249,7 @@ describe("DyadOAuthClientProvider", () => {
   });
 
   it("holds the PKCE code verifier in memory only and never on disk", async () => {
-    const p = new DyadOAuthClientProvider({
+    const p = new SambaOAuthClientProvider({
       serverId: 3,
       allowInteractive: true,
     });
@@ -261,14 +261,14 @@ describe("DyadOAuthClientProvider", () => {
   });
 
   it("throws when codeVerifier is requested without a prior save", async () => {
-    const p = new DyadOAuthClientProvider({ serverId: 4 });
+    const p = new SambaOAuthClientProvider({ serverId: 4 });
     await expect(p.codeVerifier()).rejects.toThrow(
       /No PKCE code verifier in memory/,
     );
   });
 
   it("opens the system browser when redirectToAuthorization is called in an interactive provider", async () => {
-    const p = new DyadOAuthClientProvider({
+    const p = new SambaOAuthClientProvider({
       serverId: 1,
       allowInteractive: true,
     });
@@ -284,7 +284,7 @@ describe("DyadOAuthClientProvider", () => {
     // Background providers (built by `mcp_manager`) must throw here
     // instead of opening a browser whose redirect has nowhere to
     // land. The error propagates out and the row shows "not connected".
-    const p = new DyadOAuthClientProvider({ serverId: 1 });
+    const p = new SambaOAuthClientProvider({ serverId: 1 });
     await expect(
       p.redirectToAuthorization(new URL("https://example.com/authorize")),
     ).rejects.toThrow(/click Connect/);
@@ -293,7 +293,7 @@ describe("DyadOAuthClientProvider", () => {
 
   describe("addClientAuthentication", () => {
     it("uses Basic auth when token_endpoint_auth_method is client_secret_basic", async () => {
-      const p = new DyadOAuthClientProvider({ serverId: 20 });
+      const p = new SambaOAuthClientProvider({ serverId: 20 });
       await p.saveClientInformation({
         client_id: "cid",
         client_secret: "sec",
@@ -310,7 +310,7 @@ describe("DyadOAuthClientProvider", () => {
     });
 
     it("posts client_id + client_secret as body params for client_secret_post", async () => {
-      const p = new DyadOAuthClientProvider({ serverId: 21 });
+      const p = new SambaOAuthClientProvider({ serverId: 21 });
       await p.saveClientInformation({
         client_id: "cid",
         client_secret: "sec",
@@ -325,7 +325,7 @@ describe("DyadOAuthClientProvider", () => {
     });
 
     it("uses public PKCE (no secret) when the client has no secret", async () => {
-      const p = new DyadOAuthClientProvider({ serverId: 22 });
+      const p = new SambaOAuthClientProvider({ serverId: 22 });
       await p.saveClientInformation({ client_id: "cid" });
       const headers = new Headers();
       const params = new URLSearchParams();
@@ -343,7 +343,7 @@ describe("DyadOAuthClientProvider", () => {
       // would lose its binding here and crash trying to read
       // `this.clientInformation`. Arrow-function field binding keeps
       // `this` lexical, so the call still works.
-      const p = new DyadOAuthClientProvider({ serverId: 23 });
+      const p = new SambaOAuthClientProvider({ serverId: 23 });
       await p.saveClientInformation({ client_id: "cid" });
       const unbound = p.addClientAuthentication;
       const headers = new Headers();
@@ -358,7 +358,7 @@ describe("DyadOAuthClientProvider", () => {
       // hook must pick Post over our usual Basic default; otherwise
       // the server rejects token exchange / refresh with
       // invalid_client.
-      const p = new DyadOAuthClientProvider({
+      const p = new SambaOAuthClientProvider({
         serverId: 25,
         preregisteredClientId: "cid",
         preregisteredClientSecret: "sec",
@@ -377,7 +377,7 @@ describe("DyadOAuthClientProvider", () => {
     });
 
     it("honors token_endpoint_auth_methods_supported from metadata (Basic-only server)", async () => {
-      const p = new DyadOAuthClientProvider({
+      const p = new SambaOAuthClientProvider({
         serverId: 26,
         preregisteredClientId: "cid",
         preregisteredClientSecret: "sec",
@@ -397,7 +397,7 @@ describe("DyadOAuthClientProvider", () => {
       // No discovery metadata + pre-registered confidential client:
       // Basic is the safer default per spec, and matches the
       // historical behavior pre-metadata-aware fix.
-      const p = new DyadOAuthClientProvider({
+      const p = new SambaOAuthClientProvider({
         serverId: 27,
         preregisteredClientId: "cid",
         preregisteredClientSecret: "sec",
@@ -420,7 +420,7 @@ describe("DyadOAuthClientProvider", () => {
       // server would reject with `invalid_client`. This test models
       // that pattern: invoke without awaiting, then assert params
       // are populated before any microtask boundary.
-      const p = new DyadOAuthClientProvider({ serverId: 24 });
+      const p = new SambaOAuthClientProvider({ serverId: 24 });
       await p.saveClientInformation({ client_id: "sync-cid" });
       const headers = new Headers();
       const params = new URLSearchParams();
@@ -432,7 +432,7 @@ describe("DyadOAuthClientProvider", () => {
 
   describe("invalidateCredentials", () => {
     async function seedFull(serverId: number) {
-      const p = new DyadOAuthClientProvider({
+      const p = new SambaOAuthClientProvider({
         serverId,
         allowInteractive: true,
       });
@@ -469,7 +469,7 @@ describe("DyadOAuthClientProvider", () => {
       // Re-open with allowInteractive: false to model the background
       // probe path against the same persisted row.
       void seeded;
-      const bg = new DyadOAuthClientProvider({
+      const bg = new SambaOAuthClientProvider({
         serverId: 35,
         allowInteractive: false,
       });
@@ -483,7 +483,7 @@ describe("DyadOAuthClientProvider", () => {
     it("skips scope=all when non-interactive (background can't drop client info)", async () => {
       const seeded = await seedFull(36);
       void seeded;
-      const bg = new DyadOAuthClientProvider({
+      const bg = new SambaOAuthClientProvider({
         serverId: 36,
         allowInteractive: false,
       });
@@ -566,7 +566,7 @@ describe("DyadOAuthClientProvider", () => {
 
   it("falls back to base64-only storage when safeStorage encryption is unavailable", async () => {
     vi.mocked(safeStorage.isEncryptionAvailable).mockReturnValue(false);
-    const p = new DyadOAuthClientProvider({ serverId: 99 });
+    const p = new SambaOAuthClientProvider({ serverId: 99 });
     await p.saveTokens({ access_token: "fallback-tok", token_type: "Bearer" });
     expect(safeStorage.encryptString).not.toHaveBeenCalled();
     // Round-trip still works (decrypt path also falls back).

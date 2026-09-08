@@ -2,12 +2,12 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { assertMutationPathAllowed, safeJoin } from "@/ipc/utils/path_utils";
 import {
-  getDyadMediaDir,
+  getSambaMediaDir,
   listStoredAttachments,
   resolveAttachmentLogicalPath,
   toAttachmentLogicalPath,
 } from "@/ipc/utils/media_path_utils";
-import { DyadError, DyadErrorKind } from "@/errors/dyad_error";
+import { SambaError, SambaErrorKind } from "@/errors/samba_error";
 import { readContainedTextFile } from "@/ipc/utils/bounded_text_file";
 import { isDotenvFilePath, redactDotenvValues } from "@/utils/dotenv_redaction";
 import { SANDBOX_READ_FILE_LIMIT_BYTES } from "./limits";
@@ -119,9 +119,9 @@ function parseOptionalNonNegativeInteger(
     return undefined;
   }
   if (typeof value !== "number" || !Number.isInteger(value) || value < 0) {
-    throw new DyadError(
+    throw new SambaError(
       `read_file ${name} must be a non-negative integer.`,
-      DyadErrorKind.Validation,
+      SambaErrorKind.Validation,
     );
   }
   return value;
@@ -132,9 +132,9 @@ function parseReadOptions(value: unknown): SandboxReadFileOptions {
     return {};
   }
   if (!isStructuredObject(value)) {
-    throw new DyadError(
+    throw new SambaError(
       "read_file options must be an object.",
-      DyadErrorKind.Validation,
+      SambaErrorKind.Validation,
     );
   }
 
@@ -143,9 +143,9 @@ function parseReadOptions(value: unknown): SandboxReadFileOptions {
   const encoding = value.encoding;
 
   if (encoding !== undefined && encoding !== "utf8" && encoding !== "base64") {
-    throw new DyadError(
+    throw new SambaError(
       "read_file encoding must be 'utf8' or 'base64'.",
-      DyadErrorKind.Validation,
+      SambaErrorKind.Validation,
     );
   }
 
@@ -161,30 +161,30 @@ function assertSandboxGuestPath(
   options?: { allowDotenvFile?: boolean },
 ): void {
   if (!guestPath || typeof guestPath !== "string") {
-    throw new DyadError("File path is required.", DyadErrorKind.Validation);
+    throw new SambaError("File path is required.", SambaErrorKind.Validation);
   }
   if (path.isAbsolute(guestPath) || /^[A-Za-z]:[/\\]/.test(guestPath)) {
-    throw new DyadError(
+    throw new SambaError(
       "Absolute paths are not allowed in sandbox scripts.",
-      DyadErrorKind.Validation,
+      SambaErrorKind.Validation,
     );
   }
   if (guestPath.startsWith("~/") || guestPath.startsWith("\\\\")) {
-    throw new DyadError(
+    throw new SambaError(
       "Home and UNC paths are not allowed in sandbox scripts.",
-      DyadErrorKind.Validation,
+      SambaErrorKind.Validation,
     );
   }
   if (/(^|[/\\])\.\.([/\\]|$)/.test(guestPath)) {
-    throw new DyadError(
+    throw new SambaError(
       "Path traversal is not allowed in sandbox scripts.",
-      DyadErrorKind.Validation,
+      SambaErrorKind.Validation,
     );
   }
   if (isDeniedSandboxPath(guestPath, options)) {
-    throw new DyadError(
+    throw new SambaError(
       `Sandbox scripts cannot access protected path: ${guestPath}`,
-      DyadErrorKind.Precondition,
+      SambaErrorKind.Precondition,
     );
   }
 }
@@ -207,9 +207,9 @@ export async function assertSandboxWritePathAllowed(params: {
     relativePath: params.guestPath,
   });
   if (isDeniedSandboxPath(normalized)) {
-    throw new DyadError(
+    throw new SambaError(
       `Sandbox scripts cannot access protected path: ${params.guestPath}`,
-      DyadErrorKind.Precondition,
+      SambaErrorKind.Precondition,
     );
   }
 }
@@ -225,9 +225,9 @@ async function resolveSandboxPath(params: {
       params.guestPath,
     );
     if (!attachment) {
-      throw new DyadError(
+      throw new SambaError(
         `Attachment not found: ${params.guestPath}`,
-        DyadErrorKind.NotFound,
+        SambaErrorKind.NotFound,
       );
     }
     return {
@@ -259,27 +259,27 @@ async function assertResolvedPathAllowed(params: {
     realFilePath = await fs.realpath(params.filePath);
   } catch (error) {
     if (isNodeErrorWithCode(error, "ENOENT")) {
-      throw new DyadError(
+      throw new SambaError(
         `File not found: ${params.displayPath}`,
-        DyadErrorKind.NotFound,
+        SambaErrorKind.NotFound,
       );
     }
     throw error;
   }
   const relative = path.relative(realAppPath, realFilePath);
   if (relative.startsWith("..") || path.isAbsolute(relative)) {
-    throw new DyadError(
+    throw new SambaError(
       `Sandbox scripts cannot access files outside the app: ${params.displayPath}`,
-      DyadErrorKind.Precondition,
+      SambaErrorKind.Precondition,
     );
   }
   if (params.displayPath.startsWith("attachments:")) {
-    const realMediaPath = await fs.realpath(getDyadMediaDir(params.appPath));
+    const realMediaPath = await fs.realpath(getSambaMediaDir(params.appPath));
     const mediaRelative = path.relative(realMediaPath, realFilePath);
     if (mediaRelative.startsWith("..") || path.isAbsolute(mediaRelative)) {
-      throw new DyadError(
+      throw new SambaError(
         `Sandbox scripts cannot access files outside attachment storage: ${params.displayPath}`,
-        DyadErrorKind.Precondition,
+        SambaErrorKind.Precondition,
       );
     }
     return { realFilePath, isDotenv: isDotenvFilePath(params.displayPath) };
@@ -290,9 +290,9 @@ async function assertResolvedPathAllowed(params: {
       allowDotenvFile: params.allowDotenvRead,
     })
   ) {
-    throw new DyadError(
+    throw new SambaError(
       `Sandbox scripts cannot access protected path: ${params.displayPath}`,
-      DyadErrorKind.Precondition,
+      SambaErrorKind.Precondition,
     );
   }
   const isDotenv =
@@ -321,9 +321,9 @@ export async function sandboxReadFile(
     options.length !== undefined &&
     options.length > SANDBOX_READ_FILE_LIMIT_BYTES
   ) {
-    throw new DyadError(
+    throw new SambaError(
       `read_file length ${options.length} exceeds the ${SANDBOX_READ_FILE_LIMIT_BYTES} byte limit. Read the file in chunks with start and length instead.`,
-      DyadErrorKind.Validation,
+      SambaErrorKind.Validation,
     );
   }
 
@@ -346,9 +346,9 @@ export async function sandboxReadFile(
     const remainingBytes = sanitized.length - start;
     const length = options.length ?? remainingBytes;
     if (length > SANDBOX_READ_FILE_LIMIT_BYTES) {
-      throw new DyadError(
+      throw new SambaError(
         `read_file would read ${length} sanitized bytes from ${resolved.displayPath}, exceeding the ${SANDBOX_READ_FILE_LIMIT_BYTES} byte limit. Use file_stats to get the source size, then read bounded chunks with start and length.`,
-        DyadErrorKind.Validation,
+        SambaErrorKind.Validation,
       );
     }
     const bytes = sanitized.subarray(start, start + length);
@@ -359,9 +359,9 @@ export async function sandboxReadFile(
 
   const stat = await fs.stat(realFilePath);
   if (!stat.isFile()) {
-    throw new DyadError(
+    throw new SambaError(
       `Path is not a file: ${resolved.displayPath}`,
-      DyadErrorKind.Validation,
+      SambaErrorKind.Validation,
     );
   }
   const start = options.start ?? 0;
@@ -371,9 +371,9 @@ export async function sandboxReadFile(
   const remainingBytes = stat.size - start;
   const length = options.length ?? remainingBytes;
   if (length > SANDBOX_READ_FILE_LIMIT_BYTES) {
-    throw new DyadError(
+    throw new SambaError(
       `read_file would read ${length} bytes from ${resolved.displayPath}, exceeding the ${SANDBOX_READ_FILE_LIMIT_BYTES} byte limit. Use file_stats to get the size, then read bounded chunks with start and length.`,
-      DyadErrorKind.Validation,
+      SambaErrorKind.Validation,
     );
   }
 
@@ -407,9 +407,9 @@ export async function sandboxFileStats(
   });
   const stat = await fs.stat(realFilePath);
   if (!stat.isFile()) {
-    throw new DyadError(
+    throw new SambaError(
       `Path is not a file: ${resolved.displayPath}`,
-      DyadErrorKind.Validation,
+      SambaErrorKind.Validation,
     );
   }
   return {
@@ -439,18 +439,18 @@ export async function sandboxListFiles(
     realDirPath = await fs.realpath(dirPath);
   } catch (error) {
     if (isNodeErrorWithCode(error, "ENOENT")) {
-      throw new DyadError(
+      throw new SambaError(
         `Directory not found: ${dir}`,
-        DyadErrorKind.NotFound,
+        SambaErrorKind.NotFound,
       );
     }
     throw error;
   }
   const relative = path.relative(realAppPath, realDirPath);
   if (relative.startsWith("..") || path.isAbsolute(relative)) {
-    throw new DyadError(
+    throw new SambaError(
       `Sandbox scripts cannot list files outside the app: ${dir}`,
-      DyadErrorKind.Precondition,
+      SambaErrorKind.Precondition,
     );
   }
   const entries = await fs.readdir(realDirPath, { withFileTypes: true });
@@ -477,9 +477,9 @@ export function buildSandboxCapabilitiesWithObserver(
   return {
     read_file: (guestPath: unknown, options?: unknown) => {
       if (typeof guestPath !== "string") {
-        throw new DyadError(
+        throw new SambaError(
           "read_file path must be a string.",
-          DyadErrorKind.Validation,
+          SambaErrorKind.Validation,
         );
       }
       onHostCall?.({ name: "read_file", path: guestPath });
@@ -487,9 +487,9 @@ export function buildSandboxCapabilitiesWithObserver(
     },
     list_files: (dir?: unknown) => {
       if (dir !== undefined && typeof dir !== "string") {
-        throw new DyadError(
+        throw new SambaError(
           "list_files directory must be a string.",
-          DyadErrorKind.Validation,
+          SambaErrorKind.Validation,
         );
       }
       onHostCall?.({ name: "list_files", path: dir });
@@ -497,9 +497,9 @@ export function buildSandboxCapabilitiesWithObserver(
     },
     file_stats: (guestPath: unknown) => {
       if (typeof guestPath !== "string") {
-        throw new DyadError(
+        throw new SambaError(
           "file_stats path must be a string.",
-          DyadErrorKind.Validation,
+          SambaErrorKind.Validation,
         );
       }
       onHostCall?.({ name: "file_stats", path: guestPath });

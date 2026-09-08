@@ -14,7 +14,7 @@ export function desktopExecutable(root, name, platform, arch) {
 export function desktopLaunchOptions(root, env = process.env) {
   const userData = path.resolve(
     root,
-    env.DYAD_DEV_USER_DATA_DIR?.trim() || "userData",
+    env.SAMBA_DEV_USER_DATA_DIR?.trim() || "userData",
   );
   const childEnv = { ...env, NODE_ENV: "production" };
   delete childEnv.ELECTRON_RUN_AS_NODE;

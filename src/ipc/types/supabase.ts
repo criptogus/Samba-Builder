@@ -196,7 +196,7 @@ export const supabaseContracts = {
 
   /**
    * Direct connection to Supabase with a Personal Access Token (sb_pat_…).
-   * No OAuth / Dyad proxy involved: the token is validated against the
+   * No OAuth / Samba proxy involved: the token is validated against the
    * Supabase Management API and stored for every organization it can reach.
    */
   connectWithAccessToken: defineContract({

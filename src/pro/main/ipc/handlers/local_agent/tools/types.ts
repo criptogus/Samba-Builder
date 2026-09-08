@@ -101,7 +101,7 @@ export interface AgentContext {
   /** Turn-scoped todo list for agent task tracking */
   todos: Todo[];
   /** Request ID for tracking requests to the Samba Builder engine */
-  dyadRequestId: string;
+  sambaRequestId: string;
   /** Tracks file edit tool usage per file for telemetry */
   fileEditTracker: FileEditTracker;
   /** True after a tool has successfully changed workspace contents this turn. */
@@ -152,7 +152,7 @@ export interface AgentContext {
    * If true, the user has Samba Builder enabled.
    * Engine-dependent tools require this to access the Samba Builder API.
    */
-  isDyadPro: boolean;
+  isSambaPro: boolean;
   /** The durable child thread currently executing this tool, if any. */
   subagentThreadId?: string;
   /** Persona for a child tool invocation. Root turns leave this undefined. */

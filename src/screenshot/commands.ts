@@ -10,7 +10,7 @@ import type { ScreenshotEvent, ScreenshotState } from "./state";
 export const SCREENSHOT_SETTLE_DELAY_MS = 3_000;
 
 export type ScreenshotPostMessage = (message: {
-  type: "dyad-take-screenshot";
+  type: "samba-take-screenshot";
   requestId: string;
 }) => void;
 
@@ -91,7 +91,7 @@ export function createScreenshotCommandAdapter(options: {
           return;
         case "post-capture-request":
           postMessages.get(appId)?.({
-            type: "dyad-take-screenshot",
+            type: "samba-take-screenshot",
             requestId: command.requestId,
           });
           return;

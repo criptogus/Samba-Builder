@@ -66,11 +66,11 @@ function gitXml(
       );
     }
   }
-  const openingTag = `<dyad-git ${attributes.join(" ")}>`;
+  const openingTag = `<samba-git ${attributes.join(" ")}>`;
   if (options.complete === false) {
     return openingTag;
   }
-  return `${openingTag}${options.content ? escapeXmlContent(options.content) : ""}</dyad-git>`;
+  return `${openingTag}${options.content ? escapeXmlContent(options.content) : ""}</samba-git>`;
 }
 
 function buildGitPreview(

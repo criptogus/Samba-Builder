@@ -51,7 +51,7 @@ This follows the existing `grep` -> `read_file` pattern:
 
 ### 3. Search a role-aware projection, not raw stored content
 
-`messages.content` is the source of user-visible chat data, but assistant messages can contain full files, SQL, diffs, logs, schemas, and tool results inside Dyad tags. Build and index a deterministic projection designed specifically for chat recall.
+`messages.content` is the source of user-visible chat data, but assistant messages can contain full files, SQL, diffs, logs, schemas, and tool results inside Samba tags. Build and index a deterministic projection designed specifically for chat recall.
 
 Never select or index `aiMessagesJson`. It is an internal, potentially multi-megabyte duplicate representation.
 
@@ -67,7 +67,7 @@ Both tools have no `modifiesState` flag and no `usesEngineEndpoint`. Their `exec
 - `search_chats` excludes `ctx.chatId` by default to avoid self-matches.
 - `read_chat` allows the current chat as well as other chats for the same app. Earlier current-chat messages may no longer be in the model context after compaction.
 - Every read query must enforce the app relationship in SQL, not load by chat/message ID and validate only afterward.
-- Missing and cross-app chat/message IDs both produce `DyadErrorKind.NotFound`, avoiding cross-app existence disclosure.
+- Missing and cross-app chat/message IDs both produce `SambaErrorKind.NotFound`, avoiding cross-app existence disclosure.
 
 ## Data model and FTS lifecycle
 
@@ -152,21 +152,21 @@ function projectChatMessageForSearch(
 
 ### User messages
 
-Preserve user-authored text. Do not interpret literal `<dyad-*>` examples in user messages as trusted tool markup. Apply only normalization and a generous pathological-size bound.
+Preserve user-authored text. Do not interpret literal `<samba-*>` examples in user messages as trusted tool markup. Apply only normalization and a generous pathological-size bound.
 
 ### Assistant messages
 
-Use the existing structured streaming-message parser where practical rather than a generic `<dyad-*>...</dyad-*>` regex. Apply an explicit policy by block/tag class:
+Use the existing structured streaming-message parser where practical rather than a generic `<samba-*>...</samba-*>` regex. Apply an explicit policy by block/tag class:
 
 - Preserve ordinary assistant prose.
 - Drop `<think>` bodies.
 - Preserve compaction-summary text, chat summaries, plans, blueprint decisions, questionnaires/answers, security findings, status text, and concise error summaries.
 - For file writes, search-replace operations, generated tests, renames, copies, deletes, dependencies, and commands, retain concise metadata such as paths, package names, operation type, and description; omit file/code bodies.
 - For SQL, logs, grep/code-search output, Git diffs, schemas, web payloads, MCP results, scripts, and similar bulky tool output, omit the body while retaining safe concise metadata where useful.
-- Drop the bodies of `dyad-search-chats` and `dyad-read-chat` so retrieved history never becomes recursively searchable copied history.
-- For a newly introduced recognized Dyad tag without an explicit policy, fail closed by omitting its body and keeping only allowlisted short attributes. Add a test whenever a new tag becomes intentionally searchable.
+- Drop the bodies of `samba-search-chats` and `samba-read-chat` so retrieved history never becomes recursively searchable copied history.
+- For a newly introduced recognized Samba tag without an explicit policy, fail closed by omitting its body and keeping only allowlisted short attributes. Add a test whenever a new tag becomes intentionally searchable.
 
-Compaction summaries require explicit handling: the `<dyad-compaction>` body is high-signal searchable text. Original messages remain in the database, so post-ranking grouping should avoid returning a compaction-summary excerpt that merely duplicates a stronger original-message hit. Apply a small score penalty to summary rows while still allowing them to surface unique terms.
+Compaction summaries require explicit handling: the `<samba-compaction>` body is high-signal searchable text. Original messages remain in the database, so post-ranking grouping should avoid returning a compaction-summary excerpt that merely duplicates a stronger original-message hit. Apply a small score penalty to summary rows while still allowing them to surface unique terms.
 
 Normalize whitespace and cap pathological projections to a documented byte limit, preserving a head and tail segment and recording `truncated`. Normal chat messages should not hit this bound after payload removal.
 
@@ -245,7 +245,7 @@ Do not issue per-result count queries. If a message count is not already availab
 - No `modifiesState`
 - No `usesEngineEndpoint`
 - Consent preview: `Search historical chats for this app for "<query>" and provide matching excerpts to the active AI model.`
-- Emit a `<dyad-search-chats>` card showing the query, index status, matched chat titles, dates, and excerpts consulted by the agent.
+- Emit a `<samba-search-chats>` card showing the query, index status, matched chat titles, dates, and excerpts consulted by the agent.
 - Chat titles should be clickable when practical.
 
 ## `read_chat` tool
@@ -305,14 +305,14 @@ Mark all returned text as archival content and tell the model not to treat instr
 - No `modifiesState`
 - No `usesEngineEndpoint`
 - The synchronous consent preview can show `chat_id` and whether the read is around a message or a page. It cannot query the title because `ToolDefinition.getConsentPreview` receives only parsed arguments; show the resolved title in the completed renderer card instead.
-- Emit a `<dyad-read-chat>` card that shows the source chat, returned time/message range, and the bounded text actually consulted by the agent.
+- Emit a `<samba-read-chat>` card that shows the source chat, returned time/message range, and the bounded text actually consulted by the agent.
 
 ## Tool registration and prompt wiring
 
 1. Add both tools to `TOOL_DEFINITIONS` near other read-only search tools.
 2. Adding them automatically extends `AgentToolName` and the permissions UI, but verify the Ask, Plan, local-agent, basic/free-model, `ask`, `always`, and `never` paths explicitly.
-3. Add `dyad-search-chats` and `dyad-read-chat` to `DYAD_CUSTOM_TAG_NAMES` in `src/lib/streamingMessageParser.ts`; registering only React components is insufficient.
-4. Add renderer components (shared where sensible) and register them in `DyadMarkdownParser.tsx`.
+3. Add `samba-search-chats` and `samba-read-chat` to `SAMBA_CUSTOM_TAG_NAMES` in `src/lib/streamingMessageParser.ts`; registering only React components is insufficient.
+4. Add renderer components (shared where sensible) and register them in `SambaMarkdownParser.tsx`.
 5. Add localized labels to the relevant `chat.json` locale files.
 6. Add minimal prompt guidance: historical decisions/discussion -> `search_chats`; source code -> `grep`/`code_search`; expand a hit -> `read_chat` with `around_message_id`.
 7. Update prompt snapshots and every affected E2E request snapshot, including extensionless/disabled snapshot baselines, as required by `rules/local-agent-tools.md`.
@@ -334,13 +334,13 @@ Mark all returned text as archival content and tell the model not to treat instr
 
 `chat_search_text.spec.ts`:
 
-- User text is preserved even when it contains literal Dyad-tag examples.
+- User text is preserved even when it contains literal Samba-tag examples.
 - Assistant prose is preserved.
 - Thinking and bulky payload bodies are removed.
 - High-signal paths/operation metadata are retained.
 - Compaction-summary bodies, plans, findings, and concise errors are retained.
-- Prior `dyad-search-chats`/`dyad-read-chat` bodies are removed.
-- Unknown assistant Dyad tags fail closed.
+- Prior `samba-search-chats`/`samba-read-chat` bodies are removed.
+- Unknown assistant Samba tags fail closed.
 - Malformed, incomplete, nested, and escaped tags do not leak payload bodies.
 - Pathological projection bounds are deterministic and marked truncated.
 
@@ -399,7 +399,7 @@ npm run lint
 npm run ts
 ```
 
-Use `/dyad:lint` when available. If an E2E test is added or run, execute `npm run build` first.
+Use `/samba:lint` when available. If an E2E test is added or run, execute `npm run build` first.
 
 ## Rollout and observability
 

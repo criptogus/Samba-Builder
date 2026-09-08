@@ -12,7 +12,7 @@ vi.mock("@/lib/homeChatMode", () => ({
 
 describe("resolveFirstPromptDefaultChatMode", () => {
   it("resolves immediately without consulting free quota", () => {
-    const settings = { enableDyadPro: false } as UserSettings;
+    const settings = { enableSambaPro: false } as UserSettings;
     const envVars = { OPENROUTER_API_KEY: "test-key" };
 
     expect(resolveFirstPromptDefaultChatMode({ settings, envVars })).toBe(

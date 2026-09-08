@@ -4,7 +4,7 @@ import { eq } from "drizzle-orm";
 import { db } from "@/db";
 import { projectDeliveries } from "@/db/schema";
 import { DeliveryPlanSchema, deliveryBlockers } from "@/delivery/model";
-import { DyadError, DyadErrorKind } from "@/errors/dyad_error";
+import { SambaError, SambaErrorKind } from "@/errors/samba_error";
 import { execGit } from "../utils/git_utils";
 export async function readDeliveryCommit(root: string): Promise<string> {
   const status = await execGit(["status", "--porcelain"], root, {
@@ -14,9 +14,9 @@ export async function readDeliveryCommit(root: string): Promise<string> {
   if (status.exitCode !== 0)
     throw new Error("Não foi possível verificar o estado Git do projeto.");
   if (status.stdout.trim())
-    throw new DyadError(
+    throw new SambaError(
       "Salve as alterações do projeto em uma versão Git antes de vincular ou aprovar a revisão.",
-      DyadErrorKind.Precondition,
+      SambaErrorKind.Precondition,
     );
   const head = await execGit(["rev-parse", "HEAD"], root, {
     signal: AbortSignal.timeout(10000),
@@ -47,16 +47,16 @@ export async function assertDeliveryReadyForPublish(
     !plan.reviewer.trim() ||
     !plan.approvalNote.trim()
   )
-    throw new DyadError(
+    throw new SambaError(
       "Esta entrega ainda não está aprovada. Conclua a revisão e registre a aprovação no plano de entrega antes de publicar em produção.",
-      DyadErrorKind.Precondition,
+      SambaErrorKind.Precondition,
     );
   await assertFoundationReviewed(root, plan);
   const commit = await readDeliveryCommit(root);
   if (commit !== plan.reviewCommit || commit !== plan.approvalCommit)
-    throw new DyadError(
+    throw new SambaError(
       "O código mudou desde a aprovação. Revise e aprove a nova versão antes de publicar em produção.",
-      DyadErrorKind.Precondition,
+      SambaErrorKind.Precondition,
     );
   await assertEngineeringReady(appId, plan, commit, root);
   return commit;

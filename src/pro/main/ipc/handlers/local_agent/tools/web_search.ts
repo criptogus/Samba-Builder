@@ -7,7 +7,7 @@ import {
   escapeXmlContent,
 } from "./types";
 import { engineFetch } from "./engine_fetch";
-import { DyadError, DyadErrorKind } from "@/errors/dyad_error";
+import { SambaError, SambaErrorKind } from "@/errors/samba_error";
 
 const logger = log.scope("web_search");
 
@@ -72,9 +72,9 @@ function parseSSEEvents(
       if (json.error) {
         const errorMessage =
           json.error.message || json.error.type || "Unknown SSE error";
-        throw new DyadError(
+        throw new SambaError(
           `Web search SSE error: ${errorMessage}`,
-          DyadErrorKind.External,
+          SambaErrorKind.External,
         );
       }
 
@@ -103,7 +103,7 @@ async function callWebSearchSSE(
   query: string,
   ctx: AgentContext,
 ): Promise<string> {
-  ctx.onXmlStream(`<dyad-web-search query="${escapeXmlAttr(query)}">`);
+  ctx.onXmlStream(`<samba-web-search query="${escapeXmlAttr(query)}">`);
 
   const response = await engineFetch(ctx, "/tools/web-search", {
     method: "POST",
@@ -121,9 +121,9 @@ async function callWebSearchSSE(
   }
 
   if (!response.body) {
-    throw new DyadError(
+    throw new SambaError(
       "Web search response has no body",
-      DyadErrorKind.External,
+      SambaErrorKind.External,
     );
   }
 
@@ -146,9 +146,9 @@ async function callWebSearchSSE(
       // Parse SSE events and accumulate content
       buffer = parseSSEEvents(buffer, (content) => {
         accumulated += content;
-        // Stream intermediate results to UI with dyad-web-search prefix
+        // Stream intermediate results to UI with samba-web-search prefix
         ctx.onXmlStream(
-          `<dyad-web-search query="${escapeXmlAttr(query)}">${escapeXmlContent(accumulated)}`,
+          `<samba-web-search query="${escapeXmlAttr(query)}">${escapeXmlContent(accumulated)}`,
         );
       });
     }
@@ -179,7 +179,7 @@ export const webSearchTool: ToolDefinition<z.infer<typeof webSearchSchema>> = {
   usesEngineEndpoint: true,
 
   // Requires Samba Builder engine API
-  isEnabled: (ctx) => ctx.isDyadPro,
+  isEnabled: (ctx) => ctx.isSambaPro,
 
   getConsentPreview: (args) => `Search the web: "${args.query}"`,
 
@@ -189,15 +189,15 @@ export const webSearchTool: ToolDefinition<z.infer<typeof webSearchSchema>> = {
     const result = await callWebSearchSSE(args.query, ctx);
 
     if (!result) {
-      throw new DyadError(
+      throw new SambaError(
         "Web search returned no results",
-        DyadErrorKind.External,
+        SambaErrorKind.External,
       );
     }
 
-    // Write final result to UI and DB with dyad-web-search wrapper
+    // Write final result to UI and DB with samba-web-search wrapper
     ctx.onXmlComplete(
-      `<dyad-web-search query="${escapeXmlAttr(args.query)}">${escapeXmlContent(result)}</dyad-web-search>`,
+      `<samba-web-search query="${escapeXmlAttr(args.query)}">${escapeXmlContent(result)}</samba-web-search>`,
     );
 
     logger.log(`Web search completed for query: ${args.query}`);

@@ -1,6 +1,6 @@
 import { z } from "zod";
 import type { ToolSet } from "ai";
-import { DyadError, DyadErrorKind, isDyadError } from "@/errors/dyad_error";
+import { SambaError, SambaErrorKind, isSambaError } from "@/errors/samba_error";
 import type { SubagentThreadSummary } from "@/ipc/types";
 import { getErrorMessage } from "@/lib/errors";
 
@@ -248,7 +248,7 @@ export const spawnAgentTool: ToolDefinition<
   usesEngineEndpoint: true,
   isEnabled: (ctx) =>
     Boolean(
-      ctx.isDyadPro &&
+      ctx.isSambaPro &&
       (ctx.canUseExplorerSubagent || ctx.canUseImplementerSubagent) &&
       !ctx.subagentThreadId,
     ),
@@ -273,7 +273,7 @@ export const spawnAgentTool: ToolDefinition<
       ctx.spawnedImplementerThreadIds.push(threadId);
     }
     ctx.onXmlComplete(
-      `<dyad-subagent chat-id="${escapeXmlAttr(String(ctx.chatId))}" thread-id="${escapeXmlAttr(threadId)}" persona="${escapeXmlAttr(args.persona)}" task-name="${escapeXmlAttr(args.task_name)}"></dyad-subagent>`,
+      `<samba-subagent chat-id="${escapeXmlAttr(String(ctx.chatId))}" thread-id="${escapeXmlAttr(threadId)}" persona="${escapeXmlAttr(args.persona)}" task-name="${escapeXmlAttr(args.task_name)}"></samba-subagent>`,
     );
     let subagent: SubagentThreadSummary;
     try {
@@ -288,13 +288,13 @@ export const spawnAgentTool: ToolDefinition<
       } catch (cancellationError) {
         // Keep the thread registered so the end-of-turn barrier remains
         // fail-closed when cancellation itself did not complete.
-        throw new DyadError(
+        throw new SambaError(
           `The sub-agent wait failed: ${getErrorMessage(error)} Cancellation also failed: ${getErrorMessage(cancellationError)}`,
-          isDyadError(error)
+          isSambaError(error)
             ? error.kind
-            : isDyadError(cancellationError)
+            : isSambaError(cancellationError)
               ? cancellationError.kind
-              : DyadErrorKind.Conflict,
+              : SambaErrorKind.Conflict,
           { cause: new AggregateError([error, cancellationError]) },
         );
       }
@@ -345,7 +345,7 @@ const threadIdsSchema = z.object({ thread_ids: z.array(z.string()).min(1) });
 
 function canUseAdvancedSubagentTools(ctx: AgentContext): boolean {
   return Boolean(
-    ctx.isDyadPro && ctx.canUseAdvancedSubagentTools && !ctx.subagentThreadId,
+    ctx.isSambaPro && ctx.canUseAdvancedSubagentTools && !ctx.subagentThreadId,
   );
 }
 
@@ -479,7 +479,7 @@ export const exploreCodeTool: ToolDefinition<
       )),
   buildXml: (args, isComplete) => {
     if (!args.query || isComplete) return undefined;
-    return `<dyad-explore-code${buildExploreCodeAttributes(args)}>Exploring...`;
+    return `<samba-explore-code${buildExploreCodeAttributes(args)}>Exploring...`;
   },
   execute: async (args, ctx) => {
     const appPath = resolveTargetAppPath(ctx, args.app_name);
@@ -499,7 +499,7 @@ export const exploreCodeTool: ToolDefinition<
       truncated: result.truncated,
     });
     ctx.onXmlComplete(
-      `<dyad-explore-code${attributes}>\n${escapeXmlContent(resultText)}\n</dyad-explore-code>`,
+      `<samba-explore-code${attributes}>\n${escapeXmlContent(resultText)}\n</samba-explore-code>`,
     );
     return resultText;
   },

@@ -37,8 +37,8 @@ import {
   getThemeGenerationModelOptions,
   resolveBuiltinModelAlias,
 } from "@/ipc/shared/remote_language_model_catalog";
-import { DyadError, DyadErrorKind } from "@/errors/dyad_error";
-import { getDyadEngineBaseUrl } from "@/ipc/utils/dyad_engine_url";
+import { SambaError, SambaErrorKind } from "@/errors/samba_error";
+import { getSambaEngineBaseUrl } from "@/ipc/utils/samba_engine_url";
 
 const logger = log.scope("themes_handlers");
 const handle = createLoggedHandler(logger);
@@ -70,7 +70,7 @@ function sanitizeKeywords(keywords: string): string {
 }
 
 // Directory for storing temporary theme images
-const THEME_IMAGES_TEMP_DIR = path.join(os.tmpdir(), "dyad-theme-images");
+const THEME_IMAGES_TEMP_DIR = path.join(os.tmpdir(), "samba-theme-images");
 
 // Ensure temp directory exists
 if (!fs.existsSync(THEME_IMAGES_TEMP_DIR)) {
@@ -343,34 +343,37 @@ export function registerThemesHandlers() {
 
       // Validate name
       if (!trimmedName) {
-        throw new DyadError("Theme name is required", DyadErrorKind.Validation);
+        throw new SambaError(
+          "Theme name is required",
+          SambaErrorKind.Validation,
+        );
       }
       if (trimmedName.length > 100) {
-        throw new DyadError(
+        throw new SambaError(
           "Theme name must be less than 100 characters",
-          DyadErrorKind.Validation,
+          SambaErrorKind.Validation,
         );
       }
 
       // Validate description
       if (trimmedDescription && trimmedDescription.length > 500) {
-        throw new DyadError(
+        throw new SambaError(
           "Theme description must be less than 500 characters",
-          DyadErrorKind.Validation,
+          SambaErrorKind.Validation,
         );
       }
 
       // Validate prompt
       if (!trimmedPrompt) {
-        throw new DyadError(
+        throw new SambaError(
           "Theme prompt is required",
-          DyadErrorKind.Validation,
+          SambaErrorKind.Validation,
         );
       }
       if (trimmedPrompt.length > 50000) {
-        throw new DyadError(
+        throw new SambaError(
           "Theme prompt must be less than 50,000 characters",
-          DyadErrorKind.Validation,
+          SambaErrorKind.Validation,
         );
       }
 
@@ -425,22 +428,22 @@ export function registerThemesHandlers() {
       });
 
       if (!currentTheme) {
-        throw new DyadError("Theme not found", DyadErrorKind.NotFound);
+        throw new SambaError("Theme not found", SambaErrorKind.NotFound);
       }
 
       // Validate and sanitize name if provided
       if (params.name !== undefined) {
         const trimmedName = params.name.trim();
         if (!trimmedName) {
-          throw new DyadError(
+          throw new SambaError(
             "Theme name is required",
-            DyadErrorKind.Validation,
+            SambaErrorKind.Validation,
           );
         }
         if (trimmedName.length > 100) {
-          throw new DyadError(
+          throw new SambaError(
             "Theme name must be less than 100 characters",
-            DyadErrorKind.Validation,
+            SambaErrorKind.Validation,
           );
         }
 
@@ -462,9 +465,9 @@ export function registerThemesHandlers() {
       if (params.description !== undefined) {
         const trimmedDescription = params.description.trim();
         if (trimmedDescription.length > 500) {
-          throw new DyadError(
+          throw new SambaError(
             "Theme description must be less than 500 characters",
-            DyadErrorKind.Validation,
+            SambaErrorKind.Validation,
           );
         }
         updateData.description = trimmedDescription || null;
@@ -474,15 +477,15 @@ export function registerThemesHandlers() {
       if (params.prompt !== undefined) {
         const trimmedPrompt = params.prompt.trim();
         if (!trimmedPrompt) {
-          throw new DyadError(
+          throw new SambaError(
             "Theme prompt is required",
-            DyadErrorKind.Validation,
+            SambaErrorKind.Validation,
           );
         }
         if (trimmedPrompt.length > 50000) {
-          throw new DyadError(
+          throw new SambaError(
             "Theme prompt must be less than 50,000 characters",
-            DyadErrorKind.Validation,
+            SambaErrorKind.Validation,
           );
         }
         updateData.prompt = trimmedPrompt;
@@ -496,7 +499,7 @@ export function registerThemesHandlers() {
 
       const theme = result[0];
       if (!theme) {
-        throw new DyadError("Theme not found", DyadErrorKind.NotFound);
+        throw new SambaError("Theme not found", SambaErrorKind.NotFound);
       }
 
       return {
@@ -526,7 +529,7 @@ export function registerThemesHandlers() {
 
       // Validate base64 data
       if (!data || typeof data !== "string") {
-        throw new DyadError("Invalid image data", DyadErrorKind.Validation);
+        throw new SambaError("Invalid image data", SambaErrorKind.Validation);
       }
 
       // Validate and extract extension
@@ -545,9 +548,9 @@ export function registerThemesHandlers() {
       // Validate size (base64 to bytes approximation)
       const sizeInBytes = (data.length * 3) / 4;
       if (sizeInBytes > 10 * 1024 * 1024) {
-        throw new DyadError(
+        throw new SambaError(
           "Image size exceeds 10MB limit",
-          DyadErrorKind.Validation,
+          SambaErrorKind.Validation,
         );
       }
 
@@ -586,9 +589,9 @@ export function registerThemesHandlers() {
           // File might already be deleted (ENOENT), that's okay
           // But other errors (permissions, etc.) should be reported
           if ((error as NodeJS.ErrnoException).code !== "ENOENT") {
-            throw new DyadError(
+            throw new SambaError(
               "Failed to cleanup temporary image file",
-              DyadErrorKind.External,
+              SambaErrorKind.External,
             );
           }
         }
@@ -617,37 +620,34 @@ Modern dark theme with purple accents for testing.
         };
       }
 
-      if (!settings.enableDyadPro) {
-        throw new Error(
-          "Samba Builder is required for AI theme generation. Please enable Samba Builder in Settings.",
-        );
-      }
-
       // Validate inputs - image paths are required
       if (params.imagePaths.length === 0) {
-        throw new DyadError(
+        throw new SambaError(
           "Please upload at least one image to generate a theme",
-          DyadErrorKind.External,
+          SambaErrorKind.External,
         );
       }
 
       if (params.imagePaths.length > 5) {
-        throw new DyadError("Maximum 5 images allowed", DyadErrorKind.External);
+        throw new SambaError(
+          "Maximum 5 images allowed",
+          SambaErrorKind.External,
+        );
       }
 
       // Validate keywords length
       if (params.keywords.length > 500) {
-        throw new DyadError(
+        throw new SambaError(
           "Keywords must be less than 500 characters",
-          DyadErrorKind.Validation,
+          SambaErrorKind.Validation,
         );
       }
 
       // Validate generation mode
       if (!["inspired", "high-fidelity"].includes(params.generationMode)) {
-        throw new DyadError(
+        throw new SambaError(
           "Invalid generation mode",
-          DyadErrorKind.Validation,
+          SambaErrorKind.Validation,
         );
       }
 
@@ -771,20 +771,14 @@ Modern theme extracted from website for testing.
         };
       }
 
-      if (!settings.enableDyadPro) {
-        throw new Error(
-          "Samba Builder is required for AI theme generation. Please enable Samba Builder in Settings.",
-        );
-      }
-
       // Validate URL format and protocol
       let parsedUrl: URL;
       try {
         parsedUrl = new URL(params.url);
       } catch {
-        throw new DyadError(
+        throw new SambaError(
           "Invalid URL format. Please enter a valid URL.",
-          DyadErrorKind.Validation,
+          SambaErrorKind.Validation,
         );
       }
 
@@ -808,25 +802,25 @@ Modern theme extracted from website for testing.
         /\.local$/i,
       ];
       if (blockedPatterns.some((p) => p.test(hostname))) {
-        throw new DyadError(
+        throw new SambaError(
           "Cannot crawl internal network addresses.",
-          DyadErrorKind.External,
+          SambaErrorKind.External,
         );
       }
 
       // Validate keywords length
       if (params.keywords.length > 500) {
-        throw new DyadError(
+        throw new SambaError(
           "Keywords must be less than 500 characters",
-          DyadErrorKind.Validation,
+          SambaErrorKind.Validation,
         );
       }
 
       // Validate generation mode
       if (!["inspired", "high-fidelity"].includes(params.generationMode)) {
-        throw new DyadError(
+        throw new SambaError(
           "Invalid generation mode",
-          DyadErrorKind.Validation,
+          SambaErrorKind.Validation,
         );
       }
 
@@ -841,9 +835,9 @@ Modern theme extracted from website for testing.
       // Get API key for Samba Builder Engine
       const apiKey = settings.providerSettings?.auto?.apiKey?.value;
       if (!apiKey) {
-        throw new DyadError(
+        throw new SambaError(
           "Samba Builder API key is required",
-          DyadErrorKind.Auth,
+          SambaErrorKind.Auth,
         );
       }
 
@@ -860,7 +854,7 @@ Modern theme extracted from website for testing.
       let crawlResponse: Response;
       try {
         crawlResponse = await fetch(
-          `${getDyadEngineBaseUrl()}/tools/web-crawl`,
+          `${getSambaEngineBaseUrl()}/tools/web-crawl`,
           {
             method: "POST",
             headers: {

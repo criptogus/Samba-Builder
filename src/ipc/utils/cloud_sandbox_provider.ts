@@ -12,7 +12,7 @@ import {
 import { IS_TEST_BUILD } from "./test_utils";
 import { z } from "zod";
 import { isPathIgnoredByGitIgnore } from "./gitignore_utils";
-import { getDyadEngineBaseUrl } from "./dyad_engine_url";
+import { getSambaEngineBaseUrl } from "./samba_engine_url";
 
 const logger = log.scope("cloud_sandbox_provider");
 
@@ -228,7 +228,7 @@ let cloudSandboxSyncUpdateListener:
   | ((update: CloudSandboxSyncUpdate) => void)
   | undefined;
 
-function getDyadEngineApiKey() {
+function getSambaEngineApiKey() {
   const settings = readSettings();
   const apiKey = settings.providerSettings?.auto?.apiKey?.value;
 
@@ -243,7 +243,7 @@ async function cloudSandboxFetch(
   endpoint: string,
   init: RequestInit = {},
 ): Promise<Response> {
-  const apiKey = getDyadEngineApiKey();
+  const apiKey = getSambaEngineApiKey();
   const headers = new Headers(init.headers);
   const isMultipartBody =
     typeof FormData !== "undefined" && init.body instanceof FormData;
@@ -255,7 +255,7 @@ async function cloudSandboxFetch(
     headers.set("Authorization", `Bearer ${apiKey}`);
   }
 
-  const response = await fetch(`${getDyadEngineBaseUrl()}${endpoint}`, {
+  const response = await fetch(`${getSambaEngineBaseUrl()}${endpoint}`, {
     ...init,
     headers,
   });
@@ -698,8 +698,8 @@ export async function syncCloudSandboxDirtyPaths(input: {
   }
 }
 
-class DyadEngineCloudSandboxProvider implements CloudSandboxProvider {
-  name = "dyad-engine";
+class SambaEngineCloudSandboxProvider implements CloudSandboxProvider {
+  name = "samba-engine";
 
   async createSandbox(input: {
     appId: number;
@@ -827,7 +827,7 @@ class DyadEngineCloudSandboxProvider implements CloudSandboxProvider {
 }
 
 const defaultProvider: CloudSandboxProvider =
-  new DyadEngineCloudSandboxProvider();
+  new SambaEngineCloudSandboxProvider();
 
 export async function destroyCloudSandbox(sandboxId: string): Promise<void> {
   await defaultProvider.destroySandbox(sandboxId);

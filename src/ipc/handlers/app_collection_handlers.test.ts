@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { eq } from "drizzle-orm";
-import { DyadErrorKind } from "@/errors/dyad_error";
+import { SambaErrorKind } from "@/errors/samba_error";
 import { apps, appCollections } from "@/db/schema";
 import {
   type HandlerTestHarness,
@@ -61,7 +61,7 @@ describe("registerAppCollectionHandlers", () => {
         appIds: [],
       }),
     ).rejects.toMatchObject({
-      kind: DyadErrorKind.Conflict,
+      kind: SambaErrorKind.Conflict,
       message: "A collection with that name already exists",
     });
   });
@@ -109,7 +109,7 @@ describe("registerAppCollectionHandlers", () => {
     await expect(
       harness.invokeHandler("appCollections:delete", 123),
     ).rejects.toMatchObject({
-      kind: DyadErrorKind.NotFound,
+      kind: SambaErrorKind.NotFound,
       message: "Collection not found",
     });
   });
@@ -143,7 +143,7 @@ describe("registerAppCollectionHandlers", () => {
         appIds: [appId],
       }),
     ).rejects.toMatchObject({
-      kind: DyadErrorKind.NotFound,
+      kind: SambaErrorKind.NotFound,
       message: "Collection not found",
     });
     const appRow = harness.db

@@ -61,9 +61,9 @@ export function createStreamChunk(
 }
 
 export const CANNED_MESSAGE = `
-  <dyad-write path="file1.txt">
+  <samba-write path="file1.txt">
   A file (2)
-  </dyad-write>
+  </samba-write>
   More
   EOM`;
 
@@ -272,9 +272,9 @@ export function createFakeLlmApp(getPort: () => number) {
       .type("text/plain")
       .send(
         [
-          "# dyad-default-allow-builds-schema=v1",
-          "# dyad-default-allow-builds-data-version=2026-05-21.2",
-          "# dyad-default-allow-builds-channel=remote",
+          "# samba-default-allow-builds-schema=v1",
+          "# samba-default-allow-builds-data-version=2026-05-21.2",
+          "# samba-default-allow-builds-channel=remote",
           "@swc/core",
           "esbuild",
           "sharp",
@@ -283,8 +283,8 @@ export function createFakeLlmApp(getPort: () => number) {
       );
   });
 
-  // Fake api.dyad.sh user info (Samba Builder budget). Tests point
-  // DYAD_USER_INFO_URL here so get-user-budget never hits the real API.
+  // Fake api.samba.sh user info (Samba Builder budget). Tests point
+  // SAMBA_USER_INFO_URL here so get-user-budget never hits the real API.
   app.get("/api/user/info", (req, res) => {
     if (!req.headers.authorization?.startsWith("Bearer ")) {
       res.status(401).json({ error: "Unauthorized" });
@@ -330,9 +330,9 @@ export function createFakeLlmApp(getPort: () => number) {
           category: "Other Tools",
           transport: "http",
           url: "http://localhost:3002/mcp",
-          headers: { "X-Test-Header": "dyad-e2e" },
+          headers: { "X-Test-Header": "samba-e2e" },
         },
-        // Valid stdio entry. The package is scoped under @dyad-sh so it
+        // Valid stdio entry. The package is scoped under @samba-sh so it
         // can never resolve against the real npm registry: the spec only
         // exercises the add flow, and an actual `npx` spawn in CI must
         // fail with a 404 instead of executing someone's package.
@@ -343,7 +343,7 @@ export function createFakeLlmApp(getPort: () => number) {
           category: "Testing",
           transport: "stdio",
           command: "npx",
-          args: ["-y", "@dyad-sh/e2e-nonexistent-mcp@1.0.0"],
+          args: ["-y", "@samba-sh/e2e-nonexistent-mcp@1.0.0"],
         },
         // The desktop client must drop these: a stdio entry whose command
         // isn't npx, and a malformed one.
@@ -456,7 +456,7 @@ export function createFakeLlmApp(getPort: () => number) {
       },
       aliases: [
         {
-          id: "dyad/theme-generator/google",
+          id: "samba/theme-generator/google",
           resolvedModel: {
             providerId: "google",
             apiName: "gemini-3.1-pro-preview",
@@ -465,7 +465,7 @@ export function createFakeLlmApp(getPort: () => number) {
           purpose: "theme-generation",
         },
         {
-          id: "dyad/theme-generator/anthropic",
+          id: "samba/theme-generator/anthropic",
           resolvedModel: {
             providerId: "anthropic",
             apiName: "claude-sonnet-4-6",
@@ -474,7 +474,7 @@ export function createFakeLlmApp(getPort: () => number) {
           purpose: "theme-generation",
         },
         {
-          id: "dyad/theme-generator/openai",
+          id: "samba/theme-generator/openai",
           resolvedModel: {
             providerId: "openai",
             apiName: "gpt-5.2",
@@ -483,7 +483,7 @@ export function createFakeLlmApp(getPort: () => number) {
           purpose: "theme-generation",
         },
         {
-          id: "dyad/auto/openai",
+          id: "samba/auto/openai",
           resolvedModel: {
             providerId: "openai",
             apiName: "gpt-5.2",
@@ -491,7 +491,7 @@ export function createFakeLlmApp(getPort: () => number) {
           purpose: "auto-mode",
         },
         {
-          id: "dyad/auto/anthropic",
+          id: "samba/auto/anthropic",
           resolvedModel: {
             providerId: "anthropic",
             apiName: "claude-sonnet-4-6",
@@ -499,7 +499,7 @@ export function createFakeLlmApp(getPort: () => number) {
           purpose: "auto-mode",
         },
         {
-          id: "dyad/auto/google",
+          id: "samba/auto/google",
           resolvedModel: {
             providerId: "google",
             apiName: "gemini-3.1-pro-preview",
@@ -507,7 +507,7 @@ export function createFakeLlmApp(getPort: () => number) {
           purpose: "auto-mode",
         },
         {
-          id: "dyad/help-bot/default",
+          id: "samba/help-bot/default",
           resolvedModel: {
             providerId: "openai",
             apiName: "gpt-5.2",
@@ -518,15 +518,15 @@ export function createFakeLlmApp(getPort: () => number) {
       curatedSelections: {
         themeGenerationOptions: [
           {
-            id: "dyad/theme-generator/google",
+            id: "samba/theme-generator/google",
             label: "Google Remote",
           },
           {
-            id: "dyad/theme-generator/anthropic",
+            id: "samba/theme-generator/anthropic",
             label: "Anthropic Remote",
           },
           {
-            id: "dyad/theme-generator/openai",
+            id: "samba/theme-generator/openai",
             label: "OpenAI Remote",
           },
         ],

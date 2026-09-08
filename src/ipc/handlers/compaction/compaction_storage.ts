@@ -7,7 +7,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import log from "electron-log";
-import { ensureDyadGitignored } from "@/ipc/handlers/gitignoreUtils";
+import { ensureSambaGitignored } from "@/ipc/handlers/gitignoreUtils";
 
 const logger = log.scope("compaction_storage");
 
@@ -25,27 +25,27 @@ export interface CompactionMessage {
 }
 
 /**
- * Get the backup directory for a specific chat within the app's .dyad/chats/ directory.
+ * Get the backup directory for a specific chat within the app's .samba/chats/ directory.
  */
 function getChatBackupDir(appPath: string, chatId: number): string {
-  return path.join(appPath, ".dyad", "chats", String(chatId));
+  return path.join(appPath, ".samba", "chats", String(chatId));
 }
 
 /**
- * Transform dyad-specific tool XML tags to shorter, LLM-friendly equivalents
+ * Transform samba-specific tool XML tags to shorter, LLM-friendly equivalents
  * and truncate large tool results for token efficiency.
  */
 export function transformToolTags(content: string): string {
-  // Transform <dyad-mcp-tool-call> to <tool-use>. Tolerates extra attributes
+  // Transform <samba-mcp-tool-call> to <tool-use>. Tolerates extra attributes
   // (e.g. call-id); expects server before tool, which every emitter does.
   let result = content.replace(
-    /<dyad-mcp-tool-call\b[^>]*?\bserver="([^"]*)"[^>]*?\btool="([^"]*)"[^>]*>\n([\s\S]*?)\n<\/dyad-mcp-tool-call>/g,
+    /<samba-mcp-tool-call\b[^>]*?\bserver="([^"]*)"[^>]*?\btool="([^"]*)"[^>]*>\n([\s\S]*?)\n<\/samba-mcp-tool-call>/g,
     '<tool-use name="$2" server="$1">\n$3\n</tool-use>',
   );
 
-  // Transform <dyad-mcp-tool-result> to <tool-result> with truncation
+  // Transform <samba-mcp-tool-result> to <tool-result> with truncation
   result = result.replace(
-    /<dyad-mcp-tool-result\b[^>]*?\bserver="([^"]*)"[^>]*?\btool="([^"]*)"[^>]*>\n([\s\S]*?)\n<\/dyad-mcp-tool-result>/g,
+    /<samba-mcp-tool-result\b[^>]*?\bserver="([^"]*)"[^>]*?\btool="([^"]*)"[^>]*>\n([\s\S]*?)\n<\/samba-mcp-tool-result>/g,
     (_match, server, tool, resultContent: string) => {
       const chars = resultContent.length;
       const truncated = chars > TOOL_RESULT_TRUNCATION_LIMIT;
@@ -100,11 +100,11 @@ export async function storePreCompactionMessages(
 ): Promise<string> {
   const chatBackupDir = getChatBackupDir(appPath, chatId);
 
-  // Ensure directory exists and .dyad is gitignored
+  // Ensure directory exists and .samba is gitignored
   if (!fs.existsSync(chatBackupDir)) {
     fs.mkdirSync(chatBackupDir, { recursive: true });
   }
-  await ensureDyadGitignored(appPath);
+  await ensureSambaGitignored(appPath);
 
   const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
   const backupFileName = `compaction-${timestamp}.md`;

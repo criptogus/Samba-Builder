@@ -9,7 +9,7 @@ import {
   createSequentialIdSource,
 } from "@/state_machines/testing";
 import { TwoWindowHarness } from "@/testing/two_window_harness";
-import { DyadError, DyadErrorKind } from "@/errors/dyad_error";
+import { SambaError, SambaErrorKind } from "@/errors/samba_error";
 import {
   IMAGE_GENERATION_TERMINAL_RETENTION_MS,
   imageGenerationDefinition,
@@ -326,7 +326,7 @@ describe("main-hosted image generation actor", () => {
         currentState: { jobs: [] },
       }),
     ).rejects.toMatchObject({
-      kind: DyadErrorKind.NotFound,
+      kind: SambaErrorKind.NotFound,
       message: "Target app not found",
     });
   });
@@ -373,7 +373,10 @@ describe("main-hosted image generation actor", () => {
     });
     await vi.waitFor(() => expect(service.cancel).toHaveBeenCalledOnce());
     generation.reject(
-      new DyadError("Image generation cancelled", DyadErrorKind.UserCancelled),
+      new SambaError(
+        "Image generation cancelled",
+        SambaErrorKind.UserCancelled,
+      ),
     );
     await vi.waitFor(() =>
       expect(actorA.getSnapshot().jobs[0]?.status).toBe("cancelled"),
@@ -390,7 +393,7 @@ describe("main-hosted image generation actor", () => {
 
   it("settles a provider failure only after authoritative admission", async () => {
     service.generate.mockRejectedValue(
-      new DyadError("Provider quota exhausted", DyadErrorKind.External),
+      new SambaError("Provider quota exhausted", SambaErrorKind.External),
     );
     const { actorA } = createHarness();
     await actorA.resync();

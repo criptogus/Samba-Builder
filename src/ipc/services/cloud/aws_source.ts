@@ -2,7 +2,7 @@ import ignore, { type Ignore } from "ignore";
 import * as fs from "node:fs/promises";
 import path from "node:path";
 import { createHash } from "node:crypto";
-import { DyadError, DyadErrorKind } from "@/errors/dyad_error";
+import { SambaError, SambaErrorKind } from "@/errors/samba_error";
 
 const excluded = new Set([
   ".git",
@@ -41,18 +41,18 @@ export async function prepareAwsSource(root: string, destination?: string) {
     inherited: { base: string; rules: Ignore }[] = [],
   ) {
     if (++visited > 10000 || relative.split("/").length > 40)
-      throw new DyadError(
+      throw new SambaError(
         "Muitas pastas no contexto Docker.",
-        DyadErrorKind.Precondition,
+        SambaErrorKind.Precondition,
       );
     const rules = [...inherited];
     const ignoreFile = path.join(root, relative, ".gitignore");
     try {
       const stat = await fs.lstat(ignoreFile);
       if (stat.isSymbolicLink() || stat.size > 100_000)
-        throw new DyadError(
+        throw new SambaError(
           "Arquivo .gitignore inválido para publicação.",
-          DyadErrorKind.Precondition,
+          SambaErrorKind.Precondition,
         );
       rules.push({
         base: relative ? `${relative}/` : "",
@@ -77,9 +77,9 @@ export async function prepareAwsSource(root: string, destination?: string) {
       )
         continue;
       if (entry.isSymbolicLink())
-        throw new DyadError(
+        throw new SambaError(
           `Remova o link simbólico do contexto Docker: ${name}`,
-          DyadErrorKind.Precondition,
+          SambaErrorKind.Precondition,
         );
       if (entry.isDirectory()) {
         await walk(name, rules);
@@ -95,15 +95,15 @@ export async function prepareAwsSource(root: string, destination?: string) {
         bytes > 200 * 1024 * 1024 ||
         stat.size > 20 * 1024 * 1024
       )
-        throw new DyadError(
+        throw new SambaError(
           "Contexto Docker excede o limite: 10 mil arquivos, 200 MB no total ou 20 MB por arquivo.",
-          DyadErrorKind.Precondition,
+          SambaErrorKind.Precondition,
         );
       const content = await fs.readFile(source);
       if (content.length !== stat.size)
-        throw new DyadError(
+        throw new SambaError(
           "O projeto mudou durante a leitura. Revise novamente.",
-          DyadErrorKind.Precondition,
+          SambaErrorKind.Precondition,
         );
       hash.update(`${name}\0${stat.mode & 0o777}\0${content.length}\0`);
       hash.update(content);
@@ -117,9 +117,9 @@ export async function prepareAwsSource(root: string, destination?: string) {
   }
   await walk("");
   if (!dockerfile)
-    throw new DyadError(
+    throw new SambaError(
       "Adicione um Dockerfile na raiz que compile o frontend e inicie o backend na porta configurada.",
-      DyadErrorKind.Precondition,
+      SambaErrorKind.Precondition,
     );
   return {
     sourceFiles: files,

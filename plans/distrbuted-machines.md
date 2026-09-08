@@ -17,7 +17,7 @@ correct term “distributed.”
 
 ## Summary
 
-Dyad currently has several related but distinct state-machine architectures:
+Samba currently has several related but distinct state-machine architectures:
 
 - renderer-owned controllers and managers;
 - main-process registries;
@@ -602,7 +602,7 @@ type MachineDispatchReceipt<Reason> =
 ```
 
 Expected user/environment failures crossing the main boundary use
-`DyadError`/`DyadErrorKind` where the existing IPC error path is more
+`SambaError`/`SambaErrorKind` where the existing IPC error path is more
 appropriate. Domain-level ignored events remain successful receipts, not
 exceptions.
 
@@ -731,7 +731,7 @@ Each remote machine contract has:
 - persisted-state compatibility policy across an app update.
 
 CORRECTION (2026-07-25, see plans/cleanup-state-machines.md Phase D): main
-and renderer ALWAYS ship together in production — dyad updates via
+and renderer ALWAYS ship together in production — samba updates via
 update-electron-app/Squirrel, applied on restart; renderer reloads load
 the running bundle. Live-IPC version skew is dev-only (HMR). Schema
 versioning below applies to persisted state; for live transport a
@@ -1085,7 +1085,7 @@ Use real contract registration and the handler test harness to verify:
 - outer and per-machine Zod validation;
 - manifest routing;
 - webContents subscription cleanup;
-- `DyadError` preservation;
+- `SambaError` preservation;
 - snapshot projection excludes main-only fields.
 
 ### Renderer integration tests
@@ -1678,7 +1678,7 @@ Mitigation:
 ## Non-goals
 
 - General distributed computing outside the Electron main/renderer boundary.
-- Multiple main processes or networked Dyad instances.
+- Multiple main processes or networked Samba instances.
 - Hot-moving a live actor between processes.
 - Multi-primary state, CRDTs, or conflict resolution between writable replicas.
 - Serializing closures or resource handles.
@@ -1688,7 +1688,7 @@ Mitigation:
 - Replacing domain services with commands embedded in one mega runtime.
 - Persisting every actor.
 - Guaranteeing exactly-once command execution.
-- Building Erlang/OTP, Akka, or XState inside Dyad.
+- Building Erlang/OTP, Akka, or XState inside Samba.
 
 ## Success criteria
 

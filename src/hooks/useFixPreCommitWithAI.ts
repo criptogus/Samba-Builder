@@ -10,7 +10,7 @@ import { useSelectChat } from "@/hooks/useSelectChat";
 import { useStreamChat } from "@/hooks/useStreamChat";
 import { useSettings } from "@/hooks/useSettings";
 import { useFreeAgentQuota } from "@/hooks/useFreeAgentQuota";
-import { isDyadProEnabled } from "@/lib/schemas";
+import { isSambaProEnabled } from "@/lib/schemas";
 
 /**
  * Why the AI fix cannot run right now. Named rather than boolean so the commit
@@ -29,7 +29,7 @@ export function buildPreCommitFixPrompt({
   commitMessage: string;
   failureOutput: string;
 }): string {
-  const diagnosticBoundary = `DYAD_PRE_COMMIT_OUTPUT_${globalThis.crypto.randomUUID()}`;
+  const diagnosticBoundary = `SAMBA_PRE_COMMIT_OUTPUT_${globalThis.crypto.randomUUID()}`;
   return `A manual Git commit could not be created because the repository's pre-commit checks failed.
 
 Run the repository's pre-commit hook with your run_pre_commit tool. Fix only the reported issues, then rerun the hook until it passes. Do not bypass or disable the checks. When you set the chat summary, use the original commit message below verbatim so the final agent checkpoint preserves the user's commit intent.
@@ -59,7 +59,7 @@ export function useFixPreCommitWithAI() {
   const queryClient = useQueryClient();
   const [isStarting, setIsStarting] = useState(false);
   const isStartingRef = useRef(false);
-  const isPro = settings ? isDyadProEnabled(settings) : false;
+  const isPro = settings ? isSambaProEnabled(settings) : false;
   const isAvailabilityLoading = settings === null || (!isPro && isQuotaLoading);
   const isAvailable =
     settings !== null &&

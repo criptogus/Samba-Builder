@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { ipc, type ProblemReport } from "@/ipc/types";
 import { queryKeys } from "@/lib/queryKeys";
-import { DyadError, DyadErrorKind } from "@/errors/dyad_error";
+import { SambaError, SambaErrorKind } from "@/errors/samba_error";
 
 export function useCheckProblems(appId: number | null) {
   const {
@@ -13,7 +13,7 @@ export function useCheckProblems(appId: number | null) {
     queryKey: queryKeys.problems.byApp({ appId }),
     queryFn: async (): Promise<ProblemReport> => {
       if (!appId) {
-        throw new DyadError("App ID is required", DyadErrorKind.Validation);
+        throw new SambaError("App ID is required", SambaErrorKind.Validation);
       }
       return ipc.misc.checkProblems({ appId });
     },

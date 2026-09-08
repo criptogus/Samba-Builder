@@ -22,7 +22,7 @@ For env changes, “snapshot synced” is not the same as “runtime config appl
 For cloud sandboxes:
 
 - there is no stdin bridge
-- cloud log streaming is not translated into Dyad `input-requested` events
+- cloud log streaming is not translated into Samba `input-requested` events
 
 Any remote process that asks an interactive question will still not participate correctly in the existing prompt/response UX.
 

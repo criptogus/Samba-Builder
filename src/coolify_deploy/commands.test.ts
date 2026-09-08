@@ -36,7 +36,7 @@ vi.mock("@/ipc/utils/git_utils", () => ({
 
 // Real key handling writes a keypair to disk, which a test must not do.
 vi.mock("@/ipc/utils/coolify_deploy_key", () => ({
-  repoKeyName: (owner: string, repo: string) => `dyad_${owner}_${repo}`,
+  repoKeyName: (owner: string, repo: string) => `samba_${owner}_${repo}`,
   // Identity here: the fingerprint suffix is this module's own concern, and
   // routing it through would only make every route name in these tests noisier.
   coolifyKeyName: (keyName: string) => keyName,
@@ -101,7 +101,7 @@ import { apps, coolifyAppConnections } from "@/db/schema";
 import { setupHandlerTestHarness } from "@/testing/handler_test_harness";
 import type { HandlerTestHarness } from "@/testing/handler_test_harness";
 import { createFakeClock, type FakeClock } from "@/state_machines/testing";
-import { DyadError, DyadErrorKind, isDyadError } from "@/errors/dyad_error";
+import { SambaError, SambaErrorKind, isSambaError } from "@/errors/samba_error";
 import { runDeployPipeline, type DeployReporter } from "./commands";
 
 const POLL_INTERVAL_MS = 5_000;
@@ -249,7 +249,7 @@ async function seedApp(
     .insert(apps)
     .values({
       name: "demo",
-      path: "/tmp/dyad-demo",
+      path: "/tmp/samba-demo",
       githubOrg: "acme",
       githubRepo: "demo",
       githubBranch: "main",
@@ -277,7 +277,7 @@ function readApp(appId: number) {
 /** Routes for a deployment that starts and immediately reports finished. */
 function happyPathRoutes(uuid = APP_UUID) {
   route("GET /security/keys", [
-    { uuid: "key-1", name: "dyad_acme_demo", id: 7 },
+    { uuid: "key-1", name: "samba_acme_demo", id: 7 },
   ]);
   route("POST /applications/private-deploy-key", { uuid });
   route(`PATCH /applications/${uuid}`, {});
@@ -1552,13 +1552,13 @@ describe("pre-deploy warnings", () => {
 
 describe("database resolution failures", () => {
   it("keeps the kind Neon assigned rather than reporting every failure as a crash", async () => {
-    // rules/dyad-errors.md keeps Precondition out of telemetry; rewrapping it
+    // rules/samba-errors.md keeps Precondition out of telemetry; rewrapping it
     // as External would report a missing branch as a crash on every deploy.
     const { resolveNeonBranchEnvVars } = await import("@/ipc/utils/neon_utils");
     vi.mocked(resolveNeonBranchEnvVars).mockRejectedValueOnce(
-      new DyadError(
+      new SambaError(
         "This app has no development branch.",
-        DyadErrorKind.Precondition,
+        SambaErrorKind.Precondition,
       ),
     );
     const app = await seedApp({ neonProjectId: "proj-1" });
@@ -1575,7 +1575,7 @@ describe("database resolution failures", () => {
       }),
     ).catch((e) => e);
 
-    expect(error.kind).toBe(DyadErrorKind.Precondition);
+    expect(error.kind).toBe(SambaErrorKind.Precondition);
     expect(error.message).toBe("This app has no development branch.");
   });
 
@@ -1598,7 +1598,7 @@ describe("database resolution failures", () => {
       }),
     ).catch((e) => e);
 
-    expect(error.kind).toBe(DyadErrorKind.External);
+    expect(error.kind).toBe(SambaErrorKind.External);
     expect(error.message).toMatch(/socket hang up/);
   });
 });
@@ -1900,8 +1900,8 @@ describe("failing after the old application is already gone", () => {
       }),
     ).catch((e) => e);
 
-    expect(isDyadError(error)).toBe(true);
-    expect(error.kind).toBe(DyadErrorKind.Auth);
+    expect(isSambaError(error)).toBe(true);
+    expect(error.kind).toBe(SambaErrorKind.Auth);
   });
 
   it("stays quiet when nothing was removed", async () => {

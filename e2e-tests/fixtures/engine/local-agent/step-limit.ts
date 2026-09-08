@@ -6,7 +6,7 @@ import type {
 /**
  * Fixture that triggers the step limit by generating 100 tool call turns.
  * The AI SDK's stepCountIs(100) will stop after 100 steps, and the handler
- * will append a <dyad-step-limit> notice to the response.
+ * will append a <samba-step-limit> notice to the response.
  */
 const toolCallTurns: Turn[] = Array.from({ length: 100 }, (_, i) => ({
   text: `Step ${i + 1}: reading file.`,

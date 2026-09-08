@@ -15,7 +15,7 @@ O código também inicializava o Monaco ao importar os componentes, antes de abr
 - O Monaco agora é configurado no `beforeMount` dos editores de arquivo e diff. A abertura do chat não dispara sua inicialização nem seus downloads.
 - O scheduler libera o processo de análise e seus índices após 60 segundos sem operações. A regra substitui o timer de cinco minutos do Code Explorer. Solicitações ativas não são interrompidas, e uma nova análise aguarda a saída efetiva de um processo em encerramento.
 - `npm run desktop:build` gera um pacote local de produção, separado dos pacotes E2E, sem exigir certificados de distribuição no Mac. As configurações padrão de assinatura e os fuses de produção permanecem vigentes para os releases normais.
-- `npm run desktop` abre diretamente esse pacote, sem Forge/Vite, e encerra o launcher. Reutiliza `userData` do repositório ou `DYAD_DEV_USER_DATA_DIR`, sem copiar nem apagar os dados. A execução usa argumentos diretos, sem shell, inclusive no Windows.
+- `npm run desktop` abre diretamente esse pacote, sem Forge/Vite, e encerra o launcher. Reutiliza `userData` do repositório ou `SAMBA_DEV_USER_DATA_DIR`, sem copiar nem apagar os dados. A execução usa argumentos diretos, sem shell, inclusive no Windows.
 
 ## Como usar
 

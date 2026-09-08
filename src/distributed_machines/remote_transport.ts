@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
 import { serialize } from "node:v8";
-import { DyadError, DyadErrorKind, isDyadError } from "@/errors/dyad_error";
+import { SambaError, SambaErrorKind, isSambaError } from "@/errors/samba_error";
 import type { Clock } from "@/state_machines/clock";
 import type { InvocationRef } from "@/state_machines/invocation_ref";
 import { PendingReceiptLedger } from "@/state_machines/pending_receipt_ledger";
@@ -304,17 +304,17 @@ export class RemoteMachineTransport {
       if (
         this.domainAddress(definition, authorizedKey) !== prepared.domainAddress
       ) {
-        throw new DyadError(
+        throw new SambaError(
           "Remote machine key changed during subscription authorization",
-          DyadErrorKind.Precondition,
+          SambaErrorKind.Precondition,
         );
       }
       if (
         !serialize(canonicalEncodedKey).equals(serialize(prepared.encodedKey))
       ) {
-        throw new DyadError(
+        throw new SambaError(
           "Remote machine wire address changed during subscription authorization",
-          DyadErrorKind.Precondition,
+          SambaErrorKind.Precondition,
         );
       }
       const canonicalKey = this.actorKeys.get(address) ?? authorizedKey;
@@ -325,9 +325,9 @@ export class RemoteMachineTransport {
         !alreadySubscribed &&
         currentReferences >= this.maxSubscriptionsPerWindow
       ) {
-        throw new DyadError(
+        throw new SambaError(
           "Remote machine subscription limit exceeded",
-          DyadErrorKind.RateLimited,
+          SambaErrorKind.RateLimited,
         );
       }
       this.assertPreparedSubscribeCurrent(sender, prepared);
@@ -335,15 +335,15 @@ export class RemoteMachineTransport {
         entry &&
         this.options.host.peek(definition.id, entry.key) !== entry.actor
       ) {
-        throw new DyadError(
+        throw new SambaError(
           "Remote machine actor changed during subscription authorization",
-          DyadErrorKind.Precondition,
+          SambaErrorKind.Precondition,
         );
       }
       if (prepared.consumed) {
-        throw new DyadError(
+        throw new SambaError(
           "Prepared remote subscription was already consumed",
-          DyadErrorKind.Precondition,
+          SambaErrorKind.Precondition,
         );
       }
       let admittedActor: HostedActorRef<unknown, unknown, string> | undefined;
@@ -356,18 +356,18 @@ export class RemoteMachineTransport {
           ) as HostedActorRef<unknown, unknown, string>;
         } catch (error) {
           if (error instanceof ActorAdmissionError) {
-            throw new DyadError(
+            throw new SambaError(
               `Remote machine subscription was refused: ${error.message}`,
-              DyadErrorKind.Precondition,
+              SambaErrorKind.Precondition,
               { cause: error },
             );
           }
           throw error;
         }
         if (entry && admittedActor !== entry.actor) {
-          throw new DyadError(
+          throw new SambaError(
             "Remote machine actor changed during subscription admission",
-            DyadErrorKind.Precondition,
+            SambaErrorKind.Precondition,
           );
         }
       }
@@ -375,9 +375,9 @@ export class RemoteMachineTransport {
 
       if (!entry) {
         if (!admittedActor) {
-          throw new DyadError(
+          throw new SambaError(
             "Remote machine subscription admission was not retained",
-            DyadErrorKind.Precondition,
+            SambaErrorKind.Precondition,
           );
         }
         this.actorKeys.set(address, canonicalKey);
@@ -426,9 +426,9 @@ export class RemoteMachineTransport {
         this.pendingSubscriptionKey(sender.id, prepared.address),
       ) !== prepared.pending
     ) {
-      throw new DyadError(
+      throw new SambaError(
         "Remote machine subscription was cancelled",
-        DyadErrorKind.Precondition,
+        SambaErrorKind.Precondition,
       );
     }
     this.assertCurrentSender(sender, prepared.windowSessionId);
@@ -439,9 +439,9 @@ export class RemoteMachineTransport {
         prepared.pending.lifecycleGeneration,
       )
     ) {
-      throw new DyadError(
+      throw new SambaError(
         "Remote machine lifecycle changed during subscription authorization",
-        DyadErrorKind.Precondition,
+        SambaErrorKind.Precondition,
       );
     }
   }
@@ -544,9 +544,9 @@ export class RemoteMachineTransport {
         );
       case "capacity-rejected":
         return Promise.reject(
-          new DyadError(
+          new SambaError(
             "Remote machine in-flight dispatch limit exceeded",
-            DyadErrorKind.RateLimited,
+            SambaErrorKind.RateLimited,
           ),
         );
       case "disposed":
@@ -830,7 +830,7 @@ export class RemoteMachineTransport {
         expectedObservedRevision: envelope.expectedRevision,
       });
       if (decision.kind === "deny") {
-        if (decision.error.kind !== DyadErrorKind.Auth) {
+        if (decision.error.kind !== SambaErrorKind.Auth) {
           throw decision.error;
         }
         return this.rejected(
@@ -970,9 +970,9 @@ export class RemoteMachineTransport {
                   codecs.maxEnvelopeBytes,
                 )
               ) {
-                throw new DyadError(
+                throw new SambaError(
                   `Remote operation outcome exceeds the transport limit for ${definition.id}`,
-                  DyadErrorKind.RateLimited,
+                  SambaErrorKind.RateLimited,
                 );
               }
               this.send(
@@ -1479,9 +1479,9 @@ export class RemoteMachineTransport {
           this.maxSnapshotEnvelopeBytes)
         : nativeSnapshotLimit;
     if (!this.isWithinSerializedLimit(envelope, snapshotLimit)) {
-      throw new DyadError(
+      throw new SambaError(
         `Remote snapshot exceeds the transport limit for ${entry.definition.id}`,
-        DyadErrorKind.RateLimited,
+        SambaErrorKind.RateLimited,
       );
     }
     return envelope;
@@ -1573,9 +1573,9 @@ export class RemoteMachineTransport {
   ): unknown {
     const parsed = this.keyCodec(definition).safeParse(encodedKey);
     if (!parsed.success) {
-      throw new DyadError(
+      throw new SambaError(
         "Invalid remote machine key",
-        DyadErrorKind.Validation,
+        SambaErrorKind.Validation,
       );
     }
     return definition.remoteIntent
@@ -1609,9 +1609,9 @@ export class RemoteMachineTransport {
   private requireDefinition(machineId: string): AnyRemoteMachineDefinition {
     const definition = this.options.manifest.get(machineId);
     if (!definition) {
-      throw new DyadError(
+      throw new SambaError(
         `Unknown remote machine: ${machineId}`,
-        DyadErrorKind.NotFound,
+        SambaErrorKind.NotFound,
       );
     }
     return definition;
@@ -1649,9 +1649,9 @@ export class RemoteMachineTransport {
       capturedWindowSessionId ??
       this.options.windows.sessionForWebContents(sender.id);
     if (!windowSessionId) {
-      throw new DyadError(
+      throw new SambaError(
         "Remote machine sender has no registered window session",
-        DyadErrorKind.Precondition,
+        SambaErrorKind.Precondition,
       );
     }
     return {
@@ -1687,7 +1687,7 @@ export class RemoteMachineTransport {
       });
       return { kind: "allow" };
     } catch (error) {
-      if (isDyadError(error) && error.kind === DyadErrorKind.Auth) {
+      if (isSambaError(error) && error.kind === SambaErrorKind.Auth) {
         return { kind: "deny", error };
       }
       throw error;
@@ -1719,7 +1719,7 @@ export class RemoteMachineTransport {
       });
       return { kind: "allow" };
     } catch (error) {
-      if (isDyadError(error) && error.kind === DyadErrorKind.Auth) {
+      if (isSambaError(error) && error.kind === SambaErrorKind.Auth) {
         return { kind: "deny", error };
       }
       throw error;
@@ -1759,9 +1759,9 @@ export class RemoteMachineTransport {
   ): void {
     if (received === definition.remote.protocolVersion) return;
     this.noteProtocolMismatch(sender, definition, received);
-    throw new DyadError(
+    throw new SambaError(
       "Remote machine protocol mismatch; reload the renderer",
-      DyadErrorKind.Precondition,
+      SambaErrorKind.Precondition,
     );
   }
 
@@ -1787,9 +1787,9 @@ export class RemoteMachineTransport {
     sessionId: WindowSessionId,
   ): void {
     if (this.isCurrentSender(sender, sessionId)) return;
-    throw new DyadError(
+    throw new SambaError(
       "Remote machine sender was destroyed during authorization",
-      DyadErrorKind.Precondition,
+      SambaErrorKind.Precondition,
     );
   }
 
@@ -1812,9 +1812,9 @@ export class RemoteMachineTransport {
 
   private assertOpen(): void {
     if (!this.disposed) return;
-    throw new DyadError(
+    throw new SambaError(
       "Remote machine transport is disposed",
-      DyadErrorKind.Precondition,
+      SambaErrorKind.Precondition,
     );
   }
 
@@ -1832,9 +1832,9 @@ export class RemoteMachineTransport {
       countsTowardLimit &&
       currentReferences + pendingReferences >= this.maxSubscriptionsPerWindow
     ) {
-      throw new DyadError(
+      throw new SambaError(
         "Remote machine subscription limit exceeded",
-        DyadErrorKind.RateLimited,
+        SambaErrorKind.RateLimited,
       );
     }
     const subscription: PendingSubscription = {
@@ -1927,9 +1927,9 @@ export class RemoteMachineTransport {
     if (this.isWithinSerializedLimit(address, this.maxAddressEnvelopeBytes)) {
       return;
     }
-    throw new DyadError(
+    throw new SambaError(
       "Remote machine address exceeds the transport limit",
-      DyadErrorKind.Validation,
+      SambaErrorKind.Validation,
     );
   }
 }

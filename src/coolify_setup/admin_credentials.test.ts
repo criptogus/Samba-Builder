@@ -41,7 +41,7 @@ describe("buildAdminCredentials", () => {
   it("keeps the address it was given rather than inventing one", () => {
     const creds = buildAdminCredentials("  someone@gmail.com  ");
     expect(creds.email).toBe("someone@gmail.com");
-    expect(creds.username).toBe("dyad-admin");
+    expect(creds.username).toBe("samba-admin");
     expect(isShellSafe(creds.password)).toBe(true);
   });
 });

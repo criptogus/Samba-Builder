@@ -1,4 +1,4 @@
-import { DyadError, DyadErrorKind } from "@/errors/dyad_error";
+import { SambaError, SambaErrorKind } from "@/errors/samba_error";
 import {
   sameInvocationRef,
   type InvocationRef,
@@ -78,21 +78,21 @@ export type OperationAdmission<Outcome, InvocationRef> =
       readonly ticket: OperationTicket<Outcome, InvocationRef>;
     };
 
-export class OperationIdentityConflictError extends DyadError {
+export class OperationIdentityConflictError extends SambaError {
   constructor(readonly requestId: RequestId) {
     super(
       `RequestId ${requestId} was reused with conflicting identity`,
-      DyadErrorKind.Conflict,
+      SambaErrorKind.Conflict,
     );
     this.name = "OperationIdentityConflictError";
   }
 }
 
-export class OperationCapacityError extends DyadError {
+export class OperationCapacityError extends SambaError {
   constructor() {
     super(
       "Authoritative operation capacity is exhausted",
-      DyadErrorKind.RateLimited,
+      SambaErrorKind.RateLimited,
     );
     this.name = "OperationCapacityError";
   }

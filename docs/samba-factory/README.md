@@ -1,6 +1,6 @@
 # Samba Factory — implementação local
 
-A Fábrica adiciona ao Samba Builder um fluxo de cliente → briefing → plano aprovado → tokens → execução → verificação → handoff. O editor, os provedores, o runtime e as integrações continuam sendo os do fork Dyad. O código novo está fora de `src/pro`.
+A Fábrica adiciona ao Samba Builder um fluxo de cliente → briefing → plano aprovado → tokens → execução → verificação → handoff. O editor, os provedores, o runtime e as integrações continuam sendo os do fork Samba. O código novo está fora de `src/pro`.
 
 Esta entrega implementa a fundação funcional do PRD; não representa a conclusão de todos os itens de 90/180 dias. O [PRD original](./PRD-original.md) é o material fornecido pelo solicitante, não uma validação independente das afirmações sobre concorrentes.
 

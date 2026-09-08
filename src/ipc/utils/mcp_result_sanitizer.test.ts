@@ -99,8 +99,8 @@ describe("sanitizeMcpToolResult", () => {
     const parsed = JSON.parse(result.serialized);
 
     expect(result.truncated).toBe(true);
-    expect(parsed._dyadMcpTruncation.reasons).toEqual(["byte-budget"]);
-    expect(parsed._dyadMcpTruncation.limits).toEqual({
+    expect(parsed._sambaMcpTruncation.reasons).toEqual(["byte-budget"]);
+    expect(parsed._sambaMcpTruncation.limits).toEqual({
       maxBytes: MCP_RESULT_MAX_BYTES,
     });
   });
@@ -131,7 +131,7 @@ describe("sanitizeMcpToolResult", () => {
     const result = sanitizeMcpToolResult(input);
     const parsed = JSON.parse(result.serialized);
     expect(result.truncated).toBe(true);
-    expect(parsed.bytes._dyadOmittedBinary.bytes).toBe(
+    expect(parsed.bytes._sambaOmittedBinary.bytes).toBe(
       MCP_RESULT_MAX_BYTES * 2,
     );
     expect(parsed.self).toContain("circular");

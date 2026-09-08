@@ -272,7 +272,7 @@ Summary (full tables and recipes in `plans/claude-cleanup-machines.md`):
 12 cross-machine + 3 mixed (retire, worst class). Load-bearing verified
 corrections that Phase A recipes already encode: release-age outranks
 pnpm-migration in the warning priority; six preview-error writer sites
-(four in `PreviewIframe.tsx`, including `dyad-app`-sourced cloud-sandbox
+(four in `PreviewIframe.tsx`, including `samba-app`-sourced cloud-sandbox
 errors); `subscribeStreamFinished` is deferred but does not fire on
 `disposeKey` (watchIdle facades must observe disposal); provider mount
 order constrains facade injection sites.
@@ -813,7 +813,7 @@ Architecture tests do not wait for this UX: B1's test harness exists first.
 ### Phase D — delete transitional infrastructure (rolling, per wave)
 
 Correction recorded 2026-07-25: there is **no live-IPC version-skew window
-in production**. Dyad updates via `update-electron-app`/Squirrel
+in production**. Samba updates via `update-electron-app`/Squirrel
 (src/main.ts) — updates apply on restart, main and renderer always ship
 from one bundle, and a mid-session renderer reload loads the running
 bundle, not the staged one. Version discipline therefore applies to
@@ -909,7 +909,7 @@ high-blast-radius waves get deep multi-agent review.
   into machines; snapshots carrying console logs or LLM chunks.
 - Replacing React Query; XState; actor hierarchies/supervision trees;
   exactly-once command execution claims.
-- Networked/multi-instance Dyad; hot-moving live actors between processes.
+- Networked/multi-instance Samba; hot-moving live actors between processes.
 - Visual polish and full window-management UX beyond C4's required creation,
   explicit duplication, transfer, restoration, and routing behavior.
 

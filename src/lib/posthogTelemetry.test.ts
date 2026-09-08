@@ -40,7 +40,7 @@ const HOUR_MS = 60 * 60 * 1000;
 
 function exceptionEvent(
   message = "Failed to load app 123456",
-  filename = "file:///Users/alice/dyad/src/example.ts",
+  filename = "file:///Users/alice/samba/src/example.ts",
   lineno = 42,
   colno = 7,
 ) {
@@ -77,8 +77,8 @@ describe("PostHogErrorDeduper", () => {
     expect(deduper.process(event, false, 23 * HOUR_MS)).toBeNull();
     expect(deduper.process(event, false, 25 * HOUR_MS)).toMatchObject({
       properties: {
-        dyad_error_suppressed_count: 1,
-        dyad_error_suppression_duration_ms: 25 * HOUR_MS,
+        samba_error_suppressed_count: 1,
+        samba_error_suppression_duration_ms: 25 * HOUR_MS,
       },
     });
   });
@@ -91,8 +91,8 @@ describe("PostHogErrorDeduper", () => {
     expect(deduper.process(event, true, 10 * 60 * 1000 - 1)).toBeNull();
     expect(deduper.process(event, true, 10 * 60 * 1000)).toMatchObject({
       properties: {
-        dyad_error_suppressed_count: 1,
-        dyad_error_suppression_duration_ms: 10 * 60 * 1000,
+        samba_error_suppressed_count: 1,
+        samba_error_suppression_duration_ms: 10 * 60 * 1000,
       },
     });
   });
@@ -107,12 +107,12 @@ describe("PostHogErrorDeduper", () => {
 
     expect(deduper.process(event, true, 10 * 60 * 1000)).toMatchObject({
       properties: {
-        dyad_error_suppressed_count: 2,
-        dyad_error_suppression_duration_ms: 10 * 60 * 1000,
+        samba_error_suppressed_count: 2,
+        samba_error_suppression_duration_ms: 10 * 60 * 1000,
       },
     });
     expect(deduper.process(event, true, 20 * 60 * 1000)).not.toHaveProperty(
-      "properties.dyad_error_suppressed_count",
+      "properties.samba_error_suppressed_count",
     );
   });
 
@@ -120,11 +120,11 @@ describe("PostHogErrorDeduper", () => {
     const deduper = new PostHogErrorDeduper();
     const first = exceptionEvent(
       "App 123456 failed for 44d88612-fea8-4a8b-9d71-1cbe1c0187e1",
-      "file:///Users/alice/dyad/src/example.ts",
+      "file:///Users/alice/samba/src/example.ts",
     );
     const repeat = exceptionEvent(
       "App 987654 failed for 550e8400-e29b-41d4-a716-446655440000",
-      "file:///home/bob/dyad/src/example.ts",
+      "file:///home/bob/samba/src/example.ts",
     );
 
     expect(deduper.process(first, false, 0)).toBe(first);
@@ -263,7 +263,7 @@ describe("PostHogErrorDeduper", () => {
 
   it("recovers from malformed or unavailable storage", () => {
     const malformedStorage = new MemoryStorage();
-    malformedStorage.setItem("dyadPostHogErrorDedupe:v1", "not-json");
+    malformedStorage.setItem("sambaPostHogErrorDedupe:v1", "not-json");
     const event = exceptionEvent();
     const malformedDeduper = new PostHogErrorDeduper(malformedStorage);
 
@@ -376,7 +376,7 @@ describe("PostHogErrorDeduper", () => {
         24 * HOUR_MS,
       ),
     ).toMatchObject({
-      properties: { dyad_error_suppressed_count: 1 },
+      properties: { samba_error_suppressed_count: 1 },
     });
   });
 
@@ -400,7 +400,7 @@ describe("PostHogErrorDeduper", () => {
           24 * HOUR_MS,
         ),
       ).toMatchObject({
-        properties: { dyad_error_suppressed_count: 1 },
+        properties: { samba_error_suppressed_count: 1 },
       });
     } finally {
       vi.useRealTimers();
@@ -423,7 +423,7 @@ describe("PostHogErrorDeduper", () => {
         freeWindowMs,
       ),
     ).toMatchObject({
-      properties: { dyad_error_suppressed_count: 1 },
+      properties: { samba_error_suppressed_count: 1 },
     });
   });
 
@@ -466,7 +466,7 @@ describe("PostHogErrorDeduper", () => {
     firstWindow.process(event, false, freeWindowMs - 5_000);
     firstWindow.process(event, false, freeWindowMs - 4_999);
     expect(secondWindow.process(event, false, freeWindowMs)).toMatchObject({
-      properties: { dyad_error_suppressed_count: 1 },
+      properties: { samba_error_suppressed_count: 1 },
     });
 
     firstWindow.flush(freeWindowMs + 1);
@@ -477,7 +477,7 @@ describe("PostHogErrorDeduper", () => {
         2 * freeWindowMs,
       ),
     ).toMatchObject({
-      properties: { dyad_error_suppressed_count: 1 },
+      properties: { samba_error_suppressed_count: 1 },
     });
   });
 
@@ -491,10 +491,10 @@ describe("PostHogErrorDeduper", () => {
     deduper.process(event, false, freeWindowMs - 5_000);
     deduper.process(event, false, freeWindowMs - 4_999);
     expect(deduper.process(event, false, freeWindowMs)).toMatchObject({
-      properties: { dyad_error_suppressed_count: 2 },
+      properties: { samba_error_suppressed_count: 2 },
     });
     expect(deduper.process(event, false, 2 * freeWindowMs)).not.toHaveProperty(
-      "properties.dyad_error_suppressed_count",
+      "properties.samba_error_suppressed_count",
     );
   });
 
@@ -523,7 +523,7 @@ describe("PostHogErrorDeduper", () => {
     const nextWindow = new PostHogErrorDeduper(storage, "window-c");
     expect(nextWindow.process(event, true, 10 * 60 * 1000)).toMatchObject({
       properties: {
-        dyad_error_suppressed_count: 4,
+        samba_error_suppressed_count: 4,
       },
     });
   });

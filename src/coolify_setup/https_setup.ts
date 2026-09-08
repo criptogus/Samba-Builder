@@ -1,6 +1,6 @@
 import log from "electron-log";
 import { isIP } from "node:net";
-import { DyadError, DyadErrorKind } from "@/errors/dyad_error";
+import { SambaError, SambaErrorKind } from "@/errors/samba_error";
 import { sleep } from "./sleep";
 import type { SshSession } from "@/ipc/utils/ssh_client";
 import { answerLine, runTinker } from "./tinker";
@@ -121,7 +121,7 @@ export function urlHost(host: string): string {
  * environment under a test build so parallel workers do not have to share it.
  */
 function dashboardPort(): number {
-  const override = IS_TEST_BUILD ? process.env.DYAD_E2E_DASHBOARD_PORT : null;
+  const override = IS_TEST_BUILD ? process.env.SAMBA_E2E_DASHBOARD_PORT : null;
   return override ? Number(override) : 8000;
 }
 
@@ -156,9 +156,9 @@ export async function applyInstanceDomain(
   }: { signal?: AbortSignal; timeoutMs?: number } = {},
 ): Promise<void> {
   if (domain !== null && !isPlausibleInstanceDomain(domain)) {
-    throw new DyadError(
+    throw new SambaError(
       `Refusing to set an unsafe instance domain: ${domain}`,
-      DyadErrorKind.Validation,
+      SambaErrorKind.Validation,
     );
   }
   const answer = await runTinker(
@@ -172,14 +172,14 @@ export async function applyInstanceDomain(
     `echo (function () { $s = \\App\\Models\\InstanceSettings::get(); ` +
       (domain === null
         ? `$s->fqdn = null; `
-        : `$s->fqdn = 'https://' . getenv('DYAD_INSTANCE_DOMAIN'); `) +
+        : `$s->fqdn = 'https://' . getenv('SAMBA_INSTANCE_DOMAIN'); `) +
       // Eloquent answers false rather than throwing when something vetoes
       // the write, so the throw-safety above is not enough on its own.
       `if (!$s->save()) { return 'not-saved'; } ` +
       `\\App\\Models\\Server::find(0)->setupDynamicProxyConfiguration(); ` +
       `return 'applied'; })();`,
     {
-      env: domain === null ? {} : { DYAD_INSTANCE_DOMAIN: domain },
+      env: domain === null ? {} : { SAMBA_INSTANCE_DOMAIN: domain },
       signal,
       // Bounded: the proxy rebuild is the slow part, and a server that never
       // answers leaves "Setting up HTTPS" on screen with nothing behind it.
@@ -192,9 +192,9 @@ export async function applyInstanceDomain(
   // notice beside it, and tight enough that the echoed script line — which
   // carries the word — cannot pass for the answer.
   if (!answerLine(answer, (line) => line === "applied")) {
-    throw new DyadError(
+    throw new SambaError(
       `Coolify would not take the domain: ${answer.trim()}`,
-      DyadErrorKind.External,
+      SambaErrorKind.External,
     );
   }
 }
@@ -461,7 +461,7 @@ export async function tryEnableHttps(
     const deadline = now() + timeoutMs;
     while (now() < deadline) {
       if (signal?.aborted) {
-        throw new DyadError("Cancelled.", DyadErrorKind.UserCancelled);
+        throw new SambaError("Cancelled.", SambaErrorKind.UserCancelled);
       }
       if (await check(url)) {
         keepDomain = true;

@@ -1,4 +1,4 @@
-# Hardening Dyad State Machines
+# Hardening Samba State Machines
 
 ## Status
 
@@ -13,8 +13,8 @@ This review covered 30 state-machine implementation PRs merged between
 2026-07-21 and 2026-07-23, primarily authored by `keppo-bot`, together with
 the two `wwwillchen` planning PRs:
 
-- [#4017 Machines detailed plan](https://github.com/dyad-sh/dyad/pull/4017)
-- [#4042 Machines plan progress](https://github.com/dyad-sh/dyad/pull/4042)
+- [#4017 Machines detailed plan](https://github.com/samba-sh/samba/pull/4017)
+- [#4042 Machines plan progress](https://github.com/samba-sh/samba/pull/4042)
 
 The migration's domain modeling is generally strong. Pure transitions,
 explicit commands, reference-stable snapshots, provider-owned managers, and
@@ -34,7 +34,7 @@ each domain:
 - durable acknowledgement across machine boundaries.
 
 Those mechanisms were deliberately excluded from the initial micro-kernel in
-[#4014](https://github.com/dyad-sh/dyad/pull/4014). The subsequent PR
+[#4014](https://github.com/samba-sh/samba/pull/4014). The subsequent PR
 iterations provide enough evidence to revisit that boundary. The recommended
 direction is not a framework that owns domain policy. It is a small shared
 runtime that owns event transaction mechanics while leaving state shape,
@@ -45,20 +45,20 @@ concurrency policy, and staleness policy domain-specific.
 Most serious review findings were not missing transition cases. They came from
 orchestration surrounding otherwise reasonable transition tables.
 
-| Failure class                                                        | Representative iteration                                                                 |
-| -------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
-| Re-entrant events reordered commands                                 | [#3969 review](https://github.com/dyad-sh/dyad/pull/3969#discussion_r3607908235)         |
-| An async command wedged a serial queue                               | [#3968 review and fix](https://github.com/dyad-sh/dyad/pull/3968#discussion_r3607899376) |
-| A synchronous runner throw left a machine permanently pending        | [#4029 review](https://github.com/dyad-sh/dyad/pull/4029#discussion_r3628359815)         |
-| A callback observed stale state                                      | [#4028 review](https://github.com/dyad-sh/dyad/pull/4028#discussion_r3628323130)         |
-| A local generation was mistaken for a globally unique identity       | [#4031 review](https://github.com/dyad-sh/dyad/pull/4031#discussion_r3631552691)         |
-| Late async setup escaped disposal                                    | [#4021 review](https://github.com/dyad-sh/dyad/pull/4021#discussion_r3627971018)         |
-| Terminal settlement depended on a fallible ancillary command         | [#4033 review](https://github.com/dyad-sh/dyad/pull/4033#discussion_r3628590963)         |
-| A wait state was entered without reinstalling its progress mechanism | [#4058 review](https://github.com/dyad-sh/dyad/pull/4058#discussion_r3636307586)         |
-| Command data was ignored in favor of stale React closure state       | [#4059 review](https://github.com/dyad-sh/dyad/pull/4059#discussion_r3636261590)         |
-| Cross-machine queued work lacked durable ownership and settlement    | [#4047 review](https://github.com/dyad-sh/dyad/pull/4047#discussion_r3633885316)         |
-| Teardown order dropped the final projection update                   | [#4045 review](https://github.com/dyad-sh/dyad/pull/4045#discussion_r3633712105)         |
-| UI treated dispatch as success and destroyed retryable input         | [#4061 review](https://github.com/dyad-sh/dyad/pull/4061#discussion_r3639891573)         |
+| Failure class                                                        | Representative iteration                                                                   |
+| -------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ |
+| Re-entrant events reordered commands                                 | [#3969 review](https://github.com/samba-sh/samba/pull/3969#discussion_r3607908235)         |
+| An async command wedged a serial queue                               | [#3968 review and fix](https://github.com/samba-sh/samba/pull/3968#discussion_r3607899376) |
+| A synchronous runner throw left a machine permanently pending        | [#4029 review](https://github.com/samba-sh/samba/pull/4029#discussion_r3628359815)         |
+| A callback observed stale state                                      | [#4028 review](https://github.com/samba-sh/samba/pull/4028#discussion_r3628323130)         |
+| A local generation was mistaken for a globally unique identity       | [#4031 review](https://github.com/samba-sh/samba/pull/4031#discussion_r3631552691)         |
+| Late async setup escaped disposal                                    | [#4021 review](https://github.com/samba-sh/samba/pull/4021#discussion_r3627971018)         |
+| Terminal settlement depended on a fallible ancillary command         | [#4033 review](https://github.com/samba-sh/samba/pull/4033#discussion_r3628590963)         |
+| A wait state was entered without reinstalling its progress mechanism | [#4058 review](https://github.com/samba-sh/samba/pull/4058#discussion_r3636307586)         |
+| Command data was ignored in favor of stale React closure state       | [#4059 review](https://github.com/samba-sh/samba/pull/4059#discussion_r3636261590)         |
+| Cross-machine queued work lacked durable ownership and settlement    | [#4047 review](https://github.com/samba-sh/samba/pull/4047#discussion_r3633885316)         |
+| Teardown order dropped the final projection update                   | [#4045 review](https://github.com/samba-sh/samba/pull/4045#discussion_r3633712105)         |
+| UI treated dispatch as success and destroyed retryable input         | [#4061 review](https://github.com/samba-sh/samba/pull/4061#discussion_r3639891573)         |
 
 The present implementation also shows controller-semantic drift:
 

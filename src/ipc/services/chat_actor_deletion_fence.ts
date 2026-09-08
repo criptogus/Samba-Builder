@@ -1,4 +1,4 @@
-import { DyadError, DyadErrorKind } from "@/errors/dyad_error";
+import { SambaError, SambaErrorKind } from "@/errors/samba_error";
 
 const admissionBlockCounts = new Map<number, number>();
 
@@ -21,8 +21,8 @@ export const beginChatActorDeletion = beginChatActorMutation;
 
 export function assertChatActorAdmissionOpen(
   chatId: number,
-  errorKind: DyadErrorKind = DyadErrorKind.Precondition,
+  errorKind: SambaErrorKind = SambaErrorKind.Precondition,
 ): void {
   if (!admissionBlockCounts.has(chatId)) return;
-  throw new DyadError("Chat is temporarily unavailable", errorKind);
+  throw new SambaError("Chat is temporarily unavailable", errorKind);
 }

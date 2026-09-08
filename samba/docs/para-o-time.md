@@ -6,8 +6,8 @@
 ## O que é
 
 **Plataforma da Samba para criar apps com IA, rodando 100% local.** É um fork do
-[Dyad](https://github.com/dyad-sh/dyad) (open source, 21k★) que a gente rebrandou
-e **desligou todo o backend do Dyad** — não existe servidor nosso nem assinatura:
+[Samba](https://github.com/samba-sh/samba) (open source, 21k★) que a gente rebrandou
+e **desligou todo o backend do Samba** — não existe servidor nosso nem assinatura:
 o usuário cola a chave de um provider (DeepSeek por padrão) e o agente constrói o
 produto na máquina dele. Dados do cliente nunca saem do ambiente local.
 
@@ -19,34 +19,34 @@ você itera. A diferença: **cada cliente/projeto pode ter o próprio conhecimen
 
 ## Features principais (o que já existe)
 
-| Feature | Como funciona |
-|---|---|
-| **Agente de construção local** | Conversa → app completo (plano → código → preview → itera). A lista de modelos mostra **só os conectados** (chave presente) — sem confusão |
-| **BYOK, zero assinatura** | Chave do provider direto na UI (DeepSeek `api.deepseek.com` por padrão). Nada de Pro/upgrade/trial — tudo liberado |
-| **Zero backend do Dyad** | Catálogo de modelos/templates/update/quota locais. Sem telemetria remota, sem help bot, sem logs enviados. Links de marca → sambatech.com |
-| **Conectores diretos** | GitHub (device flow nativo) · Supabase (cola o **PAT** `sb_pat_...`) · Neon (cola a **API key**) — sem OAuth de terceiros |
-| **Córtex no fluxo do agente** | RAG local (knowledge units + design system + entidades + busca híbrida). O agente **consulta sozinho** o conhecimento do domínio antes de construir — cada cliente vira memória |
-| **Memória por projeto** | `docs/PROJECT_MEMORY.md`: decisões e preferências registradas pelo agente — o projeto "lembra" entre sessões |
-| **Qualidade medida (score)** | LLM-as-judge local com o **jeito Samba** (bonito, elegante, rápido, inovador, simples, seguro): `npm run samba:score -- <app>` → nota com evidências por dimensão |
-| **Governança** | Modo `single` (livre) ou `governed` (corporativo): ciclo draft → in_review → approved com submit/approve/veto — painel no app + CLI (`gate.py`) + auditoria com hash |
-| **Design System Toolkit** | Extrair o design system de um projeto (vars shadcn/tailwind) → salvar como template → aplicar em outro (UI no app + CLI) |
-| **Auto-evolução** | Telemetria local de erros → analisador propõe melhorias **com evidência** → aprovação humana → conhecimento vira skill/PR. **Nunca merge silencioso** |
-| **MCPs ativos** | Composio (500+ apps) · Playwright (24 tools) · cua-driver (computer use) · Córtex |
-| **Apps dos clientes limpos** | Scaffold gerado sem assinatura do Dyad ("Made with Samba Builder" → sambatech.com) |
+| Feature                        | Como funciona                                                                                                                                                                   |
+| ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Agente de construção local** | Conversa → app completo (plano → código → preview → itera). A lista de modelos mostra **só os conectados** (chave presente) — sem confusão                                      |
+| **BYOK, zero assinatura**      | Chave do provider direto na UI (DeepSeek `api.deepseek.com` por padrão). Nada de Pro/upgrade/trial — tudo liberado                                                              |
+| **Zero backend do Samba**      | Catálogo de modelos/templates/update/quota locais. Sem telemetria remota, sem help bot, sem logs enviados. Links de marca → sambatech.com                                       |
+| **Conectores diretos**         | GitHub (device flow nativo) · Supabase (cola o **PAT** `sb_pat_...`) · Neon (cola a **API key**) — sem OAuth de terceiros                                                       |
+| **Córtex no fluxo do agente**  | RAG local (knowledge units + design system + entidades + busca híbrida). O agente **consulta sozinho** o conhecimento do domínio antes de construir — cada cliente vira memória |
+| **Memória por projeto**        | `docs/PROJECT_MEMORY.md`: decisões e preferências registradas pelo agente — o projeto "lembra" entre sessões                                                                    |
+| **Qualidade medida (score)**   | LLM-as-judge local com o **jeito Samba** (bonito, elegante, rápido, inovador, simples, seguro): `npm run samba:score -- <app>` → nota com evidências por dimensão               |
+| **Governança**                 | Modo `single` (livre) ou `governed` (corporativo): ciclo draft → in_review → approved com submit/approve/veto — painel no app + CLI (`gate.py`) + auditoria com hash            |
+| **Design System Toolkit**      | Extrair o design system de um projeto (vars shadcn/tailwind) → salvar como template → aplicar em outro (UI no app + CLI)                                                        |
+| **Auto-evolução**              | Telemetria local de erros → analisador propõe melhorias **com evidência** → aprovação humana → conhecimento vira skill/PR. **Nunca merge silencioso**                           |
+| **MCPs ativos**                | Composio (500+ apps) · Playwright (24 tools) · cua-driver (computer use) · Córtex                                                                                               |
+| **Apps dos clientes limpos**   | Scaffold gerado sem assinatura do Samba ("Made with Samba Builder" → sambatech.com)                                                                                             |
 
 ## Roadmap — pilares "estilo Hermes" (todos implementados)
 
-Ordem lógica: *enxerga → lembra → aprende → se mede → se vigia → só então melhora sozinho*.
+Ordem lógica: _enxerga → lembra → aprende → se mede → se vigia → só então melhora sozinho_.
 
-| Pilar | Entrega |
-|---|---|
-| **P0 — Conhecimento no fluxo** | Córtex consultado automaticamente pelo agente (retrieval antes de tarefas de domínio/design) |
-| **P1 — Memória** | Projeto mantém decisões entre sessões (`PROJECT_MEMORY.md`) |
-| **P2 — Jeito Samba no prompt** | Princípios de qualidade + design via Córtex injetados no agente |
-| **P3 — Auto-evolução governada** | Propostas de melhoria com evidência → aprovação humana via gate |
-| **P4 — Qualidade medida** | Score LLM-as-judge com rubric do jeito Samba |
-| **P5 — Vigilância** | Health check + telemetria local de erros (redige segredos) |
-| **P6 — Conhecimento corporativo** | Conhecimento aprovado espelhado como **PR** no GitHub (merge humano) |
+| Pilar                             | Entrega                                                                                      |
+| --------------------------------- | -------------------------------------------------------------------------------------------- |
+| **P0 — Conhecimento no fluxo**    | Córtex consultado automaticamente pelo agente (retrieval antes de tarefas de domínio/design) |
+| **P1 — Memória**                  | Projeto mantém decisões entre sessões (`PROJECT_MEMORY.md`)                                  |
+| **P2 — Jeito Samba no prompt**    | Princípios de qualidade + design via Córtex injetados no agente                              |
+| **P3 — Auto-evolução governada**  | Propostas de melhoria com evidência → aprovação humana via gate                              |
+| **P4 — Qualidade medida**         | Score LLM-as-judge com rubric do jeito Samba                                                 |
+| **P5 — Vigilância**               | Health check + telemetria local de erros (redige segredos)                                   |
+| **P6 — Conhecimento corporativo** | Conhecimento aprovado espelhado como **PR** no GitHub (merge humano)                         |
 
 ## Próximos passos (fora do código)
 
@@ -63,6 +63,6 @@ Ordem lógica: *enxerga → lembra → aprende → se mede → se vigia → só 
 - **Licença**: core Apache-2.0 · `src/pro/` FSL-1.1-ALv2 (uso interno Samba + serviços a clientes permitidos; não publicar o app empacotado publicamente) · código novo em `samba/`: MIT
 - **Testes**: ~7.8k testes; suíte integrada valida o fluxo BYOK ponta a ponta
 
-*Para o time: o jeito certo de começar é rodar o app (npm install + `npm run dev`),
+_Para o time: o jeito certo de começar é rodar o app (npm install + `npm run dev`),
 conectar a chave DeepSeek em Settings → Providers e pedir um app simples ao agente.
-O resto — Córtex, memória, governança — aparece sozinho no fluxo.*
+O resto — Córtex, memória, governança — aparece sozinho no fluxo._

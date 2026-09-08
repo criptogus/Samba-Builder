@@ -56,7 +56,7 @@ export const SESSION_DEBUG_SCHEMA_VERSION = 4;
 
 const DebugSystemInfoSchema = z.object({
   /** Samba Builder application version (from package.json) */
-  dyadVersion: z.string(),
+  sambaVersion: z.string(),
   /** OS platform: "darwin", "win32", "linux" */
   platform: z.string(),
   /** CPU architecture: "x64", "arm64" */
@@ -89,7 +89,7 @@ const DebugSettingsSchema = z.object({
   /** Whether changes are auto-approved without review */
   autoApproveChanges: z.boolean().nullable(),
   /** Whether Samba Builder is enabled */
-  enableDyadPro: z.boolean().nullable(),
+  enableSambaPro: z.boolean().nullable(),
   /** Model-specific effort level */
   effortLevel: z.string(),
   /** Max chat turns kept in context window */

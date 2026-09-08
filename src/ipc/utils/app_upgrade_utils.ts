@@ -3,7 +3,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { gitAddAll, gitCommit } from "./git_utils";
 import { simpleSpawn } from "./simpleSpawn";
-import { DyadError, DyadErrorKind } from "@/errors/dyad_error";
+import { SambaError, SambaErrorKind } from "@/errors/samba_error";
 import {
   isPnpmIgnoredBuildsError,
   PNPM_PM_ON_FAIL_IGNORE_ARG,
@@ -42,7 +42,7 @@ export function isComponentTaggerUpgradeNeeded(appPath: string): boolean {
     if (!viteConfigContent.includes("plugin-react")) {
       return false;
     }
-    return !viteConfigContent.includes("@dyad-sh/react-vite-component-tagger");
+    return !viteConfigContent.includes("@samba-sh/react-vite-component-tagger");
   } catch (e) {
     logger.error("Error reading vite config", e);
     return false;
@@ -118,9 +118,9 @@ export async function applyComponentTagger(
   const viteConfigPath = findViteConfigPath(appPath);
 
   if (!viteConfigPath) {
-    throw new DyadError(
+    throw new SambaError(
       "Could not find vite.config.js or vite.config.ts",
-      DyadErrorKind.External,
+      SambaErrorKind.External,
     );
   }
 
@@ -132,7 +132,7 @@ export async function applyComponentTagger(
 
   if (
     !content.includes(
-      "import dyadComponentTagger from '@dyad-sh/react-vite-component-tagger';",
+      "import sambaComponentTagger from '@samba-sh/react-vite-component-tagger';",
     )
   ) {
     const lines = content.split("\n");
@@ -146,7 +146,7 @@ export async function applyComponentTagger(
     lines.splice(
       lastImportIndex + 1,
       0,
-      "import dyadComponentTagger from '@dyad-sh/react-vite-component-tagger';",
+      "import sambaComponentTagger from '@samba-sh/react-vite-component-tagger';",
     );
     content = lines.join("\n");
   }
@@ -173,17 +173,17 @@ export async function applyComponentTagger(
   }
 
   if (pluginsIdx !== -1) {
-    if (!content.includes("dyadComponentTagger()")) {
+    if (!content.includes("sambaComponentTagger()")) {
       const bracketIdx = pluginsIdx + matchStr.indexOf("[");
       content =
         content.slice(0, bracketIdx) +
-        "[dyadComponentTagger(), " +
+        "[sambaComponentTagger(), " +
         content.slice(bracketIdx + 1);
     }
   } else {
-    throw new DyadError(
+    throw new SambaError(
       `Could not find 'plugins: [' in ${path.basename(viteConfigPath)}. Manual installation required.`,
-      DyadErrorKind.External,
+      SambaErrorKind.External,
     );
   }
 
@@ -192,7 +192,7 @@ export async function applyComponentTagger(
   if (installDependencies) {
     try {
       await simpleSpawnWithDeniedPnpmBuildSelfHeal({
-        command: `pnpm ${PNPM_PM_ON_FAIL_IGNORE_ARG} add --ignore-workspace-root-check -D @dyad-sh/react-vite-component-tagger`,
+        command: `pnpm ${PNPM_PM_ON_FAIL_IGNORE_ARG} add --ignore-workspace-root-check -D @samba-sh/react-vite-component-tagger`,
         cwd: appPath,
         successMessage:
           "component-tagger dependency installed successfully with pnpm",
@@ -203,7 +203,7 @@ export async function applyComponentTagger(
       try {
         await simpleSpawn({
           command:
-            "npm install --save-dev --legacy-peer-deps @dyad-sh/react-vite-component-tagger",
+            "npm install --save-dev --legacy-peer-deps @samba-sh/react-vite-component-tagger",
           cwd: appPath,
           successMessage:
             "component-tagger dependency installed successfully with npm",
@@ -219,9 +219,9 @@ export async function applyComponentTagger(
         } catch (rollbackErr) {
           logger.error("Failed to rollback vite config changes", rollbackErr);
         }
-        throw new DyadError(
+        throw new SambaError(
           "Failed to install component tagger dependency",
-          DyadErrorKind.Internal,
+          SambaErrorKind.Internal,
         );
       }
     }
@@ -231,10 +231,12 @@ export async function applyComponentTagger(
         await fs.promises.readFile(packageJsonPath, "utf-8"),
       );
       packageJson.devDependencies ??= {};
-      packageJson.devDependencies["@dyad-sh/react-vite-component-tagger"] =
+      packageJson.devDependencies["@samba-sh/react-vite-component-tagger"] =
         COMPONENT_TAGGER_VERSION;
-      if (packageJson.dependencies?.["@dyad-sh/react-vite-component-tagger"]) {
-        delete packageJson.dependencies["@dyad-sh/react-vite-component-tagger"];
+      if (packageJson.dependencies?.["@samba-sh/react-vite-component-tagger"]) {
+        delete packageJson.dependencies[
+          "@samba-sh/react-vite-component-tagger"
+        ];
         if (Object.keys(packageJson.dependencies).length === 0) {
           delete packageJson.dependencies;
         }
@@ -254,9 +256,9 @@ export async function applyComponentTagger(
       } catch (rollbackErr) {
         logger.error("Failed to rollback vite config changes", rollbackErr);
       }
-      throw new DyadError(
+      throw new SambaError(
         `Failed to update package.json for component tagger: ${err instanceof Error ? err.message : String(err)}`,
-        DyadErrorKind.Internal,
+        SambaErrorKind.Internal,
       );
     }
     logger.info("Skipping dependency install for component tagger");

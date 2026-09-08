@@ -1,5 +1,5 @@
 /**
- * Regression tests for https://github.com/dyad-sh/dyad/issues/3837: secrets
+ * Regression tests for https://github.com/samba-sh/samba/issues/3837: secrets
  * encrypted with Electron safeStorage on macOS were becoming unreadable after
  * upgrading from Electron 40 to Electron 43 (and, more generally, whenever a
  * session resolved a different Keychain identity than the one a secret was
@@ -13,10 +13,10 @@
  *   pre-ready.
  * - On Electron 40, a pre-ready safeStorage call silently initializes the
  *   macOS Keychain entry under the default "Chromium Safe Storage" identity
- *   instead of "dyad Safe Storage", and that (wrong) key is cached for the
+ *   instead of "samba Safe Storage", and that (wrong) key is cached for the
  *   rest of the process.
  * - On Electron 43, safeStorage refuses to run pre-ready and post-ready always
- *   uses the proper "dyad Safe Storage" identity — so ciphertext produced under
+ *   uses the proper "samba Safe Storage" identity — so ciphertext produced under
  *   the Chromium identity could never be decrypted again after the upgrade, and
  *   the old code then DROPPED the undecryptable secret (GitHub disconnected,
  *   provider API keys gone).
@@ -29,17 +29,17 @@
  *   settings writes, so it stays recoverable.
  * - Layer 1 (legacy keychain recovery): when safeStorage decrypt fails on
  *   darwin, the app reads the Keychain passwords of BOTH legacy identities via
- *   the `security` CLI ("dyad Safe Storage"/"dyad" and
+ *   the `security` CLI ("samba Safe Storage"/"samba" and
  *   "Chromium Safe Storage"/"Chromium"), derives the Chromium os_crypt key
  *   (PBKDF2-HMAC-SHA1, salt "saltysalt", 1003 iterations, 16 bytes ->
  *   AES-128-CBC, IV = 16 spaces, "v10" prefix) and decrypts. A secret encrypted
  *   under one identity is then transparently recovered in a session that
- *   resolved the other. Kill switch: DYAD_DISABLE_SAFE_STORAGE_RECOVERY=1.
+ *   resolved the other. Kill switch: SAMBA_DISABLE_SAFE_STORAGE_RECOVERY=1.
  *
  * These tests are opt-in because they must swap the user's DEFAULT macOS
  * keychain to a temporary one for the duration of the run (safeStorage always
  * uses the default keychain; using the real login keychain would pollute it
- * with "Chromium Safe Storage"/"dyad Safe Storage" entries shared with real
+ * with "Chromium Safe Storage"/"samba Safe Storage" entries shared with real
  * apps). If the run is killed hard mid-test, restore manually with:
  *
  *   security default-keychain -s ~/Library/Keychains/login.keychain-db
@@ -48,7 +48,7 @@
  * Usage (the regression tests need only the normal e2e build in out/):
  *
  *   npm run pre:e2e
- *   DYAD_E2E_SAFE_STORAGE=1 npx playwright test \
+ *   SAMBA_E2E_SAFE_STORAGE=1 npx playwright test \
  *     e2e-tests/safe_storage_keychain_identity.spec.ts --workers=1
  *
  * The two-build upgrade test additionally needs a build of the app at the
@@ -58,8 +58,8 @@
  * PREDATES this fix, so it still exhibits the old dropping behavior (see the
  * test's own comments). Point at its packaged output:
  *
- *   DYAD_E2E_SAFE_STORAGE=1 \
- *   DYAD_E2E_SAFE_STORAGE_UPGRADE_BUILD=/path/to/e43/out/dyad-darwin-arm64 \
+ *   SAMBA_E2E_SAFE_STORAGE=1 \
+ *   SAMBA_E2E_SAFE_STORAGE_UPGRADE_BUILD=/path/to/e43/out/samba-darwin-arm64 \
  *   npx playwright test e2e-tests/safe_storage_keychain_identity.spec.ts --workers=1
  */
 
@@ -72,20 +72,20 @@ import path from "path";
 import { ElectronApplication, _electron as electron } from "playwright";
 
 const ENABLED =
-  process.platform === "darwin" && process.env.DYAD_E2E_SAFE_STORAGE === "1";
+  process.platform === "darwin" && process.env.SAMBA_E2E_SAFE_STORAGE === "1";
 
-const UPGRADE_BUILD_DIR = process.env.DYAD_E2E_SAFE_STORAGE_UPGRADE_BUILD;
+const UPGRADE_BUILD_DIR = process.env.SAMBA_E2E_SAFE_STORAGE_UPGRADE_BUILD;
 
 // Keychain service names created by Chromium's os_crypt on macOS. The service
 // is "<product name> Safe Storage"; pre-ready initialization on Electron 40
 // runs before the app name is applied, so it falls back to "Chromium".
-const DYAD_SERVICE = "dyad Safe Storage";
+const SAMBA_SERVICE = "samba Safe Storage";
 const CHROMIUM_SERVICE = "Chromium Safe Storage";
 
-const KEYCHAIN_PASSWORD = "dyad-e2e-safe-storage";
+const KEYCHAIN_PASSWORD = "samba-e2e-safe-storage";
 const TEMP_KEYCHAIN = path.join(
   os.tmpdir(),
-  `dyad-e2e-safe-storage-${process.pid}.keychain-db`,
+  `samba-e2e-safe-storage-${process.pid}.keychain-db`,
 );
 
 let originalDefaultKeychain: string | null = null;
@@ -137,7 +137,7 @@ function freshTempKeychain(): void {
   // prompt), which is what makes the fallback exercisable in this environment.
   for (const [service, account, password] of [
     [CHROMIUM_SERVICE, "Chromium Key", "e2e-chromium-identity-key"],
-    [DYAD_SERVICE, "dyad Key", "e2e-dyad-identity-key"],
+    [SAMBA_SERVICE, "samba Key", "e2e-samba-identity-key"],
   ]) {
     security([
       "add-generic-password",
@@ -167,7 +167,7 @@ function restoreOriginalKeychains(): void {
   }
 }
 
-async function launchDyad({
+async function launchSamba({
   userDataDir,
   buildDir,
 }: {
@@ -191,12 +191,12 @@ async function launchDyad({
     await electronApp.firstWindow();
     return electronApp;
   } catch (error) {
-    await closeDyad(electronApp);
+    await closeSamba(electronApp);
     throw error;
   }
 }
 
-async function closeDyad(electronApp: ElectronApplication): Promise<void> {
+async function closeSamba(electronApp: ElectronApplication): Promise<void> {
   launchedApps.delete(electronApp);
   const child = electronApp.process();
   try {
@@ -285,7 +285,7 @@ function writeGithubTokenCiphertext(
 function makeUserDataDir(label: string): string {
   const dir = path.join(
     os.tmpdir(),
-    `dyad-e2e-safe-storage-${label}-${Date.now()}`,
+    `samba-e2e-safe-storage-${label}-${Date.now()}`,
   );
   fs.mkdirSync(dir, { recursive: true });
   return dir;
@@ -301,7 +301,7 @@ const UNDECRYPTABLE_CIPHERTEXT = Buffer.concat([
 test.describe("safeStorage keychain identity (issue #3837)", () => {
   test.skip(
     !ENABLED,
-    "Opt-in: requires macOS and DYAD_E2E_SAFE_STORAGE=1 (temporarily swaps the default keychain)",
+    "Opt-in: requires macOS and SAMBA_E2E_SAFE_STORAGE=1 (temporarily swaps the default keychain)",
   );
 
   test.beforeAll(() => {
@@ -321,7 +321,7 @@ test.describe("safeStorage keychain identity (issue #3837)", () => {
 
   test.afterEach(async () => {
     await Promise.all(
-      [...launchedApps].map((electronApp) => closeDyad(electronApp)),
+      [...launchedApps].map((electronApp) => closeSamba(electronApp)),
     );
   });
 
@@ -337,11 +337,11 @@ test.describe("safeStorage keychain identity (issue #3837)", () => {
 
     // Session 1: fresh profile, no secrets on disk. Nothing touches
     // safeStorage before app.ready, so the first touch (our encrypt) creates
-    // the Keychain entry under the proper "dyad Safe Storage" identity.
-    const session1 = await launchDyad({ userDataDir });
+    // the Keychain entry under the proper "samba Safe Storage" identity.
+    const session1 = await launchSamba({ userDataDir });
     const ciphertext = await encryptViaApp(session1, token);
     expect(await decryptViaApp(session1, ciphertext)).toBe(token);
-    await closeDyad(session1);
+    await closeSamba(session1);
 
     // Persist the secret the way writeSettings() would in a real
     // (non-test-build) session.
@@ -350,11 +350,11 @@ test.describe("safeStorage keychain identity (issue #3837)", () => {
     // Session 2: the settings file now contains an encrypted secret, so the
     // module-scope reconcileCloudSandboxes() -> readSettings() call decrypts
     // BEFORE app.ready. That pre-ready race silently resolves the "Chromium
-    // Safe Storage" identity, which cannot decrypt the dyad-identity ciphertext
+    // Safe Storage" identity, which cannot decrypt the samba-identity ciphertext
     // from session 1. This race is deliberately left unfixed; the fix instead
     // makes the secret survive it.
     freshTempKeychain();
-    const session2 = await launchDyad({ userDataDir });
+    const session2 = await launchSamba({ userDataDir });
 
     // The identity flip still happens: os_crypt on macOS is deterministic
     // (fixed IV), so the same plaintext encrypted by the same build must yield
@@ -377,16 +377,16 @@ test.describe("safeStorage keychain identity (issue #3837)", () => {
     const settings = await readSettingsViaIpc(session2);
     expect(settings.githubAccessToken?.value).toBe(token);
 
-    await closeDyad(session2);
+    await closeSamba(session2);
 
     // Session 3: a completely fresh keychain over the same profile. Guards
     // against the recovery in session 2 having corrupted the stored value — the
     // token must still be readable via IPC.
     freshTempKeychain();
-    const session3 = await launchDyad({ userDataDir });
+    const session3 = await launchSamba({ userDataDir });
     const settings3 = await readSettingsViaIpc(session3);
     expect(settings3.githubAccessToken?.value).toBe(token);
-    await closeDyad(session3);
+    await closeSamba(session3);
   });
 
   test("Layer 0: an undecryptable secret is locked but preserved verbatim across writes", async () => {
@@ -400,7 +400,7 @@ test.describe("safeStorage keychain identity (issue #3837)", () => {
 
     // Session 1: launch, then force a real settings write through the app by
     // flipping a harmless boolean that does NOT touch githubAccessToken.
-    const session1 = await launchDyad({ userDataDir });
+    const session1 = await launchSamba({ userDataDir });
     await writeSettingsViaIpc(session1, {
       hidePnpmMinimumReleaseAgeWarning: true,
     });
@@ -411,7 +411,7 @@ test.describe("safeStorage keychain identity (issue #3837)", () => {
     expect(settings1.githubAccessToken).toBeFalsy();
     // Sanity: the harmless write did land in the app's view.
     expect(settings1.hidePnpmMinimumReleaseAgeWarning).toBe(true);
-    await closeDyad(session1);
+    await closeSamba(session1);
 
     // Preservation crux: even though a settings write happened (proven by the
     // harmless field), the undecryptable ciphertext is still on disk EXACTLY as
@@ -428,13 +428,13 @@ test.describe("safeStorage keychain identity (issue #3837)", () => {
     // preserved-but-unreadable secret. In a test build encrypt() stores
     // plaintext, so the fresh value lands verbatim.
     freshTempKeychain();
-    const session2 = await launchDyad({ userDataDir });
+    const session2 = await launchSamba({ userDataDir });
     await writeSettingsViaIpc(session2, {
       githubAccessToken: { value: "fresh-token", encryptionType: "plaintext" },
     });
     const settings2 = await readSettingsViaIpc(session2);
     expect(settings2.githubAccessToken?.value).toBe("fresh-token");
-    await closeDyad(session2);
+    await closeSamba(session2);
 
     const afterReplace = readSettingsFileRaw(userDataDir);
     expect(afterReplace.githubAccessToken?.value).toBe("fresh-token");
@@ -446,13 +446,13 @@ test.describe("safeStorage keychain identity (issue #3837)", () => {
   test("Electron 40 -> 43 upgrade: pre-fix build still drops steady-state secrets (#3837)", async () => {
     test.skip(
       !UPGRADE_BUILD_DIR,
-      "Set DYAD_E2E_SAFE_STORAGE_UPGRADE_BUILD to a packaged build dir (e.g. out/dyad-darwin-arm64) built at the Electron 43 commit (parent of revert d24360e8)",
+      "Set SAMBA_E2E_SAFE_STORAGE_UPGRADE_BUILD to a packaged build dir (e.g. out/samba-darwin-arm64) built at the Electron 43 commit (parent of revert d24360e8)",
     );
     test.setTimeout(240_000);
     const userDataDir = makeUserDataDir("upgrade");
     const token = "gh_e2e_upgrade_secret";
 
-    // NOTE: the upgrade build (DYAD_E2E_SAFE_STORAGE_UPGRADE_BUILD) is built at
+    // NOTE: the upgrade build (SAMBA_E2E_SAFE_STORAGE_UPGRADE_BUILD) is built at
     // the Electron 43 commit that PREDATES this fix, so it still exhibits the
     // old dropping behavior — hence session 3 below asserts the secret is lost.
     // Once the Electron 43 re-land (which will carry this fix) provides the
@@ -468,9 +468,9 @@ test.describe("safeStorage keychain identity (issue #3837)", () => {
 
     // Session 1 (Electron 40): encrypt the real token. Because this session was
     // poisoned pre-ready, the ciphertext is bound to the Chromium identity.
-    const session1 = await launchDyad({ userDataDir });
+    const session1 = await launchSamba({ userDataDir });
     const ciphertext = await encryptViaApp(session1, token);
-    await closeDyad(session1);
+    await closeSamba(session1);
     writeGithubTokenCiphertext(userDataDir, ciphertext);
 
     // Session 2 (Electron 40 control): restarts on the same Electron major keep
@@ -478,11 +478,11 @@ test.describe("safeStorage keychain identity (issue #3837)", () => {
     // raw safeStorage still decrypts the ciphertext. This is why the bug stays
     // invisible until the Electron upgrade.
     freshTempKeychain();
-    const session2 = await launchDyad({ userDataDir });
+    const session2 = await launchSamba({ userDataDir });
     expect(await decryptViaApp(session2, ciphertext)).toBe(token);
     const settingsOn40 = await readSettingsViaIpc(session2);
     expect(settingsOn40.githubAccessToken?.value).toBe(token);
-    await closeDyad(session2);
+    await closeSamba(session2);
 
     // Session 2 may have rewritten the settings file, and test builds store
     // secrets as plaintext on write (encrypt() checks IS_TEST_BUILD). A real
@@ -492,12 +492,12 @@ test.describe("safeStorage keychain identity (issue #3837)", () => {
     writeGithubTokenCiphertext(userDataDir, ciphertext);
 
     // Session 3 (Electron 43, pre-fix build): safeStorage now refuses pre-ready
-    // use and post-ready always uses the proper "dyad Safe Storage" identity, so
+    // use and post-ready always uses the proper "samba Safe Storage" identity, so
     // the Chromium-identity ciphertext is permanently unreadable — and because
     // this build predates the fix, it has neither Layer 0 preservation nor
     // Layer 1 recovery.
     freshTempKeychain();
-    const session3 = await launchDyad({
+    const session3 = await launchSamba({
       userDataDir,
       buildDir: UPGRADE_BUILD_DIR,
     });
@@ -511,6 +511,6 @@ test.describe("safeStorage keychain identity (issue #3837)", () => {
     const settingsOn43 = await readSettingsViaIpc(session3);
     expect(settingsOn43.githubAccessToken).toBeFalsy();
 
-    await closeDyad(session3);
+    await closeSamba(session3);
   });
 });

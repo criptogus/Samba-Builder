@@ -5,9 +5,9 @@ import { getHomeDefaultChatMode } from "./homeChatMode";
 describe("getHomeDefaultChatMode", () => {
   it("uses local agent after Samba Builder setup", () => {
     const settings = {
-      enableDyadPro: true,
+      enableSambaPro: true,
       enableAutoUpdate: true,
-      providerSettings: { auto: { apiKey: { value: "dyad-pro-key" } } },
+      providerSettings: { auto: { apiKey: { value: "samba-pro-key" } } },
       releaseChannel: "stable",
       selectedModel: { provider: "auto", name: "auto" },
       selectedTemplateId: "react",
@@ -19,7 +19,7 @@ describe("getHomeDefaultChatMode", () => {
   it("preserves a Basic Agent default for free users", () => {
     const settings = {
       defaultChatMode: "local-agent",
-      enableDyadPro: false,
+      enableSambaPro: false,
       enableAutoUpdate: true,
       providerSettings: {},
       releaseChannel: "stable",

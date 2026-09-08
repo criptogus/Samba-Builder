@@ -44,9 +44,9 @@ export const addIntegrationTool: ToolDefinition<
     // terminal outcome is appended after settlement; the renderer hides this
     // pending card once its request is no longer live.
     if (args.provider && args.provider !== "none") {
-      return `<dyad-add-integration provider="${escapeXmlAttr(args.provider)}" outcome="pending"></dyad-add-integration>`;
+      return `<samba-add-integration provider="${escapeXmlAttr(args.provider)}" outcome="pending"></samba-add-integration>`;
     }
-    return `<dyad-add-integration outcome="pending"></dyad-add-integration>`;
+    return `<samba-add-integration outcome="pending"></samba-add-integration>`;
   },
 
   execute: async (args, ctx: AgentContext) => {
@@ -85,7 +85,7 @@ export const addIntegrationTool: ToolDefinition<
       (result.completed && !result.provider)
     ) {
       ctx.onXmlComplete(
-        `<dyad-add-integration outcome="dismissed"></dyad-add-integration>`,
+        `<samba-add-integration outcome="dismissed"></samba-add-integration>`,
       );
       return "The user dismissed the integration setup without completing it. Ask them how they'd like to proceed.";
     }
@@ -115,18 +115,18 @@ export const addIntegrationTool: ToolDefinition<
         : "";
     if (!result.completed && result.provider === null) {
       ctx.onXmlComplete(
-        `<dyad-add-integration outcome="skipped"></dyad-add-integration>`,
+        `<samba-add-integration outcome="skipped"></samba-add-integration>`,
       );
       return `The user skipped the integration setup.${mutationNote} Continue the original task without Supabase or Neon, and do not prompt for a database integration again in this continuation.`;
     }
     if (!result.completed || !result.provider) {
       ctx.onXmlComplete(
-        `<dyad-add-integration outcome="dismissed"></dyad-add-integration>`,
+        `<samba-add-integration outcome="dismissed"></samba-add-integration>`,
       );
       return "The user dismissed the integration setup without completing it. Ask them how they'd like to proceed.";
     }
     ctx.onXmlComplete(
-      `<dyad-add-integration provider="${escapeXmlAttr(result.provider)}" outcome="completed"></dyad-add-integration>`,
+      `<samba-add-integration provider="${escapeXmlAttr(result.provider)}" outcome="completed"></samba-add-integration>`,
     );
     return `User completed the ${result.provider} integration.${mutationNote} You can now continue with the next step.`;
   },

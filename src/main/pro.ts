@@ -1,6 +1,6 @@
 import { readSettings, writeSettings } from "./settings";
 
-export function handleDyadProReturn({ apiKey }: { apiKey: string }) {
+export function handleSambaProReturn({ apiKey }: { apiKey: string }) {
   const settings = readSettings();
   writeSettings({
     providerSettings: {
@@ -16,7 +16,7 @@ export function handleDyadProReturn({ apiKey }: { apiKey: string }) {
         },
       },
     },
-    enableDyadPro: true,
+    enableSambaPro: true,
     // Switch to local-agent mode and auto model for a good default experience
     selectedChatMode: "local-agent",
     selectedModel: {

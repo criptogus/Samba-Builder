@@ -8,7 +8,7 @@ import React, {
 import { useAtom, useAtomValue, useSetAtom } from "jotai";
 import { Button } from "@/components/ui/button";
 import { AlertCircle, Check, FileText } from "lucide-react";
-import { VanillaMarkdownParser } from "@/components/chat/DyadMarkdownParser";
+import { VanillaMarkdownParser } from "@/components/chat/SambaMarkdownParser";
 import {
   clearPlanAnnotations,
   planAcceptInNewChatByChatIdAtom,

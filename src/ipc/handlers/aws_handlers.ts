@@ -2,8 +2,8 @@ import { assertDeliveryReadyForPublish } from "../services/delivery_readiness";
 import { eq } from "drizzle-orm";
 import { db } from "@/db";
 import { apps } from "@/db/schema";
-import { getDyadAppPath } from "@/paths/paths";
-import { DyadError, DyadErrorKind } from "@/errors/dyad_error";
+import { getSambaAppPath } from "@/paths/paths";
+import { SambaError, SambaErrorKind } from "@/errors/samba_error";
 import { awsContracts } from "../types/aws";
 import { createTypedHandler } from "./base";
 import { appOperationCoordinator } from "../services/app_operation_coordinator";
@@ -18,8 +18,8 @@ import { cloudCommand } from "../services/cloud/aws_cli";
 async function rootFor(appId: number) {
   const app = await db.query.apps.findFirst({ where: eq(apps.id, appId) });
   if (!app)
-    throw new DyadError("Projeto não encontrado.", DyadErrorKind.NotFound);
-  return getDyadAppPath(app.path);
+    throw new SambaError("Projeto não encontrado.", SambaErrorKind.NotFound);
+  return getSambaAppPath(app.path);
 }
 export function registerAwsHandlers() {
   createTypedHandler(awsContracts.status, async (_, { appId }) => {

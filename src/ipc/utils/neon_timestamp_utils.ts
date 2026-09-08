@@ -1,13 +1,13 @@
 import { db } from "../../db";
 import { versions, apps } from "../../db/schema";
 import { eq, and } from "drizzle-orm";
-import { getDyadAppPath } from "../../paths/paths";
+import { getSambaAppPath } from "../../paths/paths";
 import { neon } from "@neondatabase/serverless";
 
 import log from "electron-log";
 import { getConnectionUri } from "@/neon_admin/neon_context";
 import { getCurrentCommitHash } from "./git_utils";
-import { DyadError, DyadErrorKind } from "@/errors/dyad_error";
+import { SambaError, SambaErrorKind } from "@/errors/samba_error";
 
 const logger = log.scope("neon_timestamp_utils");
 
@@ -29,9 +29,9 @@ async function getLastUpdatedTimestampFromNeon({
     return current_timestamp;
   } catch (error) {
     logger.error("Error retrieving timestamp from Neon:", error);
-    throw new DyadError(
+    throw new SambaError(
       `Failed to retrieve timestamp from Neon: ${error}`,
-      DyadErrorKind.External,
+      SambaErrorKind.External,
     );
   }
 }
@@ -56,22 +56,22 @@ export async function storeDbTimestampAtCurrentVersion({
     });
 
     if (!app) {
-      throw new DyadError(
+      throw new SambaError(
         `App with ID ${appId} not found`,
-        DyadErrorKind.NotFound,
+        SambaErrorKind.NotFound,
       );
     }
 
     const branchId = app.neonActiveBranchId ?? app.neonDevelopmentBranchId;
     if (!app.neonProjectId || !branchId) {
-      throw new DyadError(
+      throw new SambaError(
         `App with ID ${appId} has no Neon project or branch`,
-        DyadErrorKind.External,
+        SambaErrorKind.External,
       );
     }
 
     // 2. Get the current commit hash
-    const appPath = getDyadAppPath(app.path);
+    const appPath = getSambaAppPath(app.path);
     const currentCommitHash = await getCurrentCommitHash({ path: appPath });
 
     logger.info(`Current commit hash: ${currentCommitHash}`);

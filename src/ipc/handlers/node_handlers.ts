@@ -12,7 +12,7 @@ import { createTypedHandler } from "./base";
 import { registerTrustedIpcHandler } from "./trusted_handle";
 import { systemContracts } from "../types/system";
 import { IS_TEST_BUILD } from "../utils/test_utils";
-import { DyadError, DyadErrorKind } from "@/errors/dyad_error";
+import { SambaError, SambaErrorKind } from "@/errors/samba_error";
 import { safeSend } from "@/ipc/utils/safe_sender";
 import { getPathEnvKey } from "@/ipc/utils/path_env";
 import {
@@ -125,7 +125,7 @@ async function installManagedPnpm(): Promise<string> {
   if (!existsSync(managedPackageJsonPath)) {
     await fs.writeFile(
       managedPackageJsonPath,
-      `${JSON.stringify({ name: "dyad-managed-pnpm", private: true }, null, 2)}\n`,
+      `${JSON.stringify({ name: "samba-managed-pnpm", private: true }, null, 2)}\n`,
     );
   }
   // Install via cwd instead of a --prefix argument: on Windows, absolute
@@ -182,14 +182,14 @@ function scheduleManagedPnpmInstall(currentPnpmVersion: string | null): void {
   // `nodejs-status` query; the flag lets them opt out of the side effect. It
   // only skips the *implicit* convenience install — an explicit `installPnpm`
   // handler call is unaffected. Gated to test environments (like the other
-  // DYAD_TEST_* escapes) so a stray env var can't disable the install in a
+  // SAMBA_TEST_* escapes) so a stray env var can't disable the install in a
   // shipped build, and logged so a skip is never silent.
   if (
     (IS_TEST_BUILD || process.env.VITEST) &&
-    process.env.DYAD_SKIP_MANAGED_PNPM_INSTALL === "true"
+    process.env.SAMBA_SKIP_MANAGED_PNPM_INSTALL === "true"
   ) {
     logger.info(
-      "Skipping implicit Samba Builder-managed pnpm install (DYAD_SKIP_MANAGED_PNPM_INSTALL).",
+      "Skipping implicit Samba Builder-managed pnpm install (SAMBA_SKIP_MANAGED_PNPM_INSTALL).",
     );
     return;
   }
@@ -471,7 +471,7 @@ export function registerNodeHandlers() {
     );
 
     const nodeDownloadUrl = getNodeDownloadUrl();
-    const devNodejsStatus = process.env.DYAD_DEV_NODEJS_STATUS;
+    const devNodejsStatus = process.env.SAMBA_DEV_NODEJS_STATUS;
 
     if (process.env.NODE_ENV === "development" && devNodejsStatus) {
       logger.log("Using dev Node.js status override:", devNodejsStatus);
@@ -523,7 +523,7 @@ export function registerNodeHandlers() {
         if (managedNodeInstalled && managedNodeVersion) {
           return {
             nodeVersion: managedNodeVersion,
-            pnpmVersion: process.env.DYAD_TEST_PNPM_VERSION ?? null,
+            pnpmVersion: process.env.SAMBA_TEST_PNPM_VERSION ?? null,
             nodeDownloadUrl,
             source: "managed" as const,
             nodePath: getManagedNodeBinaryPath(),
@@ -568,8 +568,8 @@ export function registerNodeHandlers() {
       return { nodeVersion };
     } catch (error) {
       if (
-        error instanceof DyadError &&
-        error.kind === DyadErrorKind.UserCancelled
+        error instanceof SambaError &&
+        error.kind === SambaErrorKind.UserCancelled
       ) {
         sendTelemetryEvent("managed_node_install", { status: "cancelled" });
         throw error;
@@ -598,10 +598,10 @@ export function registerNodeHandlers() {
   createTypedHandler(systemContracts.installPnpm, async () => {
     try {
       const testInstallPnpmVersion = IS_TEST_BUILD
-        ? process.env.DYAD_TEST_INSTALL_PNPM_VERSION
+        ? process.env.SAMBA_TEST_INSTALL_PNPM_VERSION
         : undefined;
       if (testInstallPnpmVersion) {
-        process.env.DYAD_TEST_PNPM_VERSION = testInstallPnpmVersion;
+        process.env.SAMBA_TEST_PNPM_VERSION = testInstallPnpmVersion;
         await reloadNodePath();
         return { pnpmVersion: testInstallPnpmVersion };
       }
@@ -617,9 +617,9 @@ export function registerNodeHandlers() {
       }
 
       const reason = formatInstallFailureReason(error);
-      throw new DyadError(
+      throw new SambaError(
         `Could not install pnpm because of ${reason}`,
-        DyadErrorKind.Precondition,
+        SambaErrorKind.Precondition,
       );
     }
   });

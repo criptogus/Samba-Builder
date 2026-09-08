@@ -7,21 +7,21 @@ import type {
 
 import type { UserSettings } from "../../lib/schemas";
 import {
-  createDyadEngine,
-  transcribeWithDyadEngine,
+  createSambaEngine,
+  transcribeWithSambaEngine,
 } from "./llm_engine_provider";
 
-describe("createDyadEngine", () => {
+describe("createSambaEngine", () => {
   test("uses Anthropic messages API for Anthropic engine models", async () => {
     const requests: Array<{
       input: RequestInfo | URL;
       init?: RequestInit;
     }> = [];
 
-    const provider = createDyadEngine({
-      apiKey: "dyad-pro-key",
+    const provider = createSambaEngine({
+      apiKey: "samba-pro-key",
       baseURL: "https://engine.example.test/v1",
-      dyadOptions: {
+      sambaOptions: {
         enableLazyEdits: true,
         enableSmartFilesContext: true,
         enableWebSearch: false,
@@ -65,10 +65,10 @@ describe("createDyadEngine", () => {
         { role: "user", content: [{ type: "text", text: "Hello" }] },
       ],
       providerOptions: {
-        "dyad-engine": {
-          dyadAppId: 42,
-          dyadRequestId: "request-1",
-          dyadFiles: [{ path: "src/App.tsx", content: "export {}" }],
+        "samba-engine": {
+          sambaAppId: 42,
+          sambaRequestId: "request-1",
+          sambaFiles: [{ path: "src/App.tsx", content: "export {}" }],
         },
       },
     } satisfies LanguageModelV3CallOptions);
@@ -79,7 +79,7 @@ describe("createDyadEngine", () => {
       "https://engine.example.test/v1/messages",
     );
     expect(request.init?.headers).toMatchObject({
-      authorization: "Bearer dyad-pro-key",
+      authorization: "Bearer samba-pro-key",
       "X-Samba Builder-Request-Id": "request-1:attempt-1",
     });
 
@@ -90,7 +90,7 @@ describe("createDyadEngine", () => {
       system: [{ type: "text", text: "You are concise." }],
       thinking: { type: "adaptive", display: "summarized" },
       output_config: { effort: "medium" },
-      dyad_options: {
+      samba_options: {
         app_id: 42,
         enable_lazy_edits: true,
         enable_smart_files_context: true,
@@ -98,9 +98,9 @@ describe("createDyadEngine", () => {
         files: [{ path: "src/App.tsx", content: "export {}" }],
       },
     });
-    expect(body).not.toHaveProperty("dyadAppId");
-    expect(body).not.toHaveProperty("dyadRequestId");
-    expect(body).not.toHaveProperty("dyadFiles");
+    expect(body).not.toHaveProperty("sambaAppId");
+    expect(body).not.toHaveProperty("sambaRequestId");
+    expect(body).not.toHaveProperty("sambaFiles");
     expect(body).not.toHaveProperty("reasoning_effort");
   });
 
@@ -110,14 +110,14 @@ describe("createDyadEngine", () => {
       init?: RequestInit;
     }> = [];
 
-    const provider = createDyadEngine({
-      apiKey: "dyad-pro-key",
+    const provider = createSambaEngine({
+      apiKey: "samba-pro-key",
       baseURL: "https://engine.example.test/v1",
       queryParams: {
         feature: "anthropic-direct",
         source: "test",
       },
-      dyadOptions: {},
+      sambaOptions: {},
       settings: {} as UserSettings,
       fetch: async (input, init) => {
         requests.push({ input, init });
@@ -164,10 +164,10 @@ describe("createDyadEngine", () => {
       init?: RequestInit;
     }> = [];
 
-    const provider = createDyadEngine({
-      apiKey: "dyad-pro-key",
+    const provider = createSambaEngine({
+      apiKey: "samba-pro-key",
       baseURL: "https://engine.example.test/v1",
-      dyadOptions: {},
+      sambaOptions: {},
       settings: {} as UserSettings,
       fetch: async (input, init) => {
         requests.push({ input, init });
@@ -205,8 +205,8 @@ describe("createDyadEngine", () => {
     await model.doGenerate({
       prompt: [{ role: "user", content: [{ type: "text", text: "Hello" }] }],
       providerOptions: {
-        "dyad-engine": {
-          dyadRequestId: "visible-turn-1",
+        "samba-engine": {
+          sambaRequestId: "visible-turn-1",
         },
       },
     } satisfies LanguageModelV3CallOptions);
@@ -222,18 +222,18 @@ describe("createDyadEngine", () => {
   });
 });
 
-describe("transcribeWithDyadEngine", () => {
+describe("transcribeWithSambaEngine", () => {
   test("uses the Samba Builder transcription model alias", async () => {
     let request: { input: RequestInfo | URL; init?: RequestInit } | undefined;
 
-    const text = await transcribeWithDyadEngine(
+    const text = await transcribeWithSambaEngine(
       Buffer.from("audio"),
       "recording.webm",
       "request-1",
       {
-        apiKey: "dyad-pro-key",
+        apiKey: "samba-pro-key",
         baseURL: "https://engine.example.test/v1",
-        dyadOptions: {},
+        sambaOptions: {},
         settings: {} as UserSettings,
         fetch: async (input, init) => {
           request = { input, init };
@@ -247,6 +247,6 @@ describe("transcribeWithDyadEngine", () => {
       "https://engine.example.test/v1/audio/transcriptions",
     );
     const formData = request?.init?.body as FormData;
-    expect(formData.get("model")).toBe("dyad/transcribe");
+    expect(formData.get("model")).toBe("samba/transcribe");
   });
 });

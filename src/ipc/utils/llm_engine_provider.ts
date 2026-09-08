@@ -8,10 +8,10 @@ import {
 } from "@ai-sdk/provider-utils";
 
 import log from "electron-log";
-import { DyadError, DyadErrorKind } from "@/errors/dyad_error";
+import { SambaError, SambaErrorKind } from "@/errors/samba_error";
 import { getExtraProviderOptionsForEngine } from "./thinking_utils";
 import { getTestFetchOption } from "./test_fetch_override";
-import { DYAD_INTERNAL_REQUEST_ID_HEADER } from "./provider_options";
+import { SAMBA_INTERNAL_REQUEST_ID_HEADER } from "./provider_options";
 import type { ModelSelection, UserSettings } from "../../lib/schemas";
 import type { LanguageModel } from "ai";
 import {
@@ -27,7 +27,7 @@ export interface ChatParams {
   providerId: string;
 }
 
-type DyadEngineProviderOptions = Record<string, any>;
+type SambaEngineProviderOptions = Record<string, any>;
 
 export interface ExampleProviderSettings {
   /**
@@ -52,7 +52,7 @@ or to provide a custom fetch implementation for e.g. testing.
 */
   fetch?: FetchFunction;
 
-  dyadOptions: {
+  sambaOptions: {
     enableLazyEdits?: boolean;
     enableSmartFilesContext?: boolean;
     enableWebSearch?: boolean;
@@ -61,7 +61,7 @@ or to provide a custom fetch implementation for e.g. testing.
   modelSelection?: ModelSelection;
 }
 
-export interface DyadEngineProvider {
+export interface SambaEngineProvider {
   /**
 Creates a model for text generation.
 */
@@ -82,9 +82,9 @@ Creates a chat model for text generation.
   anthropic(modelId: ExampleChatModelId, chatParams: ChatParams): LanguageModel;
 }
 
-export function createDyadEngine(
+export function createSambaEngine(
   options: ExampleProviderSettings,
-): DyadEngineProvider {
+): SambaEngineProvider {
   const modelSelection =
     options.modelSelection ??
     ({
@@ -92,13 +92,13 @@ export function createDyadEngine(
       effortLevel: "medium",
     } satisfies ModelSelection);
   const baseURL = withoutTrailingSlash(options.baseURL);
-  logger.debug("creating dyad engine with baseURL", baseURL);
+  logger.debug("creating samba engine with baseURL", baseURL);
 
   // Track request ID attempts
   const requestIdAttempts = new Map<string, number>();
 
   const getHeaders = () => ({
-    Authorization: `Bearer ${getDyadEngineApiKey(options.apiKey)}`,
+    Authorization: `Bearer ${getSambaEngineApiKey(options.apiKey)}`,
     ...options.headers,
   });
 
@@ -110,7 +110,7 @@ export function createDyadEngine(
   }
 
   const getCommonModelConfig = (pathPrefix = ""): CommonModelConfig => ({
-    provider: `dyad-engine`,
+    provider: `samba-engine`,
     url: ({ path }) => {
       const url = new URL(`${baseURL}${pathPrefix}${path}`);
       if (options.queryParams) {
@@ -147,16 +147,16 @@ export function createDyadEngine(
     return input;
   };
 
-  // Custom fetch implementation that adds dyad-specific options to the request
-  const createDyadFetch = ({
+  // Custom fetch implementation that adds samba-specific options to the request
+  const createSambaFetch = ({
     providerId,
-    dyadProviderOptions,
-    disableDyadOptions = false,
+    sambaProviderOptions,
+    disableSambaOptions = false,
     includeFreeQuotaKey = false,
   }: {
     providerId: string;
-    dyadProviderOptions?: DyadEngineProviderOptions;
-    disableDyadOptions?: boolean;
+    sambaProviderOptions?: SambaEngineProviderOptions;
+    disableSambaOptions?: boolean;
     includeFreeQuotaKey?: boolean;
   }): FetchFunction => {
     return (input: RequestInfo | URL, init?: RequestInit) => {
@@ -178,44 +178,44 @@ export function createDyadEngine(
           ),
         };
 
-        const getDyadOption = (key: string) =>
-          key in parsedBody ? parsedBody[key] : dyadProviderOptions?.[key];
+        const getSambaOption = (key: string) =>
+          key in parsedBody ? parsedBody[key] : sambaProviderOptions?.[key];
 
-        const dyadVersionedFiles = getDyadOption("dyadVersionedFiles");
-        if ("dyadVersionedFiles" in parsedBody) {
-          delete parsedBody.dyadVersionedFiles;
+        const sambaVersionedFiles = getSambaOption("sambaVersionedFiles");
+        if ("sambaVersionedFiles" in parsedBody) {
+          delete parsedBody.sambaVersionedFiles;
         }
-        const dyadFiles = getDyadOption("dyadFiles");
-        if ("dyadFiles" in parsedBody) {
-          delete parsedBody.dyadFiles;
+        const sambaFiles = getSambaOption("sambaFiles");
+        if ("sambaFiles" in parsedBody) {
+          delete parsedBody.sambaFiles;
         }
         // Read from body (OpenAICompatible models spread providerOptions into
         // the body) with a fallback to an internal header (OpenAIResponses
         // models don't forward providerOptions, so we pass it via header).
         const requestId =
-          getDyadOption("dyadRequestId") ??
+          getSambaOption("sambaRequestId") ??
           (init.headers as Record<string, string> | undefined)?.[
-            DYAD_INTERNAL_REQUEST_ID_HEADER
+            SAMBA_INTERNAL_REQUEST_ID_HEADER
           ];
-        if ("dyadRequestId" in parsedBody) {
-          delete parsedBody.dyadRequestId;
+        if ("sambaRequestId" in parsedBody) {
+          delete parsedBody.sambaRequestId;
         }
-        const dyadAppId = getDyadOption("dyadAppId");
-        if ("dyadAppId" in parsedBody) {
-          delete parsedBody.dyadAppId;
+        const sambaAppId = getSambaOption("sambaAppId");
+        if ("sambaAppId" in parsedBody) {
+          delete parsedBody.sambaAppId;
         }
-        const dyadDisableFiles =
-          disableDyadOptions || getDyadOption("dyadDisableFiles");
-        if ("dyadDisableFiles" in parsedBody) {
-          delete parsedBody.dyadDisableFiles;
+        const sambaDisableFiles =
+          disableSambaOptions || getSambaOption("sambaDisableFiles");
+        if ("sambaDisableFiles" in parsedBody) {
+          delete parsedBody.sambaDisableFiles;
         }
-        const dyadMentionedApps = getDyadOption("dyadMentionedApps");
-        if ("dyadMentionedApps" in parsedBody) {
-          delete parsedBody.dyadMentionedApps;
+        const sambaMentionedApps = getSambaOption("sambaMentionedApps");
+        if ("sambaMentionedApps" in parsedBody) {
+          delete parsedBody.sambaMentionedApps;
         }
-        const dyadSmartContextMode = getDyadOption("dyadSmartContextMode");
-        if ("dyadSmartContextMode" in parsedBody) {
-          delete parsedBody.dyadSmartContextMode;
+        const sambaSmartContextMode = getSambaOption("sambaSmartContextMode");
+        if ("sambaSmartContextMode" in parsedBody) {
+          delete parsedBody.sambaSmartContextMode;
         }
 
         // Track and modify requestId with attempt number
@@ -227,24 +227,24 @@ export function createDyadEngine(
         }
 
         // Add files to the request if they exist
-        if (!dyadDisableFiles) {
-          parsedBody.dyad_options = {
-            files: dyadFiles,
-            versioned_files: dyadVersionedFiles,
-            enable_lazy_edits: options.dyadOptions.enableLazyEdits,
+        if (!sambaDisableFiles) {
+          parsedBody.samba_options = {
+            files: sambaFiles,
+            versioned_files: sambaVersionedFiles,
+            enable_lazy_edits: options.sambaOptions.enableLazyEdits,
             enable_smart_files_context:
-              options.dyadOptions.enableSmartFilesContext,
-            smart_context_mode: dyadSmartContextMode,
-            enable_web_search: options.dyadOptions.enableWebSearch,
-            app_id: dyadAppId,
+              options.sambaOptions.enableSmartFilesContext,
+            smart_context_mode: sambaSmartContextMode,
+            enable_web_search: options.sambaOptions.enableWebSearch,
+            app_id: sambaAppId,
           };
-          if (dyadMentionedApps?.length) {
-            parsedBody.dyad_options.mentioned_apps = dyadMentionedApps;
+          if (sambaMentionedApps?.length) {
+            parsedBody.samba_options.mentioned_apps = sambaMentionedApps;
           }
         }
 
         // Return modified request with files included and requestId in headers
-        const { [DYAD_INTERNAL_REQUEST_ID_HEADER]: _, ...outgoingHeaders } =
+        const { [SAMBA_INTERNAL_REQUEST_ID_HEADER]: _, ...outgoingHeaders } =
           (init.headers as Record<string, string>) ?? {};
         const modifiedInit = {
           ...init,
@@ -278,9 +278,9 @@ export function createDyadEngine(
   ) => {
     const config = {
       ...getCommonModelConfig(pathPrefix),
-      fetch: createDyadFetch({
+      fetch: createSambaFetch({
         providerId: chatParams.providerId,
-        disableDyadOptions: pathPrefix === "/free",
+        disableSambaOptions: pathPrefix === "/free",
         includeFreeQuotaKey: pathPrefix === "/free",
       }),
     };
@@ -299,7 +299,7 @@ export function createDyadEngine(
   ) => {
     const config = {
       ...getCommonModelConfig(),
-      fetch: createDyadFetch({ providerId: chatParams.providerId }),
+      fetch: createSambaFetch({ providerId: chatParams.providerId }),
     };
 
     return new OpenAIResponsesLanguageModel(modelId, config);
@@ -309,26 +309,26 @@ export function createDyadEngine(
     modelId: ExampleChatModelId,
     chatParams: ChatParams,
   ) => {
-    const createModel = (dyadProviderOptions?: DyadEngineProviderOptions) => {
+    const createModel = (sambaProviderOptions?: SambaEngineProviderOptions) => {
       const provider = createAnthropic({
-        authToken: getDyadEngineApiKey(options.apiKey),
+        authToken: getSambaEngineApiKey(options.apiKey),
         baseURL,
         headers: options.headers,
-        fetch: createDyadFetch({
+        fetch: createSambaFetch({
           providerId: chatParams.providerId,
-          dyadProviderOptions,
+          sambaProviderOptions,
         }),
-        name: "dyad-engine",
+        name: "samba-engine",
       });
 
       return provider(modelId);
     };
     const model = createModel();
-    const getDyadProviderOptions = (callOptions: {
+    const getSambaProviderOptions = (callOptions: {
       providerOptions?: Record<string, unknown>;
     }) =>
-      callOptions.providerOptions?.["dyad-engine"] as
-        | DyadEngineProviderOptions
+      callOptions.providerOptions?.["samba-engine"] as
+        | SambaEngineProviderOptions
         | undefined;
 
     const wrappedModel = {
@@ -337,11 +337,11 @@ export function createDyadEngine(
       modelId: model.modelId,
       supportedUrls: model.supportedUrls,
       doGenerate: (callOptions) =>
-        createModel(getDyadProviderOptions(callOptions)).doGenerate(
+        createModel(getSambaProviderOptions(callOptions)).doGenerate(
           callOptions,
         ),
       doStream: (callOptions) =>
-        createModel(getDyadProviderOptions(callOptions)).doStream(callOptions),
+        createModel(getSambaProviderOptions(callOptions)).doStream(callOptions),
     } satisfies LanguageModel;
 
     const defaultObjectGenerationMode = (
@@ -365,15 +365,15 @@ export function createDyadEngine(
   return provider;
 }
 
-export async function transcribeWithDyadEngine(
+export async function transcribeWithSambaEngine(
   audioBuffer: Buffer,
   filename: string,
   requestId: string,
   options: ExampleProviderSettings,
 ): Promise<string> {
   const baseURL = withoutTrailingSlash(options.baseURL);
-  const apiKey = getDyadEngineApiKey(options.apiKey);
-  logger.info("transcribing with dyad engine with baseURL", baseURL);
+  const apiKey = getSambaEngineApiKey(options.apiKey);
+  logger.info("transcribing with samba engine with baseURL", baseURL);
 
   const formData = new FormData();
   const mimeType = filename.endsWith(".webm")
@@ -392,7 +392,7 @@ export async function transcribeWithDyadEngine(
   );
   const blob = new Blob([audioBytes], { type: mimeType });
   formData.append("file", blob, filename);
-  formData.append("model", "dyad/transcribe");
+  formData.append("model", "samba/transcribe");
 
   const fetchFn = options.fetch || getTestFetchOption().fetch || fetch;
   const response = await fetchFn(`${baseURL}/audio/transcriptions`, {
@@ -407,27 +407,27 @@ export async function transcribeWithDyadEngine(
 
   if (!response.ok) {
     const errorText = await response.text();
-    throw new DyadError(
+    throw new SambaError(
       `Samba Builder Engine transcription failed: ${response.status} ${response.statusText} - ${errorText}`,
-      DyadErrorKind.External,
+      SambaErrorKind.External,
     );
   }
   const data = (await response.json()) as { text: string };
   return data.text;
 }
 
-function getDyadEngineApiKey(apiKey: string | undefined): string {
+function getSambaEngineApiKey(apiKey: string | undefined): string {
   const loadedApiKey = loadApiKey({
     apiKey,
-    environmentVariableName: "DYAD_PRO_API_KEY",
+    environmentVariableName: "SAMBA_PRO_API_KEY",
     description: "Samba Builder API key",
   });
   const normalizedApiKey = normalizeProviderApiKeyInput(loadedApiKey);
   const invalidCharacter = findInvalidProviderApiKeyCharacter(normalizedApiKey);
   if (invalidCharacter) {
-    throw new DyadError(
+    throw new SambaError(
       formatInvalidProviderApiKeyMessage("Samba Builder", invalidCharacter),
-      DyadErrorKind.Validation,
+      SambaErrorKind.Validation,
     );
   }
   return normalizedApiKey;

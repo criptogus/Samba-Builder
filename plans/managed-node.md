@@ -1,4 +1,4 @@
-# Dyad-managed Node.js runtime
+# Samba-managed Node.js runtime
 
 ## Problem
 
@@ -30,7 +30,7 @@ Mirrors the managed-pnpm pattern (#3734) in `socket_firewall.ts`. Extract the sh
 - **Manifest pinned in code, hashes vendored at build time**: `{ version, platform/arch → { url, sha256 } }`, sha256 taken from nodejs.org's `SHASUMS256.txt` and committed. Vendored hashes mean the mirror can't tamper: primary `https://nodejs.org/dist/...`, fallback `https://registry.npmmirror.com/-/binary/node/...` (nodejs.org is unreliable from China; we have Chinese-language users, e.g. #3705).
 - **Artifacts**: Windows `node-v22.22.3-win-{x64,arm64}.zip`; macOS `node-v22.22.3-darwin-{arm64,x64}.tar.gz` (tar.gz, not tar.xz — avoids an xz dependency).
 - **Download** via Electron `net` (inherits system/corporate proxy config) into `userData/managed-tools/node/tmp/`, with retry and IPC progress events.
-- **Atomic install**: verify sha256 → extract to temp dir → spawn extracted binary **by absolute path, `shell: false`** with `--version` → rename to `userData/managed-tools/node/v22.22.3/`. The post-extract spawn is the antivirus canary: if AV quarantined `node.exe` (AV already flags Dyad binaries — #1253, #861), fail with a targeted "your antivirus may have blocked it" error, not a mystery.
+- **Atomic install**: verify sha256 → extract to temp dir → spawn extracted binary **by absolute path, `shell: false`** with `--version` → rename to `userData/managed-tools/node/v22.22.3/`. The post-extract spawn is the antivirus canary: if AV quarantined `node.exe` (AV already flags Samba binaries — #1253, #861), fail with a targeted "your antivirus may have blocked it" error, not a mystery.
 - **Single-flight promise** (like `managedPnpmInstallPromise`) so double-clicks / concurrent status checks don't race.
 
 ### 2. Precedence + PATH wiring
@@ -51,12 +51,12 @@ Mirrors the managed-pnpm pattern (#3734) in `socket_firewall.ts`. Extract the sh
 ### 4. UI
 
 - **Preview panel Node state** (`src/components/preview_panel/PreviewPanel.tsx`, the #3738 redesign): primary button becomes **"Install Node.js for me (~30 MB)"** with a progress bar. Secondary links: "Download from nodejs.org instead" (current `handleInstallNode` behavior) and "I already have Node.js installed…" → existing `NodePathSelector`.
-- **Settings → General**: show active runtime ("Node v22.22.3 — Dyad-managed" / "… — System (`/opt/homebrew/bin/node`)"), the preference toggle, and "Remove managed Node.js" (deletes the dir, flips preference back to system). Full transparency defuses the "what did you install on my machine" objection.
+- **Settings → General**: show active runtime ("Node v22.22.3 — Samba-managed" / "… — System (`/opt/homebrew/bin/node`)"), the preference toggle, and "Remove managed Node.js" (deletes the dir, flips preference back to system). Full transparency defuses the "what did you install on my machine" objection.
 - On install success: re-run status, flip the card green, and auto-kick the pending preview start — the user should not have to find a retry button.
 
 ### 5. Updates & cleanup
 
-- Version bumps ride normal Dyad releases (bump the manifest). On startup, if managed Node exists but ≠ pinned version: install the new version in the background, keep the old one until the new one passes verification, then delete the old. No self-updating outside app releases — app releases are the security-patch channel; Node security releases become "bump manifest + release" chores.
+- Version bumps ride normal Samba releases (bump the manifest). On startup, if managed Node exists but ≠ pinned version: install the new version in the background, keep the old one until the new one passes verification, then delete the old. No self-updating outside app releases — app releases are the security-patch channel; Node security releases become "bump manifest + release" chores.
 - Old-version cleanup after successful upgrade.
 - Verify the Windows uninstaller clears `userData/managed-tools`; if not, add it (don't orphan ~150 MB).
 
@@ -70,7 +70,7 @@ Mirrors the managed-pnpm pattern (#3734) in `socket_firewall.ts`. Extract the sh
 | AV deletes/blocks extracted `node.exe`                     | Post-extract spawn check fails → targeted error + docs link + telemetry                                                                                                                                                                                  |
 | Corrupted system PATH (#3612-style ENOENT)                 | All managed-runtime operations spawn absolute paths with `shell: false`. Caveat: app dev-servers still run through a shell, so also sanitize the child env by dropping PATH entries that don't exist — this is the piece that actually closes category 4 |
 | Spaces in Windows profile path (#3513)                     | Managed dir lives under `%APPDATA%` (commonly contains spaces) — the no-shell absolute-path rule covers install/verify; add an E2E with a spaced app path                                                                                                |
-| Rosetta (x64 Dyad on arm64 Mac)                            | Match the app's arch (`os.arch()`); x64 Node under Rosetta works. No sysctl sniffing in v1                                                                                                                                                               |
+| Rosetta (x64 Samba on arm64 Mac)                           | Match the app's arch (`os.arch()`); x64 Node under Rosetta works. No sysctl sniffing in v1                                                                                                                                                               |
 | System Node disappears mid-session (nvm switch, uninstall) | Status re-check on window focus; runtime resolution happens per-spawn via env building, so the next run falls back per precedence                                                                                                                        |
 | Preference set to "managed" but not installed              | Toggle triggers the install prompt; resolution treats not-installed managed as absent and falls back to system with a warning banner                                                                                                                     |
 
@@ -90,8 +90,8 @@ Mirrors the managed-pnpm pattern (#3734) in `socket_firewall.ts`. Extract the sh
 
 ## Sequencing
 
-0. **PR 0** (shipped separately, precursor): fix the Windows PATH refresh — `reloadNodePath()`'s `cmd /c echo %PATH%` can never see registry PATH changes made after launch; re-read machine+user Path from the registry instead. https://github.com/dyad-sh/dyad/pull/3742
-1. **PR 1**: `managed_node.ts` + IPC + resolution wiring + settings field (no UI; dev-flag testable via a `DYAD_DEV_NODEJS_STATUS`-style override)
+0. **PR 0** (shipped separately, precursor): fix the Windows PATH refresh — `reloadNodePath()`'s `cmd /c echo %PATH%` can never see registry PATH changes made after launch; re-read machine+user Path from the registry instead. https://github.com/samba-sh/samba/pull/3742
+1. **PR 1**: `managed_node.ts` + IPC + resolution wiring + settings field (no UI; dev-flag testable via a `SAMBA_DEV_NODEJS_STATUS`-style override)
 2. **PR 2**: preview-panel button + progress + settings UI + i18n (en/es/pt-BR/zh-CN)
 3. **PR 3**: E2E suite + PATH-entry sanitization + telemetry
 4. Ship to **beta channel** first; watch install-failure telemetry for AV/proxy surprises before stable.

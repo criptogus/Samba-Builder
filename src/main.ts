@@ -16,7 +16,7 @@ import { promisify } from "node:util";
 import { registerIpcHandlers } from "./ipc/ipc_host";
 import dotenv from "dotenv";
 // Samba Builder: sem auto-update (o update-electron-app consultava o backend
-// do Dyad) — o import foi removido.
+// do Samba) — o import foi removido.
 import log from "electron-log";
 import {
   getSettingsFilePath,
@@ -41,7 +41,7 @@ import {
   sendTelemetryEventToWindow,
 } from "./ipc/utils/telemetry";
 import { handleSupabaseOAuthReturn } from "./supabase_admin/supabase_return_handler";
-import { handleDyadProReturn } from "./main/pro";
+import { handleSambaProReturn } from "./main/pro";
 import { IS_TEST_BUILD } from "./ipc/utils/test_utils";
 import { BackupManager } from "./backup_manager";
 import { db, getDatabasePath, initializeDatabase } from "./db";
@@ -102,8 +102,8 @@ import { encryptStoredMcpSecrets } from "./ipc/utils/mcp_secret_encryption";
 import fs from "fs";
 import { gitAddSafeDirectory } from "./ipc/utils/git_utils";
 import {
-  getDyadAppsBaseDirectory,
-  getDyadAppPath,
+  getSambaAppsBaseDirectory,
+  getSambaAppPath,
   getUserDataPath,
 } from "./paths/paths";
 import { createDeepLinkQueue } from "./main/deep_link_queue";
@@ -115,7 +115,7 @@ import {
   shouldRetainClosedWindowForActivation,
   shouldQuitAfterAllWindowsClosed,
 } from "./main/window_lifecycle_policy";
-import { registerDyadProtocolLinux } from "./main/linux_protocol_registration";
+import { registerSambaProtocolLinux } from "./main/linux_protocol_registration";
 import {
   applyManagedPnpmToProcessPath,
   getManagedPnpmBinDir,
@@ -126,7 +126,7 @@ import {
   getManagedNodeVersion,
   maybeUpgradeManagedNode,
 } from "./ipc/utils/managed_node";
-import { createDyadMediaProtocolHandler } from "./main/dyad_media_protocol";
+import { createSambaMediaProtocolHandler } from "./main/samba_media_protocol";
 import {
   createPlatformThumbnailFromPath,
   getMediaThumbnailCacheRoot,
@@ -159,7 +159,7 @@ import {
   restorableVisibleEntity,
   type WindowSessionDescriptor,
 } from "./window_infrastructure/main/window_session";
-import { DyadError, DyadErrorKind, isDyadError } from "./errors/dyad_error";
+import { SambaError, SambaErrorKind, isSambaError } from "./errors/samba_error";
 import {
   formatErrorBanner,
   formatExitBanner,
@@ -191,7 +191,7 @@ if (app.isPackaged && !app.commandLine.hasSwitch("user-data-dir")) {
     fs.readFileSync(path.join(app.getAppPath(), "package.json"), "utf8"),
   );
   const profile = metadata.sambaLocalUserDataPath;
-  const legacyProfile = path.join(app.getPath("appData"), "dyad");
+  const legacyProfile = path.join(app.getPath("appData"), "samba");
   if (
     typeof profile === "string" &&
     path.isAbsolute(profile) &&
@@ -206,7 +206,7 @@ app.setName("Samba Builder");
 
 // In dev, keep minidumps and logs under the project's ./userData, not the OS
 // one. Must run before crashReporter.start and before the first log call, when
-// electron-log caches its dir. macOS logs ignore userData: ~/Library/Logs/dyad.
+// electron-log caches its dir. macOS logs ignore userData: ~/Library/Logs/samba.
 if (process.env.NODE_ENV === "development") {
   const devUserData = getUserDataPath();
   fs.mkdirSync(devUserData, { recursive: true });
@@ -326,7 +326,7 @@ function processNativeCrashDumps(): void {
   // Where we keep dumps we've already reported, for later examination. Under
   // userData (not inside crashDumpsDir) so it stays separate from Crashpad's
   // own dump dirs and isn't picked up by the scan above.
-  const retainDir = path.join(app.getPath("userData"), "dyad-crash-reports");
+  const retainDir = path.join(app.getPath("userData"), "samba-crash-reports");
   try {
     fs.mkdirSync(retainDir, { recursive: true });
   } catch (error) {
@@ -425,12 +425,12 @@ if (fs.existsSync(gitDir)) {
 // https://www.electronjs.org/docs/latest/tutorial/launch-app-from-url-in-another-app#main-process-mainjs
 if (process.defaultApp) {
   if (process.argv.length >= 2) {
-    app.setAsDefaultProtocolClient("dyad", process.execPath, [
+    app.setAsDefaultProtocolClient("samba", process.execPath, [
       path.resolve(process.argv[1]),
     ]);
   }
 } else {
-  app.setAsDefaultProtocolClient("dyad");
+  app.setAsDefaultProtocolClient("samba");
 }
 
 export async function onReady() {
@@ -452,10 +452,10 @@ export async function onReady() {
   // crashed: both populations have to be measured the same way.
   claimPreviousSessionAppSize();
 
-  // Linux: claim the dyad:// scheme for this build (best-effort, see module).
+  // Linux: claim the sambabuilder:// scheme for this build (best-effort, see module).
   // setAsDefaultProtocolClient above is unreliable on Linux. Pass this instance's
   // userData so a browser-launched deep link forwards here, not a second window.
-  void registerDyadProtocolLinux(app.getPath("userData"));
+  void registerSambaProtocolLinux(app.getPath("userData"));
 
   // React DevTools extension loading is intentionally disabled. In Electron it
   // can spam startup logs with:
@@ -523,7 +523,7 @@ export async function onReady() {
   // See: https://git-scm.com/docs/git-config#Documentation/git-config.txt-safedirectory
   // Don't need to await because this only needs to run before
   // the user starts interacting with Samba Builder app and uses a git-related feature.
-  gitAddSafeDirectory(`${getDyadAppsBaseDirectory()}/*`);
+  gitAddSafeDirectory(`${getSambaAppsBaseDirectory()}/*`);
 
   // Check if app was force-closed by checking for the crash sentinel file.
   // The sentinel is written at startup and deleted in before-quit on clean exit.
@@ -593,19 +593,19 @@ export async function onReady() {
   // Start performance monitoring
   startPerformanceMonitoring();
 
-  // Handle dyad-media:// requests. Media-library tiles use bounded, cached
+  // Handle samba-media:// requests. Media-library tiles use bounded, cached
   // derivatives while explicit previews continue to receive the source file.
   protocol.handle(
-    "dyad-media",
-    createDyadMediaProtocolHandler({
+    "samba-media",
+    createSambaMediaProtocolHandler({
       cacheRoot: getMediaThumbnailCacheRoot(app.getPath("sessionData")),
-      resolveAppPath: getDyadAppPath,
+      resolveAppPath: getSambaAppPath,
       resolveAppId: async (appId) => {
         const appRecord = await db.query.apps.findFirst({
           where: eq(apps.id, appId),
           columns: { path: true },
         });
-        return appRecord ? getDyadAppPath(appRecord.path) : null;
+        return appRecord ? getSambaAppPath(appRecord.path) : null;
       },
       fetchFile: (url) => net.fetch(url),
       createThumbnailFromPath: (sourcePath, size) =>
@@ -642,12 +642,12 @@ export async function onReady() {
   });
 
   logger.info("Auto-update enabled=", settings.enableAutoUpdate);
-  // Samba Builder: zero backend do Dyad — sem auto-update over-the-air (o
-  // updateElectronApp do Dyad consultava api.dyad.sh com o repo
-  // dyad-sh/dyad). Atualizações são instaladas manualmente pelo usuário.
+  // Samba Builder: zero backend do Samba — sem auto-update over-the-air (o
+  // (sem auto-update: o produto é standalone e não consulta servidor remoto)
+  // samba-sh/samba). Atualizações são instaladas manualmente pelo usuário.
   if (settings.enableAutoUpdate) {
     logger.info(
-      "Auto-update desativado: Samba Builder não depende do servidor do Dyad.",
+      "Auto-update desativado: Samba Builder não depende do servidor do Samba.",
     );
   }
 }
@@ -877,9 +877,9 @@ const createWindow = ({
   rendererLoad: Promise<void>;
 } => {
   if (isAppQuitting) {
-    throw new DyadError(
+    throw new SambaError(
       "Samba Builder is shutting down",
-      DyadErrorKind.Precondition,
+      SambaErrorKind.Precondition,
     );
   }
 
@@ -1222,9 +1222,9 @@ async function createFreshStartupWindow(): Promise<void> {
 configureWindowProductController({
   openEntityInNewWindow: async (entity) => {
     if (productWindows.size >= MAX_PRODUCT_WINDOWS) {
-      throw new DyadError(
+      throw new SambaError(
         `Samba Builder supports up to ${MAX_PRODUCT_WINDOWS} open windows`,
-        DyadErrorKind.Precondition,
+        SambaErrorKind.Precondition,
       );
     }
     try {
@@ -1248,11 +1248,11 @@ configureWindowProductController({
         },
       });
     } catch (error) {
-      if (isDyadError(error)) throw error;
+      if (isSambaError(error)) throw error;
       const detail = error instanceof Error ? error.message : String(error);
-      throw new DyadError(
+      throw new SambaError(
         `Failed to open a new window: ${detail}`,
-        DyadErrorKind.External,
+        SambaErrorKind.External,
         { cause: error },
       );
     }
@@ -1359,11 +1359,11 @@ const createApplicationMenu = () => {
   Menu.setApplicationMenu(appMenu);
 };
 
-// Register dyad-media:// protocol for serving persistent media attachments.
+// Register samba-media:// protocol for serving persistent media attachments.
 // Must be called before app.whenReady().
 protocol.registerSchemesAsPrivileged([
   {
-    scheme: "dyad-media",
+    scheme: "samba-media",
     privileges: {
       standard: true,
       secure: true,
@@ -1376,7 +1376,9 @@ protocol.registerSchemesAsPrivileged([
 // A cold-start protocol URL arrives in argv before any renderer is ready.
 // Queue it in both production and E2E builds; the latter skips only the
 // singleton lock so parallel test processes can coexist.
-const initialDeepLink = process.argv.find((arg) => arg.startsWith("dyad://"));
+const initialDeepLink = process.argv.find((arg) =>
+  arg.startsWith("sambabuilder://"),
+);
 if (initialDeepLink) {
   deepLinkQueue.handle(initialDeepLink);
 }
@@ -1395,7 +1397,7 @@ if (IS_TEST_BUILD) {
     app.quit();
   } else {
     app.on("second-instance", (_event, commandLine, _workingDirectory) => {
-      const url = commandLine.find((arg) => arg.startsWith("dyad://"));
+      const url = commandLine.find((arg) => arg.startsWith("sambabuilder://"));
       if (isAppQuitting) {
         requestRelaunchAfterQuit(url);
         return;
@@ -1441,7 +1443,7 @@ function showDeepLinkSettingsError(action: string, error: unknown): void {
 }
 
 async function handleDeepLinkReturn(url: string) {
-  // example url: "dyad://supabase-oauth-return?token=a&refreshToken=b"
+  // example url: "sambabuilder://supabase-oauth-return?token=a&refreshToken=b"
   let parsed: URL;
   try {
     parsed = new URL(url);
@@ -1457,10 +1459,10 @@ async function handleDeepLinkReturn(url: string) {
     "hostname",
     parsed.hostname,
   );
-  if (parsed.protocol !== "dyad:") {
+  if (parsed.protocol !== "samba:") {
     dialog.showErrorBox(
       "Invalid Protocol",
-      `Expected dyad://, got ${parsed.protocol}. Full URL: ${url}`,
+      `Expected sambabuilder://, got ${parsed.protocol}. Full URL: ${url}`,
     );
     return;
   }
@@ -1523,15 +1525,15 @@ async function handleDeepLinkReturn(url: string) {
     }
     return;
   }
-  // dyad://dyad-pro-return?key=123&budget_reset_at=2025-05-26T16:31:13.492000Z&max_budget=100
-  if (parsed.hostname === "dyad-pro-return") {
+  // sambabuilder://samba-pro-return?key=123&budget_reset_at=2025-05-26T16:31:13.492000Z&max_budget=100
+  if (parsed.hostname === "samba-pro-return") {
     const apiKey = parsed.searchParams.get("key");
     if (!apiKey) {
       dialog.showErrorBox("Invalid URL", "Expected key");
       return;
     }
     try {
-      handleDyadProReturn({
+      handleSambaProReturn({
         apiKey,
       });
     } catch (error) {
@@ -1554,7 +1556,7 @@ async function handleDeepLinkReturn(url: string) {
     }
     return;
   }
-  // dyad://add-mcp-server?name=Chrome%20DevTools&config=eyJjb21tYW5kIjpudWxsLCJ0eXBlIjoic3RkaW8ifQ%3D%3D
+  // sambabuilder://add-mcp-server?name=Chrome%20DevTools&config=eyJjb21tYW5kIjpudWxsLCJ0eXBlIjoic3RkaW8ifQ%3D%3D
   if (parsed.hostname === "add-mcp-server") {
     const name = parsed.searchParams.get("name");
     const config = parsed.searchParams.get("config");
@@ -1584,7 +1586,7 @@ async function handleDeepLinkReturn(url: string) {
     }
     return;
   }
-  // dyad://add-prompt?data=<base64-encoded-json>
+  // sambabuilder://add-prompt?data=<base64-encoded-json>
   if (parsed.hostname === "add-prompt") {
     const data = parsed.searchParams.get("data");
     if (!data) {

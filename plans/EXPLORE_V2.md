@@ -90,7 +90,7 @@ prohibitions.
 - The `target` evidence role (canvas-app residue).
 - Answer draft, separate findings list, and duplicated causal-chain prose in the report.
 - Per-report imperative policy text.
-- `DYAD_CODE_EXPLORER_REPORT_MODE` env-var control of production behavior — benchmark arms get
+- `SAMBA_CODE_EXPLORER_REPORT_MODE` env-var control of production behavior — benchmark arms get
   explicit plumbing.
 
 ### Known bugs to fix in passing

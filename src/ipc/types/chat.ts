@@ -205,7 +205,7 @@ export type ChatStreamParams = z.infer<typeof ChatStreamParamsSchema>;
  * The renderer reconstructs as `current.slice(0, offset) + content`, so
  * `offset` must be the longest common prefix length between the previously
  * sent content and the current full response (cleanFullResponse may rewrite
- * earlier bytes inside in-progress dyad-tag attribute values).
+ * earlier bytes inside in-progress samba-tag attribute values).
  */
 export const StreamingPatchSchema = z.object({
   offset: z.number().int().nonnegative(),
@@ -509,7 +509,7 @@ export const chatContracts = {
   // Renderer→main ack for stress-test backpressure on the canned test
   // streaming path. The handler is registered unconditionally, but real
   // LLM streams omit `chunkSeq`, so the renderer only invokes this
-  // channel for canned [dyad-qa=...] streams.
+  // channel for canned [samba-qa=...] streams.
   responseAck: defineContract({
     channel: "chat:response:ack",
     input: z.object({

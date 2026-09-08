@@ -39,7 +39,7 @@ async function importAppAndSeedMedia({
     throw new Error("Failed to get app name after import");
   }
   const appPath = await po.appManagement.getCurrentAppPath();
-  const mediaDirPath = path.join(appPath, ".dyad", "media");
+  const mediaDirPath = path.join(appPath, ".samba", "media");
   fs.mkdirSync(mediaDirPath, { recursive: true });
 
   for (const fileName of files) {

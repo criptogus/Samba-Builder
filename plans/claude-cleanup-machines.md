@@ -38,8 +38,8 @@ The load-bearing ones:
   `previewRuntimeAtoms.test.ts:310`). Porting the rule as originally traced
   would silently invert product behavior.
 - **Four missed preview-error writers** in `PreviewIframe.tsx` (`:415-426`
-  cloud-sandbox errors with source `dyad-app`, `:438-445` cloud sync errors,
-  `:449-451` sync-recovery clear, `:1501` dismiss-any). `dyad-app` errors
+  cloud-sandbox errors with source `samba-app`, `:438-445` cloud sync errors,
+  `:449-451` sync-recovery clear, `:1501` dismiss-any). `samba-app` errors
   are therefore _not_ exclusively the app_run machine's, and
   `useAppRunState` alone cannot replace the reader.
 - **Mount-order reality for facade injection**: `ChatStreamProvider` mounts
@@ -282,8 +282,8 @@ does not exist today.
   - `ChatPanel.tsx:271/:274` → call-time
     `isStreamActive(manager.peek(chatId)?.getSnapshot() ?? {type:"idle"})`
     via `useChatStreamManager()`.
-  - `PromoMessage.tsx:155`, `DyadOutput.tsx:28`,
-    `DyadMarkdownParser.tsx:132` → same hook + fallback.
+  - `PromoMessage.tsx:155`, `SambaOutput.tsx:28`,
+    `SambaMarkdownParser.tsx:132` → same hook + fallback.
   - `ChatTabs.tsx:245` (aggregate; per-tab lookups :607/:835) → new
     manager-level `useStreamingChatIds` selector, or per-tab child
     components with `useChatStreamState(chat.id)`.
@@ -294,7 +294,7 @@ does not exist today.
     chat_stream command deps (its only callers are `commands.ts:467/:653`).
   - Tests: `manager.test.ts:175/183/210/215`,
     `queue_dispatch.test.ts:89`, `plan_handoff/commands.test.ts:34`
-    (fake chatStream facade), `DyadMarkdownParser.test.tsx:164`,
+    (fake chatStream facade), `SambaMarkdownParser.test.tsx:164`,
     `explore_chat_history_streaming.integration.test.tsx:78/140`,
     `hybrid_chat_harness.tsx:1053/1063` — drive the machine, not the atom.
 - Order: useStreamChat + components → plan_handoff facade (with disposal
@@ -377,7 +377,7 @@ does not exist today.
   plan_handoff also writes is stale — fix it.
 - New per-chat preview sidecar SnapshotStore (NOT a StreamState field —
   that would re-notify all stream-state subscribers per chunk).
-- `DyadMarkdownParser.tsx:248` → `useChatStreamPreview(chatId)`;
+- `SambaMarkdownParser.tsx:248` → `useChatStreamPreview(chatId)`;
   `ChatMessage.tsx:131` → equality-gated `useChatStreamHasPreview(chatId)`
   replicating the selectAtom boolean-transition optimization (and the
   identity-stable no-op in applyPreviewChunk must carry over). Helpers are
@@ -584,14 +584,14 @@ does not exist today.
 ### app_run/preview_iframe: previewError channel (L — do last in the preview family)
 
 - **No machine owns the full state**: three sources across six writer
-  sites. app_run `commands.ts:57-62` (`dyad-app`); preview_iframe
+  sites. app_run `commands.ts:57-62` (`samba-app`); preview_iframe
   `commands.ts:45` clear (cross-machine, runs in beforeNotify —
   synchronous facade calls forbidden); `useRunApp.ts:175-186/:191-195`
-  (`dyad-sync`, priority-merge updaters); PreviewIframe `setErrorMessage`
+  (`samba-sync`, priority-merge updaters); PreviewIframe `setErrorMessage`
   (`:223-231`) with call sites `:884/:901` (`preview-app`) **plus the four
   the trace missed**: `:415-426` cloud-sandbox errors with source
-  `dyad-app` (so app_run state alone can never replace the reader),
-  `:438-445` cloud sync errors (`dyad-sync`, same clobber guard),
+  `samba-app` (so app_run state alone can never replace the reader),
+  `:438-445` cloud sync errors (`samba-sync`, same clobber guard),
   `:449-451` sync-recovery clear, `:1501` user dismiss (clears any source).
   clearPreviewRuntimeForAppAtom and the harness also write the base atom
   directly.
@@ -601,13 +601,13 @@ does not exist today.
   SYNC_RECOVERED, DISMISS, plus a facade for app_run's setError/clearError
   commands, **microtask-deferred** since those execute inside app_run's
   command pipeline).
-- Encode in transitions: source-priority updater semantics (dyad-sync must
-  not clobber preview-app/dyad-app; only-clear-own-source on recovery),
+- Encode in transitions: source-priority updater semantics (samba-sync must
+  not clobber preview-app/samba-app; only-clear-own-source on recovery),
   dismiss-clears-any, and define the app_run-sets/preview_iframe-clears
   race explicitly (Jotai serializes it today).
 - Reader `PreviewIframe.tsx:221` → `selectPreviewError(iframeState)` (it
   already holds iframeState from usePreviewIframe); the source discriminant
-  is load-bearing (`:1515` hasStartupError only for `dyad-app`).
+  is load-bearing (`:1515` hasStartupError only for `samba-app`).
 - All writer sites land in one change or via temporary dual-write —
   anything else silently desyncs banners. Tests:
   `preview_iframe/commands.test.ts:167-176` (facade mock or own-state
@@ -782,7 +782,7 @@ planDocumentsAtom rename). Prereqs: PRs 1–2 (completion event and sidecar
 patterns; shared files with useStreamChat settled). Regression tests:
 `chat_stream/__tests__/{manager,queue_dispatch,commands}.test.ts`,
 `plan_handoff/commands.test.ts` (fake facade),
-`useStreamChat.test.tsx`, `DyadMarkdownParser.test.tsx`,
+`useStreamChat.test.tsx`, `SambaMarkdownParser.test.tsx`,
 `explore_chat_history_streaming.integration.test.tsx`,
 `src/testing/hybrid_chat_harness.tsx` seed/assert helpers,
 `version_preview/commands.test.ts:150/:197` — plus the full E2E streaming

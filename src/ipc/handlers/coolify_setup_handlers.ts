@@ -1,6 +1,6 @@
 import { BrowserWindow } from "electron";
 import log from "electron-log";
-import { DyadError, DyadErrorKind } from "@/errors/dyad_error";
+import { SambaError, SambaErrorKind } from "@/errors/samba_error";
 import { createTypedHandler } from "./base";
 import {
   SETUP_MACHINE_REPORTED,
@@ -177,13 +177,13 @@ function setupController(): CoolifySetupController {
             // and the handler is marked not to be logged, so what went wrong
             // goes to the log and the user gets words of ours.
             logger.error("Could not store the admin account early", error);
-            throw new DyadError(
+            throw new SambaError(
               "Samba Builder could not save the admin password on this computer, so " +
                 "it has not started the install — a server it cannot record " +
                 "the password for is one nobody can sign in to. Nothing was " +
                 "sent to the server. Try again once there is room on disk " +
                 "and the keychain is available.",
-              DyadErrorKind.External,
+              SambaErrorKind.External,
             );
           }
         },
@@ -278,11 +278,11 @@ function setupController(): CoolifySetupController {
             error instanceof SshError &&
             error.failure === "host-key-rejected"
           ) {
-            throw new DyadError(
+            throw new SambaError(
               "This server is not the one Samba Builder looked at: its SSH identity " +
                 "has changed since. Nothing was sent to it. Check the address " +
                 "and look at the server again before installing.",
-              DyadErrorKind.External,
+              SambaErrorKind.External,
             );
           }
           throw error;
@@ -386,7 +386,7 @@ function serverKeyFor(input: SetupServer): string {
  * goes through.
  */
 function sshPort(input: SetupServer): number | undefined {
-  const override = IS_TEST_BUILD ? process.env.DYAD_E2E_SSH_PORT : undefined;
+  const override = IS_TEST_BUILD ? process.env.SAMBA_E2E_SSH_PORT : undefined;
   return override ? Number(override) : input.port;
 }
 
@@ -506,10 +506,10 @@ export function registerCoolifySetupHandlers() {
           inspectTimer = setTimeout(
             () =>
               reject(
-                new DyadError(
+                new SambaError(
                   "The server did not answer. It is reachable over SSH, so " +
                     "something on it is not responding — try again in a moment.",
-                  DyadErrorKind.External,
+                  SambaErrorKind.External,
                 ),
               ),
             INSPECT_TIMEOUT_MS,
@@ -551,13 +551,13 @@ export function registerCoolifySetupHandlers() {
     // preflight, and an account record written and then taken back off.
     const emailRefusal = adminEmailRefusal(input.adminEmail);
     if (emailRefusal) {
-      throw new DyadError(emailRefusal, DyadErrorKind.Validation);
+      throw new SambaError(emailRefusal, SambaErrorKind.Validation);
     }
     if (input.customDomain && !isPlausibleInstanceDomain(input.customDomain)) {
-      throw new DyadError(
+      throw new SambaError(
         "Enter the domain on its own, with no port or path — for example " +
           "coolify.yourdomain.com.",
-        DyadErrorKind.Validation,
+        SambaErrorKind.Validation,
       );
     }
     // Not while one is going: a run in flight has already written a record of
@@ -576,19 +576,19 @@ export function registerCoolifySetupHandlers() {
       // already impossible by then, because preflight refuses a machine that
       // has Coolify on it; what is left is installing a different one, which
       // is this.
-      throw new DyadError(
+      throw new SambaError(
         "Samba Builder is holding the admin password for a server it set up. Sign out " +
           "of Coolify first — that shows the password one last time and then " +
           "forgets it — before setting up another.",
-        DyadErrorKind.Precondition,
+        SambaErrorKind.Precondition,
       );
     }
     if (!readyHosts.has(serverKeyFor(input))) {
-      throw new DyadError(
+      throw new SambaError(
         "Check the server before installing. Samba Builder shows you its fingerprint " +
           "first, so the install goes to the machine that answered rather " +
           "than to whatever holds the address by then.",
-        DyadErrorKind.Precondition,
+        SambaErrorKind.Precondition,
       );
     }
     // One at a time is the machine's rule, not a check here; it refuses by

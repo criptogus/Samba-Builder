@@ -14,7 +14,7 @@ import { afterAll, afterEach, beforeAll, describe, expect, it } from "vitest";
 import { apps } from "@/db/schema";
 import { ipc } from "@/ipc/types";
 import { writeSettings } from "@/main/settings";
-import { invalidateDyadAppsBaseDirectoryCache } from "@/paths/paths";
+import { invalidateSambaAppsBaseDirectoryCache } from "@/paths/paths";
 import {
   setupHybridChatHarness,
   type HybridChatHarness,
@@ -34,7 +34,7 @@ describe("GitHub import dialog (integration)", () => {
     importAppsRoot = path.join(path.dirname(harness.appDir), "imported-apps");
     fs.mkdirSync(importAppsRoot, { recursive: true });
     writeSettings({ customAppsFolder: importAppsRoot });
-    invalidateDyadAppsBaseDirectoryCache();
+    invalidateSambaAppsBaseDirectoryCache();
   }, 60_000);
 
   afterEach(() => {
@@ -188,10 +188,10 @@ describe("GitHub import dialog (integration)", () => {
 
     // The inverse of the default-upgrade test: no component-tagger rewrite.
     const config = fs.readFileSync(path.join(appDir, "vite.config.ts"), "utf8");
-    expect(config).not.toContain("dyadComponentTagger");
+    expect(config).not.toContain("sambaComponentTagger");
 
     const pkg = fs.readFileSync(path.join(appDir, "package.json"), "utf8");
-    expect(pkg).not.toContain("@dyad-sh/react-vite-component-tagger");
+    expect(pkg).not.toContain("@samba-sh/react-vite-component-tagger");
   }, 90_000);
 
   it("serializes concurrent imports with the same app name", async () => {
@@ -199,7 +199,7 @@ describe("GitHub import dialog (integration)", () => {
     const params = {
       url: "https://github.com/testuser/existing-vite-app.git",
       appName: "concurrent-github-import",
-      optimizeForDyad: false,
+      optimizeForSamba: false,
     };
 
     const results = await Promise.all([

@@ -4,9 +4,9 @@ import log from "electron-log";
 import { createTypedHandler } from "./base";
 import { freeModelQuotaContracts } from "../types/free_model_quota";
 import { readSettings } from "@/main/settings";
-import { DyadError, DyadErrorKind } from "@/errors/dyad_error";
-import { isDyadProEnabled } from "@/lib/schemas";
-import { getDyadEngineBaseUrl } from "../utils/dyad_engine_url";
+import { SambaError, SambaErrorKind } from "@/errors/samba_error";
+import { isSambaProEnabled } from "@/lib/schemas";
+import { getSambaEngineBaseUrl } from "../utils/samba_engine_url";
 
 const logger = log.scope("free_model_quota_handlers");
 
@@ -28,14 +28,14 @@ export async function getFreeModelQuotaStatus() {
   const settings = readSettings();
   const apiKey = settings.providerSettings?.auto?.apiKey?.value;
 
-  if (!settings.enableDyadPro || !isDyadProEnabled(settings) || !apiKey) {
-    throw new DyadError(
+  if (!settings.enableSambaPro || !isSambaProEnabled(settings) || !apiKey) {
+    throw new SambaError(
       "Samba Builder must be enabled to check free model quota.",
-      DyadErrorKind.Auth,
+      SambaErrorKind.Auth,
     );
   }
 
-  const baseURL = getDyadEngineBaseUrl().replace(/\/$/, "");
+  const baseURL = getSambaEngineBaseUrl().replace(/\/$/, "");
   let response: Awaited<ReturnType<typeof fetch>>;
   try {
     response = await fetch(`${baseURL}/free/quota`, {
@@ -46,9 +46,9 @@ export async function getFreeModelQuotaStatus() {
     });
   } catch (error) {
     logger.warn("Failed to fetch free model quota.", error);
-    throw new DyadError(
+    throw new SambaError(
       "Unable to fetch Samba Builder Free quota.",
-      DyadErrorKind.External,
+      SambaErrorKind.External,
     );
   }
 
@@ -59,11 +59,11 @@ export async function getFreeModelQuotaStatus() {
     logger.warn(
       `Failed to fetch free model quota. Status: ${response.status}. Body: ${errorSummary}`,
     );
-    throw new DyadError(
+    throw new SambaError(
       "Unable to fetch Samba Builder Free quota.",
       response.status === 401 || response.status === 403
-        ? DyadErrorKind.Auth
-        : DyadErrorKind.External,
+        ? SambaErrorKind.Auth
+        : SambaErrorKind.External,
     );
   }
 

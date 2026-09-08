@@ -16,14 +16,14 @@ import type { SshSession } from "@/ipc/utils/ssh_client";
  * real output shares a line with the last prompt.
  */
 const REAL_TRANSCRIPT = [
-  '> echo "__DYAD_OUT_START__" . PHP_EOL;',
+  '> echo "__SAMBA_OUT_START__" . PHP_EOL;',
   "",
   '> echo "line-one" . PHP_EOL; echo "line-two" . PHP_EOL;',
-  '> echo "__DYAD_OUT_END__" . PHP_EOL;',
-  "> __DYAD_OUT_START__",
+  '> echo "__SAMBA_OUT_END__" . PHP_EOL;',
+  "> __SAMBA_OUT_START__",
   "line-one",
   "line-two",
-  "__DYAD_OUT_END__",
+  "__SAMBA_OUT_END__",
 ].join("\n");
 
 /**
@@ -34,13 +34,13 @@ const REAL_TRANSCRIPT = [
  * from the echo of the script that produced it.
  */
 const REAL_4_3_14 = [
-  '> echo "__DYAD_OUT_START__" . PHP_EOL;',
+  '> echo "__SAMBA_OUT_START__" . PHP_EOL;',
   "",
   "> echo config('constants.coolify.version');",
-  '> echo PHP_EOL . "__DYAD_OUT_END__" . PHP_EOL;',
-  "> __DYAD_OUT_START__",
+  '> echo PHP_EOL . "__SAMBA_OUT_END__" . PHP_EOL;',
+  "> __SAMBA_OUT_START__",
   "4.3.14",
-  "__DYAD_OUT_END__",
+  "__SAMBA_OUT_END__",
 ].join("\n");
 
 /**
@@ -51,13 +51,13 @@ const REAL_4_3_14 = [
  * the opening marker, which is what keeps it out of the answer.
  */
 const REAL_MANGLED_ECHO = [
-  '> echo "__DYAD_OUT_START__" . PHP_EOL;',
+  '> echo "__SAMBA_OUT_START__" . PHP_EOL;',
   "",
   "> \r<l', 'nobody@example.com')->exists() ? 'yes' : 'no';",
-  '> echo PHP_EOL . "__DYAD_OUT_END__" . PHP_EOL;',
-  "> __DYAD_OUT_START__",
+  '> echo PHP_EOL . "__SAMBA_OUT_END__" . PHP_EOL;',
+  "> __SAMBA_OUT_START__",
   "no",
-  "__DYAD_OUT_END__",
+  "__SAMBA_OUT_END__",
 ].join("\n");
 
 describe("transcripts from a real Coolify", () => {
@@ -104,12 +104,12 @@ describe("finding our output however psysh prompts", () => {
     // otherwise make every call fail — and the caller reports that as Coolify
     // refusing to create an account, on a server where it exists.
     for (const marker of [
-      "__DYAD_OUT_START__",
-      "> __DYAD_OUT_START__",
-      "> > > __DYAD_OUT_START__",
+      "__SAMBA_OUT_START__",
+      "> __SAMBA_OUT_START__",
+      "> > > __SAMBA_OUT_START__",
     ]) {
       expect(
-        extractOutput([marker, "answer", "__DYAD_OUT_END__"].join("\n")),
+        extractOutput([marker, "answer", "__SAMBA_OUT_END__"].join("\n")),
       ).toBe("answer");
     }
   });
@@ -120,10 +120,10 @@ describe("finding our output however psysh prompts", () => {
     expect(
       extractOutput(
         [
-          '> echo "__DYAD_OUT_START__" . PHP_EOL;',
-          "> __DYAD_OUT_START__",
+          '> echo "__SAMBA_OUT_START__" . PHP_EOL;',
+          "> __SAMBA_OUT_START__",
           "answer",
-          "__DYAD_OUT_END__",
+          "__SAMBA_OUT_END__",
         ].join("\n"),
       ),
     ).toBe("answer");
@@ -186,10 +186,10 @@ describe("extractOutput", () => {
   it("finds output from a script that printed no trailing newline", () => {
     // The real shape before wrapScript was fixed: value and marker on one line.
     const glued = [
-      '> echo "__DYAD_OUT_START__" . PHP_EOL;',
-      "> __DYAD_OUT_START__",
+      '> echo "__SAMBA_OUT_START__" . PHP_EOL;',
+      "> __SAMBA_OUT_START__",
       "yes",
-      "__DYAD_OUT_END__",
+      "__SAMBA_OUT_END__",
     ].join("\n");
     expect(extractOutput(glued)).toBe("yes");
   });
@@ -220,11 +220,11 @@ describe("runTinker", () => {
 
   it("passes a secret by name and value, quoted", async () => {
     const session = fakeSession(() => ({ stdout: REAL_TRANSCRIPT }));
-    await runTinker(session, "echo getenv('DYAD_SECRET');", {
-      env: { DYAD_SECRET: "p@ssw0rd-+=" },
+    await runTinker(session, "echo getenv('SAMBA_SECRET');", {
+      env: { SAMBA_SECRET: "p@ssw0rd-+=" },
     });
 
-    expect(session.calls[0].command).toContain("-e DYAD_SECRET='p@ssw0rd-+='");
+    expect(session.calls[0].command).toContain("-e SAMBA_SECRET='p@ssw0rd-+='");
     // The value stays out of the script, so it never meets PHP's parser too.
     expect(session.calls[0].input).not.toContain("p@ssw0rd");
   });
@@ -235,7 +235,7 @@ describe("runTinker", () => {
     // text as a command on the user's server.
     await expect(
       runTinker(session, "echo 1;", {
-        env: { DYAD_SECRET: "a'; rm -rf /; '" },
+        env: { SAMBA_SECRET: "a'; rm -rf /; '" },
       }),
     ).rejects.toMatchObject({ kind: "internal" });
   });
@@ -264,17 +264,17 @@ describe("runTinker", () => {
 describe("wrapScript", () => {
   it("breaks the line before the closing marker", () => {
     // Captured from a real run: a script ending without PHP_EOL produced
-    // `yes__DYAD_OUT_END__`, and the marker was never found.
+    // `yes__SAMBA_OUT_END__`, and the marker was never found.
     expect(wrapScript("echo 'yes';")).toContain(
-      'echo PHP_EOL . "__DYAD_OUT_END__"',
+      'echo PHP_EOL . "__SAMBA_OUT_END__"',
     );
   });
 
   it("puts the body between the markers", () => {
     const wrapped = wrapScript("echo 42;");
     const lines = wrapped.split("\n");
-    expect(lines[0]).toContain("__DYAD_OUT_START__");
+    expect(lines[0]).toContain("__SAMBA_OUT_START__");
     expect(lines[1]).toBe("echo 42;");
-    expect(lines[2]).toContain("__DYAD_OUT_END__");
+    expect(lines[2]).toContain("__SAMBA_OUT_END__");
   });
 });

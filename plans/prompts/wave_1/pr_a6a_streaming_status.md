@@ -4,7 +4,7 @@ Implement PR A6a of plans/cleanup-state-machines.md, unblocked by design
 gate G1a — read the "G1a — DECIDED" section first; it is the contract
 this PR implements and wins over both this prompt and the appendix.
 Prereqs: A2 (#4091) landed; rebase over A3 (#4092) (shared files:
-useStreamChat, DyadMarkdownParser, chat_stream/commands.ts). Update the
+useStreamChat, SambaMarkdownParser, chat_stream/commands.ts). Update the
 plan's A6a status; remove the atoms' A1 allowlist entries.
 
 Appendix recipes: "chat_stream: isStreamingByIdAtom (L)" and
@@ -15,7 +15,7 @@ Scope — the ordered stack:
 
 1. isStreamActive-family selectors over StreamState; migrate useStreamChat
    first (~15 components follow), then direct readers (ChatPanel,
-   PromoMessage, DyadOutput, DyadMarkdownParser). Every hook read uses
+   PromoMessage, SambaOutput, SambaMarkdownParser). Every hook read uses
    the ?? {type:"idle"} fallback (G1a: no controller means idle).
 2. ChatTabs aggregate: per-tab keyed subscriptions (G1a decision 1); no
    manager index unless an existing perf test fails.

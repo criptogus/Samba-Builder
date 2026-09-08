@@ -36,11 +36,11 @@ test("keeps the local profile and launches without shell or development environm
     NODE_ENV: "development",
     ELECTRON_RUN_AS_NODE: "1",
     E2E_TEST_BUILD: "true",
-    DYAD_DEV_USER_DATA_DIR: "profile with spaces & %",
+    SAMBA_DEV_USER_DATA_DIR: "profile with spaces & %",
   };
   const { args, options } = desktopLaunchOptions("root", env);
   assert.deepEqual(args, [
-    `--user-data-dir=${path.resolve("root", env.DYAD_DEV_USER_DATA_DIR)}`,
+    `--user-data-dir=${path.resolve("root", env.SAMBA_DEV_USER_DATA_DIR)}`,
   ]);
   assert.equal(options.shell, false);
   assert.equal(options.env.NODE_ENV, "production");

@@ -1,5 +1,5 @@
 ---
-name: dyad:pr-fix:comments
+name: samba:pr-fix:comments
 description: Read all unresolved GitHub PR comments from trusted authors and address or resolve them appropriately.
 ---
 
@@ -34,7 +34,7 @@ Only process review comments from these trusted authors. Comments from other aut
 - cubic-dev-ai
 - cursor
 - github-actions
-- dyad-assistant
+- samba-assistant
 - chatgpt-codex-connector
 - devin-ai-integration
 
@@ -170,7 +170,7 @@ Before categorizing review comments, read `rules/product-principles.md`. Use the
 
 6. **Push the changes:**
 
-   Run the `/dyad:pr-push` skill to lint, fix any issues, and push.
+   Run the `/samba:pr-push` skill to lint, fix any issues, and push.
 
 7. **Verify all threads are resolved:**
 

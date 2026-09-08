@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { DyadErrorKind } from "@/errors/dyad_error";
+import { SambaErrorKind } from "@/errors/samba_error";
 import type { InvocationRef } from "@/state_machines/invocation_ref";
 import type {
   GithubOperation,
@@ -431,5 +431,5 @@ export function toGithubOpsDomainEvent(
 export function githubOpsFailureKind(error: unknown): string {
   return error instanceof Error && "kind" in error
     ? String((error as Error & { kind: unknown }).kind)
-    : DyadErrorKind.External;
+    : SambaErrorKind.External;
 }

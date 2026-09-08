@@ -7,7 +7,7 @@
   "assessment": "needs_info",
   "summary": "Your report came through without a description, so we can't tell yet what went wrong. The logs show that Samba Builder's automatic update check failed, which is probably not what you noticed, but it does mean you're on an older version.",
   "steps": [
-    "Download the latest version from https://www.dyad.sh/download and try again. A lot has been fixed since 1.9.0."
+    "Download the latest version from https://www.samba.sh/download and try again. A lot has been fixed since 1.9.0."
   ],
   "fixedIn": null,
   "related": [],

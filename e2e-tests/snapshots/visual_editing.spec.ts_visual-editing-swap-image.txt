@@ -1,5 +1,5 @@
 === src/pages/Index.tsx ===
-import { MadeWithDyad } from "@/components/made-with-dyad";
+import { MadeWithSamba } from "@/components/made-with-samba";
 
 const Index = () => {
     return (
@@ -13,7 +13,7 @@ const Index = () => {
                 <p className="text-xl text-gray-600">Start building your amazing project here!
                             </p>
             </div>
-            <MadeWithDyad />
+            <MadeWithSamba />
         </div>
     );
 };

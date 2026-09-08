@@ -68,7 +68,7 @@ export function isShellSafe(value: string): boolean {
 
 export function buildAdminCredentials(email: string): AdminCredentials {
   return {
-    username: "dyad-admin",
+    username: "samba-admin",
     // Asked for rather than invented, because the domain has to resolve and
     // because this is the address the user signs in with afterwards.
     email: email.trim(),

@@ -23,9 +23,9 @@ import {
   mcpServers,
 } from "../../db/schema";
 import { eq } from "drizzle-orm";
-import { getDyadAppPath } from "../../paths/paths";
+import { getSambaAppPath } from "../../paths/paths";
 import { validateChatContext } from "../utils/context_paths_utils";
-import { DyadError, DyadErrorKind } from "@/errors/dyad_error";
+import { SambaError, SambaErrorKind } from "@/errors/samba_error";
 import {
   getPackageManagerCommandEnv,
   PNPM_PM_ON_FAIL_IGNORE_ARG,
@@ -111,10 +111,10 @@ async function getSystemDebugInfo({
 
   // Get Samba Builder version from package.json
   const packageJsonPath = path.resolve(__dirname, "..", "..", "package.json");
-  let dyadVersion = "unknown";
+  let sambaVersion = "unknown";
   try {
     const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, "utf8"));
-    dyadVersion = packageJson.version;
+    sambaVersion = packageJson.version;
   } catch (err) {
     console.error("Failed to read package.json:", err);
   }
@@ -165,7 +165,7 @@ async function getSystemDebugInfo({
       serializeModelForDebug(settings.selectedModel) || "unknown",
     telemetryConsent: settings.telemetryConsent || "unknown",
     telemetryUrl: "https://us.i.posthog.com", // Hardcoded from renderer.tsx
-    dyadVersion,
+    sambaVersion,
     platform: process.platform,
     architecture: arch(),
     logs,
@@ -209,7 +209,7 @@ function sanitizeSettingsForDebug(
     selectedChatMode: settings.selectedChatMode ?? null,
     defaultChatMode: settings.defaultChatMode ?? null,
     autoApproveChanges: settings.autoApproveChanges ?? null,
-    enableDyadPro: settings.enableDyadPro ?? null,
+    enableSambaPro: settings.enableSambaPro ?? null,
     effortLevel: selectedModel.effortLevel,
     maxChatTurnsInContext: settings.maxChatTurnsInContext ?? null,
     enableAutoUpdate: settings.enableAutoUpdate,
@@ -330,12 +330,12 @@ export function registerDebugHandlers() {
         "..",
         "package.json",
       );
-      let dyadVersion = "unknown";
+      let sambaVersion = "unknown";
       try {
         const packageJson = JSON.parse(
           fs.readFileSync(packageJsonPath, "utf8"),
         );
-        dyadVersion = packageJson.version;
+        sambaVersion = packageJson.version;
       } catch (err) {
         console.error("Failed to read package.json:", err);
       }
@@ -373,9 +373,9 @@ export function registerDebugHandlers() {
       });
 
       if (!chatRecord) {
-        throw new DyadError(
+        throw new SambaError(
           `Chat with ID ${chatId} not found`,
-          DyadErrorKind.NotFound,
+          SambaErrorKind.NotFound,
         );
       }
 
@@ -385,9 +385,9 @@ export function registerDebugHandlers() {
       });
 
       if (!app) {
-        throw new DyadError(
+        throw new SambaError(
           `App with ID ${chatRecord.appId} not found`,
-          DyadErrorKind.NotFound,
+          SambaErrorKind.NotFound,
         );
       }
 
@@ -398,7 +398,7 @@ export function registerDebugHandlers() {
           db.select().from(language_models),
           db.select().from(mcpServers),
           extractCodebase({
-            appPath: getDyadAppPath(app.path),
+            appPath: getSambaAppPath(app.path),
             chatContext: validateChatContext(app.chatContext),
           }).then((result) => result.formattedOutput),
         ]);
@@ -412,7 +412,7 @@ export function registerDebugHandlers() {
         exportedAt: new Date().toISOString(),
 
         system: {
-          dyadVersion,
+          sambaVersion,
           platform: process.platform,
           architecture: arch(),
           nodeVersion,
@@ -523,9 +523,9 @@ export function registerDebugHandlers() {
   createTypedHandler(systemContracts.takeScreenshot, async () => {
     const win = BrowserWindow.getFocusedWindow();
     if (!win) {
-      throw new DyadError(
+      throw new SambaError(
         SCREENSHOT_ERRORS.noFocusedWindow,
-        DyadErrorKind.Precondition,
+        SambaErrorKind.Precondition,
       );
     }
 
@@ -533,7 +533,10 @@ export function registerDebugHandlers() {
     const image = await win.capturePage();
     // Validate image
     if (!image || image.isEmpty()) {
-      throw new DyadError(SCREENSHOT_ERRORS.emptyImage, DyadErrorKind.External);
+      throw new SambaError(
+        SCREENSHOT_ERRORS.emptyImage,
+        SambaErrorKind.External,
+      );
     }
     // Write the image to the clipboard
     clipboard.writeImage(image);

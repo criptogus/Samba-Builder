@@ -3,7 +3,7 @@ import {
   appOperationCoordinator,
   readAppResource,
 } from "../services/app_operation_coordinator";
-import { getDyadAppPath } from "@/paths/paths";
+import { getSambaAppPath } from "@/paths/paths";
 import crypto from "node:crypto";
 import log from "electron-log";
 import { eq } from "drizzle-orm";
@@ -14,7 +14,7 @@ import {
   type AppBlueprintVisual,
 } from "../types/app_blueprint";
 import { broadcastToRegisteredWindows } from "../utils/window_broadcast";
-import { DyadError, DyadErrorKind } from "@/errors/dyad_error";
+import { SambaError, SambaErrorKind } from "@/errors/samba_error";
 import { db } from "../../db";
 import { apps, chats } from "../../db/schema";
 
@@ -79,8 +79,8 @@ export function registerAppBlueprintHandlers() {
             where: eq(apps.id, chat.appId),
           });
           if (!project)
-            throw new DyadError("Project not found", DyadErrorKind.NotFound);
-          await recordFoundationBlueprint(getDyadAppPath(project.path), {
+            throw new SambaError("Project not found", SambaErrorKind.NotFound);
+          await recordFoundationBlueprint(getSambaAppPath(project.path), {
             appName: project.name,
             userPrompt: plan.userPrompt,
             templateId: plan.templateId,
@@ -119,9 +119,9 @@ export function registerAppBlueprintHandlers() {
     }
 
     if (plan.approved) {
-      throw new DyadError(
+      throw new SambaError(
         `Cannot edit approved app blueprint for chat ${params.chatId}`,
-        DyadErrorKind.Precondition,
+        SambaErrorKind.Precondition,
       );
     }
 
@@ -156,9 +156,9 @@ export function registerAppBlueprintHandlers() {
     }
 
     if (plan.approved) {
-      throw new DyadError(
+      throw new SambaError(
         `Cannot edit approved app blueprint for chat ${params.chatId}`,
-        DyadErrorKind.Precondition,
+        SambaErrorKind.Precondition,
       );
     }
 
@@ -176,16 +176,16 @@ export function registerAppBlueprintHandlers() {
   createTypedHandler(appBlueprintContracts.addVisual, async (_, params) => {
     const plan = appBlueprintStore.get(params.chatId);
     if (!plan) {
-      throw new DyadError(
+      throw new SambaError(
         `No app blueprint found for chat ${params.chatId} when adding visual`,
-        DyadErrorKind.NotFound,
+        SambaErrorKind.NotFound,
       );
     }
 
     if (plan.approved) {
-      throw new DyadError(
+      throw new SambaError(
         `Cannot add visual to approved app blueprint for chat ${params.chatId}`,
-        DyadErrorKind.Precondition,
+        SambaErrorKind.Precondition,
       );
     }
 
@@ -210,9 +210,9 @@ export function registerAppBlueprintHandlers() {
     }
 
     if (plan.approved) {
-      throw new DyadError(
+      throw new SambaError(
         `Cannot remove visual from approved app blueprint for chat ${params.chatId}`,
-        DyadErrorKind.Precondition,
+        SambaErrorKind.Precondition,
       );
     }
 

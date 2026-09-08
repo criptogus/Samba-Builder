@@ -46,10 +46,10 @@ describe("app lifecycle tools", () => {
       timeoutMs: undefined,
     });
     expect(ctx.onXmlStream).toHaveBeenCalledWith(
-      '<dyad-status title="Restarting app"></dyad-status>',
+      '<samba-status title="Restarting app"></samba-status>',
     );
     expect(ctx.onXmlComplete).toHaveBeenCalledWith(
-      '<dyad-status title="App restarted" state="finished"></dyad-status>',
+      '<samba-status title="App restarted" state="finished"></samba-status>',
     );
   });
 
@@ -78,10 +78,10 @@ describe("app lifecycle tools", () => {
       timeoutMs: 10 * 60 * 1_000,
     });
     expect(ctx.onXmlStream).toHaveBeenCalledWith(
-      '<dyad-status title="Reinstalling dependencies"></dyad-status>',
+      '<samba-status title="Reinstalling dependencies"></samba-status>',
     );
     expect(ctx.onXmlComplete).toHaveBeenCalledWith(
-      '<dyad-status title="Dependencies reinstalled; app restarted" state="finished"></dyad-status>',
+      '<samba-status title="Dependencies reinstalled; app restarted" state="finished"></samba-status>',
     );
   });
 

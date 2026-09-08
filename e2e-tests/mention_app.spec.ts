@@ -11,7 +11,7 @@ test("mention app (without pro)", async ({ po }) => {
 });
 
 test("mention app (with pro)", async ({ po }) => {
-  await po.setUpDyadPro();
+  await po.setUpSambaPro();
 
   await po.importApp("minimal-with-ai-rules");
   await po.navigation.goToAppsTab();

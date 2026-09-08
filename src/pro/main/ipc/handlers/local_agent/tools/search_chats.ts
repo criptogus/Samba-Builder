@@ -218,9 +218,9 @@ function buildResultXml(params: {
   if (!params.complete) {
     attrs.push(`state="pending"`);
   }
-  return `<dyad-search-chats ${attrs.join(" ")}>${
+  return `<samba-search-chats ${attrs.join(" ")}>${
     params.content ? escapeXmlContent(params.content) : ""
-  }</dyad-search-chats>`;
+  }</samba-search-chats>`;
 }
 
 export const searchChatsTool: ToolDefinition<SearchChatsArgs> = {

@@ -88,7 +88,7 @@ vi.mock("./app_run_actor_service", () => ({
   },
 }));
 vi.mock("../../paths/paths", () => ({
-  getDyadAppPath: (p: string) => `/apps/${p}`,
+  getSambaAppPath: (p: string) => `/apps/${p}`,
 }));
 vi.mock("electron-log", () => ({
   default: {
@@ -127,13 +127,13 @@ beforeEach(() => {
   mocks.readEnvFileIfExists.mockResolvedValue(null);
   mocks.createTempTestUser.mockResolvedValue({
     userId: "user-1",
-    email: "dyad-test+1@dyad.test",
+    email: "samba-test+1@samba.test",
     password: "pw",
     projectUrl: "https://sb-1.supabase.co",
   });
   mocks.getPublishableKey.mockResolvedValue("anon-key-123");
   mocks.createNeonTestAccount.mockResolvedValue({
-    email: "neon-test@dyad.test",
+    email: "neon-test@samba.test",
     password: "neon-pw",
   });
   mocks.ensureNeonAuthTrustedDomain.mockResolvedValue(null);
@@ -206,9 +206,9 @@ describe("prepareIsolatedTestDatabase — Supabase test-user path", () => {
     expect(prepared.isolation.mode).toBe("supabase-test-user");
     expect(prepared.isolation.reason).toBeUndefined();
     expect(prepared.testCredentials).toMatchObject({
-      DYAD_TEST_USER_EMAIL: "dyad-test+1@dyad.test",
-      DYAD_TEST_USER_PASSWORD: "pw",
-      DYAD_TEST_SUPABASE_URL: "https://sb-1.supabase.co",
+      SAMBA_TEST_USER_EMAIL: "samba-test+1@samba.test",
+      SAMBA_TEST_USER_PASSWORD: "pw",
+      SAMBA_TEST_SUPABASE_URL: "https://sb-1.supabase.co",
     });
     expect(prepared.infraError).toBeUndefined();
 
@@ -472,12 +472,12 @@ describe("prepareIsolatedTestDatabase — auth provisioning", () => {
         mocks.ensureNeonAuthTrustedDomain.mock.invocationCallOrder[0],
       ).toBeLessThan(mocks.createNeonTestAccount.mock.invocationCallOrder[0]);
       expect(prepared.testCredentials).toEqual({
-        DYAD_TEST_USER_EMAIL: "neon-test@dyad.test",
-        DYAD_TEST_USER_PASSWORD: "neon-pw",
+        SAMBA_TEST_USER_EMAIL: "neon-test@samba.test",
+        SAMBA_TEST_USER_PASSWORD: "neon-pw",
       });
       expect(prepared.authSetup).toEqual({
         mode: "neon-better-auth",
-        email: "neon-test@dyad.test",
+        email: "neon-test@samba.test",
         password: "neon-pw",
       });
     } finally {
@@ -579,11 +579,11 @@ describe("prepareIsolatedTestDatabase — auth provisioning", () => {
       organizationSlug: "org-1",
     });
     expect(prepared.testCredentials).toMatchObject({
-      DYAD_TEST_SUPABASE_ANON_KEY: "anon-key-123",
+      SAMBA_TEST_SUPABASE_ANON_KEY: "anon-key-123",
     });
     expect(prepared.authSetup).toEqual({
       mode: "supabase-password",
-      email: "dyad-test+1@dyad.test",
+      email: "samba-test+1@samba.test",
       password: "pw",
       projectUrl: "https://sb-1.supabase.co",
       anonKey: "anon-key-123",
@@ -605,10 +605,10 @@ describe("prepareIsolatedTestDatabase — auth provisioning", () => {
     expect(prepared.isolation.mode).toBe("supabase-test-user");
     expect(prepared.authSetup).toBeUndefined();
     expect(prepared.testCredentials).not.toHaveProperty(
-      "DYAD_TEST_SUPABASE_ANON_KEY",
+      "SAMBA_TEST_SUPABASE_ANON_KEY",
     );
     expect(prepared.testCredentials).toMatchObject({
-      DYAD_TEST_USER_EMAIL: "dyad-test+1@dyad.test",
+      SAMBA_TEST_USER_EMAIL: "samba-test+1@samba.test",
     });
   });
 });

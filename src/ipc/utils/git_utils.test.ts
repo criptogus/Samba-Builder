@@ -160,7 +160,7 @@ describe("gitCommit", () => {
       path.join(os.tmpdir(), "git-repo-hook-suppression-"),
     );
     await runGit(repoDir, ["init"]);
-    const maliciousHooksDir = path.join(repoDir, ".dyad-no-git-hooks");
+    const maliciousHooksDir = path.join(repoDir, ".samba-no-git-hooks");
     const markerPath = path.join(repoDir, "malicious-hook-ran");
     await fs.promises.mkdir(maliciousHooksDir);
     await fs.promises.writeFile(
@@ -590,7 +590,7 @@ describe("isGitPathClean", () => {
   async function makeRepo(): Promise<string> {
     repoDir = await fs.promises.mkdtemp(path.join(os.tmpdir(), "git-clean-"));
     await runGit(repoDir, ["init"]);
-    await runGit(repoDir, ["config", "user.email", "test@dyad.sh"]);
+    await runGit(repoDir, ["config", "user.email", "test@sambatech.com"]);
     await runGit(repoDir, ["config", "user.name", "Test"]);
     await fs.promises.writeFile(path.join(repoDir, "tracked.ts"), "one\n");
     await fs.promises.writeFile(path.join(repoDir, "other.ts"), "other\n");
@@ -682,13 +682,13 @@ describe("getGitUncommittedFiles", () => {
     repoDir = await fs.promises.mkdtemp(path.join(os.tmpdir(), "git-utils-"));
 
     await runGit(repoDir, ["init"]);
-    await fs.promises.mkdir(path.join(repoDir, ".dyad"), { recursive: true });
+    await fs.promises.mkdir(path.join(repoDir, ".samba"), { recursive: true });
     await fs.promises.writeFile(
       path.join(repoDir, "pnpm-workspace.yaml"),
       'packages: ["."]\n',
     );
     await fs.promises.writeFile(
-      path.join(repoDir, ".dyad", "screenshot.png"),
+      path.join(repoDir, ".samba", "screenshot.png"),
       "generated",
     );
     await fs.promises.writeFile(path.join(repoDir, "src.ts"), "user change");
@@ -702,17 +702,17 @@ describe("getGitUncommittedFiles", () => {
     repoDir = await fs.promises.mkdtemp(path.join(os.tmpdir(), "git-utils-"));
 
     await runGit(repoDir, ["init"]);
-    await fs.promises.mkdir(path.join(repoDir, ".dyad"), { recursive: true });
+    await fs.promises.mkdir(path.join(repoDir, ".samba"), { recursive: true });
     await fs.promises.writeFile(
       path.join(repoDir, "pnpm-workspace.yaml"),
       'packages: ["."]\n',
     );
     await fs.promises.writeFile(
-      path.join(repoDir, ".dyad", "screenshot.png"),
+      path.join(repoDir, ".samba", "screenshot.png"),
       "generated",
     );
     await fs.promises.writeFile(
-      path.join(repoDir, ".dyad", "foo [bar]"),
+      path.join(repoDir, ".samba", "foo [bar]"),
       "generated",
     );
     await fs.promises.writeFile(path.join(repoDir, "src.ts"), "user change");
@@ -751,12 +751,12 @@ describe("getGitUncommittedFiles", () => {
     repoDir = nextRepoDir;
 
     await runGit(nextRepoDir, ["init"]);
-    await fs.promises.mkdir(path.join(nextRepoDir, ".dyad"), {
+    await fs.promises.mkdir(path.join(nextRepoDir, ".samba"), {
       recursive: true,
     });
     // Git quotes these non-ASCII names with `\NNN` octal escapes in porcelain
     // output; both must be decoded back to their real UTF-8 paths so the
-    // user-visible file is reported and the `.dyad/` one is still filtered out.
+    // user-visible file is reported and the `.samba/` one is still filtered out.
     await fs.promises.writeFile(
       path.join(nextRepoDir, "café.txt"),
       "user change",
@@ -766,7 +766,7 @@ describe("getGitUncommittedFiles", () => {
       "user change",
     );
     await fs.promises.writeFile(
-      path.join(nextRepoDir, ".dyad", "naïve.png"),
+      path.join(nextRepoDir, ".samba", "naïve.png"),
       "generated",
     );
 
@@ -835,15 +835,15 @@ describe("gitStageToRevert", () => {
 
   it("ignores untracked Samba Builder-managed runtime files", async () => {
     const repo = await createTwoVersionRepo();
-    await fs.promises.mkdir(path.join(repo.repoDir, ".dyad"), {
+    await fs.promises.mkdir(path.join(repo.repoDir, ".samba"), {
       recursive: true,
     });
     await fs.promises.writeFile(
-      path.join(repo.repoDir, ".dyad", "screenshot.png"),
+      path.join(repo.repoDir, ".samba", "screenshot.png"),
       "generated",
     );
     await fs.promises.writeFile(
-      path.join(repo.repoDir, ".dyad", "foo [bar]"),
+      path.join(repo.repoDir, ".samba", "foo [bar]"),
       "generated",
     );
     await fs.promises.writeFile(

@@ -14,7 +14,7 @@ async function queueMessage(page: Page, chatInput: Locator, message: string) {
 testSkipIfWindows(
   "local-agent - sub-agent tools replace root explore_code",
   async ({ po }) => {
-    await po.setUpDyadPro({ localAgent: true });
+    await po.setUpSambaPro({ localAgent: true });
     await po.importApp("minimal");
     await po.chatActions.selectLocalAgentMode();
 
@@ -26,7 +26,7 @@ testSkipIfWindows(
 testSkipIfWindows(
   "local-agent - Explorer appears inline and returns partial findings",
   async ({ po }) => {
-    await po.setUpDyadPro({ localAgent: true, autoApprove: true });
+    await po.setUpSambaPro({ localAgent: true, autoApprove: true });
     await po.importApp("minimal");
     await po.chatActions.selectLocalAgentMode();
 
@@ -64,7 +64,7 @@ testSkipIfWindows(
 testSkipIfWindows(
   "local-agent - queued prompt waits for automatic review",
   async ({ po }) => {
-    await po.setUpDyadPro({ localAgent: true, autoApprove: true });
+    await po.setUpSambaPro({ localAgent: true, autoApprove: true });
     await po.page.evaluate(async () => {
       await (window as any).electron.ipcRenderer.invoke("set-user-settings", {
         enableAutoReview: true,

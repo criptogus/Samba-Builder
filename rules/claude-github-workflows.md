@@ -6,7 +6,7 @@ Guidelines for the LLM-driven workflows in `.github/workflows/` that invoke `ant
 
 If a workflow's behavior depends on a deterministic check (identity comparisons, label presence, file paths, actor type, etc.), do the check in a workflow-level `if:` condition and split into separate jobs — do not leave it to the prompt.
 
-**Why:** LLMs can conflate branches when the comment/PR body @mentions or describes the "other" party. A prior bug (see `closed-issue-comment.yml` history, dyad-sh/dyad#3228): the prompt told Claude "if COMMENT_AUTHOR == ISSUE_AUTHOR do X, else do Y," but when a maintainer closed an issue with a comment that mentioned `@original-author` and described the symptom, Claude fell into the author branch and re-opened the issue.
+**Why:** LLMs can conflate branches when the comment/PR body @mentions or describes the "other" party. A prior bug (see `closed-issue-comment.yml` history, samba-sh/samba#3228): the prompt told Claude "if COMMENT_AUTHOR == ISSUE_AUTHOR do X, else do Y," but when a maintainer closed an issue with a comment that mentioned `@original-author` and described the symptom, Claude fell into the author branch and re-opened the issue.
 
 **How to apply:**
 
@@ -55,7 +55,7 @@ This has two consequences that bite in CI:
 
 ## Scope `Write`/`Edit`/`Read` rules to workspace-relative paths
 
-`--allowedTools` path patterns without a leading `/` resolve relative to the checkout; a leading `/` is absolute. `claude-triage.yml` granted `Edit(/tmp/issue-triage/**)` while the decision file was `tmp/issue-triage/triage.json` inside the workspace, so every write was denied (`permission_denials_count: 13`, then `Claude did not write tmp/issue-triage/triage.json`, dyad-sh/dyad#4427) unless the model happened to use `Bash(echo:*)` redirection — 41 issues went unlabeled that way. Name the exact workspace-relative file and grant both `Write(...)` (new file) and `Edit(...)`: `Write(tmp/issue-triage/triage.json),Edit(tmp/issue-triage/triage.json)`.
+`--allowedTools` path patterns without a leading `/` resolve relative to the checkout; a leading `/` is absolute. `claude-triage.yml` granted `Edit(/tmp/issue-triage/**)` while the decision file was `tmp/issue-triage/triage.json` inside the workspace, so every write was denied (`permission_denials_count: 13`, then `Claude did not write tmp/issue-triage/triage.json`, samba-sh/samba#4427) unless the model happened to use `Bash(echo:*)` redirection — 41 issues went unlabeled that way. Name the exact workspace-relative file and grant both `Write(...)` (new file) and `Edit(...)`: `Write(tmp/issue-triage/triage.json),Edit(tmp/issue-triage/triage.json)`.
 
 ## Issue triage (`claude-triage.yml`) layout
 

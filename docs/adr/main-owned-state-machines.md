@@ -8,7 +8,7 @@
 
 ## Context and decision
 
-Dyad will support multiple windows that can show and control the same chat or
+Samba will support multiple windows that can show and control the same chat or
 app. A renderer controller can therefore no longer be both a window-local
 object and the authority for a shared lifecycle. Every actor has one
 authoritative host. Shared-entity and resource-owning actors run in main;
@@ -132,7 +132,7 @@ Image-generation app-quit rationale: providers may not acknowledge
 cancellation, so shutdown attempts cleanup but must not wait indefinitely.
 
 Image-generation restart rationale: generation may cost money and may already
-have produced an external side effect, so Dyad must not silently replay it
+have produced an external side effect, so Samba must not silently replay it
 after a crash; completed files that were committed before shutdown remain.
 
 Renderer-local machines die with their renderer resources and must settle or

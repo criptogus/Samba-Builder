@@ -2,7 +2,7 @@ import { randomUUID } from "node:crypto";
 import type { FactoryAction } from "@/ipc/types/factory";
 import type { FactoryProject } from "../../../../packages/samba-factory/src/schema";
 import { buildBlockers } from "../../../../packages/samba-factory/src/policy";
-import { DyadError, DyadErrorKind } from "@/errors/dyad_error";
+import { SambaError, SambaErrorKind } from "@/errors/samba_error";
 
 export function applyFactoryAction(
   project: FactoryProject,
@@ -26,9 +26,9 @@ export function applyFactoryAction(
         new Set(action.plan.tasks.map((task) => task.id)).size !==
         action.plan.tasks.length
       )
-        throw new DyadError(
+        throw new SambaError(
           "IDs de tarefas duplicados.",
-          DyadErrorKind.Validation,
+          SambaErrorKind.Validation,
         );
       next.plan = action.plan;
       next.approval = null;
@@ -37,9 +37,9 @@ export function applyFactoryAction(
       break;
     case "approve-plan":
       if (!next.plan || !next.brief.trim())
-        throw new DyadError(
+        throw new SambaError(
           "Preencha briefing e plano antes de aprovar.",
-          DyadErrorKind.Precondition,
+          SambaErrorKind.Precondition,
         );
       next.approval = approval;
       next.mode = next.brandApproval ? "build" : "design";
@@ -53,16 +53,19 @@ export function applyFactoryAction(
       if (action.mode === "build" || action.mode === "fix") {
         const blockers = buildBlockers(next);
         if (blockers.length)
-          throw new DyadError(blockers.join("\n"), DyadErrorKind.Precondition);
+          throw new SambaError(
+            blockers.join("\n"),
+            SambaErrorKind.Precondition,
+          );
       }
       next.mode = action.mode;
       break;
     case "task": {
       const task = next.plan?.tasks.find((entry) => entry.id === action.taskId);
       if (!task || !next.approval)
-        throw new DyadError(
+        throw new SambaError(
           "A tarefa precisa pertencer a um plano aprovado.",
-          DyadErrorKind.Precondition,
+          SambaErrorKind.Precondition,
         );
       task.status = action.status;
       break;
@@ -79,18 +82,18 @@ export function applyFactoryAction(
     case "resolve-request": {
       const request = next.changes.find((entry) => entry.id === action.id);
       if (!request)
-        throw new DyadError(
+        throw new SambaError(
           "Solicitação não encontrada.",
-          DyadErrorKind.NotFound,
+          SambaErrorKind.NotFound,
         );
       if (
         action.status === "in-scope" &&
         (!next.approval ||
           !next.plan?.tasks.some((task) => task.id === action.taskId))
       )
-        throw new DyadError(
+        throw new SambaError(
           "Vincule o pedido a uma tarefa do plano aprovado.",
-          DyadErrorKind.Precondition,
+          SambaErrorKind.Precondition,
         );
       request.status = action.status;
       request.taskId = action.taskId;

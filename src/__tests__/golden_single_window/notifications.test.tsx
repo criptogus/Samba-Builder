@@ -137,7 +137,7 @@ describe("golden single-window: notification routing", () => {
       title: "Golden app",
       options: {
         body: "Finished the requested change",
-        tag: "dyad-chat-complete-42",
+        tag: "samba-chat-complete-42",
       },
     });
     await act(async () => FakeNotification.instances[0].onclick?.());
@@ -156,7 +156,7 @@ describe("golden single-window: notification routing", () => {
         toolName: "write_file",
         deadlineAt: 1_000,
       },
-      tag: "dyad-agent-consent-agent-consent:1",
+      tag: "samba-agent-consent-agent-consent:1",
     },
     {
       descriptor: {
@@ -166,7 +166,7 @@ describe("golden single-window: notification routing", () => {
         questions: [{ id: "q1", question: "Which style?" }],
         deadlineAt: 1_000,
       },
-      tag: "dyad-plan-questionnaire-questionnaire:1",
+      tag: "samba-plan-questionnaire-questionnaire:1",
     },
   ])(
     "delivers one sticky notification for $descriptor.kind",
@@ -208,7 +208,7 @@ describe("golden single-window: notification routing", () => {
 
     await waitFor(() => expect(FakeNotification.instances).toHaveLength(1));
     expect(FakeNotification.instances[0].options).toMatchObject({
-      tag: "dyad-mcp-consent-mcp-consent:1",
+      tag: "samba-mcp-consent-mcp-consent:1",
       requireInteraction: true,
     });
     hook.unmount();

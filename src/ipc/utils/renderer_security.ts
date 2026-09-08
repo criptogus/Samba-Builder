@@ -1,5 +1,5 @@
 import type { IpcMainInvokeEvent } from "electron";
-import { DyadError, DyadErrorKind } from "@/errors/dyad_error";
+import { SambaError, SambaErrorKind } from "@/errors/samba_error";
 
 type RendererTrustPolicy = {
   devServerOrigin: string | null;
@@ -161,16 +161,16 @@ function isSenderMainFrame(event: IpcMainInvokeEvent): boolean {
 
 export function assertTrustedRenderer(event: IpcMainInvokeEvent): void {
   if (trustPolicy.packagedRendererProtocol === null) {
-    throw new DyadError(
+    throw new SambaError(
       "Renderer trust policy is not configured. Call configureTrustedRenderer() before handling IPC.",
-      DyadErrorKind.Internal,
+      SambaErrorKind.Internal,
     );
   }
   const frame = event.senderFrame;
   if (!frame || !isSenderMainFrame(event) || !isTrustedRendererUrl(frame.url)) {
-    throw new DyadError(
+    throw new SambaError(
       "IPC requests must originate from the trusted Samba Builder renderer.",
-      DyadErrorKind.Validation,
+      SambaErrorKind.Validation,
     );
   }
 }

@@ -1,3 +1,3 @@
 chat1
 
-<dyad-chat-summary>Chat 1</dyad-chat-summary>
+<samba-chat-summary>Chat 1</samba-chat-summary>

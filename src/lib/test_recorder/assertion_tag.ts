@@ -10,7 +10,7 @@ import {
 } from "./assertion_proposal";
 
 /**
- * Serialize/deserialize the `<dyad-test-assertions>` chat card, the durable
+ * Serialize/deserialize the `<samba-test-assertions>` chat card, the durable
  * store for a proposal. Approving rewrites the tag in place with
  * `status="approved"`, which is what makes the latch survive a reload. The tag
  * sits inside a larger message (the agent's prose and other tool cards surround
@@ -18,7 +18,7 @@ import {
  * replacing the whole message content.
  */
 
-export const ASSERTIONS_TAG = "dyad-test-assertions";
+export const ASSERTIONS_TAG = "samba-test-assertions";
 
 /**
  * `discarded` is as durable as `approved` deliberately. Both are answers, and a

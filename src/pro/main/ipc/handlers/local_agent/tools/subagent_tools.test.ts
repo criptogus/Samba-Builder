@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { DyadError, DyadErrorKind } from "@/errors/dyad_error";
+import { SambaError, SambaErrorKind } from "@/errors/samba_error";
 
 const subagentManagerMocks = vi.hoisted(() => ({
   cancelSubagent: vi.fn(async () => {}),
@@ -278,7 +278,7 @@ describe("spawn_agent schema", () => {
       "implementer-1",
     );
     subagentManagerMocks.waitForSubagents.mockRejectedValueOnce(
-      new DyadError("wait failed", DyadErrorKind.UserCancelled),
+      new SambaError("wait failed", SambaErrorKind.UserCancelled),
     );
     subagentManagerMocks.cancelSubagent.mockRejectedValueOnce(
       new Error("cancel failed"),
@@ -301,7 +301,7 @@ describe("spawn_agent schema", () => {
       ctx,
     );
     await expect(result).rejects.toMatchObject({
-      kind: DyadErrorKind.UserCancelled,
+      kind: SambaErrorKind.UserCancelled,
       message:
         "The sub-agent wait failed: wait failed Cancellation also failed: cancel failed",
     });
@@ -338,7 +338,7 @@ describe("spawn_agent schema", () => {
   it("hides advanced tools by default and when explicitly disabled", () => {
     for (const canUseAdvancedSubagentTools of [undefined, false]) {
       const ctx = {
-        isDyadPro: true,
+        isSambaPro: true,
         canUseAdvancedSubagentTools,
       } as AgentContext;
 
@@ -350,7 +350,7 @@ describe("spawn_agent schema", () => {
 
   it("exposes advanced tools to enabled root turns", () => {
     const ctx = {
-      isDyadPro: true,
+      isSambaPro: true,
       canUseAdvancedSubagentTools: true,
     } as AgentContext;
 
@@ -361,7 +361,7 @@ describe("spawn_agent schema", () => {
 
   it("keeps advanced tools hidden from child agents when enabled for root", () => {
     const root = {
-      isDyadPro: true,
+      isSambaPro: true,
       canUseAdvancedSubagentTools: true,
       sharedServerModulePaths: [],
       pendingFunctionDeploys: [],

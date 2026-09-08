@@ -35,7 +35,7 @@ const expectGitContextGuidance = (prompt: string) => {
   expect(prompt).toContain(
     "use the provided commit hash with Git inspection tools",
   );
-  expect(prompt).not.toContain("<dyad-git-context>");
+  expect(prompt).not.toContain("<samba-git-context>");
 };
 
 const expectBuildGitContextGuidance = (prompt: string) => {
@@ -47,7 +47,7 @@ const expectBuildGitContextGuidance = (prompt: string) => {
     "identifies the app state at the start of that turn",
   );
   expect(prompt).not.toContain("Git inspection tools");
-  expect(prompt).not.toContain("<dyad-git-context>");
+  expect(prompt).not.toContain("<samba-git-context>");
 };
 
 describe("local_agent_prompt", () => {
@@ -111,12 +111,12 @@ describe("local_agent_prompt", () => {
       "Reinstalling dependencies already includes a restart, so never call both lifecycle tools for the same reason",
     );
     expect(prompt).not.toContain(
-      '<dyad-command type="restart"></dyad-command>',
+      '<samba-command type="restart"></samba-command>',
     );
     expect(prompt).not.toContain(
-      '<dyad-command type="rebuild"></dyad-command>',
+      '<samba-command type="rebuild"></samba-command>',
     );
-    expect(prompt).toContain('<dyad-command type="refresh"></dyad-command>');
+    expect(prompt).toContain('<samba-command type="refresh"></samba-command>');
     expect(prompt).toContain(
       "selecting **Clear Cache** to clear cookies, local storage, service workers, and cached data",
     );
@@ -199,7 +199,7 @@ describe("local_agent_prompt", () => {
     expect(prompt).not.toContain("set_chat_summary");
     expect(prompt).not.toContain("planning_questionnaire");
     expect(prompt).not.toContain("execute SQL");
-    expect(prompt).not.toContain("dyad-execute-sql");
+    expect(prompt).not.toContain("samba-execute-sql");
     expect(prompt).not.toContain("add_integration");
   });
 
@@ -319,7 +319,7 @@ describe("local_agent_prompt", () => {
     expect(prompt).toContain('guide="add-password-reset"');
     expect(prompt).toContain("Never hand-roll a reset-token flow");
     expect(prompt).not.toContain("execute SQL");
-    expect(prompt).not.toContain("dyad-execute-sql");
+    expect(prompt).not.toContain("samba-execute-sql");
   });
 
   it("omits the Neon email-verification guide when it is disabled", () => {

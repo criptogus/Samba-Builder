@@ -13,7 +13,7 @@ import { executeSupabaseSql } from "../../../../../../supabase_admin/supabase_ma
 import { executeNeonSql } from "../../../../../../neon_admin/neon_context";
 import { writeMigrationFile } from "../../../../../../ipc/utils/file_utils";
 import { readSettings } from "../../../../../../main/settings";
-import { DyadError, DyadErrorKind } from "@/errors/dyad_error";
+import { SambaError, SambaErrorKind } from "@/errors/samba_error";
 import { resolveLinkedDatabaseProvider } from "@/shared/database_provider";
 import {
   doesSqlDeleteData,
@@ -199,9 +199,9 @@ export const executeSqlTool: ToolDefinition<z.infer<typeof executeSqlSchema>> =
     buildXml: (args, isComplete) => {
       if (args.query == undefined) return undefined;
 
-      let xml = `<dyad-execute-sql description="${escapeXmlAttr(args.description ?? "")}">\n${escapeXmlContent(args.query)}`;
+      let xml = `<samba-execute-sql description="${escapeXmlAttr(args.description ?? "")}">\n${escapeXmlContent(args.query)}`;
       if (isComplete) {
-        xml += "\n</dyad-execute-sql>";
+        xml += "\n</samba-execute-sql>";
       }
       return xml;
     },
@@ -247,9 +247,9 @@ export const executeSqlTool: ToolDefinition<z.infer<typeof executeSqlSchema>> =
         return `Successfully executed SQL query.\n\nSQL result:\n${sqlResult}`;
       }
 
-      throw new DyadError(
+      throw new SambaError(
         getUnavailableDatabaseProviderMessage(ctx, "SQL execution"),
-        DyadErrorKind.Precondition,
+        SambaErrorKind.Precondition,
       );
     },
   };

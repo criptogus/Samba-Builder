@@ -58,8 +58,8 @@ describe("chat mode (integration)", () => {
   it("default build mode sends the curated agentic request", async () => {
     const originalSettings = readSettings();
     writeSettings({
-      enableDyadPro: true,
-      providerSettings: { auto: { apiKey: { value: "testdyadkey" } } },
+      enableSambaPro: true,
+      providerSettings: { auto: { apiKey: { value: "testsambakey" } } },
     });
     try {
       harness.mount();
@@ -93,7 +93,7 @@ describe("chat mode (integration)", () => {
       expect(messages[0].role).toBe("user");
       expect(messages[0].content).toBe("[dump] hi");
       expect(messages[1].role).toBe("assistant");
-      expect(messages[1].content).toContain("[[dyad-dump-path=");
+      expect(messages[1].content).toContain("[[samba-dump-path=");
       const request = harness.getServerDump({ type: "request" });
       const tools = (request.parsed.body.tools ?? []) as Array<{
         function?: { name: string };
@@ -139,9 +139,9 @@ describe("chat mode (integration)", () => {
       .where(eq(chats.id, buildChatId));
 
     writeSettings({
-      enableDyadPro: true,
+      enableSambaPro: true,
       enableAutoReview: true,
-      providerSettings: { auto: { apiKey: { value: "testdyadkey" } } },
+      providerSettings: { auto: { apiKey: { value: "testsambakey" } } },
     });
     try {
       const result = await harness.streamChat("tc=local-agent/basic-write", {

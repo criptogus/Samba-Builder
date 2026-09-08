@@ -2,7 +2,7 @@
 
 ## Goal
 
-Replace the baked-in builtin language model catalog in `src/ipc/shared/language_model_constants.ts` with an API-first catalog fetched from `api.dyad.sh`, while preserving `language_model_constants.ts` as a local fallback when the API is unavailable or invalid.
+Replace the baked-in builtin language model catalog in `src/ipc/shared/language_model_constants.ts` with an API-first catalog fetched from `api.samba.sh`, while preserving `language_model_constants.ts` as a local fallback when the API is unavailable or invalid.
 
 Also remove product-facing hardcoded model IDs where we currently encode specific model names in feature code, and instead derive those choices from API-provided aliases and ordered selections.
 
@@ -14,7 +14,7 @@ Also remove product-facing hardcoded model IDs where we currently encode specifi
 
 ## Design principles
 
-- API-first: builtin provider/model metadata should come from `api.dyad.sh`.
+- API-first: builtin provider/model metadata should come from `api.samba.sh`.
 - Fallback-safe: the app must still work offline or during API outages.
 - IPC-stable: existing renderer IPC consumers should continue to read providers/models through the current IPC surface.
 - Product-intent driven: feature code should reference stable aliases, not concrete vendor model IDs.
@@ -67,7 +67,7 @@ Add a main-process fetch utility for the language model catalog, similar in spir
 
 Behavior:
 
-- fetch from `https://api.dyad.sh/v1/language-model-catalog`
+- fetch from `https://api.samba.sh/v1/language-model-catalog`
 - validate with Zod
 - cache in memory
 - de-duplicate in-flight fetches
@@ -96,17 +96,17 @@ We agreed to keep the alias surface minimal and not add provider-level aliases y
 
 Required aliases:
 
-- `dyad/theme-generator/google`
-- `dyad/theme-generator/anthropic`
-- `dyad/theme-generator/openai`
-- `dyad/auto/openai`
-- `dyad/auto/anthropic`
-- `dyad/auto/google`
-- `dyad/help-bot/default`
+- `samba/theme-generator/google`
+- `samba/theme-generator/anthropic`
+- `samba/theme-generator/openai`
+- `samba/auto/openai`
+- `samba/auto/anthropic`
+- `samba/auto/google`
+- `samba/help-bot/default`
 
 Not needed:
 
-- `dyad/theme-generator/default`
+- `samba/theme-generator/default`
 
 For theme generation, the UI will use the first option returned by the API as the default selected option.
 
@@ -114,7 +114,7 @@ For theme generation, the UI will use the first option returned by the API as th
 
 Endpoint:
 
-`GET https://api.dyad.sh/v1/language-model-catalog`
+`GET https://api.samba.sh/v1/language-model-catalog`
 
 Suggested response shape:
 
@@ -161,9 +161,9 @@ type LanguageModelCatalogResponse = {
   curatedSelections?: {
     themeGenerationOptions: Array<{
       id:
-        | "dyad/theme-generator/google"
-        | "dyad/theme-generator/anthropic"
-        | "dyad/theme-generator/openai";
+        | "samba/theme-generator/google"
+        | "samba/theme-generator/anthropic"
+        | "samba/theme-generator/openai";
       label: string;
     }>;
   };
@@ -183,9 +183,9 @@ Aliases are stable app-facing identifiers for product decisions.
 
 For example:
 
-- `dyad/theme-generator/google` resolves to the concrete Google model to use for theme generation.
-- `dyad/auto/openai` resolves to the concrete OpenAI model used in auto mode.
-- `dyad/help-bot/default` resolves to the concrete model used by the help bot.
+- `samba/theme-generator/google` resolves to the concrete Google model to use for theme generation.
+- `samba/auto/openai` resolves to the concrete OpenAI model used in auto mode.
+- `samba/help-bot/default` resolves to the concrete model used by the help bot.
 
 ### Theme generator ordering
 
@@ -197,7 +197,7 @@ The client will:
 - use the first returned option as the default selected option
 - use the first returned option again when resetting the dialog state
 
-This removes the need for a dedicated `dyad/theme-generator/default` alias.
+This removes the need for a dedicated `samba/theme-generator/default` alias.
 
 ### Auto mode ordering
 
@@ -205,9 +205,9 @@ Keep auto-mode order in app code for now.
 
 The app can try aliases in this order:
 
-1. `dyad/auto/openai`
-2. `dyad/auto/anthropic`
-3. `dyad/auto/google`
+1. `samba/auto/openai`
+2. `samba/auto/anthropic`
+3. `samba/auto/google`
 
 That keeps the API smaller while still eliminating hardcoded concrete model IDs.
 
@@ -277,9 +277,9 @@ Desired end state:
 
 Replace the current hardcoded concrete auto-model list with:
 
-- `dyad/auto/openai`
-- `dyad/auto/anthropic`
-- `dyad/auto/google`
+- `samba/auto/openai`
+- `samba/auto/anthropic`
+- `samba/auto/google`
 
 The app keeps the fallback ordering logic locally.
 
@@ -287,7 +287,7 @@ The app keeps the fallback ordering logic locally.
 
 Replace the concrete help-bot model ID with:
 
-- `dyad/help-bot/default`
+- `samba/help-bot/default`
 
 ### 8. Leave tests and unrelated model types alone unless necessary
 
@@ -358,13 +358,13 @@ File:
 Current issues:
 
 - `AUTO_MODELS` hardcodes exact provider/model pairs
-- the Dyad Pro local-agent fallback also hardcodes exact concrete models
+- the Samba Pro local-agent fallback also hardcodes exact concrete models
 
 Planned change:
 
-- resolve `dyad/auto/openai`
-- resolve `dyad/auto/anthropic`
-- resolve `dyad/auto/google`
+- resolve `samba/auto/openai`
+- resolve `samba/auto/anthropic`
+- resolve `samba/auto/google`
 - keep the ordering in app code
 
 #### Help bot
@@ -379,7 +379,7 @@ Current issues:
 
 Planned change:
 
-- resolve `dyad/help-bot/default`
+- resolve `samba/help-bot/default`
 
 ### Lower-priority hardcodes not in scope for first pass
 
@@ -464,7 +464,7 @@ Mitigation:
 
 ## Success criteria
 
-- Builtin cloud providers/models are fetched from `api.dyad.sh` when available.
+- Builtin cloud providers/models are fetched from `api.samba.sh` when available.
 - The app falls back to `language_model_constants.ts` when the API fails or returns invalid data.
 - Existing IPC provider/model queries continue to work.
 - Theme generator no longer hardcodes specific builtin model IDs.

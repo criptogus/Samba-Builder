@@ -203,7 +203,7 @@ Every item is a real review comment or fix iteration from this wave.
   errored finalize fired a "completed" notification (#4095); external
   errors ignored during finalizing were silently dropped (three
   reports).
-- Classified `DyadError`s rewritten to `Auth` by broad catches;
+- Classified `SambaError`s rewritten to `Auth` by broad catches;
   infrastructure failures indistinguishable from denials; expected
   admission refusals surfaced as product exceptions (#4105, #4108 ×3,
   #4119, #4121, #4123).
@@ -272,7 +272,7 @@ kernel owns, with an API whose _shape_ enforces the invariants:
 const waiter = waiters.register({
   requestId: idSource.next(), // never a reusable invocation
   invocationRef, // correlation, not identity
-  onDisposed: "reject", // classified DyadError, kind: Disposed
+  onDisposed: "reject", // classified SambaError, kind: Disposed
 });
 const receipt = await actor.dispatch(event, waiter);
 return waiter.settled; // Promise<Outcome>
@@ -493,7 +493,7 @@ superseded` plus the classified error; deriving user-facing outcome
 - Authorization and admission hooks return a discriminated
   `allow | deny(classified) `; throwing from them is an infrastructure
   failure by definition and is reported, not converted to a denial
-  (#4105). Broad catches at the transport preserve `DyadErrorKind`
+  (#4105). Broad catches at the transport preserve `SambaErrorKind`
   (#4108 ×3, #4123 Auth-vs-NotFound).
 - Expected lifecycle refusals (`ActorAdmissionError`, fence rejections,
   stale-operation ignores) have a dedicated telemetry channel distinct

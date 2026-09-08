@@ -4,7 +4,7 @@ import { eq, isNotNull } from "drizzle-orm";
 
 import { db } from "../../db";
 import { apps } from "../../db/schema";
-import { DyadError, DyadErrorKind } from "@/errors/dyad_error";
+import { SambaError, SambaErrorKind } from "@/errors/samba_error";
 import { IS_TEST_BUILD } from "@/ipc/utils/test_utils";
 import { fetchWithRetry } from "@/ipc/utils/retryWithRateLimit";
 import { appOperationCoordinator } from "@/ipc/services/app_operation_coordinator";
@@ -22,7 +22,7 @@ type AppRow = typeof apps.$inferSelect;
 export interface TempTestUser {
   /** The auth user's id (also persisted on the app row while live). */
   userId: string;
-  /** Login email, of the form `dyad-test+<appId>-<ts>@dyad.test`. */
+  /** Login email, of the form `samba-test+<appId>-<ts>@samba.test`. */
   email: string;
   /** Generated login password (handed to the test runner, never persisted). */
   password: string;
@@ -125,16 +125,16 @@ async function getServiceRoleKey({
     reveal: true,
   });
   if (!keys?.length) {
-    throw new DyadError(
+    throw new SambaError(
       `No API keys found for Supabase project ${projectId}.`,
-      DyadErrorKind.NotFound,
+      SambaErrorKind.NotFound,
     );
   }
   const secret = pickSecretKey(keys);
   if (!secret?.api_key) {
-    throw new DyadError(
+    throw new SambaError(
       `No secret key (or legacy service_role key) found for Supabase project ${projectId}. An isolated test user can't be created without one — create a secret key in Supabase under Settings → API Keys.`,
-      DyadErrorKind.NotFound,
+      SambaErrorKind.NotFound,
     );
   }
   return {
@@ -169,7 +169,7 @@ function adminHeaders(key: AdminKey): Record<string, string> {
  * on the app row (`supabaseTestUserId`) so a crash mid-run can be reconciled on
  * next launch.
  *
- * Throws `DyadError` if the app isn't connected to a Supabase project/org.
+ * Throws `SambaError` if the app isn't connected to a Supabase project/org.
  */
 export async function createTempTestUser(
   appData: AppRow,
@@ -177,20 +177,20 @@ export async function createTempTestUser(
   const projectId = appData.supabaseProjectId;
   const organizationSlug = appData.supabaseOrganizationSlug;
   if (!projectId) {
-    throw new DyadError(
+    throw new SambaError(
       `App ${appData.id} is not connected to a Supabase project.`,
-      DyadErrorKind.Precondition,
+      SambaErrorKind.Precondition,
     );
   }
   if (!organizationSlug) {
-    throw new DyadError(
+    throw new SambaError(
       `App ${appData.id} is not connected to a Supabase organization.`,
-      DyadErrorKind.Precondition,
+      SambaErrorKind.Precondition,
     );
   }
 
   const projectUrl = projectUrlFor(projectId);
-  const email = `dyad-test+${appData.id}-${Date.now()}@dyad.test`;
+  const email = `samba-test+${appData.id}-${Date.now()}@samba.test`;
   const password = crypto.randomBytes(24).toString("base64url");
 
   if (IS_TEST_BUILD) {
@@ -214,9 +214,9 @@ export async function createTempTestUser(
       userId: appData.supabaseTestUserId,
     });
     if (!priorCleanupOk) {
-      throw new DyadError(
+      throw new SambaError(
         `Couldn't clean up the previous Supabase test user for app ${appData.id}. Skipping this run to avoid leaking a test user; it will be retried on the next launch.`,
-        DyadErrorKind.External,
+        SambaErrorKind.External,
       );
     }
   }
@@ -237,7 +237,7 @@ export async function createTempTestUser(
         // trip. Inserting into auth tables directly produces a user that
         // can't log in — the Admin API avoids that.
         email_confirm: true,
-        app_metadata: { dyad_test: true, dyad_app_id: appData.id },
+        app_metadata: { samba_test: true, samba_app_id: appData.id },
       }),
     },
     `Create test user for app ${appData.id}`,
@@ -248,9 +248,9 @@ export async function createTempTestUser(
     // use instead. That's fixable in the Supabase dashboard, so say how rather
     // than surfacing raw Supabase JSON as an unexplained External failure.
     if (response.status === 401 && /legacy api keys/i.test(detail)) {
-      throw new DyadError(
+      throw new SambaError(
         "This Supabase project has its legacy API keys (anon, service_role) disabled, and Samba Builder couldn't find a secret key to use instead. Create a secret key in Supabase under Settings → API Keys, then run the tests again.",
-        DyadErrorKind.Precondition,
+        SambaErrorKind.Precondition,
       );
     }
     // `bad_jwt` means Supabase tried to read a JWT it couldn't parse. With a
@@ -261,21 +261,21 @@ export async function createTempTestUser(
       (response.status === 401 || response.status === 403) &&
       /bad_jwt|invalid jwt/i.test(detail)
     ) {
-      throw new DyadError(
+      throw new SambaError(
         `Supabase rejected the ${adminKey.isLegacyJwt ? "legacy service_role" : "secret"} key Samba Builder used to create the test user (${response.status}). ${detail}`,
-        DyadErrorKind.External,
+        SambaErrorKind.External,
       );
     }
-    throw new DyadError(
+    throw new SambaError(
       `Supabase rejected the test-user creation (${response.status}). ${detail}`,
-      DyadErrorKind.External,
+      SambaErrorKind.External,
     );
   }
   const created = (await response.json()) as { id?: string };
   if (!created?.id) {
-    throw new DyadError(
+    throw new SambaError(
       "Supabase did not return an id for the test user.",
-      DyadErrorKind.External,
+      SambaErrorKind.External,
     );
   }
 
@@ -476,7 +476,7 @@ WHERE table_schema = 'public'
       if (!SAFE_IDENT_RE.test(table) || !SAFE_IDENT_RE.test(column)) {
         continue;
       }
-      // Belt-and-suspenders: the static `$dyad_cleanup$` dollar-quote tag below
+      // Belt-and-suspenders: the static `$samba_cleanup$` dollar-quote tag below
       // is only safe as long as no interpolated value can contain `$`. SAFE_IDENT_RE
       // already forbids it, but enforce the invariant explicitly here so relaxing
       // that regex can never silently open a dollar-quote breakout.
@@ -496,7 +496,7 @@ WHERE table_schema = 'public'
         // regex validation.
         await executeSupabaseSql({
           supabaseProjectId: projectId,
-          query: `DO $dyad_cleanup$ BEGIN EXECUTE format('DELETE FROM public.%I WHERE %I = %L', '${table}', '${column}', '${userId}'); END $dyad_cleanup$;`,
+          query: `DO $samba_cleanup$ BEGIN EXECUTE format('DELETE FROM public.%I WHERE %I = %L', '${table}', '${column}', '${userId}'); END $samba_cleanup$;`,
           organizationSlug,
         });
       } catch (error) {

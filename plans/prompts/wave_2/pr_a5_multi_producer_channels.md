@@ -11,7 +11,7 @@ Appendix recipes: "app_run/preview_iframe: previewError channel",
 unit", "clearPreviewRuntimeForAppAtom (retire last)". The verified
 corrections in these recipes are load-bearing — especially the SIX
 preview-error writer sites (four in PreviewIframe.tsx, including
-dyad-app-sourced cloud-sandbox errors) and the release-age-over-
+samba-app-sourced cloud-sandbox errors) and the release-age-over-
 pnpm-migration priority direction.
 
 Scope, three units plus the finalizer:
@@ -24,7 +24,7 @@ Scope, three units plus the finalizer:
    commands (they execute inside app_run's command pipeline; the
    preview_iframe clear currently runs in beforeNotify — synchronous
    facade calls are forbidden). Encode in transitions: source-priority
-   updater semantics (dyad-sync must not clobber preview-app/dyad-app;
+   updater semantics (samba-sync must not clobber preview-app/samba-app;
    recovery clears own source only), dismiss-clears-any, and an explicit
    definition of the app_run-sets/preview_iframe-clears race (Jotai
    serializes it today — the transition must decide it deliberately).

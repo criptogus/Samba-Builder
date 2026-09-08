@@ -3,20 +3,20 @@ import { getLanguage } from "@/utils/get_language";
 import { unescapeXmlAttr, unescapeXmlContent } from "../../shared/xmlEscape";
 
 const CUSTOM_TAG_NAMES = [
-  "dyad-write",
-  "dyad-rename",
-  "dyad-delete",
-  "dyad-add-dependency",
-  "dyad-execute-sql",
-  "dyad-add-integration",
-  "dyad-output",
-  "dyad-problem-report",
-  "dyad-chat-summary",
-  "dyad-edit",
-  "dyad-codebase-context",
-  "dyad-script",
+  "samba-write",
+  "samba-rename",
+  "samba-delete",
+  "samba-add-dependency",
+  "samba-execute-sql",
+  "samba-add-integration",
+  "samba-output",
+  "samba-problem-report",
+  "samba-chat-summary",
+  "samba-edit",
+  "samba-codebase-context",
+  "samba-script",
   "think",
-  "dyad-command",
+  "samba-command",
 ];
 export const useCopyToClipboard = () => {
   const [copied, setCopied] = useState(false);
@@ -31,8 +31,8 @@ export const useCopyToClipboard = () => {
 
   const copyMessageContent = async (messageContent: string) => {
     try {
-      // Use the same parsing logic as DyadMarkdownParser but convert to clean text
-      const formattedContent = convertDyadContentToMarkdown(messageContent);
+      // Use the same parsing logic as SambaMarkdownParser but convert to clean text
+      const formattedContent = convertSambaContentToMarkdown(messageContent);
 
       // Copy to clipboard
       await navigator.clipboard.writeText(formattedContent);
@@ -52,11 +52,11 @@ export const useCopyToClipboard = () => {
     }
   };
 
-  // Convert Samba Builder content to clean markdown using the same parsing logic as DyadMarkdownParser
-  const convertDyadContentToMarkdown = (content: string): string => {
+  // Convert Samba Builder content to clean markdown using the same parsing logic as SambaMarkdownParser
+  const convertSambaContentToMarkdown = (content: string): string => {
     if (!content) return "";
 
-    // Use the same parsing functions from DyadMarkdownParser
+    // Use the same parsing functions from SambaMarkdownParser
     const contentPieces = parseCustomTags(content);
 
     let result = "";
@@ -78,7 +78,7 @@ export const useCopyToClipboard = () => {
       .trim();
   };
 
-  // Convert individual custom tags to markdown (reuse the same logic from DyadMarkdownParser)
+  // Convert individual custom tags to markdown (reuse the same logic from SambaMarkdownParser)
   const convertCustomTagToMarkdown = (tagInfo: any): string => {
     const { tag, attributes, content } = tagInfo;
 
@@ -86,7 +86,7 @@ export const useCopyToClipboard = () => {
       case "think":
         return `### Thinking\n\n${content}\n\n`;
 
-      case "dyad-write": {
+      case "samba-write": {
         const writePath = attributes.path || "file";
         const writeDesc = attributes.description || "";
         const language = getLanguage(writePath);
@@ -99,7 +99,7 @@ export const useCopyToClipboard = () => {
         return writeResult;
       }
 
-      case "dyad-edit": {
+      case "samba-edit": {
         const editPath = attributes.path || "file";
         const editDesc = attributes.description || "";
         const editLang = getLanguage(editPath);
@@ -112,23 +112,23 @@ export const useCopyToClipboard = () => {
         return editResult;
       }
 
-      case "dyad-rename": {
+      case "samba-rename": {
         const from = attributes.from || "";
         const to = attributes.to || "";
         return `### Rename: ${from} → ${to}\n\n`;
       }
 
-      case "dyad-delete": {
+      case "samba-delete": {
         const deletePath = attributes.path || "";
         return `### Delete: ${deletePath}\n\n`;
       }
 
-      case "dyad-add-dependency": {
+      case "samba-add-dependency": {
         const packages = attributes.packages || "";
         return `### Add Dependencies\n\n\`\`\`bash\n${packages}\n\`\`\`\n\n`;
       }
 
-      case "dyad-execute-sql": {
+      case "samba-execute-sql": {
         const sqlDesc = attributes.description || "";
         let sqlResult = `### Execute SQL\n\n`;
         if (sqlDesc) {
@@ -138,11 +138,11 @@ export const useCopyToClipboard = () => {
         return sqlResult;
       }
 
-      case "dyad-add-integration": {
+      case "samba-add-integration": {
         return `### Add Database Integration\n\n`;
       }
 
-      case "dyad-codebase-context": {
+      case "samba-codebase-context": {
         const files = attributes.files || "";
         let contextResult = `### Codebase Context\n\n`;
         if (files) {
@@ -152,7 +152,7 @@ export const useCopyToClipboard = () => {
         return contextResult;
       }
 
-      case "dyad-output": {
+      case "samba-output": {
         const outputType = attributes.type || "info";
         const message = attributes.message || "";
         const emoji =
@@ -172,7 +172,7 @@ export const useCopyToClipboard = () => {
         return outputResult + "\n\n";
       }
 
-      case "dyad-script": {
+      case "samba-script": {
         const description = attributes.description || "Script";
         try {
           const payload = JSON.parse(content) as {
@@ -185,7 +185,7 @@ export const useCopyToClipboard = () => {
         }
       }
 
-      case "dyad-problem-report": {
+      case "samba-problem-report": {
         const summary = attributes.summary || "";
         let problemResult = `### Problem Report\n\n`;
         if (summary) {
@@ -197,8 +197,8 @@ export const useCopyToClipboard = () => {
         return problemResult + "\n\n";
       }
 
-      case "dyad-chat-summary":
-      case "dyad-command":
+      case "samba-chat-summary":
+      case "samba-command":
         // Don't include these in copy
         return "";
 
@@ -207,7 +207,7 @@ export const useCopyToClipboard = () => {
     }
   };
 
-  // Reuse the same parsing functions from DyadMarkdownParser but simplified
+  // Reuse the same parsing functions from SambaMarkdownParser but simplified
   const parseCustomTags = (content: string) => {
     const { processedContent } = preprocessUnclosedTags(content);
 

@@ -1,4 +1,4 @@
-import { DyadError, DyadErrorKind } from "@/errors/dyad_error";
+import { SambaError, SambaErrorKind } from "@/errors/samba_error";
 import {
   fetchOllamaModels,
   parseOllamaHost,
@@ -165,7 +165,7 @@ describe("fetchOllamaModels", () => {
     await expect(fetchOllamaModels()).rejects.toMatchObject({
       message:
         "Could not connect to Ollama. Make sure it's running at http://localhost:11434",
-      kind: DyadErrorKind.Precondition,
+      kind: SambaErrorKind.Precondition,
     });
   });
 
@@ -179,9 +179,9 @@ describe("fetchOllamaModels", () => {
     );
 
     await expect(fetchOllamaModels()).rejects.toEqual(
-      new DyadError(
+      new SambaError(
         "Failed to fetch model: Service Unavailable",
-        DyadErrorKind.External,
+        SambaErrorKind.External,
       ),
     );
   });

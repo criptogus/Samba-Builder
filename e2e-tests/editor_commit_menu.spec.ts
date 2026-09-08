@@ -127,7 +127,11 @@ test("editor commit menu commits multiple staged files at once", async ({
     encoding: "utf-8",
   }).trim();
 
-  const madeWithDyadPath = path.join("src", "components", "made-with-dyad.tsx");
+  const madeWithSambaPath = path.join(
+    "src",
+    "components",
+    "made-with-samba.tsx",
+  );
   const robotsPath = path.join("public", "robots.txt");
 
   await po.previewPanel.clickTogglePreviewPanel();
@@ -137,15 +141,15 @@ test("editor commit menu commits multiple staged files at once", async ({
   ).toBeHidden({ timeout: Timeout.LONG });
 
   // Edit and save two files. Saving stages (does not commit) each file.
-  const madeWithDyadContent = 'export const MadeWithDyad = "commit-menu";\n';
+  const madeWithSambaContent = 'export const MadeWithSamba = "commit-menu";\n';
   const robotsContent = "User-agent: *\nDisallow: /commit-menu\n";
-  const madeWithDyadTreePath = madeWithDyadPath.replace(/\\/g, "/");
+  const madeWithSambaTreePath = madeWithSambaPath.replace(/\\/g, "/");
   const robotsTreePath = robotsPath.replace(/\\/g, "/");
   await editAndSaveFile(
     po.page,
-    "made-with-dyad.tsx",
-    madeWithDyadTreePath,
-    madeWithDyadContent,
+    "made-with-samba.tsx",
+    madeWithSambaTreePath,
+    madeWithSambaContent,
   );
   await editAndSaveFile(po.page, "robots.txt", robotsTreePath, robotsContent);
 
@@ -168,7 +172,7 @@ test("editor commit menu commits multiple staged files at once", async ({
   const stagedItems = po.page.getByTestId("staged-file-item");
   await expect(stagedItems).toHaveCount(2);
   await expect(
-    stagedItems.filter({ hasText: "made-with-dyad.tsx" }),
+    stagedItems.filter({ hasText: "made-with-samba.tsx" }),
   ).toHaveCount(1);
   await expect(stagedItems.filter({ hasText: "robots.txt" })).toHaveCount(1);
 
@@ -186,7 +190,7 @@ test("editor commit menu commits multiple staged files at once", async ({
   await expect(dialog).toBeVisible();
 
   const filesList = po.page.getByTestId("editor-commit-files-list");
-  await expect(filesList).toContainText("made-with-dyad.tsx");
+  await expect(filesList).toContainText("made-with-samba.tsx");
   await expect(filesList).toContainText("robots.txt");
 
   // The commit message is prefilled; replace it with a unique message.
@@ -224,7 +228,7 @@ test("editor commit menu commits multiple staged files at once", async ({
   // Committing clears every tree marker, including the folder rollups. Each row
   // is pinned down first so a missing row cannot satisfy the negated assertion.
   const clearedRows = [
-    treeRow(po.page, madeWithDyadTreePath),
+    treeRow(po.page, madeWithSambaTreePath),
     treeRow(po.page, robotsTreePath),
     treeDirRow(po.page, "src/components"),
     treeDirRow(po.page, "src"),
@@ -260,7 +264,7 @@ test("editor commit menu commits multiple staged files at once", async ({
     "git diff-tree --no-commit-id --name-only -r HEAD",
     { cwd: appPath, encoding: "utf-8" },
   ).trim();
-  expect(committedFiles).toContain(madeWithDyadPath.replace(/\\/g, "/"));
+  expect(committedFiles).toContain(madeWithSambaPath.replace(/\\/g, "/"));
   expect(committedFiles).toContain(robotsPath.replace(/\\/g, "/"));
 
   // Working tree is clean again.

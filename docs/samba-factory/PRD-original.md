@@ -1,4 +1,4 @@
-Vou mapear o que Lovable, Replit e Bolt fazem de melhor, entender o Dyad como base e transformar isso em um PRD completo do Samba Builder. Começo pelas fontes oficiais e comparativos atuais.Agora vou aprofundar o Dyad e os fluxos de produto, design e segurança de cada plataforma, para o PRD não ficar só na superfície.Estudo competitivo e PRD abaixo. A tese: Samba Builder não deve copiar um vibe-coder de consumidor. Deve ser o sistema operacional da fábrica — briefing → escopo → design → código → segurança → entrega — com skills embutidos e Dyad como runtime local.
+Vou mapear o que Lovable, Replit e Bolt fazem de melhor, entender o Samba como base e transformar isso em um PRD completo do Samba Builder. Começo pelas fontes oficiais e comparativos atuais.Agora vou aprofundar o Samba e os fluxos de produto, design e segurança de cada plataforma, para o PRD não ficar só na superfície.Estudo competitivo e PRD abaixo. A tese: Samba Builder não deve copiar um vibe-coder de consumidor. Deve ser o sistema operacional da fábrica — briefing → escopo → design → código → segurança → entrega — com skills embutidos e Samba como runtime local.
 
 Estudo competitivo + PRD
 
@@ -10,7 +10,7 @@ Data: 05/09/2026
 
 Status: Draft para implementação
 
-Base técnica: fork/evolução do Dyad (local-first, Apache 2.0 + FSL no src/pro)
+Base técnica: fork/evolução do Samba (local-first, Apache 2.0 + FSL no src/pro)
 
 Usuário primário: time de desenvolvimento da Samba, entregando apps para clientes
 
@@ -75,9 +75,9 @@ O que vale copiar:
 
 Limitações a não herdar: acoplamento à infra Replit, custo variável, código “sabor Replit”, menos local-first / privacidade de cliente.
 
-1.4 Dyad — o que já temos de graça como fundação
+1.4 Samba — o que já temos de graça como fundação
 
-Dyad é o ponto de partida certo para Samba:
+Samba é o ponto de partida certo para Samba:
 
 Desktop local (Electron), código e dados no máquina/time.
 
@@ -93,7 +93,7 @@ Rules, scaffolds, workers, makers — monorepo extensível.
 
 Código real, sem lock-in.
 
-O que Dyad não é ainda (e o Samba Builder precisa ser):
+O que Samba não é ainda (e o Samba Builder precisa ser):
 
 Não é um pipeline de fábrica (descoberta → escopo → aceite → entrega).
 
@@ -112,7 +112,7 @@ Não tem colaboração simultânea nem governança de portfolio.
 Lovable → Plan-before-code + visual edit + knowledge + security gate + connectors
 Bolt → Runtime verdadeiro + diffs + auto-fix de erro + preview instantâneo
 Replit → Skills + tasks + design canvas + security agent + checkpoints + parallel agents
-Dyad → Local-first + BYOK + MCP + ownership do código + extensibilidade
+Samba → Local-first + BYOK + MCP + ownership do código + extensibilidade
 Samba → Fábrica: briefing de cliente, escopo comercial, marca, cybersec, handoff
 
 Princípio de produto: o agente não é um coder genérico. É um time virtual da Samba com papéis, playbooks e gates.
@@ -202,7 +202,7 @@ Cliente isolado. Nenhum contexto de Cliente A vaza no projeto B.
 
 Humano aprova o que é irreversível: schema prod, domínio, secrets, publish, exclusão.
 
-Local-first, cloud-optional. Dyad local; sync Git; CI na nuvem.
+Local-first, cloud-optional. Samba local; sync Git; CI na nuvem.
 
 Design system é lei, não sugestão.
 
@@ -325,7 +325,7 @@ skills.lock
 
 10. Requisitos funcionais
 
-10.1 Workspace de fábrica (além do “app isolado” do Dyad)
+10.1 Workspace de fábrica (além do “app isolado” do Samba)
 
 Organização Samba com workspaces por cliente.
 
@@ -333,11 +333,11 @@ Projeto pertence a 1 cliente; herda brand kit + contratos de integração.
 
 Papéis: Owner, Tech Lead, Builder, Designer, PM, AppSec, Viewer (cliente).
 
-Isolamento de secrets por projeto (keychain nativo Dyad + vault opcional).
+Isolamento de secrets por projeto (keychain nativo Samba + vault opcional).
 
 Audit log: quem aprovou plan, publish, override de skill, scan ignorado.
 
-10.2 Modos de conversa (herança Lovable/Dyad/Replit)
+10.2 Modos de conversa (herança Lovable/Samba/Replit)
 
 | Modo     | Função                                            |
 | -------- | ------------------------------------------------- |
@@ -348,7 +348,7 @@ Audit log: quem aprovou plan, publish, override de skill, scan ignorado.
 | Fix      | Loop de erro/runtime/test.                        |
 | Secure   | Threat model + scan + patch.                      |
 | Review   | Diff + checklist de factory.                      |
-| Ask      | Read-only no codebase (já existe no Dyad).        |
+| Ask      | Read-only no codebase (já existe no Samba).       |
 
 Default após Approve do Plan = Build. Default em repo importado = Ask até o humano pedir Build.
 
@@ -410,9 +410,9 @@ Upload de logo + URL do site do cliente → extrai paleta e tipografia.
 
 Humano confirma tokens antes do Build.
 
-10.5 Runtime e desenvolvimento (Bolt + Dyad)
+10.5 Runtime e desenvolvimento (Bolt + Samba)
 
-Manter o que o Dyad já faz e fechar o loop estilo Bolt:
+Manter o que o Samba já faz e fechar o loop estilo Bolt:
 
 Preview local confiável + logs de server/browser visíveis ao agente.
 
@@ -424,7 +424,7 @@ Auto-fix quando preview quebra ou typecheck falha.
 
 Checkpoints Git a cada task concluída (Replit).
 
-Import brownfield (já no Dyad) + geração automática de project knowledge e AGENTS.md.
+Import brownfield (já no Samba) + geração automática de project knowledge e AGENTS.md.
 
 Stack default Samba (configurável por knowledge):
 Front: React 19 + TS + Vite ou Next.js App Router
@@ -462,7 +462,7 @@ Secrets scanning no chat e nos arquivos.
 
 Blocklist de pacotes + consulta de advisory na instalação.
 
-Consentimento de MCP (já no Dyad) + allowlist Samba de servers.
+Consentimento de MCP (já no Samba) + allowlist Samba de servers.
 
 Prompt-injection guard em conteúdo do cliente (PDF/site).
 
@@ -542,7 +542,7 @@ Cliente não recebe acesso ao editor por default — só preview comentado.
 
 10.10 Integrações (MCP first)
 
-Dyad já é MCP client. Samba Builder padroniza um Hub interno:
+Samba já é MCP client. Samba Builder padroniza um Hub interno:
 
 Must-have v1: GitHub, Figma, Linear/Jira, Slack, Supabase, Vercel, Stripe, Notion, 1Password/Vault.
 
@@ -582,10 +582,10 @@ Sem “Remix público” — projetos são privados por default.
 | Portabilidade              | Sair do Builder = repo + docs + CI. Zero runtime proprietário obrigatório           |
 | Performance do app gerado  | Lighthouse mobile ≥ 80 no template Samba                                            |
 
-12. Arquitetura proposta em cima do Dyad
+12. Arquitetura proposta em cima do Samba
 
 ┌──────────────────────────────────────────────┐
-│ Samba Builder Desktop (fork Dyad / Electron)│
+│ Samba Builder Desktop (fork Samba / Electron)│
 │ UI: Plan • Canvas • Preview • Diff • Gates │
 └──────────────┬───────────────────────────────┘
 │
@@ -596,7 +596,7 @@ Sem “Remix público” — projetos são privados por default.
 │
 ┌─────────┼──────────┬────────────┐
 │ Tools │ MCP Hub │ Runtime │ Git
-│ Dyad │ Samba │ Preview │ GH
+│ Samba │ Samba │ Preview │ GH
 │ files, │ Figma, │ (Vite/Next)│
 │ grep, │ Linear, │ logs/term │
 │ sql │ Vault │ Playwright │
@@ -605,7 +605,7 @@ Sem “Remix público” — projetos são privados por default.
 Factory Control Plane (opcional, self-host)
 workspaces • audit • skill registry • billing tokens
 
-Aproveitar pastas do Dyad:
+Aproveitar pastas do Samba:
 
 rules/ → Samba Knowledge + lints de geração
 
@@ -695,7 +695,7 @@ Reuso de módulo (% de código gerado vindo de scaffold/skill)
 16. Roadmap
 
 Fase 0 — Fundar (2–3 semanas)
-Fork Dyad, branding Samba Builder, org Git.
+Fork Samba, branding Samba Builder, org Git.
 
 Knowledge workspace Samba + stack default.
 
@@ -798,7 +798,7 @@ Hook pré-publish: typecheck + basic scan.
 
 Scaffold portal-b2b com Samba UI tokens.
 
-Painel simples de cliente/projeto (mesmo local/SQLite do Dyad no início).
+Painel simples de cliente/projeto (mesmo local/SQLite do Samba no início).
 
 Eval: um briefing real anonymizado da Samba rodado a cada PR do Builder.
 
@@ -822,4 +822,4 @@ Mostrar URL de staging para o cliente sem expor o editor.
 
 Se qualquer um desses sete passos exigir ferramenta fora do Builder (exceto GitHub/Vercel), a v1 ainda não acabou.
 
-Se quiser o próximo artefato, o mais útil na sequência é um de estes três: (1) SKILL.md completo dos 8 skills P0, (2) spec da Samba UI / tokens, ou (3) mapa de arquivos no fork Dyad (packages/samba-factory) já no formato de issues.
+Se quiser o próximo artefato, o mais útil na sequência é um de estes três: (1) SKILL.md completo dos 8 skills P0, (2) spec da Samba UI / tokens, ou (3) mapa de arquivos no fork Samba (packages/samba-factory) já no formato de issues.

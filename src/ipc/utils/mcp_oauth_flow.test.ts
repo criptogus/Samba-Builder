@@ -294,7 +294,7 @@ describe("disconnectOAuth", () => {
     expect(row!.oauthState).toBeNull();
   });
 
-  it("throws DyadError(NotFound) for an unknown server id", async () => {
+  it("throws SambaError(NotFound) for an unknown server id", async () => {
     await expect(disconnectOAuth(404)).rejects.toThrow(/not found/i);
   });
 });

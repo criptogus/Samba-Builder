@@ -1,6 +1,6 @@
 {
   "body": {
-    "model": "dyad/auto",
+    "model": "samba/auto",
     "max_tokens": 32000,
     "temperature": 0,
     "messages": [
@@ -79,14 +79,14 @@
         "type": "function",
         "function": {
           "name": "copy_file",
-          "description": "Copy a file from one location to another. Can copy uploaded attachment files (attachments:<name> or .dyad/media paths) into the codebase, or copy files within the codebase.",
+          "description": "Copy a file from one location to another. Can copy uploaded attachment files (attachments:<name> or .samba/media paths) into the codebase, or copy files within the codebase.",
           "parameters": {
             "$schema": "http://json-schema.org/draft-07/schema#",
             "type": "object",
             "properties": {
               "from": {
                 "type": "string",
-                "description": "The source file path (can be attachments:<name>, a .dyad/media path, or a path relative to the app root)"
+                "description": "The source file path (can be attachments:<name>, a .samba/media path, or a path relative to the app root)"
               },
               "to": {
                 "type": "string",
@@ -531,6 +531,6 @@
     "stream": true
   },
   "headers": {
-    "authorization": "Bearer testdyadkey"
+    "authorization": "Bearer testsambakey"
   }
 }

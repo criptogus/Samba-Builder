@@ -103,9 +103,9 @@ git_restore_file({
 - When rebuilding local-agent history, append one provider-neutral synthetic
   assistant text message after each parsed prior assistant turn:
   - If `commitHash` exists, append
-    `<dyad-git-context commit="FINAL_HASH"></dyad-git-context>`.
+    `<samba-git-context commit="FINAL_HASH"></samba-git-context>`.
   - Otherwise, if `sourceCommitHash` exists, append
-    `<dyad-git-context source_commit="START_HASH" no_commit="true"></dyad-git-context>`.
+    `<samba-git-context source_commit="START_HASH" no_commit="true"></samba-git-context>`.
   - If neither exists, append nothing. Never include both hashes by default.
 - Treat `source_commit` as "HEAD when the turn began," not an exact snapshot of
   every working-tree file the assistant saw. Treat `commit` as the repository
@@ -137,7 +137,7 @@ git_restore_file({
   blueprint gating, end-of-turn commits, and normal tool-consent behavior.
 - Register the tools under
   `src/pro/main/ipc/handlers/local_agent/tools/` and expose compact Git cards
-  through `src/components/chat/DyadMarkdownParser.tsx`, showing operation,
+  through `src/components/chat/SambaMarkdownParser.tsx`, showing operation,
   scope, short revision, path, and pending/finished state without embedding
   full output in the card.
 - Update exact agent/ask/plan tool-set expectations and affected request

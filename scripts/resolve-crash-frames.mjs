@@ -9,7 +9,7 @@
 //   node scripts/resolve-crash-frames.mjs --help
 //
 // Example:
-//   node scripts/resolve-crash-frames.mjs dyad/DF23C4907A7C231BEA2D1962BED725290/0x6ed35df
+//   node scripts/resolve-crash-frames.mjs samba/DF23C4907A7C231BEA2D1962BED725290/0x6ed35df
 //
 // The CSV file must have a header row with faulting_debug_file,
 // faulting_debug_id, and faulting_offset columns. Values may be double
@@ -26,7 +26,7 @@
 // megabytes, so they are cached in the platform's user cache directory
 // and reused across runs.
 //
-// Installed builds rename Electron's binaries to "dyad", while the
+// Installed builds rename Electron's binaries to "samba", while the
 // symbol server hosts them under their original names. When a lookup
 // by the reported name misses, the script retries with the Electron
 // names for the same debug id, which renaming does not change, and
@@ -48,7 +48,7 @@ Usage:
   node scripts/resolve-crash-frames.mjs --csv frames.csv
 
 Example:
-  node scripts/resolve-crash-frames.mjs dyad/DF23C4907A7C231BEA2D1962BED725290/0x6ed35df
+  node scripts/resolve-crash-frames.mjs samba/DF23C4907A7C231BEA2D1962BED725290/0x6ed35df
 
 The CSV file needs a header row with faulting_debug_file,
 faulting_debug_id, and faulting_offset columns. Rows are split on plain
@@ -185,11 +185,11 @@ function userCacheDir() {
   }
   return process.env.XDG_CACHE_HOME ?? path.join(os.homedir(), ".cache");
 }
-const symDir = path.join(userCacheDir(), "dyad-symbol-cache", "sym");
+const symDir = path.join(userCacheDir(), "samba-symbol-cache", "sym");
 
 // Fetch the module's .sym file into the cache and return its path, or
 // null when no candidate name resolves. Renamed binaries miss under
-// their reported name, so /dyad/i names retry as the Electron names for
+// their reported name, so /samba/i names retry as the Electron names for
 // the same debug id; a hit is cached under the reported name.
 async function ensureSymbols(debugFile, debugId) {
   const cached = path.join(symDir, debugFile, debugId, `${debugFile}.sym`);
@@ -197,10 +197,10 @@ async function ensureSymbols(debugFile, debugId) {
     return cached;
   }
   const candidates = [debugFile];
-  if (/dyad/i.test(debugFile)) {
+  if (/samba/i.test(debugFile)) {
     candidates.push(
-      debugFile.replace(/dyad/gi, "electron"),
-      debugFile.replace(/dyad/gi, "Electron"),
+      debugFile.replace(/samba/gi, "electron"),
+      debugFile.replace(/samba/gi, "Electron"),
     );
   }
   // Resolution is best effort: on any failure, warn and move on, and the

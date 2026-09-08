@@ -47,7 +47,7 @@
 // symbols.electronjs.org. Frames in system libraries (libc, OS frameworks)
 // stay as module+offset; Electron's server has no symbols for those.
 //
-// Installed builds rename the Electron binary to "dyad", while the symbol
+// Installed builds rename the Electron binary to "samba", while the symbol
 // server hosts it under its original name. The script handles this by
 // fetching symbols by debug id, which renaming does not change, and
 // staging them locally under the renamed name.
@@ -65,7 +65,7 @@ const SYMBOL_URL = "https://symbols.electronjs.org";
 // in the platform's config directory.
 function dumpDir(prod) {
   if (!prod) {
-    return path.join(process.cwd(), "userData", "dyad-crash-reports");
+    return path.join(process.cwd(), "userData", "samba-crash-reports");
   }
   const configDir =
     process.platform === "win32"
@@ -73,7 +73,7 @@ function dumpDir(prod) {
       : process.platform === "darwin"
         ? path.join(os.homedir(), "Library", "Application Support")
         : (process.env.XDG_CONFIG_HOME ?? path.join(os.homedir(), ".config"));
-  return path.join(configDir, "dyad", "dyad-crash-reports");
+  return path.join(configDir, "samba", "samba-crash-reports");
 }
 
 function newestDump(dir) {
@@ -164,7 +164,7 @@ function userCacheDir() {
   }
   return process.env.XDG_CACHE_HOME ?? path.join(os.homedir(), ".cache");
 }
-const cacheDir = path.join(userCacheDir(), "dyad-symbol-cache");
+const cacheDir = path.join(userCacheDir(), "samba-symbol-cache");
 const aliasedDir = path.join(cacheDir, "aliased");
 
 // The modules a dump loaded, from a quick unsymbolicated pass.
@@ -197,7 +197,7 @@ function safePathSegment(segment) {
 // so fetching the Electron name by id is either right or a miss.
 async function stageAliasedSymbols(dump) {
   for (const { debug_file, debug_id } of listModules(dump)) {
-    if (!/dyad/i.test(debug_file)) {
+    if (!/samba/i.test(debug_file)) {
       continue;
     }
     if (!safePathSegment(debug_file) || !safePathSegment(debug_id)) {
@@ -213,8 +213,8 @@ async function stageAliasedSymbols(dump) {
       continue;
     }
     const candidates = [
-      debug_file.replace(/dyad/i, "electron"),
-      debug_file.replace(/dyad/i, "Electron"),
+      debug_file.replace(/samba/i, "electron"),
+      debug_file.replace(/samba/i, "Electron"),
     ];
     // Symbolication is optional: on any failure, warn and move on, and the
     // module's frames stay as module+offset.

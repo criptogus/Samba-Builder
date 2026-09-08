@@ -170,7 +170,7 @@ interface ProviderConfig {
   writeAuthority?: McpOAuthWriteAuthority;
 }
 
-export class DyadOAuthClientProvider implements OAuthClientProvider {
+export class SambaOAuthClientProvider implements OAuthClientProvider {
   private readonly serverId: number;
   private readonly callbackPort: number;
   private readonly scope: string | undefined;

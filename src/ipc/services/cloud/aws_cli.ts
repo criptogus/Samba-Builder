@@ -1,14 +1,14 @@
 import { buildWindowsCommandInvocation } from "@/ipc/utils/windows_command";
 import { runBufferedProcess } from "@/ipc/utils/buffered_process";
-import { DyadError, DyadErrorKind } from "@/errors/dyad_error";
+import { SambaError, SambaErrorKind } from "@/errors/samba_error";
 import type { AwsConfig } from "@/ipc/types/aws";
 
-export class CloudCommandError extends DyadError {
+export class CloudCommandError extends SambaError {
   constructor(
     message: string,
     readonly providerCode?: string,
   ) {
-    super(message, DyadErrorKind.External);
+    super(message, SambaErrorKind.External);
   }
 }
 export async function cloudCommand(

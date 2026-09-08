@@ -7,7 +7,7 @@ import * as path from "path";
 import { db } from "../../db";
 import { apps } from "../../db/schema";
 import { eq } from "drizzle-orm";
-import { getDyadAppPath } from "../../paths/paths";
+import { getSambaAppPath } from "../../paths/paths";
 import {
   ENV_FILE_NAME,
   parseEnvFile,
@@ -16,7 +16,7 @@ import {
 import { queueCloudSandboxSnapshotSync } from "../utils/cloud_sandbox_provider";
 import { createTypedHandler } from "./base";
 import { miscContracts } from "../types/misc";
-import { DyadError, DyadErrorKind } from "@/errors/dyad_error";
+import { SambaError, SambaErrorKind } from "@/errors/samba_error";
 
 export function registerAppEnvVarsHandlers() {
   // Handler to get app environment variables
@@ -27,10 +27,10 @@ export function registerAppEnvVarsHandlers() {
       });
 
       if (!app) {
-        throw new DyadError("App not found", DyadErrorKind.NotFound);
+        throw new SambaError("App not found", SambaErrorKind.NotFound);
       }
 
-      const appPath = getDyadAppPath(app.path);
+      const appPath = getSambaAppPath(app.path);
       const envFilePath = path.join(appPath, ENV_FILE_NAME);
 
       // If .env.local doesn't exist, return empty array
@@ -62,10 +62,10 @@ export function registerAppEnvVarsHandlers() {
         });
 
         if (!app) {
-          throw new DyadError("App not found", DyadErrorKind.NotFound);
+          throw new SambaError("App not found", SambaErrorKind.NotFound);
         }
 
-        const appPath = getDyadAppPath(app.path);
+        const appPath = getSambaAppPath(app.path);
         const envFilePath = path.join(appPath, ENV_FILE_NAME);
 
         // Serialize environment variables to .env.local format

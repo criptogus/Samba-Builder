@@ -109,7 +109,7 @@ testSkipIfWindows(
     );
 
     // 8. Verify the user can explicitly send a later message in Build mode.
-    await po.sendPrompt("[dyad-qa=write] create a simple file");
+    await po.sendPrompt("[samba-qa=write] create a simple file");
     await po.chatActions.waitForChatCompletion();
   },
 );

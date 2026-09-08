@@ -5,7 +5,7 @@ import path from "node:path";
 import { db } from "../../db";
 import { apps } from "../../db/schema";
 import { eq } from "drizzle-orm";
-import { getDyadAppPath } from "../../paths/paths";
+import { getSambaAppPath } from "../../paths/paths";
 import { createTypedHandler } from "./base";
 import { designSystemContracts } from "../types/design_system";
 import {
@@ -39,7 +39,7 @@ export function registerDesignSystemHandlers() {
     designSystemContracts.extractTemplate,
     async (_, params) => {
       const app = await getApp(params.appId);
-      const appDir = getDyadAppPath(app.path);
+      const appDir = getSambaAppPath(app.path);
       const scriptPath = resolveDesignSystemToolkitPath();
 
       // Extract the app's design system to a temp JSON, then save it as a
@@ -80,7 +80,7 @@ export function registerDesignSystemHandlers() {
 
   createTypedHandler(designSystemContracts.applyTemplate, async (_, params) => {
     const app = await getApp(params.appId);
-    const appDir = getDyadAppPath(app.path);
+    const appDir = getSambaAppPath(app.path);
     const scriptPath = resolveDesignSystemToolkitPath();
 
     const stdout = await runDesignToolkit(scriptPath, [

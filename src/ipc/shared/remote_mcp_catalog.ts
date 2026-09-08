@@ -13,15 +13,15 @@ const MAX_CACHE_TTL_MS = 24 * 60 * 60 * 1000;
 const FAILURE_CACHE_TTL_MS = 30 * 1000;
 
 function getRemoteMcpCatalogUrl(): string | null {
-  if (process.env.DYAD_MCP_CATALOG_URL) {
-    return process.env.DYAD_MCP_CATALOG_URL;
+  if (process.env.SAMBA_MCP_CATALOG_URL) {
+    return process.env.SAMBA_MCP_CATALOG_URL;
   }
 
   if (process.env.E2E_TEST_BUILD === "true" && process.env.FAKE_LLM_PORT) {
     return `http://localhost:${process.env.FAKE_LLM_PORT}/api/mcp-catalog`;
   }
 
-  // Samba Builder: zero backend do Dyad — sem catálogo remoto de MCPs.
+  // Samba Builder: zero backend do Samba — sem catálogo remoto de MCPs.
   return null;
 }
 

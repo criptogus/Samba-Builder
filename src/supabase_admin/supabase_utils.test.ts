@@ -238,7 +238,7 @@ describe("getSupabaseFunctionsAffectedBySharedModules", () => {
   }
 
   beforeEach(async () => {
-    appPath = await fs.mkdtemp(path.join(os.tmpdir(), "dyad-impact-"));
+    appPath = await fs.mkdtemp(path.join(os.tmpdir(), "samba-impact-"));
     await installTypeScriptForApp();
   });
 

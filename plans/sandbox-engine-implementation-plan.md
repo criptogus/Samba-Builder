@@ -4,13 +4,13 @@
 
 ## Summary
 
-This document scopes the Dyad Engine work needed to support the new cloud sandbox runtime mode in the desktop app.
+This document scopes the Samba Engine work needed to support the new cloud sandbox runtime mode in the desktop app.
 
 The desktop app now has a client-side cloud execution path:
 
 - `runtimeMode2: "cloud"`
-- sandbox provisioning via Dyad Engine
-- remote preview proxying through the local Dyad proxy
+- sandbox provisioning via Samba Engine
+- remote preview proxying through the local Samba proxy
 - shareable preview links in the preview toolbar
 - batched file sync for `editAppFile`
 - E2E coverage against a fake engine
@@ -19,10 +19,10 @@ What remains is the real backend implementation: authenticated sandbox lifecycle
 
 ## Goals
 
-- Provide a stable Dyad Engine API for cloud sandbox creation and teardown.
+- Provide a stable Samba Engine API for cloud sandbox creation and teardown.
 - Keep provider-specific details out of the desktop app.
-- Enforce Dyad Pro access and usage limits server-side.
-- Preserve Dyad’s current preview model:
+- Enforce Samba Pro access and usage limits server-side.
+- Preserve Samba’s current preview model:
   - proxied URL for the iframe
   - direct URL for sharing and opening externally
 - Make failures explicit and actionable.
@@ -37,7 +37,7 @@ What remains is the real backend implementation: authenticated sandbox lifecycle
 
 ## Current Client Contract
 
-The desktop app currently expects these Dyad Engine endpoints under `DYAD_ENGINE_URL`:
+The desktop app currently expects these Samba Engine endpoints under `SAMBA_ENGINE_URL`:
 
 - `POST /sandboxes`
 - `DELETE /sandboxes/:sandboxId`
@@ -133,7 +133,7 @@ interface SandboxProvider {
 }
 ```
 
-Even with one provider, keep this boundary. It aligns with Dyad’s backend-flexible principle and avoids leaking Vercel specifics into route handlers.
+Even with one provider, keep this boundary. It aligns with Samba’s backend-flexible principle and avoids leaking Vercel specifics into route handlers.
 
 ### 3. Metadata Store
 
@@ -169,7 +169,7 @@ Implement:
 
 Requirements:
 
-- bearer auth using Dyad Pro credentials
+- bearer auth using Samba Pro credentials
 - reject non-Pro users with a clear 403
 - validate ownership on every sandbox-scoped route
 - map provider failures to stable error codes/messages
@@ -284,7 +284,7 @@ Connect a staging desktop build to staging engine and validate:
 
 ### Step 3
 
-Turn on for internal users first, then a small Dyad Pro cohort.
+Turn on for internal users first, then a small Samba Pro cohort.
 
 ## Testing Plan
 

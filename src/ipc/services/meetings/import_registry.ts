@@ -1,4 +1,4 @@
-import { DyadError, DyadErrorKind } from "@/errors/dyad_error";
+import { SambaError, SambaErrorKind } from "@/errors/samba_error";
 export class MeetingImportRegistry {
   private active: { owner: number; id: string; abort: AbortController } | null =
     null;
@@ -8,9 +8,9 @@ export class MeetingImportRegistry {
     work: (signal: AbortSignal) => Promise<T>,
   ): Promise<T> {
     if (this.active)
-      throw new DyadError(
+      throw new SambaError(
         "Já existe uma importação de áudio em andamento.",
-        DyadErrorKind.Conflict,
+        SambaErrorKind.Conflict,
       );
     const current = { owner, id, abort: new AbortController() };
     this.active = current;

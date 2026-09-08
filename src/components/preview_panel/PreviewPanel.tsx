@@ -41,7 +41,7 @@ import { queryKeys } from "@/lib/queryKeys";
 import { Button } from "@/components/ui/button";
 import { useSettings } from "@/hooks/useSettings";
 import { showError } from "@/lib/toast";
-import { DyadError, DyadErrorKind } from "@/errors/dyad_error";
+import { SambaError, SambaErrorKind } from "@/errors/samba_error";
 import { useLatestConsoleEntry } from "@/preview_console/hooks";
 import { useTestRecorder } from "@/hooks/useTestRecorder";
 import { RecordingBannerHost } from "./RecordingBannerHost";
@@ -374,7 +374,7 @@ const NODE_POLL_INTERVAL_MS = 4000;
 
 function isManagedNodeInstallCancelError(error: unknown) {
   return (
-    error instanceof DyadError && error.kind === DyadErrorKind.UserCancelled
+    error instanceof SambaError && error.kind === SambaErrorKind.UserCancelled
   );
 }
 

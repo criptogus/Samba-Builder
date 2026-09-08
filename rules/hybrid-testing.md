@@ -18,7 +18,7 @@ These tests are faster, easier to debug, and avoid Electron launch/package
 overhead.
 
 When moving a workflow from Build mode to Agent mode, update its fake-LLM
-response from `<dyad-write>` XML to a local-Agent fixture that invokes
+response from `<samba-write>` XML to a local-Agent fixture that invokes
 `write_file` or `search_replace`, then run the integration path that exercises
 the real chat stream. Build-mode text responses are not processed as Agent tool
 calls.
@@ -65,16 +65,16 @@ per-invocation tracking with a focused unit test, and use separate chats for
 integration coverage of app-wide cancellation.
 
 When a renderer+IPC hybrid or chat-flow harness test passes `engine: true`,
-production code must read Dyad Engine/Gateway URLs at call time. If a test still
-logs `POST https://engine.dyad.sh/v1/... 401 (Unauthorized)`, search for
-module-scope `DYAD_ENGINE_URL` constants and switch those call sites to
-`getDyadEngineBaseUrl()`.
+production code must read Samba Engine/Gateway URLs at call time. If a test still
+logs `POST https://engine.samba.sh/v1/... 401 (Unauthorized)`, search for
+module-scope `SAMBA_ENGINE_URL` constants and switch those call sites to
+`getSambaEngineBaseUrl()`.
 
 ## Test log noise
 
 - `src/testing/hybrid.setup.ts` caps electron-log's console transport at
   `warn` (its default prints everything, including `logger.debug`). Set
-  `DYAD_TEST_LOG_LEVEL=debug` to see info/debug logs while debugging a test.
+  `SAMBA_TEST_LOG_LEVEL=debug` to see info/debug logs while debugging a test.
   New per-request logging in app code should be `logger.debug`, not
   `logger.info`/`logger.log`.
 - In `testing/fake-llm-server/`, informational logs must go through
@@ -134,7 +134,7 @@ deterministic fallback; otherwise the handler waits for its production timeout
 and teardown reports a misleading pending `chat:stream`.
 
 If a chat-flow or hybrid harness suite passes all tests but fails during
-`dispose()` with `ENOTEMPTY` for a `dyad-chat-flow-*` temp directory, look for a
+`dispose()` with `ENOTEMPTY` for a `samba-chat-flow-*` temp directory, look for a
 launched app process still writing under that root (often `pnpm install`). Stop
 running apps and await process closure before removing the harness temp dir.
 

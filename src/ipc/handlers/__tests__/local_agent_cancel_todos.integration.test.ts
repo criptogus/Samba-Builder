@@ -28,8 +28,8 @@ describe("local-agent cancel todos (integration)", () => {
       chatMode: "local-agent",
       settings: {
         isTestMode: true,
-        enableDyadPro: true,
-        providerSettings: { auto: { apiKey: { value: "testdyadkey" } } },
+        enableSambaPro: true,
+        providerSettings: { auto: { apiKey: { value: "testsambakey" } } },
         enableCodeExplorer: false,
       },
     });
@@ -50,7 +50,7 @@ describe("local-agent cancel todos (integration)", () => {
     );
     await harness.selectChatMode("local-agent");
 
-    const todosDir = path.join(harness.appDir, ".dyad", "todos");
+    const todosDir = path.join(harness.appDir, ".samba", "todos");
     const streamStarted = harness.waitForEvent(
       "chat:stream:start",
       (payload) =>

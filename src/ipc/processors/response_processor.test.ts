@@ -65,7 +65,7 @@ vi.mock("../../db", () => ({
 }));
 
 vi.mock("../../paths/paths", () => ({
-  getDyadAppPath: vi.fn((appPath: string) => `/mock/apps/${appPath}`),
+  getSambaAppPath: vi.fn((appPath: string) => `/mock/apps/${appPath}`),
 }));
 
 vi.mock("../utils/git_utils", () => ({
@@ -152,7 +152,7 @@ describe("processFullResponseActions add dependency errors", () => {
     } as any);
     vi.mocked(db.query.messages.findFirst).mockResolvedValue({
       id: 1,
-      content: '<dyad-add-dependency packages="react"></dyad-add-dependency>',
+      content: '<samba-add-dependency packages="react"></samba-add-dependency>',
     } as any);
   });
 
@@ -172,7 +172,7 @@ describe("processFullResponseActions add dependency errors", () => {
     } as any);
 
     await processFullResponseActions(
-      '<dyad-execute-sql description="create users">CREATE TABLE users (id bigint);</dyad-execute-sql>',
+      '<samba-execute-sql description="create users">CREATE TABLE users (id bigint);</samba-execute-sql>',
       1,
       {
         chatSummary: undefined,
@@ -208,7 +208,7 @@ describe("processFullResponseActions add dependency errors", () => {
     } as any);
 
     await processFullResponseActions(
-      '<dyad-execute-sql description="lookup users">SELECT * FROM users;</dyad-execute-sql>',
+      '<samba-execute-sql description="lookup users">SELECT * FROM users;</samba-execute-sql>',
       1,
       {
         chatSummary: undefined,
@@ -239,7 +239,7 @@ describe("processFullResponseActions add dependency errors", () => {
     );
 
     await processFullResponseActions(
-      '<dyad-add-dependency packages="react"></dyad-add-dependency>',
+      '<samba-add-dependency packages="react"></samba-add-dependency>',
       1,
       {
         chatSummary: "   ",
@@ -270,7 +270,7 @@ describe("processFullResponseActions add dependency errors", () => {
     vi.mocked(gitAdd).mockRejectedValueOnce(new Error("git add failed"));
 
     const result = await processFullResponseActions(
-      '<dyad-add-dependency packages="react"></dyad-add-dependency>',
+      '<samba-add-dependency packages="react"></samba-add-dependency>',
       1,
       {
         chatSummary: undefined,
@@ -292,7 +292,7 @@ describe("processFullResponseActions add dependency errors", () => {
     vi.mocked(hasStagedChanges).mockResolvedValueOnce(true);
 
     await processFullResponseActions(
-      '<dyad-add-dependency packages="react"></dyad-add-dependency>',
+      '<samba-add-dependency packages="react"></samba-add-dependency>',
       1,
       {
         chatSummary: undefined,
@@ -318,7 +318,7 @@ describe("processFullResponseActions add dependency errors", () => {
     vi.mocked(hasStagedChanges).mockResolvedValueOnce(true);
 
     await processFullResponseActions(
-      '<dyad-add-dependency packages="react zod@999.0.0"></dyad-add-dependency>',
+      '<samba-add-dependency packages="react zod@999.0.0"></samba-add-dependency>',
       1,
       {
         chatSummary: undefined,
@@ -344,7 +344,7 @@ describe("processFullResponseActions add dependency errors", () => {
     vi.mocked(hasStagedChanges).mockResolvedValueOnce(true);
 
     await processFullResponseActions(
-      '<dyad-add-dependency packages="react"></dyad-add-dependency>',
+      '<samba-add-dependency packages="react"></samba-add-dependency>',
       1,
       {
         chatSummary: undefined,
@@ -363,8 +363,8 @@ describe("processFullResponseActions add dependency errors", () => {
 
     const result = await processFullResponseActions(
       `
-      <dyad-write path="src/file1.js">console.log("Hello");</dyad-write>
-      <dyad-delete path="src/missing.js"></dyad-delete>
+      <samba-write path="src/file1.js">console.log("Hello");</samba-write>
+      <samba-delete path="src/missing.js"></samba-delete>
       `,
       1,
       {
@@ -394,8 +394,8 @@ describe("processFullResponseActions add dependency errors", () => {
 
     const result = await processFullResponseActions(
       `
-      <dyad-write path="src/file1.js">console.log("Hello");</dyad-write>
-      <dyad-delete path="self/src/missing.js"></dyad-delete>
+      <samba-write path="src/file1.js">console.log("Hello");</samba-write>
+      <samba-delete path="self/src/missing.js"></samba-delete>
       `,
       1,
       {
@@ -427,8 +427,8 @@ describe("processFullResponseActions add dependency errors", () => {
 
     const result = await processFullResponseActions(
       `
-      <dyad-write path="supabase/functions/_shared/foo.ts">export const foo = 1;</dyad-write>
-      <dyad-write path="supabase/functions/beta/index.ts">Deno.serve(() => new Response("ok"));</dyad-write>
+      <samba-write path="supabase/functions/_shared/foo.ts">export const foo = 1;</samba-write>
+      <samba-write path="supabase/functions/beta/index.ts">Deno.serve(() => new Response("ok"));</samba-write>
       `,
       1,
       {
@@ -468,7 +468,7 @@ describe("processFullResponseActions add dependency errors", () => {
     } as any);
 
     await processFullResponseActions(
-      '<dyad-write path="supabase/functions/_shared/foo.ts">export const foo = 1;</dyad-write>',
+      '<samba-write path="supabase/functions/_shared/foo.ts">export const foo = 1;</samba-write>',
       1,
       {
         chatSummary: undefined,

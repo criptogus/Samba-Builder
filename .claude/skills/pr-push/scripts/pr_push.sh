@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-BASE_REPO="${PR_PUSH_BASE_REPO:-dyad-sh/dyad}"
+BASE_REPO="${PR_PUSH_BASE_REPO:-samba-sh/samba}"
 BASE_BRANCH="${PR_PUSH_BASE_BRANCH:-main}"
 DEFAULT_REMOTE="${PR_PUSH_REMOTE:-origin}"
 REVIEW_LABEL="needs-human:review-issue"

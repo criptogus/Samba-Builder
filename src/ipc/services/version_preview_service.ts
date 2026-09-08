@@ -3,9 +3,9 @@ import fs from "node:fs";
 import path from "node:path";
 import { db } from "@/db";
 import { apps } from "@/db/schema";
-import { DyadError, DyadErrorKind } from "@/errors/dyad_error";
+import { SambaError, SambaErrorKind } from "@/errors/samba_error";
 import type { VersionCommandResult } from "@/ipc/types";
-import { getDyadAppPath } from "@/paths/paths";
+import { getSambaAppPath } from "@/paths/paths";
 import type { PreviewCommand, RestoreRecovery } from "@/version_preview/state";
 import type { CurrentRepositoryAssessment } from "@/version_preview/state";
 import {
@@ -141,11 +141,11 @@ export class VersionPreviewService {
           where: eq(apps.id, appId),
         });
         if (!app) {
-          throw new DyadError("App not found", DyadErrorKind.NotFound);
+          throw new SambaError("App not found", SambaErrorKind.NotFound);
         }
-        const appPath = getDyadAppPath(app.path);
+        const appPath = getSambaAppPath(app.path);
         if (!fs.existsSync(path.join(appPath, ".git"))) {
-          throw new DyadError("Not a git repository", DyadErrorKind.External);
+          throw new SambaError("Not a git repository", SambaErrorKind.External);
         }
         const branch = await gitCurrentBranch({ path: appPath });
         return { branch: branch && branch !== NO_BRANCH ? branch : null };
@@ -166,11 +166,11 @@ export class VersionPreviewService {
           where: eq(apps.id, appId),
         });
         if (!app) {
-          throw new DyadError("App not found", DyadErrorKind.NotFound);
+          throw new SambaError("App not found", SambaErrorKind.NotFound);
         }
-        const appPath = getDyadAppPath(app.path);
+        const appPath = getSambaAppPath(app.path);
         if (!fs.existsSync(path.join(appPath, ".git"))) {
-          throw new DyadError("Not a git repository", DyadErrorKind.External);
+          throw new SambaError("Not a git repository", SambaErrorKind.External);
         }
         const [branch, headOid, uncommittedFiles] = await Promise.all([
           gitCurrentBranch({ path: appPath }),
@@ -224,7 +224,7 @@ export class VersionPreviewService {
           if (!app) {
             return this.missingRepository("App not found");
           }
-          const appPath = getDyadAppPath(app.path);
+          const appPath = getSambaAppPath(app.path);
           await gitAddAll({ path: appPath });
           const savedVersionId = await gitCommit({
             path: appPath,
@@ -273,9 +273,9 @@ export class VersionPreviewService {
         hasActiveStreamsForApp(appId),
       ]);
       if (hasActorStream || hasLegacyStream) {
-        throw new DyadError(
+        throw new SambaError(
           "Stop the active generation before continuing Version History.",
-          DyadErrorKind.Precondition,
+          SambaErrorKind.Precondition,
         );
       }
       return await appOperationCoordinator.run(
@@ -313,9 +313,9 @@ export class VersionPreviewService {
 
   assertAcceptingOperations(appId: number): void {
     if (this.resetFenceCount > 0 || this.deletionFences.has(appId)) {
-      throw new DyadError(
+      throw new SambaError(
         "The app is being deleted",
-        DyadErrorKind.Precondition,
+        SambaErrorKind.Precondition,
       );
     }
   }
@@ -331,9 +331,9 @@ export class VersionPreviewService {
   assertReadyForIntent(appId: number): void {
     this.assertAcceptingOperations(appId);
     if (this.reconcilingApps.has(appId)) {
-      throw new DyadError(
+      throw new SambaError(
         "Version preview is reconciling after restart",
-        DyadErrorKind.Precondition,
+        SambaErrorKind.Precondition,
       );
     }
   }
@@ -362,9 +362,9 @@ export class VersionPreviewService {
       where: eq(apps.id, command.appId),
     });
     if (!app) {
-      throw new DyadError("App not found", DyadErrorKind.NotFound);
+      throw new SambaError("App not found", SambaErrorKind.NotFound);
     }
-    const appPath = getDyadAppPath(app.path);
+    const appPath = getSambaAppPath(app.path);
     const [preRestoreHead, currentBranch] = await Promise.all([
       getCurrentCommitHash({
         path: appPath,
@@ -399,7 +399,7 @@ export class VersionPreviewService {
       where: eq(apps.id, appId),
     });
     if (!app) return this.missingRepository("App not found");
-    const appPath = getDyadAppPath(app.path);
+    const appPath = getSambaAppPath(app.path);
     if (!fs.existsSync(path.join(appPath, ".git"))) {
       return this.missingRepository(
         "The project repository could not be found.",

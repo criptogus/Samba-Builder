@@ -1,14 +1,14 @@
 import { db } from "../../db";
 import { messages, apps, chats } from "../../db/schema";
 import { eq } from "drizzle-orm";
-import { getDyadAppPath } from "../../paths/paths";
+import { getSambaAppPath } from "../../paths/paths";
 import {
   buildPackagesAttrPattern,
   executeAddDependency,
 } from "../processors/executeAddDependency";
 import { createLoggedHandler } from "./safe_handle";
 import log from "electron-log";
-import { DyadError, DyadErrorKind } from "@/errors/dyad_error";
+import { SambaError, SambaErrorKind } from "@/errors/samba_error";
 
 const logger = log.scope("dependency_handlers");
 const handle = createLoggedHandler(logger);
@@ -31,7 +31,10 @@ export function registerDependencyHandlers() {
       });
 
       if (!chat) {
-        throw new DyadError(`Chat ${chatId} not found`, DyadErrorKind.NotFound);
+        throw new SambaError(
+          `Chat ${chatId} not found`,
+          SambaErrorKind.NotFound,
+        );
       }
 
       // Get the app using the appId from the chat
@@ -40,9 +43,9 @@ export function registerDependencyHandlers() {
       });
 
       if (!app) {
-        throw new DyadError(
+        throw new SambaError(
           `App for chat ${chatId} not found`,
-          DyadErrorKind.NotFound,
+          SambaErrorKind.NotFound,
         );
       }
 
@@ -50,7 +53,7 @@ export function registerDependencyHandlers() {
         .reverse()
         .find((m) =>
           new RegExp(
-            `<dyad-add-dependency packages="(?:${buildPackagesAttrPattern(packages)})">`,
+            `<samba-add-dependency packages="(?:${buildPackagesAttrPattern(packages)})">`,
           ).test(m.content),
         );
 
@@ -63,7 +66,7 @@ export function registerDependencyHandlers() {
       await executeAddDependency({
         packages,
         message,
-        appPath: getDyadAppPath(app.path),
+        appPath: getSambaAppPath(app.path),
       });
     },
   );

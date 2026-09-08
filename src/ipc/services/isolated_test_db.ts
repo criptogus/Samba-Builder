@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import log from "electron-log";
 
-import { getDyadAppPath } from "../../paths/paths";
+import { getSambaAppPath } from "../../paths/paths";
 import { apps } from "../../db/schema";
 import {
   createTempTestBranch,
@@ -152,7 +152,7 @@ export async function prepareIsolatedTestDatabase({
     };
   }
 
-  const appPath = getDyadAppPath(app.path);
+  const appPath = getSambaAppPath(app.path);
   let envSnapshot: string | null = null;
   let envModified = false;
   let branchId: string | undefined;
@@ -278,8 +278,8 @@ export async function prepareIsolatedTestDatabase({
           appId: app.id,
         });
         testCredentials = {
-          DYAD_TEST_USER_EMAIL: account.email,
-          DYAD_TEST_USER_PASSWORD: account.password,
+          SAMBA_TEST_USER_EMAIL: account.email,
+          SAMBA_TEST_USER_PASSWORD: account.password,
         };
         authSetup = {
           mode: "neon-better-auth",
@@ -427,7 +427,7 @@ async function prepareSupabaseTestUserIsolation({
     // happen — and one that reads as "my login is broken" rather than "my key
     // was retired". Warn (never block) and let the panel offer the switch.
     const legacyKey = await detectLegacyAppKey({
-      appPath: getDyadAppPath(app.path),
+      appPath: getSambaAppPath(app.path),
       projectId,
       organizationSlug,
     });
@@ -469,13 +469,13 @@ async function prepareSupabaseTestUserIsolation({
     }
 
     const testCredentials: Record<string, string> = {
-      DYAD_TEST_USER_EMAIL: testUser.email,
-      DYAD_TEST_USER_PASSWORD: testUser.password,
-      DYAD_TEST_SUPABASE_URL: testUser.projectUrl,
+      SAMBA_TEST_USER_EMAIL: testUser.email,
+      SAMBA_TEST_USER_PASSWORD: testUser.password,
+      SAMBA_TEST_SUPABASE_URL: testUser.projectUrl,
     };
     let authSetup: IsolationAuthSetup | undefined;
     if (anonKey) {
-      testCredentials.DYAD_TEST_SUPABASE_ANON_KEY = anonKey;
+      testCredentials.SAMBA_TEST_SUPABASE_ANON_KEY = anonKey;
       authSetup = {
         mode: "supabase-password",
         email: testUser.email,

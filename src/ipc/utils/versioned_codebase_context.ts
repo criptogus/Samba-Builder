@@ -19,14 +19,14 @@ export interface VersionedFiles {
   hasExternalChanges: boolean;
 }
 
-interface DyadEngineProviderOptions {
+interface SambaEngineProviderOptions {
   sourceCommitHash: string | null;
   commitHash: string | null;
 }
 
 /**
  * Parse file paths from assistant message content.
- * Extracts files from <dyad-read> and <dyad-code-search-result> tags.
+ * Extracts files from <samba-read> and <samba-code-search-result> tags.
  */
 export function parseFilesFromMessage(content: string): string[] {
   const filePaths: string[] = [];
@@ -39,10 +39,10 @@ export function parseFilesFromMessage(content: string): string[] {
   }
   const matches: TagMatch[] = [];
 
-  // Parse <dyad-read path="$filePath"></dyad-read>
-  const dyadReadRegex = /<dyad-read\s+path="([^"]+)"[^>]*><\/dyad-read>/gs;
+  // Parse <samba-read path="$filePath"></samba-read>
+  const sambaReadRegex = /<samba-read\s+path="([^"]+)"[^>]*><\/samba-read>/gs;
   let match: RegExpExecArray | null;
-  while ((match = dyadReadRegex.exec(content)) !== null) {
+  while ((match = sambaReadRegex.exec(content)) !== null) {
     const filePath = normalizePath(match[1].trim());
     if (filePath) {
       matches.push({
@@ -52,9 +52,9 @@ export function parseFilesFromMessage(content: string): string[] {
     }
   }
 
-  // Parse <dyad-code-search-result>...</dyad-code-search-result>
+  // Parse <samba-code-search-result>...</samba-code-search-result>
   const codeSearchRegex =
-    /<dyad-code-search-result>(.*?)<\/dyad-code-search-result>/gs;
+    /<samba-code-search-result>(.*?)<\/samba-code-search-result>/gs;
   while ((match = codeSearchRegex.exec(content)) !== null) {
     const innerContent = match[1];
     const paths: string[] = [];
@@ -139,8 +139,8 @@ export async function processChatMessagesWithVersionedFiles({
 
     // Extract sourceCommitHash from providerOptions
     const engineOptions = message.providerOptions?.[
-      "dyad-engine"
-    ] as unknown as DyadEngineProviderOptions;
+      "samba-engine"
+    ] as unknown as SambaEngineProviderOptions;
     const sourceCommitHash = engineOptions?.sourceCommitHash;
 
     // Skip messages without sourceCommitHash
@@ -225,8 +225,8 @@ export async function processChatMessagesWithVersionedFiles({
     const message = chatMessages[i];
     if (message.role === "assistant") {
       const engineOptions = message.providerOptions?.[
-        "dyad-engine"
-      ] as unknown as DyadEngineProviderOptions;
+        "samba-engine"
+      ] as unknown as SambaEngineProviderOptions;
       if (engineOptions?.commitHash) {
         latestCommitHash = engineOptions.commitHash;
         break;

@@ -220,7 +220,7 @@ describe("getChangedFilesForCommit", () => {
 
     await write(dir, "app.ts", "v2\n");
     await write(dir, "pnpm-workspace.yaml", 'packages: ["."]\n');
-    await write(dir, ".dyad/screenshot.png", "generated\n");
+    await write(dir, ".samba/screenshot.png", "generated\n");
     const commit = await commitAll(dir, "with runtime files");
 
     const changes = await getChangedFilesForCommit({

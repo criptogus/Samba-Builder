@@ -1,6 +1,6 @@
 # Samba Builder
 
-**O Lovable da SambaTech** — fork brandado do [Dyad](https://github.com/dyad-sh/dyad)
+**O Lovable da SambaTech** — fork brandado do [Samba](https://github.com/samba-sh/samba)
 (21k+ ⭐, Apache 2.0) para produzir projetos de clientes com DeepSeek, alimentado
 pelo **Córtex** (second brain + RAG) — que evolui a cada projeto entregue.
 
@@ -8,16 +8,16 @@ pelo **Córtex** (second brain + RAG) — que evolui a cada projeto entregue.
 
 | #   | Decisão                                                                | Por quê                                                                                                         |
 | --- | ---------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------- |
-| 1   | **Fork brandado** do Dyad (Apache 2.0), não uso vanilla                | Identidade Samba Builder desde já; core aberto permite evolução própria                                         |
+| 1   | **Fork brandado** do Samba (Apache 2.0), não uso vanilla               | Identidade Samba Builder desde já; core aberto permite evolução própria                                         |
 | 2   | **LLM via gateway Hermes local** (`127.0.0.1:8642`, OpenAI-compatible) | Chave DeepSeek única e centralizada; nada exposto nas máquinas; já ativo                                        |
 | 3   | **Conhecimento no Córtex atual** (vault + RAG `127.0.0.1:8899`)        | Design system SambaTech e aprendizado já vivem lá; projetos entram com namespace próprio (00-Inbox → distiller) |
-| 4   | Integração via **MCP nativo do Dyad**                                  | Mecanismo oficial de tools; sem hack no código core; `samba/cortex-mcp/`                                        |
+| 4   | Integração via **MCP nativo do Samba**                                 | Mecanismo oficial de tools; sem hack no código core; `samba/cortex-mcp/`                                        |
 
 ## Arquitetura
 
 ```
 ┌──────────────────────────────────────────────────────────────┐
-│  Samba Builder (fork Dyad — Electron + React)                │
+│  Samba Builder (fork Samba — Electron + React)                │
 │  prompt → agente → arquivos no disco → preview → deploy      │
 │    LLM: custom provider → 127.0.0.1:8642 (DeepSeek v4 flash) │
 │    Contexto: MCP tools do Córtex (samba/cortex-mcp)          │
@@ -37,7 +37,7 @@ pelo **Córtex** (second brain + RAG) — que evolui a cada projeto entregue.
 
 - `samba/cortex-mcp/` — **MCP server** (Python stdlib, zero deps): expõe units/design system/search/kg do Córtex como tools do agente. Ver `samba/cortex-mcp/README.md`.
 - `samba/learn/` — **learning loop** (CLI): relatório estruturado de projeto → 00-Inbox do Córtex → pipeline canônico de captura/destilação.
-- Resto = upstream Dyad (não editar fora de `samba/` sem necessidade — rebase limpo).
+- Resto = upstream Samba (não editar fora de `samba/` sem necessidade — rebase limpo).
 
 ## Setup (runbook)
 
@@ -94,10 +94,10 @@ python3 samba/learn/learn.py --project ~/Projetos/landing-x \
 
 ## Licença — limites do fork
 
-- Core do Dyad: **Apache 2.0** (uso comercial e fork permitidos).
+- Core do Samba: **Apache 2.0** (uso comercial e fork permitidos).
 - `src/pro/` (features avançadas): **FSL-1.1-ALv2** — uso interno e serviços
   profissionais para clientes **permitidos**; redistribuir como produto que
-  substitui o Dyad **proibido**. Samba Builder = uso interno da SambaTech →
+  substitui o Samba **proibido**. Samba Builder = uso interno da SambaTech →
   dentro da licença. **Não publicar o app empacotado publicamente.**
 - Código novo em `samba/`: MIT.
 
@@ -106,12 +106,12 @@ python3 samba/learn/learn.py --project ~/Projetos/landing-x \
 **Fundação (feita)**
 
 - [x] Fork clonado + npm install validado (Node 24 em `~/.local/node24`)
-- [x] Repo GitHub privado: `criptogus/Samba-Builder` (origin) + `upstream` = dyad-sh/dyad
+- [x] Repo GitHub privado: `criptogus/Samba-Builder` (origin) + `upstream` = samba-sh/samba
 - [x] MCP server do Córtex (units, design system, search, kg) + seed no app (`samba:seed-cortex`)
 - [x] Learning loop v1 (relatório → 00-Inbox → memória)
 - [x] App rodando em dev (fix: skip move-to-Applications em dev)
 - [x] Rebrand v1: nome/logo/pt-BR default 100% coberto
-- [x] Anti-Dyad v1+v2 (trial/upsell/cloud) + **v3: zero escritos "Dyad" no app**
+- [x] Anti-Samba v1+v2 (trial/upsell/cloud) + **v3: zero escritos "Samba" no app**
       (376 arquivos; só créditos/técnico preservados; pasta de apps → `samba-apps`)
 - [x] Providers pré-configurados: `samba:seed` (DeepSeek gateway :8642 + OpenCode Go)
 - [x] Composio nativo (`samba:seed-mcp`) · Playwright MCP (`samba:seed-playwright`) ·
@@ -136,9 +136,9 @@ python3 samba/learn/learn.py --project ~/Projetos/landing-x \
       feedback JSONL local com redação de segredos; agendável via cron/launchd)
 - [x] P6 Espelho corporativo — `samba/autopilot/publish.py` (conhecimento aprovado
       → PR no GitHub; merge humano)
-- [x] Zero Dyad: backend desligado (catálogo/templates/update/quota locais),
+- [x] Zero Samba: backend desligado (catálogo/templates/update/quota locais),
       conectores diretos Supabase (PAT) e Neon (API key), links → sambatech.com,
-      scaffold dos apps gerados sem assinatura dyad.sh
+      scaffold dos apps gerados sem assinatura samba.sh
 - [x] UI Governança (`GovernancePanel`) e UI Design System (`DesignSystemDialog`)
       — componentes na main; registro IPC entra com o commit do trabalho em
       andamento (arquivos compartilhados com outro agente)
@@ -151,4 +151,3 @@ python3 samba/learn/learn.py --project ~/Projetos/landing-x \
 - [ ] Adapter GitHub no app (branch protection automática por política)
 - [ ] Piloto: primeiro projeto de cliente real de ponta a ponta
 - [ ] Loop automático pós-projeto agendado (cron do autopilot + eval de qualidade)
-

@@ -32,10 +32,10 @@ import { getPostCompactionMessages } from "./compaction_utils";
 import {
   getProviderOptions,
   getAiHeaders,
-  DYAD_INTERNAL_REQUEST_ID_HEADER,
+  SAMBA_INTERNAL_REQUEST_ID_HEADER,
 } from "@/ipc/utils/provider_options";
 import { escapeXmlContent } from "../../../../shared/xmlEscape";
-import { isDyadProEnabled } from "@/lib/schemas";
+import { isSambaProEnabled } from "@/lib/schemas";
 import {
   normalizeModelSelection,
   resolveDefaultModelSelection,
@@ -160,7 +160,7 @@ export async function performCompaction(
   event: IpcMainInvokeEvent,
   chatId: number,
   appPath: string,
-  dyadRequestId: string,
+  sambaRequestId: string,
   onSummaryChunk?: (accumulatedText: string) => void,
   options?: {
     createdAtStrategy?: "before-latest-user" | "now";
@@ -195,7 +195,7 @@ export async function performCompaction(
     const selectedModel = chat?.modelSelection
       ? await normalizeModelSelection(chat.modelSelection)
       : await resolveDefaultModelSelection(storedSettings);
-    const compactionModel = isDyadProEnabled(storedSettings)
+    const compactionModel = isSambaProEnabled(storedSettings)
       ? await resolveModelSelection({
           model: PRO_COMPACTION_MODEL,
           preferredEffortLevel:
@@ -233,7 +233,7 @@ export async function performCompaction(
       }),
     );
 
-    // Store readable transcript backup in the app's .dyad/chats/ directory
+    // Store readable transcript backup in the app's .samba/chats/ directory
     const backupPath = await storePreCompactionMessages(
       appPath,
       chatId,
@@ -265,12 +265,12 @@ export async function performCompaction(
         ...getAiHeaders({
           builtinProviderId: modelClient.builtinProviderId,
         }),
-        [DYAD_INTERNAL_REQUEST_ID_HEADER]: dyadRequestId,
+        [SAMBA_INTERNAL_REQUEST_ID_HEADER]: sambaRequestId,
       },
       providerOptions: getProviderOptions({
-        dyadAppId: 0,
-        dyadRequestId,
-        dyadDisableFiles: true,
+        sambaAppId: 0,
+        sambaRequestId,
+        sambaDisableFiles: true,
         files: [],
         mentionedAppsCodebases: [],
         builtinProviderId: modelClient.builtinProviderId,
@@ -305,9 +305,9 @@ export async function performCompaction(
 
     // Create the compaction indicator message
     // Include relative backup path so the AI can read the full original conversation later
-    const compactionMessageContent = `<dyad-compaction title="Conversation compacted" state="finished">
+    const compactionMessageContent = `<samba-compaction title="Conversation compacted" state="finished">
 ${escapeXmlContent(summary)}
-</dyad-compaction>
+</samba-compaction>
 
 If you need to retrieve earlier parts of the conversation history, you can read the backup file at: ${backupPath}
 Note: This file may be large. Read only the sections you need or use grep to search for specific content rather than reading the entire file.`;

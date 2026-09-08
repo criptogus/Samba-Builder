@@ -45,8 +45,8 @@ const electronConfig: ElectronConfig = {
     sshServer = await startFakeSshServer();
     // The form asks for an address, not a port, so both of these travel
     // through the same e2e seam as every other test-only behaviour here.
-    process.env.DYAD_E2E_SSH_PORT = String(sshServer.port);
-    process.env.DYAD_E2E_DASHBOARD_PORT = String(fakeLlmPort);
+    process.env.SAMBA_E2E_SSH_PORT = String(sshServer.port);
+    process.env.SAMBA_E2E_DASHBOARD_PORT = String(fakeLlmPort);
     // Whatever another spec left in the shared fake is not this test's setup.
     await resetCoolify(fakeLlmPort);
   },
@@ -61,8 +61,8 @@ function server(): FakeSshServer {
 }
 
 test.afterEach(async () => {
-  delete process.env.DYAD_E2E_SSH_PORT;
-  delete process.env.DYAD_E2E_DASHBOARD_PORT;
+  delete process.env.SAMBA_E2E_SSH_PORT;
+  delete process.env.SAMBA_E2E_DASHBOARD_PORT;
   await sshServer?.close();
   sshServer = null;
 });

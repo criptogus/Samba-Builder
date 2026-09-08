@@ -86,7 +86,7 @@ describe("TypeScript utility process exclusion", () => {
 
   it("fully exits each resident process before starting the other kind", async () => {
     const appPath = await fs.mkdtemp(
-      path.join(os.tmpdir(), "dyad-ts-scheduler-"),
+      path.join(os.tmpdir(), "samba-ts-scheduler-"),
     );
     await fs.mkdir(path.join(appPath, "node_modules", "typescript", "bin"), {
       recursive: true,
@@ -253,7 +253,7 @@ describe("TypeScript utility process exclusion", () => {
 
   it("recycles the explorer host when the app TypeScript installation changes", async () => {
     const appPath = await fs.mkdtemp(
-      path.join(os.tmpdir(), "dyad-ts-fingerprint-"),
+      path.join(os.tmpdir(), "samba-ts-fingerprint-"),
     );
     const typeScriptPath = path.join(appPath, "node_modules", "typescript");
     await fs.mkdir(path.join(typeScriptPath, "lib"), { recursive: true });

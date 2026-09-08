@@ -35,7 +35,7 @@ export SECRET_TOKEN=example
 testing/run-fake-stdio-mcp-server.sh
 ```
 
-### Integrating with Dyad (stdio MCP)
+### Integrating with Samba (stdio MCP)
 
 When adding a stdio MCP server in the app, use:
 
@@ -87,7 +87,7 @@ export PORT=3002
 node testing/fake-http-mcp-server.mjs
 ```
 
-### Integrating with Dyad (HTTP MCP)
+### Integrating with Samba (HTTP MCP)
 
 When adding an HTTP MCP server in the app, use:
 
@@ -108,7 +108,7 @@ Once connected, you should see the tools listed:
 `fake-oauth-mcp-server.mjs` bundles a minimal OAuth 2.1 authorization
 server (discovery, DCR, /authorize, /token, refresh) with a
 Streamable-HTTP MCP endpoint behind a bearer-token check. Used to test
-the Dyad MCP OAuth flow against a deterministic target rather than a
+the Samba MCP OAuth flow against a deterministic target rather than a
 real provider like Linear.
 
 The `/authorize` endpoint auto-redirects with a code (no consent UI),
@@ -142,7 +142,7 @@ FAKE_DCR=0 FAKE_CLIENT_ID=my-test-client \
   testing/run-fake-oauth-mcp-server.sh
 ```
 
-#### Wiring into Dyad (manual test)
+#### Wiring into Samba (manual test)
 
 Add an MCP server in the app with:
 

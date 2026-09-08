@@ -5,7 +5,7 @@ import { db } from "../../db";
 import { mcpServers, mcpToolConsents } from "../../db/schema";
 import { eq, and, or } from "drizzle-orm";
 import { createTypedHandler } from "./base";
-import { DyadError, DyadErrorKind } from "../../errors/dyad_error";
+import { SambaError, SambaErrorKind } from "../../errors/samba_error";
 
 import { getStoredConsent } from "../utils/mcp_consent";
 import { mcpManager } from "../utils/mcp_manager";
@@ -80,9 +80,9 @@ function parseJsonField<T>(
     return JSON.parse(value) as T;
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
-    throw new DyadError(
+    throw new SambaError(
       `Invalid JSON for "${field}": ${message}`,
-      DyadErrorKind.Validation,
+      SambaErrorKind.Validation,
     );
   }
 }
@@ -105,9 +105,9 @@ function parseSecretMapField(
     Array.isArray(parsed) ||
     !Object.values(parsed).every((v) => typeof v === "string")
   ) {
-    throw new DyadError(
+    throw new SambaError(
       `"${field}" must be an object of string values.`,
-      DyadErrorKind.Validation,
+      SambaErrorKind.Validation,
     );
   }
   return parsed as Record<string, string>;
@@ -180,16 +180,16 @@ export function registerMcpHandlers() {
         entries.every((entry) => entry.slug === GRANOLA_CATALOG_ENTRY.slug) &&
         slug !== GRANOLA_CATALOG_ENTRY.slug
       ) {
-        throw new DyadError(
+        throw new SambaError(
           "Could not reach the plugin catalog. Please check your connection and try again.",
-          DyadErrorKind.Precondition,
+          SambaErrorKind.Precondition,
         );
       }
       const entry = entries.find((e) => e.slug === slug);
       if (!entry) {
-        throw new DyadError(
+        throw new SambaError(
           `Unknown catalog entry: ${slug}`,
-          DyadErrorKind.NotFound,
+          SambaErrorKind.NotFound,
         );
       }
 
@@ -231,9 +231,9 @@ export function registerMcpHandlers() {
         (entry.transport === "stdio" && !stdioMatchesReview) ||
         transportMismatch
       ) {
-        throw new DyadError(
+        throw new SambaError(
           "The plugin catalog changed since you reviewed this plugin. Please try adding it again.",
-          DyadErrorKind.Precondition,
+          SambaErrorKind.Precondition,
         );
       }
 
@@ -275,9 +275,9 @@ export function registerMcpHandlers() {
           .from(mcpServers)
           .where(eq(mcpServers.catalogSlug, slug));
         if (!row) {
-          throw new DyadError(
+          throw new SambaError(
             `Unknown catalog entry: ${slug}`,
-            DyadErrorKind.NotFound,
+            SambaErrorKind.NotFound,
           );
         }
         return toMcpServer(row);
@@ -336,9 +336,9 @@ export function registerMcpHandlers() {
       })
       .returning();
     if (!result[0])
-      throw new DyadError(
+      throw new SambaError(
         "Failed to create MCP server.",
-        DyadErrorKind.Internal,
+        SambaErrorKind.Internal,
       );
     return toMcpServer(result[0]);
   });
@@ -405,9 +405,9 @@ export function registerMcpHandlers() {
         .where(eq(mcpServers.id, params.id))
         .returning();
       if (!result[0])
-        throw new DyadError(
+        throw new SambaError(
           `MCP server not found: ${params.id}`,
-          DyadErrorKind.NotFound,
+          SambaErrorKind.NotFound,
         );
       // Config may have changed; dispose the cached client so the next
       // use rebuilds the transport with the updated row. Fire-and-forget: a

@@ -1,4 +1,4 @@
-import { DyadError, DyadErrorKind } from "@/errors/dyad_error";
+import { SambaError, SambaErrorKind } from "@/errors/samba_error";
 
 const creationBlockCounts = new Map<number, number>();
 
@@ -21,8 +21,8 @@ export const beginAppChatDeletion = beginAppChatMutation;
 
 export function assertAppChatCreationOpen(appId: number): void {
   if (!creationBlockCounts.has(appId)) return;
-  throw new DyadError(
+  throw new SambaError(
     "App is temporarily unavailable",
-    DyadErrorKind.Precondition,
+    SambaErrorKind.Precondition,
   );
 }

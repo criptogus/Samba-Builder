@@ -29,7 +29,7 @@ dist-ssr
 /playwright-report/
 /playwright/.cache/
 .last-run.json
-.dyad/
+.samba/
 
 
 === AI_RULES.md ===
@@ -1384,7 +1384,7 @@ export default tseslint.config(
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>dyad-generated-app</title>
+    <title>samba-generated-app</title>
   </head>
 
   <body>
@@ -2150,7 +2150,7 @@ end
     "zod": "^3.25.0"
   },
   "devDependencies": {
-    "@dyad-sh/react-vite-component-tagger": "^0.9.0",
+    "@samba-sh/react-vite-component-tagger": "^0.9.0",
     "@eslint/js": "^9.9.0",
     "@tailwindcss/typography": "^0.5.15",
     "@types/node": "^22.5.5",
@@ -2172,7 +2172,7 @@ end
 }
 
 === pnpm-workspace.yaml ===
-[Dyad-managed pnpm workspace config]
+[Samba-managed pnpm workspace config]
 
 === postcss.config.js ===
 export default {
@@ -2207,7 +2207,7 @@ Allow: /
 
 
 === README.md ===
-# Welcome to your Dyad app
+# Welcome to your Samba app
 
 
 === src/App.css ===
@@ -2285,17 +2285,17 @@ const App = () => (
 export default App;
 
 
-=== src/components/made-with-dyad.tsx ===
-export const MadeWithDyad = () => {
+=== src/components/made-with-samba.tsx ===
+export const MadeWithSamba = () => {
   return (
     <div className="p-4 text-center">
       <a
-        href="https://www.dyad.sh/"
+        href="https://www.samba.sh/"
         target="_blank"
         rel="noopener noreferrer"
         className="text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
       >
-        Made with Dyad
+        Made with Samba
       </a>
     </div>
   );
@@ -7569,7 +7569,7 @@ createRoot(document.getElementById("root")!).render(<App />);
 === src/pages/Index.tsx ===
 // Update this page (the content is just a fallback if you fail to update the page)
 
-import { MadeWithDyad } from "@/components/made-with-dyad";
+import { MadeWithSamba } from "@/components/made-with-samba";
 
 const Index = () => {
   return (
@@ -7580,7 +7580,7 @@ const Index = () => {
           Start building your amazing project here!
         </p>
       </div>
-      <MadeWithDyad />
+      <MadeWithSamba />
     </div>
   );
 };
@@ -7835,7 +7835,7 @@ export default {
 
 === vite.config.ts ===
 import { defineConfig } from "vite";
-import dyadComponentTagger from "@dyad-sh/react-vite-component-tagger";
+import sambaComponentTagger from "@samba-sh/react-vite-component-tagger";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
 
@@ -7844,7 +7844,7 @@ export default defineConfig(() => ({
     host: "::",
     port: 8080,
   },
-  plugins: [dyadComponentTagger(), react()],
+  plugins: [sambaComponentTagger(), react()],
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),

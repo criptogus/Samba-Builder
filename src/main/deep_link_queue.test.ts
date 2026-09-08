@@ -6,15 +6,15 @@ describe("createDeepLinkQueue", () => {
     const handler = vi.fn();
     const queue = createDeepLinkQueue(handler);
 
-    queue.handle("dyad://one");
-    queue.handle("dyad://two");
+    queue.handle("sambabuilder://one");
+    queue.handle("sambabuilder://two");
 
     expect(handler).not.toHaveBeenCalled();
 
     queue.markReady();
 
-    expect(handler).toHaveBeenNthCalledWith(1, "dyad://one");
-    expect(handler).toHaveBeenNthCalledWith(2, "dyad://two");
+    expect(handler).toHaveBeenNthCalledWith(1, "sambabuilder://one");
+    expect(handler).toHaveBeenNthCalledWith(2, "sambabuilder://two");
   });
 
   it("handles deep links immediately after the app is marked ready", () => {
@@ -22,11 +22,11 @@ describe("createDeepLinkQueue", () => {
     const queue = createDeepLinkQueue(handler);
 
     queue.markReady();
-    queue.handle("dyad://ready");
+    queue.handle("sambabuilder://ready");
     queue.markReady();
 
     expect(handler).toHaveBeenCalledOnce();
-    expect(handler).toHaveBeenCalledWith("dyad://ready");
+    expect(handler).toHaveBeenCalledWith("sambabuilder://ready");
   });
 
   it("queues again while a newly targeted window is loading", () => {
@@ -35,10 +35,10 @@ describe("createDeepLinkQueue", () => {
     queue.markReady();
     queue.markNotReady();
 
-    queue.handle("dyad://new-window");
+    queue.handle("sambabuilder://new-window");
     expect(handler).not.toHaveBeenCalled();
 
     queue.markReady();
-    expect(handler).toHaveBeenCalledWith("dyad://new-window");
+    expect(handler).toHaveBeenCalledWith("sambabuilder://new-window");
   });
 });

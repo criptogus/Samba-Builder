@@ -573,9 +573,9 @@ assertion. chat_stream's migration (Part 1) is the proof case.
 
 The kernel defines `TransitionObserver` but the only inspection facility is
 version_preview's bespoke ring buffer (`debug.ts`,
-`window.__dyadVersionPreviewLog`). Promote it: generic
+`window.__sambaVersionPreviewLog`). Promote it: generic
 `createTraceObserver(machineName)` in the kernel — 100-entry ring buffer,
-applied + ignored events with reasons, `window.__dyadMachines` index — wired
+applied + ignored events with reasons, `window.__sambaMachines` index — wired
 into all five machines (which also closes 1B's observer gap), with
 captured-trace replay through `transition()` documented as a test technique.
 
@@ -679,7 +679,7 @@ blueprint atoms — re-read, still a clean event-sourced reducer; Vercel):
   agentTodos projection / Node-install card / cloud-sandbox banner /
   visual-changes accumulation** — each examined; clean pattern, plumbing, or
   below the bar (one-line reasons recorded in the survey output).
-- **Pro/billing gating, Dyad Pro auth return, help-bot streams,
+- **Pro/billing gating, Samba Pro auth return, help-bot streams,
   BackupManager, eval harness** — checked clean by the completeness pass:
   single-shot writes, query polling, one-dialog abort map, sequential
   startup, test infra respectively.
@@ -1032,11 +1032,11 @@ maxEntries?, describeState?, describeEvent?, describeCommand?, mute? })`
      returning a kernel `TransitionObserver` (types.ts:65-75); entries
      `{at, machine, key, from, event, to, commands, ignoredReason}` in a
      per-machine 100-entry ring; `getTraceLog(machine?)` exported for
-     main-process access; `window.__dyadMachines` (index + `dump()`)
+     main-process access; `window.__sambaMachines` (index + `dump()`)
      installed only when `typeof window !== "undefined"` so the same module
      serves connection_flow's main-side registry (observer option at
      registry.ts:71-76). `mute` keeps per-chunk ignores out of the buffer.
-   - Decision: delete debug.ts and `window.__dyadVersionPreviewLog` outright
+   - Decision: delete debug.ts and `window.__sambaVersionPreviewLog` outright
      (dev-only, no programmatic consumers; no deprecation alias).
    - Retrofit in this PR: version_preview manager, plan_handoff + app_run
      provider construction (closing 1B's observer gap), connection_flow
@@ -1044,7 +1044,7 @@ maxEntries?, describeState?, describeEvent?, describeCommand?, mute? })`
    - Tests: trace.test.ts (ring cap, ignored-reason capture, main-safety
      without `window`, replay of a captured trace through version_preview's
      `transition()` as the documented technique).
-   - Exit: all convention-compliant machines emit to `window.__dyadMachines`;
+   - Exit: all convention-compliant machines emit to `window.__sambaMachines`;
      debug.ts gone.
 2. **Voice-to-text machine + Clock/IdSource** (medium; owns handshake 4).
    - Kernel additions in `src/state_machines/clock.ts`: `Clock { now();
@@ -1093,7 +1093,7 @@ DeliverTranscription{text}, NotifyError{message}`.
    fetch (:151-158) switches to `AbortSignal.any([controller.signal,
 downloadTimeoutSignal])`; (ii) `controller.signal.aborted` checks after
    the download and inside `withLock` immediately before `writeFile`
-   (:210), throwing `DyadErrorKind.UserCancelled`; (iii) `activeControllers`
+   (:210), throwing `SambaErrorKind.UserCancelled`; (iii) `activeControllers`
    deletion moves to a `finally` — today only :89 and :217 delete it, so
    every failure after the first fetch leaks the entry forever and a later
    cancel of the dead job returns `{cancelled:true}`. Tests: handler vitest
@@ -1266,7 +1266,7 @@ hasArmedPayload}` written by the provider subscription; home.tsx's
 Phase 2 exit criteria:
 
 - [ ] trace.ts landed; version_preview/plan_handoff/app_run/connection_flow
-      observable via `window.__dyadMachines`/`getTraceLog`; debug.ts deleted.
+      observable via `window.__sambaMachines`/`getTraceLog`; debug.ts deleted.
 - [ ] Clock/IdSource in the kernel with fakes; voice/image-gen/home construct
       with them injected; MCP OAuth types its injections with them.
 - [ ] Four new machine directories in the boundaries inventory, passing
@@ -1325,7 +1325,7 @@ Design decisions (resolved):
   Three instances would triple the respond/get-pending contract surface,
   and the per-chat sweep must clear a consent AND a questionnaire in the
   same chat atomically — one keyed registry, one sweep. The divergent UI
-  surfaces (ChatInput banner, QuestionnaireInput panel, DyadAddIntegration
+  surfaces (ChatInput banner, QuestionnaireInput panel, SambaAddIntegration
   card) are projections filtered by `kind`; divergence lives in components,
   never in `transition()`.
 - **Main-authoritative registry; the renderer is a projection.** Validated
@@ -1350,7 +1350,7 @@ Design decisions (resolved):
   plan_handlers.ts:199 is the bug (bug 3's positive-feedback lie). Unified
   `respond` dispatches `human-decided`; if the transition is ignored
   (`"already-settled"`/`"unknown-request"`) the handler throws
-  `DyadErrorKind.NotFound`. Renderers show confirmation UI only on a
+  `SambaErrorKind.NotFound`. Renderers show confirmation UI only on a
   successful respond; on NotFound they re-read the projection and toast
   "request expired".
 - **Stream-end feeding (main-side, explicit mapping).** The five sweep call
@@ -1772,7 +1772,7 @@ Entry criteria:
      are dead code by construction — `SerializedIpcError` has no `code`
      field (core.ts:167-172), `serializeIpcError` drops it (:214-233), and
      `deserializeIpcError` discards `name` for any error with a valid
-     `DyadErrorKind` (:242-253), so `GitStateError.code`
+     `SambaErrorKind` (:242-253), so `GitStateError.code`
      (git_utils.ts:2339-2350) never crosses the boundary and the `err?.code`
      checks (GitHubConnector.tsx:253-256, GithubBranchManager.tsx:205)
      always see undefined — which is why the probe and substring fallbacks

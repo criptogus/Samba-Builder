@@ -1,5 +1,5 @@
 ---
-name: dyad:pr-push
+name: samba:pr-push
 description: Publish local work by committing changes, running checks, pushing the branch, and creating or refreshing a GitHub PR with a reviewer-useful description.
 ---
 
@@ -29,7 +29,7 @@ Use this skill to publish the current work to GitHub. It must complete autonomou
    bash .agents/skills/pr-push/scripts/pr_push.sh
    ```
 
-5. If the script reports a fixable failure, fix it and rerun the script. When fixing issues, do not run `git pull` from fork remotes; only pull from the upstream repo configured by `PR_PUSH_BASE_REPO` (default `dyad-sh/dyad`) if needed. Do not manually replay the full workflow unless the script itself is broken.
+5. If the script reports a fixable failure, fix it and rerun the script. When fixing issues, do not run `git pull` from fork remotes; only pull from the upstream repo configured by `PR_PUSH_BASE_REPO` (default `samba-sh/samba`) if needed. Do not manually replay the full workflow unless the script itself is broken.
 6. If the PR already existed, inspect its current title and body after the push. Refresh stale or generic agent-authored text to reflect the complete branch, while preserving human-written notes and sections added by review tools. Do not overwrite the entire body blindly.
 7. Summarize the script's final output, including the branch, committed files, ignored files, checks, pushed remote, and PR URL or bot-account PR creation link. Also report the local unit-test decision and any test command that was run.
 
@@ -44,7 +44,7 @@ The script handles the mechanical workflow:
 - Does not run unit tests. The agent decides whether to run `npm test` for broad changes or a targeted `npm test -- ...` command for narrow changes; GitHub CI runs the full suite.
 - Amends automated formatting/lint changes into the commit it created.
 - Pushes to the tracked upstream, an existing PR head remote, or `origin` with the documented fallback behavior.
-- Creates the PR against `dyad-sh/dyad:main`, unless the active GitHub account is a bot. Existing PR branches are pushed without blindly overwriting their descriptions.
+- Creates the PR against `samba-sh/samba:main`, unless the active GitHub account is a bot. Existing PR branches are pushed without blindly overwriting their descriptions.
 - Removes `needs-human:review-issue` when a PR exists.
 
 Optional environment overrides:
@@ -53,6 +53,6 @@ Optional environment overrides:
 - `PR_PUSH_PR_TITLE`: PR title.
 - `PR_PUSH_PR_BODY_FILE`: path to the prepared PR body; required when creating a PR.
 - `PR_PUSH_PR_BODY`: inline PR body override; useful when shell quoting is known to be safe.
-- `PR_PUSH_BASE_REPO`: default `dyad-sh/dyad`.
+- `PR_PUSH_BASE_REPO`: default `samba-sh/samba`.
 - `PR_PUSH_BASE_BRANCH`: default `main`.
 - `PR_PUSH_REMOTE`: default fallback remote `origin`.

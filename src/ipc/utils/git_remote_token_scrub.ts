@@ -1,7 +1,7 @@
 import log from "electron-log";
 import fs from "node:fs/promises";
 import path from "node:path";
-import { getDyadAppPath } from "@/paths/paths";
+import { getSambaAppPath } from "@/paths/paths";
 import { db } from "@/db";
 import { apps } from "@/db/schema";
 
@@ -27,7 +27,7 @@ export async function scrubGithubTokenFromRemotes(): Promise<void> {
     const counts = await Promise.all(
       allApps.map(async (app) => {
         const configPath = path.join(
-          getDyadAppPath(app.path),
+          getSambaAppPath(app.path),
           ".git",
           "config",
         );
@@ -50,7 +50,7 @@ export async function scrubGithubTokenFromRemotes(): Promise<void> {
         try {
           // Write to a temp file and rename so a crash mid-write can't
           // truncate the repo's config.
-          const tempPath = `${configPath}.dyad-scrub-tmp`;
+          const tempPath = `${configPath}.samba-scrub-tmp`;
           await fs.writeFile(tempPath, scrubbed, "utf8");
           await fs.rename(tempPath, configPath);
           return 1;

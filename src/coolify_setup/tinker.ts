@@ -1,4 +1,4 @@
-import { DyadError, DyadErrorKind } from "@/errors/dyad_error";
+import { SambaError, SambaErrorKind } from "@/errors/samba_error";
 import type { SshSession } from "@/ipc/utils/ssh_client";
 
 /**
@@ -21,8 +21,8 @@ import type { SshSession } from "@/ipc/utils/ssh_client";
  * echo, so the match is anchored to a whole line — which the echo cannot be,
  * because it carries the script around the marker.
  */
-const START = "__DYAD_OUT_START__";
-const END = "__DYAD_OUT_END__";
+const START = "__SAMBA_OUT_START__";
+const END = "__SAMBA_OUT_END__";
 
 /**
  * The command that feeds a script to tinker.
@@ -38,9 +38,9 @@ export function tinkerCommand(container = "coolify"): string {
 /** Docker's own grammar. The name is interpolated into a root command. */
 function assertSafeContainer(container: string): void {
   if (!/^[a-zA-Z0-9][a-zA-Z0-9_.-]*$/.test(container)) {
-    throw new DyadError(
+    throw new SambaError(
       `Refusing to run against an unsafe container name: ${container}`,
-      DyadErrorKind.Validation,
+      SambaErrorKind.Validation,
     );
   }
 }
@@ -50,7 +50,7 @@ function assertSafeContainer(container: string): void {
  *
  * The closing marker starts with a newline of its own because a script whose
  * last echo omits PHP_EOL would otherwise leave the marker stuck to the end of
- * the value — `yes__DYAD_OUT_END__` — and nothing would find it. Putting the
+ * the value — `yes__SAMBA_OUT_END__` — and nothing would find it. Putting the
  * break here means callers do not have to remember.
  */
 export function wrapScript(body: string): string {
@@ -136,15 +136,15 @@ function envArgs(env: Record<string, string>): string {
   return Object.entries(env)
     .map(([name, value]) => {
       if (!/^[A-Z][A-Z0-9_]*$/.test(name)) {
-        throw new DyadError(
+        throw new SambaError(
           `Unsafe environment variable name: ${name}`,
-          DyadErrorKind.Internal,
+          SambaErrorKind.Internal,
         );
       }
       if (/['\\`$\n\r]/.test(value)) {
-        throw new DyadError(
+        throw new SambaError(
           `Value for ${name} contains a character that cannot be passed safely`,
-          DyadErrorKind.Internal,
+          SambaErrorKind.Internal,
         );
       }
       return `-e ${name}='${value}'`;
@@ -179,10 +179,10 @@ export async function runTinker(
 
   const output = extractOutput(result.stdout);
   if (output === null) {
-    throw new DyadError(
+    throw new SambaError(
       "Coolify did not answer as expected while being set up. It may still be " +
         "starting — wait a moment and try again.",
-      DyadErrorKind.External,
+      SambaErrorKind.External,
     );
   }
   return output;

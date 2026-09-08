@@ -342,7 +342,7 @@ Acceptance criteria for adding a new benchmark repo:
 
 Implemented after the latest full run:
 
-- Sub-agent protocol stability: `dyad/value` now gets exactly one tool step, no provider retries,
+- Sub-agent protocol stability: `samba/value` now gets exactly one tool step, no provider retries,
   and tool failures are returned as observations unless the user aborted. This removed the
   provider `tool_calls` history corruption seen in earlier traces.
 - Sub-agent app targeting: shared read-only tool resolution treats obvious current-app aliases
@@ -590,7 +590,7 @@ Interpretation:
   - Generated/story/codegen/docs/mocks paths are now excluded from coverage claims, route classification
     takes precedence over component classification, and route coverage for detail-page tasks now
     requires detail/show/object-record/record-page identity from path/symbols, not evidence-only imports.
-    A Dyad Pro rerun (`run-2026-06-07T04-29-44-888Z`) hit the account budget and exposed a runner
+    A Samba Pro rerun (`run-2026-06-07T04-29-44-888Z`) hit the account budget and exposed a runner
     failure-path scoping bug, which is now fixed. A Codex-auth rerun
     (`run-2026-06-07T04-31-28-417Z`) confirmed the report no longer recommends answering or an edit
     target for the bad side-panel route evidence; it marks `route/page entry` missing and sends the

@@ -594,7 +594,7 @@ describe("parseMinidumpBuffer", () => {
 
   it("extracts the debug identity from a pdb70 CodeView record", () => {
     const dump = buildMinidump({
-      modules: [{ base: 0x400000n, size: 0x1000, name: "C:\\app\\dyad.exe" }],
+      modules: [{ base: 0x400000n, size: 0x1000, name: "C:\\app\\samba.exe" }],
       cvRecord: {
         kind: "pdb70",
         // Little endian GUID fields print big endian, so bytes
@@ -611,7 +611,7 @@ describe("parseMinidumpBuffer", () => {
       ipOffset: 248,
     });
     const s = parseMinidumpBuffer(dump, "win32", "x64");
-    expect(s!.faultingModule).toBe("dyad.exe");
+    expect(s!.faultingModule).toBe("samba.exe");
     expect(s!.faultingDebugFile).toBe("electron.exe.pdb");
     expect(s!.faultingDebugId).toBe("67452301AB89EFCD0123456789ABCDEF1");
   });

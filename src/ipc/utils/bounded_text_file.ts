@@ -1,7 +1,7 @@
 import { promises as fs } from "node:fs";
 import type { FileHandle } from "node:fs/promises";
 import path from "node:path";
-import { DyadError, DyadErrorKind } from "@/errors/dyad_error";
+import { SambaError, SambaErrorKind } from "@/errors/samba_error";
 
 export const APP_FILE_EDITOR_LIMIT_BYTES = 5 * 1024 * 1024;
 export const AGENT_READ_FILE_RESULT_LIMIT_BYTES = 256 * 1024;
@@ -75,18 +75,18 @@ async function openContainedFile({
     realPath = await fs.realpath(filePath);
   } catch (error) {
     if (isNodeErrorWithCode(error, "ENOENT")) {
-      throw new DyadError(
+      throw new SambaError(
         `File does not exist: ${displayPath}`,
-        DyadErrorKind.NotFound,
+        SambaErrorKind.NotFound,
       );
     }
     throw error;
   }
 
   if (isOutsideRoot(realRootPath, realPath)) {
-    throw new DyadError(
+    throw new SambaError(
       `Cannot read files outside the app: ${displayPath}`,
-      DyadErrorKind.Precondition,
+      SambaErrorKind.Precondition,
     );
   }
 
@@ -94,9 +94,9 @@ async function openContainedFile({
   try {
     const stat = await handle.stat();
     if (!stat.isFile()) {
-      throw new DyadError(
+      throw new SambaError(
         `Path is not a file: ${displayPath}`,
-        DyadErrorKind.Validation,
+        SambaErrorKind.Validation,
       );
     }
     return { handle, realPath, realRootPath, size: stat.size };
@@ -107,9 +107,9 @@ async function openContainedFile({
 }
 
 function throwBinaryFileError(displayPath: string): never {
-  throw new DyadError(
+  throw new SambaError(
     `Cannot read binary file as UTF-8 text: ${displayPath}`,
-    DyadErrorKind.Validation,
+    SambaErrorKind.Validation,
   );
 }
 
@@ -158,9 +158,9 @@ export async function readContainedTextFile({
   try {
     validateRealPath?.(opened.realPath, opened.realRootPath);
     if (opened.size > maxBytes) {
-      throw new DyadError(
+      throw new SambaError(
         `File is too large to read safely: ${displayPath} (${opened.size} bytes; ${maxBytes} byte limit)`,
-        DyadErrorKind.Validation,
+        SambaErrorKind.Validation,
       );
     }
 
@@ -179,9 +179,9 @@ export async function readContainedTextFile({
 
     const finalStat = await opened.handle.stat();
     if (finalStat.size !== opened.size) {
-      throw new DyadError(
+      throw new SambaError(
         `File changed while it was being read: ${displayPath}. Please try again.`,
-        DyadErrorKind.Conflict,
+        SambaErrorKind.Conflict,
       );
     }
     return decodeUtf8(buffer.subarray(0, offset), displayPath);
@@ -215,9 +215,9 @@ export async function readAppFileForEditor(
   const opened = await openContainedFile(params);
   try {
     if (opened.size > APP_FILE_EDITOR_LIMIT_BYTES) {
-      throw new DyadError(
+      throw new SambaError(
         `File is too large to open safely: ${params.displayPath} (${opened.size} bytes; ${APP_FILE_EDITOR_LIMIT_BYTES} byte limit)`,
-        DyadErrorKind.Validation,
+        SambaErrorKind.Validation,
       );
     }
 
@@ -236,9 +236,9 @@ export async function readAppFileForEditor(
 
     const finalStat = await opened.handle.stat();
     if (finalStat.size !== opened.size) {
-      throw new DyadError(
+      throw new SambaError(
         `File changed while it was being read: ${params.displayPath}. Please try again.`,
-        DyadErrorKind.Conflict,
+        SambaErrorKind.Conflict,
       );
     }
 

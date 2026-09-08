@@ -177,7 +177,7 @@ equivalent retry, and the fallback path can produce a
 - GitHub: token written to settings while the UI never reflects it (poll
   succeeds after unmount); connecting app A blocks app B via the
   process-global guard.
-- A stale/replayed `dyad://…-return` link overwrites credentials with no
+- A stale/replayed `samba://…-return` link overwrites credentials with no
   pending flow to validate against; whichever mounted connector consumes the
   broadcast first wins.
 - Supabase connect with no timeout at all: browser closed ⇒ silently stuck.
@@ -263,7 +263,7 @@ main-process `src/ipc/handlers/app_handlers.ts` +
   proxy-output handler all write it; a stale `finally` block can clear a
   newer operation's state (last writer wins).
 - Two independent "run finished" signals — the `runApp` IPC promise settling
-  and the `[dyad-proxy-server]started=` stdout regex
+  and the `[samba-proxy-server]started=` stdout regex
   (`useRunApp.ts:226-257`) — with no ordering guarantee: the loading screen
   can hide before the URL is set, or a re-emitted cached proxy line can
   clear a fresh restart's loading state.

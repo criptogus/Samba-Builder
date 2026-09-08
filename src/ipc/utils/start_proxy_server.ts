@@ -3,7 +3,7 @@
 import { Worker } from "worker_threads";
 import path from "path";
 import log from "electron-log";
-import { DyadError, DyadErrorKind } from "@/errors/dyad_error";
+import { SambaError, SambaErrorKind } from "@/errors/samba_error";
 import {
   PROXY_FALLBACK_MAX_ATTEMPTS,
   getProxyFallbackPortStart,
@@ -16,15 +16,15 @@ export async function startProxy(
   opts: {
     port: number;
     onStarted?: (proxyUrl: string) => void;
-    onError?: (error: DyadError) => void;
+    onError?: (error: SambaError) => void;
     fixedHeaders?: Record<string, string>;
     authBootstrapToken: string;
   },
 ) {
   if (!/^https?:\/\//.test(targetOrigin))
-    throw new DyadError(
+    throw new SambaError(
       "startProxy: targetOrigin must be absolute http/https URL",
-      DyadErrorKind.Validation,
+      SambaErrorKind.Validation,
     );
   const { port, onStarted, onError, fixedHeaders, authBootstrapToken } = opts;
   const fallbackPortStart = getProxyFallbackPortStart();
@@ -52,9 +52,9 @@ export async function startProxy(
     } else if (typeof m === "string" && m.startsWith("proxy-server-error")) {
       logger.error("[proxy] failed to bind:", m);
       onError?.(
-        new DyadError(
+        new SambaError(
           `Could not start the preview proxy: every port from ${port} to ${fallbackPortStart + PROXY_FALLBACK_MAX_ATTEMPTS - 1} is in use. Free up a port and restart the app.`,
-          DyadErrorKind.Conflict,
+          SambaErrorKind.Conflict,
         ),
       );
     }

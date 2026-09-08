@@ -31,22 +31,22 @@ describe("ports", () => {
   });
 
   it("isolates app, proxy, and fallback ports by E2E worker block", () => {
-    const previous = process.env.DYAD_E2E_PORT_BLOCK_INDEX;
+    const previous = process.env.SAMBA_E2E_PORT_BLOCK_INDEX;
     try {
-      process.env.DYAD_E2E_PORT_BLOCK_INDEX = "0";
+      process.env.SAMBA_E2E_PORT_BLOCK_INDEX = "0";
       expect(getAppPort(1)).toBe(32101);
       expect(getAppProxyPort(1)).toBe(33101);
       expect(getProxyFallbackPortStart()).toBe(34100);
 
-      process.env.DYAD_E2E_PORT_BLOCK_INDEX = "1";
+      process.env.SAMBA_E2E_PORT_BLOCK_INDEX = "1";
       expect(getAppPort(1)).toBe(34151);
       expect(getAppProxyPort(1)).toBe(35151);
       expect(getProxyFallbackPortStart()).toBe(36150);
     } finally {
       if (previous == null) {
-        delete process.env.DYAD_E2E_PORT_BLOCK_INDEX;
+        delete process.env.SAMBA_E2E_PORT_BLOCK_INDEX;
       } else {
-        process.env.DYAD_E2E_PORT_BLOCK_INDEX = previous;
+        process.env.SAMBA_E2E_PORT_BLOCK_INDEX = previous;
       }
     }
   });

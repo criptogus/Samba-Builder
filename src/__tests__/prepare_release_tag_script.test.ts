@@ -39,9 +39,9 @@ describe("prepare release tag script", () => {
   });
 
   it("parses GitHub repository coordinates", () => {
-    expect(getRepoParts("dyad-sh/dyad")).toEqual({
-      owner: "dyad-sh",
-      repo: "dyad",
+    expect(getRepoParts("samba-sh/samba")).toEqual({
+      owner: "samba-sh",
+      repo: "samba",
     });
   });
 
@@ -55,8 +55,8 @@ describe("prepare release tag script", () => {
 
     await expect(
       findReleaseByTag({
-        owner: "dyad-sh",
-        repo: "dyad",
+        owner: "samba-sh",
+        repo: "samba",
         tagName: "v1.3.0",
         token: "token",
       }),
@@ -83,8 +83,8 @@ describe("prepare release tag script", () => {
 
     await expect(
       findReleaseByTag({
-        owner: "dyad-sh",
-        repo: "dyad",
+        owner: "samba-sh",
+        repo: "samba",
         tagName: "v1.3.0",
         token: "token",
       }),
@@ -108,8 +108,8 @@ describe("prepare release tag script", () => {
 
     await expect(
       findReleaseByTag({
-        owner: "dyad-sh",
-        repo: "dyad",
+        owner: "samba-sh",
+        repo: "samba",
         tagName: "v1.3.0",
         token: "token",
       }),

@@ -15,7 +15,7 @@
 >   `bridge.once`/`invokeLog`/`lastInvoke`; `settleInFlight` now THROWS on
 >   timeout (hybrid-harness-cleanup).
 > - **6 (call-time engine/gateway env reads)** — shipped:
->   `getDyadEngineBaseUrl()` etc.
+>   `getSambaEngineBaseUrl()` etc.
 > - **7 (shared AppRoot wiring)** — shipped:
 >   `src/app_wiring/registerRendererIpcListeners.ts`.
 > - **8 (post-stream double-render)** — shipped: `waitForRenderedText`.
@@ -277,7 +277,7 @@ one commit so a revert is trivial if `once` misbehaves under `act`.
 ## 6. Read engine/gateway env vars at call time (kills the hoisted-relay boilerplate)
 
 **Problem.** `src/ipc/utils/get_model_client.ts` (~line 39) captures
-`process.env.DYAD_ENGINE_URL` (and gateway URL) at module import;
+`process.env.SAMBA_ENGINE_URL` (and gateway URL) at module import;
 `src/ipc/utils/lm_studio_utils.ts` does the same for its base URL. The
 harness's fake-server port only exists after app modules load, so every
 pro/engine/lm-studio test — node AND hybrid — carries a `vi.hoisted` block
@@ -286,15 +286,15 @@ documented in HYBRID*HARNESS.md §9 and used by `engine`, `thinking_budget`,
 `lm_studio`, `turbo_edits_v2`, `context*\*`, `local_agent_code_search` tests).
 
 **Design.** Move the env reads inside the functions that use them (or a
-`getDyadEngineUrl()` helper reading env per call). Audit for other
-import-time-frozen env reads on the model-routing path (`DYAD_GATEWAY_URL`,
+`getSambaEngineUrl()` helper reading env per call). Audit for other
+import-time-frozen env reads on the model-routing path (`SAMBA_GATEWAY_URL`,
 `LM_STUDIO_BASE_URL_FOR_TESTING`; also note `getEnvVar`'s `shellEnvSync` cache
 in `src/ipc/utils/read_env.ts` — leave the cache but document it). Runtime
 cost is a property read per request — negligible against an LLM call.
 
 Then simplify the tests: replace hoisted relays with `beforeAll` env
 assignment of the harness's real port. Add a harness option
-(`engine: true` → sets `DYAD_ENGINE_URL`/`DYAD_GATEWAY_URL` to the fake server
+(`engine: true` → sets `SAMBA_ENGINE_URL`/`SAMBA_GATEWAY_URL` to the fake server
 before seeding settings) so future engine tests are one flag.
 
 **Verification.** All relay-using tests rewritten and green twice; grep

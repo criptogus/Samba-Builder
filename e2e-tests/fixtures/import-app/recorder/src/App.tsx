@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 
 // An interactive app for the test-recorder E2E: it exercises the recorder's
-// click / fill / check / select / navigate capture and its non-dyadId selector
+// click / fill / check / select / navigate capture and its non-sambaId selector
 // strategies (this imported app has no component tagger).
 const App = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);

@@ -27,8 +27,8 @@ export function PreviewErrorBanner({
   const { isStreaming } = useStreamChat();
 
   const isDockerError = error.message.includes("Cannot connect to the Docker");
-  const isInternalDyadError = error.source === "dyad-app";
-  const isSyncError = error.source === "dyad-sync";
+  const isInternalSambaError = error.source === "samba-app";
+  const isSyncError = error.source === "samba-sync";
 
   const firstLine = error.message.split("\n")[0];
   const summaryWithoutErrorPrefix = firstLine.replace(/^Error:?\s+/i, "");
@@ -54,7 +54,7 @@ export function PreviewErrorBanner({
             >
               {errorSummary}
             </p>
-            {(isInternalDyadError || isSyncError) && (
+            {(isInternalSambaError || isSyncError) && (
               <span className="shrink-0 rounded bg-red-100 px-1.5 py-0.5 text-xs font-medium text-red-700 dark:bg-red-900 dark:text-red-300">
                 {isSyncError
                   ? "Cloud sync issue"
@@ -125,7 +125,7 @@ export function PreviewErrorBanner({
                 ? "Make sure Docker Desktop is running and try restarting the app."
                 : isSyncError
                   ? "Samba Builder could not upload your latest local changes to the cloud sandbox. Check your network connection or wait for sync to recover."
-                  : isInternalDyadError
+                  : isInternalSambaError
                     ? "Try restarting the Samba Builder app or your computer."
                     : "Try restarting the app."}
             </span>

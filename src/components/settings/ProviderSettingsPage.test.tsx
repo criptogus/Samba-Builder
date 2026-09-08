@@ -2,7 +2,7 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import type { PropsWithChildren } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { DyadErrorKind } from "@/errors/dyad_error";
+import { SambaErrorKind } from "@/errors/samba_error";
 import { ProviderSettingsPage } from "./ProviderSettingsPage";
 
 const mocks = vi.hoisted(() => ({
@@ -16,7 +16,7 @@ const mocks = vi.hoisted(() => ({
   sendFirstPrompt: vi.fn(),
   settings: {
     providerSettings: {},
-    enableDyadPro: false,
+    enableSambaPro: false,
     defaultChatMode: "build",
   } as any,
 }));
@@ -90,7 +90,7 @@ vi.mock("@/ipc/types", () => ({
   },
 }));
 
-function validationError(message: string, kind: DyadErrorKind) {
+function validationError(message: string, kind: SambaErrorKind) {
   return Object.assign(new Error(message), { kind });
 }
 
@@ -137,14 +137,14 @@ describe("ProviderSettingsPage", () => {
     mocks.sendFirstPrompt.mockReset();
     mocks.settings = {
       providerSettings: {},
-      enableDyadPro: false,
+      enableSambaPro: false,
       defaultChatMode: "build",
     };
   });
 
   it("titles auth validation errors as rejected API keys", async () => {
     mocks.validateProviderApiKey.mockRejectedValue(
-      validationError("Google rejected this API key.", DyadErrorKind.Auth),
+      validationError("Google rejected this API key.", SambaErrorKind.Auth),
     );
 
     renderProviderSettingsPage();
@@ -167,7 +167,7 @@ describe("ProviderSettingsPage", () => {
         providerSettings: {
           google: { apiKey: { value: "test-google-key" } },
         },
-        enableDyadPro: false,
+        enableSambaPro: false,
         defaultChatMode: "build",
       }),
     );
@@ -221,9 +221,9 @@ describe("ProviderSettingsPage", () => {
   });
 
   it.each([
-    [DyadErrorKind.RateLimited, "Google rate limited the API key check."],
+    [SambaErrorKind.RateLimited, "Google rate limited the API key check."],
     [
-      DyadErrorKind.External,
+      SambaErrorKind.External,
       "Google did not respond while checking this API key.",
     ],
   ])(

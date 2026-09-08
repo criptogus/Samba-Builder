@@ -15,9 +15,9 @@ import {
 import { fakeLlmLog } from "./log";
 
 const CANNED_MESSAGE = `
-  <dyad-write path="file1.txt">
+  <samba-write path="file1.txt">
   A file (2)
-  </dyad-write>
+  </samba-write>
   More
   EOM`;
 

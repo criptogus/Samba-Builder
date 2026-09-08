@@ -1,6 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
-import { DyadError, DyadErrorKind } from "@/errors/dyad_error";
+import { SambaError, SambaErrorKind } from "@/errors/samba_error";
 import { normalizePath } from "../../../shared/normalizePath";
 
 /**
@@ -20,30 +20,30 @@ export function safeJoin(basePath: string, ...paths: string[]): string {
   // Check if any of the path segments are absolute paths (which would be unsafe)
   for (const pathSegment of normalizedPaths) {
     if (path.isAbsolute(pathSegment)) {
-      throw new DyadError(
+      throw new SambaError(
         `Unsafe path: joining "${paths.join(", ")}" with base "${basePath}" would escape the base directory`,
-        DyadErrorKind.Validation,
+        SambaErrorKind.Validation,
       );
     }
     // Also check for home directory shortcuts which are effectively absolute
     if (pathSegment.startsWith("~/")) {
-      throw new DyadError(
+      throw new SambaError(
         `Unsafe path: joining "${paths.join(", ")}" with base "${basePath}" would escape the base directory`,
-        DyadErrorKind.Validation,
+        SambaErrorKind.Validation,
       );
     }
     // Check for Windows-style absolute paths (C:\, D:\, etc.)
     if (/^[A-Za-z]:[/\\]/.test(pathSegment)) {
-      throw new DyadError(
+      throw new SambaError(
         `Unsafe path: joining "${paths.join(", ")}" with base "${basePath}" would escape the base directory`,
-        DyadErrorKind.Validation,
+        SambaErrorKind.Validation,
       );
     }
     // Check for UNC paths (\\server\share)
     if (pathSegment.startsWith("\\\\")) {
-      throw new DyadError(
+      throw new SambaError(
         `Unsafe path: joining "${paths.join(", ")}" with base "${basePath}" would escape the base directory`,
-        DyadErrorKind.Validation,
+        SambaErrorKind.Validation,
       );
     }
   }
@@ -61,9 +61,9 @@ export function safeJoin(basePath: string, ...paths: string[]): string {
 
   // If relativePath starts with ".." or is absolute, then resolvedJoinedPath is outside basePath
   if (relativePath.startsWith("..") || path.isAbsolute(relativePath)) {
-    throw new DyadError(
+    throw new SambaError(
       `Unsafe path: joining "${paths.join(", ")}" with base "${basePath}" would escape the base directory`,
-      DyadErrorKind.Validation,
+      SambaErrorKind.Validation,
     );
   }
 
@@ -137,9 +137,9 @@ export async function assertMutationPathAllowed(params: {
       try {
         const stat = await fs.promises.lstat(existing);
         if (stat.isSymbolicLink()) {
-          throw new DyadError(
+          throw new SambaError(
             `Cannot modify through symlink: ${params.relativePath}`,
-            DyadErrorKind.Precondition,
+            SambaErrorKind.Precondition,
           );
         }
       } catch (lstatError) {
@@ -168,11 +168,11 @@ export async function assertMutationPathAllowed(params: {
     relative.startsWith(`..${path.sep}`) ||
     path.isAbsolute(relative)
   ) {
-    throw new DyadError(
+    throw new SambaError(
       relative === ""
         ? `Cannot modify the app root: ${params.relativePath}`
         : `Cannot modify files outside the app: ${params.relativePath}`,
-      DyadErrorKind.Precondition,
+      SambaErrorKind.Precondition,
     );
   }
   return relative.split(path.sep).join("/");
@@ -199,9 +199,9 @@ export function assertNotProjectRootPath(
   inputPath: string,
 ): void {
   if (isProjectRootPath(basePath, inputPath)) {
-    throw new DyadError(
+    throw new SambaError(
       `Refusing to delete project root for path: "${inputPath}"`,
-      DyadErrorKind.Validation,
+      SambaErrorKind.Validation,
     );
   }
   safeJoin(basePath, inputPath);

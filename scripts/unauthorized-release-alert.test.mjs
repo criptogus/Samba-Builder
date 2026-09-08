@@ -7,7 +7,7 @@ import {
 } from "./unauthorized-release-alert.mjs";
 
 const baseAlert = {
-  repository: "dyad-sh/dyad",
+  repository: "samba-sh/samba",
   releaseId: "123",
   releaseTag: "v9.9.9",
   releaseAuthor: "octocat",
@@ -15,7 +15,7 @@ const baseAlert = {
   releaseName: "Unexpected release",
   createdAt: "2026-07-27T12:00:00Z",
   publishedAt: "2026-07-27T12:05:00Z",
-  runUrl: "https://github.com/dyad-sh/dyad/actions/runs/456",
+  runUrl: "https://github.com/samba-sh/samba/actions/runs/456",
 };
 
 test("parseRecipients trims, deduplicates, and removes empty entries", () => {

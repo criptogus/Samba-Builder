@@ -19,12 +19,12 @@ import path from "node:path";
 import { spawn } from "node:child_process";
 import { randomUUID } from "node:crypto";
 import {
-  getDyadAppPath,
-  getDefaultDyadAppsDirectory,
+  getSambaAppPath,
+  getDefaultSambaAppsDirectory,
   isAppLocationAccessible,
   getUserDataPath,
-  getDyadAppsBaseDirectory,
-  invalidateDyadAppsBaseDirectoryCache,
+  getSambaAppsBaseDirectory,
+  invalidateSambaAppsBaseDirectoryCache,
 } from "../../paths/paths";
 import { promises as fsPromises } from "node:fs";
 
@@ -56,7 +56,7 @@ import { readSettings } from "../../main/settings";
 import { addLog } from "../../lib/log_store";
 import { IS_TEST_BUILD } from "../utils/test_utils";
 import {
-  DYAD_SCREENSHOT_DIR_NAME,
+  SAMBA_SCREENSHOT_DIR_NAME,
   MAX_SCREENSHOTS_PER_APP,
   SCREENSHOT_FILENAME_REGEX,
 } from "../utils/media_path_utils";
@@ -128,7 +128,7 @@ import {
 } from "../utils/cloud_sandbox_provider";
 import { createFromTemplate } from "./createFromTemplate";
 import { getInitialChatModeForNewChat } from "./chat_mode_resolution";
-import { ensureDyadGitignored } from "./gitignoreUtils";
+import { ensureSambaGitignored } from "./gitignoreUtils";
 import {
   gitListBranches,
   gitRenameBranch,
@@ -159,7 +159,7 @@ import {
   MAX_FILE_SEARCH_SIZE,
   RIPGREP_EXCLUDED_GLOBS,
 } from "../utils/ripgrep_utils";
-import { DyadError, DyadErrorKind, isDyadError } from "@/errors/dyad_error";
+import { SambaError, SambaErrorKind, isSambaError } from "@/errors/samba_error";
 import { detectFrameworkType } from "../utils/framework_utils";
 import { readAppFileForEditor } from "../utils/bounded_text_file";
 import { queryInvalidationBus } from "@/window_infrastructure/main/query_invalidation_bus";
@@ -190,7 +190,7 @@ const handle = createLoggedHandler(logger);
 async function renameDirectoryWithCaseHop(fromPath: string, toPath: string) {
   const tempPath = path.join(
     path.dirname(fromPath),
-    `.dyad-rename-${path.basename(fromPath)}-${process.pid}-${Date.now()}`,
+    `.samba-rename-${path.basename(fromPath)}-${process.pid}-${Date.now()}`,
   );
   await fsPromises.rename(fromPath, tempPath);
   try {
@@ -483,9 +483,9 @@ async function ensureAppOffTestBranch(appId: number): Promise<void> {
     // relaunch, even if this best-effort retry itself threw.
     return;
   }
-  throw new DyadError(
+  throw new SambaError(
     "Samba Builder couldn't restore this app's real database settings after recording, so starting it now would run against the temporary test branch. Check your Neon connection, then try again so Samba Builder can finish recovery.",
-    DyadErrorKind.Precondition,
+    SambaErrorKind.Precondition,
   );
 }
 
@@ -502,9 +502,9 @@ async function deleteAppById(
     appOperationDeletion = appOperationCoordinator.beginAppDeletion(appId);
   } catch (error) {
     if (error instanceof AppDeletionInProgressError) {
-      throw new DyadError(
+      throw new SambaError(
         "This app is already being deleted.",
-        DyadErrorKind.Precondition,
+        SambaErrorKind.Precondition,
         { cause: error },
       );
     }
@@ -687,7 +687,7 @@ async function deleteAppByIdExclusive(
             deletionCommitted = true;
             return { appPath: options.knownAppPath, doomedRow: null };
           }
-          throw new DyadError("App not found", DyadErrorKind.NotFound);
+          throw new SambaError("App not found", SambaErrorKind.NotFound);
         }
 
         if (runningApps.has(appId)) {
@@ -718,9 +718,9 @@ async function deleteAppByIdExclusive(
           // with the row that reconciliation needs to find it already gone.
           const testUserDeleted = await deleteTempTestUser(doomedRow ?? app);
           if (!testUserDeleted) {
-            throw new DyadError(
+            throw new SambaError(
               "Failed to delete the app's temporary Supabase test user. Please retry app deletion.",
-              DyadErrorKind.External,
+              SambaErrorKind.External,
             );
           }
           await db.delete(apps).where(eq(apps.id, appId));
@@ -735,13 +735,13 @@ async function deleteAppByIdExclusive(
           }
         } catch (error: any) {
           logger.error(`Error deleting app ${appId} from database:`, error);
-          throw new DyadError(
+          throw new SambaError(
             `Failed to delete app from database: ${error.message}`,
-            DyadErrorKind.External,
+            SambaErrorKind.External,
           );
         }
         return {
-          appPath: getDyadAppPath(app.path),
+          appPath: getSambaAppPath(app.path),
           doomedRow: doomedRow ?? null,
         };
       },
@@ -824,7 +824,7 @@ async function deleteAppByIdExclusive(
 export function registerAppHandlers() {
   registerCloudSandboxSyncUpdateListener();
 
-  createTypedHandler(systemContracts.restartDyad, async () => {
+  createTypedHandler(systemContracts.restartSamba, async () => {
     appRelaunchRequest.request();
     app.quit();
   });
@@ -847,16 +847,16 @@ export function registerAppHandlers() {
         where: eq(apps.name, appName),
       });
       if (nameConflict) {
-        throw new DyadError(
+        throw new SambaError(
           `An app named "${appName}" already exists.`,
-          DyadErrorKind.Conflict,
+          SambaErrorKind.Conflict,
         );
       }
 
       const appPath = await resolveUniqueFolderName(
         slugifyAppFolderName(appName),
       );
-      fullAppPath = getDyadAppPath(appPath);
+      fullAppPath = getSambaAppPath(appPath);
 
       if (!isAppLocationAccessible(fullAppPath)) {
         throw new Error(
@@ -927,11 +927,11 @@ export function registerAppHandlers() {
         }),
       });
 
-      // Ensure `.dyad/` is gitignored before the initial commit so the agent's
-      // later `ensureDyadGitignored` call is a no-op and the app stays clean.
+      // Ensure `.samba/` is gitignored before the initial commit so the agent's
+      // later `ensureSambaGitignored` call is a no-op and the app stays clean.
       // Otherwise the first template swap (e.g. from app-blueprint approval)
       // fails the clean-working-tree check.
-      await ensureDyadGitignored(fullAppPath);
+      await ensureSambaGitignored(fullAppPath);
 
       // Initialize git repo and create first commit
       const commitHash = await gitService.initRepoWithInitialCommit({
@@ -995,9 +995,9 @@ export function registerAppHandlers() {
         );
       }
       if (!restored) {
-        throw new DyadError(
+        throw new SambaError(
           "Samba Builder couldn't restore this app's real database settings from a previous test or recording session. Retry after checking the Neon connection.",
-          DyadErrorKind.Precondition,
+          SambaErrorKind.Precondition,
         );
       }
     }
@@ -1010,9 +1010,9 @@ export function registerAppHandlers() {
     });
 
     if (existingApp) {
-      throw new DyadError(
+      throw new SambaError(
         `An app named "${newAppName}" already exists.`,
-        DyadErrorKind.Conflict,
+        SambaErrorKind.Conflict,
       );
     }
 
@@ -1040,9 +1040,9 @@ export function registerAppHandlers() {
         });
 
         if (!originalApp) {
-          throw new DyadError(
+          throw new SambaError(
             "Original app not found.",
-            DyadErrorKind.NotFound,
+            SambaErrorKind.NotFound,
           );
         }
 
@@ -1055,17 +1055,17 @@ export function registerAppHandlers() {
           originalApp.neonTestBranchId &&
           !isTestBranchCleanupOnly(originalApp.neonTestBranchId)
         ) {
-          throw new DyadError(
+          throw new SambaError(
             "Samba Builder couldn't restore this app's real database settings from a previous test or recording session. Retry after checking the Neon connection.",
-            DyadErrorKind.Precondition,
+            SambaErrorKind.Precondition,
           );
         }
 
         const newFolderName = await resolveUniqueFolderName(
           slugifyAppFolderName(newAppName),
         );
-        const originalAppPath = getDyadAppPath(originalApp.path);
-        const newAppPath = getDyadAppPath(newFolderName);
+        const originalAppPath = getSambaAppPath(originalApp.path);
+        const newAppPath = getSambaAppPath(newFolderName);
 
         if (!isAppLocationAccessible(newAppPath)) {
           throw new Error(
@@ -1088,9 +1088,9 @@ export function registerAppHandlers() {
           );
         } catch (error) {
           logger.error("Failed to copy app directory:", error);
-          throw new DyadError(
+          throw new SambaError(
             formatCopyAppDirectoryError(error),
-            DyadErrorKind.External,
+            SambaErrorKind.External,
             { cause: error },
           );
         }
@@ -1149,11 +1149,11 @@ export function registerAppHandlers() {
     });
 
     if (!app) {
-      throw new DyadError("App not found", DyadErrorKind.NotFound);
+      throw new SambaError("App not found", SambaErrorKind.NotFound);
     }
 
     // Get app files
-    const appPath = getDyadAppPath(app.path);
+    const appPath = getSambaAppPath(app.path);
     let files: string[] = [];
 
     try {
@@ -1209,7 +1209,7 @@ export function registerAppHandlers() {
     });
     const appsWithResolvedPath = allApps.map((app) => ({
       ...app,
-      resolvedPath: getDyadAppPath(app.path),
+      resolvedPath: getSambaAppPath(app.path),
     }));
     return {
       apps: appsWithResolvedPath,
@@ -1223,10 +1223,10 @@ export function registerAppHandlers() {
     });
 
     if (!app) {
-      throw new DyadError("App not found", DyadErrorKind.NotFound);
+      throw new SambaError("App not found", SambaErrorKind.NotFound);
     }
 
-    const appPath = getDyadAppPath(app.path);
+    const appPath = getSambaAppPath(app.path);
     const fullPath = safeJoin(appPath, filePath);
 
     try {
@@ -1236,9 +1236,9 @@ export function registerAppHandlers() {
         displayPath: filePath,
       });
     } catch (error) {
-      if (isDyadError(error)) throw error;
+      if (isSambaError(error)) throw error;
       logger.error(`Error reading file ${filePath} for app ${appId}:`, error);
-      throw new DyadError("Failed to read file", DyadErrorKind.External, {
+      throw new SambaError("Failed to read file", SambaErrorKind.External, {
         cause: error,
       });
     }
@@ -1358,9 +1358,9 @@ export function registerAppHandlers() {
           `Failed to fetch cloud sandbox status for app ${appId}:`,
           error,
         );
-        throw new DyadError(
+        throw new SambaError(
           formatCloudSandboxError(error),
-          DyadErrorKind.External,
+          SambaErrorKind.External,
         );
       }
     },
@@ -1373,9 +1373,9 @@ export function registerAppHandlers() {
       const appInfo = runningApps.get(appId);
 
       if (!appInfo || appInfo.mode !== "cloud" || !appInfo.cloudSandboxId) {
-        throw new DyadError(
+        throw new SambaError(
           `App ${appId} is not running in cloud mode`,
-          DyadErrorKind.External,
+          SambaErrorKind.External,
         );
       }
 
@@ -1388,9 +1388,9 @@ export function registerAppHandlers() {
           `Failed to create cloud sandbox share link for app ${appId}:`,
           error,
         );
-        throw new DyadError(
+        throw new SambaError(
           formatCloudSandboxError(error),
-          DyadErrorKind.External,
+          SambaErrorKind.External,
         );
       }
     },
@@ -1424,10 +1424,10 @@ export function registerAppHandlers() {
     });
 
     if (!app) {
-      throw new DyadError("App not found", DyadErrorKind.NotFound);
+      throw new SambaError("App not found", SambaErrorKind.NotFound);
     }
 
-    const appPath = getDyadAppPath(app.path);
+    const appPath = getSambaAppPath(app.path);
     const fullPath = safeJoin(appPath, filePath);
 
     if (app.neonProjectId && app.neonDevelopmentBranchId) {
@@ -1462,9 +1462,9 @@ export function registerAppHandlers() {
       }
     } catch (error: any) {
       logger.error(`Error writing file ${filePath} for app ${appId}:`, error);
-      throw new DyadError(
+      throw new SambaError(
         `Failed to write file: ${error.message}`,
-        DyadErrorKind.External,
+        SambaErrorKind.External,
       );
     }
 
@@ -1571,9 +1571,9 @@ export function registerAppHandlers() {
             .limit(1);
 
           if (result.length === 0) {
-            throw new DyadError(
+            throw new SambaError(
               `App with ID ${appId} not found.`,
-              DyadErrorKind.NotFound,
+              SambaErrorKind.NotFound,
             );
           }
 
@@ -1599,9 +1599,9 @@ export function registerAppHandlers() {
             `Error in add-to-favorite handler for app ID ${appId}:`,
             error,
           );
-          throw new DyadError(
+          throw new SambaError(
             `Failed to toggle favorite status: ${error.message}`,
-            DyadErrorKind.External,
+            SambaErrorKind.External,
           );
         }
       },
@@ -1624,9 +1624,9 @@ export function registerAppHandlers() {
           .returning({ testingEnabled: apps.testingEnabled });
 
         if (updated.length === 0) {
-          throw new DyadError(
+          throw new SambaError(
             `App with ID ${appId} not found.`,
-            DyadErrorKind.NotFound,
+            SambaErrorKind.NotFound,
           );
         }
 
@@ -1656,7 +1656,7 @@ export function registerAppHandlers() {
         });
 
         if (!app) {
-          throw new DyadError("App not found", DyadErrorKind.NotFound);
+          throw new SambaError("App not found", SambaErrorKind.NotFound);
         }
 
         // Security: reject NEW absolute paths - rename-app should only accept relative paths for new paths
@@ -1674,7 +1674,7 @@ export function registerAppHandlers() {
         if (appPath !== app.path) {
           const validationError = validateAppFolderName(appPath);
           if (validationError) {
-            throw new DyadError(validationError, DyadErrorKind.Validation);
+            throw new SambaError(validationError, SambaErrorKind.Validation);
           }
         }
 
@@ -1683,7 +1683,7 @@ export function registerAppHandlers() {
         const resolveCandidatePath = (folderName: string) =>
           path.isAbsolute(app.path)
             ? path.join(path.dirname(app.path), folderName)
-            : getDyadAppPath(folderName);
+            : getSambaAppPath(folderName);
 
         if (autoResolveConflicts) {
           // Blueprint approval: resolve the display-name suffix first, then
@@ -1706,15 +1706,15 @@ export function registerAppHandlers() {
           });
 
           if (nameConflict && nameConflict.id !== appId) {
-            throw new DyadError(
+            throw new SambaError(
               `An app with the name '${appName}' already exists`,
-              DyadErrorKind.Conflict,
+              SambaErrorKind.Conflict,
             );
           }
         }
 
         const pathChanged = appPath !== app.path;
-        const currentResolvedPath = getDyadAppPath(app.path);
+        const currentResolvedPath = getSambaAppPath(app.path);
         const newAppPath = resolveCandidatePath(appPath);
 
         let hasPathConflict = false;
@@ -1727,16 +1727,16 @@ export function registerAppHandlers() {
               return false;
             }
             return (
-              getDyadAppPath(existingApp.path).toLowerCase() ===
+              getSambaAppPath(existingApp.path).toLowerCase() ===
               newAppPath.toLowerCase()
             );
           });
         }
 
         if (hasPathConflict) {
-          throw new DyadError(
+          throw new SambaError(
             `An app with the path '${newAppPath}' already exists`,
-            DyadErrorKind.Conflict,
+            SambaErrorKind.Conflict,
           );
         }
 
@@ -1770,9 +1770,9 @@ export function registerAppHandlers() {
               `Error renaming app directory from ${oldAppPath} to ${newAppPath}:`,
               error,
             );
-            throw new DyadError(
+            throw new SambaError(
               `Failed to move app files: ${error.message}`,
-              DyadErrorKind.External,
+              SambaErrorKind.External,
             );
           }
         } else if (newAppPath !== oldAppPath) {
@@ -1780,9 +1780,9 @@ export function registerAppHandlers() {
           try {
             // Check if destination directory already exists
             if (fs.existsSync(newAppPath)) {
-              throw new DyadError(
+              throw new SambaError(
                 `Destination path '${newAppPath}' already exists`,
-                DyadErrorKind.Conflict,
+                SambaErrorKind.Conflict,
               );
             }
 
@@ -1800,7 +1800,7 @@ export function registerAppHandlers() {
               `Error moving app files from ${oldAppPath} to ${newAppPath}:`,
               error,
             );
-            if (isDyadError(error)) {
+            if (isSambaError(error)) {
               throw error;
             }
             // Attempt cleanup if destination exists (partial copy may have occurred)
@@ -1817,9 +1817,9 @@ export function registerAppHandlers() {
                 );
               }
             }
-            throw new DyadError(
+            throw new SambaError(
               `Failed to move app files: ${error.message}`,
-              DyadErrorKind.External,
+              SambaErrorKind.External,
             );
           }
 
@@ -1881,9 +1881,9 @@ export function registerAppHandlers() {
           }
 
           logger.error(`Error updating app ${appId} in database:`, error);
-          throw new DyadError(
+          throw new SambaError(
             `Failed to update app in database: ${error.message}`,
-            DyadErrorKind.External,
+            SambaErrorKind.External,
           );
         }
       },
@@ -1950,7 +1950,7 @@ export function registerAppHandlers() {
       // it allows us to do the deletion last after removing the database
       const allAppPaths = await db.select({ appPath: apps.path }).from(apps);
       // To resolve app paths later
-      const basePath = getDyadAppsBaseDirectory();
+      const basePath = getSambaAppsBaseDirectory();
       logger.log("deleting database...");
       await userInputRegistry.settleAll();
       // 1. Drop the database by closing the singleton and deleting SQLite files
@@ -1996,7 +1996,7 @@ export function registerAppHandlers() {
         logger.warn("Could not delete the Coolify deploy keys:", error);
       }
       // Reset base directory cache to default, because settings are gone anyway
-      invalidateDyadAppsBaseDirectoryCache();
+      invalidateSambaAppsBaseDirectoryCache();
       logger.log("settings deleted.");
       // 3. Remove all app files recursively
       // Doing this last because it's the most time-consuming and the least important
@@ -2004,7 +2004,7 @@ export function registerAppHandlers() {
       logger.log("removing all app files...");
       // Delete any app paths that were in the database before we deleted it
       for (const { appPath } of allAppPaths) {
-        // We don't rely on getDyadAppPath here because we've already cleared the settings
+        // We don't rely on getSambaAppPath here because we've already cleared the settings
         const resolvedAppPath = path.isAbsolute(appPath)
           ? appPath
           : path.join(basePath, appPath);
@@ -2013,12 +2013,12 @@ export function registerAppHandlers() {
           force: true,
         });
       }
-      const dyadAppPath = getDefaultDyadAppsDirectory();
+      const sambaAppPath = getDefaultSambaAppsDirectory();
       // Delete the default `samba-apps` folder, even if the user no longer uses it
-      if (fs.existsSync(dyadAppPath)) {
-        await fsPromises.rm(dyadAppPath, { recursive: true, force: true });
+      if (fs.existsSync(sambaAppPath)) {
+        await fsPromises.rm(sambaAppPath, { recursive: true, force: true });
         // Recreate the base directory
-        await fsPromises.mkdir(dyadAppPath, { recursive: true });
+        await fsPromises.mkdir(sambaAppPath, { recursive: true });
       }
       logger.log("all app files removed.");
       logger.log("reset all complete.");
@@ -2057,17 +2057,17 @@ export function registerAppHandlers() {
           where: eq(apps.id, appId),
         });
         if (!app) {
-          throw new DyadError("App not found", DyadErrorKind.NotFound);
+          throw new SambaError("App not found", SambaErrorKind.NotFound);
         }
-        const appPath = getDyadAppPath(app.path);
+        const appPath = getSambaAppPath(app.path);
 
         try {
           // Check if the old branch exists
           const branches = await gitListBranches({ path: appPath });
           if (!branches.includes(oldBranchName)) {
-            throw new DyadError(
+            throw new SambaError(
               `Branch '${oldBranchName}' not found.`,
-              DyadErrorKind.NotFound,
+              SambaErrorKind.NotFound,
             );
           }
 
@@ -2105,17 +2105,17 @@ export function registerAppHandlers() {
   createTypedHandler(appContracts.respondToAppInput, async (_, params) => {
     const { appId, response } = params;
     if (response !== "y" && response !== "n") {
-      throw new DyadError(
+      throw new SambaError(
         `Invalid response: ${response}`,
-        DyadErrorKind.Validation,
+        SambaErrorKind.Validation,
       );
     }
     const appInfo = runningApps.get(appId);
 
     if (!appInfo) {
-      throw new DyadError(
+      throw new SambaError(
         `App ${appId} is not running`,
-        DyadErrorKind.External,
+        SambaErrorKind.External,
       );
     }
 
@@ -2127,9 +2127,9 @@ export function registerAppHandlers() {
     }
 
     if (!process.stdin) {
-      throw new DyadError(
+      throw new SambaError(
         `App ${appId} process has no stdin available`,
-        DyadErrorKind.External,
+        SambaErrorKind.External,
       );
     }
 
@@ -2139,9 +2139,9 @@ export function registerAppHandlers() {
       logger.debug(`Sent response '${response}' to app ${appId} stdin`);
     } catch (error: any) {
       logger.error(`Error sending response to app ${appId}:`, error);
-      throw new DyadError(
+      throw new SambaError(
         `Failed to send response to app: ${error.message}`,
-        DyadErrorKind.External,
+        SambaErrorKind.External,
       );
     }
   });
@@ -2158,10 +2158,10 @@ export function registerAppHandlers() {
     });
 
     if (!appRecord) {
-      throw new DyadError("App not found", DyadErrorKind.NotFound);
+      throw new SambaError("App not found", SambaErrorKind.NotFound);
     }
 
-    const appPath = getDyadAppPath(appRecord.path);
+    const appPath = getSambaAppPath(appRecord.path);
 
     // Search file contents with ripgrep
     const contentMatches = await searchAppFilesWithRipgrep({
@@ -2297,7 +2297,7 @@ export function registerAppHandlers() {
     });
 
     if (!app) {
-      throw new DyadError("App not found", DyadErrorKind.NotFound);
+      throw new SambaError("App not found", SambaErrorKind.NotFound);
     }
 
     const trimmedInstall = installCommand?.trim() || null;
@@ -2325,16 +2325,16 @@ export function registerAppHandlers() {
     const { appId, parentDirectory } = params;
 
     if (!parentDirectory) {
-      throw new DyadError(
+      throw new SambaError(
         "No destination folder provided.",
-        DyadErrorKind.External,
+        SambaErrorKind.External,
       );
     }
 
     if (!path.isAbsolute(parentDirectory)) {
-      throw new DyadError(
+      throw new SambaError(
         "Please select an absolute destination folder.",
-        DyadErrorKind.External,
+        SambaErrorKind.External,
       );
     }
 
@@ -2355,10 +2355,10 @@ export function registerAppHandlers() {
         });
 
         if (!app) {
-          throw new DyadError("App not found", DyadErrorKind.NotFound);
+          throw new SambaError("App not found", SambaErrorKind.NotFound);
         }
 
-        const currentResolvedPath = getDyadAppPath(app.path);
+        const currentResolvedPath = getSambaAppPath(app.path);
         // Extract app folder name from current path (works for both absolute and relative paths)
         const appFolderName = path.basename(
           path.isAbsolute(app.path) ? app.path : currentResolvedPath,
@@ -2382,7 +2382,7 @@ export function registerAppHandlers() {
         const conflict = allApps.some(
           (existingApp) =>
             existingApp.id !== appId &&
-            getDyadAppPath(existingApp.path) === nextResolvedPath,
+            getSambaAppPath(existingApp.path) === nextResolvedPath,
         );
 
         if (conflict) {
@@ -2418,9 +2418,9 @@ export function registerAppHandlers() {
             await stopAppByInfo(appId, appInfo);
           } catch (error: any) {
             logger.error(`Error stopping app ${appId} before moving:`, error);
-            throw new DyadError(
+            throw new SambaError(
               `Failed to stop app before moving: ${error.message}`,
-              DyadErrorKind.External,
+              SambaErrorKind.External,
             );
           }
         }
@@ -2473,9 +2473,9 @@ export function registerAppHandlers() {
             `Error moving app files from ${currentResolvedPath} to ${nextResolvedPath}:`,
             error,
           );
-          throw new DyadError(
+          throw new SambaError(
             `Failed to move app files: ${error.message}`,
-            DyadErrorKind.External,
+            SambaErrorKind.External,
           );
         }
       },
@@ -2502,10 +2502,10 @@ export function registerAppHandlers() {
       where: eq(apps.id, appId),
     });
     if (!appRecord) {
-      throw new DyadError("App not found", DyadErrorKind.NotFound);
+      throw new SambaError("App not found", SambaErrorKind.NotFound);
     }
 
-    const appPath = getDyadAppPath(appRecord.path);
+    const appPath = getSambaAppPath(appRecord.path);
     try {
       const commitHash = await getCurrentCommitHash({ path: appPath });
       return { commitHash };
@@ -2519,18 +2519,18 @@ export function registerAppHandlers() {
 
     // Validate data URL format
     if (!/^data:image\/(png|jpe?g|webp);base64,/.test(dataUrl)) {
-      throw new DyadError(
+      throw new SambaError(
         "Invalid screenshot data URL format",
-        DyadErrorKind.Validation,
+        SambaErrorKind.Validation,
       );
     }
 
     // Enforce a max size of 5 MB
     const MAX_DATA_URL_LENGTH = 5 * 1024 * 1024;
     if (dataUrl.length > MAX_DATA_URL_LENGTH) {
-      throw new DyadError(
+      throw new SambaError(
         "Screenshot data URL exceeds maximum allowed size",
-        DyadErrorKind.Validation,
+        SambaErrorKind.Validation,
       );
     }
 
@@ -2552,11 +2552,11 @@ export function registerAppHandlers() {
           where: eq(apps.id, appId),
         });
         if (!appRecord) {
-          throw new DyadError("App not found", DyadErrorKind.NotFound);
+          throw new SambaError("App not found", SambaErrorKind.NotFound);
         }
 
-        const appPath = getDyadAppPath(appRecord.path);
-        const screenshotDir = path.join(appPath, DYAD_SCREENSHOT_DIR_NAME);
+        const appPath = getSambaAppPath(appRecord.path);
+        const screenshotDir = path.join(appPath, SAMBA_SCREENSHOT_DIR_NAME);
         await fsPromises.mkdir(screenshotDir, { recursive: true });
 
         const base64Data = dataUrl.replace(/^data:image\/\w+;base64,/, "");
@@ -2588,16 +2588,16 @@ export function registerAppHandlers() {
       where: eq(apps.id, appId),
     });
     if (!appRecord) {
-      throw new DyadError("App not found", DyadErrorKind.NotFound);
+      throw new SambaError("App not found", SambaErrorKind.NotFound);
     }
 
-    const appPath = getDyadAppPath(appRecord.path);
-    const screenshotDir = path.join(appPath, DYAD_SCREENSHOT_DIR_NAME);
+    const appPath = getSambaAppPath(appRecord.path);
+    const screenshotDir = path.join(appPath, SAMBA_SCREENSHOT_DIR_NAME);
 
     const entries = await readScreenshotEntries(screenshotDir);
     const screenshots = entries.map(({ name }) => ({
       commitHash: name.slice(0, -".png".length),
-      url: `dyad-media://media/${encodeURIComponent(appRecord.path)}/${DYAD_SCREENSHOT_DIR_NAME}/${name}`,
+      url: `samba-media://media/${encodeURIComponent(appRecord.path)}/${SAMBA_SCREENSHOT_DIR_NAME}/${name}`,
     }));
     return { screenshots };
   });
@@ -2619,14 +2619,14 @@ export function registerAppHandlers() {
         if (!record) {
           return { appId, thumbnailUrl: null };
         }
-        const appPath = getDyadAppPath(record.path);
-        const screenshotDir = path.join(appPath, DYAD_SCREENSHOT_DIR_NAME);
+        const appPath = getSambaAppPath(record.path);
+        const screenshotDir = path.join(appPath, SAMBA_SCREENSHOT_DIR_NAME);
         const entries = await readScreenshotEntries(screenshotDir);
         const latest = entries[0];
         if (!latest) {
           return { appId, thumbnailUrl: null };
         }
-        const thumbnailUrl = `dyad-media://media/${encodeURIComponent(record.path)}/${DYAD_SCREENSHOT_DIR_NAME}/${latest.name}`;
+        const thumbnailUrl = `samba-media://media/${encodeURIComponent(record.path)}/${SAMBA_SCREENSHOT_DIR_NAME}/${latest.name}`;
         return { appId, thumbnailUrl };
       }),
     );
@@ -2678,9 +2678,9 @@ export function registerAppHandlers() {
           .from(apps)
           .where(eq(apps.name, appName));
         if (matches.length !== 1) {
-          throw new DyadError(
+          throw new SambaError(
             `Expected exactly one app named ${appName}, but matched ${matches.length}`,
-            DyadErrorKind.Validation,
+            SambaErrorKind.Validation,
           );
         }
         const updated = await db
@@ -2697,9 +2697,9 @@ export function registerAppHandlers() {
         // update would otherwise report success and leave the E2E to fail later
         // on a fixture that was never applied.
         if (updated.length !== 1) {
-          throw new DyadError(
+          throw new SambaError(
             `App ${appName} was deleted before the Neon auth fixture was applied`,
-            DyadErrorKind.NotFound,
+            SambaErrorKind.NotFound,
           );
         }
       },

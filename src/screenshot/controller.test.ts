@@ -435,7 +435,7 @@ describe("screenshot controller", () => {
       });
     });
     expect(postMessage).toHaveBeenCalledWith({
-      type: "dyad-take-screenshot",
+      type: "samba-take-screenshot",
       requestId: "screenshot-capture:1",
     });
   });
@@ -461,7 +461,7 @@ describe("screenshot controller", () => {
 
     await vi.waitFor(() => {
       expect(postMessage).toHaveBeenCalledWith({
-        type: "dyad-take-screenshot",
+        type: "samba-take-screenshot",
         requestId: "screenshot-capture:1",
       });
     });
@@ -502,7 +502,7 @@ describe("screenshot controller", () => {
 
     await vi.waitFor(() => {
       expect(postMessage).toHaveBeenCalledWith({
-        type: "dyad-take-screenshot",
+        type: "samba-take-screenshot",
         requestId: "screenshot-capture:1",
       });
     });

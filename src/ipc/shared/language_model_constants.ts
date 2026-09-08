@@ -634,7 +634,7 @@ export const CLOUD_PROVIDERS: Record<
   auto: {
     displayName: "Samba Builder",
     websiteUrl: "https://sambatech.com",
-    gatewayPrefix: "dyad/",
+    gatewayPrefix: "samba/",
   },
   azure: {
     displayName: "Azure OpenAI",

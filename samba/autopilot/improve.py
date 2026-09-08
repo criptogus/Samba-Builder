@@ -130,7 +130,7 @@ def suggest_fix(scope: str, msg: str) -> str:
     low = msg.lower()
     if any(k in low for k in ("db", "database", "sqlite", "migration")):
         return ("Verificar falhas de banco/migração na inicialização; adicionar "
-                "retry/guarda de migração e capturar o erro como DyadError.")
+                "retry/guarda de migração e capturar o erro como SambaError.")
     if any(k in low for k in ("e2e", "test", "vitest", "playwright")):
         return "Investigar flakiness de teste citado; fixar fixture/asserção e rodar o suíte isolada antes de promover."
     if any(k in low for k in ("process", "exit", "quit", "crash", "unexpectedly")):
@@ -138,11 +138,11 @@ def suggest_fix(scope: str, msg: str) -> str:
     if scope.startswith("skill:"):
         return "Editar o skill nativo citado (pitfall/checklist) com base no relato; validar com o eval do skill."
     if "chat" in scope or "conversation" in scope or "llm" in scope or "provider" in scope:
-        return "Auditar fluxo de chat/provedor: timeout/retry, tratamento de erro de API e categorização como DyadErrorKind."
+        return "Auditar fluxo de chat/provedor: timeout/retry, tratamento de erro de API e categorização como SambaErrorKind."
     if any(k in low for k in ("timeout", "timed out", "socket", "network", "fetch")):
-        return "Rever timeouts/reconexão de rede; falhar com DyadError e mensagem clara ao usuário."
+        return "Rever timeouts/reconexão de rede; falhar com SambaError e mensagem clara ao usuário."
     return ("Revisar a origem do erro no scope '%s'; adicionar tratamento específico "
-            "e capturar como DyadErrorKind (se ainda não for) ou ajustar o fluxo." % scope)
+            "e capturar como SambaErrorKind (se ainda não for) ou ajustar o fluxo." % scope)
 
 
 def main() -> int:

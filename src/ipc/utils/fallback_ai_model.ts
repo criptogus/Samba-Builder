@@ -10,8 +10,8 @@ import {
 } from "@ai-sdk/provider";
 import type { LanguageModel } from "ai";
 import log from "electron-log";
-import { DyadError, DyadErrorKind } from "@/errors/dyad_error";
-import { DYAD_INTERNAL_REQUEST_ID_HEADER } from "./provider_options";
+import { SambaError, SambaErrorKind } from "@/errors/samba_error";
+import { SAMBA_INTERNAL_REQUEST_ID_HEADER } from "./provider_options";
 
 const logger = log.scope("fallback_model");
 const MAX_LOG_FIELD_LENGTH = 500;
@@ -330,7 +330,7 @@ function getRequestId(options: LanguageModelV3CallOptions): string {
   const headers = options.headers as
     | Record<string, string | undefined>
     | undefined;
-  return headers?.[DYAD_INTERNAL_REQUEST_ID_HEADER] ?? "unknown";
+  return headers?.[SAMBA_INTERNAL_REQUEST_ID_HEADER] ?? "unknown";
 }
 
 function getAbortReason(signal: AbortSignal): unknown {
@@ -387,9 +387,9 @@ class FallbackModel implements LanguageModelV3 {
   constructor(settings: FallbackSettings) {
     // Validate settings
     if (!settings.models || settings.models.length === 0) {
-      throw new DyadError(
+      throw new SambaError(
         "At least one model must be provided in settings.models",
-        DyadErrorKind.Validation,
+        SambaErrorKind.Validation,
       );
     }
 
@@ -416,21 +416,21 @@ class FallbackModel implements LanguageModelV3 {
   private getModelAtIndex(index: number): LanguageModelV3 {
     const model = this.settings.models[index];
     if (!model) {
-      throw new DyadError(
+      throw new SambaError(
         `Model at index ${index} not found`,
-        DyadErrorKind.Internal,
+        SambaErrorKind.Internal,
       );
     }
     // The model is either a string (GatewayModelId) or LanguageModelV2/V3
     // In this fallback context, we only support actual model instances
     if (typeof model === "string") {
-      throw new DyadError(
+      throw new SambaError(
         "String model IDs are not supported in fallback model",
-        DyadErrorKind.External,
+        SambaErrorKind.External,
       );
     }
     if (model.specificationVersion !== "v3") {
-      throw new DyadError("Model is not a v3 model", DyadErrorKind.External);
+      throw new SambaError("Model is not a v3 model", SambaErrorKind.External);
     }
     return model;
   }
@@ -605,11 +605,11 @@ class FallbackModel implements LanguageModelV3 {
     await waitForRetryDelay(delayMs, abortSignal);
   }
 
-  private exhaustedError(operationName: string, error: unknown): DyadError {
+  private exhaustedError(operationName: string, error: unknown): SambaError {
     const message = error instanceof Error ? error.message : String(error);
-    return new DyadError(
+    return new SambaError(
       `All ${this.settings.models.length} models failed for ${operationName}. Last error: ${message}`,
-      DyadErrorKind.External,
+      SambaErrorKind.External,
     );
   }
 
@@ -669,9 +669,9 @@ class FallbackModel implements LanguageModelV3 {
       }
 
       // Should never reach here, but just in case
-      throw new DyadError(
+      throw new SambaError(
         `Max attempts (${this.maxAttempts}) exceeded for ${operationName}`,
-        DyadErrorKind.Internal,
+        SambaErrorKind.Internal,
       );
     } finally {
       this.isRetrying = false;
@@ -679,9 +679,9 @@ class FallbackModel implements LanguageModelV3 {
   }
 
   async doGenerate(): Promise<any> {
-    throw new DyadError(
+    throw new SambaError(
       "doGenerate is not supported for fallback model",
-      DyadErrorKind.External,
+      SambaErrorKind.External,
     );
   }
 

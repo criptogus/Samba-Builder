@@ -1,4 +1,4 @@
-import { DyadError, DyadErrorKind } from "@/errors/dyad_error";
+import { SambaError, SambaErrorKind } from "@/errors/samba_error";
 import type {
   ChatTabTransferPayload,
   WindowSessionId,
@@ -48,9 +48,9 @@ export class ChatTabTransferCoordinator {
   ): string {
     this.sweep();
     if (this.pending.has(transferId)) {
-      throw new DyadError(
+      throw new SambaError(
         "This tab transfer identifier is already in use",
-        DyadErrorKind.Conflict,
+        SambaErrorKind.Conflict,
       );
     }
     for (const [existingId, transfer] of this.pending) {
@@ -59,18 +59,18 @@ export class ChatTabTransferCoordinator {
         transfer.payload.tabInstanceId === payload.tabInstanceId
       ) {
         if (transfer.destinationWindowSessionId) {
-          throw new DyadError(
+          throw new SambaError(
             "This tab is already being transferred",
-            DyadErrorKind.Conflict,
+            SambaErrorKind.Conflict,
           );
         }
         this.deleteTransfer(existingId, transfer);
       }
     }
     if (this.pending.size >= this.maxPendingTransfers) {
-      throw new DyadError(
+      throw new SambaError(
         "Too many tab transfers are pending",
-        DyadErrorKind.Precondition,
+        SambaErrorKind.Precondition,
       );
     }
     const transfer: PendingTransfer = {
@@ -96,18 +96,18 @@ export class ChatTabTransferCoordinator {
     }
     const transfer = this.require(transferId);
     if (transfer.sourceWindowSessionId === destinationWindowSessionId) {
-      throw new DyadError(
+      throw new SambaError(
         "A tab transfer destination must be another window",
-        DyadErrorKind.Validation,
+        SambaErrorKind.Validation,
       );
     }
     if (
       transfer.destinationWindowSessionId &&
       transfer.destinationWindowSessionId !== destinationWindowSessionId
     ) {
-      throw new DyadError(
+      throw new SambaError(
         "This tab transfer is already being adopted",
-        DyadErrorKind.Conflict,
+        SambaErrorKind.Conflict,
       );
     }
     transfer.destinationWindowSessionId = destinationWindowSessionId;
@@ -141,9 +141,9 @@ export class ChatTabTransferCoordinator {
   ): Promise<void> {
     const transfer = this.require(transferId);
     if (transfer.destinationWindowSessionId !== destinationWindowSessionId) {
-      throw new DyadError(
+      throw new SambaError(
         "Only the adopting window can acknowledge this transfer",
-        DyadErrorKind.Precondition,
+        SambaErrorKind.Precondition,
       );
     }
     if (transfer.sourceRemoval) return transfer.sourceRemoval.promise;
@@ -152,9 +152,9 @@ export class ChatTabTransferCoordinator {
       transfer.sourceWindowSessionId,
     );
     if (!endpoint) {
-      throw new DyadError(
+      throw new SambaError(
         "The source window is no longer available",
-        DyadErrorKind.Precondition,
+        SambaErrorKind.Precondition,
       );
     }
     this.clearExpiry(transfer);
@@ -171,9 +171,9 @@ export class ChatTabTransferCoordinator {
       transfer.expiresAt = this.now() + this.lifetimeMs;
       this.scheduleTimedOutReceiptExpiry(transferId, transfer);
       rejectReceipt(
-        new DyadError(
+        new SambaError(
           "The source window did not confirm tab removal",
-          DyadErrorKind.Precondition,
+          SambaErrorKind.Precondition,
         ),
       );
     }, this.sourceReceiptWaitMs);
@@ -196,9 +196,9 @@ export class ChatTabTransferCoordinator {
       this.clearSourceRemoval(transfer);
       transfer.expiresAt = this.now() + this.lifetimeMs;
       this.scheduleClaimExpiry(transferId, transfer);
-      throw new DyadError(
+      throw new SambaError(
         "The source window could not remove the transferred tab",
-        DyadErrorKind.Precondition,
+        SambaErrorKind.Precondition,
         { cause: error },
       );
     }
@@ -220,9 +220,9 @@ export class ChatTabTransferCoordinator {
       transfer.payload.chatId !== input.chatId ||
       !transfer.sourceRemoval
     ) {
-      throw new DyadError(
+      throw new SambaError(
         "Tab removal confirmation does not match the pending transfer",
-        DyadErrorKind.Conflict,
+        SambaErrorKind.Conflict,
       );
     }
     const receipt = transfer.sourceRemoval;
@@ -232,9 +232,9 @@ export class ChatTabTransferCoordinator {
 
   private waitForBegin(transferId: string): Promise<void> {
     if (this.beginWaiterCount >= this.maxBeginWaiters) {
-      throw new DyadError(
+      throw new SambaError(
         "Too many tab transfer adoptions are waiting",
-        DyadErrorKind.Precondition,
+        SambaErrorKind.Precondition,
       );
     }
     return new Promise((resolve) => {
@@ -260,9 +260,9 @@ export class ChatTabTransferCoordinator {
   private require(transferId: string): PendingTransfer {
     const transfer = this.pending.get(transferId);
     if (!transfer) {
-      throw new DyadError(
+      throw new SambaError(
         "Tab transfer is missing or expired",
-        DyadErrorKind.NotFound,
+        SambaErrorKind.NotFound,
       );
     }
     return transfer;

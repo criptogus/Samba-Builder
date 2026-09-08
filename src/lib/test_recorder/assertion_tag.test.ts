@@ -86,12 +86,12 @@ describe("replaceAssertionsTagInMessage", () => {
   it("swaps only the tag, keeping the agent's message around it", () => {
     // The tool emits the card mid-message, so approving must not disturb the
     // agent's prose or a sibling tool card.
-    const message = `Here's my plan.\n\n${proposed}\n\n<dyad-status title="Ran tests">ok</dyad-status>\n\nApprove when ready.`;
+    const message = `Here's my plan.\n\n${proposed}\n\n<samba-status title="Ran tests">ok</samba-status>\n\nApprove when ready.`;
 
     const next = replaceAssertionsTagInMessage(message, approved)!;
 
     expect(next).toBe(
-      `Here's my plan.\n\n${approved}\n\n<dyad-status title="Ran tests">ok</dyad-status>\n\nApprove when ready.`,
+      `Here's my plan.\n\n${approved}\n\n<samba-status title="Ran tests">ok</samba-status>\n\nApprove when ready.`,
     );
     expect(readAssertionsTagAttribute(next, "status")).toBe("approved");
     expect(parseAssertionsPayloadFromMessage(next)).toEqual(PAYLOAD);

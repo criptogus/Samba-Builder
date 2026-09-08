@@ -4,7 +4,7 @@ import { test } from "./helpers/test_helper";
 test("default chat mode - settings dropdown change applies to new chat", async ({
   po,
 }) => {
-  await po.setUpDyadPro({ localAgent: true, autoApprove: true });
+  await po.setUpSambaPro({ localAgent: true, autoApprove: true });
 
   await po.navigation.goToSettingsTab();
   const beforeSettings = po.settings.recordSettings();

@@ -5,8 +5,8 @@ maintainer has already written by hand. Use the wording here, in product terms,
 and cite the entry id in `playbookMatch`. If nothing matches, say so with
 `"playbookMatch": null` so the team can add an entry.
 
-Links you may use in reporter-facing text: https://www.dyad.sh/download,
-https://www.dyad.sh/docs/..., https://nodejs.org, https://www.githubstatus.com,
+Links you may use in reporter-facing text: https://www.samba.sh/download,
+https://www.samba.sh/docs/..., https://nodejs.org, https://www.githubstatus.com,
 https://status.supabase.com, and issues or PRs in this repository. No other links.
 
 ---
@@ -24,7 +24,7 @@ doing and what they saw, plus a screenshot. If `Screenshot status: captured`
 but no image is attached, use `screenshot_not_attached`. If the version is
 behind, add the update step.
 
-**Title:** `[session report] No description (Dyad <version>, <Windows|macOS|Linux>)`
+**Title:** `[session report] No description (Samba <version>, <Windows|macOS|Linux>)`
 unless the main Logs section shows one clear user-facing failure, in which case
 name that failure instead.
 
@@ -45,13 +45,13 @@ failed, as a reason to update by hand.
 
 **Assessment:** `environment_setup`
 
-**Tell the reporter:** Dyad can't find Node.js on the computer, which it needs to
+**Tell the reporter:** Samba can't find Node.js on the computer, which it needs to
 run the app. Steps:
 
 1. Install Node.js from https://nodejs.org (pick the LTS version).
-2. Quit Dyad completely and open it again.
+2. Quit Samba completely and open it again.
 3. If it still doesn't work, open **Settings**, find **Node.js Path
-   Configuration**, and click **Browse for Node.js** to point Dyad at the folder
+   Configuration**, and click **Browse for Node.js** to point Samba at the folder
    where Node.js was installed.
 
 **Source:** #3665, #3348, #4188, #4189, #3612, #4456. Verified on 1.13.0.
@@ -84,7 +84,7 @@ Ask whether the project was imported from another tool.
 **When you see:** "maximum context length", "too many tokens", or a request that
 fails because the conversation is too large.
 
-**Assessment:** `likely_dyad_bug` if on a version older than 1.13.0, otherwise
+**Assessment:** `likely_samba_bug` if on a version older than 1.13.0, otherwise
 `needs_info`.
 
 **Tell the reporter:** start a new chat for the next task. If they set a very
@@ -97,13 +97,13 @@ newer, which handles this better.
 
 ### id: pro-credits-out-use-own-key
 
-**When you see:** Dyad Pro credits are used up, a daily chat limit message, or
-the reporter wants Dyad to use their own API key instead of Pro.
+**When you see:** Samba Pro credits are used up, a daily chat limit message, or
+the reporter wants Samba to use their own API key instead of Pro.
 
 **Assessment:** `question`
 
 **Tell the reporter:** click the **Pro** button next to the model picker and turn
-off **Enable Dyad Pro**. Dyad will use their own API key until they turn it
+off **Enable Samba Pro**. Samba will use their own API key until they turn it
 back on.
 
 **Source:** #4392, #4388. Verified on 1.12.0.
@@ -117,7 +117,7 @@ after payment, or charged more than expected.
 
 **Assessment:** `needs_human`
 
-**Tell the reporter:** someone from the Dyad team will check the account. Ask
+**Tell the reporter:** someone from the Samba team will check the account. Ask
 for the session id (**Help** > **Upload Chat Session**) and roughly how many
 credits were affected. Never promise a refund or credit adjustment.
 
@@ -148,7 +148,7 @@ incident, otherwise `needs_info`.
 
 **Tell the reporter:** check https://www.githubstatus.com. If there are
 uncommitted changes, click **Review & commit** first, then try again. Point to
-https://www.dyad.sh/docs/integrations/github#troubleshooting.
+https://www.samba.sh/docs/integrations/github#troubleshooting.
 
 **Source:** #3959, #4318, #3406, #3398. Verified on 1.12.0.
 
@@ -160,7 +160,7 @@ https://www.dyad.sh/docs/integrations/github#troubleshooting.
 function redeploys when only one changed.
 
 **Assessment:** `external_service` when Supabase has an incident, otherwise
-`likely_dyad_bug`.
+`likely_samba_bug`.
 
 **Tell the reporter:** check https://status.supabase.com. Restoring an earlier
 version from **Versions** redeploys the functions. Since 1.11.0 there is a
@@ -188,11 +188,11 @@ the home screen to import the folder again.
 ### id: import-folder-exists
 
 **When you see:** importing an app fails because a folder with that name already
-exists in `dyad-apps` (often after a crash mid-import).
+exists in `samba-apps` (often after a crash mid-import).
 
 **Assessment:** `fixed_in_release` (1.10.0-beta.3)
 
-**Tell the reporter:** delete or rename that folder inside `dyad-apps`, then
+**Tell the reporter:** delete or rename that folder inside `samba-apps`, then
 import again. Newer versions handle this automatically.
 
 **Source:** #4217.
@@ -204,7 +204,7 @@ import again. Newer versions handle this automatically.
 **When you see:** an app name with a trailing dot, spaces, or other unusual
 characters causing path errors or @-mention problems.
 
-**Assessment:** `likely_dyad_bug`
+**Assessment:** `likely_samba_bug`
 
 **Tell the reporter:** rename the app to letters, numbers, and dashes.
 
@@ -215,7 +215,7 @@ characters causing path errors or @-mention problems.
 ### id: network-dns
 
 **When you see:** "TypeError: terminated", "fetch failed", ENOTFOUND, or AI
-requests failing while the Dyad servers report no errors.
+requests failing while the Samba servers report no errors.
 
 **Assessment:** `environment_setup`
 
@@ -234,7 +234,7 @@ corresponding tool_result block", especially on security-related tasks.
 **Assessment:** `external_service`
 
 **Tell the reporter:** use Opus or GPT for security reviews and similar tasks;
-Fable declines some of them. Since 1.8.0-beta.1 Dyad shows a warning when this
+Fable declines some of them. Since 1.8.0-beta.1 Samba shows a warning when this
 happens.
 
 **Source:** #3747, #3922.
@@ -243,14 +243,14 @@ happens.
 
 ### id: crash-force-close
 
-**When you see:** Dyad quits on its own, freezes, or force closes.
+**When you see:** Samba quits on its own, freezes, or force closes.
 
 **Assessment:** `needs_human`
 
 **Tell the reporter:** update to the latest version (stability work landed in
 1.7.0). Then, if it happens again, open **Help** > **Upload Chat Session** and
 paste the session id here. If logs are trimmed, the team may ask for the `main`
-log file from `%APPDATA%\dyad\logs` on Windows.
+log file from `%APPDATA%\samba\logs` on Windows.
 
 **Source:** #3490, #4294, #3863, #3980.
 
@@ -262,7 +262,7 @@ log file from `%APPDATA%\dyad\logs` on Windows.
 
 **Assessment:** `environment_setup`
 
-**Tell the reporter:** Dyad needs a recent version of macOS; upgrade macOS and
+**Tell the reporter:** Samba needs a recent version of macOS; upgrade macOS and
 try again.
 
 **Source:** #4250.
@@ -277,7 +277,7 @@ specific model or provider.
 **Assessment:** `feature_request`
 
 **Tell the reporter:** add it as a custom model, see
-https://www.dyad.sh/docs/guides/ai-models/custom-models. New built-in providers
+https://www.samba.sh/docs/guides/ai-models/custom-models. New built-in providers
 are only added when there is clear demand.
 
 **Source:** #4425, #4322, #4293.
@@ -287,12 +287,12 @@ are only added when there is clear demand.
 ### id: user-app-bug
 
 **When you see:** the problem is inside the app the reporter built (a request
-loop, a runtime error in their code, their page failing), not in Dyad itself.
+loop, a runtime error in their code, their page failing), not in Samba itself.
 
 **Assessment:** `user_app_issue`
 
-**Tell the reporter:** this is coming from the app rather than from Dyad. Switch
-to Agent mode and ask Dyad to find the cause.
+**Tell the reporter:** this is coming from the app rather than from Samba. Switch
+to Agent mode and ask Samba to find the cause.
 
 **Source:** #4359.
 
@@ -300,12 +300,12 @@ to Agent mode and ask Dyad to find the cause.
 
 ### id: old-version
 
-**When you see:** the reporter's Dyad version is behind the current one.
+**When you see:** the reporter's Samba version is behind the current one.
 
 **Assessment:** keep whatever else applies; add the step below.
 
 **Tell the reporter:** download the latest version from
-https://www.dyad.sh/download. If a release fixed this exact problem, say which
+https://www.samba.sh/download. If a release fixed this exact problem, say which
 version and set `fixedIn`.
 
 **Source:** #3837, #3859, #3513, #4287, #4295.
@@ -345,7 +345,7 @@ wrong.
 
 **Assessment:** `external_service`
 
-**Tell the reporter:** that balance is managed by the provider, not by Dyad;
+**Tell the reporter:** that balance is managed by the provider, not by Samba;
 contact them directly.
 
 **Source:** #3974.

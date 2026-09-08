@@ -8,14 +8,14 @@ import {
   tryEnableHttps,
 } from "./https_setup";
 import type { SshSession } from "@/ipc/utils/ssh_client";
-import { DyadError, DyadErrorKind } from "@/errors/dyad_error";
+import { SambaError, SambaErrorKind } from "@/errors/samba_error";
 
 function transcript(output: string): string {
   return [
-    '> echo "__DYAD_OUT_START__" . PHP_EOL;',
-    "> __DYAD_OUT_START__",
+    '> echo "__SAMBA_OUT_START__" . PHP_EOL;',
+    "> __SAMBA_OUT_START__",
     output,
-    "__DYAD_OUT_END__",
+    "__SAMBA_OUT_END__",
   ].join("\n");
 }
 
@@ -128,7 +128,7 @@ describe("applyInstanceDomain", () => {
 
     expect(scripts[0]).not.toContain("coolify.example.com");
     expect(commands[0]).toContain(
-      "-e DYAD_INSTANCE_DOMAIN='coolify.example.com'",
+      "-e SAMBA_INSTANCE_DOMAIN='coolify.example.com'",
     );
   });
 
@@ -727,7 +727,7 @@ describe("tryEnableHttps", () => {
         applies += 1;
         if (applies === 1) {
           controller.abort();
-          throw new DyadError("Cancelled.", DyadErrorKind.UserCancelled);
+          throw new SambaError("Cancelled.", SambaErrorKind.UserCancelled);
         }
         return { code: 0, stdout: transcript("applied"), stderr: "" };
       }) as unknown as SshSession["run"],

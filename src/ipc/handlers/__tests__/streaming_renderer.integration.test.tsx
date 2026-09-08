@@ -29,7 +29,7 @@ describe("streaming renderer (integration)", () => {
     await harness?.dispose();
   });
 
-  it("keeps closed dyad-write blocks mounted while later blocks stream", async () => {
+  it("keeps closed samba-write blocks mounted while later blocks stream", async () => {
     const chatId = await harness.createChat();
     harness.mount({ chatId });
 

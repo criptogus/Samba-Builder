@@ -40,7 +40,7 @@ describe("ChatErrorBox Basic Agent quota error", () => {
     render(
       <ChatErrorBox
         error='{"type":"FREE_AGENT_QUOTA_EXCEEDED","resetTime":1787295600000}'
-        isDyadProEnabled={false}
+        isSambaProEnabled={false}
         onDismiss={onDismiss}
         onSwitchToBuildMode={onSwitchToBuildMode}
       />,
@@ -64,7 +64,7 @@ describe("ChatErrorBox Basic Agent quota error", () => {
     render(
       <ChatErrorBox
         error='{"type":"FREE_AGENT_QUOTA_EXCEEDED","resetTime":1787295600000}'
-        isDyadProEnabled={false}
+        isSambaProEnabled={false}
         onDismiss={vi.fn()}
       />,
     );
@@ -83,7 +83,7 @@ describe("ChatErrorBox error presentation", () => {
     render(
       <ChatErrorBox
         error={`Implementer failures:\n${"Detailed failure line\n".repeat(200)}`}
-        isDyadProEnabled
+        isSambaProEnabled
         onDismiss={vi.fn()}
       />,
     );

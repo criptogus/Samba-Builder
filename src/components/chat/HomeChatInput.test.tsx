@@ -22,7 +22,7 @@ vi.mock("jotai", async (importOriginal) => ({
 vi.mock("@/hooks/useSettings", () => ({
   useSettings: () => ({
     settings: {
-      enableDyadPro: true,
+      enableSambaPro: true,
     },
   }),
 }));

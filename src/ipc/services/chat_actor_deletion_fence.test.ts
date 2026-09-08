@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { DyadErrorKind } from "@/errors/dyad_error";
+import { SambaErrorKind } from "@/errors/samba_error";
 import {
   assertChatActorAdmissionOpen,
   beginChatActorDeletion,
@@ -11,11 +11,11 @@ describe("chat actor deletion fence", () => {
     const releaseSecond = beginChatActorDeletion(7);
 
     expect(() => assertChatActorAdmissionOpen(7)).toThrowError(
-      expect.objectContaining({ kind: DyadErrorKind.Precondition }),
+      expect.objectContaining({ kind: SambaErrorKind.Precondition }),
     );
     releaseFirst();
     expect(() => assertChatActorAdmissionOpen(7)).toThrowError(
-      expect.objectContaining({ kind: DyadErrorKind.Precondition }),
+      expect.objectContaining({ kind: SambaErrorKind.Precondition }),
     );
 
     releaseSecond();

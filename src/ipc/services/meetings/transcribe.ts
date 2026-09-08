@@ -6,7 +6,7 @@ import {
   MEETING_AUDIO_EXTENSIONS,
   normalizeTranscript,
 } from "@/shared/meeting_briefing";
-import { DyadError, DyadErrorKind } from "@/errors/dyad_error";
+import { SambaError, SambaErrorKind } from "@/errors/samba_error";
 
 const MAX_RESPONSE_BYTES = 2 * 1024 * 1024;
 export async function transcribeMeetingAudio(
@@ -23,9 +23,9 @@ export async function transcribeMeetingAudio(
     stat.size > MAX_MEETING_AUDIO_BYTES ||
     !MEETING_AUDIO_EXTENSIONS.includes(extension)
   ) {
-    throw new DyadError(
+    throw new SambaError(
       "Use um arquivo de áudio compatível de até 24 MB. Para reuniões maiores, exporte a transcrição ou divida o áudio.",
-      DyadErrorKind.Validation,
+      SambaErrorKind.Validation,
     );
   }
   signal.throwIfAborted();
@@ -47,13 +47,13 @@ export async function transcribeMeetingAudio(
   );
   if (!response.ok) {
     await response.body?.cancel();
-    throw new DyadError(
+    throw new SambaError(
       response.status === 401
         ? "A chave OpenAI configurada não foi aceita."
         : response.status === 429
           ? "A OpenAI atingiu o limite de uso ou saldo. Verifique sua conta antes de tentar novamente."
           : `A transcrição não foi concluída (OpenAI HTTP ${response.status}).`,
-      response.status === 401 ? DyadErrorKind.Auth : DyadErrorKind.External,
+      response.status === 401 ? SambaErrorKind.Auth : SambaErrorKind.External,
     );
   }
   const reader = response.body?.getReader();

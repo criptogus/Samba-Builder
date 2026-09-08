@@ -1,4 +1,4 @@
-import { DyadError, DyadErrorKind, isDyadError } from "@/errors/dyad_error";
+import { SambaError, SambaErrorKind, isSambaError } from "@/errors/samba_error";
 import type { SandboxHostCallName } from "./capabilities";
 import type { SandboxRunResult } from "./execution";
 
@@ -17,7 +17,7 @@ export interface SandboxWorkerHostCall {
 export interface SerializedSandboxWorkerError {
   name?: string;
   message: string;
-  kind?: DyadErrorKind;
+  kind?: SambaErrorKind;
   stack?: string;
 }
 
@@ -32,7 +32,7 @@ export type SandboxWorkerMessage =
 export function serializeSandboxWorkerError(
   error: unknown,
 ): SerializedSandboxWorkerError {
-  if (isDyadError(error)) {
+  if (isSambaError(error)) {
     return {
       name: error.name,
       message: error.message,
@@ -52,20 +52,20 @@ export function serializeSandboxWorkerError(
   };
 }
 
-function isDyadErrorKind(value: unknown): value is DyadErrorKind {
+function isSambaErrorKind(value: unknown): value is SambaErrorKind {
   return (
     typeof value === "string" &&
-    Object.values(DyadErrorKind).includes(value as DyadErrorKind)
+    Object.values(SambaErrorKind).includes(value as SambaErrorKind)
   );
 }
 
 export function deserializeSandboxWorkerError(
   error: SerializedSandboxWorkerError,
 ): Error {
-  if (isDyadErrorKind(error.kind)) {
-    const dyadError = new DyadError(error.message, error.kind);
-    dyadError.stack = error.stack;
-    return dyadError;
+  if (isSambaErrorKind(error.kind)) {
+    const sambaError = new SambaError(error.message, error.kind);
+    sambaError.stack = error.stack;
+    return sambaError;
   }
 
   const genericError = new Error(error.message);

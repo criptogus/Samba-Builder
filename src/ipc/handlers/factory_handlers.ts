@@ -1,7 +1,7 @@
 import { eq } from "drizzle-orm";
 import { apps } from "@/db/schema";
-import { getDyadAppPath } from "@/paths/paths";
-import { DyadError, DyadErrorKind } from "@/errors/dyad_error";
+import { getSambaAppPath } from "@/paths/paths";
+import { SambaError, SambaErrorKind } from "@/errors/samba_error";
 import { factoryContracts } from "../types/factory";
 import { createTypedHandler } from "./base";
 import { getHandlerContext } from "./handler_context";
@@ -24,7 +24,7 @@ async function appRow(appId: number) {
     where: eq(apps.id, appId),
   });
   if (!app)
-    throw new DyadError("Aplicativo não encontrado.", DyadErrorKind.NotFound);
+    throw new SambaError("Aplicativo não encontrado.", SambaErrorKind.NotFound);
   return app;
 }
 
@@ -37,9 +37,9 @@ async function withIdleFactoryApp<T>(
   const release = blockNewStreamsForApp(appId);
   try {
     if (await hasActiveStreamsForApp(appId))
-      throw new DyadError(
+      throw new SambaError(
         "Aguarde o agente terminar antes de alterar as decisões da Fábrica.",
-        DyadErrorKind.Precondition,
+        SambaErrorKind.Precondition,
       );
     return await work();
   } finally {
@@ -91,9 +91,9 @@ export function registerFactoryHandlers() {
           };
           await writeFactoryStore((store) => {
             if (store.projects.some((entry) => entry.appId === appId))
-              throw new DyadError(
+              throw new SambaError(
                 "Aplicativo já cadastrado. Não é possível trocar o cliente e misturar históricos.",
-                DyadErrorKind.Conflict,
+                SambaErrorKind.Conflict,
               );
             return { ...store, projects: [...store.projects, project] };
           });
@@ -132,11 +132,11 @@ export function registerFactoryHandlers() {
         const app = await appRow(appId);
         const project = await getFactoryProject(appId);
         if (!project || project.revision !== revision)
-          throw new DyadError(
+          throw new SambaError(
             "Atualize o projeto antes de verificar.",
-            DyadErrorKind.Conflict,
+            SambaErrorKind.Conflict,
           );
-        const scan = await runFactoryScan(getDyadAppPath(app.path));
+        const scan = await runFactoryScan(getSambaAppPath(app.path));
         return mutateFactoryProject(appId, revision, (current) => ({
           ...current,
           scan,
@@ -173,14 +173,14 @@ export function registerFactoryHandlers() {
         const app = await appRow(appId);
         const project = await getFactoryProject(appId);
         if (!project || project.revision !== revision)
-          throw new DyadError(
+          throw new SambaError(
             "Atualize o projeto antes de exportar.",
-            DyadErrorKind.Conflict,
+            SambaErrorKind.Conflict,
           );
         const artifacts = factoryArtifacts(project);
         for (const [relative, content] of Object.entries(artifacts))
           await writeFactoryArtifact(
-            getDyadAppPath(app.path),
+            getSambaAppPath(app.path),
             relative,
             content,
           );

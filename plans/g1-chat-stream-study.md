@@ -193,7 +193,7 @@ retry. C3 does not promise exactly-once external tool effects.
 
 - **Build the appendix’s renderer `QueueStore`.** It would be a temporary
   authority and remains unsafe with two windows.
-- **Keep full-snapshot renderer writes to `.dyad/queue`.** The current store
+- **Keep full-snapshot renderer writes to `.samba/queue`.** The current store
   assumes one writer (`src/main/queue_store.ts:139-142`) and cannot atomically
   couple dequeue with message acceptance.
 - **Persist callback-bearing owner entries.** Restart would produce immutable,
@@ -750,7 +750,7 @@ cannot retroactively change the already-issued acceptance result.
   transfer refs transactionally; physical deletion happens after commit.
 - Rejected intents delete unclaimed blobs. Startup sweeps expired unclaimed
   blobs and zero-ref blobs, never referenced blobs.
-- Legacy `.dyad/queue` migration stages and validates all attachment payloads
+- Legacy `.samba/queue` migration stages and validates all attachment payloads
   before committing new queue rows. Failure leaves the legacy file untouched.
 - Fault injection covers stage/write/claim/commit/physical-delete boundaries;
   leaked unclaimed data must be collectible and committed refs must never
@@ -780,7 +780,7 @@ command start.
    controller behind an adapter during this step; callbacks may exist only in
    the window adapter, never in intent/state/command data.
 5. **Create main queue/intent persistence and acceptance transaction.** Migrate
-   `.dyad/queue` entries once, paused, into the main aggregate. Keep the old
+   `.samba/queue` entries once, paused, into the main aggregate. Keep the old
    files read-only according to the durable migration/rollback retention
    policy; never dual-write.
 6. **Move plan-handoff acceptance to IDs/checkpoints.** Capture an immutable
@@ -941,7 +941,7 @@ ways:
 3. Plan recovery replays the idempotent `savePlanToDisk` step from a persisted
    phase rather than persisting a separate plan-slug checkpoint. Target-chat
    identity and implementation intent identity remain durable and idempotent.
-4. Legacy `.dyad/queue` files are imported once and intentionally retained
+4. Legacy `.samba/queue` files are imported once and intentionally retained
    during the cutover. SQLite stores the migration marker. The trailing
    deletion removes the writer and renderer IPC while retaining a read-only
    importer so existing queued prompts can still migrate.

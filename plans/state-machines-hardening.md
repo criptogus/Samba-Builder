@@ -10,8 +10,8 @@ merged 2026-07-16 through 2026-07-23 — kernel/infra (#4014, #4015, #4024,
 run and plan handoff (#3968, #3969), sagas (#4040, #4060), and the domain
 ports (#4021, #4028, #4029, #4031, #4032, #4033, #4036, #4047, #4048,
 #4058, #4059, #4061, #3967, #3970, #4005) — plus the planning PRs
-([#4017](https://github.com/dyad-sh/dyad/pull/4017),
-[#4042](https://github.com/dyad-sh/dyad/pull/4042)) and an audit of the
+([#4017](https://github.com/samba-sh/samba/pull/4017),
+[#4042](https://github.com/samba-sh/samba/pull/4042)) and an audit of the
 current eleven controller/registry runtimes.
 
 ## Scope and conclusion
@@ -37,7 +37,7 @@ each domain:
 - durable acknowledgement across machine boundaries.
 
 Those mechanisms were deliberately excluded from the initial micro-kernel
-in [#4014](https://github.com/dyad-sh/dyad/pull/4014) (decision recorded in
+in [#4014](https://github.com/samba-sh/samba/pull/4014) (decision recorded in
 `plans/machine-followup.md`: no generic controller, no XState). The PR
 iterations provide enough evidence to revisit that boundary — narrowly. The
 recommended direction is not a framework that owns domain policy. It is a
@@ -63,7 +63,7 @@ plus test tooling that makes the most-reviewed conventions checkable.
 Every item below was a real review comment that produced a fix commit.
 
 **1. Wait states that lose their progress mechanism.** The single worst
-finding class. [#4058](https://github.com/dyad-sh/dyad/pull/4058#discussion_r3636307586)
+finding class. [#4058](https://github.com/samba-sh/samba/pull/4058#discussion_r3636307586)
 (HIGH): re-entering `waitingSelectorReady` during an in-flight capture did
 not re-emit `schedule-settle` (one path emitted `cancel-settle`), leaving a
 state whose only exit is a timer event with no timer — "the machine is
@@ -75,12 +75,12 @@ and #4040's `checkingProviders` wedging the first-prompt overlay until a
 watchdog was added.
 
 **2. Operation identity confused across lifetimes.**
-[#4023](https://github.com/dyad-sh/dyad/pull/4023): stream generations were
+[#4023](https://github.com/samba-sh/samba/pull/4023): stream generations were
 per-controller counters, so dispose-and-recreate restarted at 1 and a late
 IPC payload from the old stream _passed_ the staleness check and could
 terminate the new stream — fixed by hand-rolling `lastStreamIdByChatId`
 retention in the manager.
-[#4031](https://github.com/dyad-sh/dyad/pull/4031#discussion_r3631552691):
+[#4031](https://github.com/samba-sh/samba/pull/4031#discussion_r3631552691):
 a local generation mistaken for a globally unique identity. #3969: proxy
 stdout carries no producer generation, so a URL from the old process could
 be applied after a destructive restart. #4024: the deferred-cleanup
@@ -94,10 +94,10 @@ disposing mid-stream never synced a terminal snapshot, so the legacy
 `isStreamingByIdAtom` projection stayed `true` and blocked queue dispatch
 forever; disposing in `finalizing` cleared the command queue (dropping
 `run-end-side-effects`) while skipping `releaseTransport` — a leak.
-[#4045](https://github.com/dyad-sh/dyad/pull/4045#discussion_r3633712105):
+[#4045](https://github.com/samba-sh/samba/pull/4045#discussion_r3633712105):
 `dispose()` released the projection writer before the final idle
 `syncProjection`, dropping the write.
-[#4021](https://github.com/dyad-sh/dyad/pull/4021#discussion_r3627971018):
+[#4021](https://github.com/samba-sh/samba/pull/4021#discussion_r3627971018):
 late async setup escaped disposal. #4005: bulk delete cleared
 `selectedAppId` before disposing controllers, firing `APP_CHANGED` into a
 deleted app. #3969: the stop IPC path lacked try/catch, leaving the
@@ -110,7 +110,7 @@ no-ops: Sync in conflicted/rebase-paused states (#4059), "Switch to main"
 sending `CLOSE` to an already-`closed` machine and restore buttons live
 during `recovery-required` (#4005), dialog flows keyed to success events
 the machine never emits on the conflict path
-([#4061](https://github.com/dyad-sh/dyad/pull/4061#discussion_r3639891573)
+([#4061](https://github.com/samba-sh/samba/pull/4061#discussion_r3639891573)
 — dialogs also closed on dispatch, destroying retryable input). Same
 family cross-process: #4015 (P2) — consent timeout settled the waiter in
 main but never notified the renderer, leaving a live, clickable-but-dead
@@ -118,28 +118,28 @@ consent banner. Invariant adopted: every waiter settlement path emits a
 correlated resolved event.
 
 **5. Re-entrancy and ordering within one dispatch.**
-[#3969](https://github.com/dyad-sh/dyad/pull/3969#discussion_r3607908235):
+[#3969](https://github.com/samba-sh/samba/pull/3969#discussion_r3607908235):
 a listener synchronously re-entering `process()` executed the inner
 event's commands before the outer's (fixed: processing flag +
 pending-event FIFO + enqueue-before-notify).
-[#4028](https://github.com/dyad-sh/dyad/pull/4028#discussion_r3628323130):
+[#4028](https://github.com/samba-sh/samba/pull/4028#discussion_r3628323130):
 a callback observed stale state (observers notified before commit).
-[#3968](https://github.com/dyad-sh/dyad/pull/3968#discussion_r3607899376):
+[#3968](https://github.com/samba-sh/samba/pull/3968#discussion_r3607899376):
 `watch-stream-idle` awaited inside the serial drain — a never-idle stream
 permanently wedged the FIFO; separately, the idle watcher firing
 synchronously inside the old stream's `onEnd` had its new callbacks
 deleted by the old stream's cleanup (fixed with generation-aware callback
 removal).
-[#4059](https://github.com/dyad-sh/dyad/pull/4059#discussion_r3636261590):
+[#4059](https://github.com/samba-sh/samba/pull/4059#discussion_r3636261590):
 a command runner ignored `command.files` in favor of a React closure
 cleared in the same synchronous dispatch — "works only because command
 dispatch is synchronous."
 
 **6. Command failure handling.**
-[#4029](https://github.com/dyad-sh/dyad/pull/4029#discussion_r3628359815):
+[#4029](https://github.com/samba-sh/samba/pull/4029#discussion_r3628359815):
 a synchronous `getUserMedia` throw escaped the runner before
 `MEDIA_DENIED` was emitted, stranding the machine in `acquiring`.
-[#4033](https://github.com/dyad-sh/dyad/pull/4033#discussion_r3628590963):
+[#4033](https://github.com/samba-sh/samba/pull/4033#discussion_r3628590963):
 terminal settlement depended on a fallible ancillary command —
 `persist-always` ran before terminal cleanup, so a failed SQLite write
 left the parked consent promise unresolved and "the chat stream stays
@@ -155,7 +155,7 @@ so unknown events were silently swallowed (#3970).
 
 **8. First-construction-wins singletons capturing late-arriving
 dependencies.**
-[#4047](https://github.com/dyad-sh/dyad/pull/4047#discussion_r3633885316)
+[#4047](https://github.com/samba-sh/samba/pull/4047#discussion_r3633885316)
 (HIGH, found independently by two reviewers): the projection adapter
 captured `chatStream` at first construction, during render, before the
 root effect injected the facade — reload-safe continuation silently never
@@ -565,7 +565,7 @@ Close the flagged-but-deferred review findings:
   cross-machine ordering is causal, not approximate (#4026).
 - Per-entity-key ring buffers (or key-aware capacity) so concurrent
   chats/apps stop evicting each other's trace entries (#4026).
-- Dev-gate `window.__dyadMachines`; `defaultDescription` must refuse to
+- Dev-gate `window.__sambaMachines`; `defaultDescription` must refuse to
   retain raw untagged objects (#4026 — retention/exposure hazard).
 - Freeze or defensively clone co-sim snapshots handed to caller callbacks;
   validate `result.state` eagerly (#4027).
@@ -708,7 +708,7 @@ may never need its own PR.
 ### PR 9 — Observability polish + rules doc (no prereqs; rules rewrite lands last)
 
 Trace sequence tiebreaker, per-entity-key rings, dev-gating
-`__dyadMachines`, co-sim snapshot freezing and eager `result.state`
+`__sambaMachines`, co-sim snapshot freezing and eager `result.state`
 validation, the `registerAtomWriter` prod-throw decision, and the
 `rules/state-machines.md` rewrite pointing rules at the new primitives
 (alternatively, fold each rules-doc line into the PR that lands its

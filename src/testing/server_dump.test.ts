@@ -27,7 +27,7 @@ describe("server dump normalization", () => {
             {
               role: "assistant",
               content:
-                "Read backup at .dyad\\chats\\2\\compaction-2026-07-08T00-49-31-772Z.md",
+                "Read backup at .samba\\chats\\2\\compaction-2026-07-08T00-49-31-772Z.md",
             },
           ],
         },
@@ -37,6 +37,6 @@ describe("server dump normalization", () => {
     const dump = readServerDump([dumpPath]);
 
     expect(dump.text).toContain("[[compaction-backup-path]]");
-    expect(dump.text).not.toContain(".dyad\\chats\\2");
+    expect(dump.text).not.toContain(".samba\\chats\\2");
   });
 });

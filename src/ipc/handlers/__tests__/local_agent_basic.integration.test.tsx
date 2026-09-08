@@ -7,7 +7,7 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { fireEvent, screen, waitFor } from "@testing-library/react";
 import { asc, eq } from "drizzle-orm";
 
-import { getDyadAppPath } from "@/paths/paths";
+import { getSambaAppPath } from "@/paths/paths";
 import { apps, chats, messages, projectTokenEvents } from "@/db/schema";
 import {
   deleteAppBlueprintForChat,
@@ -31,8 +31,8 @@ describe("local-agent basic flows (integration)", () => {
       chatMode: "local-agent",
       settings: {
         isTestMode: true,
-        enableDyadPro: true,
-        providerSettings: { auto: { apiKey: { value: "testdyadkey" } } },
+        enableSambaPro: true,
+        providerSettings: { auto: { apiKey: { value: "testsambakey" } } },
       },
     });
   }, 60_000);
@@ -251,7 +251,7 @@ describe("local-agent basic flows (integration)", () => {
       ).toBeGreaterThan(0);
       expect(appRow?.name).toBe("Lumen Notes");
       expect(appRow?.needsAppBlueprint).toBe(false);
-      const docs = path.join(getDyadAppPath(appRow!.path), "project-docs");
+      const docs = path.join(getSambaAppPath(appRow!.path), "project-docs");
       expect(fs.existsSync(path.join(docs, "PRD.md"))).toBe(true);
       expect(fs.existsSync(path.join(docs, "DESIGN_SYSTEM.md"))).toBe(true);
       const approvals = fs.readdirSync(path.join(docs, "approvals"));
@@ -274,7 +274,7 @@ describe("local-agent basic flows (integration)", () => {
     harness.mount({ chatId: app.chatId, appId: app.appId });
 
     // Draft the blueprint through the real streamed path (write_app_blueprint ->
-    // app-blueprint:update + <dyad-app-blueprint> assistant message) instead of
+    // app-blueprint:update + <samba-app-blueprint> assistant message) instead of
     // seeding state + a hand-inserted message + a synthetic bridge send.
     const { send } = await harness.typeInChat(
       "tc=local-agent/app-blueprint-rename",

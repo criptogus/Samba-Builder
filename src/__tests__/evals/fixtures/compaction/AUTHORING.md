@@ -1,6 +1,6 @@
 # Authoring compaction-benchmark fixtures
 
-Each fixture is a synthetic-but-realistic long Dyad AI-coding session (~180k
+Each fixture is a synthetic-but-realistic long Samba AI-coding session (~180k
 estimated transcript tokens) with a ground-truth manifest. Fixtures are
 produced by `generate.mjs` from a **spec** you author; the session narrative
 itself is written by `gpt-5.6-sol` phase-by-phase, and deterministic
@@ -12,7 +12,7 @@ _before_ the final phase, so the tail stays the authored in-flight task).
 1. Write `specs/<name>.spec.json` (format below).
 2. Run from this directory:
    `node generate.mjs --spec specs/<name>.spec.json`
-   (env: `DYAD_PRO_KEY`; takes ~10–20 min — sequential engine calls.)
+   (env: `SAMBA_PRO_KEY`; takes ~10–20 min — sequential engine calls.)
 3. On success it writes `<name>.json` (the fixture) and `<name>.stats.json`.
    On failure it prints the reason (invalid segment JSON after retries,
    missing evidence, token band) — adjust the spec (more/bigger phases or

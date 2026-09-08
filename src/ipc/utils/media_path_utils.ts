@@ -4,30 +4,30 @@ import crypto from "node:crypto";
 import { withLock } from "./lock_utils";
 
 /**
- * The root ".dyad" directory within each app that holds Samba Builder-managed files.
+ * The root ".samba" directory within each app that holds Samba Builder-managed files.
  */
-export const DYAD_INTERNAL_DIR_NAME = ".dyad";
+export const SAMBA_INTERNAL_DIR_NAME = ".samba";
 
 /**
- * The ".dyad"-relative subdir for uploaded media files.
+ * The ".samba"-relative subdir for uploaded media files.
  */
-export const DYAD_MEDIA_SUBDIR = "media";
+export const SAMBA_MEDIA_SUBDIR = "media";
 
 /**
- * The ".dyad"-relative subdir for screenshot files.
+ * The ".samba"-relative subdir for screenshot files.
  */
-export const DYAD_SCREENSHOT_SUBDIR = "screenshot";
+export const SAMBA_SCREENSHOT_SUBDIR = "screenshot";
 
 /**
  * The subdirectory within each app where uploaded media files are stored.
  */
-export const DYAD_MEDIA_DIR_NAME = `${DYAD_INTERNAL_DIR_NAME}/${DYAD_MEDIA_SUBDIR}`;
+export const SAMBA_MEDIA_DIR_NAME = `${SAMBA_INTERNAL_DIR_NAME}/${SAMBA_MEDIA_SUBDIR}`;
 export const ATTACHMENTS_MANIFEST_FILE = "attachments-manifest.json";
 
 /**
  * The subdirectory within each app where screenshot files are stored.
  */
-export const DYAD_SCREENSHOT_DIR_NAME = `${DYAD_INTERNAL_DIR_NAME}/${DYAD_SCREENSHOT_SUBDIR}`;
+export const SAMBA_SCREENSHOT_DIR_NAME = `${SAMBA_INTERNAL_DIR_NAME}/${SAMBA_SCREENSHOT_SUBDIR}`;
 
 /**
  * Maximum number of per-commit screenshots retained per app.
@@ -65,34 +65,34 @@ export type AttachmentManifestEntryInput = Omit<
 };
 
 /**
- * Check if an absolute path falls within the app's .dyad/media directory.
+ * Check if an absolute path falls within the app's .samba/media directory.
  * Used to validate that file copy operations only read from the allowed media dir.
  */
-export function isWithinDyadMediaDir(
+export function isWithinSambaMediaDir(
   absPath: string,
   appPath: string,
 ): boolean {
   const resolved = path.resolve(absPath);
   const resolvedMediaDir = path.resolve(
-    path.join(appPath, DYAD_MEDIA_DIR_NAME),
+    path.join(appPath, SAMBA_MEDIA_DIR_NAME),
   );
   const relativePath = path.relative(resolvedMediaDir, resolved);
   return !relativePath.startsWith("..") && !path.isAbsolute(relativePath);
 }
 
 /**
- * Check if an absolute path is a file inside a .dyad/media directory
+ * Check if an absolute path is a file inside a .samba/media directory
  * (without requiring a known app path). Validates by finding consecutive
- * ".dyad" + "media" path segments with at least one segment (filename) after,
+ * ".samba" + "media" path segments with at least one segment (filename) after,
  * then confirms the resolved path doesn't escape via ".." traversal.
  */
-export function isFileWithinAnyDyadMediaDir(absPath: string): boolean {
+export function isFileWithinAnySambaMediaDir(absPath: string): boolean {
   const resolved = path.resolve(absPath);
   const segments = resolved.split(path.sep);
 
   let mediaIdx = -1;
   for (let i = 0; i < segments.length - 2; i++) {
-    if (segments[i] === ".dyad" && segments[i + 1] === "media") {
+    if (segments[i] === ".samba" && segments[i + 1] === "media") {
       mediaIdx = i + 1;
       break;
     }
@@ -106,12 +106,12 @@ export function isFileWithinAnyDyadMediaDir(absPath: string): boolean {
   return !relativePath.startsWith("..") && !path.isAbsolute(relativePath);
 }
 
-export function getDyadMediaDir(appPath: string): string {
-  return path.join(appPath, DYAD_MEDIA_DIR_NAME);
+export function getSambaMediaDir(appPath: string): string {
+  return path.join(appPath, SAMBA_MEDIA_DIR_NAME);
 }
 
 export function getAttachmentsManifestPath(appPath: string): string {
-  return path.join(getDyadMediaDir(appPath), ATTACHMENTS_MANIFEST_FILE);
+  return path.join(getSambaMediaDir(appPath), ATTACHMENTS_MANIFEST_FILE);
 }
 
 export function toAttachmentLogicalPath(logicalName: string): string {
@@ -302,7 +302,7 @@ async function pruneAttachmentManifestUnlocked(
     return 0;
   }
 
-  const mediaDir = getDyadMediaDir(appPath);
+  const mediaDir = getSambaMediaDir(appPath);
   const keptEntries: AttachmentManifestEntry[] = [];
   for (const entry of entries) {
     const storedAttachment = await toStoredAttachmentInfoIfPresent(
@@ -358,7 +358,7 @@ async function toStoredAttachmentInfoIfPresent(
 export async function listStoredAttachments(
   appPath: string,
 ): Promise<StoredAttachmentInfo[]> {
-  const mediaDir = getDyadMediaDir(appPath);
+  const mediaDir = getSambaMediaDir(appPath);
   const entries = await readAttachmentManifest(appPath);
   const storedAttachments: StoredAttachmentInfo[] = [];
   for (const entry of entries) {
@@ -385,5 +385,5 @@ export async function resolveAttachmentLogicalPath(
   if (!entry) {
     return null;
   }
-  return toStoredAttachmentInfoIfPresent(getDyadMediaDir(appPath), entry);
+  return toStoredAttachmentInfoIfPresent(getSambaMediaDir(appPath), entry);
 }

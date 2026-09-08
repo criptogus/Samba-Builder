@@ -12,10 +12,10 @@ Detailed rules and learnings are in the `rules/` directory. Read the relevant fi
 | -------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | [rules/electron-ipc.md](rules/electron-ipc.md)                             | Adding/modifying IPC endpoints, handlers, React Query hooks, or renderer-to-main communication                                                                                 |
 | [rules/app-operation-coordination.md](rules/app-operation-coordination.md) | Adding/modifying main-process operations that coordinate app paths, runtime, Git, providers, chats, media, tests, or app deletion                                              |
-| [rules/dyad-errors.md](rules/dyad-errors.md)                               | Classifying IPC/main errors with `DyadError` / `DyadErrorKind` and PostHog exception filtering                                                                                 |
+| [rules/samba-errors.md](rules/samba-errors.md)                             | Classifying IPC/main errors with `SambaError` / `SambaErrorKind` and PostHog exception filtering                                                                               |
 | [rules/local-agent-tools.md](rules/local-agent-tools.md)                   | Adding/modifying local agent tools, tool flags (`modifiesState`), or read-only/plan-only guards                                                                                |
 | [rules/e2e-testing.md](rules/e2e-testing.md)                               | Writing or debugging E2E tests (Playwright, Base UI radio clicks, Lexical editor, test fixtures)                                                                               |
-| [rules/hybrid-testing.md](rules/hybrid-testing.md)                         | Writing or debugging Vitest integration tests, especially renderer+IPC harness tests and fake Dyad Engine/Gateway routing                                                      |
+| [rules/hybrid-testing.md](rules/hybrid-testing.md)                         | Writing or debugging Vitest integration tests, especially renderer+IPC harness tests and fake Samba Engine/Gateway routing                                                     |
 | [rules/git-workflow.md](rules/git-workflow.md)                             | Pushing branches, creating PRs, or dealing with fork/upstream remotes                                                                                                          |
 | [rules/base-ui-components.md](rules/base-ui-components.md)                 | Using TooltipTrigger, ToggleGroupItem, or other Base UI wrapper components                                                                                                     |
 | [rules/database-drizzle.md](rules/database-drizzle.md)                     | Modifying the database schema, generating migrations, or resolving migration conflicts                                                                                         |
@@ -25,10 +25,10 @@ Detailed rules and learnings are in the `rules/` directory. Read the relevant fi
 | [rules/prompt-guides.md](rules/prompt-guides.md)                           | Editing prompt guide Markdown under `src/prompts/guides/` or prompt assembly snapshots                                                                                         |
 | [rules/adding-settings.md](rules/adding-settings.md)                       | Adding a new user-facing setting or toggle to the Settings page                                                                                                                |
 | [rules/chat-mentions.md](rules/chat-mentions.md)                           | Modifying chat input mention parsing, `@app:` formatting, Lexical mention sync, or referenced app extraction                                                                   |
-| [rules/chat-message-indicators.md](rules/chat-message-indicators.md)       | Using `<dyad-status>` tags in chat messages for system indicators                                                                                                              |
+| [rules/chat-message-indicators.md](rules/chat-message-indicators.md)       | Using `<samba-status>` tags in chat messages for system indicators                                                                                                             |
 | [rules/chat-modes.md](rules/chat-modes.md)                                 | Adding or modifying features that select, create, persist, or fall back between Agent, Build, Ask, and Plan modes                                                              |
 | [rules/supabase-functions.md](rules/supabase-functions.md)                 | Deploying, bundling, or queueing Supabase Edge Functions                                                                                                                       |
-| [rules/product-principles.md](rules/product-principles.md)                 | Planning new features, especially via `dyad:swarm-to-plan`, to guide design trade-offs                                                                                         |
+| [rules/product-principles.md](rules/product-principles.md)                 | Planning new features, especially via `samba:swarm-to-plan`, to guide design trade-offs                                                                                        |
 | [rules/jotai-testing.md](rules/jotai-testing.md)                           | Unit-testing Jotai atoms/hooks with `renderHook`, especially across unmount/remount                                                                                            |
 | [rules/jotai-state.md](rules/jotai-state.md)                               | Adding or refactoring Jotai atoms, especially deciding React Query vs Jotai ownership, entity-keyed state, derived atoms, and async runtime state                              |
 | [rules/claude-github-workflows.md](rules/claude-github-workflows.md)       | Editing `.github/workflows/*.yml` that invoke `anthropics/claude-code-action` — workflow shape, untrusted-input handling, and **permission/`.claude/settings.json` hardening** |
@@ -89,7 +89,7 @@ npm run lint:fix
 
 > **WARNING: Do NOT run `npx eslint` directly.** The project uses **oxlint** (not eslint) via `npm run lint`. Running `npx eslint <file>` produces spurious `import/no-unresolved` errors for `@/...` path aliases and other false positives — ignore those and rely on `npm run lint` / `npm run lint:fix`.
 
-> **WARNING: Do NOT run `npx prettier --write` either.** Formatting is **oxfmt** via `npm run fmt` (check with `npm run fmt:check`). Prettier disagrees with oxfmt on operator/argument indentation, so it silently reformats untouched blocks in files you edited — `worker/dyad-recorder-client.js` picked up an unrelated 6-line hunk this way. `npm run fmt` reverts it, but only if you notice; check `git diff` for hunks you did not write.
+> **WARNING: Do NOT run `npx prettier --write` either.** Formatting is **oxfmt** via `npm run fmt` (check with `npm run fmt:check`). Prettier disagrees with oxfmt on operator/argument indentation, so it silently reformats untouched blocks in files you edited — `worker/samba-recorder-client.js` picked up an unrelated 6-line hunk this way. `npm run fmt` reverts it, but only if you notice; check `git diff` for hunks you did not write.
 
 > **WARNING: Never run `npx oxlint --fix` or `npx oxfmt` before `node_modules` is installed.** Without the pinned local binary, `npx` downloads the _latest_ version, which can rewrite files repo-wide differently from the pinned version (observed: de-indented code blocks inside `e2e-tests/fixtures/*.md` and reflowed unrelated `src/` files). Use the lockfile-pinned `./node_modules/.bin/oxlint` / `./node_modules/.bin/oxfmt`, and check `git status` for collateral edits after any repo-wide `--fix` run.
 
@@ -118,13 +118,13 @@ This is the only supported way to type-check the project. It uses the correct co
 - This is an Electron application with a secure IPC boundary.
 - Frontend is a React app that uses TanStack Router (not Next.js or React Router).
 - Data fetching/mutations should be handled with TanStack Query when touching IPC-backed endpoints.
-- Main-process IPC errors that are **not bugs** (validation, missing entities, auth, user refusal, etc.) should be thrown as **`DyadError`** with a **`DyadErrorKind`** so they can be excluded from PostHog exception telemetry. See [rules/dyad-errors.md](rules/dyad-errors.md).
+- Main-process IPC errors that are **not bugs** (validation, missing entities, auth, user refusal, etc.) should be thrown as **`SambaError`** with a **`SambaErrorKind`** so they can be excluded from PostHog exception telemetry. See [rules/samba-errors.md](rules/samba-errors.md).
 
 ## Verifying your changes
 
 You should test your changes before committing or pushing. Run relevant unit tests and E2E tests to verify expected behavior. If it's truly impossible to test a change locally (e.g. CI-only behavior, third-party service integration), note this in the PR description explaining why and what manual verification is needed.
 
-When diagnosing a bug the user hit in their running dev app, read `logs/main.log` under the dev app's userData directory — `NODE_ENV=development` repoints Electron's userData away from the OS path (`~/.config/dyad/logs/main.log`), which holds unit-test noise instead. That directory is `./userData` **inside the repo** by default, but `DYAD_DEV_USER_DATA_DIR` overrides it (see `getUserDataPath` in `src/paths/paths.ts`) — `npm run start:onboarding` sets it to a throwaway directory, so a plain `userData/logs/main.log` there is stale or absent. Check the env var first, or read the path `electron-log` prints on startup. The main log carries scoped lines (`process_manager`, `app_runtime_service`, timings) that pin down whether a failure is main-process or renderer-side.
+When diagnosing a bug the user hit in their running dev app, read `logs/main.log` under the dev app's userData directory — `NODE_ENV=development` repoints Electron's userData away from the OS path (`~/.config/samba/logs/main.log`), which holds unit-test noise instead. That directory is `./userData` **inside the repo** by default, but `SAMBA_DEV_USER_DATA_DIR` overrides it (see `getUserDataPath` in `src/paths/paths.ts`) — `npm run start:onboarding` sets it to a throwaway directory, so a plain `userData/logs/main.log` there is stale or absent. Check the env var first, or read the path `electron-log` prints on startup. The main log carries scoped lines (`process_manager`, `app_runtime_service`, timings) that pin down whether a failure is main-process or renderer-side.
 
 ## General guidance
 
@@ -173,15 +173,15 @@ If `npm test` fails in files unrelated to your change, verify the failure is pre
 
 See [rules/e2e-testing.md](rules/e2e-testing.md) for full E2E testing guidance, including Playwright tips and fixture setup.
 
-**Debugging E2E test failures with screenshots:** When an E2E test fails and you can't determine the cause from the error message alone, use the `/dyad:debug-with-playwright` skill to add screenshots at key points in the test. Playwright's built-in `screenshot: "on"` does NOT work with Electron — you must use manual `page.screenshot()` calls. The skill walks you through adding debug screenshots, running the test, viewing the captured PNGs, and cleaning up afterward.
+**Debugging E2E test failures with screenshots:** When an E2E test fails and you can't determine the cause from the error message alone, use the `/samba:debug-with-playwright` skill to add screenshots at key points in the test. Playwright's built-in `screenshot: "on"` does NOT work with Electron — you must use manual `page.screenshot()` calls. The skill walks you through adding debug screenshots, running the test, viewing the captured PNGs, and cleaning up afterward.
 
 ## Git workflow
 
 When pushing changes and creating PRs:
 
 1. If the branch already has an associated PR, push to whichever remote the branch is tracking.
-2. If the branch hasn't been pushed before, default to pushing to `origin` (the fork `wwwillchen/dyad`), then create a PR from the fork to the upstream repo (`dyad-sh/dyad`).
-3. If you cannot push to the fork due to permissions, push directly to `upstream` (`dyad-sh/dyad`) as a last resort.
+2. If the branch hasn't been pushed before, default to pushing to `origin` (the fork `wwwillchen/samba`), then create a PR from the fork to the upstream repo (`samba-sh/samba`).
+3. If you cannot push to the fork due to permissions, push directly to `upstream` (`samba-sh/samba`) as a last resort.
 
 ### Skipping automated review
 

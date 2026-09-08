@@ -1,6 +1,6 @@
 import {
-  createDyadEngine,
-  type DyadEngineProvider,
+  createSambaEngine,
+  type SambaEngineProvider,
 } from "@/ipc/utils/llm_engine_provider";
 import type { LanguageModel } from "ai";
 import type { UserSettings } from "@/lib/schemas";
@@ -14,8 +14,8 @@ export type EvalProvider = "anthropic" | "openai" | "google";
 export const GPT_5_4 = "gpt-5.4";
 
 // Single source of truth for the Samba Builder Engine URL across the eval helpers.
-export const DYAD_ENGINE_URL =
-  process.env.DYAD_ENGINE_URL ?? "https://engine.dyad.sh/v1";
+export const SAMBA_ENGINE_URL =
+  process.env.SAMBA_ENGINE_URL ?? "https://engine.samba.sh/v1";
 
 // Gateway prefixes must match CLOUD_PROVIDERS in language_model_constants.ts.
 const GATEWAY_PREFIXES: Record<EvalProvider, string> = {
@@ -24,11 +24,11 @@ const GATEWAY_PREFIXES: Record<EvalProvider, string> = {
   google: "gemini/",
 };
 
-export function hasDyadProKey(): boolean {
-  return !!process.env.DYAD_PRO_API_KEY;
+export function hasSambaProKey(): boolean {
+  return !!process.env.SAMBA_PRO_API_KEY;
 }
 
-let _provider: DyadEngineProvider | null = null;
+let _provider: SambaEngineProvider | null = null;
 
 /**
  * Reassemble an SSE stream of OpenAI chat-completion chunks into a single
@@ -222,12 +222,12 @@ const evalFetch: typeof fetch = async (input, init) => {
   return response;
 };
 
-function getProvider(): DyadEngineProvider {
+function getProvider(): SambaEngineProvider {
   if (!_provider) {
-    _provider = createDyadEngine({
-      apiKey: process.env.DYAD_PRO_API_KEY,
-      baseURL: DYAD_ENGINE_URL,
-      dyadOptions: {
+    _provider = createSambaEngine({
+      apiKey: process.env.SAMBA_PRO_API_KEY,
+      baseURL: SAMBA_ENGINE_URL,
+      sambaOptions: {
         enableLazyEdits: false,
         enableSmartFilesContext: false,
         enableWebSearch: false,
@@ -243,7 +243,7 @@ export function getEvalModel(
   provider: EvalProvider,
   modelName: string,
 ): LanguageModel {
-  const dyadProvider = getProvider();
+  const sambaProvider = getProvider();
   const modelId = `${GATEWAY_PREFIXES[provider]}${modelName}`;
 
   // Always use the chat completions model (not .responses()) because:
@@ -251,5 +251,5 @@ export function getEvalModel(
   //    SSE-to-JSON adapter handles that format. The Responses API uses a
   //    different SSE event format that would need its own adapter.
   // 2. The eval tests model quality (correct tool calls), not transport layer.
-  return dyadProvider(modelId, { providerId: provider });
+  return sambaProvider(modelId, { providerId: provider });
 }

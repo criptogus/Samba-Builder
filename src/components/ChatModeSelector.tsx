@@ -13,7 +13,7 @@ import {
 import { useChatMode } from "@/hooks/useChatMode";
 import { useFreeAgentQuota } from "@/hooks/useFreeAgentQuota";
 import type { ChatMode } from "@/lib/schemas";
-import { isDyadProEnabled } from "@/lib/schemas";
+import { isSambaProEnabled } from "@/lib/schemas";
 import { getChatModeDisplayName } from "@/lib/chatModeToast";
 import { cn } from "@/lib/utils";
 import { detectIsMac } from "@/hooks/useChatModeToggle";
@@ -38,11 +38,11 @@ export function ChatModeSelector() {
   const setHasManuallySelectedChatMode = useSetAtom(
     hasManuallySelectedChatModeAtom,
   );
-  const isProEnabled = settings ? isDyadProEnabled(settings) : false;
+  const isProEnabled = settings ? isSambaProEnabled(settings) : false;
   const { messagesRemaining, messagesLimit, isQuotaExceeded } =
     useFreeAgentQuota();
-  const isDyadFreeSelected = isFreeProModel(selectedModel);
-  const buildUnavailableForDyadFree = isDyadFreeSelected;
+  const isSambaFreeSelected = isFreeProModel(selectedModel);
+  const buildUnavailableForSambaFree = isSambaFreeSelected;
 
   useEffect(() => {
     if (
@@ -173,14 +173,14 @@ export function ChatModeSelector() {
               </div>
             </SelectItem>
           )}
-          <SelectItem value="build" disabled={buildUnavailableForDyadFree}>
+          <SelectItem value="build" disabled={buildUnavailableForSambaFree}>
             <div className="flex flex-col items-start">
               <div className="flex items-center gap-1.5">
                 <Hammer size={14} className="text-muted-foreground" />
                 <span className="font-medium">Build</span>
               </div>
               <span className="text-xs text-muted-foreground ml-[22px]">
-                {buildUnavailableForDyadFree
+                {buildUnavailableForSambaFree
                   ? "Use Agent, Ask, or Plan with Samba Builder Free"
                   : "Generate and edit code"}
               </span>

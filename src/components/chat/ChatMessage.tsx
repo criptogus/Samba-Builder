@@ -1,9 +1,9 @@
 import { type Message } from "@/ipc/types";
 import {
-  DyadMarkdownParser,
+  SambaMarkdownParser,
   VanillaMarkdownParser,
-} from "./DyadMarkdownParser";
-import { DyadAttachment, type AttachmentSize } from "./DyadAttachment";
+} from "./SambaMarkdownParser";
+import { SambaAttachment, type AttachmentSize } from "./SambaAttachment";
 import { useStreamChat } from "@/hooks/useStreamChat";
 import { StreamingLoadingAnimation } from "./StreamingLoadingAnimation";
 import {
@@ -56,7 +56,7 @@ import {
 import { ChatMessageAnnotationLayer } from "./ChatMessageAnnotationLayer";
 import { isChatMessageAnnotatable } from "./chatAnnotationEligibility";
 
-/** Extract <dyad-attachment> tags from message content and return parsed attachment data. */
+/** Extract <samba-attachment> tags from message content and return parsed attachment data. */
 function extractAttachments(content: string): {
   name: string;
   type: string;
@@ -64,7 +64,7 @@ function extractAttachments(content: string): {
   path: string;
   attachmentType: string;
 }[] {
-  const tagRegex = /<dyad-attachment\s+([^>]*)><\/dyad-attachment>/g;
+  const tagRegex = /<samba-attachment\s+([^>]*)><\/samba-attachment>/g;
   const attrRegex = /([\w-]+)="([^"]*)"/g;
   const results: {
     name: string;
@@ -93,10 +93,10 @@ function extractAttachments(content: string): {
   return results;
 }
 
-/** Strip <dyad-attachment> tags from user message content. */
+/** Strip <samba-attachment> tags from user message content. */
 function stripAttachmentInfo(content: string): string {
   return content
-    .replace(/<dyad-attachment\s+[^>]*><\/dyad-attachment>/g, "")
+    .replace(/<samba-attachment\s+[^>]*><\/samba-attachment>/g, "")
     .trim();
 }
 
@@ -355,7 +355,7 @@ const ChatMessage = ({
               >
                 {message.role === "assistant" ? (
                   <>
-                    <DyadMarkdownParser
+                    <SambaMarkdownParser
                       content={assistantTextContent}
                       messageId={message.id}
                       showStreamingPreview={isLastMessage && isStreaming}
@@ -435,7 +435,7 @@ const ChatMessage = ({
                 rootIsStreaming={isLastMessage && isStreaming}
                 showReviewAction={isLastMessage}
                 hideInlineThreads={assistantTextContent.includes(
-                  "<dyad-subagent",
+                  "<samba-subagent",
                 )}
               />
             )}
@@ -448,7 +448,7 @@ const ChatMessage = ({
                 button here instead. Text prompts render it above. */}
             {!hasUserText && restoreButtonNode}
             {attachments.map((att, i) => (
-              <DyadAttachment
+              <SambaAttachment
                 key={i}
                 size={attachmentSize}
                 node={{
@@ -481,7 +481,7 @@ const ChatMessage = ({
                 >
                   {
                     messageVersion.message
-                      .replace(/^\[dyad\]\s*/i, "")
+                      .replace(/^\[samba\]\s*/i, "")
                       .split("\n")[0]
                   }
                 </span>

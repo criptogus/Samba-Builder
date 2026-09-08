@@ -5,7 +5,7 @@ import { NeonAuthSupportedAuthProvider } from "@neondatabase/api-client";
 import { db } from "../../db";
 import { apps } from "../../db/schema";
 import { readSettings } from "../../main/settings";
-import { DyadError, DyadErrorKind } from "@/errors/dyad_error";
+import { SambaError, SambaErrorKind } from "@/errors/samba_error";
 import { createVercelClient } from "./vercel_utils";
 import { getNeonClient } from "../../neon_admin/neon_management_client";
 import {
@@ -67,9 +67,9 @@ export interface VercelSyncPreview {
 async function loadSyncableApp(appId: number): Promise<AppRow> {
   const rows = await db.select().from(apps).where(eq(apps.id, appId)).limit(1);
   if (rows.length === 0) {
-    throw new DyadError(
+    throw new SambaError(
       `App with ID ${appId} not found`,
-      DyadErrorKind.NotFound,
+      SambaErrorKind.NotFound,
     );
   }
   return rows[0];
@@ -79,7 +79,7 @@ function getVercelAccessToken(): string {
   const settings = readSettings();
   const accessToken = settings.vercelAccessToken?.value;
   if (!accessToken) {
-    throw new DyadError("Not authenticated with Vercel.", DyadErrorKind.Auth);
+    throw new SambaError("Not authenticated with Vercel.", SambaErrorKind.Auth);
   }
   return accessToken;
 }
@@ -117,9 +117,9 @@ export async function previewNeonVercelSync({
 }): Promise<VercelSyncPreview> {
   const appData = await loadSyncableApp(appId);
   if (!appData.neonProjectId) {
-    throw new DyadError(
+    throw new SambaError(
       "This app is not connected to a Neon project.",
-      DyadErrorKind.Precondition,
+      SambaErrorKind.Precondition,
     );
   }
 
@@ -189,21 +189,21 @@ export async function syncNeonConfigToVercel({
   const vercelTeamId = appData.vercelTeamId;
   const neonProjectId = appData.neonProjectId;
   if (!vercelProjectId) {
-    throw new DyadError(
+    throw new SambaError(
       "This app is not connected to a Vercel project.",
-      DyadErrorKind.Precondition,
+      SambaErrorKind.Precondition,
     );
   }
   if (!vercelTeamId) {
-    throw new DyadError(
+    throw new SambaError(
       "Vercel team ID is missing — reconnect your Vercel project to fix this.",
-      DyadErrorKind.Precondition,
+      SambaErrorKind.Precondition,
     );
   }
   if (!neonProjectId) {
-    throw new DyadError(
+    throw new SambaError(
       "This app is not connected to a Neon project.",
-      DyadErrorKind.Precondition,
+      SambaErrorKind.Precondition,
     );
   }
 

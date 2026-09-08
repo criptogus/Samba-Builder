@@ -76,7 +76,7 @@
     }
   },
   "dismissError": "Descartar error",
-  "askDyadToBuild": "Pídele a Samba Builder que construya...",
+  "askSambaToBuild": "Pídele a Samba Builder que construya...",
   "cancelGeneration": "Cancelar generación",
   "stoppingGeneration": "Deteniendo…",
   "cancellationEndingTestRun": "Finalizando la ejecución de pruebas.",
@@ -254,7 +254,7 @@
   "total": "Total",
   "failedCountTokens": "Error al contar los tokens",
   "optimizeTokens": "Optimiza tus tokens con",
-  "dyadProSmartContext": "Contexto Inteligente de Samba Builder",
+  "sambaProSmartContext": "Contexto Inteligente de Samba Builder",
   "attachFiles": "Adjuntar archivos",
   "themes": "Temas",
   "noTheme": "Sin Tema",
@@ -330,9 +330,9 @@
     "versionCount": "Versión {{count}}"
   },
   "errorBox": {
-    "accessWithDyadPro": "Acceder con Samba Builder",
+    "accessWithSambaPro": "Acceder con Samba Builder",
     "orSwitchModel": "o cambia a otro modelo.",
-    "upgradeToDyadPro": "Actualizar a Samba Builder",
+    "upgradeToSambaPro": "Actualizar a Samba Builder",
     "troubleshootingGuide": "Guía de solución de problemas",
     "invalidProKey": "Parece que no tienes una clave válida de Samba Builder.",
     "today": "hoy.",
@@ -343,12 +343,12 @@
   },
   "promo": {
     "tiredOfWaiting": "¿Cansado de esperar a la IA?",
-    "getDyadPro": "Consigue Samba Builder",
+    "getSambaPro": "Consigue Samba Builder",
     "fasterEdits": "para ediciones más rápidas con Turbo Edits.",
     "saveOnCosts": "Ahorra hasta 3 veces en costos de IA con",
     "debuggingLoop": "¿Atrapado en un bucle de depuración? Prueba un modelo diferente.",
     "joinBuilders": "Únete a más de 600 desarrolladores en el",
-    "dyadSubreddit": "Subreddit de Samba Builder",
+    "sambaSubreddit": "Subreddit de Samba Builder",
     "foundBug": "¿Encontraste un error? Haz clic en Ayuda > Informar de un error",
     "reportBadResponse": "¿Quieres reportar una mala respuesta de la IA? Sube el chat haciendo clic en Ayuda",
     "watch": "Ver",
@@ -360,7 +360,7 @@
     "keepFocused": "¿Quieres mantener enfocada a la IA? Inicia un nuevo chat.",
     "whatsNext": "¿Quieres saber qué sigue? Echa un vistazo a nuestra",
     "roadmap": "hoja de ruta",
-    "likeDyad": "¿Te gusta Samba Builder? Dale una estrella en",
+    "likeSamba": "¿Te gusta Samba Builder? Dale una estrella en",
     "gitHub": "GitHub"
   },
   "consent": {

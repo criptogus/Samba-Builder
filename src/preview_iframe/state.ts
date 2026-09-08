@@ -11,7 +11,7 @@
 /**
  * Who put the preview on the route it is showing.
  *
- * "dyad" — the user chose it through Samba Builder's chrome (address bar, back/forward,
+ * "samba" — the user chose it through Samba Builder's chrome (address bar, back/forward,
  * a restored presentation). "app" — the previewed app navigated itself, e.g. a
  * redirect or a click inside the page. "none" — nothing has navigated yet.
  *
@@ -21,7 +21,7 @@
  * pinning the test to the *destination* of a redirect skips the redirect, which
  * may be the behaviour under test.
  */
-export type PreviewRouteSource = "none" | "dyad" | "app";
+export type PreviewRouteSource = "none" | "samba" | "app";
 
 export interface PreviewIframeState {
   readonly history: readonly string[];
@@ -39,7 +39,7 @@ export interface PreviewIframeState {
 
 export interface PreviewError {
   readonly message: string;
-  readonly source: "preview-app" | "dyad-app" | "dyad-sync";
+  readonly source: "preview-app" | "samba-app" | "samba-sync";
 }
 
 export const INITIAL_PREVIEW_IFRAME_STATE: PreviewIframeState = {
@@ -108,7 +108,7 @@ export type PreviewIframeEvent =
   | {
       type: "IFRAME_ERROR";
       message: string;
-      source: "preview-app" | "dyad-app";
+      source: "preview-app" | "samba-app";
     }
   | { type: "SYNC_ERROR"; message: string }
   | { type: "SYNC_RECOVERED" }
@@ -124,8 +124,8 @@ export type PreviewIframePostMessage =
         direction?: "backward" | "forward";
       };
     }
-  | { type: "activate-dyad-component-selector" }
-  | { type: "deactivate-dyad-component-selector" }
+  | { type: "activate-samba-component-selector" }
+  | { type: "deactivate-samba-component-selector" }
   | { type: "cleanup-all-text-editing" }
   | { type: "restore-overlays" };
 

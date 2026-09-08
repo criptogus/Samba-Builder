@@ -32,12 +32,12 @@ function mockCatalogResponse(servers: unknown[], extra?: object) {
 
 describe("remote_mcp_catalog", () => {
   beforeEach(() => {
-    process.env.DYAD_MCP_CATALOG_URL = "http://localhost:9/mcp-catalog";
+    process.env.SAMBA_MCP_CATALOG_URL = "http://localhost:9/mcp-catalog";
     clearMcpCatalogCacheForTests();
   });
 
   afterEach(() => {
-    delete process.env.DYAD_MCP_CATALOG_URL;
+    delete process.env.SAMBA_MCP_CATALOG_URL;
     vi.unstubAllGlobals();
   });
 

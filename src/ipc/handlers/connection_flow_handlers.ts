@@ -17,7 +17,7 @@ import {
 } from "../../connection_flow/state";
 import { safeSend } from "../utils/safe_sender";
 import { publishQueryInvalidations } from "../utils/query_invalidation_delivery";
-import { DyadError, DyadErrorKind } from "@/errors/dyad_error";
+import { SambaError, SambaErrorKind } from "@/errors/samba_error";
 
 const logger = log.scope("connection_flow");
 
@@ -148,9 +148,9 @@ export type OAuthReturnExchangeOutcome =
  * MUST pass it, so a stale poll result can never claim (and advance) a
  * newer flow.
  *
- * The Supabase/Neon deep-link returns cannot pass it: the dyad.sh OAuth
+ * The Supabase/Neon deep-link returns cannot pass it: the samba.sh OAuth
  * proxy's login endpoints take no client-supplied state parameter, so the
- * dyad://…-oauth-return URL carries only tokens — there is nothing to
+ * sambabuilder://…-oauth-return URL carries only tokens — there is nothing to
  * round-trip an invocation ref. The closest safe correlation holds structurally
  * instead: the registry keeps at most one flow per provider and `start` is
  * a no-op while one is active, so the awaiting flow a return claims is
@@ -239,9 +239,9 @@ export function registerConnectionFlowHandlers(): void {
       params.expectedRevision,
     );
     if (!result.admitted) {
-      throw new DyadError(
+      throw new SambaError(
         `Connection flow changed before ${params.provider} start was admitted.`,
-        DyadErrorKind.Conflict,
+        SambaErrorKind.Conflict,
       );
     }
     if (result.started) {
@@ -256,7 +256,7 @@ export function registerConnectionFlowHandlers(): void {
         });
       } else {
         // Deep-link providers (Supabase/Neon) have no async preparation:
-        // the flow goes straight to awaiting the dyad:// return.
+        // the flow goes straight to awaiting the sambabuilder:// return.
         connectionFlowRegistry.markPrepared(
           params.provider,
           result.invocationRef,
@@ -285,9 +285,9 @@ export function registerConnectionFlowHandlers(): void {
         params.expectedRevision,
       );
       if (!result.admitted) {
-        throw new DyadError(
+        throw new SambaError(
           `Connection flow changed before ${params.provider} acknowledgement was admitted.`,
-          DyadErrorKind.Conflict,
+          SambaErrorKind.Conflict,
         );
       }
     },

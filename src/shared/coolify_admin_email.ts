@@ -42,7 +42,7 @@ export function adminEmailRefusal(email: string): string | null {
   if (/['"\\`$\n\r#!]/.test(trimmed)) return UNSENDABLE;
   // One trailing dot is a legal way to write an absolute name, and Coolify
   // resolves the same domain either way — so it is removed before the checks
-  // below rather than letting `dyad.test.` past the reserved list.
+  // below rather than letting `samba.test.` past the reserved list.
   const domain = trimmed
     .slice(trimmed.lastIndexOf("@") + 1)
     .toLowerCase()

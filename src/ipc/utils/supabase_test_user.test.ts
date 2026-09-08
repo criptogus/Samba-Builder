@@ -62,7 +62,7 @@ import {
   deleteTempTestUser,
   reconcileOrphanTestUsers,
 } from "./supabase_test_user";
-import { DyadErrorKind } from "@/errors/dyad_error";
+import { SambaErrorKind } from "@/errors/samba_error";
 
 type AppRow = any;
 
@@ -125,13 +125,13 @@ describe("createTempTestUser", () => {
     expect(init.headers.apikey).toBe(SECRET_KEY);
     const body = JSON.parse(init.body);
     expect(body.email_confirm).toBe(true);
-    expect(body.app_metadata).toMatchObject({ dyad_test: true });
+    expect(body.app_metadata).toMatchObject({ samba_test: true });
 
     expect(result).toMatchObject({
       userId: UUID,
       projectUrl: "https://proj-1.supabase.co",
     });
-    expect(result.email).toMatch(/^dyad-test\+7-\d+@dyad\.test$/);
+    expect(result.email).toMatch(/^samba-test\+7-\d+@samba\.test$/);
     // Persists the in-flight user id for crash reconciliation.
     expect(mocks.set).toHaveBeenCalledWith({ supabaseTestUserId: UUID });
   });
@@ -331,7 +331,7 @@ describe("createTempTestUser", () => {
 
     expect(error.message).toMatch(/Create a secret key in Supabase/);
     // User-fixable setup problem, not a Samba Builder failure worth reporting.
-    expect(error.kind).toBe(DyadErrorKind.Precondition);
+    expect(error.kind).toBe(SambaErrorKind.Precondition);
   });
 });
 
@@ -355,7 +355,7 @@ describe("deleteTempTestUser", () => {
     ).resolves.toBe(true);
 
     // Scoped DELETE ran against the discovered table/column. The cleanup SQL is
-    // a `DO $dyad_cleanup$ ... EXECUTE format('DELETE FROM ...') ...` block, so match on
+    // a `DO $samba_cleanup$ ... EXECUTE format('DELETE FROM ...') ...` block, so match on
     // the DELETE substring rather than the statement prefix.
     const deleteCall = mocks.executeSupabaseSql.mock.calls.find(([arg]) =>
       arg.query.includes("DELETE FROM"),
@@ -364,7 +364,7 @@ describe("deleteTempTestUser", () => {
     expect(deleteCall?.[0].query).toContain(`'todos'`);
     expect(deleteCall?.[0].query).toContain(`'user_id'`);
     expect(deleteCall?.[0].query).toContain(`'${UUID}'`);
-    expect(deleteCall?.[0].query).toContain("DO $dyad_cleanup$");
+    expect(deleteCall?.[0].query).toContain("DO $samba_cleanup$");
 
     // User deleted via the admin API, then column cleared.
     expect(fetchSpy).toHaveBeenCalledWith(

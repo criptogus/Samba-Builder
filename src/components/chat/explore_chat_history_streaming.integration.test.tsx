@@ -43,7 +43,7 @@ vi.mock("@/hooks/useChatStream", async (importOriginal) => ({
 }));
 
 import { exploreChatHistoryTool } from "@/pro/main/ipc/handlers/local_agent/tools/explore_chat_history";
-import { DyadMarkdownParser } from "./DyadMarkdownParser";
+import { SambaMarkdownParser } from "./SambaMarkdownParser";
 
 const REPORT_STATS: HistoryReportStats = {
   chats: 1,
@@ -85,7 +85,7 @@ describe("explore_chat_history streaming preview", () => {
     const setPreview = (id: number, content: string) =>
       manager.setPreview(id, content);
     const ctx = makeAgentContext({
-      isDyadPro: true,
+      isSambaPro: true,
       chatId,
       onXmlStream: (xml) => {
         latestPreviewXml = xml;
@@ -96,7 +96,7 @@ describe("explore_chat_history streaming preview", () => {
     render(
       <Provider store={store}>
         <ChatStreamProvider manager={manager}>
-          <DyadMarkdownParser content="" showStreamingPreview />
+          <SambaMarkdownParser content="" showStreamingPreview />
         </ChatStreamProvider>
       </Provider>,
     );
@@ -112,10 +112,10 @@ describe("explore_chat_history streaming preview", () => {
 
     // The streaming sidecar protocol deliberately carries an open custom tag.
     // This is the exact intermediate payload that looks malformed when logged.
-    expect(latestPreviewXml).toContain("<dyad-explore-chat-history");
-    expect(latestPreviewXml).not.toContain("</dyad-explore-chat-history>");
+    expect(latestPreviewXml).toContain("<samba-explore-chat-history");
+    expect(latestPreviewXml).not.toContain("</samba-explore-chat-history>");
 
-    const card = screen.getByTestId("dyad-explore-chat-history");
+    const card = screen.getByTestId("samba-explore-chat-history");
     expect(card.getAttribute("aria-expanded")).toBe("true");
     expect(screen.getByText('"what did we decide about auth?"')).toBeTruthy();
     expect(screen.getByText("Exploring...")).toBeTruthy();
@@ -123,7 +123,7 @@ describe("explore_chat_history streaming preview", () => {
 
     // Internal search_chats calls are consent-suppressed child tools and must
     // not leak their legacy card into the parent stream.
-    expect(screen.queryByTestId("dyad-search-chats")).toBeNull();
+    expect(screen.queryByTestId("samba-search-chats")).toBeNull();
 
     await act(async () => {
       reportProgress?.("Exploring chat history… (1 search, 1 read)");
@@ -131,7 +131,7 @@ describe("explore_chat_history streaming preview", () => {
     expect(
       screen.getByText("Exploring chat history… (1 search, 1 read)"),
     ).toBeTruthy();
-    expect(screen.getAllByTestId("dyad-explore-chat-history")).toHaveLength(1);
+    expect(screen.getAllByTestId("samba-explore-chat-history")).toHaveLength(1);
 
     finishSubagent();
     await act(async () => {
@@ -163,14 +163,14 @@ describe("explore_chat_history streaming preview", () => {
 
     const previewXml = readChatTool.buildXml?.(args, false);
     expect(previewXml).toBe(
-      '<dyad-read-chat chat-id="703" state="pending">Reading chat...</dyad-read-chat>',
+      '<samba-read-chat chat-id="703" state="pending">Reading chat...</samba-read-chat>',
     );
     applyPreviewChunk(manager.setPreview, chatId, { content: previewXml! });
 
     const view = render(
       <Provider store={store}>
         <ChatStreamProvider manager={manager}>
-          <DyadMarkdownParser
+          <SambaMarkdownParser
             content="<think>Considering the cited chat</think>"
             showStreamingPreview
           />
@@ -178,21 +178,21 @@ describe("explore_chat_history streaming preview", () => {
       </Provider>,
     );
 
-    const card = screen.getByTestId("dyad-read-chat");
+    const card = screen.getByTestId("samba-read-chat");
     expect(card.getAttribute("aria-expanded")).toBe("false");
     expect(screen.getByText("CHAT HISTORY")).toBeTruthy();
     expect(screen.getByText("Chat #703")).toBeTruthy();
     expect(screen.getByText("Reading chat...")).toBeTruthy();
-    expect(screen.queryByTestId("dyad-explore-chat-history")).toBeNull();
+    expect(screen.queryByTestId("samba-explore-chat-history")).toBeNull();
 
     await act(async () => {
       applyPreviewChunk(manager.setPreview, chatId, { content: "" });
       view.rerender(
         <Provider store={store}>
           <ChatStreamProvider manager={manager}>
-            <DyadMarkdownParser
+            <SambaMarkdownParser
               content={
-                '<think>Considering the cited chat</think>\n<dyad-read-chat chat-id="703" title="Build indie shop landing page" range="4–7 of 9">Historical messages</dyad-read-chat>'
+                '<think>Considering the cited chat</think>\n<samba-read-chat chat-id="703" title="Build indie shop landing page" range="4–7 of 9">Historical messages</samba-read-chat>'
               }
               showStreamingPreview
             />
@@ -200,7 +200,7 @@ describe("explore_chat_history streaming preview", () => {
         </Provider>,
       );
     });
-    expect(screen.getAllByTestId("dyad-read-chat")).toHaveLength(1);
+    expect(screen.getAllByTestId("samba-read-chat")).toHaveLength(1);
     expect(screen.getByText("Build indie shop landing page")).toBeTruthy();
     expect(screen.getByText(/messages 4–7 of 9/)).toBeTruthy();
     expect(screen.queryByText("Reading chat...")).toBeNull();

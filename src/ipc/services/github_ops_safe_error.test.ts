@@ -233,8 +233,8 @@ describe("safeGithubOpsErrorMessage", () => {
       "hook: [redacted URL]",
     ],
     [
-      "hook: DYAD_PUBLIC_GIT_DOCUMENTATION_URL_7",
-      "hook: DYAD_PUBLIC_GIT_DOCUMENTATION_URL_7",
+      "hook: SAMBA_PUBLIC_GIT_DOCUMENTATION_URL_7",
+      "hook: SAMBA_PUBLIC_GIT_DOCUMENTATION_URL_7",
     ],
     [
       "hook: -----BEGIN OPENSSH PRIVATE KEY-----\nsecretpayload\n-----END OPENSSH PRIVATE KEY-----",

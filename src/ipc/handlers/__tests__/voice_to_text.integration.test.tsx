@@ -11,10 +11,10 @@ import {
 import { h } from "@/testing/hybrid.setup";
 
 const PRO_SETTINGS: Partial<UserSettings> = {
-  enableDyadPro: true,
+  enableSambaPro: true,
   providerSettings: {
     auto: {
-      apiKey: { value: "testdyadkey" },
+      apiKey: { value: "testsambakey" },
     },
   },
 };
@@ -27,7 +27,7 @@ describe("voice-to-text chat input controls (integration)", () => {
       electronMock: h,
       autoApprove: true,
       // Tests below enable Samba Builder, which triggers free-quota fetches; route
-      // them to the fake engine instead of the real engine.dyad.sh.
+      // them to the fake engine instead of the real engine.samba.sh.
       engine: true,
       settings: { isTestMode: true },
     });
@@ -36,7 +36,7 @@ describe("voice-to-text chat input controls (integration)", () => {
   afterEach(() => {
     cleanup();
     writeSettings({
-      enableDyadPro: false,
+      enableSambaPro: false,
       providerSettings: {},
     });
   });

@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { DyadErrorKind } from "@/errors/dyad_error";
+import { SambaErrorKind } from "@/errors/samba_error";
 import {
   BufferedProcessSpawnError,
   DEFAULT_BUFFERED_PROCESS_TIMEOUT_MS,
@@ -85,7 +85,7 @@ describe("simpleSpawn", () => {
     });
 
     await expect(promise).rejects.toMatchObject({
-      kind: DyadErrorKind.External,
+      kind: SambaErrorKind.External,
       message:
         "build failed (exit code 2)\n\nSTDOUT:\nstdout tail\n\nSTDERR:\nstderr tail",
     });
@@ -110,7 +110,7 @@ describe("simpleSpawn", () => {
         timeoutMs: 25,
       }),
     ).rejects.toMatchObject({
-      kind: DyadErrorKind.External,
+      kind: SambaErrorKind.External,
       message: expect.stringContaining(
         "install failed (timed out after 25 ms)",
       ),
@@ -133,7 +133,7 @@ describe("simpleSpawn", () => {
         errorPrefix: "install failed",
       }),
     ).rejects.toMatchObject({
-      kind: DyadErrorKind.UserCancelled,
+      kind: SambaErrorKind.UserCancelled,
       message: expect.stringContaining("install failed (was cancelled)"),
     });
   });
@@ -155,7 +155,7 @@ describe("simpleSpawn", () => {
         errorPrefix: "failed",
       }),
     ).rejects.toMatchObject({
-      kind: DyadErrorKind.External,
+      kind: SambaErrorKind.External,
       message:
         "Failed to spawn command: ENOENT\n\nSTDOUT:\nbounded stdout\n\nSTDERR:\nbounded stderr",
     });

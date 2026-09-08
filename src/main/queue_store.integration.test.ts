@@ -25,7 +25,7 @@ afterEach(() => {
 
 /**
  * Create an app whose on-disk path is an absolute directory inside tempDir.
- * getDyadAppPath returns absolute paths as-is, so no path mocking is needed.
+ * getSambaAppPath returns absolute paths as-is, so no path mocking is needed.
  */
 function createApp(name: string): number {
   const appPath = path.join(tempDir, name);
@@ -48,7 +48,7 @@ function createChat(appId: number): number {
 }
 
 function queueFilePath(appName: string, chatId: number): string {
-  return path.join(tempDir, appName, ".dyad", "queue", `${chatId}.json`);
+  return path.join(tempDir, appName, ".samba", "queue", `${chatId}.json`);
 }
 
 const sampleItem: PersistedQueuedMessage = {

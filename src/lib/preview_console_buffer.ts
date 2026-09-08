@@ -17,7 +17,7 @@ const OMISSION_MARKER_SOURCE = "Samba Builder";
 const MAX_FORMATTED_ARGUMENTS = 20;
 const MAX_FORMATTED_ARGUMENT_BYTES = 8 * 1024;
 const FORWARDED_ARGUMENT_OMISSION_PATTERN = /^… \[\d+ arguments omitted\]$/;
-const CONSOLE_OMISSION_MARKER_FIELD = "__dyadConsoleOmissionMarker";
+const CONSOLE_OMISSION_MARKER_FIELD = "__sambaConsoleOmissionMarker";
 
 type BufferedConsoleEntry = ConsoleEntry & {
   [CONSOLE_OMISSION_MARKER_FIELD]?: true;

@@ -4,7 +4,7 @@ import { expect } from "@playwright/test";
 testSkipIfWindows(
   "reload shortcuts stay scoped to the focused preview",
   async ({ electronApp, po }) => {
-    await po.setUpDyadPro();
+    await po.setUpSambaPro();
     await po.sendPrompt("tc=basic");
     await po.previewPanel.expectPreviewIframeIsVisible();
 
@@ -38,7 +38,7 @@ testSkipIfWindows(
       testWindow.reloadShortcutMarker = "outer-renderer-still-alive";
       testWindow.previewSelectorReadyCount = 0;
       window.addEventListener("message", (event) => {
-        if (event.data?.type === "dyad-component-selector-initialized") {
+        if (event.data?.type === "samba-component-selector-initialized") {
           testWindow.previewSelectorReadyCount =
             (testWindow.previewSelectorReadyCount ?? 0) + 1;
         }
@@ -109,10 +109,10 @@ testSkipIfWindows(
       await frame.locator("body").evaluate((body) => {
         body.dataset.reloadShortcutMarker = "before-reload";
         body.tabIndex = -1;
-        sessionStorage.removeItem("dyad-app-key-handler");
+        sessionStorage.removeItem("samba-app-key-handler");
         document.addEventListener(
           "keydown",
-          () => sessionStorage.setItem("dyad-app-key-handler", "observed"),
+          () => sessionStorage.setItem("samba-app-key-handler", "observed"),
           { once: true },
         );
         body.focus();
@@ -141,7 +141,7 @@ testSkipIfWindows(
         .poll(() =>
           frame
             .locator("body")
-            .evaluate(() => sessionStorage.getItem("dyad-app-key-handler")),
+            .evaluate(() => sessionStorage.getItem("samba-app-key-handler")),
         )
         .toBe("observed");
 
@@ -206,7 +206,7 @@ testSkipIfWindows(
       const untrustedFrame = document.createElement("iframe");
       untrustedFrame.dataset.testid = "untrusted-preview-frame";
       untrustedFrame.src = `data:text/html,${encodeURIComponent(
-        '<script>parent.postMessage({type:"dyad-preview-reload-shortcut"},"*");parent.postMessage({type:"untrusted-reload-attempted"},"*");</script>',
+        '<script>parent.postMessage({type:"samba-preview-reload-shortcut"},"*");parent.postMessage({type:"untrusted-reload-attempted"},"*");</script>',
       )}`;
       body.appendChild(untrustedFrame);
     });

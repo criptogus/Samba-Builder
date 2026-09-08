@@ -20,12 +20,12 @@ function sha256(bytes: Buffer | string) {
 
 function createFixture() {
   const directory = fs.mkdtempSync(
-    path.join(os.tmpdir(), "dyad-release-verification-"),
+    path.join(os.tmpdir(), "samba-release-verification-"),
   );
   temporaryDirectories.push(directory);
 
   const artifact = {
-    name: "dyad-1.10.0-beta.1.Setup.exe",
+    name: "samba-1.10.0-beta.1.Setup.exe",
     sha256: sha256("binary"),
     size: Buffer.byteLength("binary"),
   };
@@ -67,10 +67,10 @@ describe("release asset provenance verification", () => {
 
   it("rejects an uploaded asset whose sanitized name is absent from provenance", () => {
     const { assets, directory } = createFixture();
-    assets[0].name = "dyad-1.10.0-beta.1 Setup.exe";
+    assets[0].name = "samba-1.10.0-beta.1 Setup.exe";
 
     expect(() => verifyReleaseAssetProvenance(assets, directory)).toThrow(
-      "Release asset dyad-1.10.0-beta.1 Setup.exe does not match provenance",
+      "Release asset samba-1.10.0-beta.1 Setup.exe does not match provenance",
     );
   });
 

@@ -115,12 +115,12 @@ function makeIframe({ autoFlush = true }: { autoFlush?: boolean } = {}) {
         typeof message === "object" &&
         message !== null &&
         "type" in message &&
-        message.type === "flush-dyad-recorder" &&
+        message.type === "flush-samba-recorder" &&
         "requestId" in message
       ) {
         queueMicrotask(() =>
           send({
-            type: "dyad-recorder-flushed",
+            type: "samba-recorder-flushed",
             requestId: message.requestId,
           }),
         );
@@ -150,7 +150,7 @@ function makeIframe({ autoFlush = true }: { autoFlush?: boolean } = {}) {
  * start hanging on its timeout — exactly as a preview that failed to load does.
  */
 function reloadAnnouncing(iframe?: ReturnType<typeof makeIframe>) {
-  return () => iframe?.send({ type: "dyad-recorder-initialized" });
+  return () => iframe?.send({ type: "samba-recorder-initialized" });
 }
 
 /** Point the hook's preview at a running dev server, as an active session is. */
@@ -400,7 +400,7 @@ describe("useTestRecorder", () => {
       stopping = result.current.stopAndReview("last click");
     });
     const flush = iframe.posted.find(
-      (message) => message.type === "flush-dyad-recorder",
+      (message) => message.type === "flush-samba-recorder",
     );
     expect(flush).toEqual(
       expect.objectContaining({ requestId: expect.any(String) }),
@@ -411,14 +411,14 @@ describe("useTestRecorder", () => {
       // The action was posted before the iframe saw the flush, but reaches the
       // renderer after Stop was clicked. The acknowledgement is its barrier.
       iframe.send({
-        type: "dyad-recorder-action",
+        type: "samba-recorder-action",
         action: {
           kind: "click",
           locator: { kind: "role", value: "button", name: "Save" },
         },
       });
       iframe.send({
-        type: "dyad-recorder-flushed",
+        type: "samba-recorder-flushed",
         requestId: flush.requestId,
       });
     });
@@ -532,17 +532,17 @@ describe("useTestRecorder", () => {
     // dropped without a trace.
     expect(result.current.isRecording).toBe(false);
     expect(iframe.posted).not.toContainEqual({
-      type: "activate-dyad-recorder",
+      type: "activate-samba-recorder",
     });
 
     await act(async () => {
-      iframe.send({ type: "dyad-recorder-initialized" });
+      iframe.send({ type: "samba-recorder-initialized" });
       await started;
     });
 
     expect(result.current.isRecording).toBe(true);
     expect(iframe.posted).toContainEqual({
-      type: "activate-dyad-recorder",
+      type: "activate-samba-recorder",
       token: AUTH_BOOTSTRAP_TOKEN,
     });
   });
@@ -642,7 +642,7 @@ describe("useTestRecorder", () => {
     const iframe = makeIframe();
     const { result } = await recordingSession({ iframe, appUrl: true });
 
-    // The shim (worker/dyad-shim.js) reports every history change the app makes,
+    // The shim (worker/samba-shim.js) reports every history change the app makes,
     // which is almost always the app routing in response to the click that is
     // already recorded. Following that click with `page.goto` would take the
     // test to the destination even when the click stops navigating — hiding the
@@ -735,7 +735,7 @@ describe("useTestRecorder", () => {
     const { result } = await recordingSession({ iframe, appUrl: true });
     act(() => {
       iframe.send({
-        type: "dyad-recorder-action",
+        type: "samba-recorder-action",
         action: {
           kind: "fill",
           locator: { kind: "css", value: "body > main > input" },
@@ -783,7 +783,7 @@ describe("useTestRecorder", () => {
     const { result } = await recordingSession({ iframe, appUrl: true });
     act(() => {
       iframe.send({
-        type: "dyad-recorder-action",
+        type: "samba-recorder-action",
         action: {
           kind: "fill",
           locator: { kind: "css", value: "body > main > input" },
@@ -831,7 +831,7 @@ describe("useTestRecorder", () => {
     act(() => {
       iframe.send(
         {
-          type: "dyad-recorder-action",
+          type: "samba-recorder-action",
           action: {
             kind: "click",
             locator: { kind: "testid", value: "spoofed" },
@@ -861,7 +861,7 @@ describe("useTestRecorder", () => {
     });
     act(() => {
       iframe.send({
-        type: "dyad-recorder-action",
+        type: "samba-recorder-action",
         action: {
           kind: "click",
           locator: { kind: "testid", value: "add" },
@@ -890,7 +890,7 @@ describe("useTestRecorder", () => {
 
     expect(stopRecordingMock).toHaveBeenCalledWith({ appId: 1 });
     expect(iframe.posted).toContainEqual({
-      type: "deactivate-dyad-recorder",
+      type: "deactivate-samba-recorder",
       token: AUTH_BOOTSTRAP_TOKEN,
     });
   });
@@ -1017,7 +1017,7 @@ describe("useTestRecorder", () => {
     // Otherwise the injected client keeps its capture-phase listeners and its
     // red hover overlay with no recording bar left to explain them.
     expect(iframe.posted).toContainEqual({
-      type: "deactivate-dyad-recorder",
+      type: "deactivate-samba-recorder",
       token: AUTH_BOOTSTRAP_TOKEN,
     });
     expect(result.current.phase).toBe("idle");
@@ -1031,7 +1031,7 @@ describe("useTestRecorder", () => {
     const { result } = await recordingSession({ iframe, appUrl: true });
     act(() => {
       iframe.send({
-        type: "dyad-recorder-action",
+        type: "samba-recorder-action",
         action: {
           kind: "click",
           locator: { kind: "role", value: "button", name: "Save" },
@@ -1116,7 +1116,7 @@ describe("useTestRecorder", () => {
       authBootstrapToken: AUTH_BOOTSTRAP_TOKEN,
       auth: {
         mode: "neon-better-auth",
-        email: "t@dyad.test",
+        email: "t@samba.test",
         password: "s3cret",
       },
     });
@@ -1124,7 +1124,7 @@ describe("useTestRecorder", () => {
 
   function findLogin(iframe: ReturnType<typeof makeIframe>) {
     const index = iframe.posted.findIndex(
-      (message: any) => message?.type === "dyad-auth-login",
+      (message: any) => message?.type === "samba-auth-login",
     );
     return index === -1
       ? null
@@ -1149,14 +1149,14 @@ describe("useTestRecorder", () => {
     expect(login.origin).toBe(PREVIEW_ORIGIN);
     expect(login.message.auth).toEqual({
       mode: "neon-better-auth",
-      email: "t@dyad.test",
+      email: "t@samba.test",
       password: "s3cret",
     });
     expect(login.message.token).toBe(AUTH_BOOTSTRAP_TOKEN);
 
     await act(async () => {
       iframe.send({
-        type: "dyad-auth-ready",
+        type: "samba-auth-ready",
         ok: true,
         nonce: login.message.nonce,
       });
@@ -1186,7 +1186,7 @@ describe("useTestRecorder", () => {
 
     await act(async () => {
       iframe.send({
-        type: "dyad-auth-ready",
+        type: "samba-auth-ready",
         ok: true,
         path: "/dashboard",
         nonce: login.message.nonce,
@@ -1228,7 +1228,7 @@ describe("useTestRecorder", () => {
       setAppUrl(store, 1);
     });
     act(() => {
-      iframe.send({ type: "dyad-auth-bootstrap-ready" });
+      iframe.send({ type: "samba-auth-bootstrap-ready" });
     });
 
     await waitFor(() => expect(findLogin(iframe)).not.toBeNull());
@@ -1237,7 +1237,7 @@ describe("useTestRecorder", () => {
 
     await act(async () => {
       iframe.send({
-        type: "dyad-auth-ready",
+        type: "samba-auth-ready",
         ok: true,
         nonce: login.message.nonce,
       });
@@ -1261,7 +1261,7 @@ describe("useTestRecorder", () => {
 
     await act(async () => {
       iframe.send({
-        type: "dyad-auth-ready",
+        type: "samba-auth-ready",
         ok: false,
         error: "no session after sign-in",
         nonce: login.message.nonce,
@@ -1308,7 +1308,7 @@ describe("useTestRecorder", () => {
       isolation: { mode: "none" },
       auth: {
         mode: "neon-better-auth",
-        email: "t@dyad.test",
+        email: "t@samba.test",
         password: "s3cret",
       },
     });
@@ -1339,7 +1339,7 @@ describe("useTestRecorder", () => {
     // is current to "recording" on credentials that were never established.
     act(() => {
       iframe.send({
-        type: "dyad-auth-ready",
+        type: "samba-auth-ready",
         ok: true,
         nonce: "some-other-attempt",
       });
@@ -1423,7 +1423,7 @@ describe("useTestRecorder", () => {
 
     await act(async () => {
       iframe.send({
-        type: "dyad-auth-ready",
+        type: "samba-auth-ready",
         ok: true,
         nonce: login.message.nonce,
       });
@@ -1536,7 +1536,9 @@ describe("useTestRecorder", () => {
 
     expect(stopRecordingMock).toHaveBeenCalledWith({ appId: 1 });
     expect(
-      iframe.posted.some((message: any) => message?.type === "dyad-auth-login"),
+      iframe.posted.some(
+        (message: any) => message?.type === "samba-auth-login",
+      ),
     ).toBe(false);
     expect(result.current.phase).toBe("idle");
   });

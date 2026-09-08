@@ -47,7 +47,7 @@ const AUTH_READY_TIMEOUT_MS = 30_000;
  * Bounded rather than open-ended: a document that never announces (an app that
  * fails to load, a proxy that didn't inject the client) must still leave the
  * user with a bar they can stop, not a start that hangs. Arming a document that
- * isn't listening costs nothing — the re-arm on `dyad-recorder-initialized`
+ * isn't listening costs nothing — the re-arm on `samba-recorder-initialized`
  * still catches it whenever it does load.
  */
 const RECORDER_READY_TIMEOUT_MS = 5_000;
@@ -119,7 +119,7 @@ export function useTestRecorder({
   const authReadyRef = useRef<
     ((data: { ok?: boolean; error?: string; path?: string }) => void) | null
   >(null);
-  // Settled by the `dyad-recorder-initialized` of the document the recording is
+  // Settled by the `samba-recorder-initialized` of the document the recording is
   // about to be armed in. Tagged with its app because the iframe ref follows the
   // *selected* app: an announce from a preview the user switched to must not be
   // read as this app's preview being ready.
@@ -319,7 +319,7 @@ export function useTestRecorder({
       // Fail closed while the app origin or capability is unavailable. The
       // initialized-message path retries activation after both are present.
       if (!token || origin === "*") return;
-      postToIframe({ type: `${type}-dyad-recorder`, token }, origin);
+      postToIframe({ type: `${type}-samba-recorder`, token }, origin);
     },
     [postToIframe, previewOrigin],
   );
@@ -407,7 +407,10 @@ export function useTestRecorder({
         };
         timer = setTimeout(finish, RECORDER_FLUSH_TIMEOUT_MS);
         recorderFlushRef.current = { appId: targetAppId, requestId, finish };
-        postToIframe({ type: "flush-dyad-recorder", token, requestId }, origin);
+        postToIframe(
+          { type: "flush-samba-recorder", token, requestId },
+          origin,
+        );
       });
     },
     [postToIframe, previewOrigin, settleRecorderFlush],
@@ -429,11 +432,11 @@ export function useTestRecorder({
       const currentAppId = appIdRef.current;
 
       switch (data.type) {
-        case "dyad-recorder-action": {
+        case "samba-recorder-action": {
           record(data.action);
           break;
         }
-        case "dyad-recorder-initialized": {
+        case "samba-recorder-initialized": {
           // The document a start is waiting on has come up; let it arm.
           if (currentAppId != null) settleRecorderReady(currentAppId);
           // Re-arm after a dev-server restart / HMR reload swapped the iframe.
@@ -442,7 +445,7 @@ export function useTestRecorder({
           }
           break;
         }
-        case "dyad-recorder-flushed": {
+        case "samba-recorder-flushed": {
           const waiting = recorderFlushRef.current;
           if (
             waiting &&
@@ -453,7 +456,7 @@ export function useTestRecorder({
           }
           break;
         }
-        case "dyad-auth-bootstrap-ready": {
+        case "samba-auth-bootstrap-ready": {
           // Closes the race where our first send lands in the dev-server restart
           // gap. Only for the app the credentials were minted for: after an app
           // switch this iframe belongs to someone else.
@@ -461,7 +464,7 @@ export function useTestRecorder({
           if (pending && pending.appId === currentAppId) {
             postToIframe(
               {
-                type: "dyad-auth-login",
+                type: "samba-auth-login",
                 auth: pending.auth,
                 nonce: pending.nonce,
                 token: pending.authBootstrapToken,
@@ -471,7 +474,7 @@ export function useTestRecorder({
           }
           break;
         }
-        case "dyad-auth-ready": {
+        case "samba-auth-ready": {
           // Only the attempt we're waiting on may settle it: a sign-in that timed
           // out can still report back, and without the nonce that stale
           // completion would advance the *next* attempt to "recording" with
@@ -735,7 +738,7 @@ export function useTestRecorder({
   }, [appId, cancelStart, releaseSession]);
 
   // The activate posted inside startRecording can be lost if the iframe is
-  // mid-load; this effect plus the re-arm on `dyad-recorder-initialized` make
+  // mid-load; this effect plus the re-arm on `samba-recorder-initialized` make
   // activation reliable. The client treats repeat activations as no-ops.
   useEffect(() => {
     if (recordingState.phase === "recording") {
@@ -862,7 +865,7 @@ export function useTestRecorder({
           if (origin !== "*") {
             postToIframe(
               {
-                type: "dyad-auth-login",
+                type: "samba-auth-login",
                 auth,
                 nonce,
                 token: authBootstrapToken,
@@ -878,7 +881,7 @@ export function useTestRecorder({
 
   // Deliver a sign-in that was registered while the preview's origin was still
   // unknown. `authenticate` withholds the credential post in that window, and
-  // the bootstrap's `dyad-auth-bootstrap-ready` announce is no rescue: the
+  // the bootstrap's `samba-auth-bootstrap-ready` announce is no rescue: the
   // inbound handler refuses it on the very same unknown origin, so an announce
   // that lands first is dropped and nothing else would ever replay the
   // handshake — the attempt would sit out its 30s timeout and degrade to
@@ -892,7 +895,7 @@ export function useTestRecorder({
     // already working on, and matches the nonce before settling either way.
     postToIframe(
       {
-        type: "dyad-auth-login",
+        type: "samba-auth-login",
         auth: pending.auth,
         nonce: pending.nonce,
         token: pending.authBootstrapToken,
@@ -1067,7 +1070,7 @@ export function useTestRecorder({
         // back is the one the recorder has to be armed in, and the announce
         // that says so can arrive before the next line of this function runs.
         // With no preview attached there is nothing to arm and nothing that
-        // could announce — the re-arm on `dyad-recorder-initialized` picks up
+        // could announce — the re-arm on `samba-recorder-initialized` picks up
         // whatever loads later.
         const previewReady = iframeElRef.current
           ? waitForRecorderReady(targetAppId)

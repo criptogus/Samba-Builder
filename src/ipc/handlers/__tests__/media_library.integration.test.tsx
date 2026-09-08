@@ -69,7 +69,7 @@ describe("media library actions (integration)", () => {
     appCounter += 1;
     const name = `${baseName}-${appCounter}`;
     const appDir = path.join(appsRoot, slug(name));
-    const mediaDir = path.join(appDir, ".dyad", "media");
+    const mediaDir = path.join(appDir, ".samba", "media");
     fs.mkdirSync(mediaDir, { recursive: true });
     fs.writeFileSync(
       path.join(appDir, "package.json"),

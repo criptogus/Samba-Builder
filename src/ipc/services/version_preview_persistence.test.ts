@@ -23,7 +23,7 @@ const session = {
 describe("version preview persistence", () => {
   beforeEach(() => {
     paths.userData = fs.mkdtempSync(
-      path.join(os.tmpdir(), "dyad-version-persistence-"),
+      path.join(os.tmpdir(), "samba-version-persistence-"),
     );
   });
 

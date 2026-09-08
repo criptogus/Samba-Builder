@@ -1,6 +1,6 @@
 # Samba Builder
 
-Ambiente local da Samba para construir aplicações de clientes com IA. Evolui o [Dyad](https://github.com/dyad-sh/dyad) com uma camada de fábrica: briefing, plano aprovado, marca, execução, segurança e handoff.
+Ambiente local da Samba para construir aplicações de clientes com IA. Evolui o [Samba](https://github.com/samba-sh/samba) com uma camada de fábrica: briefing, plano aprovado, marca, execução, segurança e handoff.
 
 ## Fábrica
 
@@ -42,7 +42,7 @@ PLAYWRIGHT_HTML_OPEN=never npm run e2e -- samba_factory.spec.ts
 
 ## Origem e licença
 
-O Samba Builder é um fork do Dyad. Consulte [NOTICE](NOTICE) e [CONTRIBUTING.md](CONTRIBUTING.md) para atribuições e convenções da base.
+O Samba Builder é um fork do Samba. Consulte [NOTICE](NOTICE) e [CONTRIBUTING.md](CONTRIBUTING.md) para atribuições e convenções da base.
 
 - Código fora de `src/pro`, incluindo `packages/samba-factory`, é licenciado sob [Apache-2.0](LICENSE).
 - Código dentro de `src/pro` mantém a [Functional Source License](src/pro/LICENSE).

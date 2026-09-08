@@ -33,9 +33,9 @@ describe("local-agent default request (integration)", () => {
       chatMode: "local-agent",
       settings: {
         isTestMode: true,
-        enableDyadPro: true,
+        enableSambaPro: true,
         enableImplementerSubagent: true,
-        providerSettings: { auto: { apiKey: { value: "testdyadkey" } } },
+        providerSettings: { auto: { apiKey: { value: "testsambakey" } } },
         // Compiler exploration is disabled, but the root still delegates
         // discovery to the Explorer sub-agent rather than exposing code_search.
         enableCodeExplorer: false,
@@ -66,7 +66,7 @@ describe("local-agent default request (integration)", () => {
     send();
 
     await waitFor(
-      () => expect(screen.getByText(/dyad-dump-path/)).toBeTruthy(),
+      () => expect(screen.getByText(/samba-dump-path/)).toBeTruthy(),
       { timeout: 20_000 },
     );
     await streamEnd;
@@ -78,7 +78,7 @@ describe("local-agent default request (integration)", () => {
 
     const req = harness.getServerDump({ type: "request" });
     // Samba Builder (BYOK): sem backend/engine — o request não carrega a chave
-    // do provider "auto" (testdyadkey) como Authorization.
+    // do provider "auto" (testsambakey) como Authorization.
     expect(req.parsed.headers.authorization).toBeUndefined();
     expect(req.parsed.body.model).toBe("[[MODEL]]");
 
@@ -88,7 +88,7 @@ describe("local-agent default request (integration)", () => {
       description?: string;
     }>;
     const toolNames = tools.map((t) => t.function?.name ?? t.name).sort();
-    // Toolset do agente (sem as tools do backend cloud do Dyad — removidas:
+    // Toolset do agente (sem as tools do backend cloud do Samba — removidas:
     // generate_image, web_search, web_crawl, web_fetch).
     expect(toolNames).toEqual([
       "add_dependency",

@@ -11,10 +11,10 @@ import { h } from "@/testing/hybrid.setup";
 import type { UserSettings } from "@/lib/schemas";
 
 const PRO_SETTINGS: Partial<UserSettings> = {
-  enableDyadPro: true,
+  enableSambaPro: true,
   providerSettings: {
     auto: {
-      apiKey: { value: "testdyadkey" },
+      apiKey: { value: "testsambakey" },
     },
   },
 };
@@ -48,7 +48,7 @@ describe("settings actions (integration)", () => {
     writeSettings({
       telemetryConsent: "unset",
       maxToolCallSteps: undefined,
-      enableDyadPro: false,
+      enableSambaPro: false,
       providerSettings: {},
       enableProLazyEditsMode: true,
       proLazyEditsMode: "v1",

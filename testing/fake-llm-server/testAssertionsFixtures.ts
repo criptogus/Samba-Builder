@@ -206,7 +206,7 @@ export function matchAssertionsAgentTurn(
 
   // Bail rather than send a call the tool must reject: without this the schema
   // check fails, `execute()` never runs, no card is emitted, and the E2E waits
-  // out its timeout on a missing `dyad-test-assertions-card` with nothing
+  // out its timeout on a missing `samba-test-assertions-card` with nothing
   // pointing at the fixture as the cause.
   const recordingId = RECORDING_ID_RE.exec(lastUserText)?.[1];
   if (!recordingId) return null;

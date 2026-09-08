@@ -42,7 +42,7 @@ function formatSettingsLines(
     `- Selected Model: ${model.provider}:${model.name}`,
     `- Chat Mode: ${settings.selectedChatMode ?? "default"}`,
     `- Auto Approve Changes: ${settings.autoApproveChanges ?? "n/a"}`,
-    `- Samba Builder Enabled: ${settings.enableDyadPro ?? "n/a"}`,
+    `- Samba Builder Enabled: ${settings.enableSambaPro ?? "n/a"}`,
     `- Effort Level: ${selectedModel?.effortLevel ?? "medium"}`,
     `- Runtime Mode: ${settings.runtimeMode2 ?? "n/a"}`,
     `- Release Channel: ${settings.releaseChannel ?? "n/a"}`,
@@ -54,7 +54,7 @@ function formatSystemInfoSection(
   userBudget: UserBudgetInfo | undefined,
 ): string {
   return `## System Information
-- Samba Builder Version: ${debugInfo.dyadVersion}
+- Samba Builder Version: ${debugInfo.sambaVersion}
 - Platform: ${debugInfo.platform}
 - Architecture: ${debugInfo.architecture}
 - Node Version: ${debugInfo.nodeVersion || "n/a"}

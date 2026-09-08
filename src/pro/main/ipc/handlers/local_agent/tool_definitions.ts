@@ -28,7 +28,7 @@ import { addIntegrationTool } from "./tools/add_integration";
 import { enableNitroTool } from "./tools/enable_nitro";
 import { readLogsTool } from "./tools/read_logs";
 import { searchReplaceTool } from "./tools/search_replace";
-// Samba Builder (BYOK): tools que dependiam do backend cloud do Dyad
+// Samba Builder (BYOK): tools que dependiam do backend cloud do Samba
 // (web_search/web_crawl/web_fetch/code_search/generate_image via engineFetch)
 // removidas — o engine exige sessão/cookie inexistente no produto.
 import { updateTodosTool } from "./tools/update_todos";
@@ -99,7 +99,7 @@ import {
 import type { AgentToolConsent } from "@/lib/schemas";
 import { getSupabaseClientCode } from "@/supabase_admin/supabase_context";
 import { getNeonClientCode } from "@/neon_admin/neon_context";
-import { DyadError, DyadErrorKind } from "@/errors/dyad_error";
+import { SambaError, SambaErrorKind } from "@/errors/samba_error";
 import { ExecuteAddDependencyError } from "@/ipc/processors/executeAddDependency";
 import { withTrackedMutation } from "./subagents/mutation_activity_tracker";
 import { estimateTokens } from "@/ipc/utils/token_utils";
@@ -292,9 +292,9 @@ export async function requireAgentToolConsent(
 
   if (current === "always") return true;
   if (current === "never")
-    throw new DyadError(
+    throw new SambaError(
       "Should not ask for consent for a tool marked as 'never'",
-      DyadErrorKind.Internal,
+      SambaErrorKind.Internal,
     );
 
   if (
@@ -399,9 +399,9 @@ function convertToolResultForAiSdk(
   if (typeof result === "string") {
     return { type: "text", value: result };
   }
-  throw new DyadError(
+  throw new SambaError(
     `Unsupported tool result type: ${typeof result}`,
-    DyadErrorKind.Internal,
+    SambaErrorKind.Internal,
   );
 }
 
@@ -476,7 +476,7 @@ export async function estimateAgentToolTokens({
   basicAgentMode = false,
   freeModelMode = false,
   enableAppBlueprint,
-  isDyadPro,
+  isSambaPro,
   frameworkType,
   supabaseProjectId,
   supabaseProviderToolsAvailable = false,
@@ -498,7 +498,7 @@ export async function estimateAgentToolTokens({
   basicAgentMode?: boolean;
   freeModelMode?: boolean;
   enableAppBlueprint: boolean;
-  isDyadPro: boolean;
+  isSambaPro: boolean;
   frameworkType: AgentContext["frameworkType"];
   supabaseProjectId: string | null;
   supabaseProviderToolsAvailable?: boolean;
@@ -515,7 +515,7 @@ export async function estimateAgentToolTokens({
   mcpToolDefs?: McpToolDef[];
 }): Promise<number> {
   const estimateContext = {
-    isDyadPro,
+    isSambaPro,
     frameworkType,
     supabaseProjectId,
     supabaseProviderToolsAvailable,
@@ -721,7 +721,7 @@ export function shouldIncludeTool(
   if (options.freeModelMode && tool.usesEngineEndpoint) {
     return false;
   }
-  if (tool.subagentOnly && !ctx.isDyadPro) {
+  if (tool.subagentOnly && !ctx.isSambaPro) {
     return false;
   }
   // search_chats is superseded by the explore_chat_history sub-agent wherever
@@ -849,9 +849,9 @@ export function buildAgentToolSet(
           await requireToolConsentOrThrow(tool, processedArgs, invocationCtx);
           const invoke = async () => {
             if (invocationCtx.abortSignal?.aborted) {
-              throw new DyadError(
+              throw new SambaError(
                 "This agent run was cancelled.",
-                DyadErrorKind.UserCancelled,
+                SambaErrorKind.UserCancelled,
               );
             }
             // Track file edit tool usage before execution to capture all attempts
@@ -902,7 +902,7 @@ export function buildAgentToolSet(
           const errorMessage = getToolErrorSummary(error);
           const errorDetails = getToolErrorDisplayDetails(error);
 
-          const errorXml = `<dyad-output type="error" message="Tool '${tool.name}' failed: ${escapeXmlAttr(errorMessage)}">${escapeXmlContent(errorDetails)}</dyad-output>`;
+          const errorXml = `<samba-output type="error" message="Tool '${tool.name}' failed: ${escapeXmlAttr(errorMessage)}">${escapeXmlContent(errorDetails)}</samba-output>`;
           invocationCtx.onXmlComplete(errorXml);
           if (toolCallId && invocationCtx.onToolActivity) {
             await invocationCtx.onToolActivity({

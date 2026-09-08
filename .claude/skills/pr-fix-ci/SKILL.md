@@ -1,6 +1,6 @@
 ---
-name: dyad:pr-fix:ci
-description: Diagnose and fix failing CI checks on a pull request from its latest GitHub Actions CI run. Use when PR CI has E2E/Playwright failures, macOS or Windows unit-test failures, or presubmit/type/build failures; analyzes the exact run logs and artifacts, invokes dyad:deflake-e2e-from-run for E2E failures, reproduces targeted unit tests locally, and publishes the fixes.
+name: samba:pr-fix:ci
+description: Diagnose and fix failing CI checks on a pull request from its latest GitHub Actions CI run. Use when PR CI has E2E/Playwright failures, macOS or Windows unit-test failures, or presubmit/type/build failures; analyzes the exact run logs and artifacts, invokes samba:deflake-e2e-from-run for E2E failures, reproduces targeted unit tests locally, and publishes the fixes.
 ---
 
 # PR Fix: CI
@@ -18,7 +18,7 @@ Fix failures from the latest `CI` workflow run for a pull request. Base the diag
 3. Find the newest `CI` workflow run for the PR's current head SHA:
 
    ```sh
-   gh run list -R dyad-sh/dyad --workflow CI --commit <HEAD_SHA> \
+   gh run list -R samba-sh/samba --workflow CI --commit <HEAD_SHA> \
      --json databaseId,url,status,conclusion,createdAt,headSha --limit 10
    ```
 
@@ -27,7 +27,7 @@ Fix failures from the latest `CI` workflow run for a pull request. Base the diag
 4. Enumerate every job and its failed step:
 
    ```sh
-   gh api repos/dyad-sh/dyad/actions/runs/<RUN_ID>/jobs --paginate \
+   gh api repos/samba-sh/samba/actions/runs/<RUN_ID>/jobs --paginate \
      --jq '.jobs[] | {id,name,status,conclusion,failed_steps:[.steps[] | select(.conclusion == "failure") | .name]}'
    ```
 
@@ -40,7 +40,7 @@ Inspect both `unit-tests-macos` and `unit-tests-windows`, even when only one fai
 1. Download each job log separately:
 
    ```sh
-   gh run view <RUN_ID> -R dyad-sh/dyad --job <JOB_ID> --log > <SCRATCH_DIR>/<OS>.log
+   gh run view <RUN_ID> -R samba-sh/samba --job <JOB_ID> --log > <SCRATCH_DIR>/<OS>.log
    ```
 
 2. Read the failing step and extract the exact test files, test names, assertion diffs, stack traces, exit codes, and platform-specific paths/errors. Do not infer a test failure merely from the job name: the macOS job also runs presubmit and type-checking.
@@ -54,16 +54,16 @@ Inspect both `unit-tests-macos` and `unit-tests-windows`, even when only one fai
 
 ## E2E failures
 
-After unit-test fixes are ready, list the run artifacts. If an E2E shard failed and `html-report` exists, invoke `/dyad:deflake-e2e-from-run` with the selected run URL. Follow its artifact-first trace analysis, rebuild, and targeted E2E verification. Running it after unit fixes lets its required `/dyad:pr-push` publish the complete CI fix together.
+After unit-test fixes are ready, list the run artifacts. If an E2E shard failed and `html-report` exists, invoke `/samba:deflake-e2e-from-run` with the selected run URL. Follow its artifact-first trace analysis, rebuild, and targeted E2E verification. Running it after unit fixes lets its required `/samba:pr-push` publish the complete CI fix together.
 
-If `merge-reports` failed, inspect that job's failed step before delegating. An install, artifact-download, or merge failure can occur before `html-report` is uploaded. Diagnose reporting-infrastructure failures from the merge job log. When shard failures also need trace analysis but `html-report` is absent, list and download every retained `blob-report-*` artifact into one scratch directory, then run Playwright's merge command locally to reconstruct the HTML report before following `/dyad:deflake-e2e-from-run`'s report-analysis phases:
+If `merge-reports` failed, inspect that job's failed step before delegating. An install, artifact-download, or merge failure can occur before `html-report` is uploaded. Diagnose reporting-infrastructure failures from the merge job log. When shard failures also need trace analysis but `html-report` is absent, list and download every retained `blob-report-*` artifact into one scratch directory, then run Playwright's merge command locally to reconstruct the HTML report before following `/samba:deflake-e2e-from-run`'s report-analysis phases:
 
 ```sh
-gh api repos/dyad-sh/dyad/actions/runs/<RUN_ID>/artifacts --paginate \
+gh api repos/samba-sh/samba/actions/runs/<RUN_ID>/artifacts --paginate \
   --jq '.artifacts[] | select(.name | startswith("blob-report-")) | .name' \
   > <SCRATCH_DIR>/blob-artifact-names
 while IFS= read -r artifact; do
-  gh run download <RUN_ID> -R dyad-sh/dyad -n "$artifact" \
+  gh run download <RUN_ID> -R samba-sh/samba -n "$artifact" \
     -D <SCRATCH_DIR>/blob-reports
 done < <SCRATCH_DIR>/blob-artifact-names
 PLAYWRIGHT_HTML_OUTPUT_DIR=<SCRATCH_DIR>/html-report \
@@ -75,16 +75,16 @@ If no shard failed and the merge job failed before producing `html-report`, do n
 The standalone `safe-storage-e2e` job is not included in the merged `html-report`. If it failed, download and inspect its dedicated artifact before editing:
 
 ```sh
-gh run download <RUN_ID> -R dyad-sh/dyad \
+gh run download <RUN_ID> -R samba-sh/samba \
   -n safe-storage-e2e-report -D <SCRATCH_DIR>/safe-storage-e2e-report
 ```
 
-Treat `blob-report/` and `test-results/` as the authoritative failure evidence. Read the retained Playwright errors, traces, screenshots, and error-context files using the same artifact-first trace analysis from `/dyad:deflake-e2e-from-run`. This spec swaps the machine-global default macOS Keychain, so never run it locally or on a self-hosted runner. Verify the surrounding logic with the narrowest safe local tests, then rely on the next ephemeral GitHub-hosted `safe-storage-e2e` job for final confirmation and say so explicitly.
+Treat `blob-report/` and `test-results/` as the authoritative failure evidence. Read the retained Playwright errors, traces, screenshots, and error-context files using the same artifact-first trace analysis from `/samba:deflake-e2e-from-run`. This spec swaps the machine-global default macOS Keychain, so never run it locally or on a self-hosted runner. Verify the surrounding logic with the narrowest safe local tests, then rely on the next ephemeral GitHub-hosted `safe-storage-e2e` job for final confirmation and say so explicitly.
 
-If the failure is a snapshot mismatch, use `/dyad:e2e-rebase` when appropriate. Do not substitute raw job-log guessing for retained Playwright artifacts.
+If the failure is a snapshot mismatch, use `/samba:e2e-rebase` when appropriate. Do not substitute raw job-log guessing for retained Playwright artifacts.
 
 ## Verify and publish
 
 Before publishing, run the narrowest affected tests plus `npm run fmt`, `npm run lint`, and `npm run ts`. If E2E application code changed, run `npm run build` before targeted E2E tests.
 
-If `/dyad:deflake-e2e-from-run` did not already publish the combined changes, invoke `/dyad:pr-push`. Report the source run URL, each failed job's concrete root cause and fix, commands run locally, and any platform result that still requires CI confirmation.
+If `/samba:deflake-e2e-from-run` did not already publish the combined changes, invoke `/samba:pr-push`. Report the source run URL, each failed job's concrete root cause and fix, commands run locally, and any platform result that still requires CI confirmation.

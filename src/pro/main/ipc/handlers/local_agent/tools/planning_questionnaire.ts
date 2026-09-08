@@ -174,7 +174,7 @@ export const planningQuestionnaireTool: ToolDefinition<
       .join("\n");
 
     ctx.onXmlComplete(
-      `<dyad-questionnaire count="${questions.length}">\n${qaEntries}\n</dyad-questionnaire>`,
+      `<samba-questionnaire count="${questions.length}">\n${qaEntries}\n</samba-questionnaire>`,
     );
 
     return `${COMPLETED_PLANNING_QUESTIONNAIRE_RESULT_PREFIX}${formattedAnswers}`;

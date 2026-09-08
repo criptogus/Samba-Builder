@@ -10,19 +10,19 @@ chat's app `appPath`, runs in `xterm.js` against a `node-pty` shell, persists
 its **per-chat visibility** in the DB, and animates in as a drawer rising
 from the bottom. The PTY process itself is **keyed per app, not per chat**:
 switching chats within the same app reuses the same live shell, so
-`npm run dev` survives chat switches. PTYs are killed when Dyad quits.
+`npm run dev` survives chat switches. PTYs are killed when Samba quits.
 
 ## Problem Statement
 
-Dyad's target user — the prosumer/developer building real apps inside Dyad —
+Samba's target user — the prosumer/developer building real apps inside Samba —
 constantly needs a shell at the app's directory to: run ad-hoc CLIs (supabase,
 drizzle-kit, prisma, vercel, neon), inspect `git`, debug install/build
 failures by re-running commands manually, run tools the AI didn't (or
 shouldn't) auto-run. Today they alt-tab to iTerm/Windows Terminal/VS Code's
-terminal, `cd` into a path they may not even know (Dyad resolves it
-internally from `app.path`), and lose the in-Dyad flow.
+terminal, `cd` into a path they may not even know (Samba resolves it
+internally from `app.path`), and lose the in-Samba flow.
 
-Strategically, this is also Dyad's biggest credibility gap with VS Code /
+Strategically, this is also Samba's biggest credibility gap with VS Code /
 Cursor for developer users. And a terminal is a **platform primitive**: once
 it exists, future features (AI suggests a command → run here, stream test
 output into chat) become cheap.
@@ -39,10 +39,10 @@ output into chat) become cheap.
 - **xterm.js terminal replaces the chat panel content** (MessagesList +
   ChatInput) when toggled on. The chat header stays mounted; only the
   message/input region swaps.
-- **CWD = `getDyadAppPath(app.path)`** for the chat's bound app.
+- **CWD = `getSambaAppPath(app.path)`** for the chat's bound app.
 - **PTY is per-app, not per-chat.** Switching chats within the same app
   reuses the same live PTY (your `npm run dev` doesn't die).
-- **PTY lifecycle**: alive until Dyad quits or user explicitly kills it.
+- **PTY lifecycle**: alive until Samba quits or user explicitly kills it.
   Survives chat switches across apps too — multiple apps can each have a
   live shell. A hard cap (max 5 concurrent PTYs) with LRU eviction + toast
   prevents runaway resource use.
@@ -72,19 +72,19 @@ output into chat) become cheap.
   Restart shell / Exit terminal).
 - **Font size**: `Cmd/Ctrl + / - / 0` keyboard shortcut. Persists globally
   (not per chat) via a jotai-atom-backed setting.
-- **Theme reactivity**: xterm palette derived from Dyad's current light/dark
+- **Theme reactivity**: xterm palette derived from Samba's current light/dark
   theme; updates live on theme change.
 - **`prefers-reduced-motion`**: replaces slide-up with a 120ms crossfade.
   This is also the first place in `src/` to use this preference — introduce
   a small shared `useReducedMotionPref()` hook (or use `useReducedMotion`
-  from framer-motion directly) that other Dyad animations can adopt later.
+  from framer-motion directly) that other Samba animations can adopt later.
 
 ### Out of Scope (Follow-up)
 
 - Multiple terminal tabs per chat or per app.
 - Per-app user-configurable shell setting (use `$SHELL` for v1; add setting
   in v1.1).
-- Scrollback persistence to disk across Dyad restarts.
+- Scrollback persistence to disk across Samba restarts.
 - AI writing to / reading from the terminal (separate, larger feature with
   its own security review).
 - Split view: chat + terminal visible simultaneously. We pre-design the
@@ -93,12 +93,12 @@ output into chat) become cheap.
 - "Running command" dot on the terminal toggle button when the PTY is
   active but collapsed. (Nice-to-have v1; must-have v1.1.)
 - Sidebar live-dot on chats that have a running PTY.
-- Detached / tmux-style session that survives Dyad quit.
+- Detached / tmux-style session that survives Samba quit.
 
 ## User Stories
 
-- **As a Dyad developer**, I want to open a terminal at my app's path with
-  one click so I can run git/npm/CLIs without leaving Dyad or remembering
+- **As a Samba developer**, I want to open a terminal at my app's path with
+  one click so I can run git/npm/CLIs without leaving Samba or remembering
   the path.
 - **As a power user**, I want my shell session to survive when I switch
   chats within the same app, so my running `npm run dev` doesn't die.
@@ -107,7 +107,7 @@ output into chat) become cheap.
 - **As a Windows user**, I want the terminal to use my normal shell (cmd
   or whatever `%COMSPEC%` says) so my PATH and aliases work.
 - **As a vim/htop user**, I want pressing Esc inside the terminal to behave
-  normally (escape insert mode, etc.) and NOT exit Dyad's terminal mode.
+  normally (escape insert mode, etc.) and NOT exit Samba's terminal mode.
 - **As a user with motion sensitivity**, I want the drawer animation to
   respect `prefers-reduced-motion`, so the feature doesn't make me sick.
 
@@ -140,7 +140,7 @@ output into chat) become cheap.
 4. The escape banner fades in at the top of the terminal region:
    "Terminal mode — Click here or press ⌘K to exit" (chord shortcut
    adapted to OS).
-5. A subtle initializing placeholder (Dyad's existing loading orb +
+5. A subtle initializing placeholder (Samba's existing loading orb +
    scrambled verb "summoning shell…", reusing `useScrambleText` from
    `StreamingLoadingAnimation`) shows during the brief PTY spawn (~50–
    200ms).
@@ -155,7 +155,7 @@ output into chat) become cheap.
 - **Default (terminal off)**: standard chat panel. Toggle button shows
   outline `SquareTerminal`.
 - **Initializing**: 50–200ms window between toggle-on and PTY-ready.
-  Placeholder + Dyad orb + scramble verb. Banner already visible.
+  Placeholder + Samba orb + scramble verb. Banner already visible.
 - **Active**: shell prompt, banner pinned at top.
 - **Empty / no app bound**: the toggle button is disabled with a tooltip
   ("This chat isn't bound to an app yet"). If somehow forced on, show a
@@ -170,7 +170,7 @@ output into chat) become cheap.
   transparent over magical.
 - **Switching chats within same app, both terminal-on**: the terminal
   surface stays mounted, xterm crossfades content (100ms). The path label
-  in the banner does a scramble-text reveal (Dyad signature). Same PTY
+  in the banner does a scramble-text reveal (Samba signature). Same PTY
   session — so the user sees the same scrollback (this is the point of
   per-app PTY).
 - **Switching chats across different apps**: the previous chat's PTY keeps
@@ -189,7 +189,7 @@ output into chat) become cheap.
   terminal region, `bg-accent/10`, full-width inside the terminal. The
   entire bar is a real `<button>` (keyboard- and screen-reader-friendly).
   Hover state highlights as clickable. Keyboard hint uses `<kbd>` styling
-  consistent with the rest of Dyad.
+  consistent with the rest of Samba.
 - **Chord shortcut**: `Cmd+K` on macOS, `Ctrl+K` on Windows/Linux.
   Captured by React in the capture phase so it fires even when xterm has
   focus. **Esc is NOT bound** (so vim/less/fzf/htop work normally inside
@@ -229,7 +229,7 @@ output into chat) become cheap.
 - `prefers-reduced-motion`: 120ms crossfade replaces the slide-up. Drop
   the scramble-text reveal in favor of plain text swap. Drop the loading
   orb in favor of a static "Loading…" label.
-- Contrast: banner text meets WCAG AA against both Dyad themes.
+- Contrast: banner text meets WCAG AA against both Samba themes.
 - All user-facing strings go through i18next (`chat.json`).
 
 ### Consistency notes
@@ -241,7 +241,7 @@ output into chat) become cheap.
 - Scramble-text reveal on chat-to-chat path change reuses
   `useScrambleText`.
 - Toast on first terminal-ready uses `showSuccess` from `@/lib/toast`.
-- Empty-state cards match Dyad's existing rounded-2xl bordered card +
+- Empty-state cards match Samba's existing rounded-2xl bordered card +
   muted-foreground + primary/secondary button pattern.
 - This is the first feature in `src/` to respect
   `prefers-reduced-motion` — introduce the pattern here and document it
@@ -296,7 +296,7 @@ don't yet know what users will want.
 
 **Per-chat persistence + per-app PTY is consistent**: this column records
 "should the drawer be visible when this chat is selected." The PTY itself
-is keyed by app and lives until Dyad quits or the user explicitly kills
+is keyed by app and lives until Samba quits or the user explicitly kills
 it. If chat A and chat B both belong to app 1, opening the terminal in
 chat A and then opening it in chat B (after switching) attaches to the
 **same** PTY session and shows the same scrollback. Matches how VS Code /
@@ -347,14 +347,14 @@ State machine (per-app PTY session):
 
 - **Spawn**: lazy, on first terminal-open for an app. Uses the existing
   `spawnPty` from `pty_command_runner.ts`. CWD =
-  `getDyadAppPath(app.path)` — validated server-side as an absolute,
+  `getSambaAppPath(app.path)` — validated server-side as an absolute,
   existing path before spawn.
 - **Survives chat switch within the same app**: yes — same PTY, same
   scrollback.
 - **Survives chat switch across apps**: yes — the previous app's PTY
   keeps running in the background. The new chat's Jotai visibility state
   determines whether its own app's terminal is shown.
-- **Survives Dyad quit**: NO. All PTYs killed on `before-quit` (via the
+- **Survives Samba quit**: NO. All PTYs killed on `before-quit` (via the
   same platform-specific termination already in `pty_command_runner.ts`:
   `taskkill /F /T` on Windows, `kill()` elsewhere).
 - **Explicit "Exit terminal"** (banner / shortcut / toggle button): sets
@@ -422,7 +422,7 @@ their own machine. But two non-obvious invariants must hold from day 1:
    chat state and `pty.write()` it. This forecloses a class of
    prompt-injection RCEs cleanly.
 3. **CWD is server-side resolved**. Renderer cannot pass an arbitrary
-   cwd. Always `getDyadAppPath(app.path)`, validated absolute + exists.
+   cwd. Always `getSambaAppPath(app.path)`, validated absolute + exists.
 4. **No env leakage**: the `open` response returns `{ shell, cwd }`
    only — never echo `process.env`.
 
@@ -436,7 +436,7 @@ their own machine. But two non-obvious invariants must hold from day 1:
 | Dense output overwhelms IPC                                         | M   | 8ms coalescing buffer in main                                                                            |
 | Per-app PTY UX confusion (toggle is per-chat)                       | M   | Banner shows app name + path; PM-flagged disambiguation                                                  |
 | Runaway resource use (many apps with live PTYs)                     | M   | Hard cap = 5; LRU eviction with toast                                                                    |
-| User loses long-running shell on Dyad quit                          | M   | Document; toast on relaunch if a session was killed                                                      |
+| User loses long-running shell on Samba quit                         | M   | Document; toast on relaunch if a session was killed                                                      |
 | Drizzle migration on existing user DBs                              | L   | Standard `ALTER ADD COLUMN` with DEFAULT                                                                 |
 | Bundle size cost of xterm + addons (~600KB gzip)                    | L   | `React.lazy` `TerminalPanel`                                                                             |
 | macOS GUI-launch PATH                                               | L   | Already solved via `shellEnvSync()`                                                                      |
@@ -454,7 +454,7 @@ their own machine. But two non-obvious invariants must hold from day 1:
   bridge; escape banner renders; toggle updates the atom and DB.
 - **E2E (Playwright)** — the one that proves it actually works:
   - Smoke: open chat with app, click terminal toggle, type
-    `echo hello dyad\n`, assert "hello dyad" appears via
+    `echo hello samba\n`, assert "hello samba" appears via
     `term.buffer.active.getLine(...)` exposed on `window` in test mode
     (xterm renders to canvas in prod).
   - Persistence: enable terminal, restart app, chat reopens in terminal
@@ -501,7 +501,7 @@ their own machine. But two non-obvious invariants must hold from day 1:
       strict listener cleanup.
 - [ ] `useReducedMotion` shared hook (or use framer-motion's directly).
 - [ ] `TerminalPanel.tsx` (lazy-loaded). xterm + all addons. Theme from
-      Dyad theme atom. `screenReaderMode: true`. Resize via
+      Samba theme atom. `screenReaderMode: true`. Resize via
       `ResizeObserver` (debounced 50ms).
 - [ ] `TerminalEscapeBanner.tsx`. Real `<button>`. Click handler +
       `Cmd/Ctrl+K` chord shortcut (capture-phase). **Do not** bind
@@ -548,7 +548,7 @@ their own machine. But two non-obvious invariants must hold from day 1:
   asked for); the PTY itself is keyed by app and survives chat switches.
   Closes the "switching chats kills my dev server" footgun without
   changing the user-visible toggle model.
-- **PTY survives chat switch across apps; killed only on Dyad quit or
+- **PTY survives chat switch across apps; killed only on Samba quit or
   explicit "Kill terminal"** — chosen by user. Add a hard cap (5
   concurrent + LRU eviction with toast) as a safety net so this doesn't
   silently consume FDs.
@@ -579,7 +579,7 @@ their own machine. But two non-obvious invariants must hold from day 1:
 
 Resolved during planning:
 
-- PTY lifecycle → keep alive across chat switches, kill on Dyad quit.
+- PTY lifecycle → keep alive across chat switches, kill on Samba quit.
   Plus an explicit "Kill terminal" action and a 5-session LRU cap.
 - MVP scope → "MVP+" with search, font size, copy-on-select, web-links.
 - Escape affordance → persistent banner with `Cmd/Ctrl+K` chord (NOT
@@ -610,4 +610,4 @@ Still genuinely open (worth a quick check during implementation):
 
 ---
 
-_Generated by dyad:swarm-to-plan (PM, UX, Eng + Will)_
+_Generated by samba:swarm-to-plan (PM, UX, Eng + Will)_

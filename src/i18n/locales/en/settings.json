@@ -123,8 +123,8 @@
     "errorLoadingSettings": "Error Loading Settings",
     "couldNotLoadProvider": "Could not load provider data: {{message}}",
     "couldNotLoadSettings": "Could not load configuration data: {{message}}",
-    "enableDyadPro": "Enable Samba Builder",
-    "toggleDyadPro": "Toggle to enable Samba Builder",
+    "enableSambaPro": "Enable Samba Builder",
+    "toggleSambaPro": "Toggle to enable Samba Builder",
     "apiKeyEmpty": "API Key cannot be empty.",
     "errorTogglingPro": "Error toggling Samba Builder: {{error}}",
     "failedSaveApiKey": "Failed to save API key.",
@@ -305,6 +305,6 @@
     "updateProvider": "Update Provider",
     "failedCreate": "Failed to create custom provider"
   },
-  "manageDyadPro": "Manage Samba Builder Subscription",
-  "setupDyadPro": "Setup Samba Builder Subscription"
+  "manageSambaPro": "Manage Samba Builder Subscription",
+  "setupSambaPro": "Setup Samba Builder Subscription"
 }

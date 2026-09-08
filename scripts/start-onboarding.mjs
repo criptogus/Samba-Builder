@@ -3,8 +3,8 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { spawn } from "node:child_process";
 
-const userDataDir = mkdtempSync(join(tmpdir(), "dyad-onboarding-"));
-const nodeStatus = process.env.DYAD_DEV_NODEJS_STATUS || "missing";
+const userDataDir = mkdtempSync(join(tmpdir(), "samba-onboarding-"));
+const nodeStatus = process.env.SAMBA_DEV_NODEJS_STATUS || "missing";
 const npmCommand = process.platform === "win32" ? "npm.cmd" : "npm";
 
 console.log("Starting Samba Builder onboarding preview");
@@ -16,8 +16,8 @@ const child = spawn(npmCommand, ["start"], {
   env: {
     ...process.env,
     NODE_ENV: "development",
-    DYAD_DEV_USER_DATA_DIR: userDataDir,
-    DYAD_DEV_NODEJS_STATUS: nodeStatus,
+    SAMBA_DEV_USER_DATA_DIR: userDataDir,
+    SAMBA_DEV_NODEJS_STATUS: nodeStatus,
   },
 });
 

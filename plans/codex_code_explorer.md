@@ -96,9 +96,9 @@ The tool should only be enabled for a target app when all of these are true:
 If any condition fails:
 
 - Do not include `explore_code` in the tool set for that app when the app context is known before request construction.
-- If the app context is only resolved at execution time, fail with `DyadErrorKind.Precondition` and a concise message such as `Code explorer requires TypeScript to be installed and configured in this app.`
+- If the app context is only resolved at execution time, fail with `SambaErrorKind.Precondition` and a concise message such as `Code explorer requires TypeScript to be installed and configured in this app.`
 
-This differs from the existing TS checker fallback behavior: `explore_code` should not use bundled Dyad TypeScript to explore arbitrary projects. The experiment is meant to measure TypeScript-aware navigation on projects that are actually configured for TypeScript.
+This differs from the existing TS checker fallback behavior: `explore_code` should not use bundled Samba TypeScript to explore arbitrary projects. The experiment is meant to measure TypeScript-aware navigation on projects that are actually configured for TypeScript.
 
 ## Implementation Design
 
@@ -112,7 +112,7 @@ Add a dedicated worker modeled after the existing TypeScript checker worker:
 - One cached worker/index per app path plus tsconfig path.
 - Idle termination after a fixed timeout, for example 10 minutes.
 
-The worker should load TypeScript from the target app using Node resolution from the app root. If that fails, report the precondition error instead of falling back to Dyad's bundled TypeScript.
+The worker should load TypeScript from the target app using Node resolution from the app root. If that fails, report the precondition error instead of falling back to Samba's bundled TypeScript.
 
 Recommended implementation split:
 
@@ -129,7 +129,7 @@ Worker build wiring:
 - Add a worker Vite config for the code explorer worker.
 - Add a Forge build entry so `code_explorer_worker.js` is emitted next to the existing worker outputs.
 - Keep Node built-ins external.
-- Keep `typescript` external so resolution comes from the target app, not from Dyad.
+- Keep `typescript` external so resolution comes from the target app, not from Samba.
 
 ### Project Discovery
 
@@ -192,7 +192,7 @@ Source-window caps:
 Add support for a new custom tag:
 
 ```xml
-<dyad-explore-code>...</dyad-explore-code>
+<samba-explore-code>...</samba-explore-code>
 ```
 
 Renderer behavior:
@@ -201,15 +201,15 @@ Renderer behavior:
 - Expanded state shows the Markdown/source windows.
 - Loading state mirrors existing local-agent tool cards.
 - Error state shows the precondition or validation message.
-- Add a stable test id such as `dyad-explore-code`.
+- Add a stable test id such as `samba-explore-code`.
 
 ## Error Handling
 
-Use `DyadError` for expected user/project failures:
+Use `SambaError` for expected user/project failures:
 
-- `DyadErrorKind.Precondition`: missing app-local TypeScript, missing tsconfig, no source files, unsupported project shape.
-- `DyadErrorKind.Validation`: invalid arguments, invalid bounds, escaping `tsconfig_path`.
-- `DyadErrorKind.NotFound`: unknown `app_name`, via existing app resolution.
+- `SambaErrorKind.Precondition`: missing app-local TypeScript, missing tsconfig, no source files, unsupported project shape.
+- `SambaErrorKind.Validation`: invalid arguments, invalid bounds, escaping `tsconfig_path`.
+- `SambaErrorKind.NotFound`: unknown `app_name`, via existing app resolution.
 
 Unexpected compiler API failures should still surface as bugs with enough context for debugging, without dumping large source content into logs.
 
@@ -222,8 +222,8 @@ Unit tests:
 - Tool gating excludes the tool when the app has no app-local TypeScript or no tsconfig.
 - Input validation rejects out-of-range caps and escaping `tsconfig_path`.
 - Graph/search on a temp TypeScript project returns expected cross-file symbols and line-numbered source windows.
-- Expected readiness failures are classified as `DyadErrorKind.Precondition`.
-- Chat parser and renderer recognize `dyad-explore-code`.
+- Expected readiness failures are classified as `SambaErrorKind.Precondition`.
+- Chat parser and renderer recognize `samba-explore-code`.
 
 E2E test:
 
@@ -237,7 +237,7 @@ E2E test:
   - verify request snapshots do not include `explore_code` when the setting is off
   - enable `enableCodeExplorer`
   - send the fixture prompt
-  - assert the rendered `dyad-explore-code` card is visible
+  - assert the rendered `samba-explore-code` card is visible
   - assert expected file names and line-numbered snippets appear
 - Run `npm run build` before the E2E test, then run the targeted Playwright spec.
 
@@ -249,7 +249,7 @@ Add a manual benchmark command:
 npm run benchmark:code-explorer
 ```
 
-The benchmark should launch packaged Dyad programmatically with a real LLM provider and run paired baseline/experiment trials.
+The benchmark should launch packaged Samba programmatically with a real LLM provider and run paired baseline/experiment trials.
 
 Repositories:
 
@@ -260,9 +260,9 @@ Repositories:
 
 Trial setup:
 
-- Same packaged Dyad build.
-- Same Dyad Engine provider path.
-- Read `DYAD_PRO_KEY` from `.env` and use it to authenticate Dyad Engine calls.
+- Same packaged Samba build.
+- Same Samba Engine provider path.
+- Read `SAMBA_PRO_KEY` from `.env` and use it to authenticate Samba Engine calls.
 - Do not print or persist the key in benchmark logs, JSONL events, or reports.
 - Same repo commit.
 - Same prompt.
@@ -270,7 +270,7 @@ Trial setup:
 - Baseline: `enableCodeExplorer=false`.
 - Experiment: `enableCodeExplorer=true`.
 - Local-agent mode.
-- Real Dyad Engine calls only; no fake-provider benchmark path.
+- Real Samba Engine calls only; no fake-provider benchmark path.
 
 Benchmark prompts:
 
@@ -292,20 +292,20 @@ Metrics:
 
 Instrumentation:
 
-- Add benchmark-only JSONL recording behind an environment variable such as `DYAD_BENCHMARK_RUN_ID`.
+- Add benchmark-only JSONL recording behind an environment variable such as `SAMBA_BENCHMARK_RUN_ID`.
 - Record provider usage, local-agent tool calls, stream steps, elapsed time, final answer text, and errors.
 - Write results under `benchmark-results/code-explorer/<run-id>/`.
 - Generate `summary.json` and `summary.md`.
 
-Programmatic Dyad driver:
+Programmatic Samba driver:
 
 - Launch the packaged Electron app from a Node CLI script with a fresh user data directory per trial.
 - Import each benchmark repo using the existing app import path with copy disabled when possible.
-- Load `.env`, require `DYAD_PRO_KEY`, and configure the app to use Dyad Engine for both arms.
+- Load `.env`, require `SAMBA_PRO_KEY`, and configure the app to use Samba Engine for both arms.
 - Configure the same model for both arms.
 - Start local-agent chats programmatically through the existing chat IPC path.
 - Read final chat state and benchmark JSONL events after each run.
-- Do not replace Dyad's real agent loop with a standalone AI SDK harness; the benchmark should measure the product path users actually exercise.
+- Do not replace Samba's real agent loop with a standalone AI SDK harness; the benchmark should measure the product path users actually exercise.
 
 Repeat count:
 
@@ -327,16 +327,16 @@ Success bar:
 - Keep the graph in memory; do not add SQLite or migrations.
 - Rebuild the graph on detected source/config mtime-size changes for v1 instead of implementing fine-grained file watching.
 - Avoid dependency installation during the benchmark by default. The selected benchmark repos should already have TypeScript configured in their checked-in dependency manifests, and readiness should be based on app-local dependency resolution from installed dependencies when the benchmark setup opts into installation.
-- Document benchmark prerequisites clearly, including `DYAD_PRO_KEY` in `.env`, packaged build requirement, and whether repo dependencies should be installed before running.
+- Document benchmark prerequisites clearly, including `SAMBA_PRO_KEY` in `.env`, packaged build requirement, and whether repo dependencies should be installed before running.
 
 ## Risks And Mitigations
 
-- Target app lacks installed TypeScript: hide the tool when readiness can be checked before request construction; otherwise return `DyadErrorKind.Precondition`.
+- Target app lacks installed TypeScript: hide the tool when readiness can be checked before request construction; otherwise return `SambaErrorKind.Precondition`.
 - Large repos are slow or memory-heavy: skip `node_modules` and `.d.ts`, scope benchmark apps to relevant subdirectories, cap graph expansion, and terminate idle workers.
 - Tool output is too large: enforce file, window, line, and character caps before returning content to the model.
 - Chat tag renders as raw XML: add both the streaming parser tag and the Markdown renderer case in the same change.
 - Benchmark results are noisy: default to one repeat for cost, but support `--repeats=N`, pinned repo commits, fixed prompts, rubric checks, and paired baseline/experiment runs.
-- Benchmark contaminates normal app behavior: write JSONL only when `DYAD_BENCHMARK_RUN_ID` is set.
+- Benchmark contaminates normal app behavior: write JSONL only when `SAMBA_BENCHMARK_RUN_ID` is set.
 
 ## Ordered Implementation Sequence
 
@@ -346,7 +346,7 @@ Success bar:
 4. Add the worker shell, worker Vite config, and Forge build entry.
 5. Add the main-process code explorer processor.
 6. Add the `explore_code` local-agent tool and register it behind the experiment/readiness gate.
-7. Add chat streaming parser and renderer support for `dyad-explore-code`.
+7. Add chat streaming parser and renderer support for `samba-explore-code`.
 8. Add the E2E fixture, fake local-agent fixture, and targeted E2E spec.
-9. Add benchmark instrumentation behind `DYAD_BENCHMARK_RUN_ID`.
-10. Add the packaged-Dyad benchmark CLI, repo/task manifests, result writer, and summary report.
+9. Add benchmark instrumentation behind `SAMBA_BENCHMARK_RUN_ID`.
+10. Add the packaged-Samba benchmark CLI, repo/task manifests, result writer, and summary report.

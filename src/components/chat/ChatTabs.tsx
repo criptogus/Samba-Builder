@@ -99,7 +99,7 @@ const TAB_GAP_PX = 4;
 const OVERFLOW_TRIGGER_WIDTH_PX = 36;
 const DEFAULT_UNMEASURED_VISIBLE_TABS = 3;
 const MAX_OVERFLOW_MENU_ITEMS = 8;
-const CHAT_TAB_TRANSFER_MIME = "application/x-dyad-chat-tab-transfer";
+const CHAT_TAB_TRANSFER_MIME = "application/x-samba-chat-tab-transfer";
 const SCROLL_RESTORE_MAX_FRAMES = 120;
 const SCROLL_RESTORE_STABILIZATION_FRAMES = 4;
 

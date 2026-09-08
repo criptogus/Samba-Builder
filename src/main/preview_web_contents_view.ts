@@ -5,7 +5,7 @@ import type { BrowserWindow, Session, WebContents } from "electron";
 import log from "electron-log";
 
 import { safeSend } from "../ipc/utils/safe_sender";
-import { DyadError, DyadErrorKind } from "../errors/dyad_error";
+import { SambaError, SambaErrorKind } from "../errors/samba_error";
 import {
   previewViewEvents,
   type PreviewViewBounds,
@@ -286,7 +286,7 @@ function createEntry(window: BrowserWindow, key: number): PreviewViewEntry {
   // No `persist:` prefix: Electron keeps this partition in memory only. A UUID
   // makes every mounted test preview a fresh browser profile, so credentials
   // from a prior run can never be inherited even if cleanup is interrupted.
-  const partition = `dyad-preview-test-${key}-${randomUUID()}`;
+  const partition = `samba-preview-test-${key}-${randomUUID()}`;
   const view = new WebContentsView({
     webPreferences: {
       // The previewed app is untrusted, user-generated code. It gets no
@@ -477,9 +477,9 @@ export function showPreviewView(
     // The contract only validates z.string().url(), so schemes like file: reach
     // here. This is an expected input rejection, not a product fault: a bare
     // Error would be forwarded to sendTelemetryException by createTypedHandler.
-    throw new DyadError(
+    throw new SambaError(
       `Unsupported preview URL: ${url}`,
-      DyadErrorKind.Validation,
+      SambaErrorKind.Validation,
     );
   }
 

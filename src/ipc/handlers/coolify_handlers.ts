@@ -6,7 +6,7 @@ import { db } from "../../db";
 import { apps } from "../../db/schema";
 import { resolveBoth } from "../utils/dns_resolve";
 import { readSettings, writeSettings } from "../../main/settings";
-import { DyadError, DyadErrorKind } from "@/errors/dyad_error";
+import { SambaError, SambaErrorKind } from "@/errors/samba_error";
 import { forgottenCoolify } from "@/lib/schemas";
 import {
   getClient,
@@ -43,7 +43,7 @@ const logger = log.scope("coolify_handlers");
 async function getApp(appId: number) {
   const app = await db.query.apps.findFirst({ where: eq(apps.id, appId) });
   if (!app) {
-    throw new DyadError(`App ${appId} not found`, DyadErrorKind.NotFound);
+    throw new SambaError(`App ${appId} not found`, SambaErrorKind.NotFound);
   }
   return app;
 }
@@ -115,11 +115,11 @@ export function registerCoolifyHandlers() {
     coolifyContracts.saveToken,
     async (_, { instanceUrl, token, acknowledgedInsecure }) => {
       if (!isSecureInstanceUrl(instanceUrl) && !acknowledgedInsecure) {
-        throw new DyadError(
+        throw new SambaError(
           "This address is not encrypted, so your API token would be readable " +
             "by anything on the network between you and the server. Confirm you " +
             "want to continue, or give Coolify a domain and certificate first.",
-          DyadErrorKind.Validation,
+          SambaErrorKind.Validation,
         );
       }
       const probe = new CoolifyClient({ instanceUrl, token });
@@ -201,9 +201,9 @@ export function registerCoolifyHandlers() {
           coolifyDeployRegistry.getSnapshot(appId),
         ).canEditConnection
       ) {
-        throw new DyadError(
+        throw new SambaError(
           "This app is deploying. Wait for it to finish, or disconnect to stop it, before changing its server.",
-          DyadErrorKind.Precondition,
+          SambaErrorKind.Precondition,
         );
       }
       // Coolify validates this as a URL and rejects a bare hostname, which is
@@ -212,9 +212,9 @@ export function registerCoolifyHandlers() {
         ? normalizeCoolifyDomain(connection.domain)
         : null;
       if (connection.domain && !domain) {
-        throw new DyadError(
+        throw new SambaError(
           `"${connection.domain}" is not a valid domain.`,
-          DyadErrorKind.Validation,
+          SambaErrorKind.Validation,
         );
       }
       await getApp(appId);
@@ -238,10 +238,10 @@ export function registerCoolifyHandlers() {
       const hasApplication =
         current.kind === "provisioned" || current.kind === "deployed";
       if (!movedHost && hasApplication && current.domain && !domain) {
-        throw new DyadError(
+        throw new SambaError(
           "A domain cannot be removed from Samba Builder once it is set. Change it to " +
             "another domain here, or clear it in Coolify.",
-          DyadErrorKind.Validation,
+          SambaErrorKind.Validation,
         );
       }
       const next = applyCoolifyConnectionChange(current, {
@@ -336,9 +336,9 @@ export function registerCoolifyHandlers() {
     await assertFactoryRelease(appId);
     await getApp(appId);
     if (!readConnection(await readConnectionState(appId))) {
-      throw new DyadError(
+      throw new SambaError(
         "Connect a Coolify server for this app first.",
-        DyadErrorKind.Validation,
+        SambaErrorKind.Validation,
       );
     }
     coolifyDeployRegistry.requestDeploy(appId);

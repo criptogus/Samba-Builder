@@ -15,13 +15,13 @@ describe("DeepLinkWindowReadiness", () => {
 
     target = targetWindow;
     readiness.setTarget(targetWindow);
-    queue.handle("dyad://cold-start");
+    queue.handle("sambabuilder://cold-start");
     readiness.markReady(firstWindow);
     expect(delivered).toEqual([]);
 
     readiness.markReady(targetWindow);
     expect(delivered).toEqual([
-      { target: targetWindow, url: "dyad://cold-start" },
+      { target: targetWindow, url: "sambabuilder://cold-start" },
     ]);
   });
 
@@ -35,11 +35,11 @@ describe("DeepLinkWindowReadiness", () => {
     readiness.setTarget(readyWindow);
     readiness.markReady(readyWindow);
     readiness.setTarget(loadingWindow);
-    queue.handle("dyad://while-loading");
+    queue.handle("sambabuilder://while-loading");
     expect(handler).not.toHaveBeenCalled();
 
     readiness.setTarget(readyWindow);
-    expect(handler).toHaveBeenCalledWith("dyad://while-loading");
+    expect(handler).toHaveBeenCalledWith("sambabuilder://while-loading");
   });
 
   it("marks a reloading target unavailable until its next completed load", () => {
@@ -51,11 +51,11 @@ describe("DeepLinkWindowReadiness", () => {
     readiness.markReady(window);
 
     readiness.markNotReady(window);
-    queue.handle("dyad://during-reload");
+    queue.handle("sambabuilder://during-reload");
     expect(handler).not.toHaveBeenCalled();
 
     readiness.markReady(window);
-    expect(handler).toHaveBeenCalledWith("dyad://during-reload");
+    expect(handler).toHaveBeenCalledWith("sambabuilder://during-reload");
   });
 
   it("delivers one-shot recovery only when the current target is ready", () => {

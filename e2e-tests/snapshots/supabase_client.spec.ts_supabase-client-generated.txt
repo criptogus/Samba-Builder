@@ -23,7 +23,7 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
-.dyad/
+.samba/
 
 
 === index.html ===
@@ -32,7 +32,7 @@ dist-ssr
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>dyad-generated-app</title>
+    <title>samba-generated-app</title>
   </head>
 
   <body>
@@ -71,7 +71,7 @@ dist-ssr
 }
 
 === pnpm-workspace.yaml ===
-[Dyad-managed pnpm workspace config]
+[Samba-managed pnpm workspace config]
 
 === src/App.tsx ===
 const App = () => <div>Minimal imported app</div>;

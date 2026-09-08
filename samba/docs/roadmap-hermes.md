@@ -31,15 +31,15 @@ backend gerenciado (BYOK e local-first, como o Córtex).
 
 ## 2. O que "estilo Hermes" significa (os mecanismos)
 
-| # | Mecanismo | O que faz | No Hermes | No Samba Builder hoje |
-|---|-----------|-----------|-----------|----------------------|
-| 1 | **Memória persistente** | Fatos entre sessões, com orçamento e consolidação | MEMORY/USER injetados em todo turno; consolida quando enche | ❌ agente esquece tudo entre sessões |
-| 2 | **Skills procedurais** | Conhecimento carregado por relevância, criado/atualizado com lições | skill_manage: criar, patch, evoluir | 🟡 `samba/skills/` + evolve.py v1 (feedback JSONL → propostas) — sem injeção no agente |
-| 3 | **RAG/vault** | Conhecimento recuperado no contexto, não tudo | Córtex (vault Obsidian, 55k+ docs) | 🟡 Córtex roda + MCP conectado — agente **não consulta** no fluxo |
-| 4 | **Automação (cron)** | Jobs: briefings, watchdogs, health, ingestão | cronjob (diário, watchdogs, evals) | ❌ nada no produto |
-| 5 | **Delegação** | Subagentes isolados com contexto | delegate_task | ✅ implementer/explorer/PM coach |
-| 6 | **Evals + observabilidade** | Medir o agente; feedback fecha o loop | agent-evaluation diário, LLM-as-judge, telemetria de sessão | 🟡 gates de qualidade no fluxo dev; sem telemetria de sessão |
-| 7 | **Auto-evolução governada** | Mudanças propostas → aprovação → versionadas | skills evoluem com lições; contribuição ao OSS | 🟡 governança pronta (gate.py/GitHub) — não ligada à evolução |
+| #   | Mecanismo                   | O que faz                                                           | No Hermes                                                   | No Samba Builder hoje                                                                  |
+| --- | --------------------------- | ------------------------------------------------------------------- | ----------------------------------------------------------- | -------------------------------------------------------------------------------------- |
+| 1   | **Memória persistente**     | Fatos entre sessões, com orçamento e consolidação                   | MEMORY/USER injetados em todo turno; consolida quando enche | ❌ agente esquece tudo entre sessões                                                   |
+| 2   | **Skills procedurais**      | Conhecimento carregado por relevância, criado/atualizado com lições | skill_manage: criar, patch, evoluir                         | 🟡 `samba/skills/` + evolve.py v1 (feedback JSONL → propostas) — sem injeção no agente |
+| 3   | **RAG/vault**               | Conhecimento recuperado no contexto, não tudo                       | Córtex (vault Obsidian, 55k+ docs)                          | 🟡 Córtex roda + MCP conectado — agente **não consulta** no fluxo                      |
+| 4   | **Automação (cron)**        | Jobs: briefings, watchdogs, health, ingestão                        | cronjob (diário, watchdogs, evals)                          | ❌ nada no produto                                                                     |
+| 5   | **Delegação**               | Subagentes isolados com contexto                                    | delegate_task                                               | ✅ implementer/explorer/PM coach                                                       |
+| 6   | **Evals + observabilidade** | Medir o agente; feedback fecha o loop                               | agent-evaluation diário, LLM-as-judge, telemetria de sessão | 🟡 gates de qualidade no fluxo dev; sem telemetria de sessão                           |
+| 7   | **Auto-evolução governada** | Mudanças propostas → aprovação → versionadas                        | skills evoluem com lições; contribuição ao OSS              | 🟡 governança pronta (gate.py/GitHub) — não ligada à evolução                          |
 
 Legenda: ✅ pronto · 🟡 parcial (falta fechar o loop) · ❌ não existe
 
@@ -48,7 +48,8 @@ Legenda: ✅ pronto · 🟡 parcial (falta fechar o loop) · ❌ não existe
 ## 3. Inventário honesto (o que já temos, para não reconstruir)
 
 **Pronto e validado:**
-- Fork Dyad rebrandado, BYOK puro, zero backend gerenciado, zero Pro/upsell na UI
+
+- Fork Samba rebrandado, BYOK puro, zero backend gerenciado, zero Pro/upsell na UI
 - Providers: DeepSeek direto (chave `sk-`) conectado e funcionando ponta a ponta
 - MCP: 4 plugins ativos (Composio, Playwright, cua-driver, **Córtex**)
 - Córtex: RAG local `127.0.0.1:8899` — vault 55k+ docs, 1.773 knowledge units, design system, KG
@@ -61,6 +62,7 @@ Legenda: ✅ pronto · 🟡 parcial (falta fechar o loop) · ❌ não existe
 - Software-factory (jeito Samba) mapeada em skills do Hermes
 
 **O fio que falta (tudo gira em torno de 3 lacunas):**
+
 1. **O agente não usa o Córtex sozinho** — retrieval é manual (o dev pede).
 2. **Não há memória entre sessões** — decisões e preferências morrem com a conversa.
 3. **As lições não voltam para o agente** — evolve.py existe, mas nada coleta as lições
@@ -85,6 +87,7 @@ relevante — o dev nunca precisa pedir.
 de contexto < 2s; custo de contexto controlado (orçamento de tokens por turno).
 
 **Fases:**
+
 - P0.1 Mapear as tools do MCP Córtex (units/search/kg/design-system) contra os
   tipos de tarefa do agente (feature nova, bug, design, onboarding).
 - P0.2 Regra no prompt do agente: quando a tarefa menciona projeto/cliente/domínio/
@@ -111,6 +114,7 @@ vez (e o cliente percebe). Memória é o que transforma uma ferramenta em um
 reexplicação); % de prompts que repetem contexto já dado; tempo de retomada < 1 min.
 
 **Fases:**
+
 - P1.1 Schema de memória por projeto (decisões, preferências, fatos do cliente,
   pendências) + por produto (jeito Samba, convenções) — **declarativo, não
   instrucional** (lição do Hermes: fatos, não ordens).
@@ -140,6 +144,7 @@ tempo lição → skill disponível < 24h; eval A/B (com skill vs sem skill) com
 tendência positiva.
 
 **Fases:**
+
 - P2.1 Coleta automática: fim de turno → extrair lições (erros evitados, atalhos,
   preferências do cliente, pegadinhas da stack) → `samba/skills/feedback/*.jsonl`.
 - P2.2 Proposta automática: `evolve.py` (já existe) agrega → propõe skill nova ou
@@ -168,6 +173,7 @@ Com a governança já pronta (gate.py + GitHub), falta a **fonte de propostas**.
 (propostas que pegaram bug antes do cliente).
 
 **Fases:**
+
 - P3.1 Telemetria local de sessão: erros, ferramentas usadas, duração, modelos,
   outcomes — **só local, nunca exfiltrar dado de cliente** (princípio).
 - P3.2 Analisador semanal (cron — P5): padrões de erro/fricção → propostas de
@@ -193,6 +199,7 @@ feedback: skill boa = score sobe; mudança ruim = score cai.
 com score acima do limiar do cliente; tendência do score médio por projeto.
 
 **Fases:**
+
 - P4.1 Rubric do jeito Samba: bonito, elegante, rápido, inovador, simples, seguro
   (já é o DNA — falta formalizar como rubric de judge).
 - P4.2 Judge automático no fim do fluxo (gates da software-factory): requisito vs
@@ -216,6 +223,7 @@ cron do Hermes aplicado ao projeto do cliente.
 incidentes detectados antes do cliente; notificações por semana (alvo: < 3).
 
 **Fases:**
+
 - P5.1 Cron local por projeto: health checks (build/testes/deps desatualizadas),
   updates seguros (patch), ingestão Córtex pós-commit.
 - P5.2 Watchdogs: preço/quota dos providers BYOK, erros recorrentes no log do app,
@@ -241,6 +249,7 @@ auditáveis (hash chain da governança aplicada a skills); zero exfiltração de
 de cliente (auditoria).
 
 **Fases:**
+
 - P6.1 Espelhar evolução de skills/conhecimento no GitHub (PR revisável) — mesmo
   mecanismo que a governança já usa para código.
 - P6.2 Papéis de conhecimento: quem aprova skill do time (tech lead), quem vê o
@@ -254,15 +263,15 @@ de cliente (auditoria).
 
 ## 5. Métricas do roadmap (como sabemos que chegou no "estilo Hermes")
 
-| Métrica | Hoje | Alvo (12 meses) |
-|---|---|---|
-| Setup de projeto novo (idea → app rodando) | horas | < 30 min com reuso de projetos anteriores |
-| Retomada de projeto (abrir → contexto pronto) | reexplicar tudo | < 1 min, zero reexplicação |
-| Lições → skill disponível | manual/inexistente | < 24h, 80% automático |
-| Score de qualidade por entrega | inexistente | toda entrega com score; tendência positiva |
-| Manutenção de rotina (deps/health) | manual | 100% automática, dev só decide |
-| Ciclo projeto → deploy (cliente) | dias | horas |
-| Intervenção humana | a cada passo | só decisão (aprovar/redirecionar) |
+| Métrica                                       | Hoje               | Alvo (12 meses)                            |
+| --------------------------------------------- | ------------------ | ------------------------------------------ |
+| Setup de projeto novo (idea → app rodando)    | horas              | < 30 min com reuso de projetos anteriores  |
+| Retomada de projeto (abrir → contexto pronto) | reexplicar tudo    | < 1 min, zero reexplicação                 |
+| Lições → skill disponível                     | manual/inexistente | < 24h, 80% automático                      |
+| Score de qualidade por entrega                | inexistente        | toda entrega com score; tendência positiva |
+| Manutenção de rotina (deps/health)            | manual             | 100% automática, dev só decide             |
+| Ciclo projeto → deploy (cliente)              | dias               | horas                                      |
+| Intervenção humana                            | a cada passo       | só decisão (aprovar/redirecionar)          |
 
 ---
 
@@ -286,7 +295,7 @@ melhora sozinho (P3)** — nunca melhorar às cegas.
 
 ## 7. Riscos e princípios (não negociáveis)
 
-1. **Local-first e BYOK, sempre.** A lição do dia: o backend do Dyad (engine com
+1. **Local-first e BYOK, sempre.** A lição do dia: o backend do Samba (engine com
    cookie) quebrou tudo e custou horas. O Samba Builder não depende de nenhum
    serviço gerenciado — Córtex roda na máquina, chaves são do usuário.
 2. **Dado do cliente não sai do ambiente dele.** Conhecimento de projeto é do
@@ -306,5 +315,5 @@ melhora sozinho (P3)** — nunca melhorar às cegas.
 
 ---
 
-*Documento vivo: revisar a cada ciclo de projeto (P2 alimenta este arquivo).
-Próxima revisão: após o piloto do primeiro projeto de cliente ponta a ponta.*
+_Documento vivo: revisar a cada ciclo de projeto (P2 alimenta este arquivo).
+Próxima revisão: após o piloto do primeiro projeto de cliente ponta a ponta._

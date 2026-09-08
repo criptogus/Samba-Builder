@@ -29,11 +29,11 @@ let remoteDesktopConfigFetchPromise: Promise<RemoteDesktopConfig | null> | null 
   null;
 
 function getRemoteDesktopConfigUrl(): string | null {
-  if (process.env.DYAD_DESKTOP_CONFIG_URL) {
-    return process.env.DYAD_DESKTOP_CONFIG_URL;
+  if (process.env.SAMBA_DESKTOP_CONFIG_URL) {
+    return process.env.SAMBA_DESKTOP_CONFIG_URL;
   }
 
-  // Samba Builder: zero backend do Dyad — sem config remota do desktop.
+  // Samba Builder: zero backend do Samba — sem config remota do desktop.
   return null;
 }
 

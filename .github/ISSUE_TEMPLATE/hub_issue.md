@@ -1,6 +1,6 @@
 ---
-name: Dyad Hub Issue
-about: Found an issue with dyad.sh/hub?
+name: Samba Hub Issue
+about: Found an issue with samba.sh/hub?
 title: "[hub]"
 labels: "hub"
 assignees: ""

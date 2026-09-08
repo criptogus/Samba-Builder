@@ -42,7 +42,7 @@ vi.mock("../shared/language_model_helpers", () => ({
     {
       id: "auto",
       name: "Samba Builder",
-      gatewayPrefix: "dyad/",
+      gatewayPrefix: "samba/",
       type: "cloud",
     },
     {
@@ -75,27 +75,27 @@ vi.mock("../shared/language_model_helpers", () => ({
 vi.mock("../shared/remote_language_model_catalog", () => ({
   resolveBuiltinModelAlias: vi.fn(async (aliasId: string) => {
     switch (aliasId) {
-      case "dyad/auto/openai":
+      case "samba/auto/openai":
         return {
           providerId: "openai",
           apiName: "gpt-5.5",
         };
-      case "dyad/auto/anthropic":
+      case "samba/auto/anthropic":
         return {
           providerId: "anthropic",
           apiName: "claude-sonnet-4-20250514",
         };
-      case "dyad/auto/google":
+      case "samba/auto/google":
         return {
           providerId: "google",
           apiName: "gemini-3.5-flash",
         };
-      case "dyad/auto/openrouter":
+      case "samba/auto/openrouter":
         return {
           providerId: "openrouter",
           apiName: "nvidia/nemotron-3-super-120b-a12b:free",
         };
-      case "dyad/auto/balanced":
+      case "samba/auto/balanced":
         return {
           providerId: "openrouter",
           apiName: "x-ai/grok-4.6",
@@ -117,7 +117,7 @@ describe("getModelClient", () => {
     const { runtimeModel } = await getModelClient(
       { provider: "auto", name: "auto" },
       {
-        enableDyadPro: false,
+        enableSambaPro: false,
         providerSettings: {
           google: { apiKey: { value: "google-key" } },
         },
@@ -137,7 +137,7 @@ describe("getModelClient", () => {
         name: "auto",
       },
       {
-        enableDyadPro: false,
+        enableSambaPro: false,
         providerSettings: {
           openrouter: {
             apiKey: {

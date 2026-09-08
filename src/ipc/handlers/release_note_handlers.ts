@@ -3,7 +3,7 @@ import fetch from "node-fetch";
 import { IS_TEST_BUILD } from "../utils/test_utils";
 import { createTypedHandler } from "./base";
 import { systemContracts } from "../types/system";
-import { DyadError, DyadErrorKind } from "@/errors/dyad_error";
+import { SambaError, SambaErrorKind } from "@/errors/samba_error";
 
 const logger = log.scope("release_note_handlers");
 
@@ -14,9 +14,9 @@ export function registerReleaseNoteHandlers() {
       const { version } = params;
 
       if (!version || typeof version !== "string") {
-        throw new DyadError(
+        throw new SambaError(
           "Invalid version provided",
-          DyadErrorKind.Validation,
+          SambaErrorKind.Validation,
         );
       }
 

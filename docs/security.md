@@ -2,7 +2,7 @@
 
 ## MustardScript Attachment Scripts
 
-Dyad uses MustardScript for local-agent attachment inspection. The tool is
+Samba uses MustardScript for local-agent attachment inspection. The tool is
 read-only: it exposes `read_file`, `list_files`, and `file_stats`, and does not
 expose shell execution, network access, environment variables, or write
 capabilities.
@@ -17,7 +17,7 @@ That policy:
 - resolves symlinks and rejects files outside the current app path
 - denies protected paths including `.env*`, `.git/`, `node_modules/`,
   `.ssh/`, `.aws/`, `.config/`, `.netrc`, `*.key`, and `*.pem`
-- allows `.dyad/` paths within the app (attachments, script output, etc.)
+- allows `.samba/` paths within the app (attachments, script output, etc.)
   while still rejecting paths outside the resolved app root
 - caps per-call file reads and total tool output
 

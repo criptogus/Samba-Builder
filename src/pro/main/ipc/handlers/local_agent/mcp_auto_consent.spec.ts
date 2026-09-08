@@ -94,7 +94,7 @@ describe("classifyMcpToolConsent", () => {
 describe("buildMcpAutoApprove", () => {
   const baseParams = {
     settings: { autoApproveSafeMcpTools: true } as any,
-    isDyadPro: true,
+    isSambaPro: true,
     chatId: 1,
     serverName: "srv",
     toolName: "tool",

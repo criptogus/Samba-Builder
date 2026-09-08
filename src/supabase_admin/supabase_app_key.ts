@@ -2,7 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import log from "electron-log";
 
-import { DyadError, DyadErrorKind } from "@/errors/dyad_error";
+import { SambaError, SambaErrorKind } from "@/errors/samba_error";
 import { IS_TEST_BUILD } from "@/ipc/utils/test_utils";
 import { getFileWriteKey, withLock } from "@/ipc/utils/lock_utils";
 import { assertMutationPathAllowed, safeJoin } from "@/ipc/utils/path_utils";
@@ -369,17 +369,17 @@ export async function detectLegacyAppKey(params: {
  * Detection tolerates an unreadable client (see `readAppKey`), but the switch
  * runs because the user pressed a button: if the file was deleted, made
  * unreadable, or is read-only between detection and the locked rewrite, that
- * has to reach the renderer as a `DyadError` with a kind, not as a raw `ENOENT`
+ * has to reach the renderer as a `SambaError` with a kind, not as a raw `ENOENT`
  * that PostHog then files as an unclassified product exception
- * (`rules/dyad-errors.md`).
+ * (`rules/samba-errors.md`).
  */
 async function readClientFile(clientFilePath: string): Promise<string> {
   try {
     return await fs.promises.readFile(clientFilePath, "utf8");
   } catch (error) {
-    throw new DyadError(
+    throw new SambaError(
       `Couldn't read the app's Supabase client at ${clientFilePath}: ${error instanceof Error ? error.message : error}`,
-      DyadErrorKind.External,
+      SambaErrorKind.External,
     );
   }
 }
@@ -391,9 +391,9 @@ async function writeClientFile(
   try {
     await fs.promises.writeFile(clientFilePath, contents);
   } catch (error) {
-    throw new DyadError(
+    throw new SambaError(
       `Couldn't update the app's Supabase client at ${clientFilePath}: ${error instanceof Error ? error.message : error}`,
-      DyadErrorKind.External,
+      SambaErrorKind.External,
     );
   }
 }

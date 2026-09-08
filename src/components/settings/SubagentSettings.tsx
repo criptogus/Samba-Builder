@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { isDyadProEnabled } from "@/lib/schemas";
+import { isSambaProEnabled } from "@/lib/schemas";
 import { SETTING_IDS } from "@/lib/settingsSearchIndex";
 import { useSettings } from "@/hooks/useSettings";
 import { Label } from "@/components/ui/label";
@@ -49,7 +49,7 @@ export function AutoFixReviewIssuesSwitch({
   compact?: boolean;
 }) {
   const { settings, updateSettings } = useSettings();
-  if (!settings || !isDyadProEnabled(settings)) return null;
+  if (!settings || !isSambaProEnabled(settings)) return null;
 
   return (
     <div className={compact ? "flex items-center gap-2" : "space-y-1"}>
@@ -75,7 +75,7 @@ export function AutoFixReviewIssuesSwitch({
 
 export function SubagentSettings() {
   const { settings, updateSettings } = useSettings();
-  if (!settings || !isDyadProEnabled(settings)) return null;
+  if (!settings || !isSambaProEnabled(settings)) return null;
 
   return (
     <div className="mt-6 space-y-4 border-t pt-5">

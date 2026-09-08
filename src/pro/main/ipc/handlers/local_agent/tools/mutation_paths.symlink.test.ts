@@ -44,7 +44,7 @@ describe.runIf(process.platform !== "win32")(
     let appPath: string;
 
     beforeEach(async () => {
-      appPath = await fs.mkdtemp(path.join(os.tmpdir(), "dyad-mutation-app-"));
+      appPath = await fs.mkdtemp(path.join(os.tmpdir(), "samba-mutation-app-"));
       await fs.symlink(".", path.join(appPath, "self"), "dir");
       gitAdd.mockResolvedValue(undefined);
       gitRemove.mockResolvedValue(undefined);

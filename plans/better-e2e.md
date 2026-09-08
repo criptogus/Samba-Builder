@@ -36,7 +36,7 @@ genuinely need** the Electron shell, real preview dev-server, subprocesses, or p
 
 - The real `chat:stream` handler + tag processor + git + sqlite run under plain-node
   vitest with only a `vi.mock("electron")` shim — **no main-process refactors**. The
-  `dyad_tags_parsing` equivalent runs in **~1.3–2s vs 30–90s** in Playwright.
+  `samba_tags_parsing` equivalent runs in **~1.3–2s vs 30–90s** in Playwright.
   Worktree: `.claude/worktrees/agent-a74e36967c5ee0a22`
   (`src/ipc/handlers/chat_stream_handlers.integration.test.ts`).
 - **workers=2 works**: 3m05–3m15s vs 5m33s on a 26-test subset (**~1.75×**), 1 latency
@@ -107,7 +107,7 @@ The spike proved feasibility with zero main-process refactors. Productionize as:
 
 - `src/testing/chat_flow_harness.ts` — `setupChatFlowHarness()` returning
   `{ db, appDir, chatId, streamChat(prompt), rendererEvents, dispose }` (temp userData
-  via `DYAD_DEV_USER_DATA_DIR`, app's own `initializeDatabase()`, fixture-app + git
+  via `SAMBA_DEV_USER_DATA_DIR`, app's own `initializeDatabase()`, fixture-app + git
   init, provider seeding identical to what the settings UI produces).
 - Shared electron mock (`src/testing/electron_mock.ts`) — the required surface is small:
   `ipcMain.handle/on`, `app.getPath/isPackaged/getVersion/on`,
@@ -116,7 +116,7 @@ The spike proved feasibility with zero main-process refactors. Productionize as:
 - Refactor `testing/fake-llm-server` to export `createApp(fixturesDir)` without
   `listen()` so vitest and Playwright share one implementation (until then the spike's
   ~60-line SSE stub covers the chat-completions path).
-  First migrations (each deletes or demotes an e2e spec): `dyad_tags_parsing`,
+  First migrations (each deletes or demotes an e2e spec): `samba_tags_parsing`,
   `dump_messages`, `smart_context_balanced/deep`, `thinking_budget`,
   `context_window/manage/compaction`, `chat_mode`, `cancelled_message` — the whole
   "assert the LLM request payload" cluster shares this one seam.

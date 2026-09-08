@@ -27,11 +27,11 @@ export function buildMcpPairing(blocks: Block[]): McpPairing {
     if (b.kind !== "custom-tag") continue;
     const callId = b.attributes["call-id"];
     if (!callId) continue;
-    if (b.tag !== "dyad-mcp-tool-call" && b.tag !== "dyad-mcp-tool-result") {
+    if (b.tag !== "samba-mcp-tool-call" && b.tag !== "samba-mcp-tool-result") {
       continue;
     }
     pairing ??= { resultByCallId: new Map(), callIds: new Set() };
-    if (b.tag === "dyad-mcp-tool-call") {
+    if (b.tag === "samba-mcp-tool-call") {
       pairing.callIds.add(callId);
     } else {
       pairing.resultByCallId.set(callId, b);

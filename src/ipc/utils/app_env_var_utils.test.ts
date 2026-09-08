@@ -18,7 +18,7 @@ vi.mock("fs", () => ({
 }));
 
 vi.mock("@/paths/paths", () => ({
-  getDyadAppPath: vi.fn((appPath: string) =>
+  getSambaAppPath: vi.fn((appPath: string) =>
     require("node:path").join("/mock/apps", appPath),
   ),
 }));

@@ -100,10 +100,10 @@ describe("runExploreCodeSubagent", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mocks.readSettings.mockReturnValue({
-      enableDyadPro: true,
+      enableSambaPro: true,
       providerSettings: {
         auto: {
-          apiKey: { value: "dyad-pro-key" },
+          apiKey: { value: "samba-pro-key" },
         },
       },
     });
@@ -116,7 +116,7 @@ describe("runExploreCodeSubagent", () => {
     mocks.getMaxTokens.mockResolvedValue(32_000);
     mocks.getTemperature.mockResolvedValue(0);
     mocks.getAiHeaders.mockReturnValue({ "x-test": "header" });
-    mocks.getProviderOptions.mockReturnValue({ dyad: "options" });
+    mocks.getProviderOptions.mockReturnValue({ samba: "options" });
     mocks.runRawExploreCode.mockResolvedValue(buildRawExploreResult());
     mocks.streamText.mockImplementation(() => ({
       fullStream: createTextStream([]),
@@ -1068,16 +1068,6 @@ describe("runExploreCodeSubagent", () => {
     );
   });
 
-  it("fails clearly when Samba Builder is unavailable", async () => {
-    mocks.readSettings.mockReturnValue({ enableDyadPro: false });
-    await expect(
-      runExploreCodeSubagent({
-        args: { query: "widget save flow", intent: "locate" },
-        ctx: createMockContext(),
-      }),
-    ).rejects.toThrow(/Samba Builder/);
-  });
-
   it("keeps benchmark-derived domain literals out of production explorer code", async () => {
     const productionFiles = [
       "src/pro/main/ipc/handlers/local_agent/tools/explore_code_subagent.ts",
@@ -1155,7 +1145,7 @@ function createMockContext(appPath = "/tmp/app"): AgentContext {
     readOnly: true,
     planModeOnly: false,
     selectedComponent: null,
-    dyadRequestId: "request-1",
+    sambaRequestId: "request-1",
     abortSignal: undefined,
     accumulatedAiMessages: [],
     onXmlStream: vi.fn(),

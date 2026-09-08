@@ -4,8 +4,8 @@ import { AppUpgrade } from "@/ipc/types";
 import { db } from "../../db";
 import { apps } from "../../db/schema";
 import { eq } from "drizzle-orm";
-import { getDyadAppPath } from "../../paths/paths";
-import { DyadError, DyadErrorKind } from "@/errors/dyad_error";
+import { getSambaAppPath } from "../../paths/paths";
+import { SambaError, SambaErrorKind } from "@/errors/samba_error";
 import {
   isComponentTaggerUpgradeNeeded,
   applyComponentTagger,
@@ -60,9 +60,9 @@ async function getApp(appId: number) {
     where: eq(apps.id, appId),
   });
   if (!app) {
-    throw new DyadError(
+    throw new SambaError(
       `App with id ${appId} not found`,
-      DyadErrorKind.NotFound,
+      SambaErrorKind.NotFound,
     );
   }
   return app;
@@ -188,7 +188,7 @@ export function registerAppUpgradeHandlers() {
     "get-app-upgrades",
     async (_, { appId }: { appId: number }): Promise<AppUpgrade[]> => {
       const app = await getApp(appId);
-      const appPath = getDyadAppPath(app.path);
+      const appPath = getSambaAppPath(app.path);
 
       const upgradesWithStatus = getAvailableUpgrades().map((upgrade) => {
         let isNeeded = false;
@@ -213,11 +213,14 @@ export function registerAppUpgradeHandlers() {
       { appId, upgradeId }: { appId: number; upgradeId: string },
     ) => {
       if (!upgradeId) {
-        throw new DyadError("upgradeId is required", DyadErrorKind.Validation);
+        throw new SambaError(
+          "upgradeId is required",
+          SambaErrorKind.Validation,
+        );
       }
 
       const app = await getApp(appId);
-      const appPath = getDyadAppPath(app.path);
+      const appPath = getSambaAppPath(app.path);
 
       if (upgradeId === "component-tagger") {
         await applyComponentTagger(appPath);
@@ -226,9 +229,9 @@ export function registerAppUpgradeHandlers() {
       } else if (upgradeId === "pnpm-version-migration") {
         await applyPnpmVersionMigration({ appPath });
       } else {
-        throw new DyadError(
+        throw new SambaError(
           `Unknown upgrade id: ${upgradeId}`,
-          DyadErrorKind.External,
+          SambaErrorKind.External,
         );
       }
       queryInvalidationBus.publish([{ family: "versions", appId }], {

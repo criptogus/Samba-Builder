@@ -21,7 +21,7 @@ const args = process.argv.slice(2);
 const options = {
   author: "reporter",
   issue: 0,
-  repo: "dyad-sh/dyad",
+  repo: "samba-sh/samba",
   context: null,
 };
 const positional = [];

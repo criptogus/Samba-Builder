@@ -1,7 +1,7 @@
 import path from "node:path";
 import { randomUUID } from "node:crypto";
 
-import { DyadError, DyadErrorKind } from "@/errors/dyad_error";
+import { SambaError, SambaErrorKind } from "@/errors/samba_error";
 import type { SubagentPersona } from "@/ipc/types";
 import type { AgentContext } from "../tools/types";
 
@@ -48,15 +48,15 @@ function getOrCreateActor(owner: MutationActivityOwner): ActorRecord {
     turns.set(owner.turnId, turn);
   }
   if (turn.appId !== owner.appId || turn.chatId !== owner.chatId) {
-    throw new DyadError(
+    throw new SambaError(
       "Mutation owner identity does not match its root turn.",
-      DyadErrorKind.Conflict,
+      SambaErrorKind.Conflict,
     );
   }
   if (turn.phase !== "open") {
-    throw new DyadError(
+    throw new SambaError(
       "This turn is already finalizing and cannot start more work.",
-      DyadErrorKind.Conflict,
+      SambaErrorKind.Conflict,
     );
   }
   let actor = turn.actors.get(owner.actorRunId);
@@ -70,9 +70,9 @@ function getOrCreateActor(owner: MutationActivityOwner): ActorRecord {
     turn.actors.set(owner.actorRunId, actor);
     actorToTurn.set(owner.actorRunId, owner.turnId);
   } else if (!actor.open) {
-    throw new DyadError(
+    throw new SambaError(
       "This agent execution was stopped and cannot modify the app.",
-      DyadErrorKind.UserCancelled,
+      SambaErrorKind.UserCancelled,
     );
   }
   return actor;
@@ -144,9 +144,9 @@ export async function withTrackedMutation<T>(
   // production writable contexts are constructed by the root/child handlers.
   if (!owner) {
     if (process.env.NODE_ENV === "test") return operation();
-    throw new DyadError(
+    throw new SambaError(
       "Writable Local Agent context is missing its mutation owner.",
-      DyadErrorKind.Precondition,
+      SambaErrorKind.Precondition,
     );
   }
   const activity = reserveMutationActivity(owner);
@@ -268,9 +268,9 @@ export function validateMutationScope(scope: string[]): string[] {
         /^[A-Za-z]:/.test(value),
     )
   ) {
-    throw new DyadError(
+    throw new SambaError(
       "Implementer scope must contain explicit relative paths within the app.",
-      DyadErrorKind.Validation,
+      SambaErrorKind.Validation,
     );
   }
   return normalized;

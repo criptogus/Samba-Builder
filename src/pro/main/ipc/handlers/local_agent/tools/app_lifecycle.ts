@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { DyadError, DyadErrorKind } from "@/errors/dyad_error";
+import { SambaError, SambaErrorKind } from "@/errors/samba_error";
 import { appRunActorService } from "@/ipc/services/app_run_actor_service";
 import type { AgentContext, ToolDefinition } from "./types";
 
@@ -9,14 +9,14 @@ const REBUILD_READY_TIMEOUT_MS = 10 * 60 * 1_000;
 
 function buildLifecycleXml(title: string, state?: "finished"): string {
   const stateAttr = state ? ` state="${state}"` : "";
-  return `<dyad-status title="${title}"${stateAttr}></dyad-status>`;
+  return `<samba-status title="${title}"${stateAttr}></samba-status>`;
 }
 
 function assertLifecycleCanStart(ctx: AgentContext): void {
   if (ctx.abortSignal?.aborted) {
-    throw new DyadError(
+    throw new SambaError(
       "The app lifecycle operation was cancelled before it started",
-      DyadErrorKind.UserCancelled,
+      SambaErrorKind.UserCancelled,
     );
   }
 }

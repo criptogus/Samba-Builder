@@ -3,7 +3,7 @@ import { eq, inArray, isNotNull } from "drizzle-orm";
 import { createTypedHandler } from "./base";
 import { getHandlerContext } from "./handler_context";
 import { appCollectionContracts } from "../types/app_collections";
-import { DyadError, DyadErrorKind } from "@/errors/dyad_error";
+import { SambaError, SambaErrorKind } from "@/errors/samba_error";
 
 function buildAppCollectionDto(
   row: {
@@ -63,9 +63,9 @@ export function registerAppCollectionHandlers() {
     const { name, appIds } = params;
     const trimmed = name.trim();
     if (!trimmed) {
-      throw new DyadError(
+      throw new SambaError(
         "Collection name is required",
-        DyadErrorKind.Validation,
+        SambaErrorKind.Validation,
       );
     }
 
@@ -87,9 +87,9 @@ export function registerAppCollectionHandlers() {
       });
     } catch (error) {
       if (isUniqueNameError(error)) {
-        throw new DyadError(
+        throw new SambaError(
           "A collection with that name already exists",
-          DyadErrorKind.Conflict,
+          SambaErrorKind.Conflict,
         );
       }
       throw error;
@@ -101,9 +101,9 @@ export function registerAppCollectionHandlers() {
       .where(eq(appCollections.id, id))
       .get();
     if (!row) {
-      throw new DyadError(
+      throw new SambaError(
         "Failed to fetch created collection",
-        DyadErrorKind.Internal,
+        SambaErrorKind.Internal,
       );
     }
     const memberAppRows = db
@@ -122,9 +122,9 @@ export function registerAppCollectionHandlers() {
     const { id, name, appIds } = params;
     const trimmed = name.trim();
     if (!trimmed) {
-      throw new DyadError(
+      throw new SambaError(
         "Collection name is required",
-        DyadErrorKind.Validation,
+        SambaErrorKind.Validation,
       );
     }
     try {
@@ -135,7 +135,7 @@ export function registerAppCollectionHandlers() {
           .where(eq(appCollections.id, id))
           .get();
         if (!existingCollection) {
-          throw new DyadError("Collection not found", DyadErrorKind.NotFound);
+          throw new SambaError("Collection not found", SambaErrorKind.NotFound);
         }
         tx.update(appCollections)
           .set({ name: trimmed, updatedAt: new Date() })
@@ -169,9 +169,9 @@ export function registerAppCollectionHandlers() {
       });
     } catch (error) {
       if (isUniqueNameError(error)) {
-        throw new DyadError(
+        throw new SambaError(
           "A collection with that name already exists",
-          DyadErrorKind.Conflict,
+          SambaErrorKind.Conflict,
         );
       }
       throw error;
@@ -190,7 +190,7 @@ export function registerAppCollectionHandlers() {
         .where(eq(appCollections.id, id))
         .get();
       if (!existingCollection) {
-        throw new DyadError("Collection not found", DyadErrorKind.NotFound);
+        throw new SambaError("Collection not found", SambaErrorKind.NotFound);
       }
       tx.update(apps)
         .set({ collectionId: null })
@@ -212,7 +212,7 @@ export function registerAppCollectionHandlers() {
           .where(eq(appCollections.id, collectionId))
           .get();
         if (!existingCollection) {
-          throw new DyadError("Collection not found", DyadErrorKind.NotFound);
+          throw new SambaError("Collection not found", SambaErrorKind.NotFound);
         }
       }
       tx.update(apps)

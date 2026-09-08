@@ -1,5 +1,5 @@
 import type { z } from "zod";
-import type { DyadError } from "@/errors/dyad_error";
+import type { SambaError } from "@/errors/samba_error";
 import type { RemoteMachineContract } from "./definition";
 import type { ActorRuntimeMetadata, RemoteMachineSender } from "./definition";
 import type { RequestIdentity } from "./request_identity";
@@ -31,14 +31,14 @@ export interface AdmittedIntentContext<Key, Intent> {
 
 export type RemoteAuthorizationDecision =
   | { readonly kind: "allow" }
-  | { readonly kind: "deny"; readonly error: DyadError };
+  | { readonly kind: "deny"; readonly error: SambaError };
 
 export const allowRemoteAuthorization = (): RemoteAuthorizationDecision => ({
   kind: "allow",
 });
 
 export const denyRemoteAuthorization = (
-  error: DyadError,
+  error: SambaError,
 ): RemoteAuthorizationDecision => ({ kind: "deny", error });
 
 export interface SubscribeAuthorizationContext<Key> {

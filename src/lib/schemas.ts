@@ -351,11 +351,11 @@ export const ExperimentsSchema = z.object({
 });
 export type Experiments = z.infer<typeof ExperimentsSchema>;
 
-export const DyadProBudgetSchema = z.object({
+export const SambaProBudgetSchema = z.object({
   budgetResetAt: z.string(),
   maxBudget: z.number(),
 });
-export type DyadProBudget = z.infer<typeof DyadProBudgetSchema>;
+export type SambaProBudget = z.infer<typeof SambaProBudgetSchema>;
 
 export const GlobPathSchema = z.object({
   globPath: z.string(),
@@ -480,7 +480,7 @@ const BaseUserSettingsFields = {
   // DEPRECATED.
   ////////////////////////////////
   enableProSaverMode: z.boolean().optional(),
-  dyadProBudget: DyadProBudgetSchema.optional(),
+  sambaProBudget: SambaProBudgetSchema.optional(),
   runtimeMode: RuntimeModeSchema.optional(),
 
   ////////////////////////////////
@@ -499,7 +499,7 @@ const BaseUserSettingsFields = {
   telemetryConsent: z.enum(["opted_in", "opted_out", "unset"]).optional(),
   telemetryUserId: z.string().optional(),
   hasRunBefore: z.boolean().optional(),
-  enableDyadPro: z.boolean().optional(),
+  enableSambaPro: z.boolean().optional(),
   experiments: ExperimentsSchema.optional(),
   lastShownReleaseNotesVersion: z.string().optional(),
   maxChatTurnsInContext: z.number().optional(),
@@ -665,14 +665,14 @@ export function migrateStoredSettings(
   };
 }
 
-export function isDyadProEnabled(_settings: UserSettings): boolean {
+export function isSambaProEnabled(_settings: UserSettings): boolean {
   // Samba Builder: sem plano Pro — todas as features liberadas para qualquer
   // usuário (o produto vende serviços, não assinatura). Mantido o nome da
   // função para não tocar os call sites do upstream.
   return true;
 }
 
-export function hasDyadProKey(settings: UserSettings): boolean {
+export function hasSambaProKey(settings: UserSettings): boolean {
   return !!settings.providerSettings?.auto?.apiKey?.value;
 }
 
@@ -702,7 +702,7 @@ export function getEffectiveDefaultChatMode(
   settings: UserSettings,
   envVars: Record<string, string | undefined>,
 ): ChatMode {
-  const isPro = isDyadProEnabled(settings);
+  const isPro = isSambaProEnabled(settings);
   const hasGoogleProviderSetup = isGoogleProviderSetup(settings, envVars);
   const hasNonGoogleProviderSetup = isNonGoogleProviderSetup(settings, envVars);
 
@@ -724,7 +724,7 @@ export function getEffectiveDefaultChatMode(
  */
 export function isBasicAgentMode(settings: UserSettings): boolean {
   return (
-    !isDyadProEnabled(settings) && settings.selectedChatMode === "local-agent"
+    !isSambaProEnabled(settings) && settings.selectedChatMode === "local-agent"
   );
 }
 
@@ -754,7 +754,7 @@ export function hasSupabaseCredentialsForOrganization(
 
 export function isTurboEditsV2Enabled(settings: UserSettings): boolean {
   return Boolean(
-    isDyadProEnabled(settings) &&
+    isSambaProEnabled(settings) &&
     settings.enableProLazyEditsMode === true &&
     settings.proLazyEditsMode === "v2",
   );

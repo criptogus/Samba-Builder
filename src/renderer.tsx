@@ -4,11 +4,7 @@ import { router } from "./router";
 import { RouterProvider } from "@tanstack/react-router";
 import { PostHogProvider } from "posthog-js/react";
 import posthog from "posthog-js";
-import {
-  getTelemetryUserId,
-  isTelemetryOptedIn,
-  isDyadProUser,
-} from "./hooks/useSettings";
+import {} from "./hooks/useSettings";
 
 // Initialize i18next before any rendering
 import "./i18n";
@@ -28,8 +24,6 @@ import {
   getExceptionTelemetryContext,
   getPostHogTelemetryStorage,
   PostHogErrorDeduper,
-  shouldBypassNonProTelemetrySampling,
-  shouldFilterPostHogExceptionEvent,
 } from "./lib/posthogTelemetry";
 import { registerRendererIpcListeners } from "./app_wiring/registerRendererIpcListeners";
 import {
@@ -110,68 +104,10 @@ document.addEventListener("visibilitychange", () => {
   }
 });
 
-const posthogClient = posthog.init(
-  "phc_5Vxx0XT8Ug3eWROhP6mm4D6D2DgIIKT232q4AKxC2ab",
-  {
-    api_host: "https://us.i.posthog.com",
-    // @ts-ignore
-    debug: import.meta.env.MODE === "development",
-    autocapture: false,
-    capture_exceptions: true,
-    capture_pageview: false,
-    before_send: (event) => {
-      if (!isTelemetryOptedIn()) {
-        console.debug("Telemetry not opted in, skipping event");
-        return null;
-      }
-
-      if (shouldFilterPostHogExceptionEvent(event)) {
-        console.debug(
-          "Filtering generic fetch failed exception from telemetry",
-        );
-        return null;
-      }
-      const telemetryUserId = getTelemetryUserId();
-      if (telemetryUserId) {
-        posthogClient.identify(telemetryUserId);
-      }
-
-      if (event?.properties["$ip"]) {
-        event.properties["$ip"] = null;
-      }
-
-      const isPro = isDyadProUser();
-      const dedupedEvent = postHogErrorDeduper.process(event, isPro);
-      if (!dedupedEvent) {
-        console.debug("Deduplicating PostHog error event", event?.event);
-        return null;
-      }
-      event = dedupedEvent;
-
-      // For non-Pro users, only send 10% of events (but always send errors,
-      // app:initial-load, promo_click, and sandbox.script.* — see
-      // shouldBypassNonProTelemetrySampling).
-      if (!isPro) {
-        if (
-          !shouldBypassNonProTelemetrySampling(event) &&
-          Math.random() > 0.1
-        ) {
-          console.debug("Non-Pro user: sampling out event", event?.event);
-          return null;
-        }
-      }
-
-      console.debug(
-        "Telemetry opted in - UUID:",
-        telemetryUserId,
-        "sending event",
-        event,
-      );
-      return event;
-    },
-    persistence: "localStorage",
-  },
-);
+// Samba Builder: telemetria remota DESATIVADA — o produto é local-first/BYOK
+// e o projeto PostHog era herdado do produto original. Sem init, o
+// posthog-js não envia nada (captures viram no-ops).
+const posthogClient = posthog;
 
 function App() {
   return (

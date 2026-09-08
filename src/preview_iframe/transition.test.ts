@@ -51,7 +51,7 @@ const EVENTS: readonly PreviewIframeEvent[] = [
 ];
 const ERROR_EVENTS: readonly PreviewIframeEvent[] = [
   { type: "IFRAME_ERROR", message: "iframe failed", source: "preview-app" },
-  { type: "IFRAME_ERROR", message: "sandbox failed", source: "dyad-app" },
+  { type: "IFRAME_ERROR", message: "sandbox failed", source: "samba-app" },
   { type: "SYNC_ERROR", message: "sync failed" },
   { type: "SYNC_RECOVERED" },
   { type: "APP_ERROR", message: "run failed" },
@@ -253,7 +253,7 @@ describe("preview iframe transition", () => {
       },
       {
         type: "post-to-iframe",
-        message: { type: "deactivate-dyad-component-selector" },
+        message: { type: "deactivate-samba-component-selector" },
       },
     ]);
 
@@ -370,7 +370,7 @@ describe("preview iframe transition", () => {
       type: "NAVIGATE",
       path: `${URL}/settings`,
     }).state;
-    expect(typedIn.currentUrlSource).toBe("dyad");
+    expect(typedIn.currentUrlSource).toBe("samba");
 
     // `documentLoad` included: a plain link or a server redirect replaces the
     // whole document and never reaches the history shim, so without it the
@@ -386,7 +386,7 @@ describe("preview iframe transition", () => {
       // Going back through Samba Builder's chrome makes it the user's choice again.
       expect(
         transition(redirected, { type: "GO_BACK" }).state.currentUrlSource,
-      ).toBe("dyad");
+      ).toBe("samba");
     }
 
     // Samba Builder's own navigation loads a document too. That load reports the route
@@ -528,9 +528,9 @@ describe("preview iframe transition", () => {
       type: "RESTORE_PRESENTATION",
       history: [URL, `${URL}/settings`],
       position: 1,
-      source: "dyad",
+      source: "samba",
     });
-    expect(restored.state.currentUrlSource).toBe("dyad");
+    expect(restored.state.currentUrlSource).toBe("samba");
 
     const appDriven = transition(INITIAL_PREVIEW_IFRAME_STATE, {
       type: "RESTORE_PRESENTATION",
@@ -573,7 +573,7 @@ describe("preview iframe transition", () => {
   });
 
   it("keeps higher-priority iframe and app errors ahead of sync errors", () => {
-    for (const source of ["preview-app", "dyad-app"] as const) {
+    for (const source of ["preview-app", "samba-app"] as const) {
       const errored = transition(INITIAL_PREVIEW_IFRAME_STATE, {
         type: "IFRAME_ERROR",
         message: `${source} failed`,

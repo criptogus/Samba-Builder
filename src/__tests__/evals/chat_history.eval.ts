@@ -6,7 +6,7 @@
  * (plans/explore_chat_history.md) buys real answer quality.
  *
  * Run:
- *   DYAD_PRO_API_KEY=... npm run eval -- chat_history
+ *   SAMBA_PRO_API_KEY=... npm run eval -- chat_history
  *   CH_SMOKE=1 ... npm run eval -- chat_history   (2 queries, quick wiring check)
  *   CH_ONLY=vague_decision-1 ...                  (filter by query id substring)
  *
@@ -24,15 +24,15 @@ import {
 } from "node:fs";
 import { resolve } from "node:path";
 
-if (!process.env.DYAD_PRO_API_KEY && process.env.DYAD_PRO_KEY) {
-  process.env.DYAD_PRO_API_KEY = process.env.DYAD_PRO_KEY;
+if (!process.env.SAMBA_PRO_API_KEY && process.env.SAMBA_PRO_KEY) {
+  process.env.SAMBA_PRO_API_KEY = process.env.SAMBA_PRO_KEY;
 }
 
 import { SONNET_4_6 } from "@/ipc/shared/language_model_constants";
 import {
   GPT_5_4,
   getEvalModel,
-  hasDyadProKey,
+  hasSambaProKey,
   type EvalProvider,
 } from "./helpers/get_eval_model";
 import {
@@ -245,7 +245,7 @@ describe("chat-history fixtures validate", () => {
 
 // ── Benchmark ──────────────────────────────────────────────────
 
-const canRun = hasDyadProKey() && scenarios.length > 0;
+const canRun = hasSambaProKey() && scenarios.length > 0;
 
 (canRun ? describe : describe.skip)("chat-history recall benchmark", () => {
   let world: SeededWorld;

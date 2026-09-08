@@ -50,7 +50,7 @@ describe("production high-volume fan-out", () => {
     });
     sendChatChunk(producer as unknown as WebContents, {
       chatId: 9,
-      streamingPreview: { content: "<dyad-write>partial" },
+      streamingPreview: { content: "<samba-write>partial" },
     });
 
     expect(producer.send).toHaveBeenCalledWith(

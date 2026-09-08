@@ -1,9 +1,9 @@
 import { BrowserWindow } from "electron";
 import log from "electron-log";
 import {
-  DyadError,
-  isDyadErrorKindFilteredFromTelemetry,
-} from "@/errors/dyad_error";
+  SambaError,
+  isSambaErrorKindFilteredFromTelemetry,
+} from "@/errors/samba_error";
 import { isGenericFetchFailedError } from "@/lib/posthogTelemetry";
 import { TelemetryEventPayload } from "@/ipc/types";
 import { sshFailureOf } from "@/shared/ssh_failure";
@@ -112,8 +112,8 @@ function framesOnly(err: Error): string | undefined {
 }
 
 export function shouldFilterTelemetryException(error: unknown): boolean {
-  // Ahead of the kind check, which returns for every DyadError: this one is a
-  // DyadError too. A non-2xx from a self-hosted Coolify is that instance
+  // Ahead of the kind check, which returns for every SambaError: this one is a
+  // SambaError too. A non-2xx from a self-hosted Coolify is that instance
   // rejecting a request rather than a fault here, and its message carries
   // whatever that machine chose to say — which can name a host, a path or a
   // connection string. The user still sees it; nothing reports it.
@@ -138,8 +138,8 @@ export function shouldFilterTelemetryException(error: unknown): boolean {
     return true;
   }
 
-  if (error instanceof DyadError) {
-    return isDyadErrorKindFilteredFromTelemetry(error.kind);
+  if (error instanceof SambaError) {
+    return isSambaErrorKindFilteredFromTelemetry(error.kind);
   }
 
   if (

@@ -55,7 +55,7 @@ const appendStepSummary = async (summary) => {
 };
 
 const fetchPRsNeedingReview = async ({ apiBaseUrl, token, username }) => {
-  const query = `is:open is:pr review-requested:${username} org:dyad-sh`;
+  const query = `is:open is:pr review-requested:${username} org:samba-sh`;
   const allPRs = [];
   let page = 1;
 

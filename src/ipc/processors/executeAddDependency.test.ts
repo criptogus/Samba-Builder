@@ -8,7 +8,7 @@ import {
   PNPM_INSTALL_POLICY_ARGS,
   SOCKET_FIREWALL_WARNING_MESSAGE,
 } from "@/ipc/utils/socket_firewall";
-import { DyadErrorKind } from "@/errors/dyad_error";
+import { SambaErrorKind } from "@/errors/samba_error";
 import {
   executeAddDependency,
   ExecuteAddDependencyError,
@@ -110,7 +110,7 @@ describe("executeAddDependency", () => {
         message: {
           id: 1,
           content:
-            '<dyad-add-dependency packages="react"></dyad-add-dependency>',
+            '<samba-add-dependency packages="react"></samba-add-dependency>',
         } as any,
         appPath: "/tmp/app",
       });
@@ -148,7 +148,7 @@ describe("executeAddDependency", () => {
         message: {
           id: 1,
           content:
-            '<dyad-add-dependency packages="react"></dyad-add-dependency>',
+            '<samba-add-dependency packages="react"></samba-add-dependency>',
         } as any,
         appPath: "/tmp/app",
       });
@@ -190,7 +190,7 @@ describe("executeAddDependency", () => {
         message: {
           id: 1,
           content:
-            '<dyad-add-dependency packages="react"></dyad-add-dependency>',
+            '<samba-add-dependency packages="react"></samba-add-dependency>',
         } as any,
         appPath: "/tmp/app",
       }),
@@ -223,7 +223,7 @@ describe("executeAddDependency", () => {
         message: {
           id: 1,
           content:
-            '<dyad-add-dependency packages="react"></dyad-add-dependency>',
+            '<samba-add-dependency packages="react"></samba-add-dependency>',
         } as any,
         appPath: "/tmp/app",
       }),
@@ -258,7 +258,7 @@ describe("executeAddDependency", () => {
         message: {
           id: 1,
           content:
-            '<dyad-add-dependency packages="react"></dyad-add-dependency>',
+            '<samba-add-dependency packages="react"></samba-add-dependency>',
         } as any,
         appPath: "/tmp/app",
       }),
@@ -290,7 +290,7 @@ describe("executeAddDependency", () => {
         message: {
           id: 1,
           content:
-            '<dyad-add-dependency packages="react"></dyad-add-dependency>',
+            '<samba-add-dependency packages="react"></samba-add-dependency>',
         } as any,
         appPath: "/tmp/app",
       }),
@@ -320,7 +320,7 @@ describe("executeAddDependency", () => {
         message: {
           id: 1,
           content:
-            '<dyad-add-dependency packages="axois"></dyad-add-dependency>',
+            '<samba-add-dependency packages="axois"></samba-add-dependency>',
         } as any,
         appPath: "/tmp/app",
       }),
@@ -351,7 +351,7 @@ describe("executeAddDependency", () => {
         message: {
           id: 1,
           content:
-            '<dyad-add-dependency packages="react"></dyad-add-dependency>',
+            '<samba-add-dependency packages="react"></samba-add-dependency>',
         } as any,
         appPath: "/tmp/app",
       }),
@@ -386,7 +386,8 @@ describe("executeAddDependency", () => {
       packages: ["react"],
       message: {
         id: 1,
-        content: '<dyad-add-dependency packages="react"></dyad-add-dependency>',
+        content:
+          '<samba-add-dependency packages="react"></samba-add-dependency>',
       } as any,
       appPath: "/tmp/app",
     });
@@ -443,7 +444,8 @@ describe("executeAddDependency", () => {
       packages: ["react"],
       message: {
         id: 1,
-        content: '<dyad-add-dependency packages="react"></dyad-add-dependency>',
+        content:
+          '<samba-add-dependency packages="react"></samba-add-dependency>',
       } as any,
       appPath: "/tmp/app",
     });
@@ -470,7 +472,7 @@ describe("executeAddDependency", () => {
   });
 
   it("uses npm for npm-shaped apps even when pnpm is available", async () => {
-    const appPath = await mkdtemp(path.join(os.tmpdir(), "dyad-add-dep-"));
+    const appPath = await mkdtemp(path.join(os.tmpdir(), "samba-add-dep-"));
     try {
       await writeFile(path.join(appPath, "package-lock.json"), "{}");
       ensureSocketFirewallInstalledMock.mockResolvedValue({
@@ -487,7 +489,7 @@ describe("executeAddDependency", () => {
         message: {
           id: 1,
           content:
-            '<dyad-add-dependency packages="react"></dyad-add-dependency>',
+            '<samba-add-dependency packages="react"></samba-add-dependency>',
         } as any,
         appPath,
       });
@@ -507,7 +509,7 @@ describe("executeAddDependency", () => {
   });
 
   it("does not warn about old pnpm for apps that explicitly use npm", async () => {
-    const appPath = await mkdtemp(path.join(os.tmpdir(), "dyad-add-dep-"));
+    const appPath = await mkdtemp(path.join(os.tmpdir(), "samba-add-dep-"));
     try {
       await writeFile(
         path.join(appPath, "package.json"),
@@ -536,7 +538,7 @@ describe("executeAddDependency", () => {
         message: {
           id: 1,
           content:
-            '<dyad-add-dependency packages="react"></dyad-add-dependency>',
+            '<samba-add-dependency packages="react"></samba-add-dependency>',
         } as any,
         appPath,
       });
@@ -551,7 +553,7 @@ describe("executeAddDependency", () => {
   });
 
   it("installs new packages, saves exact pins, and refreshes existing constraints in separate groups", async () => {
-    const appPath = await mkdtemp(path.join(os.tmpdir(), "dyad-add-dep-"));
+    const appPath = await mkdtemp(path.join(os.tmpdir(), "samba-add-dep-"));
     try {
       await writeFile(
         path.join(appPath, "package.json"),
@@ -584,7 +586,7 @@ describe("executeAddDependency", () => {
         packages,
         message: {
           id: 1,
-          content: `<dyad-add-dependency packages="${packages.join(" ")}"></dyad-add-dependency>`,
+          content: `<samba-add-dependency packages="${packages.join(" ")}"></samba-add-dependency>`,
         } as any,
         appPath,
       });
@@ -621,7 +623,7 @@ describe("executeAddDependency", () => {
   });
 
   it("reports completed package groups when a later command fails", async () => {
-    const appPath = await mkdtemp(path.join(os.tmpdir(), "dyad-add-dep-"));
+    const appPath = await mkdtemp(path.join(os.tmpdir(), "samba-add-dep-"));
     try {
       await writeFile(
         path.join(appPath, "package.json"),
@@ -647,7 +649,7 @@ describe("executeAddDependency", () => {
           message: {
             id: 1,
             content:
-              '<dyad-add-dependency packages="vite zod@999.0.0"></dyad-add-dependency>',
+              '<samba-add-dependency packages="vite zod@999.0.0"></samba-add-dependency>',
           } as any,
           appPath,
         });
@@ -670,7 +672,7 @@ describe("executeAddDependency", () => {
   });
 
   it("classifies malformed package.json as a validation error", async () => {
-    const appPath = await mkdtemp(path.join(os.tmpdir(), "dyad-add-dep-"));
+    const appPath = await mkdtemp(path.join(os.tmpdir(), "samba-add-dep-"));
     try {
       await writeFile(path.join(appPath, "package.json"), "{ invalid");
 
@@ -681,7 +683,7 @@ describe("executeAddDependency", () => {
           message: {
             id: 1,
             content:
-              '<dyad-add-dependency packages="react"></dyad-add-dependency>',
+              '<samba-add-dependency packages="react"></samba-add-dependency>',
           } as any,
           appPath,
         });
@@ -691,7 +693,7 @@ describe("executeAddDependency", () => {
 
       expect(caughtError).toMatchObject({
         originalError: {
-          kind: DyadErrorKind.Validation,
+          kind: SambaErrorKind.Validation,
         },
         displaySummary: expect.stringContaining(
           "package.json contains invalid JSON",
@@ -723,7 +725,7 @@ describe("executeAddDependency", () => {
       packages: [packageSpec],
       message: {
         id: 1,
-        content: `<dyad-add-dependency packages="${packageSpec}"></dyad-add-dependency>`,
+        content: `<samba-add-dependency packages="${packageSpec}"></samba-add-dependency>`,
       } as any,
       appPath: "/tmp/app",
     });
@@ -754,7 +756,7 @@ describe("executeAddDependency", () => {
         packages,
         message: {
           id: 1,
-          content: `<dyad-add-dependency packages="${packages.join(" ")}"></dyad-add-dependency>`,
+          content: `<samba-add-dependency packages="${packages.join(" ")}"></samba-add-dependency>`,
         } as any,
         appPath: "/tmp/app",
       }),
@@ -778,14 +780,14 @@ describe("executeAddDependency", () => {
       message: {
         id: 1,
         content:
-          '<dyad-add-dependency packages="react-safe"></dyad-add-dependency>',
+          '<samba-add-dependency packages="react-safe"></samba-add-dependency>',
       } as any,
       appPath: "/tmp/app",
     });
 
     expect(dbUpdateSetMock).toHaveBeenCalledWith({
       content:
-        '<dyad-add-dependency packages="react-safe">installed &lt;react&gt;</dyad-add-dependency>',
+        '<samba-add-dependency packages="react-safe">installed &lt;react&gt;</samba-add-dependency>',
     });
   });
 
@@ -803,14 +805,14 @@ describe("executeAddDependency", () => {
       message: {
         id: 1,
         content:
-          '<dyad-add-dependency packages="  react@latest   @scope/pkg@^2.0.0  "></dyad-add-dependency>',
+          '<samba-add-dependency packages="  react@latest   @scope/pkg@^2.0.0  "></samba-add-dependency>',
       } as any,
       appPath: "/tmp/app",
     });
 
     expect(dbUpdateSetMock).toHaveBeenCalledWith({
       content:
-        '<dyad-add-dependency packages="react@latest @scope/pkg@^2.0.0">installed</dyad-add-dependency>',
+        '<samba-add-dependency packages="react@latest @scope/pkg@^2.0.0">installed</samba-add-dependency>',
     });
   });
 
@@ -834,7 +836,7 @@ describe("executeAddDependency", () => {
       message: {
         id: 1,
         content:
-          '<dyad-add-dependency packages="core-js"></dyad-add-dependency>',
+          '<samba-add-dependency packages="core-js"></samba-add-dependency>',
       } as any,
       appPath: "/tmp/app",
     });

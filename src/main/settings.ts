@@ -27,7 +27,7 @@ import {
   getRemoteDesktopConfig,
   type RemoteDesktopConfig,
 } from "@/ipc/shared/remote_desktop_config";
-import { DyadError, DyadErrorKind } from "@/errors/dyad_error";
+import { SambaError, SambaErrorKind } from "@/errors/samba_error";
 import { ZodError } from "zod";
 import {
   getRecoveryStats,
@@ -511,16 +511,16 @@ export function tryWriteSettings(
   }
 }
 
-function toSettingsWriteError(error: unknown): DyadError {
-  if (error instanceof DyadError) {
+function toSettingsWriteError(error: unknown): SambaError {
+  if (error instanceof SambaError) {
     return error;
   }
   const message = error instanceof Error ? error.message : String(error);
   const kind =
     error instanceof ZodError
-      ? DyadErrorKind.Validation
-      : DyadErrorKind.External;
-  return new DyadError(`Failed to write settings: ${message}`, kind, {
+      ? SambaErrorKind.Validation
+      : SambaErrorKind.External;
+  return new SambaError(`Failed to write settings: ${message}`, kind, {
     cause: error,
   });
 }

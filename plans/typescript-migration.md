@@ -2,14 +2,14 @@
 
 ## Summary
 
-Remove the legacy Build-mode “Auto-fix problems” feature and its user setting, move all remaining on-disk type checks to the app’s local TypeScript CLI, and let Code Explorer fall back to a Dyad-packaged TypeScript 6 compiler API when an installed local TypeScript does not expose the legacy API (notably TypeScript 7).
+Remove the legacy Build-mode “Auto-fix problems” feature and its user setting, move all remaining on-disk type checks to the app’s local TypeScript CLI, and let Code Explorer fall back to a Samba-packaged TypeScript 6 compiler API when an installed local TypeScript does not expose the legacy API (notably TypeScript 7).
 
-The Problems panel remains available through its explicit **Run checks** and **Fix selected** actions, and Local Agent keeps `run_type_checks`. Dyad will not automatically type-check after a file save, proposal approval, or Build-mode response. Projects without an installed `typescript` package remain unsupported by both type checking and Code Explorer.
+The Problems panel remains available through its explicit **Run checks** and **Fix selected** actions, and Local Agent keeps `run_type_checks`. Samba will not automatically type-check after a file save, proposal approval, or Build-mode response. Projects without an installed `typescript` package remain unsupported by both type checking and Code Explorer.
 
 ## 1. Unship Build-mode Auto-fix Problems
 
 - Remove the `enableAutoFixProblems` setting end-to-end: defaults and active schema, Settings UI/switch, Settings search entry and ID, all locale strings, help/debug-report fields, test setup options, and settings snapshots. Retain it only as a deprecated stored-settings field so older files parse, then strip it during migration; it disappears on a later settings write.
-- Delete the Build-mode repair loop in `chat_stream_handlers.ts`, including speculative type checks, `<dyad-problem-report>` generation, retry prompts, and the virtual codebase assembled from pending write/rename/delete tags. Preserve parsing/rendering and transcript cleanup for `<dyad-problem-report>` so historical chats continue to display and replay safely.
+- Delete the Build-mode repair loop in `chat_stream_handlers.ts`, including speculative type checks, `<samba-problem-report>` generation, retry prompts, and the virtual codebase assembled from pending write/rename/delete tags. Preserve parsing/rendering and transcript cleanup for `<samba-problem-report>` so historical chats continue to display and replay safely.
 - Remove automatic Problems-query triggers from file saves, proposal approval, and completed Build turns. Make `useCheckProblems` manual-only (`enabled: false`) while retaining its `refetch` API for the Problems panel. Local Agent continues updating the Problems cache through `agent-tool:problems-update` after `run_type_checks`.
 - Keep manual Problems workflows unchanged: users can run checks, select diagnostics, and ask Build mode to fix the selected problems through `createProblemFixPrompt`.
 - Remove the auto-fix-only E2E cases, fixtures, page-object helpers, and snapshots. Update remaining Problems tests to invoke **Run checks** explicitly before asserting diagnostics or using **Fix selected/Fix all**.
@@ -28,10 +28,10 @@ The Problems panel remains available through its explicit **Run checks** and **F
 - Preserve config selection order: `tsconfig.app.json`, then `tsconfig.json`. Run the local CLI from `appPath` with fixed arguments equivalent to:
 
   ```text
-  tsc --pretty false --noEmit --incremental --tsBuildInfoFile <dyad-cache-file> --project <config>
+  tsc --pretty false --noEmit --incremental --tsBuildInfoFile <samba-cache-file> --project <config>
   ```
 
-  Store build info under Dyad’s TypeScript cache, keyed by app path, config path, and local TypeScript version, so checks never write generated files into the user project and caches are not shared across compiler versions.
+  Store build info under Samba’s TypeScript cache, keyed by app path, config path, and local TypeScript version, so checks never write generated files into the user project and caches are not shared across compiler versions.
 
 - Continue running checks inside `typescriptUtilityProcessScheduler.runExclusive("tsc", ...)`. The external CLI process does not register as a resident utility process, but the scheduler must stop a resident Code Explorer before launching it and must hold the slot until the CLI child has fully exited. This preserves the existing protection against simultaneous memory-heavy TypeScript workloads and keeps performance activity labeled as `tsc`.
 - Reuse the bounded process runner and existing five-minute type-check timeout. Execute the command/arguments without an interpolated shell command; extend the runner options only as needed to support a larger explicit diagnostic-output cap. Terminate the entire process tree on timeout.
@@ -50,7 +50,7 @@ The Problems panel remains available through its explicit **Run checks** and **F
   1. Resolve `typescript/package.json` from the app. If it is absent, keep the existing `typescript_not_installed` precondition and do **not** use the fallback.
   2. Attempt to load the app-local `typescript` module.
   3. Validate the complete legacy API surface Code Explorer consumes (system/config parsing, program and incremental-host creation, AST traversal/guards, syntax and symbol enums, and diagnostic formatting).
-  4. Use the local module when compatible; if loading fails or the required API is missing, load Dyad’s packaged `@typescript/typescript6` module and log the local version/reason and fallback version.
+  4. Use the local module when compatible; if loading fails or the required API is missing, load Samba’s packaged `@typescript/typescript6` module and log the local version/reason and fallback version.
 - Keep `getCodeExplorerAvailability` based on an installed local TypeScript package plus a discoverable tsconfig. A TS7 app therefore remains eligible and uses the fallback; an app with a tsconfig but no TypeScript installation remains ineligible.
 - Cache compiler resolution per app as today, recording `{ module, source: "local" | "bundled-ts6", version }` so logs and failures identify the active engine. Clear this cache with existing worker test-cache cleanup.
 - Use the chosen compiler for config discovery, program construction, cache freshness checks, and indexing. When bundled TS6 reports recoverable configuration diagnostics for TS7-only options, continue with a best-effort index and surface a warning that identifies the fallback compiler, the ignored configuration, and the possibility of incomplete results. Fail only when the incompatibility prevents a meaningful index, such as an unreadable configuration or no resolved source files.
@@ -83,7 +83,7 @@ The Problems panel remains available through its explicit **Run checks** and **F
 
 ## Acceptance Criteria and Assumptions
 
-- Type checks use the app-local `tsc`, including native TypeScript 7, and never fall back to Dyad TS6.
+- Type checks use the app-local `tsc`, including native TypeScript 7, and never fall back to Samba TS6.
 - Only Code Explorer may use bundled TS6, and only when the app has an installed but legacy-API-incompatible TypeScript package.
 - All automatic and model-driven Build-mode problem checking/fixing is removed; manual Problems-panel and Local Agent checks remain.
 - Type checking and Code Explorer remain mutually exclusive memory-heavy workloads.

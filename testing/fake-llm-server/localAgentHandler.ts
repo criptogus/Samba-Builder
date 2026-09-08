@@ -51,7 +51,7 @@ export function convertLegacyFixtureToLocalAgent(
   const normalized = normalizeFixtureText(source);
   const turns: Turn[] = [];
   const tagPattern =
-    /<dyad-(write|delete|rename|add-dependency|execute-sql|search-replace|add-integration|chat-summary)\b([^>]*)>([\s\S]*?)<\/dyad-\1>/g;
+    /<samba-(write|delete|rename|add-dependency|execute-sql|search-replace|add-integration|chat-summary)\b([^>]*)>([\s\S]*?)<\/samba-\1>/g;
   let precedingEnd = 0;
 
   for (const match of normalized.matchAll(tagPattern)) {
@@ -245,7 +245,7 @@ function countToolResultRounds(messages: any[]): number {
 
 /**
  * Extract the attachment path from the last user message.
- * The user message format includes: "path: /path/to/app/.dyad/media/hash.png"
+ * The user message format includes: "path: /path/to/app/.samba/media/hash.png"
  */
 function extractAttachmentPath(messages: any[]): string | null {
   // Search from the end to find the most recent user message with an attachment path

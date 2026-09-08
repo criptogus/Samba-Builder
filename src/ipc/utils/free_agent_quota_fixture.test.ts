@@ -6,7 +6,7 @@ describe("shouldSimulateFreeAgentQuotaExceeded", () => {
     expect(
       shouldSimulateFreeAgentQuotaExceeded({
         NODE_ENV: "development",
-        DYAD_SIMULATE_FREE_AGENT_QUOTA_EXCEEDED: "true",
+        SAMBA_SIMULATE_FREE_AGENT_QUOTA_EXCEEDED: "true",
       }),
     ).toBe(true);
   });
@@ -15,7 +15,7 @@ describe("shouldSimulateFreeAgentQuotaExceeded", () => {
     expect(
       shouldSimulateFreeAgentQuotaExceeded({
         NODE_ENV: "production",
-        DYAD_SIMULATE_FREE_AGENT_QUOTA_EXCEEDED: "true",
+        SAMBA_SIMULATE_FREE_AGENT_QUOTA_EXCEEDED: "true",
       }),
     ).toBe(false);
   });

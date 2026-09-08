@@ -7,7 +7,7 @@ import type {
   MachineHostContext,
 } from "@/distributed_machines/definition";
 import { REMOTE_MACHINE_PROTOCOL_VERSION } from "@/distributed_machines/remote_protocol";
-import { DyadError, DyadErrorKind } from "@/errors/dyad_error";
+import { SambaError, SambaErrorKind } from "@/errors/samba_error";
 import { queryInvalidationBus } from "@/window_infrastructure/main/query_invalidation_bus";
 import { ignore } from "@/state_machines/types";
 import {
@@ -685,7 +685,7 @@ async function appExists(appId: number): Promise<boolean> {
 async function authorizeApp(appId: number): Promise<void> {
   if (appId === 0) return;
   if (!(await appExists(appId))) {
-    throw new DyadError("App not found", DyadErrorKind.Auth);
+    throw new SambaError("App not found", SambaErrorKind.Auth);
   }
 }
 
@@ -822,9 +822,9 @@ export const versionPreviewDefinition: Definition = {
     authorizeSubscribe: ({ key }) => authorizeApp(key.appId),
     authorizeDispatch: async ({ sender, key, event }) => {
       if (key.appId === 0) {
-        throw new DyadError(
+        throw new SambaError(
           "A real app is required for version preview",
-          DyadErrorKind.Auth,
+          SambaErrorKind.Auth,
         );
       }
       await authorizeApp(key.appId);

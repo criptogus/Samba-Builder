@@ -3,7 +3,7 @@ import {
   listSupabaseOrganizations,
   type SupabaseOrganizationDetails,
 } from "./supabase_management_client";
-import { DyadError, DyadErrorKind } from "@/errors/dyad_error";
+import { SambaError, SambaErrorKind } from "@/errors/samba_error";
 import log from "electron-log";
 
 const logger = log.scope("supabase_return_handler");
@@ -88,7 +88,7 @@ export async function handleSupabaseOAuthReturn({
 /**
  * Direct connection to Supabase with a Personal Access Token (sb_pat_…).
  *
- * No Dyad OAuth proxy is involved. The PAT is validated against the Supabase
+ * No Samba OAuth proxy is involved. The PAT is validated against the Supabase
  * Management API and, for every organization the token can reach, stored as
  * that organization's credentials. A PAT is long-lived, so no refresh token or
  * expiry is persisted — the client's refresh path is a no-op for it.
@@ -101,9 +101,9 @@ export async function connectSupabaseWithAccessToken(
 ): Promise<{ organizations: number }> {
   const token = accessToken.trim();
   if (!token) {
-    throw new DyadError(
+    throw new SambaError(
       "Supabase access token is required.",
-      DyadErrorKind.Validation,
+      SambaErrorKind.Validation,
     );
   }
 
@@ -114,16 +114,16 @@ export async function connectSupabaseWithAccessToken(
     orgs = await listSupabaseOrganizations(token);
   } catch (error) {
     logger.error("Error validating Supabase access token:", error);
-    throw new DyadError(
+    throw new SambaError(
       "Couldn't validate the Supabase access token. Check that you pasted a valid Personal Access Token (sb_pat_…).",
-      DyadErrorKind.Auth,
+      SambaErrorKind.Auth,
     );
   }
 
   if (orgs.length === 0) {
-    throw new DyadError(
+    throw new SambaError(
       "No Supabase organizations were found for this access token.",
-      DyadErrorKind.Auth,
+      SambaErrorKind.Auth,
     );
   }
 

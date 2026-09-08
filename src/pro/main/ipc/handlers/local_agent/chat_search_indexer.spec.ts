@@ -73,7 +73,7 @@ describe("chat_search_indexer", () => {
       chatId,
       role: "assistant",
       content:
-        'We chose magic links. <dyad-write path="src/a.ts">SECRET_BODY</dyad-write>',
+        'We chose magic links. <samba-write path="src/a.ts">SECRET_BODY</samba-write>',
     });
 
     expect(getChatSearchPendingCountForApp(appId, 0)).toBe(1);

@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { apps, chats } from "@/db/schema";
-import { DyadErrorKind } from "@/errors/dyad_error";
+import { SambaErrorKind } from "@/errors/samba_error";
 import { createInMemoryTestDb, type TestDb } from "@/testing/test_db";
 import { acceptChatTurn } from "@/ipc/handlers/chat_turn_acceptance";
 import {
@@ -163,7 +163,7 @@ describe("main-session follow-up queue", () => {
         expectedQueueRevision: 0,
         mutationId: "stale-remove",
       }),
-    ).rejects.toMatchObject({ kind: DyadErrorKind.Conflict });
+    ).rejects.toMatchObject({ kind: SambaErrorKind.Conflict });
 
     expect(liveOwner.followUpRejected).not.toHaveBeenCalled();
     expect(loadChatQueue(database, chatId).queue).toMatchObject([
@@ -203,7 +203,7 @@ describe("main-session follow-up queue", () => {
         expectedQueueRevision: 1,
         mutationId: "stale-clear-after-acceptance",
       }),
-    ).rejects.toMatchObject({ kind: DyadErrorKind.Conflict });
+    ).rejects.toMatchObject({ kind: SambaErrorKind.Conflict });
   });
 
   it("restores a claimed session entry when owner settlement fails", async () => {
@@ -272,7 +272,7 @@ describe("main-session follow-up queue", () => {
     const intent = followUpIntent();
 
     expect(() => stageActiveIntent(database, intent)).toThrowError(
-      expect.objectContaining({ kind: DyadErrorKind.NotFound }),
+      expect.objectContaining({ kind: SambaErrorKind.NotFound }),
     );
 
     makeFollowUpDue();

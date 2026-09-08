@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Cortex MCP Server — expõe o Córtex (RAG 127.0.0.1:8899) como tools MCP (stdio)
-para o Samba Builder (fork Dyad). Python stdlib puro, sem dependências.
+para o Samba Builder (fork Samba). Python stdlib puro, sem dependências.
 
 Protocolo: JSON-RPC 2.0, newline-delimited sobre stdio (transporte MCP stdio).
 Tools: cortex_units, cortex_design_system, cortex_search, cortex_entity, cortex_health.

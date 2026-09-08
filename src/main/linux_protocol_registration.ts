@@ -9,7 +9,7 @@ import { IS_TEST_BUILD } from "../ipc/utils/test_utils";
 const logger = log.scope("linux_protocol");
 const execFileAsync = promisify(execFile);
 
-const SCHEME = "dyad";
+const SCHEME = "sambabuilder";
 const MIME_TYPE = `x-scheme-handler/${SCHEME}`;
 const DESKTOP_FILENAME = `${SCHEME}-url-handler.desktop`;
 
@@ -32,7 +32,7 @@ interface ExecInputs {
   // relative to the CWD. The OS launches the deep-link handler from a different
   // CWD than `npm start` did, so without pinning this the relaunch computes a
   // different userData, grabs a different single-instance lock, and opens a
-  // second dev window instead of forwarding. Baked in via DYAD_DEV_USER_DATA_DIR.
+  // second dev window instead of forwarding. Baked in via SAMBA_DEV_USER_DATA_DIR.
   devUserDataDir: string | undefined;
 }
 
@@ -69,17 +69,17 @@ export function computeExecCommand(inputs: ExecInputs): ExecCommand {
   // Dev / unpackaged: electron binary plus the app entry script.
   if (defaultApp && argv.length >= 2) {
     const script = path.resolve(argv[1]);
-    // When the OS opens a dyad:// link it launches this Exec line as a fresh
+    // When the OS opens a sambabuilder:// link it launches this Exec line as a fresh
     // process. To forward the deep link into the *running* dev instance it must
     // land on the same single-instance lock, which is keyed off the dev
     // userData. main.ts only selects that userData when NODE_ENV ===
     // "development", and getUserDataPath() then resolves "./userData" relative
     // to the CWD. A bare `electron .` launch (a) omits NODE_ENV, defaulting to
-    // ~/.config/dyad — the userData a packaged install uses — and (b) runs from
+    // ~/.config/samba — the userData a packaged install uses — and (b) runs from
     // the launcher's CWD, not the project root, so even with NODE_ENV set the
     // relative path points elsewhere. Either way it grabs a different lock and
     // opens a second window instead of forwarding. Pin both: NODE_ENV via `env`,
-    // and the exact absolute userData via DYAD_DEV_USER_DATA_DIR. `-u
+    // and the exact absolute userData via SAMBA_DEV_USER_DATA_DIR. `-u
     // ELECTRON_RUN_AS_NODE` guards the rare case where the launching environment
     // has it set, which would run electron as plain node.
     const envAssignments =
@@ -94,7 +94,7 @@ export function computeExecCommand(inputs: ExecInputs): ExecCommand {
             // with `"`, so a mid-argument quote (VAR="/a b") can be mis-split by
             // a strict parser. env(1) receives VAR=value as one argv element.
             ...(devUserDataDir
-              ? [quote(`DYAD_DEV_USER_DATA_DIR=${devUserDataDir}`)]
+              ? [quote(`SAMBA_DEV_USER_DATA_DIR=${devUserDataDir}`)]
               : []),
           ]
         : [];
@@ -130,7 +130,7 @@ export function buildDesktopFile(command: ExecCommand): string {
   ].join("\n");
 }
 
-// Register this build as the dyad:// handler. Linux only; best-effort.
+// Register this build as the sambabuilder:// handler. Linux only; best-effort.
 //
 // Electron's setAsDefaultProtocolClient doesn't reliably do this on Linux, so
 // we write the .desktop file ourselves and point the OS at it. We do it on
@@ -141,7 +141,7 @@ export function buildDesktopFile(command: ExecCommand): string {
 // is baked into the dev handler so a browser-launched deep link forwards into
 // this instance regardless of the launcher's working directory. Callers in the
 // main process pass it; it's ignored outside dev.
-export async function registerDyadProtocolLinux(
+export async function registerSambaProtocolLinux(
   devUserDataDir?: string,
 ): Promise<void> {
   if (process.platform !== "linux") {
@@ -199,6 +199,6 @@ export async function registerDyadProtocolLinux(
       logger.info(`Registered ${MIME_TYPE} handler at ${desktopPath}`);
     }
   } catch (error) {
-    logger.warn("Failed to register dyad:// protocol handler:", error);
+    logger.warn("Failed to register sambabuilder:// protocol handler:", error);
   }
 }

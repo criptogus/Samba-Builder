@@ -11,19 +11,19 @@ import {
 import { Button } from "@/components/ui/button";
 
 // Samba Builder: sem plano Pro/assinatura — erros de quota free, créditos e
-// upgrade (herança do Dyad) foram removidos. O usuário vê o erro real e ações
+// upgrade (herança do Samba) foram removidos. O usuário vê o erro real e ações
 // úteis (switch de modo, novo chat), nunca um link de assinatura.
 
 export function ChatErrorBox({
   onDismiss,
   error,
-  isDyadProEnabled,
+  isSambaProEnabled,
   onStartNewChat,
   onSwitchToBuildMode,
 }: {
   onDismiss: () => void;
   error: string;
-  isDyadProEnabled: boolean;
+  isSambaProEnabled: boolean;
   onStartNewChat?: () => void;
   onSwitchToBuildMode?: () => void;
 }) {
@@ -74,7 +74,7 @@ export function ChatErrorBox({
       <div className="max-h-64 overflow-y-auto scrollbar-on-hover">
         <ErrorMarkdown>{error}</ErrorMarkdown>
       </div>
-      {isDyadProEnabled && onStartNewChat && (
+      {isSambaProEnabled && onStartNewChat && (
         <div className="mt-2 flex flex-wrap gap-2">
           <Tooltip>
             <TooltipTrigger

@@ -37,7 +37,7 @@ describe("sub-agent manager status policy", () => {
     await expect(
       waitForAbortableDelay(10_000, controller.signal),
     ).rejects.toMatchObject({
-      name: "DyadError",
+      name: "SambaError",
       kind: "user_cancelled",
     });
   });

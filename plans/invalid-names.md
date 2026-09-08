@@ -2,7 +2,7 @@
 
 ## Context
 
-Dyad currently treats an app's display name and filesystem folder name inconsistently. Some flows use the app name directly as a folder path, while app blueprint approval sanitizes the display name into a folder name before renaming.
+Samba currently treats an app's display name and filesystem folder name inconsistently. Some flows use the app name directly as a folder path, while app blueprint approval sanitizes the display name into a folder name before renaming.
 
 This matters because macOS, Windows, and POSIX filesystems do not accept the same names. A name that works as display text can be invalid or dangerous as a folder name.
 
@@ -12,7 +12,7 @@ This matters because macOS, Windows, and POSIX filesystems do not accept the sam
 
 - `AppBlueprintDataSchema.appName` accepts any string.
 - `app-blueprint:edit-field` stores any `appName` string in memory.
-- On blueprint approval, `DyadAppBlueprintCard` derives the target folder with `sanitizeAppFolderName(effectiveAppName)`.
+- On blueprint approval, `SambaAppBlueprintCard` derives the target folder with `sanitizeAppFolderName(effectiveAppName)`.
 - `sanitizeAppFolderName` currently:
   - replaces `< > : " | ? * / \` with `-`
   - collapses whitespace
@@ -40,7 +40,7 @@ This matters because macOS, Windows, and POSIX filesystems do not accept the sam
 
 ## Invalid Names We Currently Allow
 
-As display names, Dyad currently allows:
+As display names, Samba currently allows:
 
 - Windows-invalid filename characters: `< > : " / \ | ? *`
 - ASCII control characters at the schema/database layer
@@ -56,7 +56,7 @@ Use separate concepts:
 - **Display name:** user-facing app name, allowed to be expressive.
 - **Folder name:** filesystem-safe app directory name, derived from or validated against the display name.
 
-The common path should stay simple: users type a nice app name, Dyad sanitizes it on their behalf, and Dyad creates a safe folder. New folder names should be lowercase slugs. User-entered and blueprint-generated display names should preserve readable/title-case formatting after sanitization, while folder names use lowercase slugs.
+The common path should stay simple: users type a nice app name, Samba sanitizes it on their behalf, and Samba creates a safe folder. New folder names should be lowercase slugs. User-entered and blueprint-generated display names should preserve readable/title-case formatting after sanitization, while folder names use lowercase slugs.
 
 Existing apps should not be proactively migrated. Apply the new policy when creating, copying, importing, or renaming apps. One deliberate exception: app blueprint approval always normalizes the folder to the canonical slug, even for legacy folders (e.g. `My App` → `my-app`), so approval has one simple rule.
 
@@ -84,7 +84,7 @@ Existing apps should not be proactively migrated. Apply the new policy when crea
 3. Apply the policy at every filesystem-writing app flow.
    - `createApp`: derive a safe lowercase slug folder name from the submitted display name before checking path conflicts and creating files, auto-suffixing on collision. Store the sanitized display name so it mirrors the folder name as much as possible.
    - `copyApp`: same as create. Note: `copyApp` today only checks the database for a display-name conflict and never checks whether the destination directory exists before `copyDir` — with slugs, two distinct display names can map to the same folder and silently merge one app's files into another's directory. Add an explicit destination-existence check (and auto-suffix) like create.
-   - import-with-copy: same as create when copying into Dyad apps.
+   - import-with-copy: same as create when copying into Samba apps.
    - `renameApp`: validate the provided `appPath` with the shared validator, and keep accepting arbitrary display `appName`. Validate ONLY when the path changes (keep the existing `pathChanged` guard) — a display-name-only rename passes the existing path back unchanged, and legacy paths must keep working without a de-facto migration. Do not slugify or lowercase a user-typed folder name; accept any folder that passes the safety validator.
    - app blueprint approval: switch to the shared utility and pass both the sanitized display name and slugified folder name to `renameApp`. Approval always normalizes the folder to the canonical slug — including legacy folders whose leaf differs only in case/format (`My App` → `my-app`). On a display-name conflict, auto-suffix the display name (`Todo App` → `Todo App 2`) and continue instead of rolling back to the rename dialog; the dialog remains only for unexpected rename failures. Manual create/copy keep the hard `Conflict` error for display-name collisions, since there the user typed the name and can adjust it.
    - Auto-suffix resolution must happen in the main process, not the renderer. Extend `renameApp` with an opt-in flag (e.g. `autoResolveConflicts: true`, used by blueprint approval) so probe-and-rename runs atomically under the existing `withLock` — a renderer-side probe followed by a rename is a race. The handler returns the final display name and path; the approval card persists the final name back into the blueprint via the existing `edit-field` path (as it already does for dialog overrides) so the blueprint, app row, and agent all agree on the name.
@@ -100,8 +100,8 @@ Existing apps should not be proactively migrated. Apply the new policy when crea
    - Show the exact resulting folder name before submit via the preview IPC handler (slug + collision suffix), so users are never surprised by the final labels.
 
 5. Improve errors.
-   - Throw `DyadError` with `DyadErrorKind.Validation` for invalid folder names.
-   - Keep conflict errors as `DyadErrorKind.Conflict`.
+   - Throw `SambaError` with `SambaErrorKind.Validation` for invalid folder names.
+   - Keep conflict errors as `SambaErrorKind.Conflict`.
    - Avoid raw filesystem errors for expected invalid-name cases.
 
 6. Add focused tests.

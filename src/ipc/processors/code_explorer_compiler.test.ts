@@ -109,7 +109,7 @@ describe("resolveCodeExplorerCompiler", () => {
 
   it("loads the replacement compiler after a pnpm-style symlink swap", async () => {
     const appPath = await fs.mkdtemp(
-      path.join(os.tmpdir(), "dyad-code-explorer-compiler-swap-"),
+      path.join(os.tmpdir(), "samba-code-explorer-compiler-swap-"),
     );
     const nodeModulesPath = path.join(appPath, "node_modules");
     const typeScriptLinkPath = path.join(nodeModulesPath, "typescript");
@@ -165,7 +165,7 @@ describe("resolveCodeExplorerCompiler", () => {
 describe("getCodeExplorerAvailability", () => {
   it("treats a TS7-like package without a main compiler export as installed", async () => {
     const appPath = await fs.mkdtemp(
-      path.join(os.tmpdir(), "dyad-code-explorer-ts7-"),
+      path.join(os.tmpdir(), "samba-code-explorer-ts7-"),
     );
     try {
       const packagePath = path.join(appPath, "node_modules", "typescript");

@@ -3,7 +3,7 @@ import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
 import { streamText, type LanguageModel } from "ai";
 import log from "electron-log";
 
-import { DyadError, DyadErrorKind, isDyadError } from "@/errors/dyad_error";
+import { SambaError, SambaErrorKind, isSambaError } from "@/errors/samba_error";
 import type { ProviderApiKeyValidationProvider } from "@/ipc/types";
 import { readEffectiveSettings } from "@/main/settings";
 import {
@@ -12,10 +12,10 @@ import {
   normalizeProviderApiKeyInput,
 } from "@/lib/providerApiKey";
 import type { UserSettings } from "@/lib/schemas";
-import { createDyadEngine } from "@/ipc/utils/llm_engine_provider";
+import { createSambaEngine } from "@/ipc/utils/llm_engine_provider";
 import { fastTextOutput } from "@/ipc/utils/stream_text_utils";
 import { IS_TEST_BUILD } from "@/ipc/utils/test_utils";
-import { getDyadEngineBaseUrl } from "@/ipc/utils/dyad_engine_url";
+import { getSambaEngineBaseUrl } from "@/ipc/utils/samba_engine_url";
 import { getTestFetchOption } from "@/ipc/utils/test_fetch_override";
 import { getOpenRouterAppAttributionHeaders } from "@/ipc/utils/openrouter_attribution";
 
@@ -43,14 +43,14 @@ export async function validateProviderApiKey({
   const providerDisplayName = PROVIDER_DISPLAY_NAMES[provider];
 
   if (!normalizedApiKey) {
-    throw new DyadError("API Key cannot be empty.", DyadErrorKind.Validation);
+    throw new SambaError("API Key cannot be empty.", SambaErrorKind.Validation);
   }
 
   const invalidCharacter = findInvalidProviderApiKeyCharacter(normalizedApiKey);
   if (invalidCharacter) {
-    throw new DyadError(
+    throw new SambaError(
       formatInvalidProviderApiKeyMessage(providerDisplayName, invalidCharacter),
-      DyadErrorKind.Validation,
+      SambaErrorKind.Validation,
     );
   }
 
@@ -60,9 +60,9 @@ export async function validateProviderApiKey({
     timer = setTimeout(() => {
       controller.abort();
       reject(
-        new DyadError(
+        new SambaError(
           `${providerDisplayName} did not respond while checking this API key. Please try again.`,
-          DyadErrorKind.External,
+          SambaErrorKind.External,
         ),
       );
     }, VALIDATION_TIMEOUT_MS);
@@ -98,7 +98,7 @@ export async function validateProviderApiKey({
     }
     return { ok: true };
   } catch (error) {
-    const rootError = isDyadError(error) ? error : (streamError ?? error);
+    const rootError = isSambaError(error) ? error : (streamError ?? error);
     throw classifyValidationError(rootError, providerDisplayName);
   } finally {
     if (timer) {
@@ -132,18 +132,18 @@ async function createValidationModel(
     }
     case "auto": {
       const settings = await readEffectiveSettings();
-      const dyad = createDyadEngine({
+      const samba = createSambaEngine({
         apiKey,
-        baseURL: getDyadEngineBaseUrl(),
+        baseURL: getSambaEngineBaseUrl(),
         ...getTestFetchOption(),
-        dyadOptions: {
+        sambaOptions: {
           enableLazyEdits: false,
           enableSmartFilesContext: false,
           enableWebSearch: false,
         },
         settings: {
           ...settings,
-          enableDyadPro: true,
+          enableSambaPro: true,
           providerSettings: {
             ...settings.providerSettings,
             auto: {
@@ -153,7 +153,7 @@ async function createValidationModel(
           },
         } satisfies UserSettings,
       });
-      return dyad("dyad/auto", { providerId: "openai" });
+      return samba("samba/auto", { providerId: "openai" });
     }
   }
 }
@@ -175,8 +175,8 @@ function getOpenRouterBaseUrl() {
 function classifyValidationError(
   error: unknown,
   providerDisplayName: string,
-): DyadError {
-  if (isDyadError(error)) {
+): SambaError {
+  if (isSambaError(error)) {
     return error;
   }
 
@@ -189,9 +189,9 @@ function classifyValidationError(
   );
 
   if (statusCode === 401 || statusCode === 403 || isAuthError(errorMessage)) {
-    return new DyadError(
+    return new SambaError(
       `${providerDisplayName} rejected this API key. Try another API key or keep this one anyway.`,
-      DyadErrorKind.Auth,
+      SambaErrorKind.Auth,
     );
   }
 
@@ -199,15 +199,15 @@ function classifyValidationError(
     statusCode === 429 ||
     /rate.?limit|too many requests/i.test(errorMessage)
   ) {
-    return new DyadError(
+    return new SambaError(
       `${providerDisplayName} rate limited the API key check. You can try again later or keep this key anyway.`,
-      DyadErrorKind.RateLimited,
+      SambaErrorKind.RateLimited,
     );
   }
 
-  return new DyadError(
+  return new SambaError(
     `Samba Builder could not verify this ${providerDisplayName} API key: ${errorMessage || "Unknown error"}`,
-    DyadErrorKind.External,
+    SambaErrorKind.External,
   );
 }
 

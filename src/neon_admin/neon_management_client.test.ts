@@ -11,7 +11,7 @@ import { refreshNeonToken } from "./neon_management_client";
 describe("refreshNeonToken", () => {
   afterEach(() => vi.unstubAllGlobals());
 
-  it("is a no-op and never calls the retired Dyad refresh endpoint", async () => {
+  it("is a no-op and never calls the retired Samba refresh endpoint", async () => {
     vi.mocked(readSettings).mockReturnValue({
       neon: {
         refreshToken: { value: "rotating-refresh-token" },
@@ -23,7 +23,7 @@ describe("refreshNeonToken", () => {
 
     await refreshNeonToken();
 
-    // Token refresh used to round-trip through the retired Dyad OAuth proxy.
+    // Token refresh used to round-trip through the retired Samba OAuth proxy.
     // Connections are now direct long-lived Neon API keys, so refreshing must
     // never hit the network.
     expect(fetch).not.toHaveBeenCalled();

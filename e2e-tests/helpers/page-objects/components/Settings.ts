@@ -250,10 +250,10 @@ export class Settings {
     await expect(this.page.getByText(/test.+2345/)).toBeVisible();
   }
 
-  async setUpDyadProvider() {
+  async setUpSambaProvider() {
     await this.page
       .locator("div")
-      .filter({ hasText: /^DyadNeeds Setup$/ })
+      .filter({ hasText: /^SambaNeeds Setup$/ })
       .nth(1)
       .click();
     await this.page
@@ -261,7 +261,7 @@ export class Settings {
       .click();
     await this.page
       .getByRole("textbox", { name: "Set Samba Builder API Key" })
-      .fill("testdyadkey");
+      .fill("testsambakey");
     await this.page.getByRole("button", { name: "Save Key" }).click();
   }
 }

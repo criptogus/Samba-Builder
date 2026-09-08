@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { asSchema } from "ai";
-import { DyadError, DyadErrorKind } from "@/errors/dyad_error";
+import { SambaError, SambaErrorKind } from "@/errors/samba_error";
 import { readChatTool } from "./read_chat";
 import {
   makeAgentContext,
@@ -278,7 +278,7 @@ describe("readChatTool.execute", () => {
     const summary = harness.insertMessage({
       chatId,
       role: "assistant",
-      content: "<dyad-compaction>summary of earlier work</dyad-compaction>",
+      content: "<samba-compaction>summary of earlier work</samba-compaction>",
       createdAt: 19_000,
       isCompactionSummary: true,
     });
@@ -307,18 +307,18 @@ describe("readChatTool.execute", () => {
     // Cross-app chat.
     await expect(
       run({ chat_id: otherChat }, { appId, chatId: chatId + 999 }),
-    ).rejects.toMatchObject({ kind: DyadErrorKind.NotFound });
+    ).rejects.toMatchObject({ kind: SambaErrorKind.NotFound });
     // Nonexistent chat.
     await expect(
       run({ chat_id: 424242 }, { appId, chatId: chatId + 999 }),
-    ).rejects.toMatchObject({ kind: DyadErrorKind.NotFound });
+    ).rejects.toMatchObject({ kind: SambaErrorKind.NotFound });
     // Message from a different chat.
     await expect(
       run(
         { chat_id: chatId, around_message_id: otherMessage },
         { appId, chatId: chatId + 999 },
       ),
-    ).rejects.toMatchObject({ kind: DyadErrorKind.NotFound });
+    ).rejects.toMatchObject({ kind: SambaErrorKind.NotFound });
     // Sanity: valid read works.
     await expect(
       run(
@@ -349,9 +349,9 @@ describe("readChatTool.execute", () => {
     harness.insertMessage({
       chatId,
       role: "assistant",
-      content: `Intro prose. <dyad-write path="src/big.ts">${"SECRET".repeat(
+      content: `Intro prose. <samba-write path="src/big.ts">${"SECRET".repeat(
         100,
-      )}</dyad-write>`,
+      )}</samba-write>`,
     });
     harness.insertMessage({
       chatId,
@@ -441,19 +441,19 @@ describe("readChatTool.execute", () => {
     );
     expect(ctx.onXmlComplete).toHaveBeenCalledTimes(1);
     const xml = vi.mocked(ctx.onXmlComplete).mock.calls[0][0];
-    expect(xml).toContain("<dyad-read-chat");
+    expect(xml).toContain("<samba-read-chat");
     expect(xml).toContain(`chat-id="${chatId}"`);
     expect(xml).toContain("range=");
   });
 
-  it("throws a validation error via DyadError for unknown errors kinds", async () => {
-    // Guard that notFound() is a DyadError instance (renderer contract).
+  it("throws a validation error via SambaError for unknown errors kinds", async () => {
+    // Guard that notFound() is a SambaError instance (renderer contract).
     const { appId } = seedChat(1);
     try {
       await run({ chat_id: 424242 }, { appId, chatId: 1 });
       expect.unreachable();
     } catch (error) {
-      expect(error).toBeInstanceOf(DyadError);
+      expect(error).toBeInstanceOf(SambaError);
     }
   });
 });

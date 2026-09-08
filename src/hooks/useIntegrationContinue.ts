@@ -4,7 +4,7 @@ import { integrationProviderSelectionAtom } from "@/atoms/integrationAtoms";
 import { previewModeAtom, selectedAppIdAtom } from "@/atoms/appAtoms";
 import { selectedChatIdAtom } from "@/atoms/chatAtoms";
 import { useLoadApp } from "@/hooks/useLoadApp";
-import { getCompletedIntegrationProvider } from "@/components/chat/dyadAddIntegrationUtils";
+import { getCompletedIntegrationProvider } from "@/components/chat/sambaAddIntegrationUtils";
 import { getUserInputReadModel } from "@/user_input/read_model";
 import {
   usePendingIntegrations,

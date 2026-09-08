@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { DyadErrorKind } from "@/errors/dyad_error";
+import { SambaErrorKind } from "@/errors/samba_error";
 import {
   AppDeletionInProgressError,
   AppOperationCoordinator,
@@ -360,7 +360,7 @@ describe("AppOperationCoordinator", () => {
         { appId: 1, operation: "late", resources: ["chat-membership"] },
         async () => undefined,
       ),
-    ).rejects.toMatchObject({ kind: DyadErrorKind.Precondition });
+    ).rejects.toMatchObject({ kind: SambaErrorKind.Precondition });
 
     const drained = vi.fn();
     const drainPromise = deletion.drain().then(drained);

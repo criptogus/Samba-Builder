@@ -49,7 +49,7 @@ export function HomeChatInput({
   }); // eslint-disable-line @typescript-eslint/no-unused-vars
   useChatModeToggle();
   const { userBudget } = useUserBudgetInfo();
-  const isProEnabled = !!userBudget && !!settings?.enableDyadPro;
+  const isProEnabled = !!userBudget && !!settings?.enableSambaPro;
 
   const handleTranscription = useCallback(
     (text: string) => {

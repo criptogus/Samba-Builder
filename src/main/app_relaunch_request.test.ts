@@ -21,7 +21,7 @@ describe("app relaunch request", () => {
     expect(request.request()).toBe(true);
     expect(request.request()).toBe(false);
     request.finish({
-      currentArgs: ["--original-argument", "dyad://stale"],
+      currentArgs: ["--original-argument", "sambabuilder://stale"],
       relaunch,
       quit,
     });
@@ -34,7 +34,7 @@ describe("app relaunch request", () => {
   it("preserves a shutdown-time deep link in the replacement process", () => {
     const request = createAppRelaunchRequest();
     const relaunch = vi.fn();
-    const deepLinkUrl = "dyad://oauth-return?code=new";
+    const deepLinkUrl = "sambabuilder://oauth-return?code=new";
 
     request.request();
     request.request({ deepLinkUrl });
@@ -42,7 +42,7 @@ describe("app relaunch request", () => {
       currentArgs: [
         "/path/to/main.js",
         "--original-argument",
-        "dyad://oauth-return?code=stale",
+        "sambabuilder://oauth-return?code=stale",
       ],
       relaunch,
       quit: vi.fn(),
@@ -57,10 +57,10 @@ describe("app relaunch request", () => {
     const request = createAppRelaunchRequest();
     const relaunch = vi.fn();
 
-    request.request({ deepLinkUrl: "dyad://first" });
-    request.request({ deepLinkUrl: "dyad://second" });
+    request.request({ deepLinkUrl: "sambabuilder://first" });
+    request.request({ deepLinkUrl: "sambabuilder://second" });
     request.finish({ currentArgs: [], relaunch, quit: vi.fn() });
 
-    expect(relaunch).toHaveBeenCalledWith({ args: ["dyad://first"] });
+    expect(relaunch).toHaveBeenCalledWith({ args: ["sambabuilder://first"] });
   });
 });

@@ -1,4 +1,4 @@
-# Why Dyad uses state machines
+# Why Samba uses state machines
 
 For a long time, this comment sat in our chat streaming code:
 
@@ -92,7 +92,7 @@ this workflow?" is answered by reading several booleans and hoping they
 agree. With a machine there is one value, and it's always one of the named
 states.
 
-In Dyad, a machine is a plain TypeScript function. No library:
+In Samba, a machine is a plain TypeScript function. No library:
 
 ```ts
 function transition(
@@ -286,7 +286,7 @@ useEffect(() => {
 
 const handleConnect = async () => {
   setIsOpeningOauth(true);
-  await ipc.system.openExternalUrl("https://oauth.dyad.sh/.../neon/login");
+  await ipc.system.openExternalUrl("https://oauth.samba.sh/.../neon/login");
   // Reset after 20s if the OAuth return never arrives
   oauthTimeoutRef.current = setTimeout(() => {
     setIsOpeningOauth(false);

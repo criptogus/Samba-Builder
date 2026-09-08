@@ -484,7 +484,7 @@ Delete machine-owned storage:
 - `currentPreviewRunStartedAtAtom`;
 - `appUrlByAppIdAtom`;
 - `currentAppUrlAtom`;
-- the `dyad-app` portion of `previewErrorByAppIdAtom`.
+- the `samba-app` portion of `previewErrorByAppIdAtom`.
 
 Audit before deciding the fate of:
 

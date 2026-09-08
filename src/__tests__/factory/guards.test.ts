@@ -15,7 +15,7 @@ vi.mock("@/db", () => ({
 }));
 vi.mock("@/db/schema", () => ({ apps: { id: "id" } }));
 vi.mock("drizzle-orm", () => ({ eq: vi.fn() }));
-vi.mock("@/paths/paths", () => ({ getDyadAppPath: (value: string) => value }));
+vi.mock("@/paths/paths", () => ({ getSambaAppPath: (value: string) => value }));
 vi.mock("@/ipc/services/factory/store", () => ({
   getFactoryProject: mocks.getProject,
   readFactoryStore: mocks.readStore,

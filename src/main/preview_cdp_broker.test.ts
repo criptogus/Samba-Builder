@@ -225,10 +225,10 @@ describe("PreviewCdpBroker", () => {
       )
       .toMatchObject({
         params: {
-          sessionId: "dyad-preview-page",
+          sessionId: "samba-preview-page",
           targetInfo: {
             targetId: "real-preview-target",
-            browserContextId: "dyad-preview-context",
+            browserContextId: "samba-preview-context",
             type: "page",
           },
         },
@@ -237,7 +237,7 @@ describe("PreviewCdpBroker", () => {
     const evaluation = await command(
       "Runtime.evaluate",
       { expression: "6 * 7" },
-      "dyad-preview-page",
+      "samba-preview-page",
     );
     expect(evaluation.result).toEqual({
       result: { type: "number", value: 42 },
@@ -287,7 +287,7 @@ describe("PreviewCdpBroker", () => {
     expect(
       await command("Browser.setDownloadBehavior", {
         behavior: "allowAndName",
-        browserContextId: "dyad-preview-context",
+        browserContextId: "samba-preview-context",
       }),
     ).toMatchObject({ result: {} });
     expect(targetDebugger.commands).toHaveLength(before);
@@ -300,7 +300,7 @@ describe("PreviewCdpBroker", () => {
     const response = await command(
       "Target.attachToTarget",
       { targetId: "privileged-renderer", flatten: true },
-      "dyad-preview-page",
+      "samba-preview-page",
     );
     expect(response.error?.message).toMatch(/Cross-target/);
     expect(targetDebugger.commands).toHaveLength(before);
@@ -312,7 +312,7 @@ describe("PreviewCdpBroker", () => {
     async (method) => {
       const { socket, command } = await connect(broker);
       const before = targetDebugger.commands.length;
-      const response = await command(method, {}, "dyad-preview-page");
+      const response = await command(method, {}, "samba-preview-page");
       expect(response.error?.message).toMatch(/Browser-global/);
       expect(targetDebugger.commands).toHaveLength(before);
       socket.close();

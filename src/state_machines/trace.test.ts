@@ -224,17 +224,17 @@ describe("machine trace observer", () => {
     const machine = machineName("devtools");
     createTraceObserver<number, string, never>(machine);
 
-    expect(window.__dyadMachines?.index).toContain(machine);
-    expect(window.__dyadMachines?.dump(machine)).toEqual([]);
+    expect(window.__sambaMachines?.index).toContain(machine);
+    expect(window.__sambaMachines?.dump(machine)).toEqual([]);
   });
 
   it("does not expose machine devtools in production builds", async () => {
-    Reflect.deleteProperty(window, "__dyadMachines");
+    Reflect.deleteProperty(window, "__sambaMachines");
     vi.stubEnv("NODE_ENV", "production");
     vi.resetModules();
     await import("./trace");
 
-    expect(window.__dyadMachines).toBeUndefined();
+    expect(window.__sambaMachines).toBeUndefined();
 
     vi.unstubAllEnvs();
     vi.resetModules();

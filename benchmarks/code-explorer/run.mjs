@@ -33,7 +33,7 @@ const { values } = parseArgs({
     timeout: { type: "string", default: "600000" },
     concurrency: { type: "string", default: "1" },
     "allow-stale-package": { type: "boolean", default: false },
-    auth: { type: "string", default: "dyad-pro" },
+    auth: { type: "string", default: "samba-pro" },
     "codex-auth-path": { type: "string" },
     "codex-model": { type: "string", default: "gpt-5.5" },
     "retry-from": { type: "string" },
@@ -61,8 +61,8 @@ if (!Number.isInteger(repeats) || repeats < 1) {
 if (!Number.isInteger(concurrency) || concurrency < 1) {
   throw new Error("--concurrency must be a positive integer");
 }
-if (!["dyad-pro", "codex"].includes(authMode)) {
-  throw new Error("--auth must be one of: dyad-pro, codex");
+if (!["samba-pro", "codex"].includes(authMode)) {
+  throw new Error("--auth must be one of: samba-pro, codex");
 }
 validateArms(selectedArms);
 const primaryCompareArm = resolvePrimaryCompareArm(
@@ -135,9 +135,13 @@ if (values["dry-run"]) {
   process.exit(0);
 }
 
-if (matrix.length > 0 && authMode === "dyad-pro" && !process.env.DYAD_PRO_KEY) {
+if (
+  matrix.length > 0 &&
+  authMode === "samba-pro" &&
+  !process.env.SAMBA_PRO_KEY
+) {
   throw new Error(
-    "DYAD_PRO_KEY must be set in .env for Samba Builder Engine benchmark runs",
+    "SAMBA_PRO_KEY must be set in .env for Samba Builder Engine benchmark runs",
   );
 }
 
@@ -554,10 +558,10 @@ function reportModeForArm(arm) {
 }
 
 async function setupBenchmarkAuth() {
-  if (authMode === "dyad-pro") {
+  if (authMode === "samba-pro") {
     return {
-      mode: "dyad-pro",
-      apiKey: process.env.DYAD_PRO_KEY,
+      mode: "samba-pro",
+      apiKey: process.env.SAMBA_PRO_KEY,
       model: values.model,
     };
   }
@@ -735,7 +739,7 @@ function normalizeResponsesPayload(incoming, model) {
     stream: true,
     store: false,
   };
-  delete outgoing.dyad_options;
+  delete outgoing.samba_options;
   delete outgoing.max_output_tokens;
   return outgoing;
 }
@@ -758,7 +762,7 @@ function fetchCodexResponses({ accessToken, accountId, outgoing }) {
     headers: {
       Authorization: `Bearer ${accessToken}`,
       "chatgpt-account-id": accountId,
-      originator: "dyad-code-explorer-benchmark",
+      originator: "samba-code-explorer-benchmark",
       "OpenAI-Beta": "responses=experimental",
       accept: "text/event-stream",
       "content-type": "application/json",
@@ -1215,7 +1219,7 @@ async function runTrial(trial, benchmarkAuth) {
 
   const benchmarkRunId = `${runId}-${trial.repo.name}-${trial.task.id}-${trial.arm}-${trial.repeat}`;
   const userDataDir = fs.mkdtempSync(
-    path.join(os.tmpdir(), "dyad-code-bench-"),
+    path.join(os.tmpdir(), "samba-code-bench-"),
   );
   const xdgConfigHome = path.join(userDataDir, "xdg-config");
   fs.mkdirSync(xdgConfigHome, { recursive: true });
@@ -1225,14 +1229,14 @@ async function runTrial(trial, benchmarkAuth) {
   let contextPaths = [];
   const env = {
     ...process.env,
-    DYAD_BENCHMARK_RUN_ID: benchmarkRunId,
-    DYAD_PRO_KEY: benchmarkAuth.apiKey,
+    SAMBA_BENCHMARK_RUN_ID: benchmarkRunId,
+    SAMBA_PRO_KEY: benchmarkAuth.apiKey,
     XDG_CONFIG_HOME: xdgConfigHome,
     GIT_CONFIG_GLOBAL: path.join(userDataDir, ".gitconfig"),
     E2E_TEST_BUILD: "true",
     OPENAI_API_KEY: process.env.OPENAI_API_KEY ?? "benchmark-placeholder",
     ...(benchmarkAuth.engineUrl && {
-      DYAD_ENGINE_URL: benchmarkAuth.engineUrl,
+      SAMBA_ENGINE_URL: benchmarkAuth.engineUrl,
     }),
   };
 
@@ -1280,7 +1284,7 @@ async function runTrial(trial, benchmarkAuth) {
           enableCodeExplorer,
         }) => {
           await window.electron.ipcRenderer.invoke("set-user-settings", {
-            enableDyadPro: true,
+            enableSambaPro: true,
             enableCodeExplorer,
             selectedChatMode: "local-agent",
             selectedModel,
@@ -3418,8 +3422,8 @@ function scoreFinalText(finalText, expectedTerms) {
 function visibleAnswerText(finalText) {
   return finalText
     .replace(/<think(?:ing)?>[\s\S]*?<\/think(?:ing)?>/gi, "")
-    .replace(/<dyad-[\s\S]*?<\/dyad-[^>]+>/g, "")
-    .replace(/<dyad-[^>]+\/>/g, "")
+    .replace(/<samba-[\s\S]*?<\/samba-[^>]+>/g, "")
+    .replace(/<samba-[^>]+\/>/g, "")
     .trim();
 }
 

@@ -52,24 +52,24 @@ export const SOCKET_FIREWALL_PROBE_TIMEOUT_MS = 30 * 1000;
 export const PACKAGE_MANAGER_PROBE_TIMEOUT_MS = 30 * 1000;
 export const ADD_DEPENDENCY_INSTALL_TIMEOUT_MS = DEFAULT_PTY_COMMAND_TIMEOUT_MS;
 const logger = log.scope("socket_firewall");
-const DYAD_ALLOW_BUILDS_SCHEMA = "v1";
-const DYAD_ALLOW_BUILDS_SCHEMA_KEY = "dyad-default-allow-builds-schema";
-const DYAD_ALLOW_BUILDS_DATA_VERSION_KEY =
-  "dyad-default-allow-builds-data-version";
-const DYAD_ALLOW_BUILDS_CHANNEL_KEY = "dyad-default-allow-builds-channel";
-const DYAD_ALLOW_BUILDS_BEGIN = "# dyad-default-allow-builds begin";
-const DYAD_ALLOW_BUILDS_END = "# dyad-default-allow-builds end";
-const LEGACY_DYAD_ALLOW_BUILDS_BEGIN = "# dyad-default-allow-builds=v1 begin";
-const LEGACY_DYAD_ALLOW_BUILDS_END = "# dyad-default-allow-builds=v1 end";
-const DYAD_AUTO_DENIED_ALLOW_BUILDS_COMMENT = "# dyad-auto-denied";
+const SAMBA_ALLOW_BUILDS_SCHEMA = "v1";
+const SAMBA_ALLOW_BUILDS_SCHEMA_KEY = "samba-default-allow-builds-schema";
+const SAMBA_ALLOW_BUILDS_DATA_VERSION_KEY =
+  "samba-default-allow-builds-data-version";
+const SAMBA_ALLOW_BUILDS_CHANNEL_KEY = "samba-default-allow-builds-channel";
+const SAMBA_ALLOW_BUILDS_BEGIN = "# samba-default-allow-builds begin";
+const SAMBA_ALLOW_BUILDS_END = "# samba-default-allow-builds end";
+const LEGACY_SAMBA_ALLOW_BUILDS_BEGIN = "# samba-default-allow-builds=v1 begin";
+const LEGACY_SAMBA_ALLOW_BUILDS_END = "# samba-default-allow-builds=v1 end";
+const SAMBA_AUTO_DENIED_ALLOW_BUILDS_COMMENT = "# samba-auto-denied";
 const PNPM_IGNORED_BUILDS_ERROR_CODE = "ERR_PNPM_IGNORED_BUILDS";
-const DYAD_ALLOW_BUILDS_METADATA_PATTERN =
-  /^#\s*(dyad-default-allow-builds-(?:schema|data-version|channel))=(.+)$/;
-const DYAD_ALLOW_BUILDS_REMOTE_URL =
-  process.env.DYAD_DEFAULT_APPROVE_BUILDS_URL ?? null;
-const DYAD_ALLOW_BUILDS_FETCH_TIMEOUT_MS = 5_000;
-export const DYAD_ALLOW_BUILDS_CACHE_TTL_MS = 60 * 60 * 1000;
-const DYAD_ALLOW_BUILDS_MAX_BYTES = 256 * 1024;
+const SAMBA_ALLOW_BUILDS_METADATA_PATTERN =
+  /^#\s*(samba-default-allow-builds-(?:schema|data-version|channel))=(.+)$/;
+const SAMBA_ALLOW_BUILDS_REMOTE_URL =
+  process.env.SAMBA_DEFAULT_APPROVE_BUILDS_URL ?? null;
+const SAMBA_ALLOW_BUILDS_FETCH_TIMEOUT_MS = 5_000;
+export const SAMBA_ALLOW_BUILDS_CACHE_TTL_MS = 60 * 60 * 1000;
+const SAMBA_ALLOW_BUILDS_MAX_BYTES = 256 * 1024;
 
 export interface CommandExecutionOptions {
   cwd?: string;
@@ -162,15 +162,15 @@ export type PackageManager = "pnpm" | "npm";
 type AllowBuildsChannel = "local" | "remote";
 
 type AllowBuildsSource = {
-  schema: typeof DYAD_ALLOW_BUILDS_SCHEMA;
+  schema: typeof SAMBA_ALLOW_BUILDS_SCHEMA;
   dataVersion: string;
   channel: AllowBuildsChannel;
   packages: string[];
 };
 type AllowBuildsMetadataKey =
-  | typeof DYAD_ALLOW_BUILDS_SCHEMA_KEY
-  | typeof DYAD_ALLOW_BUILDS_DATA_VERSION_KEY
-  | typeof DYAD_ALLOW_BUILDS_CHANNEL_KEY;
+  | typeof SAMBA_ALLOW_BUILDS_SCHEMA_KEY
+  | typeof SAMBA_ALLOW_BUILDS_DATA_VERSION_KEY
+  | typeof SAMBA_ALLOW_BUILDS_CHANNEL_KEY;
 
 type AllowBuildsTextFetcher = (
   url: string,
@@ -202,7 +202,7 @@ function parseAllowBuildsMetadata(
 ): Partial<Record<AllowBuildsMetadataKey, string>> {
   const metadata: Partial<Record<AllowBuildsMetadataKey, string>> = {};
   for (const line of lines) {
-    const match = line.trim().match(DYAD_ALLOW_BUILDS_METADATA_PATTERN);
+    const match = line.trim().match(SAMBA_ALLOW_BUILDS_METADATA_PATTERN);
     if (!match) {
       continue;
     }
@@ -216,26 +216,26 @@ function parseDefaultAllowBuilds(
 ): AllowBuildsSource {
   const lines = text.split(/\r?\n/).map((line) => line.trim());
   const metadata = parseAllowBuildsMetadata(lines);
-  if (metadata[DYAD_ALLOW_BUILDS_SCHEMA_KEY] !== DYAD_ALLOW_BUILDS_SCHEMA) {
+  if (metadata[SAMBA_ALLOW_BUILDS_SCHEMA_KEY] !== SAMBA_ALLOW_BUILDS_SCHEMA) {
     throw new Error(
-      `Invalid default pnpm allow-builds list. Expected "${DYAD_ALLOW_BUILDS_SCHEMA_KEY}=${DYAD_ALLOW_BUILDS_SCHEMA}".`,
+      `Invalid default pnpm allow-builds list. Expected "${SAMBA_ALLOW_BUILDS_SCHEMA_KEY}=${SAMBA_ALLOW_BUILDS_SCHEMA}".`,
     );
   }
-  const dataVersion = metadata[DYAD_ALLOW_BUILDS_DATA_VERSION_KEY];
+  const dataVersion = metadata[SAMBA_ALLOW_BUILDS_DATA_VERSION_KEY];
   if (!dataVersion) {
     throw new Error(
-      `Invalid default pnpm allow-builds list. Expected "${DYAD_ALLOW_BUILDS_DATA_VERSION_KEY}".`,
+      `Invalid default pnpm allow-builds list. Expected "${SAMBA_ALLOW_BUILDS_DATA_VERSION_KEY}".`,
     );
   }
-  const channel = metadata[DYAD_ALLOW_BUILDS_CHANNEL_KEY];
+  const channel = metadata[SAMBA_ALLOW_BUILDS_CHANNEL_KEY];
   if (channel !== "local" && channel !== "remote") {
     throw new Error(
-      `Invalid default pnpm allow-builds list. Expected "${DYAD_ALLOW_BUILDS_CHANNEL_KEY}" to be local or remote.`,
+      `Invalid default pnpm allow-builds list. Expected "${SAMBA_ALLOW_BUILDS_CHANNEL_KEY}" to be local or remote.`,
     );
   }
 
   return {
-    schema: DYAD_ALLOW_BUILDS_SCHEMA,
+    schema: SAMBA_ALLOW_BUILDS_SCHEMA,
     dataVersion,
     channel,
     packages: Array.from(
@@ -257,12 +257,12 @@ function buildAllowBuildsManagedBlock(
   indent: string,
 ): string[] {
   return [
-    `${indent}${DYAD_ALLOW_BUILDS_BEGIN}`,
-    `${indent}# ${DYAD_ALLOW_BUILDS_SCHEMA_KEY}=${source.schema}`,
-    `${indent}# ${DYAD_ALLOW_BUILDS_DATA_VERSION_KEY}=${source.dataVersion}`,
-    `${indent}# ${DYAD_ALLOW_BUILDS_CHANNEL_KEY}=${source.channel}`,
+    `${indent}${SAMBA_ALLOW_BUILDS_BEGIN}`,
+    `${indent}# ${SAMBA_ALLOW_BUILDS_SCHEMA_KEY}=${source.schema}`,
+    `${indent}# ${SAMBA_ALLOW_BUILDS_DATA_VERSION_KEY}=${source.dataVersion}`,
+    `${indent}# ${SAMBA_ALLOW_BUILDS_CHANNEL_KEY}=${source.channel}`,
     ...source.packages.map((pkg) => `${indent}${quoteYamlMapKey(pkg)}: true`),
-    `${indent}${DYAD_ALLOW_BUILDS_END}`,
+    `${indent}${SAMBA_ALLOW_BUILDS_END}`,
   ];
 }
 
@@ -272,16 +272,16 @@ function findAllowBuildsManagedBlock(lines: string[]): {
 } | null {
   const beginIndexes = lines
     .map((line, index) =>
-      line.trim() === DYAD_ALLOW_BUILDS_BEGIN ||
-      line.trim() === LEGACY_DYAD_ALLOW_BUILDS_BEGIN
+      line.trim() === SAMBA_ALLOW_BUILDS_BEGIN ||
+      line.trim() === LEGACY_SAMBA_ALLOW_BUILDS_BEGIN
         ? index
         : -1,
     )
     .filter((index) => index !== -1);
   const endIndexes = lines
     .map((line, index) =>
-      line.trim() === DYAD_ALLOW_BUILDS_END ||
-      line.trim() === LEGACY_DYAD_ALLOW_BUILDS_END
+      line.trim() === SAMBA_ALLOW_BUILDS_END ||
+      line.trim() === LEGACY_SAMBA_ALLOW_BUILDS_END
         ? index
         : -1,
     )
@@ -304,9 +304,9 @@ function findAllowBuildsManagedBlock(lines: string[]): {
     lines.some((line) => {
       const trimmedLine = line.trim();
       return (
-        trimmedLine.startsWith("# dyad-default-allow-builds=") &&
-        trimmedLine !== LEGACY_DYAD_ALLOW_BUILDS_BEGIN &&
-        trimmedLine !== LEGACY_DYAD_ALLOW_BUILDS_END
+        trimmedLine.startsWith("# samba-default-allow-builds=") &&
+        trimmedLine !== LEGACY_SAMBA_ALLOW_BUILDS_BEGIN &&
+        trimmedLine !== LEGACY_SAMBA_ALLOW_BUILDS_END
       );
     })
   ) {
@@ -338,14 +338,14 @@ function getExistingManagedAllowBuildsMetadata(
   );
   return {
     schema:
-      metadata[DYAD_ALLOW_BUILDS_SCHEMA_KEY] === DYAD_ALLOW_BUILDS_SCHEMA
-        ? DYAD_ALLOW_BUILDS_SCHEMA
+      metadata[SAMBA_ALLOW_BUILDS_SCHEMA_KEY] === SAMBA_ALLOW_BUILDS_SCHEMA
+        ? SAMBA_ALLOW_BUILDS_SCHEMA
         : undefined,
-    dataVersion: metadata[DYAD_ALLOW_BUILDS_DATA_VERSION_KEY],
+    dataVersion: metadata[SAMBA_ALLOW_BUILDS_DATA_VERSION_KEY],
     channel:
-      metadata[DYAD_ALLOW_BUILDS_CHANNEL_KEY] === "local" ||
-      metadata[DYAD_ALLOW_BUILDS_CHANNEL_KEY] === "remote"
-        ? metadata[DYAD_ALLOW_BUILDS_CHANNEL_KEY]
+      metadata[SAMBA_ALLOW_BUILDS_CHANNEL_KEY] === "local" ||
+      metadata[SAMBA_ALLOW_BUILDS_CHANNEL_KEY] === "remote"
+        ? metadata[SAMBA_ALLOW_BUILDS_CHANNEL_KEY]
         : undefined,
   };
 }
@@ -476,7 +476,7 @@ function removeAutoDeniedPromotedBuilds(
     if (
       parsedLine &&
       promotedPackageSet.has(parsedLine.key) &&
-      lines[index].includes(DYAD_AUTO_DENIED_ALLOW_BUILDS_COMMENT)
+      lines[index].includes(SAMBA_AUTO_DENIED_ALLOW_BUILDS_COMMENT)
     ) {
       lines.splice(index, 1);
       promotedPackages.push(parsedLine.key);
@@ -517,7 +517,7 @@ function insertAutoDeniedBuilds(
     0,
     ...newDeniedPackageNames.map(
       (packageName) =>
-        `  ${quoteYamlMapKey(packageName)}: false ${DYAD_AUTO_DENIED_ALLOW_BUILDS_COMMENT}`,
+        `  ${quoteYamlMapKey(packageName)}: false ${SAMBA_AUTO_DENIED_ALLOW_BUILDS_COMMENT}`,
     ),
   );
   return newDeniedPackageNames;
@@ -674,19 +674,19 @@ async function fetchRemoteAllowBuildsSource(
 async function fetchRemoteAllowBuildsSourceFromNetwork(
   fetcher: AllowBuildsTextFetcher,
 ): Promise<AllowBuildsSource | null> {
-  // Samba Builder: zero backend do Dyad — a lista remota de builds aprovados
-  // (api.dyad.sh) não é consultada; só allowlist local.
-  if (!DYAD_ALLOW_BUILDS_REMOTE_URL) {
+  // Samba Builder: zero backend do Samba — a lista remota de builds aprovados
+  // (backend remoto não é consultado; só allowlist local).
+  if (!SAMBA_ALLOW_BUILDS_REMOTE_URL) {
     return null;
   }
   const controller = new AbortController();
   const timeout = setTimeout(
     () => controller.abort(),
-    DYAD_ALLOW_BUILDS_FETCH_TIMEOUT_MS,
+    SAMBA_ALLOW_BUILDS_FETCH_TIMEOUT_MS,
   );
 
   try {
-    const response = await fetcher(DYAD_ALLOW_BUILDS_REMOTE_URL, {
+    const response = await fetcher(SAMBA_ALLOW_BUILDS_REMOTE_URL, {
       signal: controller.signal,
     });
     if (!response.ok) {
@@ -694,7 +694,7 @@ async function fetchRemoteAllowBuildsSourceFromNetwork(
     }
 
     const text = await response.text();
-    if (text.length > DYAD_ALLOW_BUILDS_MAX_BYTES) {
+    if (text.length > SAMBA_ALLOW_BUILDS_MAX_BYTES) {
       return null;
     }
 
@@ -704,7 +704,7 @@ async function fetchRemoteAllowBuildsSourceFromNetwork(
     }
     remoteAllowBuildsCache.set(fetcher, {
       source,
-      expiresAtMs: Date.now() + DYAD_ALLOW_BUILDS_CACHE_TTL_MS,
+      expiresAtMs: Date.now() + SAMBA_ALLOW_BUILDS_CACHE_TTL_MS,
     });
     return source;
   } catch (error) {
@@ -738,7 +738,7 @@ async function resolveAllowBuildsSource({
   const existingMetadata =
     getExistingManagedAllowBuildsMetadata(existingContent);
   if (
-    existingMetadata?.schema === DYAD_ALLOW_BUILDS_SCHEMA &&
+    existingMetadata?.schema === SAMBA_ALLOW_BUILDS_SCHEMA &&
     existingMetadata.channel === "remote"
   ) {
     return null;
@@ -1219,7 +1219,7 @@ export async function getPnpmMinimumReleaseAgeSupport(
   warningMessage?: string;
 }> {
   const testPnpmVersion = IS_TEST_BUILD
-    ? process.env.DYAD_TEST_PNPM_VERSION
+    ? process.env.SAMBA_TEST_PNPM_VERSION
     : undefined;
   if (testPnpmVersion) {
     if (isVersionAtLeast(testPnpmVersion, PNPM_MINIMUM_RELEASE_AGE_VERSION)) {

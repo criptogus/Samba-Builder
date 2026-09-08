@@ -12,7 +12,7 @@ import {
   getFallbackFailureAction,
   getFallbackRetryDelayMs,
 } from "./fallback_ai_model";
-import { DyadError, DyadErrorKind } from "@/errors/dyad_error";
+import { SambaError, SambaErrorKind } from "@/errors/samba_error";
 
 const logMocks = vi.hoisted(() => ({
   warn: vi.fn(),
@@ -68,7 +68,7 @@ function apiCallError(params: {
 }): APICallError {
   return new APICallError({
     ...params,
-    url: "https://engine.dyad.sh/v1/responses",
+    url: "https://engine.samba.sh/v1/responses",
     requestBodyValues: {},
   });
 }
@@ -347,7 +347,7 @@ describe("fallback failure policy", () => {
 
     const result = await model.doStream({
       prompt: [],
-      headers: { "x-dyad-internal-request-id": "request-123" },
+      headers: { "x-samba-internal-request-id": "request-123" },
     } as unknown as LanguageModelV3CallOptions);
     await drain(result.stream);
 
@@ -492,7 +492,7 @@ describe("fallback failure policy", () => {
 
     const result = await model.doStream({
       prompt: [],
-      headers: { "x-dyad-internal-request-id": "request-stream" },
+      headers: { "x-samba-internal-request-id": "request-stream" },
     } as unknown as LanguageModelV3CallOptions);
     await drain(result.stream);
 
@@ -675,9 +675,9 @@ describe("fallback failure policy", () => {
     await expect(
       model.doStream({ prompt: [] } as unknown as LanguageModelV3CallOptions),
     ).rejects.toMatchObject({
-      name: "DyadError",
-      kind: DyadErrorKind.External,
-    } satisfies Partial<DyadError>);
+      name: "SambaError",
+      kind: SambaErrorKind.External,
+    } satisfies Partial<SambaError>);
   });
 
   it("formats diagnostics without serializing request bodies or headers", () => {
@@ -840,7 +840,7 @@ describe("fallback model call options", () => {
       temperature: 0.2,
       maxOutputTokens: 128_000,
       providerOptions: {
-        "dyad-engine": { dyadRequestId: "req-1" },
+        "samba-engine": { sambaRequestId: "req-1" },
         openai: { reasoningEffort: "medium" },
       },
     } as unknown as LanguageModelV3CallOptions);
@@ -855,8 +855,8 @@ describe("fallback model call options", () => {
       thinking: { type: "adaptive" },
     });
     // ...request-scoped options pass through untouched.
-    expect((seen.providerOptions as any)["dyad-engine"]).toEqual({
-      dyadRequestId: "req-1",
+    expect((seen.providerOptions as any)["samba-engine"]).toEqual({
+      sambaRequestId: "req-1",
     });
     expect(seen.prompt).toEqual([]);
   });

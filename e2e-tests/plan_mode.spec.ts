@@ -10,7 +10,7 @@ async function finishPlanPresentation(po: any) {
 testSkipIfWindows(
   "plan mode - add and review plan annotations",
   async ({ po }) => {
-    await po.setUpDyadPro({ localAgent: true });
+    await po.setUpSambaPro({ localAgent: true });
     await po.importApp("minimal");
     await po.chatActions.clickNewChat();
     await po.chatActions.selectChatMode("plan");
@@ -112,7 +112,7 @@ testSkipIfWindows(
     });
 
     await expect(po.page.getByTestId("messages-list")).toContainText(
-      "[[dyad-dump-path=",
+      "[[samba-dump-path=",
       { timeout: Timeout.EXTRA_LONG },
     );
 
@@ -125,7 +125,7 @@ testSkipIfWindows(
   "plan mode - view plan button opens preview panel when collapsed",
   async ({ po }) => {
     // Set up app
-    await po.setUpDyadPro({ localAgent: true });
+    await po.setUpSambaPro({ localAgent: true });
     await po.importApp("minimal");
     await po.chatActions.clickNewChat();
 

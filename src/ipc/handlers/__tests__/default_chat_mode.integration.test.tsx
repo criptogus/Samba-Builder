@@ -11,11 +11,11 @@ import { writeSettings } from "@/main/settings";
 import type { UserSettings } from "@/lib/schemas";
 import { ipc } from "@/ipc/types";
 
-const DYAD_PRO_SETTINGS: Partial<UserSettings> = {
-  enableDyadPro: true,
+const SAMBA_PRO_SETTINGS: Partial<UserSettings> = {
+  enableSambaPro: true,
   providerSettings: {
     auto: {
-      apiKey: { value: "testdyadkey" },
+      apiKey: { value: "testsambakey" },
     },
   },
   selectedChatMode: "local-agent",
@@ -31,9 +31,9 @@ describe("default chat mode selector (integration)", () => {
       autoApprove: true,
       chatMode: "local-agent",
       // Samba Builder settings trigger free-quota fetches; route them to the fake
-      // engine instead of the real engine.dyad.sh.
+      // engine instead of the real engine.samba.sh.
       engine: true,
-      settings: { isTestMode: true, ...DYAD_PRO_SETTINGS },
+      settings: { isTestMode: true, ...SAMBA_PRO_SETTINGS },
     });
   }, 60_000);
 
@@ -58,7 +58,7 @@ describe("default chat mode selector (integration)", () => {
 
   it("shows Build for a non-Pro build default", async () => {
     writeSettings({
-      enableDyadPro: false,
+      enableSambaPro: false,
       providerSettings: {},
       selectedChatMode: "build",
       defaultChatMode: "build",

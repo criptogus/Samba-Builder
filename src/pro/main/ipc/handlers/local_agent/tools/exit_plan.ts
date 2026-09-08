@@ -3,7 +3,7 @@ import log from "electron-log";
 import { eq } from "drizzle-orm";
 import { ToolDefinition, AgentContext } from "./types";
 import { safeSend } from "@/ipc/utils/safe_sender";
-import { DyadError, DyadErrorKind } from "@/errors/dyad_error";
+import { SambaError, SambaErrorKind } from "@/errors/samba_error";
 import { db } from "@/db";
 import { apps } from "@/db/schema";
 import { startPlanHandoffFromMain } from "@/ipc/services/plan_handoff_service";
@@ -54,14 +54,14 @@ export const exitPlanTool: ToolDefinition<z.infer<typeof exitPlanSchema>> = {
   buildXml: (args) => {
     if (!args.confirmation) return undefined;
 
-    return `<dyad-exit-plan></dyad-exit-plan>`;
+    return `<samba-exit-plan></samba-exit-plan>`;
   },
 
   execute: async (args, ctx: AgentContext) => {
     if (!args.confirmation) {
-      throw new DyadError(
+      throw new SambaError(
         "User must confirm the plan before exiting plan mode",
-        DyadErrorKind.Precondition,
+        SambaErrorKind.Precondition,
       );
     }
 

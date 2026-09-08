@@ -1,6 +1,6 @@
 Creating five files to verify streaming-renderer block stability.
 
-<dyad-write path="src/streaming/StreamingRenderBlockA.tsx" description="Block A test fixture">
+<samba-write path="src/streaming/StreamingRenderBlockA.tsx" description="Block A test fixture">
 import React from "react";
 
 export const StreamingRenderBlockA = () => {
@@ -14,11 +14,11 @@ export const StreamingRenderBlockA = () => {
 };
 
 export default StreamingRenderBlockA;
-</dyad-write>
+</samba-write>
 
 A short markdown paragraph between the first and second blocks so the parser sees a markdown segment as well as custom-tag segments.
 
-<dyad-write path="src/streaming/StreamingRenderBlockB.tsx" description="Block B test fixture">
+<samba-write path="src/streaming/StreamingRenderBlockB.tsx" description="Block B test fixture">
 import React from "react";
 
 export const StreamingRenderBlockB = () => {
@@ -32,11 +32,11 @@ export const StreamingRenderBlockB = () => {
 };
 
 export default StreamingRenderBlockB;
-</dyad-write>
+</samba-write>
 
 Another markdown segment to exercise interleaved markdown and custom-tag block segments.
 
-<dyad-write path="src/streaming/StreamingRenderBlockC.tsx" description="Block C test fixture">
+<samba-write path="src/streaming/StreamingRenderBlockC.tsx" description="Block C test fixture">
 import React from "react";
 
 export const StreamingRenderBlockC = () => {
@@ -49,9 +49,9 @@ export const StreamingRenderBlockC = () => {
 };
 
 export default StreamingRenderBlockC;
-</dyad-write>
+</samba-write>
 
-<dyad-write path="src/streaming/StreamingRenderBlockD.tsx" description="Block D test fixture">
+<samba-write path="src/streaming/StreamingRenderBlockD.tsx" description="Block D test fixture">
 import React from "react";
 
 export const StreamingRenderBlockD = () => {
@@ -64,9 +64,9 @@ export const StreamingRenderBlockD = () => {
 };
 
 export default StreamingRenderBlockD;
-</dyad-write>
+</samba-write>
 
-<dyad-write path="src/streaming/StreamingRenderBlockE.tsx" description="Block E test fixture">
+<samba-write path="src/streaming/StreamingRenderBlockE.tsx" description="Block E test fixture">
 import React from "react";
 
 export const StreamingRenderBlockE = () => {
@@ -79,6 +79,6 @@ export const StreamingRenderBlockE = () => {
 };
 
 export default StreamingRenderBlockE;
-</dyad-write>
+</samba-write>
 
 All five files generated.

@@ -33,7 +33,9 @@ export function createAppRelaunchRequest() {
         if (request) {
           relaunch({
             args: [
-              ...currentArgs.filter((arg) => !arg.startsWith("dyad://")),
+              ...currentArgs.filter(
+                (arg) => !arg.startsWith("sambabuilder://"),
+              ),
               ...(request.deepLinkUrl ? [request.deepLinkUrl] : []),
             ],
           });

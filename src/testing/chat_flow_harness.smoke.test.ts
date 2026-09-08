@@ -39,7 +39,7 @@ describe("chat flow harness (smoke)", () => {
   });
 
   it("streams agent tools, writes files, commits, and records messages", async () => {
-    const prompt = "tc=local-agent/dyad-write-angle";
+    const prompt = "tc=local-agent/samba-write-angle";
     const { result, events, messages, eventsFor } =
       await harness.streamChat(prompt);
 

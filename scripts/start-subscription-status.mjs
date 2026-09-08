@@ -15,21 +15,21 @@ function getPayload(requestedState) {
       return {
         alert: "payment_past_due",
         effectiveAt: null,
-        actionUrl: "https://academy.dyad.sh/billing?source=desktop_fixture",
+        actionUrl: "https://academy.samba.sh/billing?source=desktop_fixture",
       };
     case "subscription_ending":
       return {
         alert: "subscription_ending",
         effectiveAt: futureDate(14),
         actionUrl:
-          "https://academy.dyad.sh/subscription?source=desktop_fixture",
+          "https://academy.samba.sh/subscription?source=desktop_fixture",
       };
     case "subscription_paused":
       return {
         alert: "subscription_paused",
         effectiveAt: futureDate(30),
         actionUrl:
-          "https://academy.dyad.sh/subscription?source=desktop_fixture",
+          "https://academy.samba.sh/subscription?source=desktop_fixture",
       };
     case "healthy":
       return { alert: null, effectiveAt: null, actionUrl: null };
@@ -80,8 +80,8 @@ server.listen(0, "127.0.0.1", () => {
     env: {
       ...process.env,
       NODE_ENV: "development",
-      DYAD_SUBSCRIPTION_STATUS_URL: endpoint,
-      DYAD_SUBSCRIPTION_STATUS_FIXTURE_API_KEY: fixtureApiKey,
+      SAMBA_SUBSCRIPTION_STATUS_URL: endpoint,
+      SAMBA_SUBSCRIPTION_STATUS_FIXTURE_API_KEY: fixtureApiKey,
     },
   });
 

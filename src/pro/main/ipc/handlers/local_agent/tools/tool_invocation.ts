@@ -9,7 +9,7 @@
  */
 
 import { readSettings } from "@/main/settings";
-import { DyadError, DyadErrorKind } from "@/errors/dyad_error";
+import { SambaError, SambaErrorKind } from "@/errors/samba_error";
 import { getAppBlueprintForChat } from "@/ipc/handlers/app_blueprint_handlers";
 import type { AgentToolConsent } from "@/lib/schemas";
 import { execGit } from "@/ipc/utils/git_utils";
@@ -268,9 +268,9 @@ export async function requireToolConsentOrThrow<T>(
     metadata: tool.getConsentMetadata?.(args) ?? null,
   });
   if (!allowed) {
-    throw new DyadError(
+    throw new SambaError(
       `User denied permission for ${tool.name}`,
-      DyadErrorKind.UserCancelled,
+      SambaErrorKind.UserCancelled,
     );
   }
 }
@@ -291,15 +291,15 @@ export function assertAppBlueprintApproved(params: {
   }
   const plan = getAppBlueprintForChat(params.chatId);
   if (!plan) {
-    throw new DyadError(
+    throw new SambaError(
       `App blueprint must be created and approved before running ${params.toolName}. Call write_app_blueprint first to present the blueprint for approval.`,
-      DyadErrorKind.Precondition,
+      SambaErrorKind.Precondition,
     );
   }
   if (!plan.approved) {
-    throw new DyadError(
+    throw new SambaError(
       `App blueprint must be approved before running ${params.toolName}. Call write_app_blueprint to present the blueprint for approval.`,
-      DyadErrorKind.Precondition,
+      SambaErrorKind.Precondition,
     );
   }
 }

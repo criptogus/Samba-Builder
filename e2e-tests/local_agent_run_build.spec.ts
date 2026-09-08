@@ -52,7 +52,7 @@ async function runBuildAndVerifyPreview({
 }
 
 async function setUpLocalAgent(po: PageObject) {
-  await po.setUpDyadPro({ autoApprove: true, localAgent: true });
+  await po.setUpSambaPro({ autoApprove: true, localAgent: true });
 }
 
 test("local-agent builds a Vite scaffold without stopping its preview", async ({
@@ -63,7 +63,7 @@ test("local-agent builds a Vite scaffold without stopping its preview", async ({
 
   // Build mode creates an app from the actual bundled Vite scaffold.
   await po.chatActions.selectChatMode("build");
-  await po.sendPrompt("tc=edit-made-with-dyad", {
+  await po.sendPrompt("tc=edit-made-with-samba", {
     timeout: Timeout.EXTRA_LONG,
   });
   await po.appManagement.ensurePnpmInstall();

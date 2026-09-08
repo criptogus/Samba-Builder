@@ -17,7 +17,7 @@ function runWorker(
     const child = utilityProcess.fork(
       path.join(__dirname, "supabase_dependency_analysis_worker.js"),
       [],
-      { serviceName: "dyad-supabase-dependency-analysis" },
+      { serviceName: "samba-supabase-dependency-analysis" },
     );
     let response: SupabaseDependencyAnalysisOutput | undefined;
     let failure: Error | undefined;

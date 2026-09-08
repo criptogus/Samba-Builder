@@ -1,5 +1,5 @@
 import { createVercelClient } from "@/ipc/utils/vercel_utils";
-import { DyadError, DyadErrorKind } from "@/errors/dyad_error";
+import { SambaError, SambaErrorKind } from "@/errors/samba_error";
 export async function submitVercelDeployment(
   token: string,
   project: {
@@ -47,9 +47,9 @@ export async function submitVercelDeployment(
       state: result.readyState ?? "QUEUED",
     };
   } catch {
-    throw new DyadError(
+    throw new SambaError(
       "Não foi possível solicitar a publicação. Confira o token, a equipe e a integração GitHub no painel Vercel antes de repetir.",
-      DyadErrorKind.External,
+      SambaErrorKind.External,
     );
   }
 }

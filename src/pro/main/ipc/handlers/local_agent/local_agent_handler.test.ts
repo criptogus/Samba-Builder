@@ -98,7 +98,7 @@ function buildTestChat(
  */
 function buildTestSettings(
   overrides: {
-    enableDyadPro?: boolean;
+    enableSambaPro?: boolean;
     hasApiKey?: boolean;
     selectedModel?: { name: string; provider: string };
     enableContextCompaction?: boolean;
@@ -120,10 +120,10 @@ function buildTestSettings(
     agentToolConsents: overrides.agentToolConsents,
   };
 
-  if (overrides.enableDyadPro && overrides.hasApiKey !== false) {
+  if (overrides.enableSambaPro && overrides.hasApiKey !== false) {
     return {
       ...baseSettings,
-      enableDyadPro: true,
+      enableSambaPro: true,
       providerSettings: {
         auto: {
           apiKey: { value: "test-api-key" },
@@ -234,7 +234,7 @@ vi.mock("@/main/settings", () => ({
 }));
 
 vi.mock("@/paths/paths", () => ({
-  getDyadAppPath: vi.fn((appPath: string) => `/mock/apps/${appPath}`),
+  getSambaAppPath: vi.fn((appPath: string) => `/mock/apps/${appPath}`),
 }));
 
 // Track IPC messages sent via safeSend
@@ -293,7 +293,7 @@ vi.mock("@/ipc/utils/token_utils", async (importOriginal) => ({
 vi.mock("@/ipc/utils/provider_options", () => ({
   getProviderOptions: vi.fn(() => ({})),
   getAiHeaders: vi.fn(() => ({})),
-  DYAD_INTERNAL_REQUEST_ID_HEADER: "x-dyad-internal-request-id",
+  SAMBA_INTERNAL_REQUEST_ID_HEADER: "x-samba-internal-request-id",
 }));
 
 vi.mock("@/ipc/utils/mcp_manager", () => ({
@@ -316,7 +316,7 @@ vi.mock("@/pro/main/ipc/handlers/local_agent/tool_definitions", () => ({
       name: "read_chat",
       buildXml: (args: { chat_id?: number }, isComplete: boolean) =>
         args.chat_id && !isComplete
-          ? `<dyad-read-chat chat-id="${args.chat_id}" state="pending">Reading chat...</dyad-read-chat>`
+          ? `<samba-read-chat chat-id="${args.chat_id}" state="pending">Reading chat...</samba-read-chat>`
           : undefined,
     },
     {
@@ -326,7 +326,7 @@ vi.mock("@/pro/main/ipc/handlers/local_agent/tool_definitions", () => ({
         isComplete: boolean,
       ) => {
         if (!args.path) return undefined;
-        return `<dyad-write path="${args.path}">${args.content ?? ""}${isComplete ? "</dyad-write>" : ""}`;
+        return `<samba-write path="${args.path}">${args.content ?? ""}${isComplete ? "</samba-write>" : ""}`;
       },
     },
   ],
@@ -405,7 +405,7 @@ import {
   hasCompletedAppBlueprintQuestionnaire,
   shouldStopAfterAppBlueprintWrite,
 } from "@/pro/main/ipc/handlers/local_agent/local_agent_handler";
-import { DyadError, DyadErrorKind } from "@/errors/dyad_error";
+import { SambaError, SambaErrorKind } from "@/errors/samba_error";
 import { buildAgentToolSet } from "@/pro/main/ipc/handlers/local_agent/tool_definitions";
 import {
   commitAllChanges,
@@ -508,12 +508,12 @@ const handleLocalAgentStream = (
 // Tests
 // ============================================================================
 
-const dyadRequestId = "test-request-id";
+const sambaRequestId = "test-request-id";
 
 describe("Implementer outcome notices", () => {
   it("warns when cancelled Implementer edits may be preserved", () => {
     expect(buildImplementerOutcomeNotices([], ["Fix auth"])).toEqual([
-      '<dyad-status title="Implementer cancelled" state="warning">Cancelled before completion: Fix auth. Partial changes may have been preserved; the root agent remains responsible for reviewing the final diff and choosing appropriate verification.</dyad-status>',
+      '<samba-status title="Implementer cancelled" state="warning">Cancelled before completion: Fix auth. Partial changes may have been preserved; the root agent remains responsible for reviewing the final diff and choosing appropriate verification.</samba-status>',
     ]);
   });
 });
@@ -1061,7 +1061,7 @@ describe("handleLocalAgentStream", () => {
 
   it("projects the capability-aware Implementer prompt into the root tool context", async () => {
     const { event } = createFakeEvent();
-    mockSettings = buildTestSettings({ enableDyadPro: true });
+    mockSettings = buildTestSettings({ enableSambaPro: true });
     mockChatData = buildTestChat();
     let seenContextFactory: AgentContext["refreshImplementerContext"];
     let seenSupabaseProviderToolsAvailable: boolean | undefined;
@@ -1095,7 +1095,7 @@ describe("handleLocalAgentStream", () => {
         implementerFallbackSystemPrompt: "Fallback implementer rules",
         supabaseProviderToolsAvailable: false,
         neonProviderToolsAvailable: true,
-        dyadRequestId,
+        sambaRequestId,
       },
     );
 
@@ -1147,7 +1147,7 @@ describe("handleLocalAgentStream", () => {
       async ({ provider, name, runtime, shouldNormalize }) => {
         const runtimeModel = runtime ?? { provider, name };
         const { event } = createFakeEvent();
-        mockSettings = buildTestSettings({ enableDyadPro: true });
+        mockSettings = buildTestSettings({ enableSambaPro: true });
         mockChatData = buildTestChat({
           modelSelection: {
             provider,
@@ -1213,7 +1213,7 @@ describe("handleLocalAgentStream", () => {
           {
             placeholderMessageId: 10,
             systemPrompt: "You are helpful",
-            dyadRequestId,
+            sambaRequestId,
           },
         );
 
@@ -1233,7 +1233,7 @@ describe("handleLocalAgentStream", () => {
   describe("MCP result limits", () => {
     it("bounds direct MCP tool output before it reaches XML or model history", async () => {
       const { event } = createFakeEvent();
-      mockSettings = buildTestSettings({ enableDyadPro: true });
+      mockSettings = buildTestSettings({ enableSambaPro: true });
       mockChatData = buildTestChat();
       mockMcpServers = [{ id: 42, name: "srv" }];
       const hugeText = "m".repeat(MCP_RESULT_MAX_BYTES * 3);
@@ -1279,20 +1279,20 @@ describe("handleLocalAgentStream", () => {
         {
           placeholderMessageId: 10,
           systemPrompt: "You are helpful",
-          dyadRequestId,
+          sambaRequestId,
         },
       );
 
       expect(Buffer.byteLength(returnedOutput, "utf8")).toBeLessThanOrEqual(
         MCP_RESULT_MAX_BYTES,
       );
-      expect(returnedOutput).toContain("_dyadMcpTruncation");
+      expect(returnedOutput).toContain("_sambaMcpTruncation");
       expect(returnedOutput).not.toContain(hugeText);
       const persistedContent = dbOperations.updates
         .filter((operation) => typeof operation.data.content === "string")
         .map((operation) => operation.data.content as string)
         .join("\n");
-      expect(persistedContent).toContain("_dyadMcpTruncation");
+      expect(persistedContent).toContain("_sambaMcpTruncation");
       expect(persistedContent).not.toContain(hugeText);
     });
   });
@@ -1300,7 +1300,7 @@ describe("handleLocalAgentStream", () => {
   describe("referenced app reminders", () => {
     it("advertises only registered referenced-app tools", async () => {
       const { event } = createFakeEvent();
-      mockSettings = buildTestSettings({ enableDyadPro: true });
+      mockSettings = buildTestSettings({ enableSambaPro: true });
       mockChatData = buildTestChat();
       mockStreamResult = createFakeStream([]);
       vi.mocked(buildAgentToolSet).mockReturnValue({
@@ -1314,7 +1314,7 @@ describe("handleLocalAgentStream", () => {
         {
           placeholderMessageId: 10,
           systemPrompt: "You are helpful",
-          dyadRequestId,
+          sambaRequestId,
           referencedApps: [
             { appName: "Reference App", appPath: "/tmp/reference-app" },
           ],
@@ -1335,8 +1335,8 @@ describe("handleLocalAgentStream", () => {
     });
   });
 
-  // Samba Builder: sem plano Pro/backend — a validação de status Pro do Dyad
-  // (exigir enableDyadPro/chave do engine) foi removida do produto. O agente
+  // Samba Builder: sem plano Pro/backend — a validação de status Pro do Samba
+  // (exigir enableSambaPro/chave do engine) foi removida do produto. O agente
   // roda com o modelo BYOK do usuário; o describe "Pro status validation"
   // (2 testes) foi removido por testar comportamento eliminado.
 
@@ -1344,7 +1344,7 @@ describe("handleLocalAgentStream", () => {
     it("should throw error when chat is not found", async () => {
       // Arrange
       const { event } = createFakeEvent();
-      mockSettings = buildTestSettings({ enableDyadPro: true });
+      mockSettings = buildTestSettings({ enableSambaPro: true });
       mockChatData = null; // Chat not found
 
       // Act & Assert
@@ -1356,7 +1356,7 @@ describe("handleLocalAgentStream", () => {
           {
             placeholderMessageId: 10,
             systemPrompt: "You are helpful",
-            dyadRequestId,
+            sambaRequestId,
           },
         ),
       ).rejects.toThrow("Chat not found: 999");
@@ -1365,7 +1365,7 @@ describe("handleLocalAgentStream", () => {
     it("should throw error when chat has no associated app", async () => {
       // Arrange
       const { event } = createFakeEvent();
-      mockSettings = buildTestSettings({ enableDyadPro: true });
+      mockSettings = buildTestSettings({ enableSambaPro: true });
       mockChatData = { ...buildTestChat(), app: null } as any;
 
       // Act & Assert
@@ -1377,7 +1377,7 @@ describe("handleLocalAgentStream", () => {
           {
             placeholderMessageId: 10,
             systemPrompt: "You are helpful",
-            dyadRequestId,
+            sambaRequestId,
           },
         ),
       ).rejects.toThrow("Chat not found: 1");
@@ -1392,7 +1392,7 @@ describe("handleLocalAgentStream", () => {
         name: "override-model",
         effortLevel: "high",
       };
-      mockSettings = buildTestSettings({ enableDyadPro: true });
+      mockSettings = buildTestSettings({ enableSambaPro: true });
       mockChatData = buildTestChat({
         modelSelection: {
           provider: "anthropic",
@@ -1409,7 +1409,7 @@ describe("handleLocalAgentStream", () => {
         {
           placeholderMessageId: 10,
           systemPrompt: "You are helpful",
-          dyadRequestId,
+          sambaRequestId,
           modelSelectionOverride,
         },
       );
@@ -1425,7 +1425,7 @@ describe("handleLocalAgentStream", () => {
   describe("Warning propagation", () => {
     it("replaces partial output with an inline warning for Fable refusals", async () => {
       const { event, getMessagesByChannel } = createFakeEvent();
-      mockSettings = buildTestSettings({ enableDyadPro: true });
+      mockSettings = buildTestSettings({ enableSambaPro: true });
       mockChatData = buildTestChat();
       mockStreamResult = createFakeStream([
         { type: "text-delta", id: "text-1", text: "Incomplete output" },
@@ -1443,7 +1443,7 @@ describe("handleLocalAgentStream", () => {
         {
           placeholderMessageId: 10,
           systemPrompt: "You are helpful",
-          dyadRequestId,
+          sambaRequestId,
         },
       );
 
@@ -1453,7 +1453,7 @@ describe("handleLocalAgentStream", () => {
       const finalContent = contentUpdates.at(-1)?.data.content as string;
       expect(finalContent).not.toContain("Incomplete output");
       expect(finalContent).toContain(
-        '<dyad-output type="warning" message="Model refused to respond for safety reasons">',
+        '<samba-output type="warning" message="Model refused to respond for safety reasons">',
       );
       const aiMessagesUpdate = dbOperations.updates.find(
         (update) => update.data.aiMessagesJson !== undefined,
@@ -1470,7 +1470,7 @@ describe("handleLocalAgentStream", () => {
 
     it("reports updated files when a successful workspace mutation precedes a refusal", async () => {
       const { event, getMessagesByChannel } = createFakeEvent();
-      mockSettings = buildTestSettings({ enableDyadPro: true });
+      mockSettings = buildTestSettings({ enableSambaPro: true });
       mockChatData = buildTestChat();
       vi.mocked(buildAgentToolSet).mockImplementationOnce((ctx) => {
         ctx.workspaceMutated = true;
@@ -1491,7 +1491,7 @@ describe("handleLocalAgentStream", () => {
         {
           placeholderMessageId: 10,
           systemPrompt: "You are helpful",
-          dyadRequestId,
+          sambaRequestId,
         },
       );
 
@@ -1503,7 +1503,7 @@ describe("handleLocalAgentStream", () => {
     it("enables Implementer for Auto Sidekick when the experiment is off", async () => {
       const { event } = createFakeEvent();
       mockSettings = buildTestSettings({
-        enableDyadPro: true,
+        enableSambaPro: true,
         enableImplementerSubagent: false,
         selectedModel: { provider: "auto", name: "auto-sidekick" },
       });
@@ -1524,7 +1524,7 @@ describe("handleLocalAgentStream", () => {
         {
           placeholderMessageId: 10,
           systemPrompt: "You are helpful",
-          dyadRequestId,
+          sambaRequestId,
         },
       );
 
@@ -1534,7 +1534,7 @@ describe("handleLocalAgentStream", () => {
     it("propagates the advanced sub-agent setting to root tool context", async () => {
       const { event } = createFakeEvent();
       mockSettings = buildTestSettings({
-        enableDyadPro: true,
+        enableSambaPro: true,
         enableAdvancedSubagents: true,
       });
       mockChatData = buildTestChat();
@@ -1554,7 +1554,7 @@ describe("handleLocalAgentStream", () => {
         {
           placeholderMessageId: 10,
           systemPrompt: "You are helpful",
-          dyadRequestId,
+          sambaRequestId,
         },
       );
 
@@ -1564,7 +1564,7 @@ describe("handleLocalAgentStream", () => {
     it("keeps root code search available when spawn_agent consent is Never", async () => {
       const { event } = createFakeEvent();
       mockSettings = buildTestSettings({
-        enableDyadPro: true,
+        enableSambaPro: true,
         agentToolConsents: { spawn_agent: "never" },
       });
       mockChatData = buildTestChat();
@@ -1584,7 +1584,7 @@ describe("handleLocalAgentStream", () => {
         {
           placeholderMessageId: 10,
           systemPrompt: "You are helpful",
-          dyadRequestId,
+          sambaRequestId,
         },
       );
 
@@ -1594,7 +1594,7 @@ describe("handleLocalAgentStream", () => {
     it("pauses the prompt queue when a real mutation requires auto-review", async () => {
       const { event, getMessagesByChannel } = createFakeEvent();
       mockSettings = buildTestSettings({
-        enableDyadPro: true,
+        enableSambaPro: true,
         enableAutoReview: true,
       });
       mockChatData = buildTestChat();
@@ -1613,7 +1613,7 @@ describe("handleLocalAgentStream", () => {
         {
           placeholderMessageId: 10,
           systemPrompt: "You are helpful",
-          dyadRequestId,
+          sambaRequestId,
         },
       );
 
@@ -1629,7 +1629,7 @@ describe("handleLocalAgentStream", () => {
     it("treats successful non-file mutations as workspace updates", async () => {
       const { event, getMessagesByChannel } = createFakeEvent();
       mockSettings = buildTestSettings({
-        enableDyadPro: true,
+        enableSambaPro: true,
         enableAutoReview: true,
       });
       mockChatData = buildTestChat();
@@ -1648,7 +1648,7 @@ describe("handleLocalAgentStream", () => {
         {
           placeholderMessageId: 10,
           systemPrompt: "You are helpful",
-          dyadRequestId,
+          sambaRequestId,
         },
       );
 
@@ -1664,7 +1664,7 @@ describe("handleLocalAgentStream", () => {
     it("refreshes after opaque MCP calls without starting a Git review", async () => {
       const { event, getMessagesByChannel } = createFakeEvent();
       mockSettings = buildTestSettings({
-        enableDyadPro: true,
+        enableSambaPro: true,
         enableAutoReview: true,
       });
       mockChatData = buildTestChat();
@@ -1683,7 +1683,7 @@ describe("handleLocalAgentStream", () => {
         {
           placeholderMessageId: 10,
           systemPrompt: "You are helpful",
-          dyadRequestId,
+          sambaRequestId,
         },
       );
 
@@ -1701,7 +1701,7 @@ describe("handleLocalAgentStream", () => {
     it("does not report opaque MCP calls as file updates in read-only mode", async () => {
       const { event, getMessagesByChannel } = createFakeEvent();
       mockSettings = buildTestSettings({
-        enableDyadPro: true,
+        enableSambaPro: true,
         enableAutoReview: true,
       });
       mockChatData = buildTestChat();
@@ -1720,7 +1720,7 @@ describe("handleLocalAgentStream", () => {
         {
           placeholderMessageId: 10,
           systemPrompt: "You are helpful",
-          dyadRequestId,
+          sambaRequestId,
           readOnly: true,
         },
       );
@@ -1737,7 +1737,7 @@ describe("handleLocalAgentStream", () => {
         entityKey: 1,
         operationId: "local-agent-error",
       } as const;
-      mockSettings = buildTestSettings({ enableDyadPro: true });
+      mockSettings = buildTestSettings({ enableSambaPro: true });
       mockChatData = buildTestChat();
 
       const warningMessage = "Firewall checks were skipped for this install.";
@@ -1768,7 +1768,7 @@ describe("handleLocalAgentStream", () => {
         {
           placeholderMessageId: 10,
           systemPrompt: "You are helpful",
-          dyadRequestId,
+          sambaRequestId,
         },
       );
 
@@ -1784,7 +1784,7 @@ describe("handleLocalAgentStream", () => {
 
     it("persists successful shared-module Supabase deploy status into aiMessagesJson", async () => {
       const { event } = createFakeEvent();
-      mockSettings = buildTestSettings({ enableDyadPro: true });
+      mockSettings = buildTestSettings({ enableSambaPro: true });
       mockChatData = buildTestChat({
         supabaseProjectId: "supabase-project-id",
       });
@@ -1792,7 +1792,7 @@ describe("handleLocalAgentStream", () => {
       vi.mocked(deployAllFunctionsIfNeeded).mockImplementationOnce(
         async (ctx) => {
           ctx.onXmlComplete(
-            '<dyad-status title="Supabase functions deployed: 2/2 complete" state="finished">\n2 succeeded\n0 failed\n</dyad-status>',
+            '<samba-status title="Supabase functions deployed: 2/2 complete" state="finished">\n2 succeeded\n0 failed\n</samba-status>',
           );
           return { success: true };
         },
@@ -1805,7 +1805,7 @@ describe("handleLocalAgentStream", () => {
         {
           placeholderMessageId: 10,
           systemPrompt: "You are helpful",
-          dyadRequestId,
+          sambaRequestId,
         },
       );
 
@@ -1815,7 +1815,7 @@ describe("handleLocalAgentStream", () => {
       const finalContent = contentUpdates[contentUpdates.length - 1].data
         .content as string;
 
-      expect(finalContent).toContain("<dyad-status");
+      expect(finalContent).toContain("<samba-status");
       expect(finalContent).toContain(
         'title="Supabase functions deployed: 2/2 complete"',
       );
@@ -1831,15 +1831,15 @@ describe("handleLocalAgentStream", () => {
             .aiMessagesJson as { messages: unknown[] }
         ).messages,
       );
-      expect(persistedAiMessages).toContain("<dyad-status");
+      expect(persistedAiMessages).toContain("<samba-status");
       expect(persistedAiMessages).toContain(
         'title=\\"Supabase functions deployed: 2/2 complete\\"',
       );
     });
 
-    it("appends shared-module Supabase deploy warnings as dyad-output", async () => {
+    it("appends shared-module Supabase deploy warnings as samba-output", async () => {
       const { event } = createFakeEvent();
-      mockSettings = buildTestSettings({ enableDyadPro: true });
+      mockSettings = buildTestSettings({ enableSambaPro: true });
       mockChatData = buildTestChat({
         supabaseProjectId: "supabase-project-id",
       });
@@ -1857,7 +1857,7 @@ describe("handleLocalAgentStream", () => {
         {
           placeholderMessageId: 10,
           systemPrompt: "You are helpful",
-          dyadRequestId,
+          sambaRequestId,
         },
       );
 
@@ -1867,7 +1867,7 @@ describe("handleLocalAgentStream", () => {
       const finalContent = contentUpdates[contentUpdates.length - 1].data
         .content as string;
 
-      expect(finalContent).toContain('<dyad-output type="warning"');
+      expect(finalContent).toContain('<samba-output type="warning"');
       expect(finalContent).toContain(
         'message="Supabase function deploy warning"',
       );
@@ -1887,15 +1887,15 @@ describe("handleLocalAgentStream", () => {
             .aiMessagesJson as { messages: unknown[] }
         ).messages,
       );
-      expect(persistedAiMessages).toContain('<dyad-output type=\\"warning\\"');
+      expect(persistedAiMessages).toContain('<samba-output type=\\"warning\\"');
       expect(persistedAiMessages).toContain(
         'message=\\"Supabase function deploy warning\\"',
       );
     });
 
-    it("appends shared-module Supabase deploy failures as dyad-output and still commits", async () => {
+    it("appends shared-module Supabase deploy failures as samba-output and still commits", async () => {
       const { event, getMessagesByChannel } = createFakeEvent();
-      mockSettings = buildTestSettings({ enableDyadPro: true });
+      mockSettings = buildTestSettings({ enableSambaPro: true });
       mockChatData = buildTestChat({
         supabaseProjectId: "supabase-project-id",
       });
@@ -1913,7 +1913,7 @@ describe("handleLocalAgentStream", () => {
         {
           placeholderMessageId: 10,
           systemPrompt: "You are helpful",
-          dyadRequestId,
+          sambaRequestId,
         },
       );
 
@@ -1926,7 +1926,7 @@ describe("handleLocalAgentStream", () => {
       const finalContent = contentUpdates[contentUpdates.length - 1].data
         .content as string;
 
-      expect(finalContent).toContain('<dyad-output type="error"');
+      expect(finalContent).toContain('<samba-output type="error"');
       expect(finalContent).toContain(
         'message="Failed to deploy Supabase functions"',
       );
@@ -1946,7 +1946,7 @@ describe("handleLocalAgentStream", () => {
             .aiMessagesJson as { messages: unknown[] }
         ).messages,
       );
-      expect(persistedAiMessages).toContain('<dyad-output type=\\"error\\"');
+      expect(persistedAiMessages).toContain('<samba-output type=\\"error\\"');
       expect(persistedAiMessages).toContain(
         'message=\\"Failed to deploy Supabase functions\\"',
       );
@@ -1954,7 +1954,7 @@ describe("handleLocalAgentStream", () => {
 
     it("warns when a sandbox script does not read the current attachment", async () => {
       const { event } = createFakeEvent();
-      mockSettings = buildTestSettings({ enableDyadPro: true });
+      mockSettings = buildTestSettings({ enableSambaPro: true });
       mockChatData = buildTestChat();
       mockStreamResult = createFakeStream([
         {
@@ -1972,7 +1972,7 @@ describe("handleLocalAgentStream", () => {
         {
           placeholderMessageId: 10,
           systemPrompt: "You are helpful",
-          dyadRequestId,
+          sambaRequestId,
           currentTurnHasOnDiskAttachment: true,
         },
       );
@@ -1988,7 +1988,7 @@ describe("handleLocalAgentStream", () => {
 
     it("does not warn when a sandbox script reads an attachment path", async () => {
       const { event } = createFakeEvent();
-      mockSettings = buildTestSettings({ enableDyadPro: true });
+      mockSettings = buildTestSettings({ enableSambaPro: true });
       mockChatData = buildTestChat();
       mockStreamResult = createFakeStream([
         {
@@ -2006,7 +2006,7 @@ describe("handleLocalAgentStream", () => {
         {
           placeholderMessageId: 10,
           systemPrompt: "You are helpful",
-          dyadRequestId,
+          sambaRequestId,
           currentTurnHasOnDiskAttachment: true,
         },
       );
@@ -2022,7 +2022,7 @@ describe("handleLocalAgentStream", () => {
 
     it("does not warn when a sandbox script uses the attachments alias", async () => {
       const { event } = createFakeEvent();
-      mockSettings = buildTestSettings({ enableDyadPro: true });
+      mockSettings = buildTestSettings({ enableSambaPro: true });
       mockChatData = buildTestChat();
       mockStreamResult = createFakeStream([
         {
@@ -2040,7 +2040,7 @@ describe("handleLocalAgentStream", () => {
         {
           placeholderMessageId: 10,
           systemPrompt: "You are helpful",
-          dyadRequestId,
+          sambaRequestId,
           currentTurnHasOnDiskAttachment: true,
         },
       );
@@ -2056,7 +2056,7 @@ describe("handleLocalAgentStream", () => {
 
     it("warns when a sandbox script only mentions attachments in prose", async () => {
       const { event } = createFakeEvent();
-      mockSettings = buildTestSettings({ enableDyadPro: true });
+      mockSettings = buildTestSettings({ enableSambaPro: true });
       mockChatData = buildTestChat();
       mockStreamResult = createFakeStream([
         {
@@ -2074,7 +2074,7 @@ describe("handleLocalAgentStream", () => {
         {
           placeholderMessageId: 10,
           systemPrompt: "You are helpful",
-          dyadRequestId,
+          sambaRequestId,
           currentTurnHasOnDiskAttachment: true,
         },
       );
@@ -2092,7 +2092,7 @@ describe("handleLocalAgentStream", () => {
   describe("Context compaction setting", () => {
     it("builds model history from the refreshed chat after pending compaction", async () => {
       const { event } = createFakeEvent();
-      mockSettings = buildTestSettings({ enableDyadPro: true });
+      mockSettings = buildTestSettings({ enableSambaPro: true });
       mockChatData = buildTestChat({
         messages: [
           {
@@ -2135,7 +2135,7 @@ describe("handleLocalAgentStream", () => {
               id: 20,
               role: "assistant",
               content:
-                '<dyad-compaction title="Conversation compacted" state="finished">refreshed summary</dyad-compaction>',
+                '<samba-compaction title="Conversation compacted" state="finished">refreshed summary</samba-compaction>',
               isCompactionSummary: true,
               createdAt: new Date("2025-01-01T00:02:00Z"),
             },
@@ -2146,7 +2146,7 @@ describe("handleLocalAgentStream", () => {
         return {
           success: true,
           summary: "refreshed summary",
-          backupPath: ".dyad/chats/1/compaction-test.md",
+          backupPath: ".samba/chats/1/compaction-test.md",
         };
       });
       mockStreamResult = createFakeStream([
@@ -2160,7 +2160,7 @@ describe("handleLocalAgentStream", () => {
         {
           placeholderMessageId: 10,
           systemPrompt: "You are helpful",
-          dyadRequestId,
+          sambaRequestId,
         },
       );
 
@@ -2169,7 +2169,7 @@ describe("handleLocalAgentStream", () => {
         {
           role: "assistant",
           content:
-            '<dyad-compaction title="Conversation compacted" state="finished">refreshed summary</dyad-compaction>',
+            '<samba-compaction title="Conversation compacted" state="finished">refreshed summary</samba-compaction>',
         },
         { role: "user", content: "current task" },
       ]);
@@ -2179,7 +2179,7 @@ describe("handleLocalAgentStream", () => {
       // Arrange
       const { event } = createFakeEvent();
       mockSettings = buildTestSettings({
-        enableDyadPro: true,
+        enableSambaPro: true,
         enableContextCompaction: false,
       });
       mockChatData = buildTestChat();
@@ -2194,7 +2194,7 @@ describe("handleLocalAgentStream", () => {
         {
           placeholderMessageId: 10,
           systemPrompt: "You are helpful",
-          dyadRequestId,
+          sambaRequestId,
         },
       );
 
@@ -2205,7 +2205,7 @@ describe("handleLocalAgentStream", () => {
     it("unwinds immediately when initial compaction is aborted", async () => {
       const { event, getMessagesByChannel } = createFakeEvent();
       const abortController = new AbortController();
-      mockSettings = buildTestSettings({ enableDyadPro: true });
+      mockSettings = buildTestSettings({ enableSambaPro: true });
       mockChatData = buildTestChat();
       mockIsChatPendingCompaction.mockResolvedValue(true);
       mockPerformCompaction.mockImplementation(async () => {
@@ -2225,7 +2225,7 @@ describe("handleLocalAgentStream", () => {
           {
             placeholderMessageId: 10,
             systemPrompt: "You are helpful",
-            dyadRequestId,
+            sambaRequestId,
           },
         ),
       ).resolves.toBe(false);
@@ -2246,7 +2246,7 @@ describe("handleLocalAgentStream", () => {
   describe("Mid-turn compaction", () => {
     it("preserves the full in-flight tail after sanitizing follow-up history", async () => {
       const { event } = createFakeEvent();
-      mockSettings = buildTestSettings({ enableDyadPro: true });
+      mockSettings = buildTestSettings({ enableSambaPro: true });
       mockChatData = buildTestChat();
 
       vi.mocked(buildAgentToolSet).mockImplementation((ctx) => {
@@ -2286,7 +2286,7 @@ describe("handleLocalAgentStream", () => {
         return {
           success: true,
           summary: "Conversation compacted.",
-          backupPath: ".dyad/chats/1/compaction-test.md",
+          backupPath: ".samba/chats/1/compaction-test.md",
         };
       });
 
@@ -2422,7 +2422,7 @@ describe("handleLocalAgentStream", () => {
         {
           placeholderMessageId: 10,
           systemPrompt: "You are helpful",
-          dyadRequestId,
+          sambaRequestId,
         },
       );
 
@@ -2435,7 +2435,7 @@ describe("handleLocalAgentStream", () => {
     it("should compact between steps when token usage crosses threshold", async () => {
       // Arrange
       const { event, getMessagesByChannel } = createFakeEvent();
-      mockSettings = buildTestSettings({ enableDyadPro: true });
+      mockSettings = buildTestSettings({ enableSambaPro: true });
       const t0 = new Date("2025-01-01T00:00:00Z");
       const t1 = new Date("2025-01-01T00:01:00Z");
       const t2 = new Date("2025-01-01T00:02:00Z");
@@ -2471,7 +2471,7 @@ describe("handleLocalAgentStream", () => {
               id: 20,
               role: "assistant",
               content:
-                '<dyad-compaction title="Conversation compacted" state="finished">mid-turn summary</dyad-compaction>',
+                '<samba-compaction title="Conversation compacted" state="finished">mid-turn summary</samba-compaction>',
               isCompactionSummary: true,
               createdAt: new Date("2025-01-01T00:03:30Z"),
             },
@@ -2480,7 +2480,7 @@ describe("handleLocalAgentStream", () => {
         return {
           success: true,
           summary: "mid-turn summary",
-          backupPath: ".dyad/chats/1/compaction-test.md",
+          backupPath: ".samba/chats/1/compaction-test.md",
         };
       });
 
@@ -2538,7 +2538,7 @@ describe("handleLocalAgentStream", () => {
         {
           placeholderMessageId: 10,
           systemPrompt: "You are helpful",
-          dyadRequestId,
+          sambaRequestId,
         },
       );
 
@@ -2549,7 +2549,7 @@ describe("handleLocalAgentStream", () => {
         expect.anything(),
         1,
         "/mock/apps/test-app-path",
-        dyadRequestId,
+        sambaRequestId,
         expect.any(Function),
         {
           createdAtStrategy: "now",
@@ -2584,7 +2584,7 @@ describe("handleLocalAgentStream", () => {
       const compactionIndex = finalContent.indexOf("Conversation compacted");
       const doneIndex = finalContent.indexOf("done");
       const backupPathIndex = finalContent.indexOf(
-        ".dyad/chats/1/compaction-test.md",
+        ".samba/chats/1/compaction-test.md",
       );
 
       expect(beforeCompactionIndex).toBeGreaterThanOrEqual(0);
@@ -2602,7 +2602,7 @@ describe("handleLocalAgentStream", () => {
 
     it("compacts before the next step when a tool error projects usage over the threshold", async () => {
       const { event } = createFakeEvent();
-      mockSettings = buildTestSettings({ enableDyadPro: true });
+      mockSettings = buildTestSettings({ enableSambaPro: true });
       mockChatData = buildTestChat();
       mockCheckAndMarkForCompaction.mockImplementation(
         async (_chatId, tokens) => tokens >= 220_000,
@@ -2665,7 +2665,7 @@ describe("handleLocalAgentStream", () => {
         {
           placeholderMessageId: 10,
           systemPrompt: "You are helpful",
-          dyadRequestId,
+          sambaRequestId,
         },
       );
 
@@ -2678,7 +2678,7 @@ describe("handleLocalAgentStream", () => {
     it("should persist post-compaction response messages without reshaping", async () => {
       // Arrange
       const { event } = createFakeEvent();
-      mockSettings = buildTestSettings({ enableDyadPro: true });
+      mockSettings = buildTestSettings({ enableSambaPro: true });
       const t0 = new Date("2025-01-01T00:00:00Z");
       const t1 = new Date("2025-01-01T00:01:00Z");
       const t2 = new Date("2025-01-01T00:02:00Z");
@@ -2714,7 +2714,7 @@ describe("handleLocalAgentStream", () => {
               id: 20,
               role: "assistant",
               content:
-                '<dyad-compaction title="Conversation compacted" state="finished">mid-turn summary</dyad-compaction>',
+                '<samba-compaction title="Conversation compacted" state="finished">mid-turn summary</samba-compaction>',
               isCompactionSummary: true,
               createdAt: new Date("2025-01-01T00:03:30Z"),
             },
@@ -2723,7 +2723,7 @@ describe("handleLocalAgentStream", () => {
         return {
           success: true,
           summary: "mid-turn summary",
-          backupPath: ".dyad/chats/1/compaction-test.md",
+          backupPath: ".samba/chats/1/compaction-test.md",
         };
       });
 
@@ -2845,7 +2845,7 @@ describe("handleLocalAgentStream", () => {
         {
           placeholderMessageId: 10,
           systemPrompt: "You are helpful",
-          dyadRequestId,
+          sambaRequestId,
         },
       );
 
@@ -2864,7 +2864,7 @@ describe("handleLocalAgentStream", () => {
   describe("Stream processing - text content", () => {
     it("does not send AI SDK history in full renderer message chunks", async () => {
       const { event, getMessagesByChannel } = createFakeEvent();
-      mockSettings = buildTestSettings({ enableDyadPro: true });
+      mockSettings = buildTestSettings({ enableSambaPro: true });
       mockChatData = buildTestChat({
         messages: [
           {
@@ -2894,7 +2894,7 @@ describe("handleLocalAgentStream", () => {
         {
           placeholderMessageId: 10,
           systemPrompt: "You are helpful",
-          dyadRequestId,
+          sambaRequestId,
         },
       );
 
@@ -2916,7 +2916,7 @@ describe("handleLocalAgentStream", () => {
         entityKey: 1,
         operationId: "local-agent-success",
       } as const;
-      mockSettings = buildTestSettings({ enableDyadPro: true });
+      mockSettings = buildTestSettings({ enableSambaPro: true });
       mockChatData = buildTestChat({
         messages: [{ id: 1, role: "user", content: "Hello" }],
       });
@@ -2933,7 +2933,7 @@ describe("handleLocalAgentStream", () => {
         {
           placeholderMessageId: 10,
           systemPrompt: "You are helpful",
-          dyadRequestId,
+          sambaRequestId,
         },
       );
 
@@ -2974,7 +2974,7 @@ describe("handleLocalAgentStream", () => {
     it("should retry and resume when a stream terminates transiently", async () => {
       // Arrange
       const { event, getMessagesByChannel } = createFakeEvent();
-      mockSettings = buildTestSettings({ enableDyadPro: true });
+      mockSettings = buildTestSettings({ enableSambaPro: true });
       mockChatData = buildTestChat();
 
       const streamMessagesByAttempt: any[][] = [];
@@ -3018,7 +3018,7 @@ describe("handleLocalAgentStream", () => {
         {
           placeholderMessageId: 10,
           systemPrompt: "You are helpful",
-          dyadRequestId,
+          sambaRequestId,
         },
       );
 
@@ -3055,7 +3055,7 @@ describe("handleLocalAgentStream", () => {
     it("should replay emitted tool events before retrying a terminated stream", async () => {
       // Arrange
       const { event, getMessagesByChannel } = createFakeEvent();
-      mockSettings = buildTestSettings({ enableDyadPro: true });
+      mockSettings = buildTestSettings({ enableSambaPro: true });
       mockChatData = buildTestChat();
 
       const streamMessagesByAttempt: any[][] = [];
@@ -3111,7 +3111,7 @@ describe("handleLocalAgentStream", () => {
         {
           placeholderMessageId: 10,
           systemPrompt: "You are helpful",
-          dyadRequestId,
+          sambaRequestId,
         },
       );
 
@@ -3152,7 +3152,7 @@ describe("handleLocalAgentStream", () => {
     it("should retry and resume when the provider emits a retryable server error", async () => {
       // Arrange
       const { event, getMessagesByChannel } = createFakeEvent();
-      mockSettings = buildTestSettings({ enableDyadPro: true });
+      mockSettings = buildTestSettings({ enableSambaPro: true });
       mockChatData = buildTestChat();
 
       const streamMessagesByAttempt: any[][] = [];
@@ -3204,7 +3204,7 @@ describe("handleLocalAgentStream", () => {
         {
           placeholderMessageId: 10,
           systemPrompt: "You are helpful",
-          dyadRequestId,
+          sambaRequestId,
         },
       );
 
@@ -3233,7 +3233,7 @@ describe("handleLocalAgentStream", () => {
     it("should report circular provider errors without overflowing the stack", async () => {
       // Arrange
       const { event, getMessagesByChannel } = createFakeEvent();
-      mockSettings = buildTestSettings({ enableDyadPro: true });
+      mockSettings = buildTestSettings({ enableSambaPro: true });
       mockChatData = buildTestChat();
 
       const circularStreamError: Record<string, unknown> = {
@@ -3258,7 +3258,7 @@ describe("handleLocalAgentStream", () => {
         {
           placeholderMessageId: 10,
           systemPrompt: "You are helpful",
-          dyadRequestId,
+          sambaRequestId,
         },
       );
 
@@ -3276,7 +3276,7 @@ describe("handleLocalAgentStream", () => {
     it("should wrap reasoning content in think tags", async () => {
       // Arrange
       const { event } = createFakeEvent();
-      mockSettings = buildTestSettings({ enableDyadPro: true });
+      mockSettings = buildTestSettings({ enableSambaPro: true });
       mockChatData = buildTestChat();
       mockStreamResult = createFakeStream([
         { type: "reasoning-start" },
@@ -3293,7 +3293,7 @@ describe("handleLocalAgentStream", () => {
         {
           placeholderMessageId: 10,
           systemPrompt: "You are helpful",
-          dyadRequestId,
+          sambaRequestId,
         },
       );
 
@@ -3314,7 +3314,7 @@ describe("handleLocalAgentStream", () => {
     it("should close thinking block when transitioning to text", async () => {
       // Arrange
       const { event } = createFakeEvent();
-      mockSettings = buildTestSettings({ enableDyadPro: true });
+      mockSettings = buildTestSettings({ enableSambaPro: true });
       mockChatData = buildTestChat();
       // Simulate reasoning-delta without explicit reasoning-end before text
       mockStreamResult = createFakeStream([
@@ -3330,7 +3330,7 @@ describe("handleLocalAgentStream", () => {
         {
           placeholderMessageId: 10,
           systemPrompt: "You are helpful",
-          dyadRequestId,
+          sambaRequestId,
         },
       );
 
@@ -3355,7 +3355,7 @@ describe("handleLocalAgentStream", () => {
   describe("Stream processing - pre-execution tool errors", () => {
     it("does not persist a completed tool card before validation succeeds", async () => {
       const { event } = createFakeEvent();
-      mockSettings = buildTestSettings({ enableDyadPro: true });
+      mockSettings = buildTestSettings({ enableSambaPro: true });
       mockChatData = buildTestChat();
       vi.mocked(buildAgentToolSet).mockReturnValue({ write_file: {} });
       const invalidInput = { path: "src/App.tsx" };
@@ -3378,7 +3378,7 @@ describe("handleLocalAgentStream", () => {
           completedCardPersistedBeforeValidation = dbOperations.updates.some(
             (update) =>
               typeof update.data.content === "string" &&
-              update.data.content.includes("<dyad-write"),
+              update.data.content.includes("<samba-write"),
           );
           yield {
             type: "tool-call",
@@ -3413,7 +3413,7 @@ describe("handleLocalAgentStream", () => {
         {
           placeholderMessageId: 10,
           systemPrompt: "You are helpful",
-          dyadRequestId,
+          sambaRequestId,
         },
       );
 
@@ -3422,16 +3422,16 @@ describe("handleLocalAgentStream", () => {
         .reverse()
         .find((update) => typeof update.data.content === "string")?.data
         .content as string;
-      expect(finalContent).not.toContain("<dyad-write");
+      expect(finalContent).not.toContain("<samba-write");
       expect(finalContent).toContain(
-        '<dyad-status title="Tool &quot;write_file&quot; failed" state="error">',
+        '<samba-status title="Tool &quot;write_file&quot; failed" state="error">',
       );
       expect(finalContent).toContain(validationMessage);
     });
 
     it("persists a completed tool card after validation succeeds", async () => {
       const { event } = createFakeEvent();
-      mockSettings = buildTestSettings({ enableDyadPro: true });
+      mockSettings = buildTestSettings({ enableSambaPro: true });
       mockChatData = buildTestChat();
       vi.mocked(buildAgentToolSet).mockReturnValue({ write_file: {} });
       const validInput = {
@@ -3456,7 +3456,7 @@ describe("handleLocalAgentStream", () => {
           completedCardPersistedBeforeValidation = dbOperations.updates.some(
             (update) =>
               typeof update.data.content === "string" &&
-              update.data.content.includes("<dyad-write"),
+              update.data.content.includes("<samba-write"),
           );
           yield {
             type: "tool-call",
@@ -3476,7 +3476,7 @@ describe("handleLocalAgentStream", () => {
         {
           placeholderMessageId: 10,
           systemPrompt: "You are helpful",
-          dyadRequestId,
+          sambaRequestId,
         },
       );
 
@@ -3486,14 +3486,14 @@ describe("handleLocalAgentStream", () => {
         .find((update) => typeof update.data.content === "string")?.data
         .content as string;
       expect(finalContent).toContain(
-        '<dyad-write path="src/App.tsx">export default function App() {}</dyad-write>',
+        '<samba-write path="src/App.tsx">export default function App() {}</samba-write>',
       );
-      expect(finalContent.match(/<dyad-write/g)).toHaveLength(1);
+      expect(finalContent.match(/<samba-write/g)).toHaveLength(1);
     });
 
     it("replaces an invalid tool preview with a persistent error status", async () => {
       const { event, getMessagesByChannel } = createFakeEvent();
-      mockSettings = buildTestSettings({ enableDyadPro: true });
+      mockSettings = buildTestSettings({ enableSambaPro: true });
       mockChatData = buildTestChat();
       vi.mocked(buildAgentToolSet).mockReturnValue({ read_chat: {} });
 
@@ -3557,7 +3557,7 @@ describe("handleLocalAgentStream", () => {
         {
           placeholderMessageId: 10,
           systemPrompt: "You are helpful",
-          dyadRequestId,
+          sambaRequestId,
         },
       );
 
@@ -3571,7 +3571,7 @@ describe("handleLocalAgentStream", () => {
       expect(
         (pendingPreview!.args[0] as any).streamingPreview.content,
       ).toContain(
-        '<dyad-read-chat chat-id="703" state="pending">Reading chat...',
+        '<samba-read-chat chat-id="703" state="pending">Reading chat...',
       );
       expect(
         (previewChunks.at(-1)!.args[0] as any).streamingPreview.content,
@@ -3579,7 +3579,7 @@ describe("handleLocalAgentStream", () => {
 
       const statusChunkIndex = chunks.findIndex((message) =>
         (message.args[0] as any).streamingPatch?.content?.includes(
-          '<dyad-status title="Tool &quot;read_chat&quot; failed" state="error">',
+          '<samba-status title="Tool &quot;read_chat&quot; failed" state="error">',
         ),
       );
       const clearPreviewIndex = chunks.findIndex(
@@ -3593,16 +3593,16 @@ describe("handleLocalAgentStream", () => {
         .find((update) => typeof update.data.content === "string")?.data
         .content as string;
       expect(finalContent).toContain(
-        '<dyad-status title="Tool &quot;read_chat&quot; failed" state="error">',
+        '<samba-status title="Tool &quot;read_chat&quot; failed" state="error">',
       );
       expect(finalContent).toContain(validationMessage);
-      expect(finalContent).toContain("</dyad-status>");
+      expect(finalContent).toContain("</samba-status>");
       expect(finalContent).toContain("I could not inspect that citation.");
     });
 
     it("does not clear another tool call's active preview", async () => {
       const { event, getMessagesByChannel } = createFakeEvent();
-      mockSettings = buildTestSettings({ enableDyadPro: true });
+      mockSettings = buildTestSettings({ enableSambaPro: true });
       mockChatData = buildTestChat();
       vi.mocked(buildAgentToolSet).mockReturnValue({ read_chat: {} });
       let previewClearedBeforeStreamEnd: boolean | undefined;
@@ -3655,7 +3655,7 @@ describe("handleLocalAgentStream", () => {
         {
           placeholderMessageId: 10,
           systemPrompt: "You are helpful",
-          dyadRequestId,
+          sambaRequestId,
         },
       );
 
@@ -3681,7 +3681,7 @@ describe("handleLocalAgentStream", () => {
     it("injects a non-persisted reflection message after invalid planning_questionnaire input", async () => {
       // Arrange
       const { event } = createFakeEvent();
-      mockSettings = buildTestSettings({ enableDyadPro: true });
+      mockSettings = buildTestSettings({ enableSambaPro: true });
       mockChatData = buildTestChat({
         messages: [{ id: 1, role: "user", content: "Help me plan this app" }],
       });
@@ -3770,7 +3770,7 @@ describe("handleLocalAgentStream", () => {
         {
           placeholderMessageId: 10,
           systemPrompt: "You are helpful",
-          dyadRequestId,
+          sambaRequestId,
         },
       );
 
@@ -3809,7 +3809,7 @@ describe("handleLocalAgentStream", () => {
     it("does not stop the stream when set_chat_summary is called", async () => {
       // Arrange
       const { event } = createFakeEvent();
-      mockSettings = buildTestSettings({ enableDyadPro: true });
+      mockSettings = buildTestSettings({ enableSambaPro: true });
       mockChatData = buildTestChat();
       mockStreamResult = createFakeStream([]);
 
@@ -3821,7 +3821,7 @@ describe("handleLocalAgentStream", () => {
         {
           placeholderMessageId: 10,
           systemPrompt: "You are helpful",
-          dyadRequestId,
+          sambaRequestId,
         },
       );
 
@@ -3835,7 +3835,7 @@ describe("handleLocalAgentStream", () => {
     it("runs a follow-up pass when the first pass ends with set_chat_summary and incomplete todos remain", async () => {
       // Arrange
       const { event } = createFakeEvent();
-      mockSettings = buildTestSettings({ enableDyadPro: true });
+      mockSettings = buildTestSettings({ enableSambaPro: true });
       mockChatData = buildTestChat();
 
       vi.mocked(buildAgentToolSet).mockImplementation((ctx) => {
@@ -3937,7 +3937,7 @@ describe("handleLocalAgentStream", () => {
         {
           placeholderMessageId: 10,
           systemPrompt: "You are helpful",
-          dyadRequestId,
+          sambaRequestId,
         },
       );
 
@@ -3963,7 +3963,7 @@ describe("handleLocalAgentStream", () => {
   describe("Abort handling", () => {
     it("runs a synthesis pass with completed Explorer reports before finalizing", async () => {
       const { event } = createFakeEvent();
-      mockSettings = buildTestSettings({ enableDyadPro: true });
+      mockSettings = buildTestSettings({ enableSambaPro: true });
       mockChatData = buildTestChat();
       vi.mocked(buildAgentToolSet).mockImplementation((ctx) => {
         if (!ctx.spawnedSubagentThreadIds?.includes("explorer-1")) {
@@ -3993,7 +3993,7 @@ describe("handleLocalAgentStream", () => {
         {
           placeholderMessageId: 10,
           systemPrompt: "You are helpful",
-          dyadRequestId,
+          sambaRequestId,
         },
       );
 
@@ -4010,7 +4010,7 @@ describe("handleLocalAgentStream", () => {
 
     it("does not inject an Explorer report already returned by blocking spawn", async () => {
       const { event } = createFakeEvent();
-      mockSettings = buildTestSettings({ enableDyadPro: true });
+      mockSettings = buildTestSettings({ enableSambaPro: true });
       mockChatData = buildTestChat();
       vi.mocked(buildAgentToolSet).mockImplementation((ctx) => {
         ctx.spawnedSubagentThreadIds?.push("explorer-1");
@@ -4028,7 +4028,7 @@ describe("handleLocalAgentStream", () => {
         {
           placeholderMessageId: 10,
           systemPrompt: "You are helpful",
-          dyadRequestId,
+          sambaRequestId,
         },
       );
 
@@ -4038,7 +4038,7 @@ describe("handleLocalAgentStream", () => {
 
     it("releases the root finalization fence when cancellation wins after the join", async () => {
       const { event } = createFakeEvent();
-      mockSettings = buildTestSettings({ enableDyadPro: true });
+      mockSettings = buildTestSettings({ enableSambaPro: true });
       mockChatData = buildTestChat();
       mockStreamResult = createFakeStream([
         { type: "text-delta", text: "Finishing" },
@@ -4058,7 +4058,7 @@ describe("handleLocalAgentStream", () => {
         {
           placeholderMessageId: 10,
           systemPrompt: "You are helpful",
-          dyadRequestId,
+          sambaRequestId,
         },
       );
 
@@ -4072,7 +4072,7 @@ describe("handleLocalAgentStream", () => {
 
     it("reports stored Implementer errors and latest activity", async () => {
       const { event, getMessagesByChannel } = createFakeEvent();
-      mockSettings = buildTestSettings({ enableDyadPro: true });
+      mockSettings = buildTestSettings({ enableSambaPro: true });
       mockChatData = buildTestChat();
       vi.mocked(buildAgentToolSet).mockImplementationOnce((ctx) => {
         ctx.spawnedSubagentThreadIds?.push("implementer-1");
@@ -4106,7 +4106,7 @@ describe("handleLocalAgentStream", () => {
         {
           placeholderMessageId: 10,
           systemPrompt: "You are helpful",
-          dyadRequestId,
+          sambaRequestId,
         },
       );
 
@@ -4133,7 +4133,7 @@ describe("handleLocalAgentStream", () => {
 
     it("reports a failed Implementer when no stored detail exists", async () => {
       const { event, getMessagesByChannel } = createFakeEvent();
-      mockSettings = buildTestSettings({ enableDyadPro: true });
+      mockSettings = buildTestSettings({ enableSambaPro: true });
       mockChatData = buildTestChat();
       vi.mocked(buildAgentToolSet).mockImplementationOnce((ctx) => {
         ctx.spawnedSubagentThreadIds?.push("implementer-1");
@@ -4163,7 +4163,7 @@ describe("handleLocalAgentStream", () => {
         {
           placeholderMessageId: 10,
           systemPrompt: "You are helpful",
-          dyadRequestId,
+          sambaRequestId,
         },
       );
 
@@ -4177,7 +4177,7 @@ describe("handleLocalAgentStream", () => {
 
     it("cancels spawned sub-agents when the root stream fails", async () => {
       const { event } = createFakeEvent();
-      mockSettings = buildTestSettings({ enableDyadPro: true });
+      mockSettings = buildTestSettings({ enableSambaPro: true });
       mockChatData = buildTestChat();
       vi.mocked(buildAgentToolSet).mockImplementationOnce((ctx) => {
         expect(ctx.spawnedSubagentThreadIds).toBeDefined();
@@ -4199,7 +4199,7 @@ describe("handleLocalAgentStream", () => {
         {
           placeholderMessageId: 10,
           systemPrompt: "You are helpful",
-          dyadRequestId,
+          sambaRequestId,
         },
       );
 
@@ -4212,7 +4212,7 @@ describe("handleLocalAgentStream", () => {
     it("should stop processing stream chunks when abort signal is triggered", async () => {
       // Arrange
       const { event } = createFakeEvent();
-      mockSettings = buildTestSettings({ enableDyadPro: true });
+      mockSettings = buildTestSettings({ enableSambaPro: true });
       mockChatData = buildTestChat();
 
       const abortController = new AbortController();
@@ -4239,7 +4239,7 @@ describe("handleLocalAgentStream", () => {
         {
           placeholderMessageId: 10,
           systemPrompt: "You are helpful",
-          dyadRequestId,
+          sambaRequestId,
         },
       );
 
@@ -4260,7 +4260,7 @@ describe("handleLocalAgentStream", () => {
     it("should save partial response with cancellation note when aborted", async () => {
       // Arrange
       const { event } = createFakeEvent();
-      mockSettings = buildTestSettings({ enableDyadPro: true });
+      mockSettings = buildTestSettings({ enableSambaPro: true });
       mockChatData = buildTestChat();
 
       const abortController = new AbortController();
@@ -4270,7 +4270,10 @@ describe("handleLocalAgentStream", () => {
           yield { type: "text-delta", text: "Partial response" };
           abortController.abort();
           // This will not be processed due to abort
-          throw new DyadError("Simulated abort error", DyadErrorKind.Internal);
+          throw new SambaError(
+            "Simulated abort error",
+            SambaErrorKind.Internal,
+          );
         })(),
         response: Promise.resolve({ messages: [] }),
       };
@@ -4283,7 +4286,7 @@ describe("handleLocalAgentStream", () => {
         {
           placeholderMessageId: 10,
           systemPrompt: "You are helpful",
-          dyadRequestId,
+          sambaRequestId,
         },
       );
 
@@ -4302,7 +4305,7 @@ describe("handleLocalAgentStream", () => {
     it("should save commit hash after successful stream", async () => {
       // Arrange
       const { event } = createFakeEvent();
-      mockSettings = buildTestSettings({ enableDyadPro: true });
+      mockSettings = buildTestSettings({ enableSambaPro: true });
       mockChatData = buildTestChat();
       mockStreamResult = createFakeStream([
         { type: "text-delta", text: "Done" },
@@ -4316,7 +4319,7 @@ describe("handleLocalAgentStream", () => {
         {
           placeholderMessageId: 10,
           systemPrompt: "You are helpful",
-          dyadRequestId,
+          sambaRequestId,
         },
       );
 
@@ -4331,7 +4334,7 @@ describe("handleLocalAgentStream", () => {
     it("should set approval state to approved after completion", async () => {
       // Arrange
       const { event } = createFakeEvent();
-      mockSettings = buildTestSettings({ enableDyadPro: true });
+      mockSettings = buildTestSettings({ enableSambaPro: true });
       mockChatData = buildTestChat();
       mockStreamResult = createFakeStream([
         { type: "text-delta", text: "Done" },
@@ -4345,7 +4348,7 @@ describe("handleLocalAgentStream", () => {
         {
           placeholderMessageId: 10,
           systemPrompt: "You are helpful",
-          dyadRequestId,
+          sambaRequestId,
         },
       );
 

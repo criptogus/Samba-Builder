@@ -148,8 +148,8 @@ const configuredInstances = new WeakSet<object>();
 export const configureMonaco: BeforeMount = (monaco) => {
   if (configuredInstances.has(monaco)) return;
   configuredInstances.add(monaco);
-  monaco.editor.defineTheme("dyad-light", customLight);
-  monaco.editor.defineTheme("dyad-dark", customDark);
+  monaco.editor.defineTheme("samba-light", customLight);
+  monaco.editor.defineTheme("samba-dark", customDark);
   monaco.languages.typescript.typescriptDefaults.setCompilerOptions({
     jsx: monaco.languages.typescript.JsxEmit.React,
   });

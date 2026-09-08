@@ -26,10 +26,10 @@ import {
 import { h } from "@/testing/hybrid.setup";
 
 const PRO_SETTINGS: Partial<UserSettings> = {
-  enableDyadPro: true,
+  enableSambaPro: true,
   providerSettings: {
     auto: {
-      apiKey: { value: "testdyadkey" },
+      apiKey: { value: "testsambakey" },
     },
   },
 };
@@ -98,7 +98,7 @@ describe("chat image generation (integration)", () => {
     expect(fileName).toMatch(/^generated_a_beautiful_sunset_over_mo/);
     expect(fileName.endsWith(".png")).toBe(true);
 
-    const mediaPath = path.join(harness.appDir, ".dyad", "media", fileName);
+    const mediaPath = path.join(harness.appDir, ".samba", "media", fileName);
     expect(fs.existsSync(mediaPath)).toBe(true);
 
     const sendButton = await screen.findByRole("button", {
@@ -123,6 +123,6 @@ describe("chat image generation (integration)", () => {
       .orderBy(messages.id);
     expect(userMessage.role).toBe("user");
     expect(userMessage.content).toContain(fileName);
-    expect(userMessage.content).toContain("<dyad-attachment");
+    expect(userMessage.content).toContain("<samba-attachment");
   }, 60_000);
 });

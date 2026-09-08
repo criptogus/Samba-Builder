@@ -30,9 +30,9 @@ import {
   UserSettings,
   AzureProviderSetting,
   VertexProviderSetting,
-  hasDyadProKey,
+  hasSambaProKey,
 } from "@/lib/schemas";
-import { DyadErrorKind } from "@/errors/dyad_error";
+import { SambaErrorKind } from "@/errors/samba_error";
 import {
   findInvalidProviderApiKeyCharacter,
   formatInvalidProviderApiKeyMessage,
@@ -51,7 +51,7 @@ type ApiKeyValidationDialogState = {
   message: string;
   apiKey: string;
   allowKeepInvalidKey: boolean;
-  errorKind?: DyadErrorKind;
+  errorKind?: SambaErrorKind;
 };
 
 const VALIDATED_API_KEY_PROVIDERS = new Set<string>([
@@ -60,21 +60,21 @@ const VALIDATED_API_KEY_PROVIDERS = new Set<string>([
   "auto",
 ]);
 
-function getErrorKind(error: unknown): DyadErrorKind | undefined {
+function getErrorKind(error: unknown): SambaErrorKind | undefined {
   const kind =
     typeof error === "object" && error !== null
       ? (error as { kind?: unknown }).kind
       : undefined;
   return typeof kind === "string" &&
-    Object.values(DyadErrorKind).includes(kind as DyadErrorKind)
-    ? (kind as DyadErrorKind)
+    Object.values(SambaErrorKind).includes(kind as SambaErrorKind)
+    ? (kind as SambaErrorKind)
     : undefined;
 }
 
 function getApiKeyValidationDialogTitle(
   dialog: ApiKeyValidationDialogState | null,
 ) {
-  return dialog?.errorKind === DyadErrorKind.Auth
+  return dialog?.errorKind === SambaErrorKind.Auth
     ? "API key rejected"
     : "Could not verify API key";
 }
@@ -111,7 +111,7 @@ export function ProviderSettingsPage({ provider }: ProviderSettingsPageProps) {
   const supportsCustomModels =
     providerData?.type === "custom" || providerData?.type === "cloud";
 
-  const isDyad = provider === "auto";
+  const isSamba = provider === "auto";
 
   const [apiKeyInput, setApiKeyInput] = useState("");
   const [isSaving, setIsSaving] = useState(false);
@@ -132,12 +132,12 @@ export function ProviderSettingsPage({ provider }: ProviderSettingsPageProps) {
   const resumeFirstPrompt = useFirstPromptProviderResume();
 
   // Use fetched data (or defaults for Samba Builder)
-  const providerDisplayName = isDyad
+  const providerDisplayName = isSamba
     ? "Samba Builder"
     : (providerData?.name ?? "Unknown Provider");
   const providerWebsiteUrl = providerData?.websiteUrl;
-  const hasFreeTier = isDyad ? false : providerData?.hasFreeTier;
-  const envVarName = isDyad ? undefined : providerData?.envVarName;
+  const hasFreeTier = isSamba ? false : providerData?.hasFreeTier;
+  const envVarName = isSamba ? undefined : providerData?.envVarName;
 
   // Use provider ID (which is the 'provider' prop)
   const userApiKey = settings?.providerSettings?.[provider]?.apiKey?.value;
@@ -241,7 +241,8 @@ export function ProviderSettingsPage({ provider }: ProviderSettingsPageProps) {
 
       const isFirstProviderSetup = !isAnyProviderSetup();
       // Check if this is the first time user is setting up Samba Builder
-      const isNewDyadProSetup = isDyad && settings && !hasDyadProKey(settings);
+      const isNewSambaProSetup =
+        isSamba && settings && !hasSambaProKey(settings);
 
       const settingsUpdate: Partial<UserSettings> = {
         providerSettings: {
@@ -254,10 +255,10 @@ export function ProviderSettingsPage({ provider }: ProviderSettingsPageProps) {
           },
         },
       };
-      if (isDyad) {
-        settingsUpdate.enableDyadPro = true;
+      if (isSamba) {
+        settingsUpdate.enableSambaPro = true;
         // Set default chat mode to local-agent when user upgrades to pro
-        if (isNewDyadProSetup) {
+        if (isNewSambaProSetup) {
           settingsUpdate.defaultChatMode = "local-agent";
         }
       }
@@ -273,7 +274,7 @@ export function ProviderSettingsPage({ provider }: ProviderSettingsPageProps) {
       }
 
       // Refetch user budget when Samba Builder key is saved
-      if (isDyad) {
+      if (isSamba) {
         queryClient.invalidateQueries({ queryKey: queryKeys.userBudget.info });
       }
     } catch (error: any) {
@@ -405,7 +406,7 @@ export function ProviderSettingsPage({ provider }: ProviderSettingsPageProps) {
   }
 
   // Handle case where provider is not found (e.g., invalid ID in URL)
-  if (!providerData && !isDyad) {
+  if (!providerData && !isSamba) {
     return (
       <div className="min-h-screen px-8 py-4">
         <div className="max-w-4xl mx-auto">
@@ -503,7 +504,7 @@ export function ProviderSettingsPage({ provider }: ProviderSettingsPageProps) {
             isLoading={settingsLoading}
             hasFreeTier={hasFreeTier}
             providerWebsiteUrl={providerWebsiteUrl}
-            isDyad={isDyad}
+            isSamba={isSamba}
             onOpenProviderWebsite={() => {
               if (!isConfigured) {
                 setAwaitingKeyFromWebsite(true);
@@ -522,7 +523,7 @@ export function ProviderSettingsPage({ provider }: ProviderSettingsPageProps) {
                 Could not load configuration data: {settingsError.message}
               </AlertDescription>
             </Alert>
-          ) : isDyad ? (
+          ) : isSamba ? (
             <div className="mt-6 p-4 bg-(--background-lightest) rounded-lg border">
               <h3 className="font-medium">Modo automático</h3>
               <p className="text-sm text-gray-600 dark:text-gray-400">
@@ -550,7 +551,7 @@ export function ProviderSettingsPage({ provider }: ProviderSettingsPageProps) {
               onSaveKey={handleSaveKey}
               onTestKey={shouldValidateApiKey ? handleTestKey : undefined}
               onDeleteKey={handleDeleteKey}
-              isDyad={isDyad}
+              isSamba={isSamba}
               updateSettings={updateSettings}
               highlightPasteButton={highlightPasteButton}
               onDismissPasteHighlight={() => setHighlightPasteButton(false)}

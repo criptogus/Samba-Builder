@@ -71,7 +71,7 @@ vi.mock("@/hooks/useUserBudgetInfo", () => ({
     isLoadingUserBudget: false,
   }),
 }));
-vi.mock("./ProBanner", () => ({ AiAccessBanner: () => null }));
+vi.mock("./AiAccessBanner", () => ({ AiAccessBanner: () => null }));
 vi.mock("./AppSearchSelect", () => ({ AppSearchSelect: () => null }));
 
 describe("ImageGeneratorDialog", () => {

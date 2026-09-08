@@ -1,4 +1,4 @@
-import { hasDyadProKey, type UserSettings } from "@/lib/schemas";
+import { hasSambaProKey, type UserSettings } from "@/lib/schemas";
 import { DEFAULT_ENABLE_TESTING_FOR_NEW_APPS } from "@/shared/settings_defaults";
 import {
   appSizeEventFields,
@@ -7,7 +7,7 @@ import {
 
 type TelemetryProperties = Record<string, unknown> | undefined;
 
-const POSTHOG_ERROR_DEDUPE_STORAGE_KEY = "dyadPostHogErrorDedupe:v1";
+const POSTHOG_ERROR_DEDUPE_STORAGE_KEY = "sambaPostHogErrorDedupe:v1";
 const FREE_ERROR_DEDUPE_WINDOW_MS = 24 * 60 * 60 * 1000;
 const PRO_ERROR_DEDUPE_WINDOW_MS = 10 * 60 * 1000;
 const MAX_ERROR_DEDUPE_ENTRIES = 500;
@@ -52,7 +52,7 @@ export type InitialLoadTelemetryInput = {
 
 export function getSettingsPersonTelemetryProperties(settings: UserSettings) {
   return {
-    isPro: hasDyadProKey(settings),
+    isPro: hasSambaProKey(settings),
     enableAppBlueprint: settings.enableAppBlueprint ?? true,
     enableTestingForNewApps:
       settings.enableTestingForNewApps ?? DEFAULT_ENABLE_TESTING_FOR_NEW_APPS,
@@ -202,8 +202,8 @@ export class PostHogErrorDeduper {
       ...event,
       properties: {
         ...event.properties,
-        dyad_error_suppressed_count: suppressedCount,
-        dyad_error_suppression_duration_ms: Math.max(
+        samba_error_suppressed_count: suppressedCount,
+        samba_error_suppression_duration_ms: Math.max(
           0,
           now - existing.lastSentAt,
         ),

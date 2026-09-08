@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { eq } from "drizzle-orm";
 import { apps, chats, messages, security_fix_chats } from "@/db/schema";
-import { DyadErrorKind } from "@/errors/dyad_error";
+import { SambaErrorKind } from "@/errors/samba_error";
 import {
   type HandlerTestHarness,
   setupHandlerTestHarness,
@@ -53,7 +53,7 @@ describe("registerSecurityHandlers", () => {
         findings: [finding],
       }),
     ).rejects.toMatchObject({
-      kind: DyadErrorKind.NotFound,
+      kind: SambaErrorKind.NotFound,
       message: "Security review chat not found for this app",
     });
 
@@ -99,7 +99,7 @@ describe("registerSecurityHandlers", () => {
       .values({
         chatId: reviewChatId,
         role: "assistant",
-        content: `<dyad-security-finding title="${finding.title}" level="${finding.level}">${finding.description}</dyad-security-finding>`,
+        content: `<samba-security-finding title="${finding.title}" level="${finding.level}">${finding.description}</samba-security-finding>`,
       })
       .run();
 

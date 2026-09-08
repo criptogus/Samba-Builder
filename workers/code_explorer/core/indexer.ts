@@ -380,7 +380,7 @@ function isInProjectSource(appPath: string, fileName: string): boolean {
   if (relative.startsWith("..") || path.isAbsolute(relative)) return false;
   const segments = relative.split("/");
   if (segments.includes("node_modules")) return false;
-  if (segments.includes(".dyad")) return false;
+  if (segments.includes(".samba")) return false;
   if (DECLARATION_FILE_EXTENSION_REGEX.test(relative)) return false;
   return SOURCE_FILE_EXTENSION_REGEX.test(relative);
 }

@@ -40,7 +40,7 @@ describe("legacy chat stream message projection", () => {
       },
     });
 
-    const { eventsFor } = await harness.streamChat("tc=dyad-write-angle");
+    const { eventsFor } = await harness.streamChat("tc=samba-write-angle");
     const fullChunks = eventsFor("chat:response:chunk")
       .map((event) => event.payload)
       .filter(

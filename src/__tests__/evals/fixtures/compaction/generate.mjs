@@ -4,14 +4,14 @@
  *
  * Reads a scenario spec (see AUTHORING.md), has gpt-5.6-sol author the
  * session narrative phase-by-phase, materializes a Samba Builder-format message list
- * (full <dyad-write> contents, MCP tool tags), amplifies to the target
+ * (full <samba-write> contents, MCP tool tags), amplifies to the target
  * transcript size with deterministic bulk-asset/filler turns, validates that
  * every manifest evidence string landed, and writes <name>.json + stats.
  *
  * Usage:
  *   node generate.mjs --spec specs/<name>.spec.json [--target 180000] [--force]
  *
- * Env: DYAD_PRO_KEY or DYAD_PRO_API_KEY (required), DYAD_ENGINE_URL (optional),
+ * Env: SAMBA_PRO_KEY or SAMBA_PRO_API_KEY (required), SAMBA_ENGINE_URL (optional),
  *      CMPGEN_MODEL (default gpt-5.6-sol).
  */
 import fs from "node:fs";
@@ -34,12 +34,12 @@ const MIN_TOKENS = Number(argValue("--min", "165000"));
 const MAX_TOKENS = Number(argValue("--max", "210000"));
 const FORCE = argv.includes("--force");
 
-const API_KEY = process.env.DYAD_PRO_API_KEY || process.env.DYAD_PRO_KEY;
-const ENGINE_URL = process.env.DYAD_ENGINE_URL || "https://engine.dyad.sh/v1";
+const API_KEY = process.env.SAMBA_PRO_API_KEY || process.env.SAMBA_PRO_KEY;
+const ENGINE_URL = process.env.SAMBA_ENGINE_URL || "https://engine.samba.sh/v1";
 const MODEL = process.env.CMPGEN_MODEL || "gpt-5.6-sol";
 
 if (!SPEC_PATH) fail("Missing --spec <path>");
-if (!API_KEY) fail("Missing DYAD_PRO_KEY / DYAD_PRO_API_KEY in env");
+if (!API_KEY) fail("Missing SAMBA_PRO_KEY / SAMBA_PRO_API_KEY in env");
 
 function fail(msg) {
   console.error(`[generate] FATAL: ${msg}`);
@@ -57,11 +57,11 @@ const TOOL_RESULT_TRUNCATION_LIMIT = 1000;
 
 function transformToolTags(content) {
   let result = content.replace(
-    /<dyad-mcp-tool-call\b[^>]*?\bserver="([^"]*)"[^>]*?\btool="([^"]*)"[^>]*>\n([\s\S]*?)\n<\/dyad-mcp-tool-call>/g,
+    /<samba-mcp-tool-call\b[^>]*?\bserver="([^"]*)"[^>]*?\btool="([^"]*)"[^>]*>\n([\s\S]*?)\n<\/samba-mcp-tool-call>/g,
     '<tool-use name="$2" server="$1">\n$3\n</tool-use>',
   );
   result = result.replace(
-    /<dyad-mcp-tool-result\b[^>]*?\bserver="([^"]*)"[^>]*?\btool="([^"]*)"[^>]*>\n([\s\S]*?)\n<\/dyad-mcp-tool-result>/g,
+    /<samba-mcp-tool-result\b[^>]*?\bserver="([^"]*)"[^>]*?\btool="([^"]*)"[^>]*>\n([\s\S]*?)\n<\/samba-mcp-tool-result>/g,
     (_m, server, tool, rc) => {
       const truncated = rc.length > TOOL_RESULT_TRUNCATION_LIMIT;
       const body = truncated
@@ -263,13 +263,13 @@ function synthAsset(bulk, scale = 1) {
 // ---------------------------------------------------------------------------
 function toolCallXml(tool, args, result) {
   return (
-    `<dyad-mcp-tool-call server="dyad" tool="${tool}">\n${JSON.stringify(args)}\n</dyad-mcp-tool-call>\n` +
-    `<dyad-mcp-tool-result server="dyad" tool="${tool}">\n${result}\n</dyad-mcp-tool-result>`
+    `<samba-mcp-tool-call server="samba" tool="${tool}">\n${JSON.stringify(args)}\n</samba-mcp-tool-call>\n` +
+    `<samba-mcp-tool-result server="samba" tool="${tool}">\n${result}\n</samba-mcp-tool-result>`
   );
 }
 
-function dyadWriteXml(p, description, content) {
-  return `<dyad-write path="${p}" description="${description}">\n${content}\n</dyad-write>`;
+function sambaWriteXml(p, description, content) {
+  return `<samba-write path="${p}" description="${description}">\n${content}\n</samba-write>`;
 }
 
 // ---------------------------------------------------------------------------
@@ -350,7 +350,7 @@ function materializeTurns(turns, fileState, bulkByPath) {
       } else if (action.type === "write") {
         fileState[action.path] = action.content;
         parts.push(
-          dyadWriteXml(
+          sambaWriteXml(
             action.path,
             action.description ?? "Update file",
             action.content,
@@ -362,7 +362,7 @@ function materializeTurns(turns, fileState, bulkByPath) {
         const content = synthAsset(bulk, 1);
         fileState[bulk.path] = content;
         parts.push(
-          dyadWriteXml(
+          sambaWriteXml(
             bulk.path,
             `Generate ${bulk.asset} (${bulk.count} entries)`,
             content,
@@ -406,7 +406,7 @@ function fillerCycle(spec, fileState, cycleIdx) {
       role: "assistant",
       content: [
         `Regenerating ${bulk.path} with ${n} entries.`,
-        dyadWriteXml(
+        sambaWriteXml(
           bulk.path,
           `Expand generated ${kindLabel} to ${n} entries`,
           content,

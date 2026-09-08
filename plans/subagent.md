@@ -1,10 +1,10 @@
-# Dyad Sub-agent System
+# Samba Sub-agent System
 
 > Updated 2026-07-13 after reviewing OpenAI Codex commit `c39520f3d1522f2587694b52eba7d3eb39460137` and resolving the initial product decisions.
 
 ## Summary
 
-Dyad will add a visible, root-controlled, depth-one sub-agent system with three fixed personas:
+Samba will add a visible, root-controlled, depth-one sub-agent system with three fixed personas:
 
 - **Explorer** is read-only, enabled by default for Pro users, and may be invoked automatically by the root model.
 - **Reviewer** is read-only and never exposed as a model-callable persona. Pro users may start it with the Review UI button; a default-off setting separately controls application-triggered auto-review.
@@ -34,7 +34,7 @@ These are binding decisions:
 - Implementer cannot use terminal, MCP, SQL, sandbox writes, dependency installation, git, deploy, integration-management, or app-global settings tools.
 - Only one Implementer may be active for an app. It acquires an exclusive app-level mutation lease; the root and other agents cannot mutate that app while it writes.
 - The system allows the root plus at most three concurrently running child turns, with at most one Implementer.
-- Concurrency is not initially user-configurable and spawning does not require a separate confirmation. The initial release has no Dyad-defined per-child or aggregate token, step, tool-call, or wall-time limits; usage remains visible in the UI.
+- Concurrency is not initially user-configurable and spawning does not require a separate confirmation. The initial release has no Samba-defined per-child or aggregate token, step, tool-call, or wall-time limits; usage remains visible in the UI.
 - Children receive a bounded context envelope, never the complete root history by default.
 - Child execution does not survive app restart initially. Active children become interrupted and their partial transcripts remain available.
 - Child threads, transcripts, mailbox messages, and results are retained for the lifetime of the parent chat. There is no time-based or size-based transcript pruning in this plan.
@@ -42,7 +42,7 @@ These are binding decisions:
 - Sub-agent activity appears in a compact, expandable inline Agent team card.
 - Existing consent UI is reused with persona and task attribution.
 - Future write isolation—finer-grained leases versus worktrees—remains intentionally undecided.
-- If a persona's required model is unavailable, the run is blocked with setup guidance. Dyad does not silently substitute the root model or another provider model.
+- If a persona's required model is unavailable, the run is blocked with setup guidance. Samba does not silently substitute the root model or another provider model.
 - Auto-review runs after a completed writable assistant turn, including an Implementer handoff, once no writer holds the lease. It requires a non-empty diff hash that has not already been reviewed.
 - Review scope primarily uses the latest assistant message's immutable commit range because Local Agent normally auto-commits each writable turn. When no turn range exists, it includes staged, unstaged, and non-ignored untracked text files under the app root compared with `HEAD`. Ignored files and binary contents are excluded; an unborn repository compares against Git's empty tree; non-Git projects cannot be reviewed initially.
 - The **Review changes** button lives at the bottom of the latest assistant message, not in the code-diff UI. Its label/file count must make the repository-wide since-commit scope clear.
@@ -63,15 +63,15 @@ Each persona has its own model and reasoning defaults rather than inheriting the
 | Reviewer    | `gpt-5.6-sol`  | Medium                   |
 | Implementer | `gpt-5.6-luna` | High                     |
 
-Both selected models exist in the reviewed Codex model catalog but are not currently registered in Dyad. Adding them to Dyad's model catalog/constants is therefore an implementation prerequisite. Resolve the exact persona model before scheduling; if it is unavailable for the Pro user's configured account/provider, block the run with setup guidance.
+Both selected models exist in the reviewed Codex model catalog but are not currently registered in Samba. Adding them to Samba's model catalog/constants is therefore an implementation prerequisite. Resolve the exact persona model before scheduling; if it is unavailable for the Pro user's configured account/provider, block the run with setup guidance.
 
 ## Problem Statement
 
-Dyad's Local Agent currently performs investigation, implementation, and self-review in one linear loop. Reconnaissance consumes root context, independent work cannot proceed concurrently, and users lack an explicit independent review checkpoint.
+Samba's Local Agent currently performs investigation, implementation, and self-review in one linear loop. Reconnaissance consumes root context, independent work cannot proceed concurrently, and users lack an explicit independent review checkpoint.
 
-Dyad already has a specialized `explore_code` nested loop, but it is blocking, single-purpose, hard-coded, and lacks a durable lifecycle. This plan replaces that surface with a general child runtime while preserving Dyad's consent model, provider abstraction, live change visibility, and root-owned completion flow.
+Samba already has a specialized `explore_code` nested loop, but it is blocking, single-purpose, hard-coded, and lacks a durable lifecycle. This plan replaces that surface with a general child runtime while preserving Samba's consent model, provider abstraction, live change visibility, and root-owned completion flow.
 
-> Dyad can assemble a small, visible team of specialized agents while the root remains accountable for the overall task.
+> Samba can assemble a small, visible team of specialized agents while the root remains accountable for the overall task.
 
 ## Goals
 
@@ -82,7 +82,7 @@ Dyad already has a specialized `explore_code` nested loop, but it is blocking, s
 - Make every assignment, status, message, result, error, consent request, and mutation attributable and inspectable.
 - Support durable root-to-child messages and follow-up turns without respawning.
 - Preserve child transcripts and partial results with the chat, including across reloads and restarts.
-- Work through Dyad's Vercel AI SDK provider abstraction while requiring the exact persona defaults and clearly blocking unavailable configurations.
+- Work through Samba's Vercel AI SDK provider abstraction while requiring the exact persona defaults and clearly blocking unavailable configurations.
 - Enforce Pro entitlement at model schema, IPC, manager, and tool-execution boundaries.
 - Preserve normal single-agent behavior when Explorer is disabled and no other persona is invoked.
 
@@ -189,7 +189,7 @@ For Pro users, add four independent controls under a searchable **Sub-agents** s
 
 1. `enableExplorerSubagent?: boolean`
    - Label: **Use Explorer sub-agent**
-   - Copy: "Let Dyad automatically delegate read-only codebase research to Explorer. This may use additional model tokens."
+   - Copy: "Let Samba automatically delegate read-only codebase research to Explorer. This may use additional model tokens."
    - Default: `true`.
 
 2. `enableAutoReview?: boolean`
@@ -312,7 +312,7 @@ For Pro users, the model-visible `spawn_agent` enum includes Explorer when enabl
 - Per-thread abort controllers support targeted cancellation.
 - Root cancellation cancels the active tree with bounded cleanup.
 - Shutdown interrupts active work; startup reconciliation changes stale running states to interrupted.
-- The initial release sets no Dyad-defined hard caps on child steps, tool calls, output tokens, wall time, or aggregate usage beyond provider/platform constraints.
+- The initial release sets no Samba-defined hard caps on child steps, tool calls, output tokens, wall time, or aggregate usage beyond provider/platform constraints.
 - The Agent team card exposes worker count and measured usage. No user concurrency setting or per-spawn modal initially.
 
 ### Bounded context and durable messaging
@@ -372,7 +372,7 @@ The root chat scheduler also owns a queued-message review barrier. When auto-rev
 
 Personas are configuration over the shared runner: prompt, allowlisted tools, report schema, model/default reasoning, and whether model/user invocation is permitted.
 
-Add `gpt-5.6-luna` and `gpt-5.6-sol` to Dyad's model constants/catalog with accurate capabilities. Resolve the exact persona model/provider before durable scheduling and record the provider, model, and reasoning on the thread. If the required model is unavailable, do not create a runnable child or substitute another model; return a handled blocked result with setup guidance.
+Add `gpt-5.6-luna` and `gpt-5.6-sol` to Samba's model constants/catalog with accurate capabilities. Resolve the exact persona model/provider before durable scheduling and record the provider, model, and reasoning on the thread. If the required model is unavailable, do not create a runnable child or substitute another model; return a handled blocked result with setup guidance.
 
 ### Implementer mutation lease
 
@@ -419,7 +419,7 @@ Record persona, resolved provider/model, counts, durations, token totals, state,
 
 - [ ] Characterize current `explore_code` success, cancellation, progress, evidence, and report bounding.
 - [ ] Extract `runSubagentTurn`, persona definitions, schemas, and bounded context from the child-only Explorer loop.
-- [ ] Add `gpt-5.6-luna` and `gpt-5.6-sol` to Dyad model metadata and implement exact-model blocking with setup guidance.
+- [ ] Add `gpt-5.6-luna` and `gpt-5.6-sol` to Samba model metadata and implement exact-model blocking with setup guidance.
 - [ ] Implement Explorer on `gpt-5.6-luna` with high reasoning.
 - [ ] Add `spawn_agent` and remove the root `explore_code` tool, prompt references, snapshots, and duplicate code path in the same change.
 
@@ -535,7 +535,7 @@ After `npm run build`:
 - Explorer and Reviewer have no runtime mutation path.
 - Implementer cannot run without its independent setting, writable mode, allowed scope, and writer lease; it never bypasses consent.
 - At most three children and one Implementer run concurrently; root and Implementer cannot write simultaneously.
-- No Dyad-defined token, step, tool-call, wall-time, or aggregate usage caps are imposed initially; measured usage remains visible.
+- No Samba-defined token, step, tool-call, wall-time, or aggregate usage caps are imposed initially; measured usage remains visible.
 - Root messages and follow-up assignments are durable, ordered, bounded, and address existing child threads.
 - Restart interrupts execution but preserves partial transcripts and messages; no child auto-resumes.
 - Child records remain until their parent chat is deleted; no pruning is implemented.
@@ -570,7 +570,7 @@ After `npm run build`:
 - **Productionizable:** Implementer writes normal files; the root owns tests, commits, and deploys.
 - **Intuitive but Power-User Friendly:** Explorer helps automatically; Reviewer has one clear Review changes button plus optional auto-review/auto-fix; Implementer remains a guarded power feature.
 - **Transparent Over Magical:** every child, message, cost, target, mutation, interruption, and stale result is visible.
-- **Bridge, Don't Replace:** sub-agents reuse Dyad's workspace, tools, providers, diffs, settings, and consent model.
+- **Bridge, Don't Replace:** sub-agents reuse Samba's workspace, tools, providers, diffs, settings, and consent model.
 
 ## Deferred Decision
 

@@ -41,8 +41,8 @@ export function generateSshKeyPair(): { private: string; public: string } {
   throw new Error("ssh2 generated 8 unusable ed25519 keys in a row.");
 }
 
-const START = "__DYAD_OUT_START__";
-const END = "__DYAD_OUT_END__";
+const START = "__SAMBA_OUT_START__";
+const END = "__SAMBA_OUT_END__";
 
 interface FakeServerBehaviour {
   /** What the batched probe reports. Defaults to a healthy empty machine. */
@@ -129,11 +129,11 @@ function answerTinker(
   if (script.includes("->exists()")) {
     // Answered about the address the script actually asked about. A script
     // that read no variable, or the wrong one, gets told there is no account.
-    if (!env.DYAD_ADMIN_EMAIL) return "no";
+    if (!env.SAMBA_ADMIN_EMAIL) return "no";
     return state.installed ? "yes" : "no";
   }
   if (script.includes("createToken")) {
-    if (!env.DYAD_ADMIN_EMAIL) return "no-user";
+    if (!env.SAMBA_ADMIN_EMAIL) return "no-user";
     // Sanctum's shape: an id, a pipe, then 40+ alphanumerics. Samba Builder checks
     // that before storing it, so a token that merely looks token-ish is
     // rejected — as a stray warning line should be.

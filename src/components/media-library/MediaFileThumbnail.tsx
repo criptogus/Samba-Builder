@@ -9,7 +9,7 @@ import {
   Expand,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { buildDyadMediaThumbnailUrl } from "@/lib/dyadMediaUrl";
+import { buildSambaMediaThumbnailUrl } from "@/lib/sambaMediaUrl";
 import { buttonVariants } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -38,7 +38,7 @@ export function MediaFileThumbnail({
   onPreviewImage: (file: MediaFile) => void;
   isBusy: boolean;
 }) {
-  const mediaUrl = buildDyadMediaThumbnailUrl(
+  const mediaUrl = buildSambaMediaThumbnailUrl(
     appPath,
     file.fileName,
     file.modifiedAtMs,

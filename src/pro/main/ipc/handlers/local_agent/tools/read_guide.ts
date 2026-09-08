@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { ToolDefinition, escapeXmlAttr } from "./types";
-import { DyadError, DyadErrorKind } from "@/errors/dyad_error";
+import { SambaError, SambaErrorKind } from "@/errors/samba_error";
 
 import addAuthentication from "@/prompts/guides/add-authentication.md?raw";
 import addEmailVerification from "@/prompts/guides/add-email-verification.md?raw";
@@ -36,16 +36,16 @@ export const readGuideTool: ToolDefinition<z.infer<typeof readGuideSchema>> = {
 
   buildXml: (args) => {
     if (!args.guide) return undefined;
-    return `<dyad-read-guide name="${escapeXmlAttr(args.guide)}"></dyad-read-guide>`;
+    return `<samba-read-guide name="${escapeXmlAttr(args.guide)}"></samba-read-guide>`;
   },
 
   execute: async (args, ctx) => {
     const content = GUIDES[args.guide];
     if (!content) {
       const available = Object.keys(GUIDES).join(", ");
-      throw new DyadError(
+      throw new SambaError(
         `Guide "${args.guide}" not found. Available guides: ${available}`,
-        DyadErrorKind.NotFound,
+        SambaErrorKind.NotFound,
       );
     }
     return filterGuideByFramework(content, ctx.frameworkType);

@@ -25,18 +25,19 @@ vi.mock("electron-log", () => ({
 }));
 
 describe("parseFilesFromMessage", () => {
-  describe("dyad-read tags", () => {
-    it("should parse a single dyad-read tag", () => {
-      const input = '<dyad-read path="src/components/Button.tsx"></dyad-read>';
+  describe("samba-read tags", () => {
+    it("should parse a single samba-read tag", () => {
+      const input =
+        '<samba-read path="src/components/Button.tsx"></samba-read>';
       const result = parseFilesFromMessage(input);
       expect(result).toEqual(["src/components/Button.tsx"]);
     });
 
-    it("should parse multiple dyad-read tags", () => {
+    it("should parse multiple samba-read tags", () => {
       const input = `
-        <dyad-read path="src/components/Button.tsx"></dyad-read>
-        <dyad-read path="src/utils/helpers.ts"></dyad-read>
-        <dyad-read path="src/styles/main.css"></dyad-read>
+        <samba-read path="src/components/Button.tsx"></samba-read>
+        <samba-read path="src/utils/helpers.ts"></samba-read>
+        <samba-read path="src/styles/main.css"></samba-read>
       `;
       const result = parseFilesFromMessage(input);
       expect(result).toEqual([
@@ -46,18 +47,18 @@ describe("parseFilesFromMessage", () => {
       ]);
     });
 
-    it("should trim whitespace from file paths in dyad-read tags", () => {
+    it("should trim whitespace from file paths in samba-read tags", () => {
       const input =
-        '<dyad-read path="  src/components/Button.tsx  "></dyad-read>';
+        '<samba-read path="  src/components/Button.tsx  "></samba-read>';
       const result = parseFilesFromMessage(input);
       expect(result).toEqual(["src/components/Button.tsx"]);
     });
 
     it("should skip empty path attributes", () => {
       const input = `
-        <dyad-read path="src/components/Button.tsx"></dyad-read>
-        <dyad-read path=""></dyad-read>
-        <dyad-read path="src/utils/helpers.ts"></dyad-read>
+        <samba-read path="src/components/Button.tsx"></samba-read>
+        <samba-read path=""></samba-read>
+        <samba-read path="src/utils/helpers.ts"></samba-read>
       `;
       const result = parseFilesFromMessage(input);
       expect(result).toEqual([
@@ -68,27 +69,27 @@ describe("parseFilesFromMessage", () => {
 
     it("should handle file paths with special characters", () => {
       const input =
-        '<dyad-read path="src/components/@special/Button-v2.tsx"></dyad-read>';
+        '<samba-read path="src/components/@special/Button-v2.tsx"></samba-read>';
       const result = parseFilesFromMessage(input);
       expect(result).toEqual(["src/components/@special/Button-v2.tsx"]);
     });
   });
 
-  describe("dyad-code-search-result tags", () => {
-    it("should parse a single file from dyad-code-search-result", () => {
-      const input = `<dyad-code-search-result>
+  describe("samba-code-search-result tags", () => {
+    it("should parse a single file from samba-code-search-result", () => {
+      const input = `<samba-code-search-result>
 src/components/Button.tsx
-</dyad-code-search-result>`;
+</samba-code-search-result>`;
       const result = parseFilesFromMessage(input);
       expect(result).toEqual(["src/components/Button.tsx"]);
     });
 
-    it("should parse multiple files from dyad-code-search-result", () => {
-      const input = `<dyad-code-search-result>
+    it("should parse multiple files from samba-code-search-result", () => {
+      const input = `<samba-code-search-result>
 src/components/Button.tsx
 src/components/Input.tsx
 src/utils/helpers.ts
-</dyad-code-search-result>`;
+</samba-code-search-result>`;
       const result = parseFilesFromMessage(input);
       expect(result).toEqual([
         "src/components/Button.tsx",
@@ -98,11 +99,11 @@ src/utils/helpers.ts
     });
 
     it("should trim whitespace from each line", () => {
-      const input = `<dyad-code-search-result>
+      const input = `<samba-code-search-result>
   src/components/Button.tsx  
     src/components/Input.tsx    
 src/utils/helpers.ts
-</dyad-code-search-result>`;
+</samba-code-search-result>`;
       const result = parseFilesFromMessage(input);
       expect(result).toEqual([
         "src/components/Button.tsx",
@@ -111,15 +112,15 @@ src/utils/helpers.ts
       ]);
     });
 
-    it("should skip empty lines in dyad-code-search-result", () => {
-      const input = `<dyad-code-search-result>
+    it("should skip empty lines in samba-code-search-result", () => {
+      const input = `<samba-code-search-result>
 src/components/Button.tsx
 
 src/components/Input.tsx
 
 
 src/utils/helpers.ts
-</dyad-code-search-result>`;
+</samba-code-search-result>`;
       const result = parseFilesFromMessage(input);
       expect(result).toEqual([
         "src/components/Button.tsx",
@@ -129,13 +130,13 @@ src/utils/helpers.ts
     });
 
     it("should skip lines that look like tags (starting with < or >)", () => {
-      const input = `<dyad-code-search-result>
+      const input = `<samba-code-search-result>
 src/components/Button.tsx
 <some-tag>
 src/components/Input.tsx
 >some-line
 src/utils/helpers.ts
-</dyad-code-search-result>`;
+</samba-code-search-result>`;
       const result = parseFilesFromMessage(input);
       expect(result).toEqual([
         "src/components/Button.tsx",
@@ -144,18 +145,18 @@ src/utils/helpers.ts
       ]);
     });
 
-    it("should handle multiple dyad-code-search-result tags", () => {
-      const input = `<dyad-code-search-result>
+    it("should handle multiple samba-code-search-result tags", () => {
+      const input = `<samba-code-search-result>
 src/components/Button.tsx
 src/components/Input.tsx
-</dyad-code-search-result>
+</samba-code-search-result>
 
 Some text in between
 
-<dyad-code-search-result>
+<samba-code-search-result>
 src/utils/helpers.ts
 src/styles/main.css
-</dyad-code-search-result>`;
+</samba-code-search-result>`;
       const result = parseFilesFromMessage(input);
       expect(result).toEqual([
         "src/components/Button.tsx",
@@ -167,16 +168,16 @@ src/styles/main.css
   });
 
   describe("mixed tags", () => {
-    it("should parse both dyad-read and dyad-code-search-result tags", () => {
+    it("should parse both samba-read and samba-code-search-result tags", () => {
       const input = `
-<dyad-read path="src/config/app.ts"></dyad-read>
+<samba-read path="src/config/app.ts"></samba-read>
 
-<dyad-code-search-result>
+<samba-code-search-result>
 src/components/Button.tsx
 src/components/Input.tsx
-</dyad-code-search-result>
+</samba-code-search-result>
 
-<dyad-read path="src/utils/helpers.ts"></dyad-read>
+<samba-read path="src/utils/helpers.ts"></samba-read>
 `;
       const result = parseFilesFromMessage(input);
       expect(result).toEqual([
@@ -189,13 +190,13 @@ src/components/Input.tsx
 
     it("should deduplicate file paths", () => {
       const input = `
-<dyad-read path="src/components/Button.tsx"></dyad-read>
-<dyad-read path="src/components/Button.tsx"></dyad-read>
+<samba-read path="src/components/Button.tsx"></samba-read>
+<samba-read path="src/components/Button.tsx"></samba-read>
 
-<dyad-code-search-result>
+<samba-code-search-result>
 src/components/Button.tsx
 src/utils/helpers.ts
-</dyad-code-search-result>
+</samba-code-search-result>
 `;
       const result = parseFilesFromMessage(input);
       expect(result).toEqual([
@@ -208,26 +209,26 @@ src/utils/helpers.ts
       const input = `
 Here's what I found:
 
-<dyad-read path="src/components/Header.tsx"></dyad-read>
+<samba-read path="src/components/Header.tsx"></samba-read>
 
 I also searched for related files:
 
-<dyad-code-search-result>
+<samba-code-search-result>
 src/components/Header.tsx
 src/components/Footer.tsx
 src/styles/layout.css
-</dyad-code-search-result>
+</samba-code-search-result>
 
 Let me also check the config:
 
-<dyad-read path="src/config/site.ts"></dyad-read>
+<samba-read path="src/config/site.ts"></samba-read>
 
 And finally:
 
-<dyad-code-search-result>
+<samba-code-search-result>
 src/utils/navigation.ts
 src/utils/theme.ts
-</dyad-code-search-result>
+</samba-code-search-result>
 `;
       const result = parseFilesFromMessage(input);
       expect(result).toEqual([
@@ -256,8 +257,8 @@ src/utils/theme.ts
 
     it("should handle malformed tags gracefully", () => {
       const input = `
-<dyad-read path="src/file1.ts"
-<dyad-code-search-result>
+<samba-read path="src/file1.ts"
+<samba-code-search-result>
 src/file2.ts
 `;
       const result = parseFilesFromMessage(input);
@@ -267,17 +268,17 @@ src/file2.ts
 
     it("should handle nested angle brackets in file paths", () => {
       const input =
-        '<dyad-read path="src/components/Generic<T>.tsx"></dyad-read>';
+        '<samba-read path="src/components/Generic<T>.tsx"></samba-read>';
       const result = parseFilesFromMessage(input);
       expect(result).toEqual(["src/components/Generic<T>.tsx"]);
     });
 
     it("should preserve file path case sensitivity", () => {
-      const input = `<dyad-code-search-result>
+      const input = `<samba-code-search-result>
 src/Components/Button.tsx
 src/components/button.tsx
 SRC/COMPONENTS/BUTTON.TSX
-</dyad-code-search-result>`;
+</samba-code-search-result>`;
       const result = parseFilesFromMessage(input);
       expect(result).toEqual([
         "src/Components/Button.tsx",
@@ -289,17 +290,17 @@ SRC/COMPONENTS/BUTTON.TSX
     it("should handle very long file paths", () => {
       const longPath =
         "src/very/deeply/nested/directory/structure/with/many/levels/components/Button.tsx";
-      const input = `<dyad-read path="${longPath}"></dyad-read>`;
+      const input = `<samba-read path="${longPath}"></samba-read>`;
       const result = parseFilesFromMessage(input);
       expect(result).toEqual([longPath]);
     });
 
     it("should handle file paths with dots", () => {
-      const input = `<dyad-code-search-result>
+      const input = `<samba-code-search-result>
 ./src/components/Button.tsx
 ../utils/helpers.ts
 ../../config/app.config.ts
-</dyad-code-search-result>`;
+</samba-code-search-result>`;
       const result = parseFilesFromMessage(input);
       expect(result).toEqual([
         "./src/components/Button.tsx",
@@ -309,10 +310,10 @@ SRC/COMPONENTS/BUTTON.TSX
     });
 
     it("should handle absolute paths", () => {
-      const input = `<dyad-code-search-result>
+      const input = `<samba-code-search-result>
 /absolute/path/to/file.tsx
 /another/absolute/path.ts
-</dyad-code-search-result>`;
+</samba-code-search-result>`;
       const result = parseFilesFromMessage(input);
       expect(result).toEqual([
         "/absolute/path/to/file.tsx",
@@ -407,9 +408,9 @@ describe("processChatMessagesWithVersionedFiles", () => {
         {
           role: "assistant",
           content:
-            'I found this file: <dyad-read path="src/old.ts"></dyad-read>',
+            'I found this file: <samba-read path="src/old.ts"></samba-read>',
           providerOptions: {
-            "dyad-engine": {
+            "samba-engine": {
               sourceCommitHash: "abc123",
             },
           },
@@ -454,7 +455,7 @@ describe("processChatMessagesWithVersionedFiles", () => {
           content: [
             {
               type: "text",
-              text: 'Here is the file: <dyad-read path="src/array.ts"></dyad-read>',
+              text: 'Here is the file: <samba-read path="src/array.ts"></samba-read>',
             },
             {
               type: "text",
@@ -462,7 +463,7 @@ describe("processChatMessagesWithVersionedFiles", () => {
             },
           ],
           providerOptions: {
-            "dyad-engine": {
+            "samba-engine": {
               sourceCommitHash: "def456",
             },
           },
@@ -498,7 +499,7 @@ describe("processChatMessagesWithVersionedFiles", () => {
         {
           role: "user",
           content:
-            'Check this: <dyad-read path="src/user-file.ts"></dyad-read>',
+            'Check this: <samba-read path="src/user-file.ts"></samba-read>',
         },
       ];
       const appPath = "/test/app";
@@ -522,15 +523,16 @@ describe("processChatMessagesWithVersionedFiles", () => {
       const chatMessages: ModelMessage[] = [
         {
           role: "assistant",
-          content: 'File here: <dyad-read path="src/no-commit.ts"></dyad-read>',
+          content:
+            'File here: <samba-read path="src/no-commit.ts"></samba-read>',
           // No providerOptions
         },
         {
           role: "assistant",
           content:
-            'Another file: <dyad-read path="src/no-commit2.ts"></dyad-read>',
+            'Another file: <samba-read path="src/no-commit2.ts"></samba-read>',
           providerOptions: {
-            // dyad-engine not set
+            // samba-engine not set
           },
         },
       ];
@@ -556,7 +558,7 @@ describe("processChatMessagesWithVersionedFiles", () => {
           role: "assistant",
           content: [],
           providerOptions: {
-            "dyad-engine": {
+            "samba-engine": {
               sourceCommitHash: "abc123",
             },
           },
@@ -576,7 +578,7 @@ describe("processChatMessagesWithVersionedFiles", () => {
   });
 
   describe("parsing multiple file paths", () => {
-    it("should process multiple files from dyad-code-search-result", async () => {
+    it("should process multiple files from samba-code-search-result", async () => {
       const { getFileAtCommit } = await import("@/ipc/utils/git_utils");
       const mockGetFileAtCommit = vi.mocked(getFileAtCommit);
 
@@ -591,12 +593,12 @@ describe("processChatMessagesWithVersionedFiles", () => {
       const chatMessages: ModelMessage[] = [
         {
           role: "assistant",
-          content: `<dyad-code-search-result>
+          content: `<samba-code-search-result>
 src/file1.ts
 src/file2.ts
-</dyad-code-search-result>`,
+</samba-code-search-result>`,
           providerOptions: {
-            "dyad-engine": {
+            "samba-engine": {
               sourceCommitHash: "commit1",
             },
           },
@@ -634,7 +636,7 @@ src/file2.ts
       });
     });
 
-    it("should process mixed dyad-read and dyad-code-search-result tags", async () => {
+    it("should process mixed samba-read and samba-code-search-result tags", async () => {
       const { getFileAtCommit } = await import("@/ipc/utils/git_utils");
       const mockGetFileAtCommit = vi.mocked(getFileAtCommit);
 
@@ -648,15 +650,15 @@ src/file2.ts
         {
           role: "assistant",
           content: `
-<dyad-read path="src/file1.ts"></dyad-read>
+<samba-read path="src/file1.ts"></samba-read>
 
-<dyad-code-search-result>
+<samba-code-search-result>
 src/file2.ts
 src/file3.ts
-</dyad-code-search-result>
+</samba-code-search-result>
 `,
           providerOptions: {
-            "dyad-engine": {
+            "samba-engine": {
               sourceCommitHash: "hash1",
             },
           },
@@ -692,9 +694,9 @@ src/file3.ts
         {
           role: "assistant",
           content:
-            'Missing file: <dyad-read path="src/missing.ts"></dyad-read>',
+            'Missing file: <samba-read path="src/missing.ts"></samba-read>',
           providerOptions: {
-            "dyad-engine": {
+            "samba-engine": {
               sourceCommitHash: "commit1",
             },
           },
@@ -726,9 +728,9 @@ src/file3.ts
       const chatMessages: ModelMessage[] = [
         {
           role: "assistant",
-          content: 'Error file: <dyad-read path="src/error.ts"></dyad-read>',
+          content: 'Error file: <samba-read path="src/error.ts"></samba-read>',
           providerOptions: {
-            "dyad-engine": {
+            "samba-engine": {
               sourceCommitHash: "commit1",
             },
           },
@@ -763,13 +765,13 @@ src/file3.ts
       const chatMessages: ModelMessage[] = [
         {
           role: "assistant",
-          content: `<dyad-code-search-result>
+          content: `<samba-code-search-result>
 src/success.ts
 src/error.ts
 src/missing.ts
-</dyad-code-search-result>`,
+</samba-code-search-result>`,
           providerOptions: {
-            "dyad-engine": {
+            "samba-engine": {
               sourceCommitHash: "commit1",
             },
           },
@@ -814,9 +816,9 @@ src/missing.ts
         },
         {
           role: "assistant",
-          content: 'Here it is: <dyad-read path="src/file1.ts"></dyad-read>',
+          content: 'Here it is: <samba-read path="src/file1.ts"></samba-read>',
           providerOptions: {
-            "dyad-engine": {
+            "samba-engine": {
               sourceCommitHash: "commit1",
             },
           },
@@ -828,9 +830,9 @@ src/missing.ts
         {
           role: "assistant",
           content:
-            'Here it is again: <dyad-read path="src/file1.ts"></dyad-read>',
+            'Here it is again: <samba-read path="src/file1.ts"></samba-read>',
           providerOptions: {
-            "dyad-engine": {
+            "samba-engine": {
               sourceCommitHash: "commit2",
             },
           },
@@ -893,9 +895,9 @@ src/missing.ts
       const chatMessages: ModelMessage[] = [
         {
           role: "assistant",
-          content: 'Old version: <dyad-read path="src/old.ts"></dyad-read>',
+          content: 'Old version: <samba-read path="src/old.ts"></samba-read>',
           providerOptions: {
-            "dyad-engine": {
+            "samba-engine": {
               sourceCommitHash: "abc123",
             },
           },
@@ -943,12 +945,12 @@ src/missing.ts
       const chatMessages: ModelMessage[] = [
         {
           role: "assistant",
-          content: `<dyad-code-search-result>
+          content: `<samba-code-search-result>
 src/file1.ts
 src/file2.ts
-</dyad-code-search-result>`,
+</samba-code-search-result>`,
           providerOptions: {
-            "dyad-engine": {
+            "samba-engine": {
               sourceCommitHash: "commit1",
             },
           },
@@ -989,7 +991,7 @@ src/file2.ts
           role: "assistant",
           content: "No commit hash here",
           providerOptions: {
-            "dyad-engine": {
+            "samba-engine": {
               sourceCommitHash: "abc123",
               commitHash: null,
             },
@@ -1024,7 +1026,7 @@ src/file2.ts
           role: "assistant",
           content: "Assistant message with commit hash",
           providerOptions: {
-            "dyad-engine": {
+            "samba-engine": {
               sourceCommitHash: "ignored-for-this-test",
               commitHash: "commit-123",
             },
@@ -1059,7 +1061,7 @@ src/file2.ts
           role: "assistant",
           content: "Assistant message with different commit hash",
           providerOptions: {
-            "dyad-engine": {
+            "samba-engine": {
               sourceCommitHash: "ignored-for-this-test",
               commitHash: "older-commit",
             },
@@ -1094,7 +1096,7 @@ src/file2.ts
           role: "assistant",
           content: "Assistant message with matching commit but dirty status",
           providerOptions: {
-            "dyad-engine": {
+            "samba-engine": {
               sourceCommitHash: "ignored-for-this-test",
               commitHash: "same-commit",
             },

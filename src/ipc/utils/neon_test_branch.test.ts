@@ -280,7 +280,7 @@ describe("deleteTempTestBranch", () => {
 
   it("strips a cleanup-only marker before calling Neon", async () => {
     await deleteTempTestBranch(
-      makeApp({ neonTestBranchId: "dyad-cleanup-only:v1:test-br" }),
+      makeApp({ neonTestBranchId: "samba-cleanup-only:v1:test-br" }),
     );
     expect(mocks.deleteProjectBranch).toHaveBeenCalledWith("proj-1", "test-br");
     expect(mocks.set).toHaveBeenCalledWith({ neonTestBranchId: null });
@@ -356,7 +356,7 @@ describe("markAndDeleteTempTestBranch", () => {
       "test-br",
     );
     expect(mocks.set).toHaveBeenCalledWith({
-      neonTestBranchId: "dyad-cleanup-only:v1:test-br",
+      neonTestBranchId: "samba-cleanup-only:v1:test-br",
     });
     expect(mocks.deleteProjectBranch).toHaveBeenCalledWith("proj-1", "test-br");
     const markedAt = mocks.set.mock.invocationCallOrder[0];
@@ -431,11 +431,11 @@ describe("restoreAppFromTestBranch", () => {
       ),
     ).resolves.toBe(true);
 
-    expect(isTestBranchCleanupOnly("dyad-cleanup-only:v1:leaked-br")).toBe(
+    expect(isTestBranchCleanupOnly("samba-cleanup-only:v1:leaked-br")).toBe(
       true,
     );
     expect(mocks.set).toHaveBeenCalledWith({
-      neonTestBranchId: "dyad-cleanup-only:v1:leaked-br",
+      neonTestBranchId: "samba-cleanup-only:v1:leaked-br",
     });
     expect(mocks.set).not.toHaveBeenCalledWith({ neonTestBranchId: null });
   });
@@ -444,7 +444,7 @@ describe("restoreAppFromTestBranch", () => {
     await expect(
       restoreAppFromTestBranch(
         makeApp({
-          neonTestBranchId: "dyad-cleanup-only:v1:leaked-br",
+          neonTestBranchId: "samba-cleanup-only:v1:leaked-br",
         }),
       ),
     ).resolves.toBe(true);

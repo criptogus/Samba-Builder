@@ -24,7 +24,7 @@ approval, template apply).
   (`Todo App 2` → `Todo App 3`).
 - Collision probing is deliberately capped at 1000 candidates to keep a
   pathological database/filesystem state from blocking a user action
-  indefinitely. Exhausting the cap must surface a `DyadErrorKind.Conflict`
+  indefinitely. Exhausting the cap must surface a `SambaErrorKind.Conflict`
   with actionable context; auto-suffixing is not an unbounded guarantee.
 - App creation/import flows must serialize display-name checking, folder
   allocation, filesystem creation, and the database insert under one

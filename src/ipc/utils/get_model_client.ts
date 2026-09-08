@@ -26,17 +26,17 @@ import {
 import { resolveBuiltinModelAlias } from "../shared/remote_language_model_catalog";
 import { LanguageModelProvider } from "@/ipc/types";
 import {
-  createDyadEngine,
-  type DyadEngineProvider,
+  createSambaEngine,
+  type SambaEngineProvider,
 } from "./llm_engine_provider";
 
 import { getLmStudioBaseUrl } from "./lm_studio_utils";
 import { createOllamaProvider } from "./ollama_provider";
 import { getOllamaApiUrl } from "../handlers/local_model_ollama_handler";
 import { createFallback } from "./fallback_ai_model";
-import { getDyadEngineBaseUrl } from "./dyad_engine_url";
+import { getSambaEngineBaseUrl } from "./samba_engine_url";
 import { getTestFetchOption } from "./test_fetch_override";
-import { DyadError, DyadErrorKind } from "@/errors/dyad_error";
+import { SambaError, SambaErrorKind } from "@/errors/samba_error";
 import {
   findInvalidProviderApiKeyCharacter,
   formatInvalidProviderApiKeyMessage,
@@ -58,20 +58,20 @@ function getModelClientFetchOption(): { fetch?: FetchFunction } {
   return getTestFetchOption();
 }
 
-const AUTO_DYAD_PRO_MODEL_ALIASES = [
-  "dyad/auto/openai",
-  "dyad/auto/anthropic",
-  "dyad/auto/google",
+const AUTO_SAMBA_PRO_MODEL_ALIASES = [
+  "samba/auto/openai",
+  "samba/auto/anthropic",
+  "samba/auto/google",
 ] as const;
 
 const AUTO_MODEL_ALIASES = [
-  ...AUTO_DYAD_PRO_MODEL_ALIASES,
-  "dyad/auto/openrouter",
+  ...AUTO_SAMBA_PRO_MODEL_ALIASES,
+  "samba/auto/openrouter",
 ] as const;
 
 const OPENROUTER_FREE_MODEL_NAME = "openrouter/free";
 const AUTO_BALANCED_MODEL_NAME = "balanced";
-const AUTO_BALANCED_ALIAS = "dyad/auto/balanced";
+const AUTO_BALANCED_ALIAS = "samba/auto/balanced";
 
 export interface ModelClient {
   model: LanguageModel;
@@ -90,12 +90,12 @@ type ResolvedAliasModel = NonNullable<
   Awaited<ReturnType<typeof resolveBuiltinModelAlias>>
 >;
 
-function createDyadEngineAliasModel({
+function createSambaEngineAliasModel({
   provider,
   resolvedModel,
   modelId,
 }: {
-  provider: DyadEngineProvider;
+  provider: SambaEngineProvider;
   resolvedModel: ResolvedAliasModel;
   modelId: string;
 }): LanguageModel {
@@ -145,27 +145,27 @@ export async function getModelClient(
   const modelSelection = getAutoSidekickRuntimeModel(selectedModelSelection);
   const allProviders = await getLanguageModelProviders();
 
-  const dyadApiKey = settings.enableDyadPro
+  const sambaApiKey = settings.enableSambaPro
     ? getProviderApiKeyForRequest(
         settings.providerSettings?.auto?.apiKey?.value,
         "Samba Builder",
       )
     : undefined;
   // Samba Builder: produto BYOK puro — SEM backend de engine gerenciado
-  // (herança do Dyad autenticava por cookie de sessão; sem sessão logada o
+  // (herança do Samba autenticava por cookie de sessão; sem sessão logada o
   // engine responde "No cookie auth credentials found"). O caminho do engine
   // fica permanentemente desligado: o modelo vai SEMPRE direto ao provider
   // conectado via API (chave do usuário).
-  const isDyadProEnabledForRequest = false;
+  const isSambaProEnabledForRequest = false;
 
   if (
     model.provider === "auto" &&
     model.name === AUTO_BALANCED_MODEL_NAME &&
-    !isDyadProEnabledForRequest
+    !isSambaProEnabledForRequest
   ) {
-    throw new DyadError(
+    throw new SambaError(
       "Auto (balanced) requer um modelo conectado. Selecione Auto ou um modelo conectado via API.",
-      DyadErrorKind.Auth,
+      SambaErrorKind.Auth,
     );
   }
 
@@ -173,38 +173,38 @@ export async function getModelClient(
   const providerConfig = allProviders.find((p) => p.id === model.provider);
 
   if (!providerConfig) {
-    throw new DyadError(
+    throw new SambaError(
       `Configuration not found for provider: ${model.provider}`,
-      DyadErrorKind.NotFound,
+      SambaErrorKind.NotFound,
     );
   }
 
-  if (isFreeProModel(model) && (!settings.enableDyadPro || !dyadApiKey)) {
-    throw new DyadError(
+  if (isFreeProModel(model) && (!settings.enableSambaPro || !sambaApiKey)) {
+    throw new SambaError(
       "Samba Builder Free requires an active Samba Builder API key. Switch to another model or enable Samba Builder.",
-      DyadErrorKind.Auth,
+      SambaErrorKind.Auth,
     );
   }
 
   // Handle Samba Builder override — só quando existe a chave do engine (backend
-  // cloud da Samba/Dyad). Sem chave (produto sem backend próprio), o provider é
+  // cloud da Samba/Samba). Sem chave (produto sem backend próprio), o provider é
   // usado direto com a chave BYOK do usuário — evita AI_LoadAPIKeyError.
-  if (isDyadProEnabledForRequest && dyadApiKey) {
-    const dyadEngineUrl = process.env.DYAD_ENGINE_URL;
+  if (isSambaProEnabledForRequest && sambaApiKey) {
+    const sambaEngineUrl = process.env.SAMBA_ENGINE_URL;
     // Check if the selected provider supports Samba Builder (has a gateway prefix) OR
     // we're using local engine.
     // IMPORTANT: some providers like OpenAI have an empty string gateway prefix,
     // so we do a nullish and not a truthy check here.
-    if (providerConfig.gatewayPrefix != null || dyadEngineUrl) {
+    if (providerConfig.gatewayPrefix != null || sambaEngineUrl) {
       // Native tool-backed modes select and edit files themselves. Retired
       // engine-side Build options remain in stored settings only for backwards
       // compatibility and must not affect requests.
       const enableSmartFilesContext = false;
-      const provider = createDyadEngine({
-        apiKey: dyadApiKey,
-        baseURL: getDyadEngineBaseUrl(),
+      const provider = createSambaEngine({
+        apiKey: sambaApiKey,
+        baseURL: getSambaEngineBaseUrl(),
         ...getModelClientFetchOption(),
-        dyadOptions: {
+        sambaOptions: {
           enableLazyEdits: false,
           enableSmartFilesContext,
           enableWebSearch: false,
@@ -218,7 +218,7 @@ export async function getModelClient(
       );
 
       logger.debug(
-        `\x1b[1;30;42m Using Samba Builder engine: ${dyadEngineUrl ?? "<prod>"} \x1b[0m`,
+        `\x1b[1;30;42m Using Samba Builder engine: ${sambaEngineUrl ?? "<prod>"} \x1b[0m`,
       );
 
       // Do not use free variant (for openrouter).
@@ -250,9 +250,9 @@ export async function getModelClient(
         (p) => p.id === "openrouter",
       );
       if (!openRouterProvider) {
-        throw new DyadError(
+        throw new SambaError(
           "OpenRouter provider not found",
-          DyadErrorKind.NotFound,
+          SambaErrorKind.NotFound,
         );
       }
       return {
@@ -296,7 +296,7 @@ export async function getModelClient(
         );
         if (
           resolvedModel.providerId === "openrouter" &&
-          !isDyadProEnabledForRequest &&
+          !isSambaProEnabledForRequest &&
           providerInfo
         ) {
           return {
@@ -392,7 +392,7 @@ async function getProModelClient({
 }: {
   model: LargeLanguageModel;
   settings: UserSettings;
-  provider: DyadEngineProvider;
+  provider: SambaEngineProvider;
   modelId: string;
 }): Promise<ModelClient> {
   if (isFreeProModel(model)) {
@@ -407,9 +407,9 @@ async function getProModelClient({
   if (model.provider === "auto" && model.name === AUTO_BALANCED_MODEL_NAME) {
     const resolvedModel = await resolveBuiltinModelAlias(AUTO_BALANCED_ALIAS);
     if (!resolvedModel) {
-      throw new DyadError(
+      throw new SambaError(
         "Auto (balanced) could not be resolved from the model catalog",
-        DyadErrorKind.External,
+        SambaErrorKind.External,
       );
     }
 
@@ -418,23 +418,23 @@ async function getProModelClient({
       (providerInfo) => providerInfo.id === resolvedModel.providerId,
     );
     if (!resolvedProvider) {
-      throw new DyadError(
+      throw new SambaError(
         `Configuration not found for provider: ${resolvedModel.providerId}`,
-        DyadErrorKind.NotFound,
+        SambaErrorKind.NotFound,
       );
     }
 
     if (resolvedModel.apiProtocol !== "responses") {
-      throw new DyadError(
+      throw new SambaError(
         "Auto (balanced) must use the Responses API according to the model catalog",
-        DyadErrorKind.External,
+        SambaErrorKind.External,
       );
     }
 
     const resolvedModelId = `${resolvedProvider.gatewayPrefix || ""}${resolvedModel.apiName}`;
 
     return {
-      model: createDyadEngineAliasModel({
+      model: createSambaEngineAliasModel({
         provider,
         resolvedModel,
         modelId: resolvedModelId,
@@ -450,7 +450,7 @@ async function getProModelClient({
   ) {
     const providers = await getLanguageModelProviders();
     const fallbackEntries = await Promise.all(
-      AUTO_DYAD_PRO_MODEL_ALIASES.map(async (aliasId) => {
+      AUTO_SAMBA_PRO_MODEL_ALIASES.map(async (aliasId) => {
         const resolvedModel = await resolveBuiltinModelAlias(aliasId);
         if (!resolvedModel || resolvedModel.apiName.endsWith(":free")) {
           return null;
@@ -463,7 +463,7 @@ async function getProModelClient({
           resolvedProvider?.gatewayPrefix || ""
         }${resolvedModel.apiName}`;
 
-        const instance = createDyadEngineAliasModel({
+        const instance = createSambaEngineAliasModel({
           provider,
           resolvedModel,
           modelId: resolvedModelId,
@@ -475,7 +475,7 @@ async function getProModelClient({
         // Provider-family thinking options are already injected by the Samba Builder
         // Engine fetch wrapper from this entry's providerId; adding e.g.
         // providerOptions.google here would be ignored because these AI SDK
-        // model instances read the dyad-engine provider-options key.
+        // model instances read the samba-engine provider-options key.
         const chainModelSelection = {
           provider: resolvedModel.providerId,
           name: resolvedModel.apiName,
@@ -496,9 +496,9 @@ async function getProModelClient({
 
     const validEntries = fallbackEntries.filter((entry) => entry !== null);
     if (validEntries.length === 0) {
-      throw new DyadError(
+      throw new SambaError(
         "No auto-mode models could be resolved from the catalog",
-        DyadErrorKind.External,
+        SambaErrorKind.External,
       );
     }
 
@@ -572,9 +572,9 @@ function getRegularModelClient(
   ].includes(providerId);
   const hasTestFetchOverride = Boolean(getModelClientFetchOption().fetch);
   if (providerRequiresKey && !apiKey && !hasTestFetchOverride) {
-    throw new DyadError(
+    throw new SambaError(
       `O provider ${providerConfig.name ?? providerId} não está conectado (chave de API ausente). Adicione a chave em Settings → Providers ou selecione um modelo conectado (ex.: DeepSeek).`,
-      DyadErrorKind.Auth,
+      SambaErrorKind.Auth,
     );
   }
   // Create client based on provider ID or type
@@ -843,9 +843,9 @@ function getRegularModelClient(
         };
       }
       // If it's not a known ID and not type 'custom', it's unsupported
-      throw new DyadError(
+      throw new SambaError(
         `Unsupported model provider: ${model.provider}`,
-        DyadErrorKind.Validation,
+        SambaErrorKind.Validation,
       );
     }
   }
@@ -861,9 +861,9 @@ function getProviderApiKeyForRequest(
   }
   const invalidCharacter = findInvalidProviderApiKeyCharacter(normalizedValue);
   if (invalidCharacter) {
-    throw new DyadError(
+    throw new SambaError(
       formatInvalidProviderApiKeyMessage(providerDisplayName, invalidCharacter),
-      DyadErrorKind.Validation,
+      SambaErrorKind.Validation,
     );
   }
   return normalizedValue;

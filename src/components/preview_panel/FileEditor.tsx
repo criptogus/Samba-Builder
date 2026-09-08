@@ -198,7 +198,7 @@ export const FileEditor = ({
     setIsSaving(false);
   }, [content]);
 
-  const editorTheme = isDarkMode ? "dyad-dark" : "dyad-light";
+  const editorTheme = isDarkMode ? "samba-dark" : "samba-light";
   const modelPath = React.useMemo(() => {
     const normalizedPath = filePath.replace(/^\/+/, "");
     return `file:///app-${appId ?? "unknown"}/${encodeURI(normalizedPath)}`;

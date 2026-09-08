@@ -244,7 +244,7 @@ export function SupabaseConnector({ appId }: { appId: number }) {
     }
   }, [flowState, t]);
 
-  // A dyad://supabase-oauth-return processed with no active flow (cold
+  // A sambabuilder://supabase-oauth-return processed with no active flow (cold
   // start, app restarted mid-flow, or a return that arrived after the flow
   // timed out): tokens are already stored, just refresh what we show.
   useUnsolicitedConnectionReturn("supabase", () => {
@@ -360,7 +360,7 @@ export function SupabaseConnector({ appId }: { appId: number }) {
     }
   };
 
-  // Direct connect with a Supabase Personal Access Token (no Dyad OAuth).
+  // Direct connect with a Supabase Personal Access Token (no Samba OAuth).
   const [showAccessTokenForm, setShowAccessTokenForm] = useState(false);
   const [accessTokenDraft, setAccessTokenDraft] = useState("");
   const [isConnectingWithToken, setIsConnectingWithToken] = useState(false);

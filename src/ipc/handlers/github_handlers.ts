@@ -25,7 +25,7 @@ import {
 import { gitService } from "../services/git_service";
 import * as schema from "../../db/schema";
 import fs from "node:fs";
-import { getDyadAppPath, isAppLocationAccessible } from "../../paths/paths";
+import { getSambaAppPath, isAppLocationAccessible } from "../../paths/paths";
 import { db } from "../../db";
 import { apps } from "../../db/schema";
 import { eq } from "drizzle-orm";
@@ -36,7 +36,7 @@ import path from "node:path";
 import { createTypedHandler } from "./base";
 import { githubContracts } from "../types/github";
 import type { CloneRepoParams, CloneRepoResult } from "../types/github";
-import { DyadError, DyadErrorKind } from "@/errors/dyad_error";
+import { SambaError, SambaErrorKind } from "@/errors/samba_error";
 import {
   sanitizeAppDisplayName,
   slugifyAppFolderName,
@@ -172,9 +172,9 @@ export async function prepareLocalBranch({
 }) {
   const app = await db.query.apps.findFirst({ where: eq(apps.id, appId) });
   if (!app) {
-    throw new DyadError("App not found", DyadErrorKind.NotFound);
+    throw new SambaError("App not found", SambaErrorKind.NotFound);
   }
-  const appPath = getDyadAppPath(app.path);
+  const appPath = getSambaAppPath(app.path);
   const targetBranch = branch || "main";
 
   try {
@@ -279,7 +279,7 @@ export async function prepareLocalBranch({
     }
   } catch (gitError: any) {
     logger.error("[GitHub Handler] Failed to prepare local branch:", gitError);
-    if (gitError instanceof DyadError) throw gitError;
+    if (gitError instanceof SambaError) throw gitError;
     const errorMessage =
       gitError?.message ||
       "Failed to prepare local branch for the connected repository.";
@@ -406,9 +406,9 @@ async function pollForAccessToken(invocationRef: ConnectionFlowInvocationRef) {
           break;
       }
     } else {
-      throw new DyadError(
+      throw new SambaError(
         `Unknown response structure: ${JSON.stringify(data)}`,
-        DyadErrorKind.External,
+        SambaErrorKind.External,
       );
     }
   } catch (error) {
@@ -534,7 +534,10 @@ async function handleListGithubRepos(): Promise<
     const settings = readSettings();
     const accessToken = settings.githubAccessToken?.value;
     if (!accessToken) {
-      throw new DyadError("Not authenticated with GitHub.", DyadErrorKind.Auth);
+      throw new SambaError(
+        "Not authenticated with GitHub.",
+        SambaErrorKind.Auth,
+      );
     }
 
     // Fetch user's repositories
@@ -562,7 +565,7 @@ async function handleListGithubRepos(): Promise<
       private: repo.private,
     }));
   } catch (err: any) {
-    if (err instanceof DyadError) throw err;
+    if (err instanceof SambaError) throw err;
     logger.error("[GitHub Handler] Failed to list repos:", err);
     throw new Error(err.message || "Failed to list GitHub repositories.");
   }
@@ -578,7 +581,10 @@ async function handleGetRepoBranches(
     const settings = readSettings();
     const accessToken = settings.githubAccessToken?.value;
     if (!accessToken) {
-      throw new DyadError("Not authenticated with GitHub.", DyadErrorKind.Auth);
+      throw new SambaError(
+        "Not authenticated with GitHub.",
+        SambaErrorKind.Auth,
+      );
     }
 
     // Fetch repository branches
@@ -605,7 +611,7 @@ async function handleGetRepoBranches(
       commit: { sha: branch.commit.sha },
     }));
   } catch (err: any) {
-    if (err instanceof DyadError) throw err;
+    if (err instanceof SambaError) throw err;
     logger.error("[GitHub Handler] Failed to get repo branches:", err);
     throw new Error(err.message || "Failed to get repository branches.");
   }
@@ -667,7 +673,7 @@ export async function handleCreateRepo(
     where: eq(apps.id, appId),
   });
   if (!app) {
-    throw new DyadError("App not found", DyadErrorKind.NotFound);
+    throw new SambaError("App not found", SambaErrorKind.NotFound);
   }
 
   // Normalize the repo name to match GitHub's automatic normalization
@@ -678,7 +684,7 @@ export async function handleCreateRepo(
   const settings = readSettings();
   const accessToken = settings.githubAccessToken?.value;
   if (!accessToken) {
-    throw new DyadError("Not authenticated with GitHub.", DyadErrorKind.Auth);
+    throw new SambaError("Not authenticated with GitHub.", SambaErrorKind.Auth);
   }
   // If org is empty, create for the authenticated user
   let owner = org;
@@ -783,7 +789,10 @@ export async function handleConnectToExistingRepo(
     const settings = readSettings();
     const accessToken = settings.githubAccessToken?.value;
     if (!accessToken) {
-      throw new DyadError("Not authenticated with GitHub.", DyadErrorKind.Auth);
+      throw new SambaError(
+        "Not authenticated with GitHub.",
+        SambaErrorKind.Auth,
+      );
     }
 
     // Verify the repository exists and user has access
@@ -819,7 +828,7 @@ export async function handleConnectToExistingRepo(
     // Store org, repo, and branch in the app's DB row
     await updateAppGithubRepo({ appId, org: owner, repo, branch });
   } catch (err: any) {
-    if (err instanceof DyadError) throw err;
+    if (err instanceof SambaError) throw err;
     logger.error("[GitHub Handler] Failed to connect to existing repo:", err);
     throw new Error(err.message || "Failed to connect to existing repository.");
   }
@@ -842,18 +851,18 @@ export async function handlePushToGithub(
   const settings = readSettings();
   const accessToken = settings.githubAccessToken?.value;
   if (!accessToken) {
-    throw new DyadError("Not authenticated with GitHub.", DyadErrorKind.Auth);
+    throw new SambaError("Not authenticated with GitHub.", SambaErrorKind.Auth);
   }
 
   // Get app info from DB
   const app = await db.query.apps.findFirst({ where: eq(apps.id, appId) });
   if (!app || !app.githubOrg || !app.githubRepo) {
-    throw new DyadError(
+    throw new SambaError(
       "App is not linked to a GitHub repo.",
-      DyadErrorKind.Precondition,
+      SambaErrorKind.Precondition,
     );
   }
-  const appPath = getDyadAppPath(app.path);
+  const appPath = getSambaAppPath(app.path);
   const branch = app.githubBranch || "main";
 
   // Set up remote URL (credentials are never stored in the URL; auth is
@@ -907,7 +916,7 @@ export async function handleAbortRebase(
 ): Promise<void> {
   const app = await db.query.apps.findFirst({ where: eq(apps.id, appId) });
   if (!app) throw new Error("App not found");
-  const appPath = getDyadAppPath(app.path);
+  const appPath = getSambaAppPath(app.path);
 
   await gitRebaseAbort({ path: appPath });
 }
@@ -918,7 +927,7 @@ export async function handleContinueRebase(
 ): Promise<void> {
   const app = await db.query.apps.findFirst({ where: eq(apps.id, appId) });
   if (!app) throw new Error("App not found");
-  const appPath = getDyadAppPath(app.path);
+  const appPath = getSambaAppPath(app.path);
 
   await gitRebaseContinue({ path: appPath });
 }
@@ -930,16 +939,16 @@ export async function handleRebaseFromGithub(
   const settings = readSettings();
   const accessToken = settings.githubAccessToken?.value;
   if (!accessToken) {
-    throw new DyadError("Not authenticated with GitHub.", DyadErrorKind.Auth);
+    throw new SambaError("Not authenticated with GitHub.", SambaErrorKind.Auth);
   }
   const app = await db.query.apps.findFirst({ where: eq(apps.id, appId) });
   if (!app || !app.githubOrg || !app.githubRepo) {
-    throw new DyadError(
+    throw new SambaError(
       "App is not linked to a GitHub repo.",
-      DyadErrorKind.Precondition,
+      SambaErrorKind.Precondition,
     );
   }
-  const appPath = getDyadAppPath(app.path);
+  const appPath = getSambaAppPath(app.path);
   const branch = app.githubBranch || "main";
 
   // Set up remote URL (credentials are never stored in the URL; auth is
@@ -989,7 +998,7 @@ export async function handleGetGitState(
 ): Promise<{ mergeInProgress: boolean; rebaseInProgress: boolean }> {
   const app = await db.query.apps.findFirst({ where: eq(apps.id, appId) });
   if (!app) throw new Error("App not found");
-  const appPath = getDyadAppPath(app.path);
+  const appPath = getSambaAppPath(app.path);
 
   const mergeInProgress = isGitMergeInProgress({ path: appPath });
   const rebaseInProgress = isGitRebaseInProgress({ path: appPath });
@@ -1005,14 +1014,17 @@ async function handleListCollaborators(
     const settings = readSettings();
     const accessToken = settings.githubAccessToken?.value;
     if (!accessToken) {
-      throw new DyadError("Not authenticated with GitHub.", DyadErrorKind.Auth);
+      throw new SambaError(
+        "Not authenticated with GitHub.",
+        SambaErrorKind.Auth,
+      );
     }
 
     const app = await db.query.apps.findFirst({ where: eq(apps.id, appId) });
     if (!app || !app.githubOrg || !app.githubRepo) {
-      throw new DyadError(
+      throw new SambaError(
         "App is not linked to a GitHub repo.",
-        DyadErrorKind.Precondition,
+        SambaErrorKind.Precondition,
       );
     }
 
@@ -1039,7 +1051,7 @@ async function handleListCollaborators(
       permissions: c.permissions,
     }));
   } catch (err: any) {
-    if (err instanceof DyadError) throw err;
+    if (err instanceof SambaError) throw err;
     logger.error("[GitHub Handler] Failed to list collaborators:", err);
     throw new Error(err.message || "Failed to list collaborators.");
   }
@@ -1053,12 +1065,15 @@ async function handleInviteCollaborator(
     // Validate username
     const trimmedUsername = username.trim();
     if (!trimmedUsername) {
-      throw new DyadError("Username cannot be empty.", DyadErrorKind.External);
+      throw new SambaError(
+        "Username cannot be empty.",
+        SambaErrorKind.External,
+      );
     }
     if (trimmedUsername.length > 39) {
-      throw new DyadError(
+      throw new SambaError(
         "GitHub username cannot exceed 39 characters.",
-        DyadErrorKind.Validation,
+        SambaErrorKind.Validation,
       );
     }
     // Single character usernames must be alphanumeric only
@@ -1080,14 +1095,17 @@ async function handleInviteCollaborator(
     const settings = readSettings();
     const accessToken = settings.githubAccessToken?.value;
     if (!accessToken) {
-      throw new DyadError("Not authenticated with GitHub.", DyadErrorKind.Auth);
+      throw new SambaError(
+        "Not authenticated with GitHub.",
+        SambaErrorKind.Auth,
+      );
     }
 
     const app = await db.query.apps.findFirst({ where: eq(apps.id, appId) });
     if (!app || !app.githubOrg || !app.githubRepo) {
-      throw new DyadError(
+      throw new SambaError(
         "App is not linked to a GitHub repo.",
-        DyadErrorKind.Precondition,
+        SambaErrorKind.Precondition,
       );
     }
 
@@ -1114,7 +1132,7 @@ async function handleInviteCollaborator(
       );
     }
   } catch (err: any) {
-    if (err instanceof DyadError) throw err;
+    if (err instanceof SambaError) throw err;
     logger.error("[GitHub Handler] Failed to invite collaborator:", err);
     throw new Error(err.message || "Failed to invite collaborator.");
   }
@@ -1128,14 +1146,17 @@ async function handleRemoveCollaborator(
     const settings = readSettings();
     const accessToken = settings.githubAccessToken?.value;
     if (!accessToken) {
-      throw new DyadError("Not authenticated with GitHub.", DyadErrorKind.Auth);
+      throw new SambaError(
+        "Not authenticated with GitHub.",
+        SambaErrorKind.Auth,
+      );
     }
 
     const app = await db.query.apps.findFirst({ where: eq(apps.id, appId) });
     if (!app || !app.githubOrg || !app.githubRepo) {
-      throw new DyadError(
+      throw new SambaError(
         "App is not linked to a GitHub repo.",
-        DyadErrorKind.Precondition,
+        SambaErrorKind.Precondition,
       );
     }
 
@@ -1158,7 +1179,7 @@ async function handleRemoveCollaborator(
       );
     }
   } catch (err: any) {
-    if (err instanceof DyadError) throw err;
+    if (err instanceof SambaError) throw err;
     logger.error("[GitHub Handler] Failed to remove collaborator:", err);
     throw new Error(err.message || "Failed to remove collaborator.");
   }
@@ -1170,7 +1191,7 @@ export async function handleGetMergeConflicts(
 ): Promise<string[]> {
   const app = await db.query.apps.findFirst({ where: eq(apps.id, appId) });
   if (!app) throw new Error("App not found");
-  const appPath = getDyadAppPath(app.path);
+  const appPath = getSambaAppPath(app.path);
 
   const conflicts = await gitGetMergeConflicts({ path: appPath });
   return conflicts;
@@ -1188,7 +1209,7 @@ export async function handleDisconnectGithubRepo(
   });
 
   if (!app) {
-    throw new DyadError("App not found", DyadErrorKind.NotFound);
+    throw new SambaError("App not found", SambaErrorKind.NotFound);
   }
 
   // Update app in database to remove GitHub repo, org, and branch
@@ -1211,7 +1232,7 @@ async function handleCloneRepoFromUrl(
     installCommand,
     startCommand,
     appName,
-    optimizeForDyad = true,
+    optimizeForSamba = true,
   } = params;
   try {
     const settings = readSettings();
@@ -1256,7 +1277,7 @@ async function handleCloneRepoFromUrl(
       const folderName = await resolveUniqueFolderName(
         slugifyAppFolderName(finalAppName),
       );
-      const appPath = getDyadAppPath(folderName);
+      const appPath = getSambaAppPath(folderName);
 
       if (!isAppLocationAccessible(appPath)) {
         throw new Error(
@@ -1300,7 +1321,7 @@ async function handleCloneRepoFromUrl(
       logger.log(`Successfully cloned repo ${owner}/${repoName} to ${appPath}`);
 
       let autoUpgradeWarning = false;
-      if (optimizeForDyad && isComponentTaggerUpgradeNeeded(appPath)) {
+      if (optimizeForSamba && isComponentTaggerUpgradeNeeded(appPath)) {
         try {
           await applyComponentTagger(appPath, { installDependencies: false });
           logger.log(
@@ -1330,7 +1351,7 @@ async function handleCloneRepoFromUrl(
       };
     });
   } catch (err: unknown) {
-    if (err instanceof DyadError) {
+    if (err instanceof SambaError) {
       throw err;
     }
     logger.error("[GitHub Handler] Unexpected error in clone flow:", err);

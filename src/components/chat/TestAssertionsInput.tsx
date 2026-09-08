@@ -51,11 +51,11 @@ import {
  * The recorded-test proposal, attached to the composer.
  *
  * The plan itself is persisted in an assistant message (a
- * `<dyad-test-assertions>` tag), but a plan waiting on a decision belongs with
+ * `<samba-test-assertions>` tag), but a plan waiting on a decision belongs with
  * the other things waiting on one — the questionnaire, the prompt queue, the
  * consent banner — rather than scrolled away up the transcript. So the live
  * plan is read back out of the message and rendered here, and the message
- * itself keeps only a receipt of what was decided (`DyadTestAssertionsCard`).
+ * itself keeps only a receipt of what was decided (`SambaTestAssertionsCard`).
  *
  * Layout is a timeline: one rail, a neutral node per step, a filled node per
  * assertion, so the steps stay quiet context while the assertions carry the
@@ -537,7 +537,7 @@ export function TestAssertionsPlanCard({
   return (
     <div
       className="border-b border-border bg-muted/30"
-      data-testid="dyad-test-assertions-card"
+      data-testid="samba-test-assertions-card"
     >
       <button
         type="button"
@@ -570,7 +570,7 @@ export function TestAssertionsPlanCard({
           className="inline-flex shrink-0 items-center gap-1 text-xs text-muted-foreground"
           data-testid={
             isApproved && !isBusy
-              ? "dyad-test-assertions-approved-badge"
+              ? "samba-test-assertions-approved-badge"
               : undefined
           }
         >
@@ -627,7 +627,7 @@ export function TestAssertionsPlanCard({
               return (
                 <li
                   key={`step-${item.stepIndex}`}
-                  data-testid={`dyad-test-assertions-step-${item.stepIndex}`}
+                  data-testid={`samba-test-assertions-step-${item.stepIndex}`}
                   className="group/row flex gap-2 pr-2 pl-3"
                   {...dropProps}
                 >
@@ -664,7 +664,7 @@ export function TestAssertionsPlanCard({
             return (
               <li
                 key={item.id}
-                data-testid={`dyad-test-assertions-assertion-${item.id}`}
+                data-testid={`samba-test-assertions-assertion-${item.id}`}
                 draggable={!isLocked && !isEditing}
                 tabIndex={isLocked ? undefined : 0}
                 aria-label={
@@ -731,7 +731,7 @@ export function TestAssertionsPlanCard({
                         rows={2}
                         placeholder="Describe what this should check…"
                         aria-label="Assertion description"
-                        data-testid={`dyad-test-assertions-edit-${item.id}`}
+                        data-testid={`samba-test-assertions-edit-${item.id}`}
                         className="w-full resize-none rounded-md border border-input bg-(--background-lighter) px-2 py-1 text-[13px] leading-5 text-foreground outline-none placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring"
                       />
                     ) : (
@@ -740,7 +740,7 @@ export function TestAssertionsPlanCard({
                         onClick={() => startEdit(item.id, item.text)}
                         disabled={isLocked}
                         title={isLocked ? undefined : "Click to edit"}
-                        data-testid={`dyad-test-assertions-text-${item.id}`}
+                        data-testid={`samba-test-assertions-text-${item.id}`}
                         className={cn(
                           "w-full rounded-sm text-left text-[13px] leading-5 text-foreground",
                           "focus-visible:ring-ring focus-visible:ring-2 focus-visible:outline-none",
@@ -813,7 +813,7 @@ export function TestAssertionsPlanCard({
                         onClick={() => removeAssertion(item.id)}
                         aria-label="Remove this check"
                         title="Remove"
-                        data-testid={`dyad-test-assertions-remove-${item.id}`}
+                        data-testid={`samba-test-assertions-remove-${item.id}`}
                         className={cn(
                           ICON_BUTTON,
                           ROW_ACTION,
@@ -850,7 +850,7 @@ export function TestAssertionsPlanCard({
           // wait is the whole state.
           <span
             className="inline-flex items-center gap-1.5 text-xs text-muted-foreground"
-            data-testid="dyad-test-assertions-generating-note"
+            data-testid="samba-test-assertions-generating-note"
           >
             <Loader2 size={12} className="animate-spin motion-reduce:hidden" />
             Generating the test file…
@@ -860,7 +860,7 @@ export function TestAssertionsPlanCard({
           // says what is actually happening rather than borrowing the approval's.
           <span
             className="inline-flex items-center gap-1.5 text-xs text-muted-foreground"
-            data-testid="dyad-test-assertions-closing-note"
+            data-testid="samba-test-assertions-closing-note"
           >
             <Loader2 size={12} className="animate-spin motion-reduce:hidden" />
             Closing the plan…
@@ -874,7 +874,7 @@ export function TestAssertionsPlanCard({
               type="button"
               onClick={openSpecFile}
               disabled={!specPath}
-              data-testid="dyad-test-assertions-open-file-button"
+              data-testid="samba-test-assertions-open-file-button"
               className="ml-auto rounded-md px-2 py-1 text-xs font-medium text-foreground transition-colors duration-150 hover:bg-(--background-darker) focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-default disabled:opacity-50"
             >
               Open test file
@@ -883,7 +883,7 @@ export function TestAssertionsPlanCard({
         ) : discarded ? (
           <span
             className="text-xs text-muted-foreground"
-            data-testid="dyad-test-assertions-discarded-note"
+            data-testid="samba-test-assertions-discarded-note"
           >
             Closed without generating a test.
           </span>
@@ -907,7 +907,7 @@ export function TestAssertionsPlanCard({
                 type="button"
                 onClick={() => void handleDiscard()}
                 disabled={isBusy}
-                data-testid="dyad-test-assertions-discard-button"
+                data-testid="samba-test-assertions-discard-button"
                 className="rounded-md px-2 py-1 text-xs font-medium text-muted-foreground transition-colors duration-150 hover:bg-(--background-darker) hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
               >
                 Close without generating
@@ -916,7 +916,7 @@ export function TestAssertionsPlanCard({
                 type="button"
                 onClick={() => void handleApprove()}
                 disabled={isBusy || hasBlankAssertion || !proposalId}
-                data-testid="dyad-test-assertions-approve-button"
+                data-testid="samba-test-assertions-approve-button"
                 className="inline-flex items-center gap-1.5 rounded-md bg-purple-600 px-2.5 py-1 text-xs font-medium text-white transition-colors duration-150 hover:bg-purple-700 focus-visible:ring-2 focus-visible:ring-purple-600 focus-visible:ring-offset-2 focus-visible:ring-offset-(--background-lighter) focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50 dark:bg-purple-600 dark:hover:bg-purple-500"
               >
                 {isApproving && (

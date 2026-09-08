@@ -146,7 +146,7 @@ describe("preview popup security", () => {
     ["a packaged renderer route", "file:///chat?chatId=42"],
     [
       "release notes",
-      "https://www.dyad.sh/docs/releases/0.30.0?hideHeader=true",
+      "https://www.samba.sh/docs/releases/0.30.0?hideHeader=true",
     ],
     ["a missing referrer", ""],
   ])("denies popups referred by %s", (_label, referrerUrl) => {

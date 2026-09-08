@@ -2,7 +2,7 @@ import { db } from "../../db";
 import { chats, messages } from "../../db/schema";
 import { and, eq } from "drizzle-orm";
 import fs from "node:fs";
-import { getDyadAppPath } from "../../paths/paths";
+import { getSambaAppPath } from "../../paths/paths";
 import path from "node:path";
 import {
   assertNotProjectRootPath,
@@ -38,17 +38,17 @@ import {
   hasStagedChanges,
 } from "../utils/git_utils";
 import { readSettings } from "@/main/settings";
-import { DyadError, DyadErrorKind } from "@/errors/dyad_error";
+import { SambaError, SambaErrorKind } from "@/errors/samba_error";
 import { writeMigrationFile } from "../utils/file_utils";
 import {
-  getDyadWriteTags,
-  getDyadRenameTags,
-  getDyadDeleteTags,
-  getDyadAddDependencyTags,
-  getDyadExecuteSqlTags,
-  getDyadSearchReplaceTags,
-  getDyadCopyTags,
-} from "../utils/dyad_tag_parser";
+  getSambaWriteTags,
+  getSambaRenameTags,
+  getSambaDeleteTags,
+  getSambaAddDependencyTags,
+  getSambaExecuteSqlTags,
+  getSambaSearchReplaceTags,
+  getSambaCopyTags,
+} from "../utils/samba_tag_parser";
 import { applySearchReplace } from "../../pro/main/ipc/processors/search_replace_processor";
 import { storeDbTimestampAtCurrentVersion } from "../utils/neon_timestamp_utils";
 import { executeNeonSql } from "../../neon_admin/neon_context";
@@ -74,21 +74,21 @@ function formatOutputError(error: unknown): string {
 
 function formatSkippedActionSummary(fullResponse: string): string {
   const counts: Array<[number, string, string]> = [
-    [getDyadWriteTags(fullResponse).length, "write", "writes"],
-    [getDyadRenameTags(fullResponse).length, "rename", "renames"],
-    [getDyadDeleteTags(fullResponse).length, "delete", "deletes"],
+    [getSambaWriteTags(fullResponse).length, "write", "writes"],
+    [getSambaRenameTags(fullResponse).length, "rename", "renames"],
+    [getSambaDeleteTags(fullResponse).length, "delete", "deletes"],
     [
-      getDyadAddDependencyTags(fullResponse).length,
+      getSambaAddDependencyTags(fullResponse).length,
       "dependency install",
       "dependency installs",
     ],
-    [getDyadExecuteSqlTags(fullResponse).length, "SQL query", "SQL queries"],
+    [getSambaExecuteSqlTags(fullResponse).length, "SQL query", "SQL queries"],
     [
-      getDyadSearchReplaceTags(fullResponse).length,
+      getSambaSearchReplaceTags(fullResponse).length,
       "search-replace",
       "search-replaces",
     ],
-    [getDyadCopyTags(fullResponse).length, "copy", "copies"],
+    [getSambaCopyTags(fullResponse).length, "copy", "copies"],
   ];
 
   return counts
@@ -108,8 +108,8 @@ export async function dryRunSearchReplace({
   appPath: string;
 }) {
   const issues: { filePath: string; error: string }[] = [];
-  const dyadSearchReplaceTags = getDyadSearchReplaceTags(fullResponse);
-  for (const tag of dyadSearchReplaceTags) {
+  const sambaSearchReplaceTags = getSambaSearchReplaceTags(fullResponse);
+  for (const tag of sambaSearchReplaceTags) {
     const filePath = tag.path;
     const fullFilePath = safeJoin(appPath, filePath);
     try {
@@ -174,17 +174,17 @@ export async function processFullResponseActions(
     return {};
   }
 
-  const appPath = getDyadAppPath(chatWithApp.app.path);
-  const dyadDeletePaths = getDyadDeleteTags(fullResponse);
+  const appPath = getSambaAppPath(chatWithApp.app.path);
+  const sambaDeletePaths = getSambaDeleteTags(fullResponse);
   let preparedDeletePaths: PreparedDeletePath[];
   try {
     // Perform the lexical pass across the entire batch first so a later root
     // alias cannot cause even read-only filesystem work for an earlier path.
-    for (const filePath of dyadDeletePaths) {
+    for (const filePath of sambaDeletePaths) {
       assertNotProjectRootPath(appPath, filePath);
     }
     preparedDeletePaths = await Promise.all(
-      dyadDeletePaths.map((filePath) => prepareDeletePath(appPath, filePath)),
+      sambaDeletePaths.map((filePath) => prepareDeletePath(appPath, filePath)),
     );
   } catch (error) {
     logger.error("Refusing unsafe delete response:", error);
@@ -206,10 +206,10 @@ export async function processFullResponseActions(
       });
     } catch (error) {
       logger.error("Error creating Neon branch at current version:", error);
-      throw new DyadError(
+      throw new SambaError(
         "Could not create Neon branch; database versioning functionality is not working: " +
           error,
-        DyadErrorKind.External,
+        SambaErrorKind.External,
       );
     }
   }
@@ -231,14 +231,14 @@ export async function processFullResponseActions(
 
   try {
     // Extract all tags
-    const dyadWriteTags = getDyadWriteTags(fullResponse);
-    const dyadRenameTags = getDyadRenameTags(fullResponse);
-    const dyadAddDependencyPackages = getDyadAddDependencyTags(fullResponse);
+    const sambaWriteTags = getSambaWriteTags(fullResponse);
+    const sambaRenameTags = getSambaRenameTags(fullResponse);
+    const sambaAddDependencyPackages = getSambaAddDependencyTags(fullResponse);
     let installedOrUpdatedDependencyPackages: string[] = [];
     const hasDbProvider =
       chatWithApp.app.supabaseProjectId || chatWithApp.app.neonProjectId;
-    const dyadExecuteSqlQueries = hasDbProvider
-      ? getDyadExecuteSqlTags(fullResponse)
+    const sambaExecuteSqlQueries = hasDbProvider
+      ? getSambaExecuteSqlTags(fullResponse)
       : [];
 
     const message = await db.query.messages.findFirst({
@@ -255,8 +255,8 @@ export async function processFullResponseActions(
     }
 
     // Handle SQL execution tags
-    if (dyadExecuteSqlQueries.length > 0) {
-      for (const query of dyadExecuteSqlQueries) {
+    if (sambaExecuteSqlQueries.length > 0) {
+      for (const query of sambaExecuteSqlQueries) {
         try {
           if (chatWithApp.app.neonProjectId) {
             // Route to Neon executor
@@ -264,9 +264,9 @@ export async function processFullResponseActions(
               chatWithApp.app.neonActiveBranchId ??
               chatWithApp.app.neonDevelopmentBranchId;
             if (!branchId) {
-              throw new DyadError(
+              throw new SambaError(
                 "No active Neon branch found for SQL execution. Please select a branch in the Neon integration settings.",
-                DyadErrorKind.Precondition,
+                SambaErrorKind.Precondition,
               );
             }
             try {
@@ -288,14 +288,14 @@ export async function processFullResponseActions(
                 errorMsg.includes("authentication failed") ||
                 errorMsg.includes("access token")
               ) {
-                throw new DyadError(
+                throw new SambaError(
                   `Neon authentication failed. Please reconnect your Neon account in the integration settings. Details: ${errorMsg}`,
-                  DyadErrorKind.Auth,
+                  SambaErrorKind.Auth,
                 );
               }
-              throw new DyadError(
+              throw new SambaError(
                 `Neon SQL query failed: ${errorMsg}`,
-                DyadErrorKind.External,
+                SambaErrorKind.External,
               );
             }
           } else if (chatWithApp.app.supabaseProjectId) {
@@ -334,19 +334,19 @@ export async function processFullResponseActions(
           });
         }
       }
-      logger.log(`Executed ${dyadExecuteSqlQueries.length} SQL queries`);
+      logger.log(`Executed ${sambaExecuteSqlQueries.length} SQL queries`);
     }
 
     // TODO: Handle add dependency tags
-    if (dyadAddDependencyPackages.length > 0) {
+    if (sambaAddDependencyPackages.length > 0) {
       try {
         const addDependencyResult = await executeAddDependency({
-          packages: dyadAddDependencyPackages,
+          packages: sambaAddDependencyPackages,
           message: message,
           appPath,
         });
         warningMessages.push(...addDependencyResult.warningMessages);
-        installedOrUpdatedDependencyPackages = dyadAddDependencyPackages;
+        installedOrUpdatedDependencyPackages = sambaAddDependencyPackages;
       } catch (error) {
         if (error instanceof ExecuteAddDependencyError) {
           warningMessages.push(...error.warningMessages);
@@ -355,12 +355,12 @@ export async function processFullResponseActions(
             message:
               error.completedPackages.length > 0
                 ? `Partially installed or updated dependencies: ${error.completedPackages.join(", ")}. ${error.displaySummary}`
-                : `Failed to add dependencies: ${dyadAddDependencyPackages.join(", ")}. ${error.displaySummary}`,
+                : `Failed to add dependencies: ${sambaAddDependencyPackages.join(", ")}. ${error.displaySummary}`,
             error: error.displayDetails,
           });
         } else {
           errors.push({
-            message: `Failed to add dependencies: ${dyadAddDependencyPackages.join(", ")}`,
+            message: `Failed to add dependencies: ${sambaAddDependencyPackages.join(", ")}`,
             error: error,
           });
         }
@@ -443,7 +443,7 @@ export async function processFullResponseActions(
     }
 
     // Process all file renames
-    for (const tag of dyadRenameTags) {
+    for (const tag of sambaRenameTags) {
       const fromPath = safeJoin(appPath, tag.from);
       const toPath = safeJoin(appPath, tag.to);
 
@@ -519,8 +519,8 @@ export async function processFullResponseActions(
     }
 
     // Process all search-replace edits
-    const dyadSearchReplaceTags = getDyadSearchReplaceTags(fullResponse);
-    for (const tag of dyadSearchReplaceTags) {
+    const sambaSearchReplaceTags = getSambaSearchReplaceTags(fullResponse);
+    for (const tag of sambaSearchReplaceTags) {
       const filePath = tag.path;
       const fullFilePath = safeJoin(appPath, filePath);
 
@@ -532,14 +532,14 @@ export async function processFullResponseActions(
 
       try {
         if (!fs.existsSync(fullFilePath)) {
-          // Do not show warning to user because we already attempt to do a <dyad-write> tag to fix it.
+          // Do not show warning to user because we already attempt to do a <samba-write> tag to fix it.
           logger.warn(`Search-replace target file does not exist: ${filePath}`);
           continue;
         }
         const original = await readFile(fullFilePath, "utf8");
         const result = applySearchReplace(original, tag.content);
         if (!result.success || typeof result.content !== "string") {
-          // Do not show warning to user because we already attempt to do a <dyad-write> and/or a subsequent <dyad-search-replace> tag to fix it.
+          // Do not show warning to user because we already attempt to do a <samba-write> and/or a subsequent <samba-search-replace> tag to fix it.
           logger.warn(
             `Failed to apply search-replace to ${filePath}: ${result.error ?? "unknown"}`,
           );
@@ -580,8 +580,8 @@ export async function processFullResponseActions(
     }
 
     // Process all file copies
-    const dyadCopyTags = getDyadCopyTags(fullResponse);
-    for (const tag of dyadCopyTags) {
+    const sambaCopyTags = getSambaCopyTags(fullResponse);
+    for (const tag of sambaCopyTags) {
       try {
         const result = await executeCopyFile({
           from: tag.from,
@@ -616,7 +616,7 @@ export async function processFullResponseActions(
     }
 
     // Process all file writes
-    for (const tag of dyadWriteTags) {
+    for (const tag of sambaWriteTags) {
       const filePath = tag.path;
       const content = tag.content;
       const fullFilePath = safeJoin(appPath, filePath);
@@ -704,7 +704,7 @@ export async function processFullResponseActions(
       writtenFiles.length > 0 ||
       renamedFiles.length > 0 ||
       deletedFiles.length > 0 ||
-      dyadAddDependencyPackages.length > 0;
+      sambaAddDependencyPackages.length > 0;
 
     let uncommittedFiles: string[] = [];
     let extraFilesError: string | undefined;
@@ -730,8 +730,8 @@ export async function processFullResponseActions(
         changes.push(
           `installed or updated ${installedOrUpdatedDependencyPackages.join(", ")} package(s)`,
         );
-      if (dyadExecuteSqlQueries.length > 0)
-        changes.push(`executed ${dyadExecuteSqlQueries.length} SQL queries`);
+      if (sambaExecuteSqlQueries.length > 0)
+        changes.push(`executed ${sambaExecuteSqlQueries.length} SQL queries`);
 
       const changeSummary = changes.join(", ");
       const trimmedChatSummary = chatSummary?.trim();
@@ -774,13 +774,13 @@ export async function processFullResponseActions(
               amend: true,
             });
             logger.log(
-              `Amend commit with changes outside of dyad: ${uncommittedFiles.join(", ")}`,
+              `Amend commit with changes outside of samba: ${uncommittedFiles.join(", ")}`,
             );
           } catch (error) {
             // Just log, but don't throw an error because the user can still
             // commit these changes outside of Samba Builder if needed.
             logger.error(
-              `Failed to commit changes outside of dyad: ${uncommittedFiles.join(", ")}`,
+              `Failed to commit changes outside of samba: ${uncommittedFiles.join(", ")}`,
             );
             extraFilesError = (error as any).toString();
           }
@@ -810,7 +810,7 @@ export async function processFullResponseActions(
         changedPaths: [...writtenFiles, ...renamedFiles],
         deletedPaths: [
           ...processedDeletePaths,
-          ...dyadRenameTags.map((renameTag) => renameTag.from),
+          ...sambaRenameTags.map((renameTag) => renameTag.from),
         ],
       });
     }
@@ -834,13 +834,13 @@ export async function processFullResponseActions(
     ${warnings
       .map(
         (warning) =>
-          `<dyad-output type="warning" message="${escapeXmlAttr(warning.message)}">${escapeXmlContent(formatOutputError(warning.error))}</dyad-output>`,
+          `<samba-output type="warning" message="${escapeXmlAttr(warning.message)}">${escapeXmlContent(formatOutputError(warning.error))}</samba-output>`,
       )
       .join("\n")}
     ${errors
       .map(
         (error) =>
-          `<dyad-output type="error" message="${escapeXmlAttr(error.message)}">${escapeXmlContent(formatOutputError(error.error))}</dyad-output>`,
+          `<samba-output type="error" message="${escapeXmlAttr(error.message)}">${escapeXmlContent(formatOutputError(error.error))}</samba-output>`,
       )
       .join("\n")}
     `;

@@ -4,7 +4,7 @@ import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { apps, chats, messages } from "@/db/schema";
-import { DyadErrorKind } from "@/errors/dyad_error";
+import { SambaErrorKind } from "@/errors/samba_error";
 import { activeRecordings } from "@/ipc/services/recording_registry";
 import { generateTestUserFixtureSource } from "@/lib/test_recorder/fixture_templates";
 import {
@@ -73,7 +73,7 @@ vi.mock("../utils/window_broadcast", () => ({
 }));
 
 vi.mock("../../paths/paths", () => ({
-  getDyadAppPath: (appPath: string) => appRoots.get(appPath) ?? appPath,
+  getSambaAppPath: (appPath: string) => appRoots.get(appPath) ?? appPath,
 }));
 
 import { registerTestAssertionHandlers } from "./test_assertion_handlers";
@@ -125,7 +125,7 @@ describe("registerTestAssertionHandlers", () => {
   let tmpDir: string;
 
   beforeEach(() => {
-    tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "dyad-assertions-"));
+    tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "samba-assertions-"));
     appRoots.set("test-app", tmpDir);
     // Module-level, so without this each test inherits the previous one's
     // parked and already-written recordings.
@@ -687,7 +687,7 @@ describe("registerTestAssertionHandlers", () => {
             proposalId,
             items,
           }),
-        ).rejects.toMatchObject({ kind: DyadErrorKind.Precondition });
+        ).rejects.toMatchObject({ kind: SambaErrorKind.Precondition });
         expect(mockStreamText).not.toHaveBeenCalled();
         expect(specExists(SPEC_PATH)).toBe(false);
       } finally {
@@ -737,7 +737,7 @@ describe("registerTestAssertionHandlers", () => {
       // The marker names the draft AND the proposal that wrote the file, which
       // is what lets a re-approval tell its own write from another card's.
       expect(readSpec().split("\n", 1)[0]).toBe(
-        '// dyad-recording-draft-id: "draft-test" "proposal-1"',
+        '// samba-recording-draft-id: "draft-test" "proposal-1"',
       );
       expect(first.specPath).toBe(SPEC_PATH);
       expect(second.specPath).toBe(SPEC_PATH);
@@ -833,7 +833,7 @@ describe("registerTestAssertionHandlers", () => {
       await deletion.drain();
       try {
         await expect(approve(appId, chatId)).rejects.toMatchObject({
-          kind: DyadErrorKind.Precondition,
+          kind: SambaErrorKind.Precondition,
         });
       } finally {
         deletion.release();
@@ -950,7 +950,7 @@ describe("registerTestAssertionHandlers", () => {
       expect(specExists()).toBe(true);
       // Rewritten by the second card, so its marker names that proposal.
       expect(readSpec().split("\n", 1)[0]).toBe(
-        '// dyad-recording-draft-id: "draft-test" "proposal-2"',
+        '// samba-recording-draft-id: "draft-test" "proposal-2"',
       );
     });
 
@@ -980,7 +980,7 @@ describe("registerTestAssertionHandlers", () => {
       });
       fs.writeFileSync(
         path.join(tmpDir, SPEC_PATH),
-        `// dyad-recording-draft-id: "draft-test" "${proposalId}"\n// body\n`,
+        `// samba-recording-draft-id: "draft-test" "${proposalId}"\n// body\n`,
         "utf-8",
       );
       resetRecordedTestDrafts();
@@ -1035,7 +1035,7 @@ describe("registerTestAssertionHandlers", () => {
       });
       fs.writeFileSync(
         path.join(tmpDir, SPEC_PATH),
-        `// dyad-recording-draft-id: "draft-test" "${proposalId}"\n// body\n`,
+        `// samba-recording-draft-id: "draft-test" "${proposalId}"\n// body\n`,
         "utf-8",
       );
       resetRecordedTestDrafts();
@@ -1069,7 +1069,7 @@ describe("registerTestAssertionHandlers", () => {
           proposalId,
           items,
         }),
-      ).rejects.toMatchObject({ kind: DyadErrorKind.Validation });
+      ).rejects.toMatchObject({ kind: SambaErrorKind.Validation });
     });
 
     // Either way the recording still becomes a test: losing it because one
@@ -1178,7 +1178,7 @@ describe("registerTestAssertionHandlers", () => {
           proposalId,
           items,
         }),
-      ).rejects.toMatchObject({ kind: DyadErrorKind.Validation });
+      ).rejects.toMatchObject({ kind: SambaErrorKind.Validation });
       expect(specExists()).toBe(false);
     });
   });
@@ -1234,7 +1234,7 @@ describe("registerTestAssertionHandlers", () => {
           proposalId,
           items,
         }),
-      ).rejects.toMatchObject({ kind: DyadErrorKind.Precondition });
+      ).rejects.toMatchObject({ kind: SambaErrorKind.Precondition });
       expect(specExists()).toBe(false);
       expect(status()).toBe("discarded");
     });
@@ -1271,7 +1271,7 @@ describe("registerTestAssertionHandlers", () => {
       );
 
       await expect(discard(otherAppId, chatId)).rejects.toMatchObject({
-        kind: DyadErrorKind.Validation,
+        kind: SambaErrorKind.Validation,
       });
       expect(status()).toBe("proposed");
     });

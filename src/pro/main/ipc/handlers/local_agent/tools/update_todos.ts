@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { DyadError, DyadErrorKind } from "@/errors/dyad_error";
+import { SambaError, SambaErrorKind } from "@/errors/samba_error";
 import { ToolDefinition, AgentContext, Todo } from "./types";
 import { saveTodos, deleteTodos } from "../todo_persistence";
 
@@ -127,9 +127,9 @@ export const updateTodosTool: ToolDefinition<
         } else {
           // New todo - require all fields
           if (todo.content === undefined || todo.status === undefined) {
-            throw new DyadError(
+            throw new SambaError(
               `New todo with id "${todo.id}" must have content and status defined`,
-              DyadErrorKind.Validation,
+              SambaErrorKind.Validation,
             );
           }
           existingTodosMap.set(todo.id, todo as Todo);
@@ -140,9 +140,9 @@ export const updateTodosTool: ToolDefinition<
       // Replace mode: require all fields
       for (const todo of args.todos) {
         if (todo.content === undefined || todo.status === undefined) {
-          throw new DyadError(
+          throw new SambaError(
             `Todo with id "${todo.id}" must have content and status defined when merge is false`,
-            DyadErrorKind.Validation,
+            SambaErrorKind.Validation,
           );
         }
       }

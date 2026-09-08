@@ -1,7 +1,7 @@
 import { createStore } from "jotai";
 import { describe, expect, it, vi } from "vitest";
 
-import { DyadError, DyadErrorKind } from "@/errors/dyad_error";
+import { SambaError, SambaErrorKind } from "@/errors/samba_error";
 import type {
   PendingUserInputPayload,
   UserInputDescriptorPayload,
@@ -290,7 +290,7 @@ describe("user-input renderer read model", () => {
     const fake = createFakeIpc();
     const showErrorToast = vi.fn();
     fake.respond.mockRejectedValueOnce(
-      new DyadError("gone", DyadErrorKind.NotFound),
+      new SambaError("gone", SambaErrorKind.NotFound),
     );
     const adapter = getUserInputReadModel({
       store,
@@ -322,7 +322,7 @@ describe("user-input renderer read model", () => {
     const fake = createFakeIpc();
     const showErrorToast = vi.fn();
     fake.respond.mockRejectedValueOnce(
-      new DyadError("gone", DyadErrorKind.NotFound),
+      new SambaError("gone", SambaErrorKind.NotFound),
     );
     fake.getPending
       .mockResolvedValueOnce([])
@@ -440,7 +440,7 @@ describe("user-input renderer read model", () => {
     const fake = createFakeIpc();
     const showErrorToast = vi.fn();
     fake.respond.mockRejectedValueOnce(
-      new DyadError("gone", DyadErrorKind.NotFound),
+      new SambaError("gone", SambaErrorKind.NotFound),
     );
     const adapter = getUserInputReadModel({
       store,
@@ -540,7 +540,7 @@ describe("user-input renderer read model", () => {
         questionnaireSubmitted: false,
       },
     );
-    rejectRespond(new DyadError("gone", DyadErrorKind.NotFound));
+    rejectRespond(new SambaError("gone", SambaErrorKind.NotFound));
     await expect(response).resolves.toBe(false);
     stop();
   });

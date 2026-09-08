@@ -13,7 +13,7 @@ import {
 const tempDirs: string[] = [];
 
 function makeApp(files: Record<string, string>): string {
-  const appPath = fs.mkdtempSync(path.join(os.tmpdir(), "dyad-legacy-"));
+  const appPath = fs.mkdtempSync(path.join(os.tmpdir(), "samba-legacy-"));
   tempDirs.push(appPath);
   for (const [rel, content] of Object.entries(files)) {
     const full = path.join(appPath, rel);

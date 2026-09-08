@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { DyadErrorKind } from "@/errors/dyad_error";
+import { SambaErrorKind } from "@/errors/samba_error";
 import {
   OperationRouteCapacityError,
   OperationRouteIdentityConflictError,
@@ -112,7 +112,7 @@ describe("OperationRouteRegistry", () => {
           return error;
         }
       })(),
-    ).toMatchObject({ kind: DyadErrorKind.Conflict });
+    ).toMatchObject({ kind: SambaErrorKind.Conflict });
     expect(
       (() => {
         try {
@@ -121,7 +121,7 @@ describe("OperationRouteRegistry", () => {
           return error;
         }
       })(),
-    ).toMatchObject({ kind: DyadErrorKind.RateLimited });
+    ).toMatchObject({ kind: SambaErrorKind.RateLimited });
   });
 
   it("retains terminal replay within a finite bound and evicts by settlement order", () => {

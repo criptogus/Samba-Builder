@@ -12,7 +12,7 @@
  */
 import type { createStore } from "jotai";
 
-import { DyadErrorKind, isDyadError } from "@/errors/dyad_error";
+import { SambaErrorKind, isSambaError } from "@/errors/samba_error";
 import type {
   PendingUserInputPayload,
   UserInputDescriptorPayload,
@@ -450,7 +450,7 @@ export function getUserInputReadModel({
         return true;
       } catch (error) {
         pendingResponses.delete(requestId);
-        if (isDyadError(error) && error.kind === DyadErrorKind.NotFound) {
+        if (isSambaError(error) && error.kind === SambaErrorKind.NotFound) {
           // Never expose a request main has already rejected as stale, even if
           // the best-effort authoritative refresh also fails.
           markChanged(requestId);

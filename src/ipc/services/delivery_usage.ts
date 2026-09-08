@@ -2,7 +2,7 @@ import { eq } from "drizzle-orm";
 import { db } from "@/db";
 import { agentThreads, chats, projectDeliveries } from "@/db/schema";
 import { DeliveryPlanSchema } from "@/delivery/model";
-import { DyadError, DyadErrorKind } from "@/errors/dyad_error";
+import { SambaError, SambaErrorKind } from "@/errors/samba_error";
 export function getDeliveryAgentUsage(appId: number) {
   const rows = db
     .select({
@@ -32,8 +32,8 @@ export function assertDeliveryAgentBudget(appId: number) {
   if (!plan.subagentTokenBudget) return;
   const usage = getDeliveryAgentUsage(appId);
   if (usage.inputTokens + usage.outputTokens >= plan.subagentTokenBudget)
-    throw new DyadError(
+    throw new SambaError(
       "O limite de tokens dos subagentes deste projeto foi atingido. Revise o consumo no plano de entrega antes de continuar.",
-      DyadErrorKind.Precondition,
+      SambaErrorKind.Precondition,
     );
 }

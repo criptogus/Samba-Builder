@@ -4,7 +4,7 @@ import os from "node:os";
 import path from "node:path";
 import { eq } from "drizzle-orm";
 import { apps } from "@/db/schema";
-import { DyadErrorKind } from "@/errors/dyad_error";
+import { SambaErrorKind } from "@/errors/samba_error";
 import { appOperationCoordinator } from "@/ipc/services/app_operation_coordinator";
 import {
   type HandlerTestHarness,
@@ -29,8 +29,8 @@ vi.mock("@/paths/paths", async (importOriginal) => {
   const { default: nodeOs } = await import("node:os");
   return {
     ...actual,
-    getDyadAppPath: (appPath: string) =>
-      nodePath.join(nodeOs.tmpdir(), "dyad-image-generation-tests", appPath),
+    getSambaAppPath: (appPath: string) =>
+      nodePath.join(nodeOs.tmpdir(), "samba-image-generation-tests", appPath),
   };
 });
 
@@ -60,7 +60,7 @@ function abortableFetch(signal?: AbortSignal): Promise<Response> {
 }
 
 describe("ImageGenerationService", () => {
-  const tempBase = path.join(os.tmpdir(), "dyad-image-generation-tests");
+  const tempBase = path.join(os.tmpdir(), "samba-image-generation-tests");
   let harness: HandlerTestHarness;
   let appId: number;
   let service: ImageGenerationService;
@@ -120,7 +120,7 @@ describe("ImageGenerationService", () => {
       cancelled: true,
     });
     await expect(generation).rejects.toMatchObject({
-      kind: DyadErrorKind.UserCancelled,
+      kind: SambaErrorKind.UserCancelled,
     });
     await expect(cancel("generation-phase")).resolves.toEqual({
       cancelled: false,
@@ -151,7 +151,7 @@ describe("ImageGenerationService", () => {
       cancelled: true,
     });
     await expect(generation).rejects.toMatchObject({
-      kind: DyadErrorKind.UserCancelled,
+      kind: SambaErrorKind.UserCancelled,
     });
   });
 
@@ -184,7 +184,7 @@ describe("ImageGenerationService", () => {
 
     await expect(generation).rejects.toMatchObject({
       message: "Image download timed out. Please try again.",
-      kind: DyadErrorKind.External,
+      kind: SambaErrorKind.External,
     });
     await expect(cancel("download-timeout")).resolves.toEqual({
       cancelled: false,
@@ -210,16 +210,16 @@ describe("ImageGenerationService", () => {
 
     await expect(generate("download-network-failure")).rejects.toMatchObject({
       message: "Failed to download generated image.",
-      kind: DyadErrorKind.External,
+      kind: SambaErrorKind.External,
       cause: expect.any(TypeError),
     });
   });
 
   it.each([
-    [401, DyadErrorKind.Auth],
-    [403, DyadErrorKind.Auth],
-    [429, DyadErrorKind.RateLimited],
-    [503, DyadErrorKind.External],
+    [401, SambaErrorKind.Auth],
+    [403, SambaErrorKind.Auth],
+    [429, SambaErrorKind.RateLimited],
+    [503, SambaErrorKind.External],
   ])("classifies generation HTTP %i as %s", async (status, expectedKind) => {
     vi.stubGlobal(
       "fetch",
@@ -232,10 +232,10 @@ describe("ImageGenerationService", () => {
   });
 
   it.each([
-    [401, DyadErrorKind.Auth],
-    [403, DyadErrorKind.Auth],
-    [429, DyadErrorKind.RateLimited],
-    [503, DyadErrorKind.External],
+    [401, SambaErrorKind.Auth],
+    [403, SambaErrorKind.Auth],
+    [429, SambaErrorKind.RateLimited],
+    [503, SambaErrorKind.External],
   ])("classifies download HTTP %i as %s", async (status, expectedKind) => {
     vi.stubGlobal(
       "fetch",
@@ -285,7 +285,7 @@ describe("ImageGenerationService", () => {
     body.resolve(new Uint8Array([1, 2, 3]).buffer);
 
     await expect(generation).rejects.toMatchObject({
-      kind: DyadErrorKind.UserCancelled,
+      kind: SambaErrorKind.UserCancelled,
     });
   });
 
@@ -319,7 +319,7 @@ describe("ImageGenerationService", () => {
     releaseMkdir.resolve();
 
     await expect(generation).rejects.toMatchObject({
-      kind: DyadErrorKind.UserCancelled,
+      kind: SambaErrorKind.UserCancelled,
     });
     expect(writeFile).not.toHaveBeenCalledWith(
       expect.stringMatching(/\.tmp$/),
@@ -364,7 +364,7 @@ describe("ImageGenerationService", () => {
     });
 
     await expect(generation).rejects.toMatchObject({
-      kind: DyadErrorKind.UserCancelled,
+      kind: SambaErrorKind.UserCancelled,
     });
     expect(writeFile).toHaveBeenCalledWith(
       expect.stringMatching(/\.tmp$/),
@@ -420,16 +420,16 @@ describe("ImageGenerationService", () => {
     await expect(generation).resolves.toMatchObject({
       appPath: "moved-app",
       appName: "Moved app",
-      filePath: expect.stringContaining(path.join("moved-app", ".dyad")),
+      filePath: expect.stringContaining(path.join("moved-app", ".samba")),
     });
     await expect(
       fs.promises.readFile(
         path.join(tempBase, "moved-app", ".gitignore"),
         "utf-8",
       ),
-    ).resolves.toContain(".dyad/");
+    ).resolves.toContain(".samba/");
     expect(
-      fs.existsSync(path.join(tempBase, "test-app", ".dyad", "media")),
+      fs.existsSync(path.join(tempBase, "test-app", ".samba", "media")),
     ).toBe(false);
   });
 
@@ -479,7 +479,7 @@ describe("ImageGenerationService", () => {
     await repositoryMutation;
     await expect(generation).resolves.toMatchObject({
       appPath: "test-app",
-      filePath: expect.stringContaining(path.join("test-app", ".dyad")),
+      filePath: expect.stringContaining(path.join("test-app", ".samba")),
     });
   });
 

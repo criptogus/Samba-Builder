@@ -2,7 +2,7 @@ import type { ClientChannel, ConnectConfig } from "ssh2";
 import type { SshFailure } from "@/shared/ssh_failure";
 import { createHash } from "crypto";
 import log from "electron-log";
-import { DyadError, DyadErrorKind } from "@/errors/dyad_error";
+import { SambaError, SambaErrorKind } from "@/errors/samba_error";
 
 const logger = log.scope("ssh_client");
 
@@ -35,11 +35,11 @@ export interface SshTarget {
  */
 export type { SshFailure };
 
-export class SshError extends DyadError {
+export class SshError extends SambaError {
   constructor(
     readonly failure: SshFailure,
     message: string,
-    kind: DyadErrorKind,
+    kind: SambaErrorKind,
     /**
      * What the operating system called it, where it said anything.
      *
@@ -110,7 +110,7 @@ function classify(
       "auth-rejected",
       "The server refused this key. Add Samba Builder's public key to the server's " +
         "authorized_keys and try again.",
-      DyadErrorKind.Auth,
+      SambaErrorKind.Auth,
     );
   }
   if (level === "handshake") {
@@ -128,7 +128,7 @@ function classify(
           : ""
       }. That usually means the server's SSH is older or more restricted ` +
         `than Samba Builder's defaults.`,
-      DyadErrorKind.External,
+      SambaErrorKind.External,
     );
   }
   if (level === "client-timeout") {
@@ -139,7 +139,7 @@ function classify(
             "frozen; check it and try again."
         : "The server did not answer in time. Check the address and that " +
             "port 22 is reachable.",
-      DyadErrorKind.External,
+      SambaErrorKind.External,
     );
   }
   if (
@@ -151,7 +151,7 @@ function classify(
       "unreachable",
       `Could not reach the server (${err.code}). Check the address and that ` +
         `port 22 is open.`,
-      DyadErrorKind.External,
+      SambaErrorKind.External,
       err.code,
     );
   }
@@ -160,7 +160,7 @@ function classify(
     connected
       ? `The connection to the server failed: ${err.message}`
       : `Could not connect over SSH: ${err.message}`,
-    DyadErrorKind.External,
+    SambaErrorKind.External,
     err.code,
   );
 }
@@ -253,12 +253,12 @@ export async function connectSsh(
     // that whole stretch — the panel said "Stopping…" and kept going.
     if (signal?.aborted) {
       conn.end();
-      reject(new DyadError("Cancelled.", DyadErrorKind.UserCancelled));
+      reject(new SambaError("Cancelled.", SambaErrorKind.UserCancelled));
       return;
     }
     const onAbort = () => {
       conn.end();
-      reject(new DyadError("Cancelled.", DyadErrorKind.UserCancelled));
+      reject(new SambaError("Cancelled.", SambaErrorKind.UserCancelled));
     };
     signal?.addEventListener("abort", onAbort, { once: true });
     const settled = (fn: () => void) => () => {
@@ -283,7 +283,7 @@ export async function connectSsh(
           new SshError(
             "host-key-rejected",
             "The server's identity was not accepted, so nothing was sent to it.",
-            DyadErrorKind.UserCancelled,
+            SambaErrorKind.UserCancelled,
           ),
         );
         return;
@@ -315,7 +315,7 @@ export async function connectSsh(
     run(command, { input, onOutput, signal, timeoutMs } = {}) {
       return new Promise<SshResult>((resolve, reject) => {
         if (signal?.aborted) {
-          reject(new DyadError("Cancelled.", DyadErrorKind.UserCancelled));
+          reject(new SambaError("Cancelled.", SambaErrorKind.UserCancelled));
           return;
         }
         let timer: ReturnType<typeof setTimeout> | undefined;
@@ -330,7 +330,7 @@ export async function connectSsh(
           cancelled = true;
           stopListening();
           openStream?.close();
-          reject(new DyadError("Cancelled.", DyadErrorKind.UserCancelled));
+          reject(new SambaError("Cancelled.", SambaErrorKind.UserCancelled));
         };
         signal?.addEventListener("abort", onAbort, { once: true });
         const stopListening = () => {
@@ -351,7 +351,7 @@ export async function connectSsh(
               new SshError(
                 "command-timeout",
                 "The server did not answer in time.",
-                DyadErrorKind.External,
+                SambaErrorKind.External,
               ),
             );
           }, timeoutMs);

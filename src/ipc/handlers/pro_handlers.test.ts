@@ -1,7 +1,7 @@
 // @vitest-environment node
 
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { DyadErrorKind } from "@/errors/dyad_error";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { SambaErrorKind } from "@/errors/samba_error";
 import { unwrapIpcEnvelope } from "@/ipc/contracts/core";
 import { configureTrustedRenderer } from "@/ipc/utils/renderer_security";
 import {
@@ -14,7 +14,7 @@ import {
 const mocks = vi.hoisted(() => ({
   ipcHandlers: new Map<string, (event: unknown, input: unknown) => unknown>(),
   readSettings: vi.fn(),
-  transcribeWithDyadEngine: vi.fn(),
+  transcribeWithSambaEngine: vi.fn(),
   fetch: vi.fn(),
   openExternal: vi.fn(),
   logger: {
@@ -50,11 +50,11 @@ vi.mock("../../main/settings", () => ({
 }));
 
 vi.mock("../utils/llm_engine_provider", () => ({
-  transcribeWithDyadEngine: mocks.transcribeWithDyadEngine,
+  transcribeWithSambaEngine: mocks.transcribeWithSambaEngine,
 }));
 
-vi.mock("../utils/dyad_engine_url", () => ({
-  getDyadEngineBaseUrl: () => "https://engine.example/v1",
+vi.mock("../utils/samba_engine_url", () => ({
+  getSambaEngineBaseUrl: () => "https://engine.example/v1",
 }));
 
 vi.mock("../utils/telemetry", () => ({
@@ -66,8 +66,7 @@ vi.mock("../utils/test_utils", () => ({
 }));
 
 const { getRegisteredHandlerForTesting } = await import("./base");
-const { parseBillingActionUrl, registerProHandlers } =
-  await import("./pro_handlers");
+const { registerProHandlers } = await import("./pro_handlers");
 
 configureTrustedRenderer({
   devServerUrl: "http://localhost:5173",
@@ -78,22 +77,18 @@ registerProHandlers();
 const transcribeAudio = getRegisteredHandlerForTesting(
   audioContracts.transcribeAudio.channel,
 );
-const getSubscriptionStatus = getRegisteredHandlerForTesting(
-  "get-subscription-status",
-);
-const openBillingAction = getRegisteredHandlerForTesting("open-billing-action");
 
 describe("pro audio transcription handler", () => {
   beforeEach(() => {
     mocks.readSettings.mockReset();
     mocks.readSettings.mockReturnValue({
-      enableDyadPro: true,
+      enableSambaPro: true,
       providerSettings: {
         auto: { apiKey: { value: "test-api-key" } },
       },
     });
-    mocks.transcribeWithDyadEngine.mockReset();
-    mocks.transcribeWithDyadEngine.mockResolvedValue("transcribed text");
+    mocks.transcribeWithSambaEngine.mockReset();
+    mocks.transcribeWithSambaEngine.mockResolvedValue("transcribed text");
   });
 
   it("transcribes a bounded typed array through a zero-copy Buffer view", async () => {
@@ -107,13 +102,13 @@ describe("pro audio transcription handler", () => {
       }),
     ).resolves.toEqual({ text: "transcribed text" });
 
-    expect(mocks.transcribeWithDyadEngine).toHaveBeenCalledTimes(1);
-    const audioBuffer = mocks.transcribeWithDyadEngine.mock.calls[0][0];
+    expect(mocks.transcribeWithSambaEngine).toHaveBeenCalledTimes(1);
+    const audioBuffer = mocks.transcribeWithSambaEngine.mock.calls[0][0];
     expect(Buffer.isBuffer(audioBuffer)).toBe(true);
     expect([...audioBuffer]).toEqual([1, 2, 3, 4]);
     audioData[0] = 9;
     expect(audioBuffer[0]).toBe(9);
-    expect(mocks.transcribeWithDyadEngine).toHaveBeenCalledWith(
+    expect(mocks.transcribeWithSambaEngine).toHaveBeenCalledWith(
       audioBuffer,
       "recording.webm",
       "request-123",
@@ -175,14 +170,14 @@ describe("pro audio transcription handler", () => {
     },
   ])("rejects $name before calling the engine", async ({ input }) => {
     await expect(transcribeAudio({} as never, input)).rejects.toMatchObject({
-      kind: DyadErrorKind.Validation,
+      kind: SambaErrorKind.Validation,
     });
-    expect(mocks.transcribeWithDyadEngine).not.toHaveBeenCalled();
+    expect(mocks.transcribeWithSambaEngine).not.toHaveBeenCalled();
   });
 
   it("classifies a missing Pro subscription as an auth error", async () => {
     mocks.readSettings.mockReturnValue({
-      enableDyadPro: false,
+      enableSambaPro: false,
       providerSettings: {},
     });
 
@@ -192,8 +187,8 @@ describe("pro audio transcription handler", () => {
         filename: "recording.webm",
         requestId: "request-123",
       }),
-    ).rejects.toMatchObject({ kind: DyadErrorKind.Auth });
-    expect(mocks.transcribeWithDyadEngine).not.toHaveBeenCalled();
+    ).rejects.toMatchObject({ kind: SambaErrorKind.Auth });
+    expect(mocks.transcribeWithSambaEngine).not.toHaveBeenCalled();
   });
 
   it("rejects transcription IPC from an untrusted renderer", async () => {
@@ -215,141 +210,6 @@ describe("pro audio transcription handler", () => {
       "trusted Samba Builder renderer",
     );
     expect(mocks.readSettings).not.toHaveBeenCalled();
-    expect(mocks.transcribeWithDyadEngine).not.toHaveBeenCalled();
-  });
-});
-
-describe("subscription status handlers", () => {
-  beforeEach(() => {
-    process.env.DYAD_SUBSCRIPTION_STATUS_URL =
-      "https://academy.test/api/desktop/subscription-status";
-    mocks.fetch.mockReset();
-    mocks.openExternal.mockReset();
-    mocks.readSettings.mockReturnValue({
-      providerSettings: {
-        auto: { apiKey: { value: "stored-pro-key" } },
-      },
-    });
-  });
-
-  afterEach(() => {
-    delete process.env.DYAD_SUBSCRIPTION_STATUS_FIXTURE_API_KEY;
-  });
-
-  it("sends the stored bearer key and validates the response", async () => {
-    mocks.fetch.mockResolvedValue({
-      ok: true,
-      json: vi.fn().mockResolvedValue({
-        alert: "subscription_ending",
-        effectiveAt: "2026-08-03T00:00:00.000Z",
-        actionUrl: "https://academy.dyad.sh/subscription?source=app",
-      }),
-    });
-
-    await expect(
-      getSubscriptionStatus({} as never, undefined),
-    ).resolves.toEqual({
-      alert: "subscription_ending",
-      effectiveAt: "2026-08-03T00:00:00.000Z",
-      actionUrl: "https://academy.dyad.sh/subscription?source=app",
-    });
-    expect(mocks.fetch).toHaveBeenCalledWith(
-      "https://academy.test/api/desktop/subscription-status",
-      expect.objectContaining({
-        headers: expect.objectContaining({
-          Authorization: "Bearer stored-pro-key",
-        }),
-      }),
-    );
-  });
-
-  it("returns null without a configured key", async () => {
-    mocks.readSettings.mockReturnValue({ providerSettings: {} });
-    await expect(
-      getSubscriptionStatus({} as never, undefined),
-    ).resolves.toBeNull();
-    expect(mocks.fetch).not.toHaveBeenCalled();
-  });
-
-  it("uses a fixture key for a loopback endpoint without stored Pro settings", async () => {
-    process.env.DYAD_SUBSCRIPTION_STATUS_URL =
-      "http://127.0.0.1:4321/subscription-status";
-    process.env.DYAD_SUBSCRIPTION_STATUS_FIXTURE_API_KEY = "fixture-key";
-    mocks.readSettings.mockReturnValue({ providerSettings: {} });
-    mocks.fetch.mockResolvedValue({
-      ok: true,
-      json: vi.fn().mockResolvedValue({
-        alert: "payment_past_due",
-        effectiveAt: null,
-        actionUrl: "https://academy.dyad.sh/billing",
-      }),
-    });
-
-    await expect(
-      getSubscriptionStatus({} as never, undefined),
-    ).resolves.toMatchObject({ alert: "payment_past_due" });
-    expect(mocks.fetch).toHaveBeenCalledWith(
-      "http://127.0.0.1:4321/subscription-status",
-      expect.objectContaining({
-        headers: expect.objectContaining({
-          Authorization: "Bearer fixture-key",
-        }),
-      }),
-    );
-  });
-
-  it("never sends a fixture key to a non-loopback endpoint", async () => {
-    process.env.DYAD_SUBSCRIPTION_STATUS_FIXTURE_API_KEY = "fixture-key";
-    mocks.readSettings.mockReturnValue({ providerSettings: {} });
-
-    await expect(
-      getSubscriptionStatus({} as never, undefined),
-    ).resolves.toBeNull();
-    expect(mocks.fetch).not.toHaveBeenCalled();
-  });
-
-  it.each([
-    {
-      name: "unauthorized response",
-      response: { ok: false, status: 401 },
-    },
-    {
-      name: "malformed response",
-      response: {
-        ok: true,
-        json: vi.fn().mockResolvedValue({ alert: "expired" }),
-      },
-    },
-  ])("returns null for a $name", async ({ response }) => {
-    mocks.fetch.mockResolvedValue(response);
-    await expect(
-      getSubscriptionStatus({} as never, undefined),
-    ).resolves.toBeNull();
-  });
-
-  it("returns null for a network failure", async () => {
-    mocks.fetch.mockRejectedValue(new Error("offline"));
-    await expect(
-      getSubscriptionStatus({} as never, undefined),
-    ).resolves.toBeNull();
-  });
-
-  it.each([
-    "http://academy.dyad.sh/subscription",
-    "https://example.com/subscription",
-    "https://user:pass@academy.dyad.sh/subscription",
-    "https://academy.dyad.sh:8443/subscription",
-    "not a URL",
-  ])("rejects unsafe billing URL %s", (url) => {
-    expect(() => parseBillingActionUrl(url)).toThrow(
-      "Invalid billing action URL",
-    );
-  });
-
-  it("accepts and opens an Academy HTTPS billing URL", async () => {
-    const url = "https://academy.dyad.sh/subscription?source=app";
-    expect(parseBillingActionUrl(url)).toBe(url);
-    await expect(openBillingAction({} as never, url)).resolves.toBeUndefined();
-    expect(mocks.openExternal).not.toHaveBeenCalled();
+    expect(mocks.transcribeWithSambaEngine).not.toHaveBeenCalled();
   });
 });

@@ -15,7 +15,7 @@ vi.mock("electron-log", () => ({
 vi.mock("@/db", () => ({ db: { select: dbMocks.select } }));
 vi.mock("@/db/schema", () => ({ apps: { path: "path" } }));
 vi.mock("@/paths/paths", () => ({
-  getDyadAppPath: (appPath: string) => appPath,
+  getSambaAppPath: (appPath: string) => appPath,
 }));
 vi.mock("@/ipc/utils/media_path_utils", async () => {
   const actual = await vi.importActual<
@@ -27,7 +27,7 @@ vi.mock("@/ipc/utils/media_path_utils", async () => {
 import { cleanupOldMediaFiles } from "@/ipc/utils/media_cleanup";
 import {
   ATTACHMENTS_MANIFEST_FILE,
-  DYAD_MEDIA_DIR_NAME,
+  SAMBA_MEDIA_DIR_NAME,
 } from "@/ipc/utils/media_path_utils";
 
 describe("cleanupOldMediaFiles filesystem safety", () => {
@@ -47,16 +47,16 @@ describe("cleanupOldMediaFiles filesystem safety", () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date("2025-01-31T00:00:00.000Z"));
 
-    const root = await fs.mkdtemp(path.join(os.tmpdir(), "dyad-media-"));
+    const root = await fs.mkdtemp(path.join(os.tmpdir(), "samba-media-"));
     tempDirectories.push(root);
     const appPath = path.join(root, "app");
     const externalPath = path.join(root, "external");
-    await fs.mkdir(path.join(appPath, ".dyad"), { recursive: true });
+    await fs.mkdir(path.join(appPath, ".samba"), { recursive: true });
     await fs.mkdir(externalPath);
     const externalFile = path.join(externalPath, "old-secret.txt");
     await fs.writeFile(externalFile, "do not delete");
     await fs.utimes(externalFile, new Date(2020, 0), new Date(2020, 0));
-    await fs.symlink(externalPath, path.join(appPath, DYAD_MEDIA_DIR_NAME));
+    await fs.symlink(externalPath, path.join(appPath, SAMBA_MEDIA_DIR_NAME));
     dbMocks.from.mockResolvedValue([{ path: appPath }]);
 
     await cleanupOldMediaFiles();
@@ -70,10 +70,10 @@ describe("cleanupOldMediaFiles filesystem safety", () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date("2025-01-31T00:00:00.000Z"));
 
-    const root = await fs.mkdtemp(path.join(os.tmpdir(), "dyad-media-"));
+    const root = await fs.mkdtemp(path.join(os.tmpdir(), "samba-media-"));
     tempDirectories.push(root);
     const appPath = path.join(root, "app");
-    const mediaPath = path.join(appPath, DYAD_MEDIA_DIR_NAME);
+    const mediaPath = path.join(appPath, SAMBA_MEDIA_DIR_NAME);
     await fs.mkdir(mediaPath, { recursive: true });
     const oldFile = path.join(mediaPath, "old.png");
     const freshFile = path.join(mediaPath, "fresh.png");
@@ -127,10 +127,10 @@ describe("cleanupOldMediaFiles filesystem safety", () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date("2025-01-31T00:00:00.000Z"));
 
-    const root = await fs.mkdtemp(path.join(os.tmpdir(), "dyad-media-"));
+    const root = await fs.mkdtemp(path.join(os.tmpdir(), "samba-media-"));
     tempDirectories.push(root);
     const appPath = path.join(root, "app");
-    const mediaPath = path.join(appPath, DYAD_MEDIA_DIR_NAME);
+    const mediaPath = path.join(appPath, SAMBA_MEDIA_DIR_NAME);
     await fs.mkdir(mediaPath, { recursive: true });
     const manifestPath = path.join(mediaPath, ATTACHMENTS_MANIFEST_FILE);
     const aliasPath = path.join(mediaPath, "old.png");

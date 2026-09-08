@@ -426,7 +426,7 @@ visibility becomes `state.type !== "closed"`, and the open/close buttons send
 `debug.ts` keeps a ring buffer of the last ~100
 `{ state.type, event.type, commands }` entries per controller, logged through
 the existing renderer logger at debug level and exposed on
-`window.__dyadVersionPreviewLog` in dev builds. This is the vanilla answer to
+`window.__sambaVersionPreviewLog` in dev builds. This is the vanilla answer to
 the XState inspector: when a rare race is reported, the reproduction is a
 readable event trace, and any trace replays deterministically through
 `transition` in a test.

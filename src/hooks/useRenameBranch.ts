@@ -4,7 +4,7 @@ import { showError } from "@/lib/toast";
 import { selectedAppIdAtom } from "@/atoms/appAtoms";
 import { useAtomValue } from "jotai";
 import { queryKeys } from "@/lib/queryKeys";
-import { DyadError, DyadErrorKind } from "@/errors/dyad_error";
+import { SambaError, SambaErrorKind } from "@/errors/samba_error";
 
 interface RenameBranchParams {
   appId: number;
@@ -19,21 +19,21 @@ export function useRenameBranch() {
   const mutation = useMutation<void, Error, RenameBranchParams>({
     mutationFn: async (params: RenameBranchParams) => {
       if (params.appId === null || params.appId === undefined) {
-        throw new DyadError(
+        throw new SambaError(
           "App ID is required to rename a branch.",
-          DyadErrorKind.Validation,
+          SambaErrorKind.Validation,
         );
       }
       if (!params.oldBranchName) {
-        throw new DyadError(
+        throw new SambaError(
           "Old branch name is required.",
-          DyadErrorKind.Validation,
+          SambaErrorKind.Validation,
         );
       }
       if (!params.newBranchName) {
-        throw new DyadError(
+        throw new SambaError(
           "New branch name is required.",
-          DyadErrorKind.Validation,
+          SambaErrorKind.Validation,
         );
       }
       await ipc.app.renameBranch(params);

@@ -198,12 +198,12 @@ export interface RemoteMachineContract<
    */
   readonly unavailableSnapshot: (key: Key) => RemoteState;
   readonly revisionPolicy: (event: Event) => RemoteRevisionPolicy;
-  /** Throw DyadErrorKind.Auth for an expected access denial. */
+  /** Throw SambaErrorKind.Auth for an expected access denial. */
   readonly authorizeSubscribe: (context: {
     readonly sender: RemoteMachineSender;
     readonly key: Key;
   }) => void | Promise<void>;
-  /** Throw DyadErrorKind.Auth for an expected access denial. */
+  /** Throw SambaErrorKind.Auth for an expected access denial. */
   readonly authorizeDispatch: (context: {
     readonly sender: RemoteMachineSender;
     readonly key: Key;

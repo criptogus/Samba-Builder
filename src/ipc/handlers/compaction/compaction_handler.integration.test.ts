@@ -14,7 +14,7 @@ const {
 } = vi.hoisted(() => ({
   mockSafeSend: vi.fn(),
   mockStorePreCompactionMessages: vi.fn(
-    async () => ".dyad/chats/1/compaction-test.md",
+    async () => ".samba/chats/1/compaction-test.md",
   ),
   mockStreamText: vi.fn(),
   mockGetModelClient: vi.fn(async () => ({
@@ -44,7 +44,7 @@ vi.mock("@/ipc/utils/get_model_client", () => ({
 }));
 
 vi.mock("@/ipc/utils/provider_options", () => ({
-  DYAD_INTERNAL_REQUEST_ID_HEADER: "x-dyad-request-id",
+  SAMBA_INTERNAL_REQUEST_ID_HEADER: "x-samba-request-id",
   getAiHeaders: () => ({}),
   getProviderOptions: () => ({}),
 }));
@@ -205,19 +205,19 @@ describe("performCompaction", () => {
     expect(result).toMatchObject({
       success: true,
       summary: "Complete summary",
-      backupPath: ".dyad/chats/1/compaction-test.md",
+      backupPath: ".samba/chats/1/compaction-test.md",
     });
     await expect(loadSummaryMessages()).resolves.toHaveLength(1);
     await expect(loadChat()).resolves.toMatchObject({
       pendingCompaction: false,
-      compactionBackupPath: ".dyad/chats/1/compaction-test.md",
+      compactionBackupPath: ".samba/chats/1/compaction-test.md",
     });
     expect(mockSafeSend).toHaveBeenCalledWith(
       expect.anything(),
       "chat:compaction:complete",
       {
         chatId,
-        backupPath: ".dyad/chats/1/compaction-test.md",
+        backupPath: ".samba/chats/1/compaction-test.md",
       },
     );
   });
@@ -225,8 +225,8 @@ describe("performCompaction", () => {
   it("pins the benchmarked compaction model for Samba Builder users", async () => {
     settingsState.current = {
       selectedModel: { provider: "anthropic", name: "test-model" },
-      enableDyadPro: true,
-      providerSettings: { auto: { apiKey: { value: "dyad-pro-key" } } },
+      enableSambaPro: true,
+      providerSettings: { auto: { apiKey: { value: "samba-pro-key" } } },
     };
     mockStreamText.mockReturnValue({
       textStream: textStream(["Complete summary"]),
@@ -247,8 +247,8 @@ describe("performCompaction", () => {
         effortLevel: "high",
       },
       {
-        enableDyadPro: true,
-        providerSettings: { auto: { apiKey: { value: "dyad-pro-key" } } },
+        enableSambaPro: true,
+        providerSettings: { auto: { apiKey: { value: "samba-pro-key" } } },
         selectedModel: {
           provider: "openai",
           name: "gpt-5.6-luna",
