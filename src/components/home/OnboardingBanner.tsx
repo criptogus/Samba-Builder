@@ -29,7 +29,7 @@ export const OnboardingBanner = ({
           <div className="relative p-2">
             <img
               src="https://img.youtube.com/vi/rgdNoHLaRN4/maxresdefault.jpg"
-              alt="Get started with Dyad in 3 minutes"
+              alt="Get started with Samba Builder in 3 minutes"
               className="w-28 h-16 object-cover rounded-md"
             />
             <div className="absolute inset-0 flex items-center justify-center">
