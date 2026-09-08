@@ -72,7 +72,7 @@ server.listen(0, "127.0.0.1", () => {
   }
 
   const endpoint = `http://127.0.0.1:${address.port}/subscription-status`;
-  console.log(`Starting Dyad with subscription fixture: ${state}`);
+  console.log(`Starting Samba Builder with subscription fixture: ${state}`);
   console.log(`  endpoint: ${endpoint}`);
 
   const child = spawn(npmCommand, ["start"], {

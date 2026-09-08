@@ -22,7 +22,7 @@ export const previewIframeRefAtom = atom<HTMLIFrameElement | null>(null);
  * Set only when a test run needs a page it can drive over CDP — the native view
  * cannot host component selection, the visual editor, the annotator, or console
  * capture, so it is never offered as a way to browse the app. Deliberately
- * session-local rather than persisted: restarting Dyad always lands back on the
+ * session-local rather than persisted: restarting Samba Builder always lands back on the
  * iframe.
  *
  * Holds the owning app's id rather than a bare flag because run state is

@@ -284,14 +284,16 @@ describe("HelpDialog screenshot prompt", () => {
 
     // The reporter goes back into help while the report is still being built.
     fireEvent.click(screen.getByText("reopen-help"));
-    expect(await screen.findByText("Need help with Dyad?")).toBeTruthy();
+    expect(
+      await screen.findByText("Need help with Samba Builder?"),
+    ).toBeTruthy();
 
     releaseDebugInfo(debugInfo);
     await waitFor(() => expect(mocks.openExternalUrl).toHaveBeenCalled());
 
     // The arriving report files correctly and does not touch what is on screen.
     expect(bodyOfOpenedIssue()).toContain("Session ID: v2:abc");
-    expect(screen.getByText("Need help with Dyad?")).toBeTruthy();
+    expect(screen.getByText("Need help with Samba Builder?")).toBeTruthy();
   });
 
   it("reports a dismissal so every opening has an outcome", async () => {

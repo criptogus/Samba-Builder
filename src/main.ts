@@ -1,6 +1,5 @@
 import {
   app,
-  autoUpdater,
   BrowserWindow,
   dialog,
   Menu,
@@ -16,7 +15,8 @@ import { execFile } from "node:child_process";
 import { promisify } from "node:util";
 import { registerIpcHandlers } from "./ipc/ipc_host";
 import dotenv from "dotenv";
-import { updateElectronApp, UpdateSourceType } from "update-electron-app";
+// Samba Builder: sem auto-update (o update-electron-app consultava o backend
+// do Dyad) — o import foi removido.
 import log from "electron-log";
 import {
   getSettingsFilePath,
@@ -35,7 +35,7 @@ import {
   recoveryNeedsKeychainUnlock,
   retryRecoveryWithKeychainUnlock,
 } from "./main/safe_storage_legacy";
-import { recordUpdaterError } from "./main/updater_state";
+// (import de recordUpdaterError removido — sem auto-update)
 import {
   sendTelemetryEvent,
   sendTelemetryEventToWindow,
@@ -183,6 +183,27 @@ log.errorHandler.startCatching({
   },
 });
 
+// Preserve the profile when a locally packaged build is opened via Finder or
+// Explorer. An explicit --user-data-dir always wins. Release builds have no
+// local profile metadata and retain any existing legacy production profile.
+if (app.isPackaged && !app.commandLine.hasSwitch("user-data-dir")) {
+  const metadata = JSON.parse(
+    fs.readFileSync(path.join(app.getAppPath(), "package.json"), "utf8"),
+  );
+  const profile = metadata.sambaLocalUserDataPath;
+  const legacyProfile = path.join(app.getPath("appData"), "dyad");
+  if (
+    typeof profile === "string" &&
+    path.isAbsolute(profile) &&
+    fs.existsSync(profile)
+  ) {
+    app.setPath("userData", profile);
+  } else if (fs.existsSync(legacyProfile)) {
+    app.setPath("userData", legacyProfile);
+  }
+}
+app.setName("Samba Builder");
+
 // In dev, keep minidumps and logs under the project's ./userData, not the OS
 // one. Must run before crashReporter.start and before the first log call, when
 // electron-log caches its dir. macOS logs ignore userData: ~/Library/Logs/dyad.
@@ -212,7 +233,7 @@ log.info(
 );
 const execFileAsync = promisify(execFile);
 
-// Prefer the Dyad-managed pnpm (if installed) for everything spawned from the
+// Prefer the Samba Builder-managed pnpm (if installed) for everything spawned from the
 // main process. Runs after all module imports, so it wins over the shell PATH
 // that fixPath() restores at app_runtime_service load time.
 applyManagedPnpmToProcessPath();
@@ -413,6 +434,14 @@ if (process.defaultApp) {
 }
 
 export async function onReady() {
+  if (process.platform === "darwin") {
+    const dockIcon = nativeImage.createFromPath(
+      app.isPackaged
+        ? path.join(process.resourcesPath, "logo.png")
+        : path.join(app.getAppPath(), "assets/icon/logo.png"),
+    );
+    if (!dockIcon.isEmpty()) app.dock?.setIcon(dockIcon);
+  }
   // Take over the sentinel before any startup work that can crash. Migrations,
   // the keychain and git all run below; if one of them kills us, a sentinel
   // still naming the previous session would report this crash as that one.
@@ -449,7 +478,7 @@ export async function onReady() {
     const message = error instanceof Error ? error.message : String(error);
     dialog.showErrorBox(
       "Database Migration Failed",
-      `Dyad could not initialize its local database. ${message}`,
+      `Samba Builder could not initialize its local database. ${message}`,
     );
     app.quit();
     return;
@@ -489,11 +518,11 @@ export async function onReady() {
 
   const settings = await readEffectiveSettings();
 
-  // Add dyad-apps directory to git safe.directory (required for Windows).
+  // Add samba-apps directory to git safe.directory (required for Windows).
   // The trailing /* allows access to all repositories under the named directory.
   // See: https://git-scm.com/docs/git-config#Documentation/git-config.txt-safedirectory
   // Don't need to await because this only needs to run before
-  // the user starts interacting with Dyad app and uses a git-related feature.
+  // the user starts interacting with Samba Builder app and uses a git-related feature.
   gitAddSafeDirectory(`${getDyadAppsBaseDirectory()}/*`);
 
   // Check if app was force-closed by checking for the crash sentinel file.
@@ -613,29 +642,13 @@ export async function onReady() {
   });
 
   logger.info("Auto-update enabled=", settings.enableAutoUpdate);
+  // Samba Builder: zero backend do Dyad — sem auto-update over-the-air (o
+  // updateElectronApp do Dyad consultava api.dyad.sh com o repo
+  // dyad-sh/dyad). Atualizações são instaladas manualmente pelo usuário.
   if (settings.enableAutoUpdate) {
-    // Technically we could just pass the releaseChannel directly to the host,
-    // but this is more explicit and falls back to stable if there's an unknown
-    // release channel.
-    const postfix = settings.releaseChannel === "beta" ? "beta" : "stable";
-    const host = `https://api.dyad.sh/v1/update/${postfix}`;
-    logger.info("Auto-update release channel=", postfix);
-    // update-electron-app logs updater errors at info level, which the
-    // warn-filtered bug-report logs drop — leaving only the orphaned stack
-    // trace tail. Log at error level and record for debug bundles.
-    autoUpdater.on("error", (error) => {
-      logger.error("Auto-updater error:", error);
-      recordUpdaterError(error);
-    });
-    updateElectronApp({
-      logger,
-      updateInterval: "60 minutes",
-      updateSource: {
-        type: UpdateSourceType.ElectronPublicUpdateService,
-        repo: "dyad-sh/dyad",
-        host,
-      },
-    }); // additional configuration options available
+    logger.info(
+      "Auto-update desativado: Samba Builder não depende do servidor do Dyad.",
+    );
   }
 }
 
@@ -864,7 +877,10 @@ const createWindow = ({
   rendererLoad: Promise<void>;
 } => {
   if (isAppQuitting) {
-    throw new DyadError("Dyad is shutting down", DyadErrorKind.Precondition);
+    throw new DyadError(
+      "Samba Builder is shutting down",
+      DyadErrorKind.Precondition,
+    );
   }
 
   // Create the browser window.
@@ -1207,7 +1223,7 @@ configureWindowProductController({
   openEntityInNewWindow: async (entity) => {
     if (productWindows.size >= MAX_PRODUCT_WINDOWS) {
       throw new DyadError(
-        `Dyad supports up to ${MAX_PRODUCT_WINDOWS} open windows`,
+        `Samba Builder supports up to ${MAX_PRODUCT_WINDOWS} open windows`,
         DyadErrorKind.Precondition,
       );
     }
@@ -1303,11 +1319,11 @@ const createApplicationMenu = () => {
       label: "View",
       submenu: [
         {
-          label: "Reload Dyad",
+          label: "Reload Samba Builder",
           click: () => BrowserWindow.getFocusedWindow()?.reload(),
         },
         {
-          label: "Force Reload Dyad",
+          label: "Force Reload Samba Builder",
           click: () =>
             BrowserWindow.getFocusedWindow()?.webContents.reloadIgnoringCache(),
         },
@@ -1519,7 +1535,7 @@ async function handleDeepLinkReturn(url: string) {
         apiKey,
       });
     } catch (error) {
-      showDeepLinkSettingsError("save Dyad Pro settings", error);
+      showDeepLinkSettingsError("save Samba Builder settings", error);
       return;
     }
     // Send message to renderer to trigger re-render
@@ -1528,7 +1544,7 @@ async function handleDeepLinkReturn(url: string) {
     });
     return;
   }
-  // Fired by the OAuth callback page to hand focus back to Dyad
+  // Fired by the OAuth callback page to hand focus back to Samba Builder
   // after consent. Tokens land via the loopback listener; focusing
   // the window is the only side-effect needed here.
   if (parsed.hostname === "mcp-oauth-return") {

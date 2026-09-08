@@ -1,7 +1,7 @@
 /**
  * Templates for the generated `e2e-tests/fixtures/test-user.ts` sign-in helper.
  * Auth-gated specs call `await signIn(page)` instead of driving the login UI;
- * the helper reads the isolated-session credentials Dyad injects into the run.
+ * the helper reads the isolated-session credentials Samba Builder injects into the run.
  */
 
 export type RecorderAuthMode =
@@ -18,7 +18,7 @@ export function fixtureMarker(mode: Exclude<RecorderAuthMode, "none">): string {
   return `// dyad-generated-fixture: ${mode}`;
 }
 
-/** The auth mode a fixture declares, or null when it isn't Dyad-generated. */
+/** The auth mode a fixture declares, or null when it isn't Samba Builder-generated. */
 export function readFixtureMode(
   source: string,
 ): Exclude<RecorderAuthMode, "none"> | null {
@@ -34,11 +34,11 @@ const NEON_BETTER_AUTH_FIXTURE: string[] = [
   `import { expect, type Page } from "@playwright/test";`,
   ``,
   `/**`,
-  ` * Sign in the Dyad-provisioned test user by driving the app's own Better Auth`,
+  ` * Sign in the Samba Builder-provisioned test user by driving the app's own Better Auth`,
   ` * endpoint from the page itself, so Chromium accepts the HttpOnly session`,
   ` * cookie exactly as it does for an interactive sign-in.`,
   ` *`,
-  ` * Dyad provisions an isolated user per test run and injects its credentials`,
+  ` * Samba Builder provisions an isolated user per test run and injects its credentials`,
   ` * via DYAD_TEST_USER_EMAIL / DYAD_TEST_USER_PASSWORD.`,
   ` */`,
   `export async function signIn(page: Page): Promise<void> {`,
@@ -46,7 +46,7 @@ const NEON_BETTER_AUTH_FIXTURE: string[] = [
   `  const password = process.env.DYAD_TEST_USER_PASSWORD;`,
   `  if (!email || !password) {`,
   `    throw new Error(`,
-  `      "DYAD_TEST_USER_EMAIL / DYAD_TEST_USER_PASSWORD are not set. Run this test from Dyad's Tests panel so an isolated user is provisioned.",`,
+  `      "DYAD_TEST_USER_EMAIL / DYAD_TEST_USER_PASSWORD are not set. Run this test from Samba Builder's Tests panel so an isolated user is provisioned.",`,
   `    );`,
   `  }`,
   `  const origin = new URL(`,
@@ -79,9 +79,9 @@ const SUPABASE_PASSWORD_FIXTURE: string[] = [
   `import { expect, type Page } from "@playwright/test";`,
   ``,
   `/**`,
-  ` * Sign in the Dyad-provisioned Supabase test user via the password grant,`,
+  ` * Sign in the Samba Builder-provisioned Supabase test user via the password grant,`,
   ` * then seed supabase-js's session into localStorage before the app loads so`,
-  ` * it boots authenticated. Dyad injects the project URL, anon key, and the`,
+  ` * it boots authenticated. Samba Builder injects the project URL, anon key, and the`,
   ` * isolated user's credentials.`,
   ` */`,
   `export async function signIn(page: Page): Promise<void> {`,
@@ -91,7 +91,7 @@ const SUPABASE_PASSWORD_FIXTURE: string[] = [
   `  const password = process.env.DYAD_TEST_USER_PASSWORD;`,
   `  if (!url || !anonKey || !email || !password) {`,
   `    throw new Error(`,
-  `      "Supabase test credentials are not set. Run this test from Dyad's Tests panel so an isolated user is provisioned.",`,
+  `      "Supabase test credentials are not set. Run this test from Samba Builder's Tests panel so an isolated user is provisioned.",`,
   `    );`,
   `  }`,
   `  const response = await page.request.post(`,

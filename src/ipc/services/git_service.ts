@@ -137,7 +137,7 @@ export class GitService {
    */
   async initRepoWithInitialCommit({
     path,
-    message = "Init Dyad app",
+    message = "Init Samba Builder app",
     ref = "main",
   }: {
     path: string;

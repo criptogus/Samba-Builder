@@ -5,6 +5,7 @@ export interface Template {
   imageUrl: string;
   githubUrl?: string;
   isOfficial: boolean;
+  isTeam?: boolean;
   isExperimental?: boolean;
   requiresNeon?: boolean;
 }

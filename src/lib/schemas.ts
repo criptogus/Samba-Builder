@@ -203,23 +203,28 @@ export type GithubUser = z.infer<typeof GithubUserSchema>;
 
 /**
  * Supabase organization credentials.
- * Each organization has its own OAuth tokens.
+ * Each organization has its own access token.
+ *
+ * `refreshToken` / `expiresIn` / `tokenTimestamp` are optional: they are only
+ * present for OAuth connections. A direct connection (a Personal Access Token
+ * pasted by the user) has just an `accessToken`, which is long-lived and never
+ * needs refreshing.
  */
 export const SupabaseOrganizationCredentialsSchema = z.object({
   accessToken: SecretSchema,
-  refreshToken: SecretSchema,
-  expiresIn: z.number(),
-  tokenTimestamp: z.number(),
+  refreshToken: SecretSchema.optional(),
+  expiresIn: z.number().optional(),
+  tokenTimestamp: z.number().optional(),
 });
 export type SupabaseOrganizationCredentials = z.infer<
   typeof SupabaseOrganizationCredentialsSchema
 >;
 
 /**
- * The admin account on a server Dyad set up itself.
+ * The admin account on a server Samba Builder set up itself.
  *
  * Its own shape rather than fields on the instance below, because it is a
- * fact about a machine Dyad built rather than about the Coolify Dyad talks
+ * fact about a machine Samba Builder built rather than about the Coolify Samba Builder talks
  * to. Usually the same server; not always.
  */
 export const CoolifyAdminSchema = z.object({
@@ -235,11 +240,11 @@ export const CoolifyAdminSchema = z.object({
    * The address of the server this account opens.
    *
    * There are two addresses stored, and they are usually the same one. This
-   * is the machine Dyad installed Coolify on. `instanceUrl` on the object
-   * below is the Coolify Dyad is currently talking to.
+   * is the machine Samba Builder installed Coolify on. `instanceUrl` on the object
+   * below is the Coolify Samba Builder is currently talking to.
    *
    * They come apart in one case. Coolify has no API for making API tokens, so
-   * Dyad mints one through a workaround, and that workaround can fail. The
+   * Samba Builder mints one through a workaround, and that workaround can fail. The
    * install still succeeded, so the finished screen hands over this account
    * and says to make a token by hand — and the next screen offers the token
    * form with this address already filled in. Someone who instead points that
@@ -255,7 +260,7 @@ export const CoolifyAdminSchema = z.object({
 });
 
 /**
- * A Coolify instance Dyad can deploy to.
+ * A Coolify instance Samba Builder can deploy to.
  *
  * One object rather than two loose fields: the address and the token are only
  * useful together, and neither says anything on its own. Which app deploys
@@ -266,9 +271,9 @@ export const CoolifySchema = z.object({
   instanceUrl: z.string().optional(),
   accessToken: SecretSchema.optional(),
   /**
-   * The admin account on a server Dyad set up itself.
+   * The admin account on a server Samba Builder set up itself.
    *
-   * Kept because Dyad invented this password on the user's behalf, for their
+   * Kept because Samba Builder invented this password on the user's behalf, for their
    * own machine — showing it once and forgetting it leaves them locked out of
    * a server they own. Encrypted like the token, and like the token it
    * reaches the renderer whenever settings are read, not only when the panel
@@ -537,6 +542,7 @@ const BaseUserSettingsFields = {
   enableCodeExplorer: z.boolean().optional(),
   runTypeScriptForWholeProject: z.boolean().optional(),
   enableMultiWindow: z.boolean().optional(),
+  maxConcurrentSubagents: z.number().int().min(1).max(3).optional(),
   enableExplorerSubagent: z.boolean().optional(),
   enableAutoReview: z.boolean().optional(),
   enableReviewButton: z.boolean().optional(),
@@ -577,7 +583,7 @@ export const StoredUserSettingsSchema = z
     defaultChatMode: StoredChatModeSchema.optional(),
     // Deprecated: renamed to enableChatEventNotifications
     enableChatCompletionNotifications: z.boolean().optional(),
-    // Deprecated: Dyad always uses the bundled Dugite Git backend.
+    // Deprecated: Samba Builder always uses the bundled Dugite Git backend.
     enableNativeGit: z.boolean().optional(),
     // Deprecated: Problems checks are manual-only.
     enableAutoFixProblems: z.boolean().optional(),
@@ -659,8 +665,11 @@ export function migrateStoredSettings(
   };
 }
 
-export function isDyadProEnabled(settings: UserSettings): boolean {
-  return settings.enableDyadPro === true && hasDyadProKey(settings);
+export function isDyadProEnabled(_settings: UserSettings): boolean {
+  // Samba Builder: sem plano Pro — todas as features liberadas para qualquer
+  // usuário (o produto vende serviços, não assinatura). Mantido o nome da
+  // função para não tocar os call sites do upstream.
+  return true;
 }
 
 export function hasDyadProKey(settings: UserSettings): boolean {

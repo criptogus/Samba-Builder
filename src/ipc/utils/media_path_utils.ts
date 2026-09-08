@@ -4,7 +4,7 @@ import crypto from "node:crypto";
 import { withLock } from "./lock_utils";
 
 /**
- * The root ".dyad" directory within each app that holds Dyad-managed files.
+ * The root ".dyad" directory within each app that holds Samba Builder-managed files.
  */
 export const DYAD_INTERNAL_DIR_NAME = ".dyad";
 

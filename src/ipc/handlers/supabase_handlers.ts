@@ -27,6 +27,7 @@ import {
 } from "../services/app_operation_coordinator";
 import { createTestOnlyLoggedHandler } from "./safe_handle";
 import { readSettings, writeSettings } from "../../main/settings";
+import { connectSupabaseWithAccessToken } from "../../supabase_admin/supabase_return_handler";
 import {
   SUPABASE_PROJECT_CREATED_BUT_UNLINKED,
   supabaseContracts,
@@ -198,6 +199,18 @@ export function registerSupabaseHandlers() {
       });
 
       logger.info(`Deleted Supabase organization ${organizationSlug}`);
+    },
+  );
+
+  // Direct connection with a Personal Access Token (no Dyad OAuth proxy).
+  createTypedHandler(
+    supabaseContracts.connectWithAccessToken,
+    async (_, { accessToken }) => {
+      const result = await connectSupabaseWithAccessToken(accessToken);
+      logger.info(
+        `Connected Supabase directly with an access token (${result.organizations} organization(s)).`,
+      );
+      return result;
     },
   );
 
@@ -437,7 +450,7 @@ export function registerSupabaseHandlers() {
     });
   });
 
-  // Set app project - links a Dyad app to a Supabase project.
+  // Set app project - links a Samba Builder app to a Supabase project.
   // Provider ownership serializes this with the key switch, which reads this
   // association and writes the matching key into the app's source. Repointing
   // mid-switch would leave the client holding the previous project's key.
@@ -475,7 +488,7 @@ export function registerSupabaseHandlers() {
     ),
   );
 
-  // Unset app project - removes the link between a Dyad app and a Supabase
+  // Unset app project - removes the link between a Samba Builder app and a Supabase
   // project. This legacy contract spells the app id `app`, so it declares the
   // provider operation directly rather than using createAppOperationHandler.
   createTypedHandler(supabaseContracts.unsetAppProject, async (_, params) => {

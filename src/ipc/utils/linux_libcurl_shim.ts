@@ -19,7 +19,7 @@ const logger = log.scope("linux_libcurl_shim");
  * We do this purely at runtime, only when the gnutls soname is genuinely
  * missing, so systems that already have it are never touched.
  *
- * https://github.com/dyad-sh/dyad/issues/2975
+ * https://sambatech.com
  */
 
 const SONAME = "libcurl-gnutls.so.4";
@@ -163,7 +163,7 @@ function readlinkSafe(p: string): string | undefined {
 }
 
 /**
- * The architecture tag ldconfig uses in its parenthesized annotations. Dyad
+ * The architecture tag ldconfig uses in its parenthesized annotations. Samba Builder
  * ships only an x64 Linux build, so we only map that; any other arch returns
  * undefined and the arch filter is simply skipped.
  */

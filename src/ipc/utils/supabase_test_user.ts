@@ -194,7 +194,7 @@ export async function createTempTestUser(
   const password = crypto.randomBytes(24).toString("base64url");
 
   if (IS_TEST_BUILD) {
-    // Don't hit the network in Dyad's own E2E build (fake Supabase project).
+    // Don't hit the network in Samba Builder's own E2E build (fake Supabase project).
     const userId = "00000000-0000-4000-8000-000000000000";
     await persistTestUserId(appData.id, userId);
     return { userId, email, password, projectUrl };
@@ -249,7 +249,7 @@ export async function createTempTestUser(
     // than surfacing raw Supabase JSON as an unexplained External failure.
     if (response.status === 401 && /legacy api keys/i.test(detail)) {
       throw new DyadError(
-        "This Supabase project has its legacy API keys (anon, service_role) disabled, and Dyad couldn't find a secret key to use instead. Create a secret key in Supabase under Settings → API Keys, then run the tests again.",
+        "This Supabase project has its legacy API keys (anon, service_role) disabled, and Samba Builder couldn't find a secret key to use instead. Create a secret key in Supabase under Settings → API Keys, then run the tests again.",
         DyadErrorKind.Precondition,
       );
     }
@@ -262,7 +262,7 @@ export async function createTempTestUser(
       /bad_jwt|invalid jwt/i.test(detail)
     ) {
       throw new DyadError(
-        `Supabase rejected the ${adminKey.isLegacyJwt ? "legacy service_role" : "secret"} key Dyad used to create the test user (${response.status}). ${detail}`,
+        `Supabase rejected the ${adminKey.isLegacyJwt ? "legacy service_role" : "secret"} key Samba Builder used to create the test user (${response.status}). ${detail}`,
         DyadErrorKind.External,
       );
     }

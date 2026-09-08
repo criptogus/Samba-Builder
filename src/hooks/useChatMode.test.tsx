@@ -94,22 +94,6 @@ describe("useChatMode without an active chat", () => {
 
     expect(result.current.selectedMode).toBe("build");
   });
-
-  it("shows Build when the automatic Google-only fallback applies", () => {
-    mocks.isQuotaLoading = false;
-    mocks.settings = makeSettings({
-      selectedChatMode: "local-agent",
-      providerSettings: {
-        google: { apiKey: { value: "test-key" } },
-      },
-    });
-
-    const { result } = renderHook(() => useChatMode(null), {
-      wrapper: makeWrapper(),
-    });
-
-    expect(result.current.selectedMode).toBe("build");
-  });
 });
 
 describe("useChatMode with an active chat", () => {

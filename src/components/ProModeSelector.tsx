@@ -37,14 +37,14 @@ export function ProModeSelector() {
           <Sparkles className="h-3.5 w-3.5" />
           <span className="font-medium">Pro</span>
         </TooltipTrigger>
-        <TooltipContent>Configure Dyad Pro settings</TooltipContent>
+        <TooltipContent>Configure Samba Builder settings</TooltipContent>
       </Tooltip>
       <PopoverContent className="w-80 border-primary/20">
         <div className="space-y-4">
           <div className="space-y-1">
             <h4 className="font-medium flex items-center gap-1.5">
               <Sparkles className="h-4 w-4 text-primary" />
-              <span className="text-primary font-medium">Dyad Pro</span>
+              <span className="text-primary font-medium">Samba Builder</span>
             </h4>
             <div className="h-px bg-gradient-to-r from-primary/50 via-primary/20 to-transparent" />
           </div>
@@ -53,7 +53,7 @@ export function ProModeSelector() {
               <a
                 className="inline-flex items-center justify-center gap-2 rounded-md border border-primary/30 bg-primary/10 px-3 py-2 text-sm font-medium text-primary shadow-sm transition-colors hover:bg-primary/20 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring cursor-pointer"
                 onClick={() => {
-                  ipc.system.openExternalUrl("https://dyad.sh/pro#ai");
+                  ipc.system.openExternalUrl("https://sambatech.com");
                 }}
                 title="Visit dyad.sh/pro to unlock Pro features"
               >
@@ -63,8 +63,8 @@ export function ProModeSelector() {
           )}
           <SelectorRow
             id="pro-enabled"
-            label="Enable Dyad Pro"
-            tooltip="Uses Dyad Pro AI credits for the main AI model and Pro modes."
+            label="Enable Samba Builder"
+            tooltip="Uses Samba Builder AI credits for the main AI model and Pro modes."
             isTogglable={hasProKey}
             settingEnabled={Boolean(settings?.enableDyadPro)}
             toggle={toggleProEnabled}

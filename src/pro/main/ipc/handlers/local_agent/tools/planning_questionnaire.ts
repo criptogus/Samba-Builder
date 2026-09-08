@@ -67,6 +67,8 @@ Use this tool when:
 Skip only when blueprint mode is not enabled and the request is a specific, concrete change.
 </when_to_use>
 
+For product discovery, act as a senior Product Manager: reuse the conversation and briefing, then ask one high-impact question (at most three related questions) about the user problem, evidence, first-release scope or success before asking about visual style. Explain the decision it unlocks. Adapt the next question to the answer; accept uncertainty and distinguish recommendations from approved requirements. A narrow bug fix does not need a new product interview.
+
 <input_schema>
 The tool accepts ONLY a "questions" array.
 
@@ -80,19 +82,19 @@ Each question object has these fields:
 </input_schema>
 
 <correct_example>
-Reasoning: The user asked to "build me a todo app". I need to clarify the look and feel and key product features. I'll use radio for single-choice and checkbox for multi-choice.
+Reasoning: The user asked to "build me a todo app". I need to understand the actual user problem before choosing features or visual style.
 
 {
   "questions": [
     {
       "type": "radio",
-      "question": "What visual style do you prefer?",
-      "options": ["Minimal & clean", "Colorful & playful", "Dark & modern"]
+      "question": "Who struggles most with keeping track of tasks?",
+      "options": ["An individual planning their day", "A team coordinating shared work", "A manager following deliveries"]
     },
     {
       "type": "checkbox",
-      "question": "Which features do you want?",
-      "options": ["Due dates", "Categories/tags", "Priority levels"]
+      "question": "Which outcome matters most in the first version?",
+      "options": ["Know what to do next", "Avoid missed commitments", "See who is responsible"]
     }
   ]
 }

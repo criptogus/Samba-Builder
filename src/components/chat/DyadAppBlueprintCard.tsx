@@ -580,6 +580,7 @@ export const DyadAppBlueprintCard: React.FC<DyadAppBlueprintCardProps> = ({
 
         const followUpPrompt = [
           "The app blueprint has been approved. Please build the app based on the following approved blueprint:",
+          "First read project-docs/README.md and complete the PRD, architecture, technology stack and official design system using the existing brief, questionnaire answers and actual template files. Keep unresolved decisions explicit; do not repeat answered questions. Then implement and update testing, operations, decisions and changelog alongside the code. GitHub setup must use the real project connector; never claim a repository exists without verification.",
           "",
           `App Name: ${finalAppName}`,
           `Template: ${plan.templateId}`,

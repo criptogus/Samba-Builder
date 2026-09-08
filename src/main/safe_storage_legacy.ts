@@ -183,7 +183,7 @@ function isUnlockCanceledStatus(status: number): boolean {
  *
  * v1 trade-off: shelling out to `security` can trigger a macOS Keychain
  * permission prompt for items created by the app, because the `security` tool
- * is a differently-signed program than Dyad. This interface exists so a future
+ * is a differently-signed program than Samba Builder. This interface exists so a future
  * in-process implementation (SecItemCopyMatching, silent for same-signed apps)
  * can replace this reader without touching the recovery logic.
  */

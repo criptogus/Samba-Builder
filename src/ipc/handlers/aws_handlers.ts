@@ -1,3 +1,4 @@
+import { assertDeliveryReadyForPublish } from "../services/delivery_readiness";
 import { eq } from "drizzle-orm";
 import { db } from "@/db";
 import { apps } from "@/db/schema";
@@ -53,14 +54,11 @@ export function registerAwsHandlers() {
           operation: "aws-deploy",
           resources: ["app-path", "repository", "provider"],
         },
-        async () =>
-          deployAws(
-            appId,
-            config,
-            await rootFor(appId),
-            accountId,
-            sourceDigest,
-          ),
+        async () => {
+          const root = await rootFor(appId);
+          await assertDeliveryReadyForPublish(appId, root);
+          return deployAws(appId, config, root, accountId, sourceDigest);
+        },
       ),
   );
   createTypedHandler(awsContracts.refresh, async (_, { appId }) =>

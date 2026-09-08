@@ -1,27 +1,11 @@
-import {
-  type Template,
-  type ApiTemplate,
-  localTemplatesData,
-} from "../../shared/templates";
-import log from "electron-log";
-
-const logger = log.scope("template_utils");
+import { cachedTeamTemplates } from "../services/project_templates/store";
+import { type Template, localTemplatesData } from "../../shared/templates";
 
 // In-memory cache for API templates
 let apiTemplatesCache: Template[] | null = null;
 let apiTemplatesFetchPromise: Promise<Template[]> | null = null;
 
-// Convert API template to our Template interface
-function convertApiTemplate(apiTemplate: ApiTemplate): Template {
-  return {
-    id: `${apiTemplate.githubOrg}/${apiTemplate.githubRepo}`,
-    title: apiTemplate.title,
-    description: apiTemplate.description,
-    imageUrl: apiTemplate.imageUrl,
-    githubUrl: `https://github.com/${apiTemplate.githubOrg}/${apiTemplate.githubRepo}`,
-    isOfficial: false,
-  };
-}
+// (convertApiTemplate removido — sem templates remotos da API do Dyad)
 
 // Fetch templates from API with caching
 export async function fetchApiTemplates(): Promise<Template[]> {
@@ -37,26 +21,9 @@ export async function fetchApiTemplates(): Promise<Template[]> {
 
   // Start new fetch
   apiTemplatesFetchPromise = (async (): Promise<Template[]> => {
-    try {
-      const response = await fetch("https://api.dyad.sh/v1/templates");
-      if (!response.ok) {
-        throw new Error(
-          `Failed to fetch templates: ${response.status} ${response.statusText}`,
-        );
-      }
-
-      const apiTemplates: ApiTemplate[] = await response.json();
-      const convertedTemplates = apiTemplates.map(convertApiTemplate);
-
-      // Cache the result
-      apiTemplatesCache = convertedTemplates;
-      return convertedTemplates;
-    } catch (error) {
-      logger.error("Failed to fetch API templates:", error);
-      // Reset the promise so we can retry later
-      apiTemplatesFetchPromise = null;
-      return []; // Return empty array on error
-    }
+    // Samba Builder: zero backend do Dyad — os templates remotos
+    // (api.dyad.sh/v1/templates) não são buscados; só templates locais.
+    return [];
   })();
 
   return apiTemplatesFetchPromise;
@@ -65,7 +32,11 @@ export async function fetchApiTemplates(): Promise<Template[]> {
 // Get all templates (local + API)
 export async function getAllTemplates(): Promise<Template[]> {
   const apiTemplates = await fetchApiTemplates();
-  return [...localTemplatesData, ...apiTemplates];
+  return [
+    ...localTemplatesData,
+    ...apiTemplates,
+    ...(await cachedTeamTemplates()),
+  ];
 }
 
 export async function getTemplateOrThrow(

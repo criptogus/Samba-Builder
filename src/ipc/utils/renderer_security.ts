@@ -168,7 +168,7 @@ export function assertTrustedRenderer(event: IpcMainInvokeEvent): void {
   const frame = event.senderFrame;
   if (!frame || !isSenderMainFrame(event) || !isTrustedRendererUrl(frame.url)) {
     throw new DyadError(
-      "IPC requests must originate from the trusted Dyad renderer.",
+      "IPC requests must originate from the trusted Samba Builder renderer.",
       DyadErrorKind.Validation,
     );
   }

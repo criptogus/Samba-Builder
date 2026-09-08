@@ -1,5 +1,9 @@
 import { readSettings, writeSettings } from "../main/settings";
-import { listSupabaseOrganizations } from "./supabase_management_client";
+import {
+  listSupabaseOrganizations,
+  type SupabaseOrganizationDetails,
+} from "./supabase_management_client";
+import { DyadError, DyadErrorKind } from "@/errors/dyad_error";
 import log from "electron-log";
 
 const logger = log.scope("supabase_return_handler");
@@ -79,4 +83,66 @@ export async function handleSupabaseOAuthReturn({
       },
     });
   }
+}
+
+/**
+ * Direct connection to Supabase with a Personal Access Token (sb_pat_…).
+ *
+ * No Dyad OAuth proxy is involved. The PAT is validated against the Supabase
+ * Management API and, for every organization the token can reach, stored as
+ * that organization's credentials. A PAT is long-lived, so no refresh token or
+ * expiry is persisted — the client's refresh path is a no-op for it.
+ *
+ * Returns the number of organizations connected so the caller can surface a
+ * meaningful result.
+ */
+export async function connectSupabaseWithAccessToken(
+  accessToken: string,
+): Promise<{ organizations: number }> {
+  const token = accessToken.trim();
+  if (!token) {
+    throw new DyadError(
+      "Supabase access token is required.",
+      DyadErrorKind.Validation,
+    );
+  }
+
+  // Validates the token against the real Management API and discovers the
+  // organizations it can reach.
+  let orgs: SupabaseOrganizationDetails[];
+  try {
+    orgs = await listSupabaseOrganizations(token);
+  } catch (error) {
+    logger.error("Error validating Supabase access token:", error);
+    throw new DyadError(
+      "Couldn't validate the Supabase access token. Check that you pasted a valid Personal Access Token (sb_pat_…).",
+      DyadErrorKind.Auth,
+    );
+  }
+
+  if (orgs.length === 0) {
+    throw new DyadError(
+      "No Supabase organizations were found for this access token.",
+      DyadErrorKind.Auth,
+    );
+  }
+
+  // Re-read settings right before writing to merge into the latest state.
+  const settings = readSettings();
+  const existingOrgs = settings.supabase?.organizations ?? {};
+  const organizations = { ...existingOrgs };
+  for (const org of orgs) {
+    organizations[org.slug] = {
+      accessToken: { value: token },
+    };
+  }
+
+  writeSettings({
+    supabase: {
+      ...settings.supabase,
+      organizations,
+    },
+  });
+
+  return { organizations: Object.keys(organizations).length };
 }

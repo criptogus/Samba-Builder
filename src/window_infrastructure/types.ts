@@ -164,8 +164,10 @@ export interface WindowCapabilityLease {
 
 export const QueryInvalidationScopeSchema = z.discriminatedUnion("family", [
   z.object({ family: z.literal("apps") }),
+  z.object({ family: z.literal("templates") }),
   z.object({ family: z.literal("chats") }),
   z.object({ family: z.literal("app-collections") }),
+  z.object({ family: z.literal("delivery") }),
   z.object({ family: z.literal("media") }),
   z.object({ family: z.literal("token-count") }),
   z.object({ family: z.literal("user-budget") }),
@@ -174,6 +176,10 @@ export const QueryInvalidationScopeSchema = z.discriminatedUnion("family", [
   z.object({
     family: z.literal("app"),
     appId: z.number().int().positive(),
+  }),
+  z.object({
+    family: z.literal("app-files"),
+    appId: z.number().int().positive().optional(),
   }),
   z.object({
     family: z.literal("versions"),
@@ -265,6 +271,7 @@ export function queryInvalidationScopeKey(
 ): string {
   switch (scope.family) {
     case "app":
+    case "app-files":
     case "versions":
     case "branches":
     case "problems":

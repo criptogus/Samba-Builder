@@ -20,7 +20,7 @@ testSetup.describe("Setup Flow", () => {
       dialog.getByText("Your prompt is saved — it'll send as soon as"),
     ).toBeVisible();
     await expect(
-      dialog.getByRole("button", { name: /Start free Dyad Pro trial/ }),
+      dialog.getByRole("button", { name: /Start free Samba Builder trial/ }),
     ).toBeVisible();
     await expect(dialog.getByRole("button", { name: "Google" })).toBeVisible();
     await expect(
@@ -31,7 +31,7 @@ testSetup.describe("Setup Flow", () => {
     ).toBeVisible();
     await expect(
       dialog.getByRole("button", {
-        name: "Already have Dyad Pro? Add your key",
+        name: "Already have Samba Builder? Add your key",
       }),
     ).toBeVisible();
   });
@@ -313,7 +313,7 @@ testSetup.describe("Setup Flow", () => {
   );
 
   testSetup(
-    "Dyad Pro return deep link switches the pending first prompt from Build to Agent",
+    "Samba Builder return deep link switches the pending first prompt from Build to Agent",
     async ({ po, electronApp }) => {
       await expectInitialBuildMode(po);
       const prompt = "Build a tiny workout planner";
@@ -329,7 +329,9 @@ testSetup.describe("Setup Flow", () => {
         timeout: Timeout.EXTRA_LONG,
       });
       await expect(po.page.getByRole("dialog")).not.toBeVisible();
-      await expect(po.page.getByText("Welcome to Dyad Pro!")).not.toBeVisible();
+      await expect(
+        po.page.getByText("Welcome to Samba Builder!"),
+      ).not.toBeVisible();
       await expectSelectedApp(po);
       await expectLocalAgentMode(po, "Agent");
     },

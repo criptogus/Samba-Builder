@@ -1,4 +1,9 @@
 import { z } from "zod";
+import {
+  TemplateDraftInputSchema,
+  TemplateDraftSchema,
+  TemplateIdSchema,
+} from "../../shared/project_templates";
 import { defineContract, createClient } from "../contracts/core";
 
 // =============================================================================
@@ -15,6 +20,7 @@ export const TemplateSchema = z.object({
   imageUrl: z.string(),
   githubUrl: z.string().optional(),
   isOfficial: z.boolean(),
+  isTeam: z.boolean().optional(),
   isExperimental: z.boolean().optional(),
   requiresNeon: z.boolean().optional(),
 });
@@ -204,6 +210,28 @@ export type CleanupThemeImagesParams = z.infer<
 // =============================================================================
 
 export const templateContracts = {
+  prepareProjectTemplate: defineContract({
+    channel: "templates:prepare-project",
+    input: TemplateDraftInputSchema,
+    output: TemplateDraftSchema,
+  }),
+  publishProjectTemplate: defineContract({
+    channel: "templates:publish-project",
+    input: z.object({ id: TemplateIdSchema }),
+    output: TemplateSchema,
+    invalidates: () => [{ family: "templates" }],
+  }),
+  discardTemplateDraft: defineContract({
+    channel: "templates:discard-draft",
+    input: z.object({ id: TemplateIdSchema }),
+    output: z.void(),
+  }),
+  syncTeamTemplates: defineContract({
+    channel: "templates:sync-team",
+    input: z.void(),
+    output: z.object({ count: z.number(), private: z.boolean() }),
+    invalidates: () => [{ family: "templates" }],
+  }),
   getTemplates: defineContract({
     channel: "get-templates",
     input: z.void(),

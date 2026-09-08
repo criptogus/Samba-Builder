@@ -15,7 +15,7 @@ const logger = log.scope("queue_store");
 const ChatQueueSchema = z.array(PersistedQueuedMessageSchema);
 
 /**
- * Per-chat queued-prompt files live inside the app's Dyad-managed `.dyad/`
+ * Per-chat queued-prompt files live inside the app's Samba Builder-managed `.dyad/`
  * folder, mirroring how agent todos are persisted
  * (`<appPath>/.dyad/todos/<chatId>.json`). Keeping them here means they are
  * scoped to their app and cleaned up automatically when the app is deleted.

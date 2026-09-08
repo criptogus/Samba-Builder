@@ -147,6 +147,16 @@ export const neonContracts = {
     output: NeonProjectSchema,
   }),
 
+  /**
+   * Direct connection to Neon with an account API key. No OAuth / Dyad proxy
+   * involved: the key is validated against the Neon API and stored.
+   */
+  connectWithApiKey: defineContract({
+    channel: "neon:connect-with-api-key",
+    input: z.object({ apiKey: z.string().min(1) }),
+    output: z.void(),
+  }),
+
   getProject: defineContract({
     channel: "neon:get-project",
     input: GetNeonProjectParamsSchema,

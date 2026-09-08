@@ -149,7 +149,6 @@ const SUBAGENT_ALLOWED_TOOL_NAMES = [
   "read_file",
   "list_files",
   "grep",
-  "code_search",
   "search_chats",
   "read_chat",
   "explore_code",
@@ -173,9 +172,6 @@ const SUBAGENT_ALLOWED_TOOL_NAMES = [
   "run_tests",
   "restart_app",
   "read_guide",
-  "web_search",
-  "web_crawl",
-  "web_fetch",
 ] as const;
 const SUBAGENT_ALLOWED_TOOLS = new Set<string>(SUBAGENT_ALLOWED_TOOL_NAMES);
 

@@ -17,56 +17,12 @@ export function ErrorBoundary({ error }: ErrorComponentProps) {
   const handleReportBug = async () => {
     setIsLoading(true);
     try {
-      // Get system debug info
-      const debugInfo = await ipc.system.getSystemDebugInfo();
-
-      // Create a formatted issue body with the debug info and error information
-      const issueBody = `
-## Bug Description
-<!-- Please describe the issue you're experiencing -->
-
-## Steps to Reproduce
-<!-- Please list the steps to reproduce the issue -->
-
-## Expected Behavior
-<!-- What did you expect to happen? -->
-
-## Actual Behavior
-<!-- What actually happened? -->
-
-## Error Details
-- Error Name: ${error?.name || "Unknown"}
-- Error Message: ${error?.message || "Unknown"}
-${error?.stack ? `\n\`\`\`\n${error.stack.slice(0, 1000)}\n\`\`\`` : ""}
-
-## System Information
-- Dyad Version: ${debugInfo.dyadVersion}
-- Platform: ${debugInfo.platform}
-- Architecture: ${debugInfo.architecture}
-- Node Version: ${debugInfo.nodeVersion || "Not available"}
-- PNPM Version: ${debugInfo.pnpmVersion || "Not available"}
-- Node Path: ${debugInfo.nodePath || "Not available"}
-- Telemetry ID: ${debugInfo.telemetryId || "Not available"}
-
-## Logs
-\`\`\`
-${debugInfo.logs.slice(-3_500) || "No logs available"}
-\`\`\`
-`;
-
-      // Create the GitHub issue URL with the pre-filled body
-      const encodedBody = encodeURIComponent(issueBody);
-      const encodedTitle = encodeURIComponent(
-        "[bug] Error in Dyad application",
-      );
-      const githubIssueUrl = `https://github.com/dyad-sh/dyad/issues/new?title=${encodedTitle}&labels=bug,filed-from-app,client-error&body=${encodedBody}`;
-
-      // Open the pre-filled GitHub issue page
-      await ipc.system.openExternalUrl(githubIssueUrl);
+      // Support opens without collecting or attaching local diagnostic logs.
+      await ipc.system.openExternalUrl("https://sambatech.com");
     } catch (err) {
-      console.error("Failed to prepare bug report:", err);
-      // Fallback to opening the regular GitHub issue page
-      ipc.system.openExternalUrl("https://github.com/dyad-sh/dyad/issues/new");
+      console.error("Failed to open Samba support:", err);
+      // Retry opening the support website
+      ipc.system.openExternalUrl("https://sambatech.com");
     } finally {
       setIsLoading(false);
     }
@@ -101,8 +57,8 @@ ${debugInfo.logs.slice(-3_500) || "No logs available"}
         <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-md flex items-center gap-2">
           <LightbulbIcon className="h-4 w-4 text-blue-700 dark:text-blue-400 flex-shrink-0" />
           <p className="text-sm text-blue-700 dark:text-blue-400">
-            <strong>Tip:</strong> Try closing and re-opening Dyad as a temporary
-            workaround.
+            <strong>Tip:</strong> Try closing and re-opening Samba Builder as a
+            temporary workaround.
           </p>
         </div>
       </div>

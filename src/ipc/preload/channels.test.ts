@@ -1,3 +1,6 @@
+import { deliveryContracts } from "../types/delivery";
+import { nativeAgentContracts } from "../types/native_agents";
+import { meetingsContracts } from "../types/meetings";
 import { awsContracts } from "../types/aws";
 import { vercelContracts } from "../types/vercel";
 import { describe, expect, it } from "vitest";
@@ -75,5 +78,31 @@ it("allows native AWS and Vercel publishing contracts", () => {
     ...Object.values(awsContracts),
     ...Object.values(vercelContracts),
   ])
+    expect(VALID_INVOKE_CHANNELS).toContain(contract.channel);
+});
+
+it("allows meeting import and cancellation through preload", () => {
+  for (const contract of Object.values(meetingsContracts))
+    expect(VALID_INVOKE_CHANNELS).toContain(contract.channel);
+});
+
+it("exposes the project template workflow channels", () => {
+  expect(VALID_INVOKE_CHANNELS).toEqual(
+    expect.arrayContaining([
+      "templates:prepare-project",
+      "templates:publish-project",
+      "templates:discard-draft",
+      "templates:sync-team",
+    ]),
+  );
+});
+
+it("allows native agent lifecycle contracts", () => {
+  for (const contract of Object.values(nativeAgentContracts))
+    expect(VALID_INVOKE_CHANNELS).toContain(contract.channel);
+});
+
+it("allows delivery contracts through preload", () => {
+  for (const contract of Object.values(deliveryContracts))
     expect(VALID_INVOKE_CHANNELS).toContain(contract.channel);
 });

@@ -84,7 +84,7 @@ test("uses a unique folder when a GitHub import destination already exists", asy
   await po.setUp();
 
   const appName = "existing-vite-app";
-  const destinationPath = path.join(po.userDataDir, "dyad-apps", appName);
+  const destinationPath = path.join(po.userDataDir, "samba-apps", appName);
   const markerPath = path.join(destinationPath, "existing-file.txt");
   fs.mkdirSync(destinationPath, { recursive: true });
   fs.writeFileSync(markerPath, "do not overwrite");

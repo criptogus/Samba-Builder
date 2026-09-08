@@ -5,7 +5,7 @@ import type { Express, Request, Response } from "express";
  * A Coolify instance, enough of one to deploy against.
  *
  * Unlike the GitHub mock beside it, nothing in production needs redirecting
- * here: the instance URL is typed in by the user, so a test points Dyad at
+ * here: the instance URL is typed in by the user, so a test points Samba Builder at
  * this by filling the connection form. The only build-time seam it relies on
  * is the one every e2e test already uses for the app's user data directory,
  * which is where deploy keys are written.
@@ -119,7 +119,7 @@ export function registerFakeCoolify(app: Express): void {
   api.get("/security/keys", (req, res) => {
     if (!authed(req, res)) return;
     // The private half is echoed back the way an instance with
-    // read:sensitive would, so a spec can assert what Dyad uploaded.
+    // read:sensitive would, so a spec can assert what Samba Builder uploaded.
     res.json(state.keys);
   });
 

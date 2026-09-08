@@ -105,7 +105,7 @@ export function actionToCodeLine(action: RecordedAction): string {
 export function recordedBodyStatements(draft: RecordedTestDraft): string[] {
   const statements: string[] = [];
   if (draftIncludesSignIn(draft)) statements.push(`await signIn(page);`);
-  // The base URL is configured by Dyad's Playwright bootstrap.
+  // The base URL is configured by Samba Builder's Playwright bootstrap.
   //
   // Skipped only for the recorder's own opening route: a session started from a
   // route rather than the app root records that route as its first action, and

@@ -122,3 +122,5 @@ storybook-static/
 eval-results/
 benchmark-results/
 benchmarks/code-explorer/repos/
+
+/work/quality-tools/

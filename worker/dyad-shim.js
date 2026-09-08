@@ -20,7 +20,7 @@
    *
    * A same-document `location.replace()` by the app is indistinguishable from a
    * link here and reads as a push; the parent's equality check still covers the
-   * one case that matters, Dyad's own `location.replace` navigation.
+   * one case that matters, Samba Builder's own `location.replace` navigation.
    */
   function loadHistoryEffect() {
     try {

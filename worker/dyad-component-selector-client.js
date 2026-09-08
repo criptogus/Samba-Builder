@@ -528,7 +528,7 @@
     const key = e.key.toLowerCase();
     const hasCtrlOrMeta = isMac ? e.metaKey : e.ctrlKey;
 
-    // Electron's native reload accelerators target the whole Dyad renderer.
+    // Electron's native reload accelerators target the whole Samba Builder renderer.
     // Keep reload shortcuts scoped to the preview even while it owns focus.
     const hasUnexpectedReloadModifier =
       e.altKey || (isMac ? e.ctrlKey : e.metaKey);
@@ -600,7 +600,7 @@
   window.addEventListener("message", (e) => {
     // The shim can also run inside iframes nested in the app preview. Bubble a
     // child's shortcut request one frame at a time until the top preview frame
-    // can deliver it to Dyad with the source identity the parent expects.
+    // can deliver it to Samba Builder with the source identity the parent expects.
     if (
       e.source !== window.parent &&
       e.origin === window.location.origin &&
@@ -670,7 +670,7 @@
   function initializeComponentSelector() {
     if (!document.body) {
       console.error(
-        "Dyad component selector initialization failed: document.body not found.",
+        "Samba Builder component selector initialization failed: document.body not found.",
       );
       return;
     }
@@ -702,7 +702,7 @@
           },
           "*",
         );
-        console.debug("Dyad component selector initialized");
+        console.debug("Samba Builder component selector initialized");
         return true;
       }
       return false;
@@ -716,7 +716,7 @@
 
       // If not found, set up MutationObserver to watch for tagged elements
       console.debug(
-        "Dyad component selector waiting for tagged elements to appear...",
+        "Samba Builder component selector waiting for tagged elements to appear...",
       );
 
       observer = new MutationObserver((mutations) => {
@@ -763,7 +763,7 @@
         // Only warn if we never found tagged elements
         if (!document.body.querySelector("[data-dyad-id]")) {
           console.warn(
-            "Dyad component selector not initialized because no DOM elements were tagged",
+            "Samba Builder component selector not initialized because no DOM elements were tagged",
           );
         }
       }, INIT_TIMEOUT_MS);

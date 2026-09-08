@@ -1,3 +1,5 @@
+import { recordProjectTokenUsage } from "@/ipc/services/project_accounting";
+import { buildPlanningQuestionnaireReflectionMessage } from "./planning_recovery";
 /**
  * Local Agent v2 Handler
  * Main orchestrator for tool-based agent mode with parallel execution
@@ -734,8 +736,8 @@ export async function handleLocalAgentStream(
   ) {
     const errorMessage =
       referencedApps.length > 0
-        ? "Referencing other apps (@app:Name) in local-agent mode requires Dyad Pro. Please enable Dyad Pro in Settings → Pro."
-        : "Agent v2 requires Dyad Pro. Please enable Dyad Pro in Settings → Pro.";
+        ? "Referencing other apps (@app:Name) in local-agent mode requires Samba Builder. Please enable Samba Builder in Settings."
+        : "Agent v2 requires Samba Builder. Please enable Samba Builder in Settings.";
     safeSend(event.sender, "chat:response:error", {
       chatId: req.chatId,
       invocationRef: req.invocationRef,
@@ -1505,6 +1507,15 @@ export async function handleLocalAgentStream(
               return result;
             },
             onStepFinish: async (step) => {
+              recordProjectTokenUsage(
+                req.chatId,
+                modelClient.builtinProviderId ?? selectedModel.provider,
+                typeof modelClient.model === "string"
+                  ? modelClient.model
+                  : modelClient.model.modelId,
+                "agent",
+                step.usage,
+              );
               if (!hasInjectedPlanningQuestionnaireReflection) {
                 const questionnaireError =
                   getPlanningQuestionnaireErrorFromStep(step);
@@ -2257,7 +2268,7 @@ export async function handleLocalAgentStream(
     const workspaceChanged =
       (ctx.mutationCount ?? 0) > 0 || ctx.workspaceMutated === true;
     // Successful MCP tools may have changed app files even though their
-    // schemas do not tell Dyad which tools are mutating. Preserve preview
+    // schemas do not tell Samba Builder which tools are mutating. Preserve preview
     // refresh for that conservative case without treating it as sufficient
     // evidence to start an automatic Git review.
     const updatedFiles =
@@ -2441,8 +2452,8 @@ function getErrorResponseBody(error: unknown, depth = 0): string | undefined {
 const FREE_MODEL_QUOTA_MARKERS = [
   "dyad_free_model_quota_exceeded",
   "FREE_MODEL_QUOTA_EXCEEDED",
-  "Dyad Free has reached its daily limit.",
-  "Dyad Free limit",
+  "Samba Builder Free has reached its daily limit.",
+  "Samba Builder Free limit",
 ];
 
 function getErrorMessageWithDetails(error: unknown): string {
@@ -2634,18 +2645,6 @@ function getPlanningQuestionnaireErrorFromStep(step: {
   }
 
   return null;
-}
-
-function buildPlanningQuestionnaireReflectionMessage(
-  errorDetail?: string,
-  planModeOnly?: boolean,
-): string {
-  const base = "Your planning_questionnaire tool call had a format error.";
-  const detail = errorDetail ? ` The error was: ${errorDetail}` : "";
-  if (planModeOnly) {
-    return `[System]${base}${detail} Review the tool's input schema, fix the issue, and re-call planning_questionnaire with correct arguments.`;
-  }
-  return `[System]${base}${detail} Skip the questionnaire step and proceed directly to the planning phase.`;
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {

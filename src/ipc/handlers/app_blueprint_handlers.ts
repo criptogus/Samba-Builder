@@ -1,3 +1,9 @@
+import { recordFoundationBlueprint } from "../services/project_foundation";
+import {
+  appOperationCoordinator,
+  readAppResource,
+} from "../services/app_operation_coordinator";
+import { getDyadAppPath } from "@/paths/paths";
 import crypto from "node:crypto";
 import log from "electron-log";
 import { eq } from "drizzle-orm";
@@ -61,10 +67,33 @@ export function registerAppBlueprintHandlers() {
       columns: { appId: true },
     });
     if (chat) {
-      await db
-        .update(apps)
-        .set({ needsAppBlueprint: false })
-        .where(eq(apps.id, chat.appId));
+      await appOperationCoordinator.run(
+        {
+          appId: chat.appId,
+          operation: "record-project-foundation",
+          resources: [readAppResource("app-path"), "repository", "metadata"],
+          refuseWhenRecording: "record project documentation",
+        },
+        async () => {
+          const project = await db.query.apps.findFirst({
+            where: eq(apps.id, chat.appId),
+          });
+          if (!project)
+            throw new DyadError("Project not found", DyadErrorKind.NotFound);
+          await recordFoundationBlueprint(getDyadAppPath(project.path), {
+            appName: project.name,
+            userPrompt: plan.userPrompt,
+            templateId: plan.templateId,
+            themeId: plan.themeId,
+            designDirection: plan.designDirection,
+            primaryColor: plan.primaryColor,
+          });
+          await db
+            .update(apps)
+            .set({ needsAppBlueprint: false })
+            .where(eq(apps.id, chat.appId));
+        },
+      );
     } else {
       logger.warn(
         `Chat ${params.chatId} not found when clearing needsAppBlueprint`,

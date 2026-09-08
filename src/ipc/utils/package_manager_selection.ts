@@ -44,7 +44,7 @@ export function getPackageManagerSignal(appPath: string): PackageManagerSignal {
 }
 
 /**
- * Chooses the package manager for Dyad-managed commands (run, add-dependency).
+ * Chooses the package manager for Samba Builder-managed commands (run, add-dependency).
  *
  * Precedence is intentionally explicit:
  * 1. package.json packageManager="pnpm@..." means the project asked for pnpm;

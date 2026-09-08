@@ -115,7 +115,7 @@ export function registerImportHandlers() {
           );
         }
 
-        // Copy the app folder to the Dyad apps directory.
+        // Copy the app folder to the Samba Builder apps directory.
         // Why not use fs.cp? Because we want stable ordering for
         // tests.
         await copyDirectoryRecursive(sourcePath, appPath);

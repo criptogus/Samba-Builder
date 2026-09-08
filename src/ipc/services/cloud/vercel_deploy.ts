@@ -9,6 +9,7 @@ export async function submitVercelDeployment(
     org: string;
     repo: string;
     branch: string;
+    sha?: string;
   },
   target: "preview" | "production",
 ) {
@@ -25,6 +26,7 @@ export async function submitVercelDeployment(
             org: project.org,
             repo: project.repo,
             ref: project.branch,
+            ...(project.sha ? { sha: project.sha } : {}),
           },
         },
       },

@@ -3,7 +3,7 @@ import type { UserSettings } from "./schemas";
 import { getHomeDefaultChatMode } from "./homeChatMode";
 
 describe("getHomeDefaultChatMode", () => {
-  it("uses local agent after Dyad Pro setup", () => {
+  it("uses local agent after Samba Builder setup", () => {
     const settings = {
       enableDyadPro: true,
       enableAutoUpdate: true,

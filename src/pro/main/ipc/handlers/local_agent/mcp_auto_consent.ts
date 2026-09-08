@@ -15,7 +15,7 @@ import {
 
 const logger = log.scope("mcp-auto-consent");
 
-// Fixed classifier model routed through the Dyad Pro engine gateway.
+// Fixed classifier model routed through the Samba Builder engine gateway.
 const MCP_CONSENT_MODEL: LargeLanguageModel = {
   name: "gpt-5.6-luna",
   provider: "openai",
@@ -130,7 +130,7 @@ export async function classifyMcpToolConsent(
 }
 
 // Builds the auto-approve callback for requireMcpToolConsent, or undefined when
-// the feature is off or the turn is running in Dyad Free mode. Shared by both
+// the feature is off or the turn is running in Samba Builder Free mode. Shared by both
 // agent MCP paths (sandbox host functions and directly-registered tools) so
 // auto-approval behaves the same regardless of how the tool is plumbed.
 export function buildMcpAutoApprove(params: {

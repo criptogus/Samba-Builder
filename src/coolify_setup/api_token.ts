@@ -22,7 +22,7 @@ const TINKER_TIMEOUT_MS = 30_000;
  * Every workaround below is marked, and each says what would replace it.
  *
  * All of it is best-effort. When any part of it does not work the caller falls
- * back to asking the user for a token, which is the path Dyad has always had.
+ * back to asking the user for a token, which is the path Samba Builder has always had.
  */
 
 /**
@@ -90,7 +90,7 @@ export async function readCoolifyVersion(
     // thing to be true. The key this reads is Coolify's own and free to move,
     // which is the ordinary way to arrive here.
     throw new DyadError(
-      "Dyad could not read which version of Coolify this is, so it could not " +
+      "Samba Builder could not read which version of Coolify this is, so it could not " +
         "set up an API token by itself. The server is installed — open it " +
         "and make a token there.",
       DyadErrorKind.External,
@@ -109,7 +109,7 @@ export async function readCoolifyVersion(
       // install is ordinary. Worth saying as itself: the version is not the
       // problem, and there is nothing to fix by finding a newer Coolify.
       throw new DyadError(
-        "Coolify did not answer in time when Dyad asked which version it " +
+        "Coolify did not answer in time when Samba Builder asked which version it " +
           "is. It may still be starting up — open it and connect with a " +
           "token once it does.",
         DyadErrorKind.External,
@@ -164,7 +164,7 @@ export async function enableApi(
 }
 
 /**
- * Creates an API token for Dyad.
+ * Creates an API token for Samba Builder.
  *
  * WORKAROUND, in two parts.
  *
@@ -251,7 +251,7 @@ export interface AutomaticAccess {
  * Enables the API and mints a token, or reports that it could not.
  *
  * Returns null rather than throwing when the instance is one this cannot drive,
- * because that is not a failure — it is the ordinary case of an instance Dyad
+ * because that is not a failure — it is the ordinary case of an instance Samba Builder
  * did not install, and the caller asks for a token by hand instead.
  */
 export async function tryAutomaticAccess(

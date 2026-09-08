@@ -28,10 +28,9 @@ import { addIntegrationTool } from "./tools/add_integration";
 import { enableNitroTool } from "./tools/enable_nitro";
 import { readLogsTool } from "./tools/read_logs";
 import { searchReplaceTool } from "./tools/search_replace";
-import { webSearchTool } from "./tools/web_search";
-import { webCrawlTool } from "./tools/web_crawl";
-import { webFetchTool } from "./tools/web_fetch";
-import { generateImageTool } from "./tools/generate_image";
+// Samba Builder (BYOK): tools que dependiam do backend cloud do Dyad
+// (web_search/web_crawl/web_fetch/code_search/generate_image via engineFetch)
+// removidas — o engine exige sessão/cookie inexistente no produto.
 import { updateTodosTool } from "./tools/update_todos";
 import { runTypeChecksTool } from "./tools/run_type_checks";
 import { runTestsTool } from "./tools/run_tests";
@@ -43,7 +42,6 @@ import {
   restartAppTool,
 } from "./tools/app_lifecycle";
 import { grepTool } from "./tools/grep";
-import { codeSearchTool } from "./tools/code_search";
 import { exploreChatHistoryTool } from "./tools/explore_chat_history";
 import { searchChatsTool } from "./tools/search_chats";
 import { readChatTool } from "./tools/read_chat";
@@ -154,7 +152,6 @@ export const TOOL_DEFINITIONS: readonly ToolDefinition[] = [
   gitShowFileTool,
   gitRestoreFileTool,
   grepTool,
-  codeSearchTool,
   exploreChatHistoryTool,
   searchChatsTool,
   readChatTool,
@@ -172,10 +169,6 @@ export const TOOL_DEFINITIONS: readonly ToolDefinition[] = [
   addIntegrationTool,
   enableNitroTool,
   readLogsTool,
-  webSearchTool,
-  webCrawlTool,
-  webFetchTool,
-  generateImageTool,
   updateTodosTool,
   runTypeChecksTool,
   runPreCommitTool,
@@ -439,7 +432,7 @@ export interface BuildAgentToolSetOptions {
    */
   basicAgentMode?: boolean;
   /**
-   * If true, exclude tools that call separate Dyad Engine endpoints.
+   * If true, exclude tools that call separate Samba Builder Engine endpoints.
    * The free Pro model only uses the engine chat-completions endpoint.
    */
   freeModelMode?: boolean;

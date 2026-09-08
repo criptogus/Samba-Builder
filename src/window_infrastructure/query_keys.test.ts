@@ -25,3 +25,31 @@ describe("the coolify scope", () => {
     expect(others).not.toContainEqual(queryKeys.coolify.status({ appId: 7 }));
   });
 });
+
+it("invalidates the shared template catalog in all windows", () => {
+  expect(queryKeysForInvalidationScope({ family: "templates" })).toEqual([
+    queryKeys.templates.all,
+  ]);
+});
+
+it("invalidates file content changed by native agents in the correct project", () => {
+  expect(
+    queryKeysForInvalidationScope({ family: "app-files", appId: 7 }),
+  ).toEqual([queryKeys.appFiles.byApp({ appId: 7 })]);
+  expect(queryKeysForInvalidationScope({ family: "app-files" })).toEqual([
+    queryKeys.appFiles.all,
+  ]);
+  expect(
+    queryKeys.appFiles
+      .content({ appId: 7, filePath: "index.html" })
+      .slice(0, 3),
+  ).toEqual(queryKeys.appFiles.byApp({ appId: 7 }));
+});
+
+it("invalidates delivery editors and attention panels in other windows", () => {
+  expect(queryKeysForInvalidationScope({ family: "delivery" })).toEqual([
+    ["project-delivery"],
+    ["delivery-attention"],
+    ["delivery-approvals"],
+  ]);
+});

@@ -43,11 +43,12 @@ export function RecordingStorageWarningDialog({
             Start recording from a clean slate?
           </AlertDialogTitle>
           <AlertDialogDescription>
-            Recording starts from a signed-out browser, so Dyad clears the
-            preview's cookies and local storage first. You'll be signed out of
-            your preview and anything the app stored there will be gone. Cookies
-            aren't specific to one preview, so any other app you have running is
-            signed out too. Your app's code and database aren't touched.
+            Recording starts from a signed-out browser, so Samba Builder clears
+            the preview's cookies and local storage first. You'll be signed out
+            of your preview and anything the app stored there will be gone.
+            Cookies aren't specific to one preview, so any other app you have
+            running is signed out too. Your app's code and database aren't
+            touched.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>

@@ -7,11 +7,11 @@ import { DyadError, DyadErrorKind } from "@/errors/dyad_error";
 const logger = log.scope("ssh_client");
 
 /**
- * Dyad's SSH client, for setting a server up before Coolify exists on it.
+ * Samba Builder's SSH client, for setting a server up before Coolify exists on it.
  *
- * Deploying needs no SSH at all — Coolify clones from GitHub with a key Dyad
+ * Deploying needs no SSH at all — Coolify clones from GitHub with a key Samba Builder
  * hands it. This is the other half: reaching a bare machine to install Coolify
- * in the first place, which nothing else in Dyad does.
+ * in the first place, which nothing else in Samba Builder does.
  */
 
 /** Long enough for a slow link, short enough that a wrong address gives up. */
@@ -77,7 +77,7 @@ export function hostKeyFingerprint(key: Buffer): string {
  *
  * A parameter rather than a policy baked in here, because the answer differs by
  * how we arrived. A server the user typed the address of has nothing to check
- * against, so the honest answer is to show them the fingerprint. One Dyad has
+ * against, so the honest answer is to show them the fingerprint. One Samba Builder has
  * already looked at can be checked exactly.
  *
  * Synchronous: ssh2 decides during the handshake, with nothing to await into,
@@ -108,7 +108,7 @@ function classify(
   if (level === "client-authentication") {
     return new SshError(
       "auth-rejected",
-      "The server refused this key. Add Dyad's public key to the server's " +
+      "The server refused this key. Add Samba Builder's public key to the server's " +
         "authorized_keys and try again.",
       DyadErrorKind.Auth,
     );
@@ -122,12 +122,12 @@ function classify(
       "handshake-failed",
       // The library's own words, with its "Handshake failed:" preamble taken
       // off — this sentence has already said that much.
-      `Dyad and this server could not agree on how to connect${
+      `Samba Builder and this server could not agree on how to connect${
         err.message
           ? `: ${err.message.replace(/^handshake failed:\s*/i, "")}`
           : ""
       }. That usually means the server's SSH is older or more restricted ` +
-        `than Dyad's defaults.`,
+        `than Samba Builder's defaults.`,
       DyadErrorKind.External,
     );
   }

@@ -53,7 +53,7 @@ export function getProductionUserDataPath({
   if (platform === "win32") {
     if (!env.APPDATA) {
       throw new Error(
-        "APPDATA is not set; cannot locate Dyad's production data.",
+        "APPDATA is not set; cannot locate Samba Builder's production data.",
       );
     }
     return path.join(env.APPDATA, "dyad");
@@ -102,7 +102,7 @@ export function getProcessesUsingDataDirectories(
         .filter(Boolean);
     } catch (error) {
       throw new Error(
-        "Could not check whether Dyad is running. Close Dyad and try again.",
+        "Could not check whether Samba Builder is running. Close Samba Builder and try again.",
         { cause: error },
       );
     }
@@ -127,7 +127,7 @@ export function getProcessesUsingDataDirectories(
     // lsof exits with status 1 when no process has any of the files open.
     if (error?.status === 1) return [];
     throw new Error(
-      "Could not check whether Dyad is running. Install lsof or close Dyad and try again.",
+      "Could not check whether Samba Builder is running. Install lsof or close Samba Builder and try again.",
       { cause: error },
     );
   }
@@ -160,7 +160,7 @@ export function copyProductionDataToDev({
   });
   if (activePids.length > 0) {
     throw new Error(
-      `Dyad is using the production or development data (PID${activePids.length === 1 ? "" : "s"} ${activePids.join(", ")}). Close all Dyad instances and try again.`,
+      `Samba Builder is using the production or development data (PID${activePids.length === 1 ? "" : "s"} ${activePids.join(", ")}). Close all Samba Builder instances and try again.`,
     );
   }
 
@@ -201,7 +201,7 @@ export function copyProductionDataToDev({
 function main() {
   const { source, destination } = copyProductionDataToDev();
   console.log(
-    `Copied Dyad production data from:\n  ${source}\nto:\n  ${destination}`,
+    `Copied Samba Builder production data from:\n  ${source}\nto:\n  ${destination}`,
   );
 }
 

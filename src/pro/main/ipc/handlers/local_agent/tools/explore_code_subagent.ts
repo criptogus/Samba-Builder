@@ -12,7 +12,7 @@ import {
   fastTextOutput,
 } from "@/ipc/utils/stream_text_utils";
 import { getMaxTokens, getTemperature } from "@/ipc/utils/token_utils";
-import type { UserSettings } from "@/lib/schemas";
+import type { UserSettings, ModelSelection } from "@/lib/schemas";
 import { DyadError, DyadErrorKind } from "@/errors/dyad_error";
 import { grepTool } from "./grep";
 import { listFilesTool } from "./list_files";
@@ -93,12 +93,26 @@ export async function runExploreCodeSubagent({
   tools: durableTools,
   onProgress,
   onUsage,
+  beforeModelStep,
+  onStepUsage,
   onFinalized,
+  modelSelection,
 }: {
   args: ExploreCodeArgs;
+  modelSelection?: ModelSelection;
   ctx: AgentContext;
   tools?: ToolSet;
   onProgress?: (progressText: string) => void;
+  beforeModelStep?: () => void;
+  onStepUsage?: (usage: {
+    provider?: string;
+    model?: string;
+    inputUnknown?: boolean;
+    outputUnknown?: boolean;
+    inputTokens: number;
+    outputTokens: number;
+    toolCallCount: number;
+  }) => Promise<void>;
   onUsage?: (usage: {
     inputTokens: number;
     outputTokens: number;
@@ -112,25 +126,28 @@ export async function runExploreCodeSubagent({
 }): Promise<string> {
   const storedSettings = readSettings();
   assertDyadValueAvailable(storedSettings);
-  const selectedModel = await resolveModelSelection({
-    model: SUBAGENT_MODEL,
-    preferredEffortLevel:
-      storedSettings.modelEffortPreferences?.[
-        getModelPreferenceKey(SUBAGENT_MODEL)
-      ],
-  });
+  const requestedModel = modelSelection ?? SUBAGENT_MODEL;
+  const selectedModel =
+    modelSelection ??
+    (await resolveModelSelection({
+      model: requestedModel,
+      preferredEffortLevel:
+        storedSettings.modelEffortPreferences?.[
+          getModelPreferenceKey(requestedModel)
+        ],
+    }));
   const settings = { ...storedSettings, selectedModel };
 
   const modelInfo = await getModelClient(
-    SUBAGENT_MODEL,
+    requestedModel,
     settings,
     selectedModel,
   );
   const maxOutputTokens = Math.min(
-    (await getMaxTokens(SUBAGENT_MODEL)) ?? SUBAGENT_MAX_OUTPUT_TOKENS,
+    (await getMaxTokens(requestedModel)) ?? SUBAGENT_MAX_OUTPUT_TOKENS,
     SUBAGENT_MAX_OUTPUT_TOKENS,
   );
-  const temperature = await getTemperature(SUBAGENT_MODEL);
+  const temperature = await getTemperature(requestedModel);
   const intent: ExploreIntent = args.intent ?? "locate";
   const observations: SubagentObservation[] = [];
   const candidateRegistry = createCandidateRegistry();
@@ -140,7 +157,7 @@ export async function runExploreCodeSubagent({
   let explainBounceUsed = false;
   // Set only when a report is finally accepted (not on a bounced submit_report).
   // Used to stop the agent loop right after acceptance so the AI SDK does not
-  // spend an extra Dyad Engine step feeding the "Report accepted." tool result
+  // spend an extra Samba Builder Engine step feeding the "Report accepted." tool result
   // back to the model (which could also run more read-only tools post-report).
   let reportFinalized = false;
 
@@ -204,7 +221,23 @@ export async function runExploreCodeSubagent({
       system: buildExploreCodeSubagentSystemPrompt(),
       prompt: buildExploreCodeSubagentPrompt(args),
       tools,
+      onStepFinish: async (step) => {
+        await onStepUsage?.({
+          inputTokens: step.usage.inputTokens ?? 0,
+          outputTokens: step.usage.outputTokens ?? 0,
+          provider:
+            modelInfo.modelClient.builtinProviderId ?? selectedModel.provider,
+          model:
+            typeof modelInfo.modelClient.model === "string"
+              ? modelInfo.modelClient.model
+              : modelInfo.modelClient.model.modelId,
+          inputUnknown: step.usage.inputTokens === undefined,
+          outputUnknown: step.usage.outputTokens === undefined,
+          toolCallCount: step.toolCalls.length,
+        });
+      },
       prepareStep: ({ messages }) => {
+        beforeModelStep?.();
         subagentStepCount++;
         return prepareExploreCodeSubagentStep({
           messages,
@@ -363,7 +396,7 @@ function renderFinalReport({
 function assertDyadValueAvailable(settings: UserSettings): void {
   if (!settings.enableDyadPro || !settings.providerSettings?.auto?.apiKey) {
     throw new DyadError(
-      "explore_code sub-agent requires Dyad Pro with an auto provider API key",
+      "explore_code sub-agent requires Samba Builder with an auto provider API key",
       DyadErrorKind.Precondition,
     );
   }

@@ -5,14 +5,14 @@
 
 // Service Worker installation
 self.addEventListener("install", (_event) => {
-  console.log("[Dyad SW] Installing...");
+  console.log("[Samba Builder SW] Installing...");
   // Skip waiting to activate immediately
   self.skipWaiting();
 });
 
 // Service Worker activation
 self.addEventListener("activate", (event) => {
-  console.log("[Dyad SW] Activating...");
+  console.log("[Samba Builder SW] Activating...");
   // Claim all clients immediately
   event.waitUntil(self.clients.claim());
 });

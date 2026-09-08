@@ -80,7 +80,7 @@ describe("createDyadEngine", () => {
     );
     expect(request.init?.headers).toMatchObject({
       authorization: "Bearer dyad-pro-key",
-      "X-Dyad-Request-Id": "request-1:attempt-1",
+      "X-Samba Builder-Request-Id": "request-1:attempt-1",
     });
 
     const body = JSON.parse(String(request.init?.body));
@@ -216,14 +216,14 @@ describe("createDyadEngine", () => {
       "https://engine.example.test/v1/free/chat/completions",
     );
     expect(requests[0].init?.headers).toMatchObject({
-      "X-Dyad-Request-Id": "visible-turn-1:attempt-1",
-      "X-Dyad-Free-Quota-Key": "visible-turn-1",
+      "X-Samba Builder-Request-Id": "visible-turn-1:attempt-1",
+      "X-Samba Builder-Free-Quota-Key": "visible-turn-1",
     });
   });
 });
 
 describe("transcribeWithDyadEngine", () => {
-  test("uses the Dyad transcription model alias", async () => {
+  test("uses the Samba Builder transcription model alias", async () => {
     let request: { input: RequestInfo | URL; init?: RequestInit } | undefined;
 
     const text = await transcribeWithDyadEngine(

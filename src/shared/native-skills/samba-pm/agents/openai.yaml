@@ -1,0 +1,4 @@
+interface:
+  display_name: "PM Samba"
+  short_description: "Problema real, inovação útil e design com personalidade"
+  default_prompt: "Use $samba-pm para transformar minha ideia em um produto simples, útil e com design marcante, começando pela pergunta mais importante."

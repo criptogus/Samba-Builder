@@ -35,7 +35,8 @@ export const INFO_NEEDED = [
 ];
 export const NEEDS_HUMAN_LABEL = "triage/needs-human";
 export const FAILED_LABEL = "triage/failed";
-export const SIGN_OFF = "Someone from the Dyad team will follow up here.";
+export const SIGN_OFF =
+  "Someone from the Samba Builder team will follow up here.";
 
 const LIMITS = {
   title: 80,
@@ -67,9 +68,9 @@ const INFO_NEEDED_TEXT = {
   screenshot_not_attached:
     "It looks like your screenshot didn't come through. Could you paste it here?",
   session_id:
-    "In Dyad, open **Help** > **Upload Chat Session** and paste the session id here so we can see the logs.",
+    "In Samba Builder, open **Help** > **Upload Chat Session** and paste the session id here so we can see the logs.",
   version:
-    "Which version of Dyad are you on, and are you on Windows, Mac, or Linux?",
+    "Which version of Samba Builder are you on, and are you on Windows, Mac, or Linux?",
 };
 
 const RELATED_OUTCOME_TEXT = {
@@ -325,7 +326,7 @@ function stepsWithUpdate(triage) {
     /dyad\.sh\/download/i.test(step),
   );
   if (alreadyMentionsDownload) return triage.steps;
-  const update = `Update to Dyad ${triage.fixedIn.version} or newer from https://www.dyad.sh/download, which includes the fix ([release notes](${triage.fixedIn.url})).`;
+  const update = `Update to Samba Builder ${triage.fixedIn.version} or newer from https://www.dyad.sh/download, which includes the fix ([release notes](${triage.fixedIn.url})).`;
   return [update, ...triage.steps].slice(0, LIMITS.steps);
 }
 
@@ -350,7 +351,7 @@ function renderRelated(related) {
 function renderTeamNotes(triage) {
   const lines = [
     "<details>",
-    "<summary>Notes for the Dyad team</summary>",
+    "<summary>Notes for the Samba Builder team</summary>",
     "",
     triage.developerNotes || "- No notes from the automatic first look.",
     `- Assessment: ${triage.assessment} · Playbook: ${triage.playbookMatch ?? "no match"}`,
@@ -386,7 +387,7 @@ export function composeComment(triage, { author } = {}) {
   }
 
   const lines = [
-    `Hi ${greeting}, thanks for ${triage.filedFromApp ? "sending this from Dyad" : "the report"}.`,
+    `Hi ${greeting}, thanks for ${triage.filedFromApp ? "sending this from Samba Builder" : "the report"}.`,
   ];
   if (triage.nonEnglish) {
     lines.push(
@@ -419,5 +420,5 @@ export function composeComment(triage, { author } = {}) {
 
 export function composeFallbackComment({ author } = {}) {
   const greeting = author ? `@${author}` : "there";
-  return `Hi ${greeting}, thanks for the report. Our automatic first look didn't complete, so someone from the Dyad team will take a look directly.`;
+  return `Hi ${greeting}, thanks for the report. Our automatic first look didn't complete, so someone from the Samba Builder team will take a look directly.`;
 }

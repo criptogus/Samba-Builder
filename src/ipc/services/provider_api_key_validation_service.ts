@@ -29,7 +29,7 @@ const PROVIDER_DISPLAY_NAMES: Record<ProviderApiKeyValidationProvider, string> =
   {
     google: "Google",
     openrouter: "OpenRouter",
-    auto: "Dyad",
+    auto: "Samba Builder",
   };
 
 export async function validateProviderApiKey({
@@ -68,7 +68,7 @@ export async function validateProviderApiKey({
     }, VALIDATION_TIMEOUT_MS);
   });
 
-  // Some providers (e.g. the Dyad engine) report auth failures as an error
+  // Some providers (e.g. the Samba Builder engine) report auth failures as an error
   // event inside an HTTP 200 stream. streamText surfaces those through
   // onError while its text promise resolves with empty text, so capture
   // and re-throw them to fail validation. For HTTP-level failures the text
@@ -206,7 +206,7 @@ function classifyValidationError(
   }
 
   return new DyadError(
-    `Dyad could not verify this ${providerDisplayName} API key: ${errorMessage || "Unknown error"}`,
+    `Samba Builder could not verify this ${providerDisplayName} API key: ${errorMessage || "Unknown error"}`,
     DyadErrorKind.External,
   );
 }
@@ -240,7 +240,7 @@ function extractStatusCode(error: unknown, depth = 0): number | undefined {
   return extractStatusCode(candidate.cause, depth + 1);
 }
 
-// Stream error events (e.g. from the Dyad engine's LiteLLM proxy) are plain
+// Stream error events (e.g. from the Samba Builder engine's LiteLLM proxy) are plain
 // strings that lead with the upstream status code, like
 // "401 LiteLLM Virtual Key expected. ...".
 function extractStatusCodeFromMessage(message: string): number | undefined {

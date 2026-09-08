@@ -119,11 +119,11 @@ describe("safeGithubOpsErrorMessage", () => {
       "fatal: unable to auto-detect email address (got '[redacted identity]')",
     ],
     [
-      "fatal: unable to create /Users/John Smith/dyad-apps/demo/.git/index.lock",
+      "fatal: unable to create /Users/John Smith/samba-apps/demo/.git/index.lock",
       "fatal: unable to create [redacted path] … [path remainder redacted]",
     ],
     [
-      String.raw`fatal: unable to create C:\Users\John Smith\dyad-apps\demo\.git\index.lock`,
+      String.raw`fatal: unable to create C:\Users\John Smith\samba-apps\demo\.git\index.lock`,
       "fatal: unable to create [redacted path] … [path remainder redacted]",
     ],
     [
@@ -135,7 +135,7 @@ describe("safeGithubOpsErrorMessage", () => {
       "fatal: cannot access [redacted path] … [path remainder redacted]",
     ],
     [
-      String.raw`fatal: unable to read C:\Users\John Smith\dyad-apps\demo\src\App.tsx`,
+      String.raw`fatal: unable to read C:\Users\John Smith\samba-apps\demo\src\App.tsx`,
       "fatal: unable to read [redacted path] … [path remainder redacted]",
     ],
     [
@@ -171,7 +171,7 @@ describe("safeGithubOpsErrorMessage", () => {
       "fatal: unable to auto-detect email address (got '[redacted identity]')",
     ],
     [
-      "fatal: repository 'file:///Users/alice/dyad-apps/demo' does not exist",
+      "fatal: repository 'file:///Users/alice/samba-apps/demo' does not exist",
       "fatal: repository '[redacted URL]' does not exist",
     ],
     [

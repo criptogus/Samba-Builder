@@ -619,7 +619,7 @@ Modern dark theme with purple accents for testing.
 
       if (!settings.enableDyadPro) {
         throw new Error(
-          "Dyad Pro is required for AI theme generation. Please enable Dyad Pro in Settings.",
+          "Samba Builder is required for AI theme generation. Please enable Samba Builder in Settings.",
         );
       }
 
@@ -773,7 +773,7 @@ Modern theme extracted from website for testing.
 
       if (!settings.enableDyadPro) {
         throw new Error(
-          "Dyad Pro is required for AI theme generation. Please enable Dyad Pro in Settings.",
+          "Samba Builder is required for AI theme generation. Please enable Samba Builder in Settings.",
         );
       }
 
@@ -838,10 +838,13 @@ Modern theme extracted from website for testing.
         );
       }
 
-      // Get API key for Dyad Engine
+      // Get API key for Samba Builder Engine
       const apiKey = settings.providerSettings?.auto?.apiKey?.value;
       if (!apiKey) {
-        throw new DyadError("Dyad Pro API key is required", DyadErrorKind.Auth);
+        throw new DyadError(
+          "Samba Builder API key is required",
+          DyadErrorKind.Auth,
+        );
       }
 
       // Crawl the website
@@ -863,7 +866,7 @@ Modern theme extracted from website for testing.
             headers: {
               "Content-Type": "application/json",
               Authorization: `Bearer ${apiKey}`,
-              "X-Dyad-Request-Id": `theme-crawl-${uuidv4()}`,
+              "X-Samba Builder-Request-Id": `theme-crawl-${uuidv4()}`,
             },
             body: JSON.stringify({ url: params.url }),
             signal: controller.signal,

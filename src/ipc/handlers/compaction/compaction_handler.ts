@@ -50,7 +50,7 @@ const logger = log.scope("compaction_handler");
 // quality at ~2x lower latency, which matters because compaction blocks the
 // turn mid-stream. Matches the durable Explorer persona model.
 // Non-Pro users keep their selected chat model — the pinned model is only
-// reachable through the Dyad Engine gateway.
+// reachable through the Samba Builder Engine gateway.
 const PRO_COMPACTION_MODEL = {
   provider: "openai",
   name: "gpt-5.6-luna",

@@ -26,7 +26,7 @@ describe("voice-to-text chat input controls (integration)", () => {
     harness = await setupHybridChatHarness({
       electronMock: h,
       autoApprove: true,
-      // Tests below enable Dyad Pro, which triggers free-quota fetches; route
+      // Tests below enable Samba Builder, which triggers free-quota fetches; route
       // them to the fake engine instead of the real engine.dyad.sh.
       engine: true,
       settings: { isTestMode: true },
@@ -55,18 +55,5 @@ describe("voice-to-text chat input controls (integration)", () => {
     });
     expect(micButton).toBeTruthy();
     expect((micButton as HTMLButtonElement).disabled).toBe(false);
-  });
-
-  it("shows the locked mic button for non-Pro users", async () => {
-    writeSettings({
-      enableDyadPro: false,
-      providerSettings: {},
-    });
-    const chatId = await harness.createChat();
-    harness.mount({ chatId });
-
-    expect(
-      await screen.findByRole("button", { name: "Voice to text (Pro)" }),
-    ).toBeTruthy();
   });
 });

@@ -101,7 +101,7 @@ describe("main process bootstrap", () => {
 
     await vi.waitFor(() => expect(mocks.exit).toHaveBeenCalledWith(1));
     expect(mocks.logError).toHaveBeenCalledWith(
-      "Failed to load the Dyad application runtime:",
+      "Failed to load the Samba Builder application runtime:",
       expect.objectContaining({
         message:
           "Electron became ready before the application runtime completed its pre-ready registrations",
@@ -120,11 +120,11 @@ describe("main process bootstrap", () => {
 
     await vi.waitFor(() => expect(mocks.exit).toHaveBeenCalledWith(1));
     expect(mocks.logError).toHaveBeenCalledWith(
-      "Failed to load the Dyad application runtime:",
+      "Failed to load the Samba Builder application runtime:",
       expect.any(Error),
     );
     expect(mocks.showErrorBox).toHaveBeenCalledWith(
-      "Dyad failed to start",
+      "Samba Builder failed to start",
       expect.stringMatching(
         new RegExp(
           `^The application runtime could not be loaded\\.\\n\\nError: .+runtime failed\\n\\nDetails were written to:\\n${mocks.logFilePath}\\n\\nPlease share this error and log file when contacting support\\.$`,

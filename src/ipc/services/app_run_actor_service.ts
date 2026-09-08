@@ -203,7 +203,7 @@ export class AppRunActorService {
         type: "server" as const,
         level: "info" as const,
         message: "Restarting app",
-        sourceName: "Dyad",
+        sourceName: "Samba Builder",
         appId,
         timestamp: startedAt,
         runtimeBoundary: "restart" as const,

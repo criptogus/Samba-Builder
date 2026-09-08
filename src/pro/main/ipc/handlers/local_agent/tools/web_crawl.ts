@@ -111,7 +111,7 @@ export const webCrawlTool: ToolDefinition<z.infer<typeof webCrawlSchema>> = {
   defaultConsent: "ask",
   usesEngineEndpoint: true,
 
-  // Requires Dyad Pro engine API
+  // Requires Samba Builder engine API
   isEnabled: (ctx) => ctx.isDyadPro,
 
   getConsentPreview: (args) => `Crawl URL: "${args.url}"`,

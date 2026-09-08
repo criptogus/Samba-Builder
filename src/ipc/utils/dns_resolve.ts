@@ -4,7 +4,7 @@ import * as dns from "node:dns/promises";
  * Asking DNS where a name points, without mistaking silence for an answer.
  *
  * Shared because two callers need the same distinction: the app-domain check
- * the user runs before saving, and the instance domain Dyad points Coolify at
+ * the user runs before saving, and the instance domain Samba Builder points Coolify at
  * during setup. Both are advisory, and both are wrong in the same expensive
  * way if a resolver that could not be reached reads as "no such record".
  */

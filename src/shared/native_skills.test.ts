@@ -3,6 +3,7 @@ import { nativeSkills } from "./native_skills";
 import {
   loadNativeSkill,
   MAX_NATIVE_SKILL_CHARS,
+  MAX_NATIVE_CONTEXT_CHARS,
   nativeSkillContext,
   parseNativeSkillRequest,
 } from "./load_native_skill";
@@ -80,4 +81,50 @@ describe("native skill activation", () => {
       expect(body.length).toBeLessThanOrEqual(MAX_NATIVE_SKILL_CHARS);
     }
   });
+});
+
+it("loads the portable PM Samba skill through the real command resolver", async () => {
+  const request = parseNativeSkillRequest(
+    "/samba-pm Quero reduzir retrabalho em uma clínica",
+  );
+  expect(request).toEqual({
+    slugs: ["samba-pm"],
+    prompt: "Quero reduzir retrabalho em uma clínica",
+  });
+  const body = await loadNativeSkill(request.slugs[0]);
+  expect(body.startsWith("---\nname: samba-pm")).toBe(true);
+  const context = await nativeSkillContext(request.slugs);
+  expect(context).toContain(body);
+  expect(context).toContain("Em Ask/Plan, não realize alterações");
+  expect(parseNativeSkillRequest("Explique /samba-pm").slugs).toEqual([]);
+});
+
+it("rejects combined instruction bloat without silently truncating any skill", async () => {
+  const body = "x".repeat(Math.floor(MAX_NATIVE_CONTEXT_CHARS / 3));
+  await expect(
+    nativeSkillContext(
+      ["samba-design", "samba-security", "samba-performance"],
+      async () => body,
+    ),
+  ).rejects.toThrow("limite de contexto");
+});
+it("fits the actual PM, design and security workflow within the aggregate budget", async () => {
+  const context = await nativeSkillContext([
+    "samba-pm",
+    "samba-design",
+    "samba-security",
+  ]);
+  expect(context).toContain("# PM Samba");
+  expect(context).toContain("# Design de interfaces");
+  expect(context).toContain("# Segurança de aplicações");
+});
+
+it("resolves the motion workflow without exceeding the shared budget", async () => {
+  const request = parseNativeSkillRequest(
+    "/samba-design /samba-motion /samba-security Crie um portal",
+  );
+  const context = await nativeSkillContext(request.slugs);
+  expect(context).toContain("prefers-reduced-motion");
+  expect(context).toContain("autorização");
+  expect(request.prompt).toBe("Crie um portal");
 });

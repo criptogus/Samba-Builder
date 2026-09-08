@@ -476,7 +476,7 @@ describe("inspectRepositoryHealth", () => {
     }
   });
 
-  it("ignores Dyad-managed working-tree churn when assessing cleanliness", async () => {
+  it("ignores Samba Builder-managed working-tree churn when assessing cleanliness", async () => {
     repoDir = await fs.promises.mkdtemp(path.join(os.tmpdir(), "git-health-"));
     await runGit(repoDir, ["init", "-b", "main"]);
     await fs.promises.writeFile(
@@ -574,7 +574,7 @@ describe("gitListFilesNative", () => {
   });
 });
 
-// Gates whether Dyad may auto-commit a file it rewrote: `git commit -- <path>`
+// Gates whether Samba Builder may auto-commit a file it rewrote: `git commit -- <path>`
 // records the whole working-tree version of that path, so a file the user was
 // already editing must not be committed on their behalf.
 describe("isGitPathClean", () => {
@@ -637,7 +637,7 @@ describe("isGitPathClean", () => {
 
   // "Clean" authorizes an auto-commit, so a user config that merely HIDES
   // untracked files must not make a wholly untracked file look committed —
-  // that would sweep every line the user wrote into Dyad's commit.
+  // that would sweep every line the user wrote into Samba Builder's commit.
   it("is dirty for an untracked file even with status.showUntrackedFiles=no", async () => {
     const repo = await makeRepo();
     await runGit(repo, ["config", "status.showUntrackedFiles", "no"]);
@@ -678,7 +678,7 @@ describe("getGitUncommittedFiles", () => {
     }
   });
 
-  it("ignores Dyad-managed runtime files in native git status", async () => {
+  it("ignores Samba Builder-managed runtime files in native git status", async () => {
     repoDir = await fs.promises.mkdtemp(path.join(os.tmpdir(), "git-utils-"));
 
     await runGit(repoDir, ["init"]);
@@ -698,7 +698,7 @@ describe("getGitUncommittedFiles", () => {
     ]);
   });
 
-  it("ignores Dyad-managed runtime files in native status details", async () => {
+  it("ignores Samba Builder-managed runtime files in native status details", async () => {
     repoDir = await fs.promises.mkdtemp(path.join(os.tmpdir(), "git-utils-"));
 
     await runGit(repoDir, ["init"]);
@@ -833,7 +833,7 @@ describe("gitStageToRevert", () => {
     return { repoDir, targetOid };
   }
 
-  it("ignores untracked Dyad-managed runtime files", async () => {
+  it("ignores untracked Samba Builder-managed runtime files", async () => {
     const repo = await createTwoVersionRepo();
     await fs.promises.mkdir(path.join(repo.repoDir, ".dyad"), {
       recursive: true,

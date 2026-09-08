@@ -546,7 +546,7 @@ async function revertCodebaseToVersion({
   }
   if (repositoryHealth.operationInProgress) {
     throw new DyadError(
-      `Cannot revert: a Git ${repositoryHealth.operationInProgress} is in progress. Finish or cancel it outside Dyad, then try again.`,
+      `Cannot revert: a Git ${repositoryHealth.operationInProgress} is in progress. Finish or cancel it outside Samba Builder, then try again.`,
       DyadErrorKind.Conflict,
     );
   }
@@ -598,7 +598,7 @@ async function revertCodebaseToVersion({
       `Preserving dirty tree in a checkpoint commit before restoring app ${appId}. ` +
         `User-visible uncommitted file(s): ${preservedFiles.length}` +
         (preservedUserVisibleFiles ? ` (${preservedUserVisibleFiles})` : "") +
-        ". Dyad-managed runtime files may also be included in the checkpoint.",
+        ". Samba Builder-managed runtime files may also be included in the checkpoint.",
     );
     checkpointGitStep("preserve-dirty-tree");
     await gitAddAll({ path: appPath });
@@ -1025,7 +1025,7 @@ export function registerVersionHandlers() {
       return results;
     } catch (error: any) {
       // Preserve the original error kind for DyadErrors thrown by inner
-      // functions; only wrap unexpected (non-Dyad) failures as External.
+      // functions; only wrap unexpected (non-Samba Builder) failures as External.
       if (error instanceof DyadError) {
         throw error;
       }

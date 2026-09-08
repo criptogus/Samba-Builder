@@ -59,7 +59,7 @@ export const exploreChatHistoryTool: ToolDefinition<ExploreChatHistoryArgs> = {
   isEnabled: (ctx) => ctx.isDyadPro && !ctx.subagentThreadId,
 
   getConsentPreview: (args) =>
-    `Research this app's chat history for "${args.query}" using the Dyad Engine and provide a summarized, cited report to the active AI model.`,
+    `Research this app's chat history for "${args.query}" using the Samba Builder Engine and provide a summarized, cited report to the active AI model.`,
 
   buildXml: (args, isComplete) => {
     if (isComplete) return undefined;

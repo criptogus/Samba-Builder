@@ -138,7 +138,7 @@ test("refuses to deploy an app whose server is on another instance", async ({
 
   // The instance now reports a different server, as it would after the token
   // was repointed somewhere else. The app's application is still running
-  // where it was, so Dyad must say so rather than offer to deploy.
+  // where it was, so Samba Builder must say so rather than offer to deploy.
   await resetCoolify(fakeLlmPort, {
     servers: [{ uuid: "srv-elsewhere", name: "other", ip: "203.0.113.99" }],
   });
@@ -197,7 +197,7 @@ test("deploys, and reports the address the app is reachable at", async ({
     po.page.getByText(address, { exact: false }).first(),
   ).toBeVisible({ timeout: Timeout.EXTRA_LONG });
 
-  // What Dyad claims about an app is the thing three rounds of review kept
+  // What Samba Builder claims about an app is the thing three rounds of review kept
   // getting wrong, so it is asserted against what the instance received.
   expect(applications[0].build_pack).toBe("railpack");
   expect(applications[0].ports_exposes).toBe("3000");

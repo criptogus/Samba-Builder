@@ -17,7 +17,8 @@ import { neonContracts, type NeonBranch } from "../types/neon";
 import { db } from "../../db";
 import { apps } from "../../db/schema";
 import { eq } from "drizzle-orm";
-import { EndpointType } from "@neondatabase/api-client";
+import { EndpointType, createApiClient } from "@neondatabase/api-client";
+import { writeSettings } from "../../main/settings";
 import { retryOnLocked } from "../utils/retryOnLocked";
 import { DyadError, DyadErrorKind } from "@/errors/dyad_error";
 import {
@@ -106,6 +107,43 @@ async function restoreEnvFileSnapshot({
 
 export function registerNeonHandlers() {
   // Do not use log handler because there's sensitive data in the response
+
+  // Direct connection with an API key (no Dyad OAuth proxy).
+  createTypedHandler(neonContracts.connectWithApiKey, async (_, { apiKey }) => {
+    const key = apiKey.trim();
+    if (!key) {
+      throw new DyadError(
+        "Neon API key is required.",
+        DyadErrorKind.Validation,
+      );
+    }
+    // Validate the key against the Neon API before persisting it, so a bad key
+    // surfaces at connect time instead of after the UI switches to the
+    // project-selector state.
+    try {
+      const client = createApiClient({ apiKey: key });
+      const response = await client.getCurrentUserOrganizations();
+      const orgs = response.data?.organizations;
+      if (!orgs || orgs.length === 0) {
+        throw new DyadError(
+          "No Neon organizations were found for this API key.",
+          DyadErrorKind.Auth,
+        );
+      }
+    } catch (error) {
+      if (error instanceof DyadError) throw error;
+      logger.error("Error validating Neon API key:", error);
+      throw new DyadError(
+        "Couldn't validate the Neon API key. Check that you pasted a valid key.",
+        DyadErrorKind.Auth,
+      );
+    }
+    // A Neon API key is long-lived and has no refresh token; the client's
+    // refresh path is a no-op for it.
+    writeSettings({ neon: { accessToken: { value: key } } });
+    logger.info("Connected Neon directly with an API key.");
+  });
+
   createLockedHandler(neonContracts.createProject, async (_, params) => {
     const { name, appId } = params;
     const neonClient = await getNeonClient();
@@ -518,7 +556,7 @@ export function registerNeonHandlers() {
     }
   });
 
-  // Link an existing Neon project to a Dyad app
+  // Link an existing Neon project to a Samba Builder app
   createLockedHandler(neonContracts.setAppProject, async (_, params) => {
     const { appId, projectId } = params;
     logger.info(`Setting Neon project ${projectId} for app ${appId}`);
@@ -679,7 +717,7 @@ export function registerNeonHandlers() {
     }
   });
 
-  // Unlink a Neon project from a Dyad app
+  // Unlink a Neon project from a Samba Builder app
   createLockedHandler(neonContracts.unsetAppProject, async (_, params) => {
     const { appId } = params;
     logger.info(`Unsetting Neon project for app ${appId}`);

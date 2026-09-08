@@ -1,6 +1,13 @@
+import { emptyDeliveryPlan } from "@/delivery/model";
 import { app, dialog } from "electron";
 import { closeDatabase, db, getDatabaseFilePaths } from "../../db";
-import { apps, chats, messages, versions } from "../../db/schema";
+import {
+  apps,
+  chats,
+  messages,
+  versions,
+  projectDeliveries,
+} from "../../db/schema";
 import { desc, eq, inArray, like } from "drizzle-orm";
 import { createTypedHandler } from "./base";
 import { appContracts } from "../types/app";
@@ -444,7 +451,7 @@ async function removeAppFiles(appId: number, appPath: string): Promise<void> {
  * Only Restart used to check this, so a user who hit the refusal could press
  * Run instead and bring the app up against the temporary test branch — the
  * exact outcome the check exists to prevent. And refusing on its own was a dead
- * end: Dyad wrote the swapped `.env.local` and offered no way to put the
+ * end: Samba Builder wrote the swapped `.env.local` and offered no way to put the
  * original back. So retry the restore first — the same recovery the startup
  * sweep performs — and only refuse when that fails too.
  */
@@ -477,7 +484,7 @@ async function ensureAppOffTestBranch(appId: number): Promise<void> {
     return;
   }
   throw new DyadError(
-    "Dyad couldn't restore this app's real database settings after recording, so starting it now would run against the temporary test branch. Check your Neon connection, then try again so Dyad can finish recovery.",
+    "Samba Builder couldn't restore this app's real database settings after recording, so starting it now would run against the temporary test branch. Check your Neon connection, then try again so Samba Builder can finish recovery.",
     DyadErrorKind.Precondition,
   );
 }
@@ -586,7 +593,7 @@ async function deleteAppById(
         stranded(
           deletedRow.neonProjectId
             ? "Neon rejected the delete"
-            : "the app was no longer linked to a Neon project, so Dyad could not address the branch",
+            : "the app was no longer linked to a Neon project, so Samba Builder could not address the branch",
         );
       }
     } catch (error) {
@@ -910,6 +917,16 @@ export function registerAppHandlers() {
         fullAppPath,
       });
 
+      await db.insert(projectDeliveries).values({
+        appId: app.id,
+        revision: 1,
+        data: JSON.stringify({
+          ...emptyDeliveryPlan(),
+          foundationRequired: true,
+          engineeringRequired: true,
+        }),
+      });
+
       // Ensure `.dyad/` is gitignored before the initial commit so the agent's
       // later `ensureDyadGitignored` call is a no-op and the app stays clean.
       // Otherwise the first template swap (e.g. from app-blueprint approval)
@@ -979,7 +996,7 @@ export function registerAppHandlers() {
       }
       if (!restored) {
         throw new DyadError(
-          "Dyad couldn't restore this app's real database settings from a previous test or recording session. Retry after checking the Neon connection.",
+          "Samba Builder couldn't restore this app's real database settings from a previous test or recording session. Retry after checking the Neon connection.",
           DyadErrorKind.Precondition,
         );
       }
@@ -1039,7 +1056,7 @@ export function registerAppHandlers() {
           !isTestBranchCleanupOnly(originalApp.neonTestBranchId)
         ) {
           throw new DyadError(
-            "Dyad couldn't restore this app's real database settings from a previous test or recording session. Retry after checking the Neon connection.",
+            "Samba Builder couldn't restore this app's real database settings from a previous test or recording session. Retry after checking the Neon connection.",
             DyadErrorKind.Precondition,
           );
         }
@@ -1997,7 +2014,7 @@ export function registerAppHandlers() {
         });
       }
       const dyadAppPath = getDefaultDyadAppsDirectory();
-      // Delete the default `dyad-apps` folder, even if the user no longer uses it
+      // Delete the default `samba-apps` folder, even if the user no longer uses it
       if (fs.existsSync(dyadAppPath)) {
         await fsPromises.rm(dyadAppPath, { recursive: true, force: true });
         // Recreate the base directory

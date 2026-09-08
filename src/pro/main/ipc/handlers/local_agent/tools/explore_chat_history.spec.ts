@@ -60,7 +60,7 @@ describe("exploreChatHistoryTool contract", () => {
     expect(exploreChatHistoryTool.modifiesState).toBeUndefined();
   });
 
-  it("is enabled only for Dyad Pro contexts", () => {
+  it("is enabled only for Samba Builder contexts", () => {
     expect(exploreChatHistoryTool.isEnabled).toBeDefined();
     expect(
       exploreChatHistoryTool.isEnabled!(makeAgentContext({ isDyadPro: true })),

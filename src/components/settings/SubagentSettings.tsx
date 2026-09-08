@@ -1,3 +1,4 @@
+import { Button } from "@/components/ui/button";
 import { isDyadProEnabled } from "@/lib/schemas";
 import { SETTING_IDS } from "@/lib/settingsSearchIndex";
 import { useSettings } from "@/hooks/useSettings";
@@ -85,6 +86,57 @@ export function SubagentSettings() {
           agents.
         </p>
       </div>
+      <div className="flex flex-wrap gap-2">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() =>
+            updateSettings({
+              enableExplorerSubagent: true,
+              enableImplementerSubagent: true,
+              enableAdvancedSubagents: true,
+              maxConcurrentSubagents: 2,
+            })
+          }
+        >
+          Ativar especialistas sob demanda
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() =>
+            updateSettings({
+              maxConcurrentSubagents: 1,
+              previewIdleTimeoutPolicy: "default",
+            })
+          }
+        >
+          Modo econômico
+        </Button>
+      </div>
+      <p className="text-xs text-muted-foreground">
+        Especialistas usam o modelo escolhido explicitamente no chat. Com Auto,
+        usam o modelo padrão de cada função. As permissões são preservadas. No
+        modo econômico, previews ociosos podem ser suspensos após 10 minutos.
+      </p>
+      <label className="block space-y-2 text-sm">
+        <span>Agentes simultâneos no aplicativo</span>
+        <select
+          className="block rounded-md border bg-background p-2"
+          value={settings.maxConcurrentSubagents ?? 2}
+          onChange={(e) =>
+            updateSettings({ maxConcurrentSubagents: Number(e.target.value) })
+          }
+        >
+          <option value={1}>1 — menor uso de memória</option>
+          <option value={2}>2 — equilibrado</option>
+          <option value={3}>3 — maior paralelismo e consumo</option>
+        </select>
+        <p className="text-muted-foreground">
+          O limite é compartilhado entre projetos. Tarefas excedentes aguardam
+          na fila; reduzir o limite não interrompe tarefas em execução.
+        </p>
+      </label>
       <SettingRow
         id={SETTING_IDS.enableExplorerSubagent}
         label="Use Explorer sub-agent"

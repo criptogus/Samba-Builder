@@ -37,8 +37,8 @@ describe("buildConfigForFramework", () => {
     ).toBe("");
   });
 
-  it("leaves a start command alone for a framework Dyad never sets one for", () => {
-    // Next.js carries `next start`, so Dyad has never supplied a command for
+  it("leaves a start command alone for a framework Samba Builder never sets one for", () => {
+    // Next.js carries `next start`, so Samba Builder has never supplied a command for
     // it — and a value the user set in Coolify is theirs, not a stale one of
     // ours to clear.
     expect(
@@ -72,7 +72,7 @@ describe("buildConfigForFramework", () => {
       });
 
       it("claims nothing beyond the build pack, the port, and a start command", () => {
-        // Everything else is the build pack's to decide, and a field Dyad
+        // Everything else is the build pack's to decide, and a field Samba Builder
         // does not send is one Coolify keeps as already configured.
         expect(Object.keys(config).sort()).toEqual([
           "buildPack",

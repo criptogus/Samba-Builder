@@ -11,7 +11,7 @@
 // cards in the DOM (asserted below), and the tool XML + narration text is also
 // asserted from the persisted message content, as in the node version.
 //
-// Dyad Pro engine/gateway calls are routed to the harness fake server via
+// Samba Builder engine/gateway calls are routed to the harness fake server via
 // `engine: true`.
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 

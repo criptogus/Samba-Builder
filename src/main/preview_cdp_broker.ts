@@ -169,7 +169,7 @@ function syntheticPageTargetInfo(target: BrokerTarget): CdpTargetInfo {
     // target's id cannot be replaced without rewriting every frame reference.
     targetId: target.realTargetId,
     type: "page",
-    title: "Dyad test preview",
+    title: "Samba Builder test preview",
     url: target.url,
     attached: true,
     browserContextId: PREVIEW_BROWSER_CONTEXT_ID,
@@ -180,7 +180,7 @@ function syntheticBrowserTargetInfo(): CdpTargetInfo {
   return {
     targetId: PREVIEW_BROWSER_TARGET_ID,
     type: "browser",
-    title: "Dyad preview broker",
+    title: "Samba Builder preview broker",
     url: "",
     attached: true,
   };
@@ -191,7 +191,7 @@ function syntheticBrowserTargetInfo(): CdpTargetInfo {
  *
  * This is intentionally not a transparent proxy. It creates a synthetic
  * browser with exactly one representable page and rejects browser-global
- * commands that could enumerate or attach to Dyad's other WebContents.
+ * commands that could enumerate or attach to Samba Builder's other WebContents.
  */
 export class PreviewCdpBroker {
   readonly token = randomBytes(32).toString("base64url");

@@ -1,7 +1,16 @@
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { createStore, Provider } from "jotai";
 import type { ReactNode } from "react";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import {
+  afterAll,
+  afterEach,
+  beforeAll,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
+} from "vitest";
 
 import * as parserModule from "@/lib/streamingMessageParser";
 import type {
@@ -9,6 +18,17 @@ import type {
   ParserState,
 } from "@/lib/streamingMessageParser";
 import { selectedChatIdAtom } from "@/atoms/chatAtoms";
+import i18n from "@/i18n";
+
+// Este arquivo de teste é upstream (EN): o app roda em pt-BR por padrão, então
+// os rótulos esperados aqui só existem no dicionário en. Força en só neste
+// arquivo e restaura o default ao final.
+beforeAll(async () => {
+  await i18n.changeLanguage("en");
+});
+afterAll(async () => {
+  await i18n.changeLanguage("pt-BR");
+});
 
 const mockStreamState = vi.hoisted(() => ({
   current: { type: "idle" } as { type: string },

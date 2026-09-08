@@ -44,7 +44,7 @@ describe("generateTestUserFixtureSource", () => {
     ).toBe("supabase-password");
   });
 
-  it("reports a user-authored fixture as not Dyad-generated", () => {
+  it("reports a user-authored fixture as not Samba Builder-generated", () => {
     expect(readFixtureMode(`export async function signIn() {}\n`)).toBeNull();
   });
 });

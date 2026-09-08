@@ -9,6 +9,15 @@ export interface NativeSkill {
 }
 export const nativeSkills: readonly NativeSkill[] = [
   {
+    slug: "samba-pm",
+    title: "PM Samba",
+    category: "Produto",
+    description:
+      "Guia ideias e briefings até um produto simples, inovador e com design marcante, resolvendo um problema real.",
+    sources: ["criptogus/Samba-Builder"],
+    prerequisite: null,
+  },
+  {
     slug: "samba-spec",
     title: "Especificação de produto",
     category: "Produto",
@@ -50,7 +59,11 @@ export const nativeSkills: readonly NativeSkill[] = [
     category: "Engenharia",
     description:
       "Encontra regressões acionáveis com arquivo, cenário e impacto.",
-    sources: ["mattpocock/skills", "msitarzewski/agency-agents"],
+    sources: [
+      "mattpocock/skills",
+      "msitarzewski/agency-agents",
+      "obra/superpowers",
+    ],
     prerequisite: null,
   },
   {
@@ -59,7 +72,7 @@ export const nativeSkills: readonly NativeSkill[] = [
     category: "Engenharia",
     description:
       "Revisa autenticação, dados, segredos e fronteiras de confiança.",
-    sources: ["affaan-m/ECC"],
+    sources: ["affaan-m/ECC", "OWASP/ASVS"],
     prerequisite: null,
   },
   {
@@ -67,11 +80,23 @@ export const nativeSkills: readonly NativeSkill[] = [
     title: "Design de interfaces",
     category: "Design",
     description:
-      "Define direção visual, componentes e estados com identidade consistente.",
+      "Cria direção de arte própria, composição editorial e interfaces refinadas, com revisão visual e design system sustentável.",
     sources: [
       "nextlevelbuilder/ui-ux-pro-max-skill",
       "Leonxlnx/taste-skill",
       "VoltAgent/awesome-design-md",
+    ],
+    prerequisite: null,
+  },
+  {
+    slug: "samba-motion",
+    title: "Direção de movimento",
+    category: "Design",
+    description:
+      "Coreografa transições e interações expressivas, leves e acessíveis, com padrões fáceis de manter.",
+    sources: [
+      "https://motion.dev/docs/react-accessibility",
+      "https://web.dev/articles/animations-guide",
     ],
     prerequisite: null,
   },
@@ -94,11 +119,11 @@ export const nativeSkills: readonly NativeSkill[] = [
   },
   {
     slug: "samba-performance",
-    title: "Desempenho e memória",
+    title: "Desempenho web e memória",
     category: "Engenharia",
     description:
-      "Mede consumo, identifica retenção e valida otimizações com carga comparável.",
-    sources: ["affaan-m/ECC"],
+      "Analisa carregamento web, backend e memória; prioriza gargalos medidos com carga comparável.",
+    sources: ["affaan-m/ECC", "vercel-labs/agent-skills"],
     prerequisite: null,
   },
   {

@@ -255,7 +255,7 @@ describe("PackageManagerWarningBanner", () => {
     renderBanner({
       kind: "pnpm-migration",
       message:
-        "This app pins an older pnpm that can't read the lockfile Dyad writes.",
+        "This app pins an older pnpm that can't read the lockfile Samba Builder writes.",
     });
 
     expect(screen.queryByRole("button", { name: /install/i })).toBeNull();
@@ -288,7 +288,7 @@ describe("PackageManagerWarningBanner", () => {
     renderBanner({
       kind: "pnpm-migration",
       message:
-        "This app pins an older pnpm that can't read the lockfile Dyad writes.",
+        "This app pins an older pnpm that can't read the lockfile Samba Builder writes.",
     });
 
     const migrateButton = screen.getByTestId(

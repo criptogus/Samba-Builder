@@ -206,7 +206,7 @@ export function useNotificationHandler() {
             ? ` from "${params.sourceLabel}"`
             : "";
           showWarning(
-            `"${params.toolName}"${target} needs your approval. Enable notifications for Dyad in your operating system's notification settings.`,
+            `"${params.toolName}"${target} needs your approval. Enable notifications for Samba Builder in your operating system's notification settings.`,
           );
         }
         return;
@@ -329,7 +329,7 @@ export function useNotificationHandler() {
         const chatSummary = await resolveChatSummary(chatId, queryClient);
         const appName = chatSummary?.appId
           ? await resolveAppNameForAppId(chatSummary.appId, queryClient)
-          : "Dyad";
+          : "Samba Builder";
         const chatTitle = chatSummary?.title ?? null;
 
         const bodyContext = summary || chatTitle || "Chat response completed";
@@ -349,7 +349,7 @@ export function useNotificationHandler() {
         if (!completionDeniedWarningShownRef.current) {
           completionDeniedWarningShownRef.current = true;
           showWarning(
-            "Enable notifications for Dyad in your operating system's notification settings to receive chat completion alerts.",
+            "Enable notifications for Samba Builder in your operating system's notification settings to receive chat completion alerts.",
           );
         }
         return;
@@ -366,7 +366,7 @@ export function useNotificationHandler() {
           if (permission === "denied") {
             completionDeniedWarningShownRef.current = true;
             showWarning(
-              "Enable notifications for Dyad in your operating system's notification settings to receive chat completion alerts.",
+              "Enable notifications for Samba Builder in your operating system's notification settings to receive chat completion alerts.",
             );
           }
           return;
@@ -385,7 +385,7 @@ export function useNotificationHandler() {
             const chatSummary = await resolveChatSummary(chatId, queryClient);
             const appName = chatSummary?.appId
               ? await resolveAppNameForAppId(chatSummary.appId, queryClient)
-              : "Dyad";
+              : "Samba Builder";
             const chatTitle = chatSummary?.title ?? null;
 
             const bodyContext =

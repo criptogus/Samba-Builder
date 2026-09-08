@@ -2,14 +2,14 @@
   "labels": ["bug", "issue/incomplete"],
   "nonEnglish": false,
   "incomplete": true,
-  "title": "[session report] Node.js not found on Windows (Dyad 1.13.0)",
+  "title": "[session report] Node.js not found on Windows (Samba Builder 1.13.0)",
   "filedFromApp": true,
   "assessment": "environment_setup",
-  "summary": "Dyad can't find Node.js on your computer, which it needs to run your app. This is a setup problem rather than something wrong with your app, and it has a known fix.",
+  "summary": "Samba Builder can't find Node.js on your computer, which it needs to run your app. This is a setup problem rather than something wrong with your app, and it has a known fix.",
   "steps": [
     "Install Node.js from https://nodejs.org (pick the LTS version).",
-    "Quit Dyad completely and open it again.",
-    "If it still doesn't work, open **Settings**, find **Node.js Path Configuration**, and click **Browse for Node.js** to point Dyad at the folder where you installed it."
+    "Quit Samba Builder completely and open it again.",
+    "If it still doesn't work, open **Settings**, find **Node.js Path Configuration**, and click **Browse for Node.js** to point Samba Builder at the folder where you installed it."
   ],
   "fixedIn": null,
   "related": [

@@ -10,7 +10,7 @@ const logger = log.scope("coolify_deploy_key");
 /**
  * Manages the keypair Coolify uses to clone a private repository.
  *
- * Dyad never connects over SSH itself: it generates a keypair, hands the
+ * Samba Builder never connects over SSH itself: it generates a keypair, hands the
  * public half to GitHub as a deploy key and the private half to Coolify.
  * GitHub allows a deploy key on only one repository, so each repo gets its own.
  */
@@ -19,12 +19,12 @@ const logger = log.scope("coolify_deploy_key");
 const KEY_COMMENT = "dyad-deploy";
 
 /**
- * Dyad's own directory, not ~/.ssh.
+ * Samba Builder's own directory, not ~/.ssh.
  *
- * These are keys Dyad generates and manages, not the user's. ~/.ssh is a
- * directory Dyad treats as off-limits everywhere else — the sandbox's
+ * These are keys Samba Builder generates and manages, not the user's. ~/.ssh is a
+ * directory Samba Builder treats as off-limits everywhere else — the sandbox's
  * protected-path list and the MCP consent policy both name it — and writing
- * an unencrypted private key into it puts Dyad's own files among identities
+ * an unencrypted private key into it puts Samba Builder's own files among identities
  * the user maintains by hand.
  */
 export function deployKeyDirPath(): string {

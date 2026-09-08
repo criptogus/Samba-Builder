@@ -149,7 +149,7 @@ export class ImageGenerationService {
 
     if (!apiKey) {
       throw new DyadError(
-        "Dyad Pro API key is required for image generation",
+        "Samba Builder API key is required for image generation",
         DyadErrorKind.Auth,
       );
     }
@@ -179,7 +179,7 @@ export class ImageGenerationService {
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${apiKey}`,
-          "X-Dyad-Request-Id": requestId,
+          "X-Samba Builder-Request-Id": requestId,
         },
         body: JSON.stringify({
           prompt: fullPrompt,

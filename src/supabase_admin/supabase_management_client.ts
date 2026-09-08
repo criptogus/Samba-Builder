@@ -3,7 +3,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { z } from "zod";
 import { withLock } from "../ipc/utils/lock_utils";
-import { readSettings, writeSettings } from "../main/settings";
+import { readSettings } from "../main/settings";
 import {
   SupabaseManagementAPI,
   SupabaseManagementAPIError,
@@ -140,10 +140,14 @@ const sharedFilesCache = new Map<string, CachedSharedFiles>();
  * Returns true if token needs to be refreshed
  */
 function isTokenExpired(expiresIn?: number): boolean {
+  const settings = readSettings();
+  // A connection without a refresh token is a long-lived access token (a
+  // Personal Access Token pasted directly) — it does not expire, so never
+  // attempt a refresh (the OAuth proxy no longer exists).
+  if (!settings.supabase?.refreshToken?.value) return false;
   if (!expiresIn) return true;
 
   // Get when the token was saved (expiresIn is stored at the time of token receipt)
-  const settings = readSettings();
   const tokenTimestamp = settings.supabase?.tokenTimestamp || 0;
   const currentTime = Math.floor(Date.now() / 1000);
 
@@ -158,66 +162,11 @@ function isTokenExpired(expiresIn?: number): boolean {
 let refreshSupabaseTokenPromise: Promise<void> | null = null;
 
 async function refreshSupabaseTokenOnce(): Promise<void> {
-  const settings = readSettings();
-  const refreshToken = settings.supabase?.refreshToken?.value;
-
-  if (!isTokenExpired(settings.supabase?.expiresIn)) {
-    return;
-  }
-
-  if (!refreshToken) {
-    throw new DyadError(
-      "Supabase refresh token not found. Please authenticate first.",
-      DyadErrorKind.Auth,
-    );
-  }
-
-  try {
-    // Make request to Supabase refresh endpoint
-    const response = await fetch(
-      "https://supabase-oauth.dyad.sh/api/connect-supabase/refresh",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ refreshToken }),
-      },
-    );
-
-    if (!response.ok) {
-      throw new DyadError(
-        `Supabase token refresh failed. Try going to Settings to disconnect Supabase and then reconnect to Supabase. Error status: ${response.statusText}`,
-        DyadErrorKind.External,
-      );
-    }
-
-    const {
-      accessToken,
-      refreshToken: newRefreshToken,
-      expiresIn,
-    } = await response.json();
-
-    // Re-read settings right before writing to get latest state
-    const freshSettings = readSettings();
-    // Update settings with new tokens, preserving existing fields (e.g. organizations map)
-    writeSettings({
-      supabase: {
-        ...freshSettings.supabase,
-        accessToken: {
-          value: accessToken,
-        },
-        refreshToken: {
-          value: newRefreshToken,
-        },
-        expiresIn,
-        tokenTimestamp: Math.floor(Date.now() / 1000), // Store current timestamp
-      },
-    });
-  } catch (error) {
-    logger.error("Error refreshing Supabase token:", error);
-    throw error;
-  }
+  // Supabase token refresh used to round-trip through the retired Dyad OAuth
+  // proxy. Connections are now made directly with a long-lived Personal Access
+  // Token that never expires, so there is nothing to refresh — this is a
+  // deliberate no-op and never makes a network request.
+  return;
 }
 
 export function refreshSupabaseToken(): Promise<void> {
@@ -286,6 +235,9 @@ export async function getSupabaseClient({
 function isOrganizationTokenExpired(
   org: SupabaseOrganizationCredentials,
 ): boolean {
+  // A direct (Personal Access Token) connection has no refresh token and never
+  // expires, so it is never "expired" and no refresh is attempted.
+  if (!org.refreshToken?.value) return false;
   if (!org.expiresIn || !org.tokenTimestamp) return true;
 
   const currentTime = Math.floor(Date.now() / 1000);
@@ -309,74 +261,11 @@ async function refreshSupabaseTokenForOrganization(
     );
   }
 
-  if (!isOrganizationTokenExpired(org)) {
-    return;
-  }
-
-  const refreshToken = org.refreshToken?.value;
-  if (!refreshToken) {
-    throw new DyadError(
-      "Supabase refresh token not found. Please authenticate first.",
-      DyadErrorKind.Auth,
-    );
-  }
-
-  try {
-    const response = await fetch(
-      "https://supabase-oauth.dyad.sh/api/connect-supabase/refresh",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ refreshToken }),
-      },
-    );
-
-    if (!response.ok) {
-      throw new DyadError(
-        `Supabase token refresh failed. Try going to Settings to disconnect Supabase and then reconnect. Error status: ${response.statusText}`,
-        DyadErrorKind.External,
-      );
-    }
-
-    const {
-      accessToken,
-      refreshToken: newRefreshToken,
-      expiresIn,
-    } = await response.json();
-
-    // Re-read settings right before writing to avoid stale-read race conditions.
-    // The async fetch above may take time, during which other org credentials
-    // could be written. Reading here ensures we merge into the latest state.
-    const freshSettings = readSettings();
-    const existingOrgs = freshSettings.supabase?.organizations ?? {};
-    writeSettings({
-      supabase: {
-        ...freshSettings.supabase,
-        organizations: {
-          ...existingOrgs,
-          [organizationSlug]: {
-            ...existingOrgs[organizationSlug],
-            accessToken: {
-              value: accessToken,
-            },
-            refreshToken: {
-              value: newRefreshToken,
-            },
-            expiresIn,
-            tokenTimestamp: Math.floor(Date.now() / 1000),
-          },
-        },
-      },
-    });
-  } catch (error) {
-    logger.error(
-      `Error refreshing Supabase token for organization ${organizationSlug}:`,
-      error,
-    );
-    throw error;
-  }
+  // Supabase token refresh used to round-trip through the retired Dyad OAuth
+  // proxy. Connections are now made directly with a long-lived Personal Access
+  // Token that never expires, so there is nothing to refresh — this is a
+  // deliberate no-op and never makes a network request.
+  return;
 }
 
 /**
@@ -875,7 +764,7 @@ export interface CreatedSupabaseProjectResponse {
 }
 
 /**
- * Generated and deliberately never surfaced or stored: Dyad reaches projects
+ * Generated and deliberately never surfaced or stored: Samba Builder reaches projects
  * through the Management API and their API keys, so nothing needs it, and
  * holding a Postgres superuser password would be a liability. Users reset it
  * from the Supabase dashboard for direct access.
@@ -1478,7 +1367,7 @@ export function classifyManagementApiError(
     (error.response.status === 401 || error.response.status === 403)
   ) {
     return new DyadError(
-      `Supabase would not authorize Dyad to ${action}. Reconnect your Supabase account in Settings, or check that this organization still has access to the project. Original error: ${message}`,
+      `Supabase would not authorize Samba Builder to ${action}. Reconnect your Supabase account in Settings, or check that this organization still has access to the project. Original error: ${message}`,
       DyadErrorKind.Auth,
     );
   }

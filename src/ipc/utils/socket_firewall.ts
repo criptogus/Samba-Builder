@@ -66,8 +66,7 @@ const PNPM_IGNORED_BUILDS_ERROR_CODE = "ERR_PNPM_IGNORED_BUILDS";
 const DYAD_ALLOW_BUILDS_METADATA_PATTERN =
   /^#\s*(dyad-default-allow-builds-(?:schema|data-version|channel))=(.+)$/;
 const DYAD_ALLOW_BUILDS_REMOTE_URL =
-  process.env.DYAD_DEFAULT_APPROVE_BUILDS_URL ??
-  "https://api.dyad.sh/v1/default-approve-builds.txt";
+  process.env.DYAD_DEFAULT_APPROVE_BUILDS_URL ?? null;
 const DYAD_ALLOW_BUILDS_FETCH_TIMEOUT_MS = 5_000;
 export const DYAD_ALLOW_BUILDS_CACHE_TTL_MS = 60 * 60 * 1000;
 const DYAD_ALLOW_BUILDS_MAX_BYTES = 256 * 1024;
@@ -292,13 +291,13 @@ function findAllowBuildsManagedBlock(lines: string[]): {
     const beginIndex = beginIndexes[0];
     const endIndex = endIndexes[0];
     if (beginIndex >= endIndex) {
-      throw new Error("Malformed Dyad pnpm allow-builds markers.");
+      throw new Error("Malformed Samba Builder pnpm allow-builds markers.");
     }
     return { beginIndex, endIndex };
   }
 
   if (beginIndexes.length !== endIndexes.length || beginIndexes.length > 1) {
-    throw new Error("Malformed Dyad pnpm allow-builds markers.");
+    throw new Error("Malformed Samba Builder pnpm allow-builds markers.");
   }
 
   if (
@@ -311,7 +310,9 @@ function findAllowBuildsManagedBlock(lines: string[]): {
       );
     })
   ) {
-    throw new Error("Unsupported Dyad pnpm allow-builds marker version.");
+    throw new Error(
+      "Unsupported Samba Builder pnpm allow-builds marker version.",
+    );
   }
 
   return null;
@@ -414,7 +415,7 @@ function parseAllowBuildsLine(
 // pnpm 11 appends `pkg: set this to true or false` placeholder entries to
 // allowBuilds after a non-strict install that ignored builds. A placeholder
 // neither satisfies strict mode (installs still fail with
-// ERR_PNPM_IGNORED_BUILDS) nor represents a human decision, so Dyad treats
+// ERR_PNPM_IGNORED_BUILDS) nor represents a human decision, so Samba Builder treats
 // these as its own to resolve: remove them and let the caller convert them
 // into tagged denials (or a managed `true` when the allow-list covers them).
 const PNPM_PLACEHOLDER_ALLOW_BUILDS_VALUE_PATTERN =
@@ -673,6 +674,11 @@ async function fetchRemoteAllowBuildsSource(
 async function fetchRemoteAllowBuildsSourceFromNetwork(
   fetcher: AllowBuildsTextFetcher,
 ): Promise<AllowBuildsSource | null> {
+  // Samba Builder: zero backend do Dyad — a lista remota de builds aprovados
+  // (api.dyad.sh) não é consultada; só allowlist local.
+  if (!DYAD_ALLOW_BUILDS_REMOTE_URL) {
+    return null;
+  }
   const controller = new AbortController();
   const timeout = setTimeout(
     () => controller.abort(),

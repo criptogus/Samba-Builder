@@ -37,9 +37,9 @@ describe("addresses Coolify would turn down", () => {
 });
 
 describe("adminEmailRefusal", () => {
-  it("does not call an address Dyad cannot send undeliverable", () => {
+  it("does not call an address Samba Builder cannot send undeliverable", () => {
     // `!` and `#` are legal in a local part, so this address may work
-    // perfectly well — the refusal is Dyad's, and saying the domain does not
+    // perfectly well — the refusal is Samba Builder's, and saying the domain does not
     // resolve sends the user to check something that was never wrong.
     const refusal = adminEmailRefusal("will!s@gmail.com");
 
@@ -76,14 +76,14 @@ describe("adminEmailRefusal", () => {
     // The branch a half-typed address lands on, which is most of the
     // keystrokes anyone makes here — so the wrong message on it is the one a
     // user sees most. `foo..com` is the same: a shape Coolify will not
-    // resolve, not a character Dyad cannot send.
+    // resolve, not a character Samba Builder cannot send.
     const undeliverable = adminEmailRefusal("admin@dyad.test");
 
     expect(adminEmailRefusal("adm")).toBe(undeliverable);
     expect(adminEmailRefusal("admin@nodomain")).toBe(undeliverable);
     expect(adminEmailRefusal("admin@foo..com")).toBe(undeliverable);
     // Reserved for documentation, which is a fact about where mail goes and
-    // not about anything Dyad cannot send.
+    // not about anything Samba Builder cannot send.
     expect(adminEmailRefusal("admin@example.com")).toBe(undeliverable);
     expect(adminEmailRefusal("admin@mail.example.net")).toBe(undeliverable);
   });

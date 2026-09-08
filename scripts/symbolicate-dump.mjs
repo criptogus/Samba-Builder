@@ -1,10 +1,10 @@
-// Symbolicate Dyad crash dumps with minidump-stackwalk and Electron's
+// Symbolicate Samba Builder crash dumps with minidump-stackwalk and Electron's
 // public symbol server. Turns a .dmp file into a stack trace with function
 // names, source files, and line numbers.
 //
 // Usage:
 //   node scripts/symbolicate-dump.mjs                   # newest dev dump
-//   node scripts/symbolicate-dump.mjs --prod            # newest dump of the installed Dyad
+//   node scripts/symbolicate-dump.mjs --prod            # newest dump of the installed Samba Builder
 //   node scripts/symbolicate-dump.mjs path/to/crash.dmp [more.dmp ...]
 //   node scripts/symbolicate-dump.mjs --json crash.dmp  # machine readable
 //   node scripts/symbolicate-dump.mjs --help
@@ -102,11 +102,11 @@ function newestDump(dir) {
 const args = process.argv.slice(2);
 
 if (args.includes("--help") || args.includes("-h")) {
-  console.log(`Symbolicate Dyad crash dumps.
+  console.log(`Symbolicate Samba Builder crash dumps.
 
 Usage:
   node scripts/symbolicate-dump.mjs                   # newest dev dump
-  node scripts/symbolicate-dump.mjs --prod            # newest dump of the installed Dyad
+  node scripts/symbolicate-dump.mjs --prod            # newest dump of the installed Samba Builder
   node scripts/symbolicate-dump.mjs <dump.dmp> [more.dmp ...]
 
 --prod only affects which dump is auto-picked; explicit paths ignore it.

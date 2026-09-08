@@ -1,0 +1,58 @@
+name: Samba quality and desktop packages
+on:
+  workflow_dispatch:
+  push:
+    branches: [codex/samba-production-quality]
+permissions:
+  contents: read
+concurrency:
+  group: samba-quality-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  desktop:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-14, windows-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 60
+    env:
+      SAMBA_LOCAL_DESKTOP_BUILD: "true"
+      WINDOWS_SIGN: "false"
+      GOMAXPROCS: "2"
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+      - run: npm ci
+      - run: npm audit --omit=dev --audit-level=low
+      - run: npm ci --prefix testing/fake-llm-server
+      - run: npm ci --ignore-scripts --prefix quality-tools
+      - run: node quality-tools/node_modules/playwright/cli.js install chromium
+      - run: node --test quality-tools/runner.test.mjs quality-tools/benchmark.test.mjs
+      - run: npm run ts
+      - run: npx vitest run src/ipc/services/engineering_readiness.integration.test.ts src/ipc/services/foundation_review.test.ts src/ipc/services/test_evidence.integration.test.ts
+      - name: Remove development tools from packaged resources
+        run: node -e "require('fs').rmSync('quality-tools/node_modules',{recursive:true,force:true})"
+      - run: npm run build
+      - run: npm run e2e -- e2e-tests/foundation_review.spec.ts e2e-tests/delivery_test_evidence.spec.ts e2e-tests/engineering.spec.ts --workers=1
+      - run: npm run desktop:build
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Samba-Builder-${{ matrix.os }}
+          path: out/desktop/
+          if-no-files-found: error
+          retention-days: 14
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: diagnostics-${{ matrix.os }}
+          path: test-results/
+          retention-days: 7

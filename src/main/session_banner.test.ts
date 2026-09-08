@@ -70,7 +70,7 @@ describe("banners", () => {
       ),
     ];
     for (const line of lines) {
-      expect(line).toContain("===== Dyad ");
+      expect(line).toContain("===== Samba Builder ");
       expect(line.split("\n")).toHaveLength(1);
     }
   });
@@ -86,16 +86,16 @@ describe("banners", () => {
         node: "20.19.0",
       }),
     ).toBe(
-      "===== Dyad started | pid 4821 | 1.11.0-beta.1 | linux x64 | electron 38.0.0 | node 20.19.0 =====",
+      "===== Samba Builder started | pid 4821 | 1.11.0-beta.1 | linux x64 | electron 38.0.0 | node 20.19.0 =====",
     );
   });
 
   it("omits uptime when it isn't known", () => {
     expect(formatExitBanner(4821, "duplicate instance")).toBe(
-      "===== Dyad exiting | pid 4821 | duplicate instance =====",
+      "===== Samba Builder exiting | pid 4821 | duplicate instance =====",
     );
     expect(formatExitBanner(4821, "exitCode=0", 28_560_000)).toBe(
-      "===== Dyad exiting | pid 4821 | exitCode=0 | uptime 7h56m =====",
+      "===== Samba Builder exiting | pid 4821 | exitCode=0 | uptime 7h56m =====",
     );
   });
 
@@ -116,20 +116,20 @@ describe("banners", () => {
 
   it("names the error kind and how long the session had been up", () => {
     expect(formatErrorBanner(4821, "uncaughtException", 252_000)).toBe(
-      "===== Dyad main-process error | pid 4821 | uncaughtException | uptime 4m12s =====",
+      "===== Samba Builder main-process error | pid 4821 | uncaughtException | uptime 4m12s =====",
     );
   });
 
   it("says so when the lost session's start time is unavailable", () => {
     expect(formatPreviousSessionBanner(undefined)).toBe(
-      "===== Dyad previous session ended unexpectedly | start time unknown =====",
+      "===== Samba Builder previous session ended unexpectedly | start time unknown =====",
     );
   });
 
   it("approximates the lost session's uptime from its last sample", () => {
     const started = new Date(2026, 7, 17, 0, 39, 48, 628).getTime();
     expect(formatPreviousSessionBanner(started, started + 28_560_000)).toBe(
-      "===== Dyad previous session ended unexpectedly | started 2026-08-17 00:39:48.628 | ran ~7h56m =====",
+      "===== Samba Builder previous session ended unexpectedly | started 2026-08-17 00:39:48.628 | ran ~7h56m =====",
     );
   });
 
@@ -137,7 +137,7 @@ describe("banners", () => {
     const started = new Date(2026, 7, 17, 0, 39, 48, 628).getTime();
     // Left over from an earlier run, so this session never sampled.
     expect(formatPreviousSessionBanner(started, started - 5_000)).toBe(
-      "===== Dyad previous session ended unexpectedly | started 2026-08-17 00:39:48.628 | uptime unknown (ended before its first sample) =====",
+      "===== Samba Builder previous session ended unexpectedly | started 2026-08-17 00:39:48.628 | uptime unknown (ended before its first sample) =====",
     );
     expect(formatPreviousSessionBanner(started, started)).toContain(
       "uptime unknown",
@@ -147,7 +147,7 @@ describe("banners", () => {
   it("omits uptime when either end of the interval is missing", () => {
     const started = new Date(2026, 7, 17, 0, 39, 48, 628).getTime();
     expect(formatPreviousSessionBanner(started)).toBe(
-      "===== Dyad previous session ended unexpectedly | started 2026-08-17 00:39:48.628 =====",
+      "===== Samba Builder previous session ended unexpectedly | started 2026-08-17 00:39:48.628 =====",
     );
     expect(formatPreviousSessionBanner(undefined, started)).not.toContain(
       "ran",

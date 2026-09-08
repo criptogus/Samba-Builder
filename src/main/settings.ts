@@ -88,8 +88,7 @@ export const DEFAULT_SETTINGS: UserSettings = {
 const CRASH_SENTINEL_FILE = "session.lock";
 const RENDERER_CRASH_FILE = "renderer-crash.json";
 const SETTINGS_FILE = "user-settings.json";
-const RESTORE_SETTINGS_DOCS_URL =
-  "https://www.dyad.sh/docs/guides/migrate-restore#restoring-settings-from-backup";
+const RESTORE_SETTINGS_DOCS_URL = "https://sambatech.com";
 let initialLoadIsFirstSession = false;
 
 export function setInitialLoadIsFirstSession(value: boolean): void {
@@ -694,7 +693,7 @@ function readExistingSettingsFile(
       };
     } else {
       // The address is not a secret and survives a token that will not
-      // decrypt, so the user is not asked to retype what Dyad still knows.
+      // decrypt, so the user is not asked to retype what Samba Builder still knows.
       const { accessToken: _dropped, ...rest } = combinedSettings.coolify;
       combinedSettings.coolify = rest;
     }
@@ -1031,7 +1030,7 @@ function readSettingsForWrite(filePath: string): {
     logger.error("Existing settings file is unreadable:", error);
     notifyRendererError({
       message:
-        "Dyad could not read your existing settings file, so it fell back to default settings.",
+        "Samba Builder could not read your existing settings file, so it fell back to default settings.",
       action: {
         label: "Read restore docs",
         url: RESTORE_SETTINGS_DOCS_URL,

@@ -200,7 +200,7 @@ export const PreviewIframe = ({
     // `page.goto("/that/path")` against the app — a destination the user never
     // visited. Unknown or off-origin means no hint at all.
     //
-    // And only for a route the user picked through Dyad's chrome: one the app
+    // And only for a route the user picked through Samba Builder's chrome: one the app
     // reached itself is not a starting point anyone chose, and opening a
     // session there makes replay `goto` the destination and skip the
     // navigation — often a redirect that is the thing under test — that got to
@@ -383,14 +383,16 @@ export const PreviewIframe = ({
       sendIframeEvent({
         type: "IFRAME_ERROR",
         message: cloudSandboxStatus.lastErrorMessage
-          ? cloudSandboxStatus.lastErrorMessage.includes("Dyad stopped")
+          ? cloudSandboxStatus.lastErrorMessage.includes(
+              "Samba Builder stopped",
+            )
             ? cloudSandboxStatus.lastErrorMessage
             : cloudSandboxStatus.terminationReason === "credits_exhausted"
-              ? "This cloud sandbox was stopped because your Dyad Pro credits ran out. Add credits and start it again."
-              : "This cloud sandbox was stopped because Dyad could not confirm billing. Please try starting it again."
+              ? "This cloud sandbox was stopped because your Samba Builder credits ran out. Add credits and start it again."
+              : "This cloud sandbox was stopped because Samba Builder could not confirm billing. Please try starting it again."
           : cloudSandboxStatus.terminationReason === "credits_exhausted"
-            ? "This cloud sandbox was stopped because your Dyad Pro credits ran out. Add credits and start it again."
-            : "This cloud sandbox was stopped because Dyad could not confirm billing. Please try starting it again.",
+            ? "This cloud sandbox was stopped because your Samba Builder credits ran out. Add credits and start it again."
+            : "This cloud sandbox was stopped because Samba Builder could not confirm billing. Please try starting it again.",
         source: "dyad-app",
       });
     }
@@ -1723,7 +1725,7 @@ function RecordingSetupOverlay({
         </p>
         <p className="text-sm text-muted-foreground">
           {recorder.phase === "starting" || recorder.phase === "authenticating"
-            ? "Dyad is preparing an isolated environment for your recording — hold off on interacting with the preview until it's ready."
+            ? "Samba Builder is preparing an isolated environment for your recording — hold off on interacting with the preview until it's ready."
             : "Hold off on interacting with the preview until this finishes."}
         </p>
       </div>

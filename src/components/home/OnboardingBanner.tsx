@@ -41,7 +41,7 @@ export const OnboardingBanner = ({
           <div className="flex-1 px-4 py-3">
             <div className="text-foreground">
               <p className="font-semibold text-base">
-                Get started with Dyad in 3 minutes
+                Get started with Samba Builder in 3 minutes
               </p>
               <p className="text-sm text-muted-foreground">
                 Start building your app for free

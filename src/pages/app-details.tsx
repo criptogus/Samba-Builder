@@ -1,3 +1,6 @@
+import { ProjectManagementPanel } from "@/components/ProjectManagementPanel";
+import { ProjectDeliveryPanel } from "@/components/ProjectDeliveryPanel";
+import { SaveProjectTemplateButton } from "@/components/SaveProjectTemplateButton";
 import { useNavigate, useSearch } from "@tanstack/react-router";
 import { normalizePath } from "../../shared/normalizePath";
 import {
@@ -60,6 +63,7 @@ import { useDebounce } from "@/hooks/useDebounce";
 import { useCheckName } from "@/hooks/useCheckName";
 import { useAppFolderPreview } from "@/hooks/useAppFolderPreview";
 import { AppUpgrades } from "@/components/AppUpgrades";
+import { DesignSystemDialog } from "@/components/DesignSystemDialog";
 import { CapacitorControls } from "@/components/CapacitorControls";
 import { GithubCollaboratorManager } from "@/components/GithubCollaboratorManager";
 import { useAddAppToFavorite } from "@/hooks/useAddAppToFavorite";
@@ -401,14 +405,18 @@ export default function AppDetailsPage() {
 
   return (
     <div
-      className="relative min-h-screen p-4 w-full"
+      className="relative min-h-screen w-full px-5 py-7 sm:px-9"
       data-testid="app-details-page"
     >
-      <BackButton label="Back" className="absolute top-4 left-4 mb-0" />
+      <div className="mx-auto w-full max-w-6xl">
+        <BackButton label="Back" className="mb-5" />
+      </div>
 
-      <div className="w-full max-w-2xl mx-auto mt-10 p-4 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm relative">
-        <div className="flex items-center mb-3">
-          <h2 className="text-2xl font-bold">{selectedApp.name}</h2>
+      <div className="relative mx-auto w-full max-w-6xl">
+        <div className="flex flex-wrap items-center gap-2 border-b border-border pb-5 pr-10">
+          <h2 className="min-w-0 flex-1 truncate text-2xl font-semibold tracking-tight">
+            {selectedApp.name}
+          </h2>
           <Tooltip>
             <TooltipTrigger
               render={
@@ -418,6 +426,11 @@ export default function AppDetailsPage() {
                   className="ml-1 p-0.5 h-auto"
                   onClick={() => appId && toggleFavorite(appId)}
                   disabled={isFavoriteLoading}
+                  aria-label={
+                    selectedApp.isFavorite
+                      ? "Remove from favorites"
+                      : "Add to favorites"
+                  }
                   data-testid="favorite-button"
                 />
               }
@@ -425,8 +438,8 @@ export default function AppDetailsPage() {
               <Star
                 className={`h-4 w-4 ${
                   selectedApp.isFavorite
-                    ? "fill-[#6c55dc] text-[#6c55dc]"
-                    : "hover:fill-[#6c55dc] hover:text-[#6c55dc]"
+                    ? "fill-primary text-primary"
+                    : "hover:fill-primary hover:text-primary"
                 }`}
               />
             </TooltipTrigger>
@@ -441,9 +454,19 @@ export default function AppDetailsPage() {
             size="sm"
             className="ml-1 p-0.5 h-auto"
             onClick={handleOpenRenameDialog}
+            aria-label="Rename project"
             data-testid="app-details-rename-app-button"
           >
             <Pencil className="h-3.5 w-3.5" />
+          </Button>
+          <Button
+            onClick={handleOpenInChat}
+            disabled={chatsLoading || isOpeningChat}
+            className="ml-3 gap-2"
+            size="sm"
+          >
+            Open in Chat
+            <MessageCircle className="h-4 w-4" />
           </Button>
         </div>
 
@@ -452,6 +475,7 @@ export default function AppDetailsPage() {
           <Popover>
             <PopoverTrigger
               className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 hover:bg-accent hover:text-accent-foreground h-7 w-7 p-0"
+              aria-label="Project actions"
               data-testid="app-details-more-options-button"
             >
               <MoreVertical className="h-4 w-4" />
@@ -482,6 +506,12 @@ export default function AppDetailsPage() {
                 >
                   Copy app
                 </Button>
+                {selectedApp && (
+                  <SaveProjectTemplateButton
+                    appId={selectedApp.id}
+                    name={selectedApp.name}
+                  />
+                )}
                 <Button
                   onClick={() => setIsDeleteDialogOpen(true)}
                   variant="ghost"
@@ -495,130 +525,36 @@ export default function AppDetailsPage() {
           </Popover>
         </div>
 
-        {latestScreenshotUrl && !screenshotLoadFailed && (
-          <button
-            type="button"
-            onClick={handleOpenInChat}
-            disabled={chatsLoading || isOpeningChat}
-            aria-label={`Open ${selectedApp.name} in Chat`}
-            data-testid="app-details-screenshot-open-in-chat"
-            className="group relative mb-4 block aspect-video w-full overflow-hidden rounded-lg border border-border bg-muted cursor-pointer transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-default disabled:opacity-60"
-          >
-            <img
-              src={latestScreenshotUrl}
-              alt={`Preview of ${selectedApp?.name ?? "app"}`}
-              onError={() => setScreenshotLoadFailed(true)}
-              className="h-full w-full object-contain transition-transform duration-200 group-hover:scale-[1.02] group-disabled:scale-100"
-            />
-            <div className="pointer-events-none absolute inset-0 flex items-center justify-center bg-black/0 opacity-0 transition-all duration-200 group-hover:bg-black/15 group-hover:opacity-100 group-disabled:opacity-0">
-              <span className="flex items-center gap-2 rounded-md bg-background/95 px-3 py-1.5 text-sm font-medium text-foreground shadow-md">
-                Open in Chat
-                <MessageCircle className="h-4 w-4" />
-              </span>
+        <section
+          className="mb-6 rounded-xl border border-border bg-card p-5"
+          aria-label="Base e repositório do projeto"
+        >
+          <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
+            <div>
+              <h2 className="text-sm font-semibold">Base do projeto</h2>
+              <p className="mt-1 text-sm text-muted-foreground">
+                PRD, arquitetura, stack, design system e manutenção em
+                project-docs nos novos projetos.
+              </p>
+              <p className="mt-1 text-xs text-muted-foreground">
+                Documentos começam como rascunho e evoluem com o briefing e o
+                código. Projetos anteriores mantêm seus arquivos.
+              </p>
             </div>
-          </button>
-        )}
-
-        <div className="grid grid-cols-2 gap-3 text-sm mb-4">
-          <div>
-            <span className="block text-gray-500 dark:text-gray-400 mb-0.5 text-xs">
-              Created
-            </span>
-            <span>{selectedApp.createdAt.toString()}</span>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => ipc.system.showItemInFolder(currentAppPath)}
+            >
+              Abrir arquivos
+            </Button>
           </div>
-          <div>
-            <span className="block text-gray-500 dark:text-gray-400 mb-0.5 text-xs">
-              Last Updated
-            </span>
-            <span>{selectedApp.updatedAt.toString()}</span>
-          </div>
-          <div className="col-span-2">
-            <span className="block text-gray-500 dark:text-gray-400 mb-0.5 text-xs">
-              Path
-            </span>
-            <div className="flex items-center gap-1">
-              <Tooltip>
-                <TooltipTrigger
-                  render={
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="ml-[-8px] p-0.5 h-auto cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-                      onClick={() => {
-                        ipc.system.showItemInFolder(currentAppPath);
-                      }}
-                    />
-                  }
-                >
-                  <Folder className="h-3.5 w-3.5" />
-                </TooltipTrigger>
-                <TooltipContent>Show in folder</TooltipContent>
-              </Tooltip>
-              <span className="text-sm break-all">{currentAppPath}</span>
-            </div>
-          </div>
-          <div className="col-span-2">
-            <span className="block text-gray-500 dark:text-gray-400 mb-0.5 text-xs">
-              Collection
-            </span>
-            <div className="flex items-center gap-1">
-              <Folder className="h-3.5 w-3.5 text-muted-foreground" />
-              <span
-                className="text-sm"
-                data-testid="app-details-collection-name"
-              >
-                {currentCollection?.name ?? "No collection yet"}
-              </span>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="ml-1 h-auto text-muted-foreground cursor-pointer hover:bg-transparent hover:text-foreground transition-colors"
-                onClick={() => setIsAssignCollectionDialogOpen(true)}
-                data-testid="app-details-edit-collection-button"
-              >
-                {selectedApp.collectionId == null ? (
-                  <Plus className="h-3.5 w-3.5" />
-                ) : (
-                  <Pencil className="h-3.5 w-3.5" />
-                )}
-              </Button>
-              {selectedApp.collectionId != null && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="-ml-2 h-auto text-muted-foreground cursor-pointer hover:bg-transparent hover:text-destructive transition-colors"
-                  onClick={async () => {
-                    try {
-                      await assignApps({
-                        collectionId: null,
-                        appIds: [selectedApp.id],
-                      });
-                      showSuccess("Removed from collection");
-                    } catch (error) {
-                      showError(error);
-                    }
-                  }}
-                  title="Remove from collection"
-                  aria-label="Remove from collection"
-                  data-testid="app-details-remove-collection-button"
-                >
-                  <Trash2 className="h-3.5 w-3.5" />
-                </Button>
-              )}
-            </div>
-          </div>
-        </div>
-        <div className="mt-4 flex flex-col gap-2">
-          <Button
-            onClick={handleOpenInChat}
-            disabled={chatsLoading || isOpeningChat}
-            className="cursor-pointer w-full py-5 flex justify-center items-center gap-2"
-            size="lg"
-          >
-            Open in Chat
-            <MessageCircle className="h-4 w-4" />
-          </Button>
-          <div className="border border-gray-200 rounded-md p-4">
+          <p className="mb-3 text-sm font-medium">
+            {selectedApp.githubRepo
+              ? "Repositório conectado · sincronize cada entrega"
+              : "Etapa pendente · crie ou conecte o repositório GitHub da equipe"}
+          </p>
+          <div className="border border-border rounded-lg p-4">
             <GitHubConnector appId={appId} folderName={selectedApp.path} />
             {selectedApp.githubOrg && selectedApp.githubRepo && appId && (
               <div className="pt-4 border-t border-gray-100 dark:border-gray-800">
@@ -626,51 +562,192 @@ export default function AppDetailsPage() {
               </div>
             )}
           </div>
-          {/* When providerFilter is set, show the selected connector only if the other provider isn't already active */}
-          {providerFilter === "supabase" &&
-            appId &&
-            !selectedApp?.neonProjectId && <SupabaseConnector appId={appId} />}
-          {providerFilter === "supabase" &&
-            appId &&
-            selectedApp?.neonProjectId && (
-              <UnavailableIntegrationCard provider="supabase" />
+        </section>
+        <ProjectDeliveryPanel key={selectedApp.id} appId={selectedApp.id} />
+        <ProjectManagementPanel
+          key={`management-${selectedApp.id}`}
+          appId={selectedApp.id}
+        />
+        <details
+          open={!!providerFilter}
+          className="mt-6 rounded-xl border border-border bg-card p-5"
+        >
+          <summary className="cursor-pointer text-sm font-medium">
+            Configuração do projeto · arquivos e integrações
+          </summary>
+          <div className="mt-5 space-y-5">
+            {latestScreenshotUrl && !screenshotLoadFailed && (
+              <button
+                type="button"
+                onClick={handleOpenInChat}
+                disabled={chatsLoading || isOpeningChat}
+                aria-label={`Open ${selectedApp.name} in Chat`}
+                data-testid="app-details-screenshot-open-in-chat"
+                className="group relative mb-4 block aspect-video w-full max-w-sm overflow-hidden rounded-lg border border-border bg-muted cursor-pointer transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-default disabled:opacity-60"
+              >
+                <img
+                  src={latestScreenshotUrl}
+                  alt={`Preview of ${selectedApp?.name ?? "app"}`}
+                  onError={() => setScreenshotLoadFailed(true)}
+                  className="h-full w-full object-contain transition-transform duration-200 group-hover:scale-[1.02] group-disabled:scale-100"
+                />
+                <div className="pointer-events-none absolute inset-0 flex items-center justify-center bg-black/0 opacity-0 transition-all duration-200 group-hover:bg-black/15 group-hover:opacity-100 group-disabled:opacity-0">
+                  <span className="flex items-center gap-2 rounded-md bg-background/95 px-3 py-1.5 text-sm font-medium text-foreground shadow-md">
+                    Open in Chat
+                    <MessageCircle className="h-4 w-4" />
+                  </span>
+                </div>
+              </button>
             )}
-          {providerFilter === "neon" &&
-            appId &&
-            !selectedApp?.supabaseProjectId && <NeonConnector appId={appId} />}
-          {providerFilter === "neon" &&
-            appId &&
-            selectedApp?.supabaseProjectId && (
-              <UnavailableIntegrationCard provider="neon" />
-            )}
-          {/* When no providerFilter, show both with existing mutual exclusion */}
-          {!providerFilter && (
-            <>
-              {appId &&
-                !selectedApp?.neonProjectId &&
-                !selectedApp?.supabaseProjectId && (
-                  <div className="flex items-start gap-2 rounded-md border border-muted bg-muted/30 px-3 py-2 text-xs text-muted-foreground">
-                    <Info className="h-4 w-4 shrink-0 mt-0.5" />
-                    <span>{t("integrations.mutualExclusion.chooseOne")}</span>
-                  </div>
+
+            <div className="grid grid-cols-2 gap-3 text-sm mb-4">
+              <div>
+                <span className="block text-gray-500 dark:text-gray-400 mb-0.5 text-xs">
+                  Created
+                </span>
+                <span>
+                  {new Date(selectedApp.createdAt).toLocaleDateString()}
+                </span>
+              </div>
+              <div>
+                <span className="block text-gray-500 dark:text-gray-400 mb-0.5 text-xs">
+                  Last Updated
+                </span>
+                <span>
+                  {new Date(selectedApp.updatedAt).toLocaleDateString()}
+                </span>
+              </div>
+              <div className="col-span-2">
+                <span className="block text-gray-500 dark:text-gray-400 mb-0.5 text-xs">
+                  Path
+                </span>
+                <div className="flex items-center gap-1">
+                  <Tooltip>
+                    <TooltipTrigger
+                      render={
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="ml-[-8px] p-0.5 h-auto cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                          onClick={() => {
+                            ipc.system.showItemInFolder(currentAppPath);
+                          }}
+                        />
+                      }
+                    >
+                      <Folder className="h-3.5 w-3.5" />
+                    </TooltipTrigger>
+                    <TooltipContent>Show in folder</TooltipContent>
+                  </Tooltip>
+                  <span className="text-sm break-all">{currentAppPath}</span>
+                </div>
+              </div>
+              <div className="col-span-2">
+                <span className="block text-gray-500 dark:text-gray-400 mb-0.5 text-xs">
+                  Collection
+                </span>
+                <div className="flex items-center gap-1">
+                  <Folder className="h-3.5 w-3.5 text-muted-foreground" />
+                  <span
+                    className="text-sm"
+                    data-testid="app-details-collection-name"
+                  >
+                    {currentCollection?.name ?? "No collection yet"}
+                  </span>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="ml-1 h-auto text-muted-foreground cursor-pointer hover:bg-transparent hover:text-foreground transition-colors"
+                    onClick={() => setIsAssignCollectionDialogOpen(true)}
+                    data-testid="app-details-edit-collection-button"
+                  >
+                    {selectedApp.collectionId == null ? (
+                      <Plus className="h-3.5 w-3.5" />
+                    ) : (
+                      <Pencil className="h-3.5 w-3.5" />
+                    )}
+                  </Button>
+                  {selectedApp.collectionId != null && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="-ml-2 h-auto text-muted-foreground cursor-pointer hover:bg-transparent hover:text-destructive transition-colors"
+                      onClick={async () => {
+                        try {
+                          await assignApps({
+                            collectionId: null,
+                            appIds: [selectedApp.id],
+                          });
+                          showSuccess("Removed from collection");
+                        } catch (error) {
+                          showError(error);
+                        }
+                      }}
+                      title="Remove from collection"
+                      aria-label="Remove from collection"
+                      data-testid="app-details-remove-collection-button"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </Button>
+                  )}
+                </div>
+              </div>
+            </div>
+            <div className="mt-4 flex flex-col gap-2">
+              {/* When providerFilter is set, show the selected connector only if the other provider isn't already active */}
+              {providerFilter === "supabase" &&
+                appId &&
+                !selectedApp?.neonProjectId && (
+                  <SupabaseConnector appId={appId} />
                 )}
-              {appId && !selectedApp?.neonProjectId && (
-                <SupabaseConnector appId={appId} />
+              {providerFilter === "supabase" &&
+                appId &&
+                selectedApp?.neonProjectId && (
+                  <UnavailableIntegrationCard provider="supabase" />
+                )}
+              {providerFilter === "neon" &&
+                appId &&
+                !selectedApp?.supabaseProjectId && (
+                  <NeonConnector appId={appId} />
+                )}
+              {providerFilter === "neon" &&
+                appId &&
+                selectedApp?.supabaseProjectId && (
+                  <UnavailableIntegrationCard provider="neon" />
+                )}
+              {/* When no providerFilter, show both with existing mutual exclusion */}
+              {!providerFilter && (
+                <>
+                  {appId &&
+                    !selectedApp?.neonProjectId &&
+                    !selectedApp?.supabaseProjectId && (
+                      <div className="flex items-start gap-2 rounded-md border border-muted bg-muted/30 px-3 py-2 text-xs text-muted-foreground">
+                        <Info className="h-4 w-4 shrink-0 mt-0.5" />
+                        <span>
+                          {t("integrations.mutualExclusion.chooseOne")}
+                        </span>
+                      </div>
+                    )}
+                  {appId && !selectedApp?.neonProjectId && (
+                    <SupabaseConnector appId={appId} />
+                  )}
+                  {appId && selectedApp?.neonProjectId && (
+                    <UnavailableIntegrationCard provider="supabase" />
+                  )}
+                  {appId && !selectedApp?.supabaseProjectId && (
+                    <NeonConnector appId={appId} />
+                  )}
+                  {appId && selectedApp?.supabaseProjectId && (
+                    <UnavailableIntegrationCard provider="neon" />
+                  )}
+                </>
               )}
-              {appId && selectedApp?.neonProjectId && (
-                <UnavailableIntegrationCard provider="supabase" />
-              )}
-              {appId && !selectedApp?.supabaseProjectId && (
-                <NeonConnector appId={appId} />
-              )}
-              {appId && selectedApp?.supabaseProjectId && (
-                <UnavailableIntegrationCard provider="neon" />
-              )}
-            </>
-          )}
-          {appId && <CapacitorControls appId={appId} />}
-          <AppUpgrades appId={appId} />
-        </div>
+              {appId && <CapacitorControls appId={appId} />}
+              <AppUpgrades appId={appId} />
+              {appId && <DesignSystemDialog appId={appId} />}
+            </div>
+          </div>
+        </details>
 
         {/* Rename Dialog */}
         <Dialog open={isRenameDialogOpen} onOpenChange={setIsRenameDialogOpen}>

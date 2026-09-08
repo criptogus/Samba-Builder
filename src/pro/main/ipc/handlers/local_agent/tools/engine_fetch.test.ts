@@ -167,7 +167,8 @@ describe("engineFetch", () => {
       { timeoutMs: 25 },
     );
     const rejection = expect(request).rejects.toMatchObject({
-      message: "Dyad engine request to /tools/test timed out after 25ms",
+      message:
+        "Samba Builder engine request to /tools/test timed out after 25ms",
       kind: DyadErrorKind.External,
     });
     await vi.advanceTimersByTimeAsync(25);

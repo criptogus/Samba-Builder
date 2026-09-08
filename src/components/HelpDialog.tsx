@@ -7,7 +7,6 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import {
-  BookOpenIcon,
   BugIcon,
   UploadIcon,
   ChevronLeftIcon,
@@ -84,8 +83,7 @@ const screenTransition = {
 // GitHub issue helpers (shared between Report a Bug & Upload Chat Session)
 // =============================================================================
 
-const GITHUB_ISSUES_BASE =
-  "https://github.com/dyad-sh/dyad/issues/new" as const;
+const GITHUB_ISSUES_BASE = "https://sambatech.com" as const;
 
 function openGitHubIssue(params: {
   title: string;
@@ -397,38 +395,10 @@ export function HelpDialog() {
   };
 
   const handleSubmitChatLogs = async () => {
-    if (!debugBundle) return;
-    setIsUploading(true);
-    try {
-      const response = await fetch(
-        "https://upload-logs.dyad.sh/generate-upload-url",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            extension: "json",
-            contentType: "application/json",
-          }),
-        },
-      );
-      if (!response.ok) {
-        showError(`Failed to get upload URL: ${response.statusText}`);
-        throw new Error(`Failed to get upload URL: ${response.statusText}`);
-      }
-      const { uploadUrl, filename } = await response.json();
-      await ipc.system.uploadToSignedUrl({
-        url: uploadUrl,
-        contentType: "application/json",
-        data: debugBundle,
-      });
-      setSessionId("v2:" + filename.replace(".json", ""));
-      navigateTo("upload-complete");
-    } catch (error) {
-      console.error("Failed to upload chat logs:", error);
-      alert("Failed to upload chat logs. Please try again.");
-    } finally {
-      setIsUploading(false);
-    }
+    // Samba Builder: sem backend próprio — os logs NÃO são enviados a servidor
+    // externo (o upload para o servidor do Dyad foi removido). O suporte é
+    // acionado pelo contato da Samba.
+    ipc.system.openExternalUrl("https://sambatech.com");
   };
 
   const handleCancelReview = () => {
@@ -528,33 +498,21 @@ export function HelpDialog() {
       skipInitial={!hasNavigated.current}
     >
       <DialogHeader>
-        <DialogTitle>Need help with Dyad?</DialogTitle>
+        <DialogTitle>Need help with Samba Builder?</DialogTitle>
       </DialogHeader>
       <DialogDescription>
         If you need help or want to report an issue, here are some options:
       </DialogDescription>
       <div className="flex flex-col w-full mt-4 space-y-5">
-        {/* Self-service help */}
-        {isDyadProUser ? (
-          <Button
-            variant="default"
-            onClick={() => setIsHelpBotOpen(true)}
-            className="w-full py-6 border-primary/50 shadow-sm shadow-primary/10 transition-all hover:shadow-md hover:shadow-primary/15"
-          >
-            <SparklesIcon className="mr-2 h-5 w-5" /> Chat with Dyad help bot
-            (Pro)
-          </Button>
-        ) : (
-          <Button
-            variant="outline"
-            onClick={() =>
-              ipc.system.openExternalUrl("https://www.dyad.sh/docs")
-            }
-            className="w-full py-6 bg-(--background-lightest)"
-          >
-            <BookOpenIcon className="mr-2 h-5 w-5" /> Open Docs
-          </Button>
-        )}
+        {/* Suporte — sem backend próprio: o chat de ajuda (que falava com o
+            servidor do Dyad) foi substituído pelo contato da Samba */}
+        <Button
+          variant="default"
+          onClick={() => ipc.system.openExternalUrl("https://sambatech.com")}
+          className="w-full py-6 border-primary/50 shadow-sm shadow-primary/10 transition-all hover:shadow-md hover:shadow-primary/15"
+        >
+          <SparklesIcon className="mr-2 h-5 w-5" /> Contact Samba support
+        </Button>
 
         {/* Divider */}
         <div className="flex items-center gap-3">
@@ -571,9 +529,7 @@ export function HelpDialog() {
           <div className="border rounded-lg p-4 space-y-3 relative">
             <div className="flex items-center gap-2">
               <MessageSquareIcon className="h-4 w-4 text-primary" />
-              <span className="text-sm font-semibold">
-                AI / model issues
-              </span>
+              <span className="text-sm font-semibold">AI / model issues</span>
             </div>
             <p className="text-sm text-muted-foreground">
               Best for AI quality issues. Uploads your chat session and code for
@@ -603,8 +559,8 @@ export function HelpDialog() {
               <span className="text-sm font-semibold">Non-AI issues</span>
             </div>
             <p className="text-sm text-muted-foreground">
-              Includes error logs to troubleshoot non-AI issues with Dyad (UI
-              bugs, crashes, setup problems, etc.).
+              Includes error logs to troubleshoot non-AI issues with Samba
+              Builder (UI bugs, crashes, setup problems, etc.).
             </p>
             <Button
               variant="outline"
@@ -671,7 +627,7 @@ export function HelpDialog() {
           )}
 
           <ReviewDetailsSection title="System Information" mono={false}>
-            <p>Dyad Version: {debugBundle.system.dyadVersion}</p>
+            <p>Samba Builder Version: {debugBundle.system.dyadVersion}</p>
             <p>Platform: {debugBundle.system.platform}</p>
             <p>Architecture: {debugBundle.system.architecture}</p>
             <p>

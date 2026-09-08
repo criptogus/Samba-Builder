@@ -4,7 +4,7 @@ import { randomInt } from "crypto";
  * The admin account Coolify seeds itself with during installation.
  *
  * Coolify creates its first user from environment variables the installer
- * writes, which is what lets Dyad set a server up without the user ever opening
+ * writes, which is what lets Samba Builder set a server up without the user ever opening
  * the dashboard. The values only take effect while no admin exists, so this
  * cannot take over an instance somebody is already using.
  */

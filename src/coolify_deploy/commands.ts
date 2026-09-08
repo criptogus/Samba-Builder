@@ -171,7 +171,7 @@ async function recordConnectionChange(
 }
 
 /**
- * Puts Dyad's public key on the repository as a deploy key.
+ * Puts Samba Builder's public key on the repository as a deploy key.
  *
  * "Already in use" from GitHub does not mean it is on *this* repository — a
  * deploy key belongs to exactly one repo across all of GitHub — so confirm
@@ -211,7 +211,7 @@ async function ensureGithubDeployKey({
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        title: "Dyad deploy key (Coolify)",
+        title: "Samba Builder deploy key (Coolify)",
         key: publicKey,
         read_only: true,
       }),
@@ -268,7 +268,7 @@ async function ensureGithubDeployKey({
         // whole explanation the user gets for a failed deploy.
         throw new DyadError(
           `GitHub returned something other than a key list for ${owner}/${repo}, ` +
-            `so Dyad could not tell whether the deploy key it holds is already ` +
+            `so Samba Builder could not tell whether the deploy key it holds is already ` +
             `registered there. Try again in a moment.`,
           DyadErrorKind.External,
         );
@@ -291,7 +291,7 @@ async function ensureGithubDeployKey({
         `repository, so GitHub will not accept it here. Remove it from the other ` +
         `repository's deploy keys, or delete ${deployKeyFilePath(keyName)} to ` +
         `generate a new ` +
-        `one — Dyad registers a regenerated key with Coolify under a new name.`,
+        `one — Samba Builder registers a regenerated key with Coolify under a new name.`,
       DyadErrorKind.Validation,
     );
   }
@@ -539,7 +539,7 @@ async function warnIfBranchNotPushed({
 
   // Uncommitted work does not move HEAD, so the comparison above says nothing
   // about it. Deploying what is on GitHub is the intent, but a user looking
-  // at edits Dyad has just made has no way to tell they are not in this
+  // at edits Samba Builder has just made has no way to tell they are not in this
   // build.
   try {
     const uncommitted = await getGitUncommittedFiles({ path: appPath });
@@ -709,7 +709,7 @@ export async function runDeployPipeline({
     // The half already in hand, rather than a second read off disk with a
     // fallback that would fingerprint an empty string.
     name: coolifyKeyName(keyName, publicKey),
-    description: "Key Dyad uses to let Coolify clone this repository",
+    description: "Key Samba Builder uses to let Coolify clone this repository",
     privateKey: readPrivateKey(keyName),
   });
   throwIfAborted(signal);

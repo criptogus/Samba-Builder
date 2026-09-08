@@ -50,3 +50,23 @@ it("does not project provider errors or misleading URLs", async () => {
     submitVercelDeployment("token", project, "preview"),
   ).rejects.toThrow("Confira o token");
 });
+
+it("pins production to the delivery's approved commit", async () => {
+  call.mockResolvedValue({
+    id: "deployment",
+    url: "site.vercel.app",
+    readyState: "QUEUED",
+  });
+  await submitVercelDeployment(
+    "token",
+    { ...project, sha: "a".repeat(40) },
+    "production",
+  );
+  expect(call).toHaveBeenLastCalledWith(
+    expect.objectContaining({
+      requestBody: expect.objectContaining({
+        gitSource: expect.objectContaining({ sha: "a".repeat(40) }),
+      }),
+    }),
+  );
+});

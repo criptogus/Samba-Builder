@@ -74,12 +74,10 @@ interface LinkedGitHubRepo {
 function GitHubTroubleshootingLink({ className = "" }: { className?: string }) {
   return (
     <a
-      href="https://www.dyad.sh/docs/integrations/github#troubleshooting"
+      href="https://sambatech.com"
       onClick={(event) => {
         event.preventDefault();
-        ipc.system.openExternalUrl(
-          "https://www.dyad.sh/docs/integrations/github#troubleshooting",
-        );
+        ipc.system.openExternalUrl("https://sambatech.com");
       }}
       className={`cursor-pointer text-blue-600 hover:underline dark:text-blue-400 ${className}`}
       target="_blank"
@@ -452,7 +450,7 @@ function ConnectedGitHubConnector({
                   <p className="sr-only">
                     {(
                       conflictVerificationError ??
-                      "Dyad couldn't check the repository."
+                      "Samba Builder couldn't check the repository."
                     )
                       .split("\n", 1)[0]
                       .slice(0, 240)}
@@ -465,7 +463,7 @@ function ConnectedGitHubConnector({
                   <GitHubOperationError
                     message={
                       conflictVerificationError ??
-                      "Dyad couldn't check the repository."
+                      "Samba Builder couldn't check the repository."
                     }
                   />
                 </div>
