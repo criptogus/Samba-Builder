@@ -122,21 +122,33 @@ python3 samba/learn/learn.py --project ~/Projetos/landing-x \
 - [x] Skills nativos: `samba/skills/` + meta-skill de evolução por feedback
       (Codex: UI NativeSkillsLibrary)
 
-**Codex (branches abertos, aguardando merge na main)**
+**Auto-evolução (roadmap-hermes — implementado)**
 
-- [ ] `fix/desktop-branding` — bundle/Dock como Samba Builder
-- [ ] `feat/native-skills` — biblioteca de skills curados no app
-- [ ] `feat/native-cloud-publishing` — publish Vercel/AWS nativo
-- [ ] `perf/lower-desktop-memory` — Monaco on-demand + launch leve
-- [ ] `feat/meeting-briefings` — (em andamento)
+- [x] P0 Córtex no fluxo do agente (bloco `cortex_knowledge` no prompt: retrieval
+      automático de units/search/entity/design_system antes de tarefas de domínio)
+- [x] P1 Memória por projeto (`docs/PROJECT_MEMORY.md` — lida e mantida pelo agente)
+- [x] P2 Jeito Samba injetado no prompt (bonito/elegante/rápido/inovador/simples/seguro)
+- [x] P3 Auto-evolução governada — `samba/autopilot/improve.py` (propostas com
+      evidência → aprovação humana via `gate.py`; nunca merge silencioso)
+- [x] P4 Qualidade medida — `samba/quality/score.py` (LLM-as-judge local, rubric
+      Samba, chave BYOK; `npm run samba:score -- <app>`)
+- [x] P5 Vigilância — `samba/autopilot/health.py` + `telemetry.py` (erros do app →
+      feedback JSONL local com redação de segredos; agendável via cron/launchd)
+- [x] P6 Espelho corporativo — `samba/autopilot/publish.py` (conhecimento aprovado
+      → PR no GitHub; merge humano)
+- [x] Zero Dyad: backend desligado (catálogo/templates/update/quota locais),
+      conectores diretos Supabase (PAT) e Neon (API key), links → sambatech.com,
+      scaffold dos apps gerados sem assinatura dyad.sh
+- [x] UI Governança (`GovernancePanel`) e UI Design System (`DesignSystemDialog`)
+      — componentes na main; registro IPC entra com o commit do trabalho em
+      andamento (arquivos compartilhados com outro agente)
 
 **Pendências reais (próximos)**
 
-- [ ] Merge dos branches do Codex na main (um a um, resolvendo package.json/forge)
-- [ ] Colar chave do gateway na UI → primeiro build real ponta a ponta
-- [ ] UI da governança no app (estado do projeto + botões submeter/aprovar/vetar) + gate real no deploy (bloquear publish sem approved)
+- [ ] Merge do trabalho em andamento na main (Codex: 108 arquivos em wip — ativa
+      o registro das UIs de governança/design system + painel de management)
+- [ ] Rebuild + instalar com as UIs ativas
 - [ ] Adapter GitHub no app (branch protection automática por política)
-- [ ] UI do Design System Toolkit (gerar/salvar/aplicar na página Templates) +
-      knowledge units por cliente no Córtex
 - [ ] Piloto: primeiro projeto de cliente real de ponta a ponta
-- [ ] Loop automático pós-projeto (cron/trigger) + eval de qualidade do Córtex
+- [ ] Loop automático pós-projeto agendado (cron do autopilot + eval de qualidade)
+
