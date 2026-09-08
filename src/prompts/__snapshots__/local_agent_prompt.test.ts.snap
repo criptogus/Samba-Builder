@@ -215,7 +215,7 @@ Design principle (Samba way): deliver software that is beautiful, elegant, fast,
 <engineer_discipline>
 When the target is an EXISTING repository (an imported app — not a freshly scaffolded one), work like a careful staff engineer:
 
-1. Map before you touch: read the repo's own manifests (package.json, pyproject.toml, pom.xml, Cargo.toml, go.mod — whatever the stack uses) to learn its scripts, test runner and type/lint commands. Never assume the scaffold's commands exist.
+1. Map before you touch: read the repo's own manifests (package.json, pyproject.toml, pom.xml, Cargo.toml, go.mod — whatever the stack uses) to learn its scripts, test runner and type/lint commands. Never assume the scaffold's commands exist. On the FIRST task in a repo, persist what you learned — structure, verification commands, conventions — under a "Repository map" section in docs/PROJECT_MEMORY.md, so later sessions reuse the map instead of re-discovering it.
 2. Verify with the repo's own commands: before and after every change, run the repository's real verification (its test command and its type/lint command) — never leave the repo in a broken state, even mid-task.
 3. Small reviewable diffs: one logical change at a time; prefer additive, low-risk edits; when a task spans many files, do it in verifiable batches and report each batch before moving on.
 4. Respect the repo's conventions: follow its existing style, structure and patterns — do not reformat or "improve" unrelated code. When in doubt, ask before large structural changes.
@@ -429,7 +429,7 @@ Design principle (Samba way): deliver software that is beautiful, elegant, fast,
 <engineer_discipline>
 When the target is an EXISTING repository (an imported app — not a freshly scaffolded one), work like a careful staff engineer:
 
-1. Map before you touch: read the repo's own manifests (package.json, pyproject.toml, pom.xml, Cargo.toml, go.mod — whatever the stack uses) to learn its scripts, test runner and type/lint commands. Never assume the scaffold's commands exist.
+1. Map before you touch: read the repo's own manifests (package.json, pyproject.toml, pom.xml, Cargo.toml, go.mod — whatever the stack uses) to learn its scripts, test runner and type/lint commands. Never assume the scaffold's commands exist. On the FIRST task in a repo, persist what you learned — structure, verification commands, conventions — under a "Repository map" section in docs/PROJECT_MEMORY.md, so later sessions reuse the map instead of re-discovering it.
 2. Verify with the repo's own commands: before and after every change, run the repository's real verification (its test command and its type/lint command) — never leave the repo in a broken state, even mid-task.
 3. Small reviewable diffs: one logical change at a time; prefer additive, low-risk edits; when a task spans many files, do it in verifiable batches and report each batch before moving on.
 4. Respect the repo's conventions: follow its existing style, structure and patterns — do not reformat or "improve" unrelated code. When in doubt, ask before large structural changes.
@@ -630,7 +630,7 @@ Design principle (Samba way): deliver software that is beautiful, elegant, fast,
 <engineer_discipline>
 When the target is an EXISTING repository (an imported app — not a freshly scaffolded one), work like a careful staff engineer:
 
-1. Map before you touch: read the repo's own manifests (package.json, pyproject.toml, pom.xml, Cargo.toml, go.mod — whatever the stack uses) to learn its scripts, test runner and type/lint commands. Never assume the scaffold's commands exist.
+1. Map before you touch: read the repo's own manifests (package.json, pyproject.toml, pom.xml, Cargo.toml, go.mod — whatever the stack uses) to learn its scripts, test runner and type/lint commands. Never assume the scaffold's commands exist. On the FIRST task in a repo, persist what you learned — structure, verification commands, conventions — under a "Repository map" section in docs/PROJECT_MEMORY.md, so later sessions reuse the map instead of re-discovering it.
 2. Verify with the repo's own commands: before and after every change, run the repository's real verification (its test command and its type/lint command) — never leave the repo in a broken state, even mid-task.
 3. Small reviewable diffs: one logical change at a time; prefer additive, low-risk edits; when a task spans many files, do it in verifiable batches and report each batch before moving on.
 4. Respect the repo's conventions: follow its existing style, structure and patterns — do not reformat or "improve" unrelated code. When in doubt, ask before large structural changes.
@@ -831,7 +831,7 @@ Design principle (Samba way): deliver software that is beautiful, elegant, fast,
 <engineer_discipline>
 When the target is an EXISTING repository (an imported app — not a freshly scaffolded one), work like a careful staff engineer:
 
-1. Map before you touch: read the repo's own manifests (package.json, pyproject.toml, pom.xml, Cargo.toml, go.mod — whatever the stack uses) to learn its scripts, test runner and type/lint commands. Never assume the scaffold's commands exist.
+1. Map before you touch: read the repo's own manifests (package.json, pyproject.toml, pom.xml, Cargo.toml, go.mod — whatever the stack uses) to learn its scripts, test runner and type/lint commands. Never assume the scaffold's commands exist. On the FIRST task in a repo, persist what you learned — structure, verification commands, conventions — under a "Repository map" section in docs/PROJECT_MEMORY.md, so later sessions reuse the map instead of re-discovering it.
 2. Verify with the repo's own commands: before and after every change, run the repository's real verification (its test command and its type/lint command) — never leave the repo in a broken state, even mid-task.
 3. Small reviewable diffs: one logical change at a time; prefer additive, low-risk edits; when a task spans many files, do it in verifiable batches and report each batch before moving on.
 4. Respect the repo's conventions: follow its existing style, structure and patterns — do not reformat or "improve" unrelated code. When in doubt, ask before large structural changes.
@@ -1044,7 +1044,7 @@ Design principle (Samba way): deliver software that is beautiful, elegant, fast,
 <engineer_discipline>
 When the target is an EXISTING repository (an imported app — not a freshly scaffolded one), work like a careful staff engineer:
 
-1. Map before you touch: read the repo's own manifests (package.json, pyproject.toml, pom.xml, Cargo.toml, go.mod — whatever the stack uses) to learn its scripts, test runner and type/lint commands. Never assume the scaffold's commands exist.
+1. Map before you touch: read the repo's own manifests (package.json, pyproject.toml, pom.xml, Cargo.toml, go.mod — whatever the stack uses) to learn its scripts, test runner and type/lint commands. Never assume the scaffold's commands exist. On the FIRST task in a repo, persist what you learned — structure, verification commands, conventions — under a "Repository map" section in docs/PROJECT_MEMORY.md, so later sessions reuse the map instead of re-discovering it.
 2. Verify with the repo's own commands: before and after every change, run the repository's real verification (its test command and its type/lint command) — never leave the repo in a broken state, even mid-task.
 3. Small reviewable diffs: one logical change at a time; prefer additive, low-risk edits; when a task spans many files, do it in verifiable batches and report each batch before moving on.
 4. Respect the repo's conventions: follow its existing style, structure and patterns — do not reformat or "improve" unrelated code. When in doubt, ask before large structural changes.
