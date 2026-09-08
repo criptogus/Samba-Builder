@@ -371,10 +371,7 @@ export function ImportAppDialog({ isOpen, onClose }: ImportAppDialogProps) {
                 value="github-repos"
                 className="text-xs sm:text-sm px-2 py-2"
               >
-                <span className="hidden sm:inline">
-                  {t("home:yourGithubRepos")}
-                </span>
-                <span className="sm:hidden">{t("home:githubRepos")}</span>
+                {t("home:yourGithubRepos")}
               </TabsTrigger>
               <TabsTrigger
                 value="github-url"
