@@ -622,7 +622,7 @@ realPnpmStrictBuildsTestSkipIfWindows(
     const packageJsonPath = path.join(appPath, "package.json");
     const packageJson = JSON.parse(await fs.readFile(packageJsonPath, "utf8"));
     // An old pin contradicts the managed pnpm: CI/deploys following it cannot
-    // read the 9.0 lockfile Dyad writes. This is the migration trigger.
+    // read the 9.0 lockfile Samba Builder writes. This is the migration trigger.
     packageJson.packageManager = "pnpm@8.15.9";
     await fs.writeFile(
       packageJsonPath,

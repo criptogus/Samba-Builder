@@ -307,7 +307,7 @@ describe("runPreCommitTool", () => {
     );
   });
 
-  it("uses Dyad's package-manager environment for hooks", async () => {
+  it("uses Samba Builder's package-manager environment for hooks", async () => {
     vi.stubEnv("COREPACK_ENABLE_PROJECT_SPEC", "1");
     try {
       await runPreCommitTool.execute({}, context(repo));

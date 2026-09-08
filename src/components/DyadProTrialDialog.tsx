@@ -13,19 +13,14 @@ interface DyadProTrialDialogProps {
 export function DyadProTrialDialog({
   isOpen,
   onClose,
-  utmCampaign = "setup-dialog-v2",
 }: DyadProTrialDialogProps) {
-  const utmParams = `utm_source=dyad-app&utm_medium=app&utm_campaign=${encodeURIComponent(utmCampaign)}`;
-
   const handleStartTrial = () => {
-    ipc.system.openExternalUrl(
-      `https://academy.dyad.sh/redirect-to-checkout?trialCode=7PRO30&${utmParams}`,
-    );
+    ipc.system.openExternalUrl("https://sambatech.com");
     onClose();
   };
 
   const handleLearnMore = () => {
-    ipc.system.openExternalUrl(`https://www.dyad.sh/pro?${utmParams}`);
+    ipc.system.openExternalUrl("https://sambatech.com");
   };
 
   const features = [
@@ -57,7 +52,7 @@ export function DyadProTrialDialog({
           {/* Title */}
           <div className="text-center">
             <h2 className="text-xl font-semibold tracking-tight text-foreground">
-              Unlock Dyad Pro
+              Unlock Samba Builder
             </h2>
             <p className="mt-1 text-sm text-muted-foreground">
               Start your free 7-day trial today

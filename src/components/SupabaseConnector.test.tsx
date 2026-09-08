@@ -742,7 +742,7 @@ describe("SupabaseConnector — app API key", () => {
     );
   });
 
-  // The key is still legacy and Dyad couldn't act on it — the one case where
+  // The key is still legacy and Samba Builder couldn't act on it — the one case where
   // claiming the key is "already up to date" would be a plain falsehood.
   it("does not claim the key is current when nothing could be switched", async () => {
     switchAppToPublishableKeyMock.mockResolvedValue({

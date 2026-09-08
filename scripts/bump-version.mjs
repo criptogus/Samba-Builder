@@ -83,7 +83,7 @@ if (parsed.beta != null) {
 }
 
 console.log();
-console.log(bold("  Dyad Version Bump"));
+console.log(bold("  Samba Builder Version Bump"));
 console.log(dim("  ─────────────────"));
 console.log(`  Current version: ${cyan(`v${currentVersion}`)}`);
 console.log();

@@ -16,7 +16,7 @@
 // summary, the follow-up response text) plus the masked [dump] transcript sent
 // to the LLM afterwards. Note the local-agent chat handler returns undefined
 // (not the chatId), so success is asserted via the stored messages / absence
-// of a stream error. Dyad Engine calls are routed to the harness fake server
+// of a stream error. Samba Builder Engine calls are routed to the harness fake server
 // via `engine: true`.
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 import { execFileSync } from "node:child_process";
@@ -404,7 +404,7 @@ describe("context compaction (integration)", () => {
     }
   });
 
-  it("does not create an interrupted version for Dyad-managed-only churn", async () => {
+  it("does not create an interrupted version for Samba Builder-managed-only churn", async () => {
     const targetCommitHash = await getCurrentCommitHash({
       path: harness.appDir,
     });

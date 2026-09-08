@@ -293,36 +293,4 @@ describe("useFixPreCommitWithAI", () => {
     expect(result.current.isAvailable).toBe(false);
     expect(result.current.unavailableReason).toBe("tool-permission");
   });
-
-  it("names an exhausted quota as the reason so the dialog can say so", () => {
-    mocks.settings.current = { enableDyadPro: false, agentToolConsents: {} };
-    mocks.quota.current = {
-      isQuotaExceeded: true,
-      isLoading: false,
-      error: null,
-    };
-
-    const { result } = renderHook(() => useFixPreCommitWithAI(), {
-      wrapper: Wrapper,
-    });
-
-    expect(result.current.isAvailable).toBe(false);
-    expect(result.current.unavailableReason).toBe("quota-exhausted");
-  });
-
-  it("reports no reason while availability is still loading", () => {
-    mocks.settings.current = { enableDyadPro: false, agentToolConsents: {} };
-    mocks.quota.current = {
-      isQuotaExceeded: false,
-      isLoading: true,
-      error: null,
-    };
-
-    const { result } = renderHook(() => useFixPreCommitWithAI(), {
-      wrapper: Wrapper,
-    });
-
-    expect(result.current.isAvailabilityLoading).toBe(true);
-    expect(result.current.unavailableReason).toBeNull();
-  });
 });

@@ -213,7 +213,7 @@ describe("getChangedFilesForCommit", () => {
     );
   });
 
-  it("excludes Dyad-managed runtime files", async () => {
+  it("excludes Samba Builder-managed runtime files", async () => {
     const dir = await setupRepo();
     await write(dir, "app.ts", "v1\n");
     await commitAll(dir, "init");

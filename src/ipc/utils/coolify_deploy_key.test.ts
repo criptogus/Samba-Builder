@@ -60,7 +60,7 @@ const hasSshSigning = (() => {
 })();
 
 /**
- * A throwaway directory standing in for Dyad's userData, so these never
+ * A throwaway directory standing in for Samba Builder's userData, so these never
  * touch anything real.
  *
  * This is the one module in the feature that writes keys to disk, and the

@@ -228,7 +228,7 @@ describe("naming the stored token", () => {
     expect(JSON.stringify(status)).not.toContain("super-secret");
   });
 
-  it("names a server Dyad set up, so the panel can hold the address to it", async () => {
+  it("names a server Samba Builder set up, so the panel can hold the address to it", async () => {
     settings.coolify = {
       ...(settings.coolify as Record<string, unknown>),
       admin: {
@@ -244,7 +244,7 @@ describe("naming the stored token", () => {
     expect(JSON.stringify(status)).not.toContain("Abc123@xyz");
   });
 
-  it("has no server address when Dyad set nothing up", async () => {
+  it("has no server address when Samba Builder set nothing up", async () => {
     const status: any = await call("coolify:get-status", { appId: 1 });
 
     expect(status.serverUrl).toBeNull();
@@ -271,7 +271,7 @@ describe("clearing the token", () => {
   });
 
   it("forgets every stored detail of the instance", async () => {
-    // Dyad holds one Coolify at a time, so anything surviving here belongs to
+    // Samba Builder holds one Coolify at a time, so anything surviving here belongs to
     // an instance nothing is connected to — and the next connection would put
     // a stranger's password under its address. The dialog in front of this
     // shows all of it and asks the user to confirm before it goes.
@@ -339,7 +339,7 @@ describe("clearing the token", () => {
   it("keeps everything when the same instance answers at a new address", async () => {
     // The connection form tells people to give Coolify a domain and
     // certificate, which changes the address. Treating that as a new instance
-    // abandons applications that are still running, with nothing left in Dyad
+    // abandons applications that are still running, with nothing left in Samba Builder
     // that can reach them.
     // A genuinely different address, so the repoint branch really runs — but
     // the instance still reports the server the app is pinned to.
@@ -356,7 +356,7 @@ describe("clearing the token", () => {
   });
 });
 
-describe("the admin account Dyad created", () => {
+describe("the admin account Samba Builder created", () => {
   beforeEach(() => {
     settings.coolify = {
       ...(settings.coolify as Record<string, unknown>),
@@ -371,7 +371,7 @@ describe("the admin account Dyad created", () => {
   it("survives the token for it being saved", async () => {
     // Setting up a server writes the account before there is any token, and
     // this is the call that supplies one. Replacing rather than merging here
-    // would drop the password on the way in, and Dyad has the only copy.
+    // would drop the password on the way in, and Samba Builder has the only copy.
     await call("coolify:save-token", {
       instanceUrl: "https://coolify.example.com",
       token: "tok-2",

@@ -54,7 +54,7 @@ async function reloadNodePath() {
   const pathKey = getPathEnvKey(process.env);
   if (platform() === "win32") {
     // Re-read PATH from the registry: spawning a child (e.g. `cmd /c echo
-    // %PATH%`) can never observe PATH entries an installer added while Dyad
+    // %PATH%`) can never observe PATH entries an installer added while Samba Builder
     // was running, because children inherit this process's stale copy.
     const refreshedPath = await readRefreshedWindowsPath(
       process.env.PATH ?? "",
@@ -189,35 +189,37 @@ function scheduleManagedPnpmInstall(currentPnpmVersion: string | null): void {
     process.env.DYAD_SKIP_MANAGED_PNPM_INSTALL === "true"
   ) {
     logger.info(
-      "Skipping implicit Dyad-managed pnpm install (DYAD_SKIP_MANAGED_PNPM_INSTALL).",
+      "Skipping implicit Samba Builder-managed pnpm install (DYAD_SKIP_MANAGED_PNPM_INSTALL).",
     );
     return;
   }
   if (managedPnpmInstallPromise) {
-    logger.info("Dyad-managed pnpm install is already in progress.");
+    logger.info("Samba Builder-managed pnpm install is already in progress.");
     return;
   }
   if (managedPnpmImplicitInstallFailed) {
     logger.info(
-      "Skipping implicit Dyad-managed pnpm install because it already failed this session.",
+      "Skipping implicit Samba Builder-managed pnpm install because it already failed this session.",
     );
     return;
   }
 
   if (currentPnpmVersion) {
     logger.info(
-      `Existing pnpm ${currentPnpmVersion} is older than ${PNPM_MINIMUM_RELEASE_AGE_VERSION}; installing Dyad-managed pnpm in the background.`,
+      `Existing pnpm ${currentPnpmVersion} is older than ${PNPM_MINIMUM_RELEASE_AGE_VERSION}; installing Samba Builder-managed pnpm in the background.`,
     );
   } else {
     logger.info(
-      "pnpm not found; installing Dyad-managed pnpm in the background.",
+      "pnpm not found; installing Samba Builder-managed pnpm in the background.",
     );
   }
 
   void getManagedPnpmInstallPromise()
     .then((managedPnpmVersion) => {
       managedPnpmImplicitInstallFailed = false;
-      logger.info(`Installed Dyad-managed pnpm ${managedPnpmVersion}.`);
+      logger.info(
+        `Installed Samba Builder-managed pnpm ${managedPnpmVersion}.`,
+      );
     })
     .catch((error) => {
       managedPnpmImplicitInstallFailed = true;
@@ -549,7 +551,7 @@ export function registerNodeHandlers() {
       writeSettings({
         // Preserve a valid custom path; it remains the most explicit runtime
         // selection. If there is no valid custom runtime, the install button
-        // switches Dyad to the newly installed managed runtime.
+        // switches Samba Builder to the newly installed managed runtime.
         nodeRuntimePreference: customNode
           ? (settings.nodeRuntimePreference ?? "system")
           : "managed",

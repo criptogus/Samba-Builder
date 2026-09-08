@@ -67,16 +67,6 @@ describe("chat mode resolution", () => {
     expect(getEffectiveDefaultChatMode(settings, {})).toBe("local-agent");
   });
 
-  it("uses the Google-only automatic Build default", () => {
-    const settings = makeSettings({
-      providerSettings: {
-        google: { apiKey: { value: "test-key" } },
-      },
-    });
-
-    expect(getEffectiveDefaultChatMode(settings, {})).toBe("build");
-  });
-
   it("uses basic agent when Google and another provider are configured", () => {
     const settings = makeSettings({
       providerSettings: {

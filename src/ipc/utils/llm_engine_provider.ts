@@ -251,11 +251,11 @@ export function createDyadEngine(
           headers: {
             ...outgoingHeaders,
             ...(modifiedRequestId && {
-              "X-Dyad-Request-Id": modifiedRequestId,
+              "X-Samba Builder-Request-Id": modifiedRequestId,
             }),
             ...(includeFreeQuotaKey &&
               requestId && {
-                "X-Dyad-Free-Quota-Key": requestId,
+                "X-Samba Builder-Free-Quota-Key": requestId,
               }),
           },
           body: JSON.stringify(parsedBody),
@@ -399,7 +399,7 @@ export async function transcribeWithDyadEngine(
     method: "POST",
     headers: {
       Authorization: `Bearer ${apiKey}`,
-      "X-Dyad-Request-Id": requestId,
+      "X-Samba Builder-Request-Id": requestId,
       ...options.headers,
     },
     body: formData,
@@ -408,7 +408,7 @@ export async function transcribeWithDyadEngine(
   if (!response.ok) {
     const errorText = await response.text();
     throw new DyadError(
-      `Dyad Engine transcription failed: ${response.status} ${response.statusText} - ${errorText}`,
+      `Samba Builder Engine transcription failed: ${response.status} ${response.statusText} - ${errorText}`,
       DyadErrorKind.External,
     );
   }
@@ -420,13 +420,13 @@ function getDyadEngineApiKey(apiKey: string | undefined): string {
   const loadedApiKey = loadApiKey({
     apiKey,
     environmentVariableName: "DYAD_PRO_API_KEY",
-    description: "Dyad Pro API key",
+    description: "Samba Builder API key",
   });
   const normalizedApiKey = normalizeProviderApiKeyInput(loadedApiKey);
   const invalidCharacter = findInvalidProviderApiKeyCharacter(normalizedApiKey);
   if (invalidCharacter) {
     throw new DyadError(
-      formatInvalidProviderApiKeyMessage("Dyad", invalidCharacter),
+      formatInvalidProviderApiKeyMessage("Samba Builder", invalidCharacter),
       DyadErrorKind.Validation,
     );
   }

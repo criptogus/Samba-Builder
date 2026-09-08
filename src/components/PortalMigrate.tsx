@@ -40,9 +40,7 @@ export const PortalMigrate = ({ appId }: PortalMigrateProps) => {
   };
 
   const openDocs = () => {
-    ipc.system.openExternalUrl(
-      "https://www.dyad.sh/docs/templates/portal#create-a-database-migration",
-    );
+    ipc.system.openExternalUrl("https://sambatech.com");
   };
 
   return (

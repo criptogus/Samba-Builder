@@ -26,8 +26,6 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 
-import { Switch } from "@/components/ui/switch";
-import { showError } from "@/lib/toast";
 import {
   UserSettings,
   AzureProviderSetting,
@@ -133,7 +131,7 @@ export function ProviderSettingsPage({ provider }: ProviderSettingsPageProps) {
   const { hasArmedPayload } = useFirstPromptSaga();
   const resumeFirstPrompt = useFirstPromptProviderResume();
 
-  // Use fetched data (or defaults for Dyad)
+  // Use fetched data (or defaults for Samba Builder)
   const providerDisplayName = isDyad
     ? "Samba Builder"
     : (providerData?.name ?? "Unknown Provider");
@@ -232,7 +230,7 @@ export function ProviderSettingsPage({ provider }: ProviderSettingsPageProps) {
           setApiKeyValidationDialog({
             message:
               error?.message ||
-              `Dyad could not verify this ${providerDisplayName} API key.`,
+              `Samba Builder could not verify this ${providerDisplayName} API key.`,
             apiKey: normalizedValue,
             allowKeepInvalidKey: true,
             errorKind: getErrorKind(error),
@@ -242,7 +240,7 @@ export function ProviderSettingsPage({ provider }: ProviderSettingsPageProps) {
       }
 
       const isFirstProviderSetup = !isAnyProviderSetup();
-      // Check if this is the first time user is setting up Dyad Pro
+      // Check if this is the first time user is setting up Samba Builder
       const isNewDyadProSetup = isDyad && settings && !hasDyadProKey(settings);
 
       const settingsUpdate: Partial<UserSettings> = {
@@ -274,7 +272,7 @@ export function ProviderSettingsPage({ provider }: ProviderSettingsPageProps) {
         setShowStartBuildingBanner(true);
       }
 
-      // Refetch user budget when Dyad Pro key is saved
+      // Refetch user budget when Samba Builder key is saved
       if (isDyad) {
         queryClient.invalidateQueries({ queryKey: queryKeys.userBudget.info });
       }
@@ -309,7 +307,7 @@ export function ProviderSettingsPage({ provider }: ProviderSettingsPageProps) {
       setApiKeyValidationDialog({
         message:
           error?.message ||
-          `Dyad could not verify this ${providerDisplayName} API key.`,
+          `Samba Builder could not verify this ${providerDisplayName} API key.`,
         apiKey: normalizedValue,
         allowKeepInvalidKey: false,
         errorKind: getErrorKind(error),
@@ -337,20 +335,6 @@ export function ProviderSettingsPage({ provider }: ProviderSettingsPageProps) {
     } catch (error: any) {
       console.error("Error deleting API key:", error);
       setSaveError(error.message || "Failed to delete API key.");
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
-  // --- Toggle Dyad Pro Handler ---
-  const handleToggleDyadPro = async (enabled: boolean) => {
-    setIsSaving(true);
-    try {
-      await updateSettings({
-        enableDyadPro: enabled,
-      });
-    } catch (error: any) {
-      showError(`Error toggling Dyad Pro: ${error}`);
     } finally {
       setIsSaving(false);
     }
@@ -500,7 +484,7 @@ export function ProviderSettingsPage({ provider }: ProviderSettingsPageProps) {
                   AI access is ready
                 </h2>
                 <p className="mt-1 text-sm text-green-800/80 dark:text-green-200/80">
-                  You can now start building with Dyad.
+                  You can now start building with Samba Builder.
                 </p>
               </div>
             </div>
@@ -538,6 +522,15 @@ export function ProviderSettingsPage({ provider }: ProviderSettingsPageProps) {
                 Could not load configuration data: {settingsError.message}
               </AlertDescription>
             </Alert>
+          ) : isDyad ? (
+            <div className="mt-6 p-4 bg-(--background-lightest) rounded-lg border">
+              <h3 className="font-medium">Modo automático</h3>
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                O Auto usa automaticamente o modelo de qualquer provider
+                conectado abaixo (ex: DeepSeek). Basta colar a chave do provider
+                que você usa — sem assinatura. O Auto não tem chave própria.
+              </p>
+            </div>
           ) : (
             <ApiKeyConfiguration
               provider={provider}
@@ -562,23 +555,6 @@ export function ProviderSettingsPage({ provider }: ProviderSettingsPageProps) {
               highlightPasteButton={highlightPasteButton}
               onDismissPasteHighlight={() => setHighlightPasteButton(false)}
             />
-          )}
-
-          {isDyad && !settingsLoading && (
-            <div className="mt-6 flex items-center justify-between p-4 bg-(--background-lightest) rounded-lg border">
-              <div>
-                <h3 className="font-medium">Enable Dyad Pro</h3>
-                <p className="text-sm text-gray-600 dark:text-gray-400">
-                  Toggle to enable Dyad Pro
-                </p>
-              </div>
-              <Switch
-                aria-label="Enable Dyad Pro"
-                checked={settings?.enableDyadPro}
-                onCheckedChange={handleToggleDyadPro}
-                disabled={isSaving}
-              />
-            </div>
           )}
 
           {/* Conditionally render CustomModelsSection */}

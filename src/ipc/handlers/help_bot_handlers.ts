@@ -27,6 +27,12 @@ const helpSessions = new Map<string, HelpMessage[]>();
 const activeHelpStreams = new Map<string, AbortController>();
 
 export function registerHelpBotHandlers() {
+  // Samba Builder: zero backend do Dyad — o help bot conversava com
+  // helpchat.dyad.sh (servidor do Dyad). Desativado: nada é registrado e o
+  // suporte é via https://sambatech.com. (O código abaixo fica apenas para
+  // referência de contrato IPC; nunca executa.)
+  return;
+
   // Abort in-flight help-bot streams and drop session history on quit.
   // (Guarded: `app` is undefined when this module is imported in unit tests.)
   app?.on?.("before-quit", () => {

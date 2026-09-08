@@ -1,3 +1,9 @@
+import { managementContracts } from "../types/management";
+import { deliveryContracts } from "../types/delivery";
+import { governanceContracts } from "../types/governance";
+import { nativeAgentContracts } from "../types/native_agents";
+import { meetingsContracts } from "../types/meetings";
+import { awsContracts } from "../types/aws";
 /**
  * Channel Definitions for Preload Script
  *
@@ -65,6 +71,7 @@ import {
 import { appCollectionContracts } from "../types/app_collections";
 import { terminalContracts } from "../types/terminal";
 import { testsContracts, testsEvents } from "../types/tests";
+import { designSystemContracts } from "../types/design_system";
 import { recordingContracts, recordingEvents } from "../types/recording";
 import { userInputContracts, userInputEvents } from "../types/user_input";
 import { firstPromptSendContracts } from "../types/first_prompt";
@@ -119,6 +126,9 @@ export const VALID_INVOKE_CHANNELS = [
   ...getInvokeChannels(githubContracts),
   ...getInvokeChannels(gitContracts),
   ...getInvokeChannels(mcpContracts),
+  ...getInvokeChannels(awsContracts),
+  ...getInvokeChannels(meetingsContracts),
+  ...getInvokeChannels(nativeAgentContracts),
   ...getInvokeChannels(vercelContracts),
   ...getInvokeChannels(coolifyContracts),
   ...getInvokeChannels(coolifySetupContracts),
@@ -148,8 +158,12 @@ export const VALID_INVOKE_CHANNELS = [
   ...getInvokeChannels(mediaContracts),
   ...getInvokeChannels(appBlueprintContracts),
   ...getInvokeChannels(appCollectionContracts),
+  ...getInvokeChannels(deliveryContracts),
+  ...getInvokeChannels(managementContracts),
+  ...getInvokeChannels(governanceContracts),
   ...getInvokeChannels(terminalContracts),
   ...getInvokeChannels(testsContracts),
+  ...getInvokeChannels(designSystemContracts),
   ...getInvokeChannels(recordingContracts),
   ...getInvokeChannels(userInputContracts),
   ...getInvokeChannels(windowInfrastructureContracts),

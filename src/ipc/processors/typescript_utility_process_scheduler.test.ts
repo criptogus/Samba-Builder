@@ -246,3 +246,85 @@ describe("TypeScriptUtilityProcessScheduler", () => {
     ).resolves.toBe("recovered");
   });
 });
+
+describe("idle TypeScript memory release", () => {
+  afterEach(() => vi.useRealTimers());
+
+  it("releases the resident after a minute and resets the timer on reuse", async () => {
+    vi.useFakeTimers();
+    const scheduler = new TypeScriptUtilityProcessScheduler();
+    let registration: ReturnType<typeof scheduler.registerResidentProcess>;
+    const stop = vi.fn(async () => registration.clear());
+    await scheduler.runExclusive("code-explorer", async () => {
+      registration = scheduler.registerResidentProcess({
+        kind: "code-explorer",
+        reusable: true,
+        token: {},
+        stop,
+      });
+    });
+    await vi.advanceTimersByTimeAsync(59_000);
+    await scheduler.runExclusive("code-explorer", async () => undefined);
+    await vi.advanceTimersByTimeAsync(59_000);
+    expect(stop).not.toHaveBeenCalled();
+    await vi.advanceTimersByTimeAsync(1_000);
+    expect(stop).toHaveBeenCalledTimes(1);
+  });
+
+  it("never evicts an index during an active operation", async () => {
+    vi.useFakeTimers();
+    const scheduler = new TypeScriptUtilityProcessScheduler();
+    let registration: ReturnType<typeof scheduler.registerResidentProcess>;
+    const stop = vi.fn(async () => registration.clear());
+    await scheduler.runExclusive("code-explorer", async () => {
+      registration = scheduler.registerResidentProcess({
+        kind: "code-explorer",
+        reusable: true,
+        token: {},
+        stop,
+      });
+    });
+    let finish!: () => void;
+    const active = scheduler.runExclusive(
+      "code-explorer",
+      () =>
+        new Promise<void>((resolve) => {
+          finish = resolve;
+        }),
+    );
+    await vi.advanceTimersByTimeAsync(120_000);
+    expect(stop).not.toHaveBeenCalled();
+    finish();
+    await active;
+    await vi.advanceTimersByTimeAsync(60_000);
+    expect(stop).toHaveBeenCalledTimes(1);
+  });
+
+  it("waits for actual exit when a request arrives during idle shutdown", async () => {
+    vi.useFakeTimers();
+    const scheduler = new TypeScriptUtilityProcessScheduler();
+    let registration: ReturnType<typeof scheduler.registerResidentProcess>;
+    let exited!: () => void;
+    await scheduler.runExclusive("code-explorer", async () => {
+      registration = scheduler.registerResidentProcess({
+        kind: "code-explorer",
+        reusable: true,
+        token: {},
+        stop: () =>
+          new Promise<void>((resolve) => {
+            exited = () => {
+              registration.clear();
+              resolve();
+            };
+          }),
+      });
+    });
+    await vi.advanceTimersByTimeAsync(60_000);
+    const operation = vi.fn(async () => undefined);
+    const next = scheduler.runExclusive("code-explorer", operation);
+    expect(operation).not.toHaveBeenCalled();
+    exited();
+    await next;
+    expect(operation).toHaveBeenCalledTimes(1);
+  });
+});

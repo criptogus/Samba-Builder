@@ -2,7 +2,7 @@
 //
 // Bundles a minimal OAuth 2.1 authorization server (discovery, DCR,
 // /authorize, /token, refresh) AND a Streamable-HTTP MCP endpoint
-// behind it. Used to exercise the Dyad MCP OAuth flow against a
+// behind it. Used to exercise the Samba Builder MCP OAuth flow against a
 // deterministic, controllable target rather than a real provider.
 //
 // Env knobs:

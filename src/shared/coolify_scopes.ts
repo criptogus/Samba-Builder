@@ -3,7 +3,7 @@
  * them.
  *
  * Lives in shared/ so the setup instructions in the renderer, the 403 message
- * in the main process, and the token Dyad mints for itself cannot drift apart:
+ * in the main process, and the token Samba Builder mints for itself cannot drift apart:
  * Coolify fixes a token's scopes when it is created, so a token missing one
  * has to be recreated.
  *

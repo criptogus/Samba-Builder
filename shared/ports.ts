@@ -46,7 +46,7 @@ export const PROXY_PORT_RANGE = 10_000;
 /**
  * Start of the fallback band used when an app's deterministic proxy port is
  * already taken (by a foreign service or, in the rare 10k-app overlap, another
- * Dyad app). It sits just above the proxy range so a fallback never collides
+ * Samba Builder app). It sits just above the proxy range so a fallback never collides
  * with another app's *reserved* proxy slot.
  */
 export const PROXY_FALLBACK_PORT_START = PROXY_PORT_BASE + PROXY_PORT_RANGE;

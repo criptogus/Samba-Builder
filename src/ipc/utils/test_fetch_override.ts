@@ -7,7 +7,7 @@
  * HTTP traffic behaves like real Node.
  *
  * Lives in its own dependency-free module (not get_model_client.ts) so
- * secondary factories — provider key validation, the help bot, Dyad Engine
+ * secondary factories — provider key validation, the help bot, Samba Builder Engine
  * transcription — can thread it without import cycles.
  *
  * The setter THROWS outside test environments: `process.env.VITEST` (set by

@@ -7,7 +7,7 @@ const userDataDir = mkdtempSync(join(tmpdir(), "dyad-onboarding-"));
 const nodeStatus = process.env.DYAD_DEV_NODEJS_STATUS || "missing";
 const npmCommand = process.platform === "win32" ? "npm.cmd" : "npm";
 
-console.log("Starting Dyad onboarding preview");
+console.log("Starting Samba Builder onboarding preview");
 console.log(`  userData: ${userDataDir}`);
 console.log(`  Node.js status: ${nodeStatus}`);
 

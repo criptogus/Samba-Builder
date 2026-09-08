@@ -99,7 +99,7 @@ describe("listSupabaseOrganizations", () => {
 describe("refreshSupabaseToken", () => {
   afterEach(() => vi.unstubAllGlobals());
 
-  it("shares one refresh request across concurrent callers", async () => {
+  it("is a no-op and never calls the retired Dyad refresh endpoint", async () => {
     vi.mocked(readSettings).mockReturnValue({
       supabase: {
         refreshToken: { value: "rotating-refresh-token" },
@@ -107,36 +107,14 @@ describe("refreshSupabaseToken", () => {
         tokenTimestamp: 0,
       },
     } as ReturnType<typeof readSettings>);
-    let release: (response: Response) => void = () => {};
-    vi.stubGlobal(
-      "fetch",
-      vi.fn(
-        () =>
-          new Promise<Response>((resolve) => {
-            release = resolve;
-          }),
-      ),
-    );
+    vi.stubGlobal("fetch", vi.fn());
 
-    const first = refreshSupabaseToken();
-    const second = refreshSupabaseToken();
-    expect(second).toBe(first);
-    expect(fetch).toHaveBeenCalledOnce();
+    await refreshSupabaseToken();
 
-    release(
-      new Response(
-        JSON.stringify({
-          accessToken: "access",
-          refreshToken: "rotated",
-          expiresIn: 3600,
-        }),
-        { status: 200 },
-      ),
-    );
-    await expect(Promise.all([first, second])).resolves.toEqual([
-      undefined,
-      undefined,
-    ]);
+    // Token refresh used to round-trip through the retired Dyad OAuth proxy.
+    // Connections are now direct long-lived Personal Access Tokens, so
+    // refreshing must never hit the network.
+    expect(fetch).not.toHaveBeenCalled();
   });
 });
 

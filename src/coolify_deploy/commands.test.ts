@@ -897,7 +897,7 @@ describe("build configuration", () => {
     const created = bodyOf("POST /applications/private-deploy-key");
     expect(created.build_pack).toBe("railpack");
     expect(created.ports_exposes).toBe("3000");
-    // Nothing else is claimed about an app Dyad does not recognise, so railpack
+    // Nothing else is claimed about an app Samba Builder does not recognise, so railpack
     // reads it and decides for itself.
     expect(created.start_command).toBeUndefined();
     expect(created.publish_directory).toBeUndefined();
@@ -1438,7 +1438,7 @@ describe("pre-deploy warnings", () => {
   it("says when edits are only on disk, which no commit hash reveals", async () => {
     // Deploying what is on GitHub is the intent, but uncommitted work does
     // not move HEAD, so the push check above cannot see it. A user looking at
-    // edits Dyad just made would otherwise get a green deploy without them.
+    // edits Samba Builder just made would otherwise get a green deploy without them.
     git.uncommitted = ["src/App.tsx", "src/main.tsx"];
     const app = await seedApp();
     happyPathRoutes();
@@ -1660,7 +1660,7 @@ describe("keeping the Coolify application in step with the repo", () => {
   it("leaves settings it has no opinion on untouched", async () => {
     // A redeploy that rewrote every field would replace anything the user set
     // in Coolify, and anything an app configured for itself, with a default
-    // Dyad invented. Only what Dyad actually has a value for is sent.
+    // Samba Builder invented. Only what Samba Builder actually has a value for is sent.
     framework.type = "nextjs";
     const app = await seedApp({ connection: { applicationUuid: APP_UUID } });
     happyPathRoutes();

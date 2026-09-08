@@ -4,7 +4,7 @@ export const FREE_PRO_MODEL_PROVIDER = "auto";
 export const FREE_PRO_MODEL_NAME = "free-pro";
 export const FREE_PRO_MODEL_FALLBACK_CHAT_MODE: ChatMode = "local-agent";
 export const FREE_PRO_BUILD_MODE_ERROR =
-  "Dyad Free is not available in Build mode. Switch to Agent, Ask, or Plan mode, or choose a paid model.";
+  "Samba Builder Free is not available in Build mode. Switch to Agent, Ask, or Plan mode, or choose a paid model.";
 
 export function isFreeProModel(
   model: Pick<LargeLanguageModel, "provider" | "name"> | null | undefined,

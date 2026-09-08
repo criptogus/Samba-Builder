@@ -6,7 +6,7 @@ import { eq } from "drizzle-orm";
 
 import { DyadErrorKind } from "@/errors/dyad_error";
 import type { RemoveFileAndCommitResult } from "../services/git_service";
-import { apps } from "@/db/schema";
+import { apps, projectTestExecutions } from "@/db/schema";
 import {
   appOperationCoordinator,
   type AppOperationRequest,
@@ -182,6 +182,18 @@ describe("tests handlers", () => {
       } finally {
         windowRegistry.unregister(sender.id);
       }
+
+      const receipt = harness.db
+        .select()
+        .from(projectTestExecutions)
+        .where(eq(projectTestExecutions.appId, appId))
+        .get();
+      expect(receipt).toMatchObject({
+        appId,
+        source: "agent",
+        status: "inconclusive",
+        passed: 0,
+      });
 
       expect(broadcastToRegisteredWindowsMock).toHaveBeenCalledWith(
         sender,

@@ -313,7 +313,7 @@ describe("AppRuntimeService", () => {
       type: "server",
       level: "info",
       message: "Rebuilding app",
-      sourceName: "Dyad",
+      sourceName: "Samba Builder",
       appId: APP_ID,
       timestamp: 123,
       runtimeBoundary: "rebuild",

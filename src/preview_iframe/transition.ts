@@ -125,7 +125,7 @@ export function transition(
           preservedUrl: currentUrl,
         });
       }
-      // A document load caused by Dyad's own navigation must not be misread as
+      // A document load caused by Samba Builder's own navigation must not be misread as
       // the app's doing: that navigation already set `currentUrl` to this URL
       // before the document loaded, so it is ignored rather than downgrading
       // provenance to "app". `replaceState` shares the check for the same

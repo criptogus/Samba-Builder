@@ -724,7 +724,7 @@ describe("run_build", () => {
     });
   });
 
-  it("cleans only marked Dyad-owned snapshot directories", async () => {
+  it("cleans only marked Samba Builder-owned snapshot directories", async () => {
     const root = await fs.mkdtemp(path.join(os.tmpdir(), "dyad-build-test-"));
     temporaryDirectories.push(root);
     const repoPath = path.join(root, "repo");

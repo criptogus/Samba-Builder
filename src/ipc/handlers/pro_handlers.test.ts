@@ -212,7 +212,7 @@ describe("pro audio transcription handler", () => {
     );
 
     expect(() => unwrapIpcEnvelope(envelope as never)).toThrow(
-      "trusted Dyad renderer",
+      "trusted Samba Builder renderer",
     );
     expect(mocks.readSettings).not.toHaveBeenCalled();
     expect(mocks.transcribeWithDyadEngine).not.toHaveBeenCalled();

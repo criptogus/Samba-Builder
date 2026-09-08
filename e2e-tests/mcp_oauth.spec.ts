@@ -49,7 +49,7 @@ testSkipIfWindows("mcp - oauth connects and calls a tool", async ({ po }) => {
 
     // Drive the OAuth authorize URL via fetch (redirect:follow) so
     // the test doesn't open the OS browser. The fake's /authorize
-    // auto-redirects to the loopback callback, and Dyad's listener
+    // auto-redirects to the loopback callback, and Samba Builder's listener
     // resolves the flow normally.
     await po.electronApp.evaluate(({ shell }) => {
       shell.openExternal = async (url) => {

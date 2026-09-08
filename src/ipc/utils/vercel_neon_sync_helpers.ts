@@ -11,7 +11,7 @@ export type VercelEnvTarget = "production" | "preview" | "development";
  * deliberately don't target preview/development: the synced DATABASE_URL is
  * usually the production branch, and exposing it to non-prod environments
  * (e.g. via a local `vercel env pull`) makes it easy to accidentally mutate the
- * production DB. Local development doesn't pull from Vercel, and Dyad apps
+ * production DB. Local development doesn't pull from Vercel, and Samba Builder apps
  * rarely use Vercel preview deployments, so production-only is the safer
  * default.
  */
@@ -89,7 +89,7 @@ export function canonicalOrigin(value: string): string | null {
 
   // Neon Auth compares the complete browser Origin, including its scheme.
   // Production hosts should remain HTTPS even if a caller supplies `http://`,
-  // but Dyad's local preview genuinely runs over HTTP. Preserve that scheme for
+  // but Samba Builder's local preview genuinely runs over HTTP. Preserve that scheme for
   // loopback only so its sign-in origin can be allowlisted exactly.
   if (/^http:\/\//i.test(trimmed)) {
     try {

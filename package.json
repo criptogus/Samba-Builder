@@ -18,6 +18,15 @@
     "bump": "node scripts/bump-version.mjs",
     "clean": "rimraf out scaffold/node_modules",
     "start": "node scripts/start-supervisor.mjs",
+    "desktop:build": "cross-env SAMBA_LOCAL_DESKTOP_BUILD=true E2E_TEST_BUILD=false npm run package",
+    "desktop": "node scripts/start-desktop.mjs",
+    "samba:seed": "python3 samba/setup/seed-providers.py",
+    "samba:seed-mcp": "python3 samba/setup/seed-mcp-composio.py",
+    "samba:seed-playwright": "python3 samba/setup/seed-mcp-playwright.py",
+    "samba:seed-cua": "python3 samba/setup/seed-mcp-cua.py",
+    "samba:seed-cortex": "python3 samba/setup/seed-mcp-cortex.py",
+    "samba:score": "python3 samba/quality/score.py",
+    "samba:governance": "python3 samba/governance/gate.py",
     "start:onboarding": "node scripts/start-onboarding.mjs",
     "start:out-of-quota": "cross-env NODE_ENV=development DYAD_SIMULATE_FREE_AGENT_QUOTA_EXCEEDED=true npm start",
     "copy-data-to-dev": "node scripts/copy-data-to-dev.mjs",
@@ -47,7 +56,7 @@
     "fmt": "npx oxfmt",
     "presubmit": "npm run fmt:check && npm run lint",
     "eval": "cross-env NODE_OPTIONS=--no-deprecation vitest run --config vitest.eval.config.ts",
-    "test": "node --test scripts/start-supervisor.test.mjs scripts/copy-data-to-dev.test.mjs scripts/unauthorized-release-alert.test.mjs scripts/pr-review/validate-review.test.mjs scripts/issue-triage/triage-comment.test.mjs scripts/issue-triage/prepare-context.test.mjs && cross-env NODE_OPTIONS=--no-deprecation VITE_CJS_IGNORE_WARNING=true vitest run",
+    "test": "node --test scripts/start-desktop.test.mjs scripts/start-supervisor.test.mjs scripts/copy-data-to-dev.test.mjs scripts/unauthorized-release-alert.test.mjs scripts/pr-review/validate-review.test.mjs scripts/issue-triage/triage-comment.test.mjs scripts/issue-triage/prepare-context.test.mjs && cross-env NODE_OPTIONS=--no-deprecation VITE_CJS_IGNORE_WARNING=true vitest run",
     "test:watch": "cross-env NODE_OPTIONS=--no-deprecation VITE_CJS_IGNORE_WARNING=true vitest",
     "test:ui": "cross-env NODE_OPTIONS=--no-deprecation VITE_CJS_IGNORE_WARNING=true vitest --ui",
     "extract-codebase": "ts-node scripts/extract-codebase.ts",
@@ -75,6 +84,7 @@
     "@ai-sdk/openai-compatible": "^2.0.26",
     "@ai-sdk/provider-utils": "^4.0.13",
     "@ai-sdk/xai": "^3.0.46",
+    "@anthropic-ai/claude-agent-sdk": "0.2.63",
     "@babel/parser": "^7.28.5",
     "@base-ui/react": "^1.2.0",
     "@biomejs/biome": "^1.9.4",
@@ -108,7 +118,7 @@
     "cmdk": "^1.1.1",
     "date-fns": "^4.1.0",
     "dotenv": "^16.4.7",
-    "drizzle-orm": "^0.41.0",
+    "drizzle-orm": "^0.45.2",
     "dugite": "^3.0.0",
     "electron-log": "^5.4.3",
     "electron-playwright-helpers": "^2.1.0",
@@ -158,8 +168,8 @@
     "update-electron-app": "^3.1.2",
     "use-sync-external-store": "^1.6.0",
     "uuid": "^11.1.0",
-    "yaml": "^2.8.1",
     "ws": "^8.19.0",
+    "yaml": "^2.8.1",
     "zod": "^4.3.6"
   },
   "optionalDependencies": {
@@ -198,7 +208,7 @@
     "@typescript-eslint/eslint-plugin": "^5.62.0",
     "@typescript-eslint/parser": "^5.62.0",
     "@typescript/native-preview": "^7.0.0-dev.20260107.1",
-    "@vitest/ui": "^3.1.1",
+    "@vitest/ui": "^3.2.7",
     "babel-plugin-react-compiler": "^1.0.0",
     "cross-env": "^7.0.3",
     "drizzle-kit": "^0.30.6",
@@ -206,7 +216,7 @@
     "esbuild": "^0.25.9",
     "eslint": "^8.57.1",
     "eslint-plugin-import": "^2.31.0",
-    "happy-dom": "^17.4.4",
+    "happy-dom": "^20.14.0",
     "husky": "^9.1.7",
     "lint-staged": "^15.5.2",
     "oxfmt": "^0.26.0",
@@ -215,13 +225,14 @@
     "storybook": "^8.6.15",
     "typescript": "6.0.3",
     "undici": "^8.7.0",
-    "vite": "^5.4.17",
-    "vitest": "^3.1.1"
+    "vite": "^6.4.3",
+    "vitest": "^3.2.7"
   },
   "overrides": {
     "@vercel/sdk": {
       "@modelcontextprotocol/sdk": "$@modelcontextprotocol/sdk"
-    }
+    },
+    "tar": "^7.5.22"
   },
   "engines": {
     "node": ">=24 <26"

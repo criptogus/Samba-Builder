@@ -254,7 +254,7 @@ function readAppKey(clientFilePath: string): string | undefined {
  *
  * The key is written into the app's source once, at generation time, and never
  * refreshed — the prompt tells the AI to create that file only if it doesn't
- * already exist. So the key outlives the format Dyad writes today, and keeps
+ * already exist. So the key outlives the format Samba Builder writes today, and keeps
  * working right up until the project disables legacy keys, at which point every
  * request the app makes fails with "Legacy API keys are disabled".
  *
@@ -399,10 +399,10 @@ async function writeClientFile(
 }
 
 /**
- * Was the client file untouched before Dyad rewrote it?
+ * Was the client file untouched before Samba Builder rewrote it?
  *
  * Decides whether the rewrite may be auto-committed. `git commit -- <path>`
- * records the whole working-tree version of that path, not the single hunk Dyad
+ * records the whole working-tree version of that path, not the single hunk Samba Builder
  * changed, so committing a file the user was already editing would fold their
  * in-progress work into a commit labelled as a key swap. It answers false on
  * any failure (not a repo, git unavailable): "can't prove it was clean" has to
@@ -428,7 +428,7 @@ async function wasClientFileClean({
 /**
  * Commit the rewritten client on the app's behalf.
  *
- * Dyad's own edit is not something the user needs to review: leaving it in the
+ * Samba Builder's own edit is not something the user needs to review: leaving it in the
  * working tree only greets them with the "uncommitted changes" banner over a
  * one-line key swap they didn't type and can't meaningfully judge. Committing
  * it also gives the change a version to revert to, which an unstaged edit has.

@@ -1138,7 +1138,7 @@ describe("preserving undecryptable secrets", () => {
   });
 
   it("puts the Coolify admin password through encryption", () => {
-    // Dyad made this one up and is the only thing holding it, which is a
+    // Samba Builder made this one up and is the only thing holding it, which is a
     // reason to keep it readable and not a reason to keep it in the clear.
     writeSettings({
       coolify: {

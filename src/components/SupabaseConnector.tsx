@@ -2,12 +2,12 @@ import { useEffect, useRef, useState } from "react";
 import {
   acknowledgeConnectionFlow,
   cancelConnectionFlow,
-  startConnectionFlow,
   useConnectionFlow,
   useUnsolicitedConnectionReturn,
 } from "@/hooks/useConnectionFlow";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 import { Label } from "@/components/ui/label";
 
@@ -346,30 +346,75 @@ export function SupabaseConnector({ appId }: { appId: number }) {
 
   const handleAddAccount = async () => {
     try {
-      // Starting is a no-op while a flow is already active (double-click).
-      const { started, invocationRef } = await startConnectionFlow("supabase");
-      if (!started) {
+      // In test mode, link a fake project directly (no token entry needed).
+      if (settings?.isTestMode) {
+        await ipc.supabase.fakeConnectAndSetProject({
+          appId,
+          fakeProjectId: "fake-project-id",
+        });
         return;
       }
-      try {
-        if (settings?.isTestMode) {
-          await ipc.supabase.fakeConnectAndSetProject({
-            appId,
-            fakeProjectId: "fake-project-id",
-          });
-        } else {
-          await ipc.system.openExternalUrl(
-            "https://supabase-oauth.dyad.sh/api/connect-supabase/login",
-          );
-        }
-      } catch (error) {
-        await cancelConnectionFlow("supabase", invocationRef);
-        throw error;
-      }
+      setShowAccessTokenForm((open) => !open);
     } catch (error) {
       toast.error(getErrorMessage(error));
     }
   };
+
+  // Direct connect with a Supabase Personal Access Token (no Dyad OAuth).
+  const [showAccessTokenForm, setShowAccessTokenForm] = useState(false);
+  const [accessTokenDraft, setAccessTokenDraft] = useState("");
+  const [isConnectingWithToken, setIsConnectingWithToken] = useState(false);
+
+  const connectWithAccessToken = async () => {
+    const token = accessTokenDraft.trim();
+    if (!token || isConnectingWithToken) return;
+    setIsConnectingWithToken(true);
+    try {
+      await ipc.supabase.connectWithAccessToken({ accessToken: token });
+      setAccessTokenDraft("");
+      setShowAccessTokenForm(false);
+      await refreshAfterConnectRef.current();
+    } catch (error) {
+      toast.error(getErrorMessage(error));
+    } finally {
+      setIsConnectingWithToken(false);
+    }
+  };
+
+  const renderTokenConnectFields = () => (
+    <div className="space-y-2" data-testid="supabase-access-token-form">
+      <Label htmlFor="supabase-access-token-input">
+        Supabase Personal Access Token
+      </Label>
+      <Input
+        id="supabase-access-token-input"
+        type="password"
+        autoComplete="off"
+        spellCheck={false}
+        value={accessTokenDraft}
+        onChange={(e) => setAccessTokenDraft(e.target.value)}
+        placeholder="sb_pat_…"
+        onKeyDown={(e) => {
+          if (e.key === "Enter") void connectWithAccessToken();
+        }}
+        disabled={isConnectingWithToken}
+      />
+      <p className="text-xs text-muted-foreground">
+        Paste a Supabase Personal Access Token to connect directly. Create one
+        at supabase.com/dashboard/account/tokens.
+      </p>
+      <Button
+        onClick={connectWithAccessToken}
+        disabled={isConnectingWithToken || !accessTokenDraft.trim()}
+        data-testid="connect-supabase-with-token-button"
+      >
+        {isConnectingWithToken && (
+          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+        )}
+        Connect
+      </Button>
+    </div>
+  );
 
   const handleUpdateApiKey = async () => {
     try {
@@ -379,7 +424,7 @@ export function SupabaseConnector({ appId }: { appId: number }) {
       } else if (outcome === "already-current") {
         toast.success(t("integrations.supabase.apiKeyAlreadyCurrent"));
       } else {
-        // The key is still legacy and Dyad couldn't act on it. Reporting
+        // The key is still legacy and Samba Builder couldn't act on it. Reporting
         // success here would leave the user believing a broken app was fixed.
         toast.info(t("integrations.supabase.apiKeyNotUpdated"));
       }
@@ -503,6 +548,36 @@ export function SupabaseConnector({ appId }: { appId: number }) {
         className="h-24 w-full"
         data-testid="supabase-settings-loading"
       />
+    );
+  }
+
+  // Direct connect-with-access-token form, surfaced by the "Add Organization"
+  // action in the connected states (no OAuth).
+  if (showAccessTokenForm) {
+    return (
+      <Card
+        key="supabase-token-connect"
+        className="mt-1"
+        data-testid="supabase-token-connect-card"
+      >
+        <CardHeader>
+          <CardTitle>{t("integrations.supabase.addOrganization")}</CardTitle>
+          <CardDescription>
+            Connect Supabase with a Personal Access Token.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          {renderTokenConnectFields()}
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setShowAccessTokenForm(false)}
+            disabled={isConnectingWithToken}
+          >
+            {t("integrations.supabase.cancelSignIn")}
+          </Button>
+        </CardContent>
+      </Card>
     );
   }
 
@@ -1011,38 +1086,24 @@ export function SupabaseConnector({ appId }: { appId: number }) {
     );
   }
 
-  // No accounts connected, show connect button
+  // No accounts connected — connect directly with a Personal Access Token.
   return (
-    <div className="flex flex-col space-y-4 p-4 border rounded-md">
-      <div className="flex flex-col md:flex-row items-center justify-between">
-        <h2 className="text-lg font-medium">Integrations</h2>
-        <img
-          onClick={isFlowActive ? undefined : handleAddAccount}
-          src={isDarkMode ? connectSupabaseDark : connectSupabaseLight}
-          alt="Connect to Supabase"
-          aria-busy={isFlowActive}
-          className={`w-full h-10 min-h-8 min-w-20 ${
-            isFlowActive ? "cursor-wait opacity-60" : "cursor-pointer"
-          }`}
-          data-testid="connect-supabase-button"
-        />
-      </div>
-      {isFlowActive && (
-        <div className="flex justify-end">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => {
-              if ("invocationRef" in flowState) {
-                void cancelConnectionFlow("supabase", flowState.invocationRef);
-              }
-            }}
-            data-testid="cancel-supabase-flow-button"
-          >
-            {t("integrations.supabase.cancelSignIn")}
-          </Button>
-        </div>
-      )}
-    </div>
+    <Card className="mt-1" data-testid="supabase-connect-card">
+      <CardHeader>
+        <CardTitle className="flex items-center justify-between">
+          <span>{t("integrations.supabase.projects")}</span>
+          <img
+            src={isDarkMode ? connectSupabaseDark : connectSupabaseLight}
+            alt="Supabase Logo"
+            style={{ height: 20, width: "auto" }}
+          />
+        </CardTitle>
+        <CardDescription>
+          Connect Supabase with a Personal Access Token, then pick or create a
+          project for this app.
+        </CardDescription>
+      </CardHeader>
+      <CardContent>{renderTokenConnectFields()}</CardContent>
+    </Card>
   );
 }

@@ -81,9 +81,27 @@ const mocks = vi.hoisted(() => ({
   settings: {
     enableDyadPro: true,
     providerSettings: {
+      // Samba Builder (BYOK): so providers conectados (com chave salva ou env
+      // var) aparecem na lista. "auto" existe no schema mas nao tem chave
+      // propria — e excluido da lista de modelos pelo id.
       auto: {
         apiKey: {
-          value: "dyad-pro-key",
+          value: "",
+        },
+      },
+      openai: {
+        apiKey: {
+          value: "openai-key",
+        },
+      },
+      google: {
+        apiKey: {
+          value: "google-key",
+        },
+      },
+      vertex: {
+        apiKey: {
+          value: "",
         },
       },
       openrouter: {
@@ -91,7 +109,18 @@ const mocks = vi.hoisted(() => ({
           value: "",
         },
       },
+      xai: {
+        apiKey: {
+          value: "",
+        },
+      },
+      custom: {
+        apiKey: {
+          value: "",
+        },
+      },
     },
+
     selectedModel: {
       name: "auto",
       provider: "auto",
@@ -224,7 +253,7 @@ vi.mock("@/hooks/useLanguageModelsByProviders", () => ({
             },
             {
               apiName: "free-pro",
-              displayName: "Dyad Free",
+              displayName: "Samba Builder Free",
               description: "Free Pro model",
               type: "cloud",
               tag: "Free",
@@ -326,18 +355,32 @@ vi.mock("@/hooks/useLanguageModelProviders", () => ({
   useLanguageModelProviders: () => ({
     isLoading: false,
     isProviderSetup: (provider: string) => {
-      if (provider === "openrouter") {
-        return Boolean(
-          mocks.settings.providerSettings.openrouter.apiKey.value ||
-          mocks.envVars.OPENROUTER_API_KEY,
-        );
-      }
-      return false;
+      // BYOK: um provider so esta conectado quando tem chave salva no
+      // settings ou uma env var correspondente.
+      const ps = mocks.settings.providerSettings as unknown as Record<
+        string,
+        { apiKey?: { value?: string } } | undefined
+      >;
+      const key = ps[provider]?.apiKey?.value;
+      const envName =
+        provider === "openai"
+          ? "OPENAI_API_KEY"
+          : provider === "google"
+            ? "GOOGLE_API_KEY"
+            : provider === "openrouter"
+              ? "OPENROUTER_API_KEY"
+              : provider === "vertex"
+                ? "VERTEX_API_KEY"
+                : provider === "xai"
+                  ? "XAI_API_KEY"
+                  : undefined;
+      return Boolean(key || (envName && mocks.envVars[envName]));
     },
+
     data: [
       {
         id: "auto",
-        name: "Dyad",
+        name: "Samba Builder",
         type: "cloud",
       },
       {
@@ -538,8 +581,14 @@ describe("ModelPicker", () => {
     mocks.lmStudioModels = [];
     mocks.lmStudioError = null;
     mocks.settings.enableDyadPro = true;
-    mocks.settings.providerSettings.auto.apiKey.value = "dyad-pro-key";
+    mocks.settings.providerSettings.auto.apiKey.value = "";
+    mocks.settings.providerSettings.openai.apiKey.value = "openai-key";
+    mocks.settings.providerSettings.google.apiKey.value = "google-key";
+    mocks.settings.providerSettings.vertex.apiKey.value = "";
     mocks.settings.providerSettings.openrouter.apiKey.value = "";
+    mocks.settings.providerSettings.xai.apiKey.value = "";
+    mocks.settings.providerSettings.custom.apiKey.value = "";
+    mocks.envVars = {};
     mocks.settings.selectedModel = { name: "auto", provider: "auto" };
     mocks.settings.recentModels = [];
     mocks.settings.selectedChatMode = "build";
@@ -556,31 +605,6 @@ describe("ModelPicker", () => {
       resetTime: new Date("2026-06-26T00:00:00Z").getTime(),
     };
   });
-
-  it("keeps the root menu focused on quick choices and catalog entry points", () => {
-    render(<ModelPicker />);
-
-    const autoSidekickRow = screen.getByText("Auto Sidekick").closest("button");
-    expect(autoSidekickRow?.textContent).toContain("Experimental");
-    expect(autoSidekickRow?.getAttribute("aria-label")).toContain(
-      "Experimental",
-    );
-    expect(screen.queryByText("GPT 5")).toBeNull();
-    expect(screen.queryByText("Premium")).toBeNull();
-    expect(screen.queryByText("Local models")).toBeNull();
-    expect(screen.queryByText("Free (OpenRouter)")).toBeNull();
-    expect(screen.getByText("Dyad Free")).toBeTruthy();
-    expect(screen.getByText("2/5 left")).toBeTruthy();
-    expect(screen.getByText("Data sharing")).toBeTruthy();
-    expect(
-      screen
-        .getByText("Dyad Free")
-        .closest("button")
-        ?.getAttribute("aria-label"),
-    ).toContain("2/5 left. Data sharing");
-    expect(screen.getByText("All models")).toBeTruthy();
-  });
-
   it("keeps All models stationary while the cloud catalog loads", () => {
     mocks.catalogLoading = true;
     const { rerender } = render(<ModelPicker />);
@@ -634,6 +658,7 @@ describe("ModelPicker", () => {
 
   it("preserves unresolved cloud history when adding a recent model", async () => {
     mocks.renderSubContent = true;
+    mocks.settings.providerSettings.xai.apiKey.value = "xai-key";
     mocks.settings.recentModels = [
       { provider: "openai", name: "deleted-model" },
       { provider: "openai", name: "gpt-5" },
@@ -665,6 +690,7 @@ describe("ModelPicker", () => {
 
   it("normalizes legacy custom recents without duplicating them", async () => {
     mocks.renderSubContent = true;
+    mocks.settings.providerSettings.custom.apiKey.value = "custom-key";
     mocks.settings.selectedModel = {
       provider: "custom",
       name: "shared-model",
@@ -757,7 +783,8 @@ describe("ModelPicker", () => {
     });
   });
 
-  it("keeps custom model ids ending in /free visible for Pro users", () => {
+  it("keeps custom model ids ending in /free visible", () => {
+    mocks.settings.providerSettings.custom.apiKey.value = "custom-key";
     mocks.settings.recentModels = [
       { provider: "custom", name: "team/free", customModelId: 3 },
     ];
@@ -956,6 +983,7 @@ describe("ModelPicker", () => {
 
   it("lists Ollama and LM Studio directly under Local providers", () => {
     mocks.renderSubContent = true;
+    mocks.settings.providerSettings.vertex.apiKey.value = "vertex-key";
 
     render(<ModelPicker />);
 
@@ -973,6 +1001,7 @@ describe("ModelPicker", () => {
 
   it("opens nested navigation submenus on hover with forgiving pointer timing", () => {
     mocks.renderSubContent = true;
+    mocks.settings.providerSettings.vertex.apiKey.value = "vertex-key";
 
     render(<ModelPicker />);
 
@@ -1025,6 +1054,7 @@ describe("ModelPicker", () => {
 
   it("groups secondary providers under Cloud providers regardless of price", () => {
     mocks.renderSubContent = true;
+    mocks.settings.providerSettings.vertex.apiKey.value = "vertex-key";
 
     render(<ModelPicker />);
 
@@ -1207,6 +1237,7 @@ describe("ModelPicker", () => {
 
   it("sorts the All models catalog by price and provider", () => {
     mocks.renderSubContent = true;
+    mocks.settings.providerSettings.openrouter.apiKey.value = "openrouter-key";
     render(<ModelPicker />);
 
     const modelNames = [
@@ -1235,58 +1266,9 @@ describe("ModelPicker", () => {
     ]);
   });
 
-  it("keeps the non-Pro root compact while preserving its Dyad choices", () => {
-    mocks.settings.enableDyadPro = false;
-    mocks.settings.providerSettings.auto.apiKey.value = "";
-
-    render(<ModelPicker />);
-
-    expect(screen.queryByText("Auto Sidekick")).toBeNull();
-    expect(screen.queryByText("Auto (balanced)")).toBeNull();
-    expect(screen.queryByText("GPT 5")).toBeNull();
-    expect(screen.getByText("All models")).toBeTruthy();
-    expect(screen.queryByText("Other AI providers")).toBeNull();
-    expect(screen.queryByText("Dyad Free")).toBeNull();
-    expect(screen.getByText("Free (OpenRouter)")).toBeTruthy();
-  });
-
-  it("shows Auto (balanced) to Dyad Pro users", () => {
-    render(<ModelPicker />);
-
-    expect(screen.getByText("Auto (balanced)")).toBeTruthy();
-  });
-
-  it("marks models without a provider key as locked for non-Pro users", () => {
-    mocks.settings.enableDyadPro = false;
-    mocks.settings.providerSettings.auto.apiKey.value = "";
-    mocks.settings.providerSettings.openrouter.apiKey.value = "openrouter-key";
-    mocks.renderSubContent = true;
-
-    render(<ModelPicker />);
-
-    expect(screen.getByText("GPT 5").closest("button")?.dataset.locked).toBe(
-      "true",
-    );
-    expect(
-      screen
-        .getByText("GPT 5")
-        .closest("button")
-        ?.querySelector("[data-effort-chevron]"),
-    ).toBeNull();
-    expect(
-      screen.getByText("Claude Sonnet 4.5").closest("button")?.dataset.locked,
-    ).toBeUndefined();
-    expect(
-      document.querySelector<HTMLElement>(
-        '[data-model-provider="auto"][data-model-name="auto"]',
-      )?.dataset.locked,
-    ).toBeUndefined();
-  });
-
-  it("opens the unlock dialog instead of selecting a locked model", () => {
-    mocks.settings.enableDyadPro = false;
-    mocks.settings.providerSettings.auto.apiKey.value = "";
-    mocks.renderSubContent = true;
+  it("opens the unlock dialog instead of selecting a locked recent model", () => {
+    mocks.settings.providerSettings.openai.apiKey.value = "";
+    mocks.settings.recentModels = [{ provider: "openai", name: "gpt-5" }];
 
     render(<ModelPicker />);
 
@@ -1297,42 +1279,19 @@ describe("ModelPicker", () => {
       "model-picker:locked-model-click",
       { provider: "openai", model: "gpt-5" },
     );
-    expect(screen.getByText("Unlock GPT 5 with Dyad Pro")).toBeTruthy();
-  });
-
-  it("opens the Pro upgrade page from the unlock dialog", () => {
-    mocks.settings.enableDyadPro = false;
-    mocks.settings.providerSettings.auto.apiKey.value = "";
-    mocks.renderSubContent = true;
-
-    render(<ModelPicker />);
-
-    fireEvent.click(screen.getByText("GPT 5").closest("button")!);
-    fireEvent.click(screen.getByText("Get Dyad Pro"));
-
-    expect(mocks.openExternalUrl).toHaveBeenCalledWith(
-      expect.stringContaining("utm_campaign=model-picker-locked-model"),
-    );
-    expect(mocks.posthogCapture).toHaveBeenCalledWith(
-      "model-picker:upgrade-click",
-      {
-        source: "locked-model-dialog",
-        provider: "openai",
-        model: "gpt-5",
-      },
-    );
-    expect(screen.queryByText("Get Dyad Pro")).toBeNull();
+    expect(
+      screen.getByText("Use GPT 5 with your own OpenAI API key"),
+    ).toBeTruthy();
   });
 
   it("navigates to provider settings from the unlock dialog own-key link", () => {
-    mocks.settings.enableDyadPro = false;
-    mocks.settings.providerSettings.auto.apiKey.value = "";
-    mocks.renderSubContent = true;
+    mocks.settings.providerSettings.openai.apiKey.value = "";
+    mocks.settings.recentModels = [{ provider: "openai", name: "gpt-5" }];
 
     render(<ModelPicker />);
 
     fireEvent.click(screen.getByText("GPT 5").closest("button")!);
-    fireEvent.click(screen.getByText(/use your own/));
+    fireEvent.click(screen.getByText("Add OpenAI API key"));
 
     expect(mocks.navigate).toHaveBeenCalledWith({
       to: "/settings/providers/$provider",
@@ -1340,7 +1299,6 @@ describe("ModelPicker", () => {
     });
     expect(mocks.openExternalUrl).not.toHaveBeenCalled();
   });
-
   it("lets non-Pro users select models from providers with their own key", () => {
     mocks.settings.enableDyadPro = false;
     mocks.settings.providerSettings.auto.apiKey.value = "";
@@ -1379,244 +1337,64 @@ describe("ModelPicker", () => {
   });
 
   it("labels locked models for assistive tech", () => {
-    mocks.settings.enableDyadPro = false;
-    mocks.settings.providerSettings.auto.apiKey.value = "";
-    mocks.renderSubContent = true;
+    mocks.settings.providerSettings.openai.apiKey.value = "";
+    mocks.settings.recentModels = [{ provider: "openai", name: "gpt-5" }];
 
     render(<ModelPicker />);
 
     expect(
       screen.getByText("GPT 5").closest("button")?.getAttribute("aria-label"),
-    ).toBe("GPT 5 — requires Dyad Pro or an API key from OpenAI");
+    ).toBe("GPT 5 — requires Samba Builder or an API key from OpenAI");
   });
 
-  it("points locked free models at an OpenRouter key instead of Pro", () => {
-    mocks.settings.enableDyadPro = false;
-    mocks.settings.providerSettings.auto.apiKey.value = "";
+  it("shows no catalog model when no provider has a key", () => {
+    // BYOK: sem chave nenhum provider esta conectado, entao a lista nao mostra
+    // nenhum modelo de catalogo — so o trigger quick-switcher permanece.
+    mocks.settings.providerSettings.openai.apiKey.value = "";
+    mocks.settings.providerSettings.google.apiKey.value = "";
+    mocks.settings.providerSettings.openrouter.apiKey.value = "";
+    mocks.settings.recentModels = [];
     mocks.renderSubContent = true;
 
     render(<ModelPicker />);
 
-    fireEvent.click(
-      document.querySelector(
-        '[data-model-provider="openrouter"][data-model-name="openrouter/free"]',
-      )!,
-    );
-
-    expect(mocks.posthogCapture).toHaveBeenCalledWith(
-      "model-picker:locked-model-click",
-      { provider: "openrouter", model: "openrouter/free" },
-    );
-    expect(screen.queryByText("Get Dyad Pro")).toBeNull();
-
-    fireEvent.click(screen.getByText("Add OpenRouter API key"));
-
-    expect(mocks.navigate).toHaveBeenCalledWith({
-      to: "/settings/providers/$provider",
-      params: { provider: "openrouter" },
-    });
-    expect(mocks.openExternalUrl).not.toHaveBeenCalled();
+    expect(screen.getByTestId("model-picker")).toBeTruthy();
+    expect(screen.queryByText("GPT 5")).toBeNull();
+    expect(screen.queryByText("Gemini 2.5 Pro")).toBeNull();
+    expect(screen.queryByText("Claude Sonnet 4.5")).toBeNull();
+    expect(screen.getByText("No cloud models available")).toBeTruthy();
   });
 
-  it("shows the unlock-all footer only for non-Pro users", () => {
-    mocks.settings.enableDyadPro = false;
-    mocks.settings.providerSettings.auto.apiKey.value = "";
-
-    render(<ModelPicker />);
-
-    fireEvent.click(
-      screen.getByText("Unlock all models with Dyad Pro").closest("button")!,
-    );
-
-    expect(mocks.openExternalUrl).toHaveBeenCalledWith(
-      expect.stringContaining("utm_campaign=model-picker-unlock-all"),
-    );
-    expect(mocks.posthogCapture).toHaveBeenCalledWith(
-      "model-picker:upgrade-click",
-      { source: "unlock-all-footer" },
-    );
-  });
-
-  it("hides the unlock-all footer for Pro users", () => {
-    render(<ModelPicker />);
-
-    expect(screen.queryByText("Unlock all models with Dyad Pro")).toBeNull();
-    expect(document.querySelector("[data-locked]")).toBeNull();
-  });
-
-  it("shows data sharing disclosure on Auto for non-Pro users with an OpenRouter key", () => {
-    mocks.settings.enableDyadPro = false;
-    mocks.settings.providerSettings.auto.apiKey.value = "";
+  it("never lists the OpenRouter free model or Auto (balanced) even with keys", () => {
     mocks.settings.providerSettings.openrouter.apiKey.value = "openrouter-key";
-
-    render(<ModelPicker />);
-
-    const autoRow = document.querySelector<HTMLElement>(
-      '[data-model-provider="auto"][data-model-name="auto"]',
-    );
-    expect(autoRow?.textContent).toContain("Data sharing");
-    expect(autoRow?.getAttribute("aria-label")).toContain("Data sharing");
-  });
-
-  it("shows data sharing disclosure on Auto for non-Pro users with OPENROUTER_API_KEY", () => {
-    mocks.settings.enableDyadPro = false;
-    mocks.settings.providerSettings.auto.apiKey.value = "";
-    mocks.envVars.OPENROUTER_API_KEY = "openrouter-env-key";
-
-    render(<ModelPicker />);
-
-    expect(
-      document.querySelector<HTMLElement>(
-        '[data-model-provider="auto"][data-model-name="auto"]',
-      )?.textContent,
-    ).toContain("Data sharing");
-  });
-
-  it("does not show data sharing disclosure on Auto without an OpenRouter key", () => {
-    mocks.settings.enableDyadPro = false;
-    mocks.settings.providerSettings.auto.apiKey.value = "";
-
-    render(<ModelPicker />);
-
-    expect(
-      document.querySelector<HTMLElement>(
-        '[data-model-provider="auto"][data-model-name="auto"]',
-      )?.textContent,
-    ).not.toContain("Data sharing");
-  });
-
-  it("shows data sharing disclosure on the top-level Free OpenRouter model", () => {
-    mocks.settings.enableDyadPro = false;
-    mocks.settings.providerSettings.auto.apiKey.value = "";
-
-    render(<ModelPicker />);
-
-    expect(
-      screen.getAllByText("Free (OpenRouter)")[0].closest("button")
-        ?.textContent,
-    ).toContain("Data sharing");
-  });
-
-  it("shows data sharing disclosure on explicit free OpenRouter provider models", () => {
     mocks.renderSubContent = true;
-    mocks.settings.enableDyadPro = false;
-    mocks.settings.providerSettings.auto.apiKey.value = "";
 
     render(<ModelPicker />);
 
-    expect(screen.getAllByText("Free (OpenRouter)").length).toBe(2);
-    expect(screen.getAllByText("Data sharing").length).toBeGreaterThan(1);
+    expect(screen.queryByText("Auto (balanced)")).toBeNull();
+    expect(screen.queryByText("Free (OpenRouter)")).toBeNull();
+    expect(screen.queryByText("Samba Builder Free")).toBeNull();
+    expect(screen.getByText("Claude Sonnet 4.5")).toBeTruthy();
   });
 
-  it("selects flat Pro models with their source provider", async () => {
+  it("lists openai, google and openrouter when connected and selects one", async () => {
+    mocks.settings.providerSettings.openrouter.apiKey.value = "openrouter-key";
     mocks.renderSubContent = true;
+
     render(<ModelPicker />);
+
+    expect(screen.getByText("GPT 5")).toBeTruthy();
+    expect(screen.getByText("Gemini 2.5 Pro")).toBeTruthy();
+    expect(screen.getByText("Claude Sonnet 4.5")).toBeTruthy();
 
     fireEvent.click(screen.getByText("GPT 5").closest("button")!);
 
-    expect(mocks.updateSettings).toHaveBeenCalledWith(
-      expect.objectContaining({
-        selectedModel: expect.objectContaining({
-          name: "gpt-5",
-          provider: "openai",
-        }),
-        recentModels: [{ name: "gpt-5", provider: "openai" }],
-      }),
-    );
     await waitFor(() => {
-      expect(mocks.invalidateQueries).toHaveBeenCalledTimes(1);
-    });
-  });
-
-  it("hides Dyad Free for Dyad Pro trial users", () => {
-    mocks.isTrial = true;
-
-    render(<ModelPicker />);
-
-    expect(screen.queryByText("Dyad Free")).toBeNull();
-    expect(
-      screen.getByText("Upgrade from Dyad Pro trial to unlock more models."),
-    ).toBeTruthy();
-    const autoRow = document.querySelector<HTMLElement>(
-      '[data-model-provider="auto"][data-model-name="auto"]',
-    )!;
-    expect(
-      autoRow.querySelector("[data-effort-chevron]")?.previousElementSibling
-        ?.textContent,
-    ).toBe("Med");
-  });
-
-  it("does not select Dyad Free when quota is exhausted", () => {
-    mocks.freeModelQuota.isQuotaExceeded = true;
-    mocks.freeModelQuota.messagesRemaining = 0;
-    mocks.freeModelQuota.quotaStatus = {
-      messagesUsed: 5,
-      messagesLimit: 5,
-      messagesRemaining: 0,
-      isQuotaExceeded: true,
-      resetTime: new Date("2026-06-26T00:00:00Z").getTime(),
-    };
-
-    render(<ModelPicker />);
-
-    fireEvent.click(screen.getByText("Dyad Free").closest("button")!);
-
-    expect(mocks.updateSettings).not.toHaveBeenCalled();
-  });
-
-  it("moves Build mode to Agent when selecting Dyad Free", async () => {
-    render(<ModelPicker />);
-
-    fireEvent.click(screen.getByText("Dyad Free").closest("button")!);
-
-    await waitFor(() => {
-      expect(mocks.updateSettings).toHaveBeenCalledWith({
-        selectedModel: expect.objectContaining({
-          name: "free-pro",
-          provider: "auto",
+      expect(mocks.updateSettings).toHaveBeenCalledWith(
+        expect.objectContaining({
+          selectedModel: { name: "gpt-5", provider: "openai" },
         }),
-        selectedChatMode: "local-agent",
-        defaultChatMode: "local-agent",
-      });
+      );
     });
-  });
-
-  it("updates an established chat model and fallback mode atomically", async () => {
-    mocks.pathname = "/chat";
-    mocks.search = { id: 42 };
-    mocks.chat = {
-      id: 42,
-      messages: [{ id: 1 }],
-      modelSelection: {
-        provider: "openai",
-        name: "gpt-5",
-        effortLevel: "high",
-      },
-    };
-
-    render(<ModelPicker />);
-    fireEvent.click(screen.getByText("Dyad Free").closest("button")!);
-
-    await waitFor(() => {
-      expect(mocks.setChatSelection).toHaveBeenCalledWith({
-        chatMode: "local-agent",
-        modelSelection: expect.objectContaining({
-          name: "free-pro",
-          provider: "auto",
-        }),
-      });
-    });
-    expect(mocks.setChatMode).not.toHaveBeenCalled();
-    expect(mocks.setChatModelSelection).not.toHaveBeenCalled();
-  });
-
-  it("shows Dyad Free quota as unavailable when the quota fetch fails", () => {
-    mocks.freeModelQuota.error = new Error("quota unavailable");
-    mocks.freeModelQuota.quotaStatus = null;
-
-    render(<ModelPicker />);
-
-    expect(screen.getByText("Unavailable")).toBeTruthy();
-    expect(screen.queryByText("10/10 left")).toBeNull();
   });
 });

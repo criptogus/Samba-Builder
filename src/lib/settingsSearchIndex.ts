@@ -117,7 +117,8 @@ export const SETTINGS_SEARCH_INDEX: SearchableSettingItem[] = [
   {
     id: SETTING_IDS.nodeRuntime,
     label: "Node Runtime",
-    description: "Choose between system Node.js and Dyad-managed Node.js",
+    description:
+      "Choose between system Node.js and Samba Builder-managed Node.js",
     keywords: ["node", "nodejs", "runtime", "managed", "system"],
     sectionId: SECTION_IDS.general,
     sectionLabel: "General",
@@ -126,8 +127,15 @@ export const SETTINGS_SEARCH_INDEX: SearchableSettingItem[] = [
     id: SETTING_IDS.customAppsFolder,
     label: "Customize Apps Folder",
     description:
-      "Set the top-level folder that Dyad will store new applications in",
-    keywords: ["customize", "apps", "path", "folder", "directory", "dyad-apps"],
+      "Set the top-level folder that Samba Builder will store new applications in",
+    keywords: [
+      "customize",
+      "apps",
+      "path",
+      "folder",
+      "directory",
+      "samba-apps",
+    ],
     sectionId: SECTION_IDS.general,
     sectionLabel: "General",
   },
@@ -423,7 +431,7 @@ export const SETTINGS_SEARCH_INDEX: SearchableSettingItem[] = [
     id: SETTING_IDS.autoApproveSafeMcpTools,
     label: "Skip consent for safe MCP tools",
     description:
-      "In Agent mode, use a fast model to judge each MCP tool call and skip the consent prompt for safe ones. Risky actions still require approval. Requires Dyad Pro",
+      "In Agent mode, use a fast model to judge each MCP tool call and skip the consent prompt for safe ones. Risky actions still require approval. Requires Samba Builder",
     keywords: [
       "mcp",
       "consent",

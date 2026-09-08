@@ -15,7 +15,7 @@ const EMBEDDED_GITHUB_CREDENTIALS_REGEX =
   /(https?:\/\/)[^@/\s]+@github\.com(?=[/:\s]|$)/g;
 
 /**
- * Removes GitHub access tokens that older Dyad versions embedded in remote
+ * Removes GitHub access tokens that older Samba Builder versions embedded in remote
  * URLs (.git/config). Auth is now injected per-invocation via environment
  * variables, so a URL-embedded token is both unnecessary and a plaintext
  * credential sitting on disk. Run on app startup.

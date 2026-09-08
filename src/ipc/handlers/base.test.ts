@@ -283,18 +283,20 @@ describe("IPC handler envelopes", () => {
       { sender: { mainFrame }, senderFrame },
     );
 
-    expect(() => unwrapIpcEnvelope(envelope)).toThrow("trusted Dyad renderer");
+    expect(() => unwrapIpcEnvelope(envelope)).toThrow(
+      "trusted Samba Builder renderer",
+    );
     expect(implementation).not.toHaveBeenCalled();
   });
 
   it("normalizes the Windows file-volume prefix for packaged SPA routes", () => {
     configureTrustedRenderer({
       packagedRendererUrl:
-        "file:///C:/Program%20Files/Dyad/renderer/main_window/index.html",
+        "file:///C:/Program%20Files/Samba Builder/renderer/main_window/index.html",
     });
 
     for (const url of [
-      "file:///C:/Program%20Files/Dyad/renderer/main_window/index.html",
+      "file:///C:/Program%20Files/Samba Builder/renderer/main_window/index.html",
       "file:///C:/",
       "file:///C:/chat?chatId=42#message-3",
       "file:///C:/providers/openai?section=models",
@@ -334,7 +336,7 @@ describe("IPC handler envelopes", () => {
         },
       );
       expect(() => unwrapIpcEnvelope(envelope)).toThrow(
-        "trusted Dyad renderer",
+        "trusted Samba Builder renderer",
       );
       expect(mocks.sendTelemetryException).not.toHaveBeenCalled();
     } finally {
@@ -376,7 +378,7 @@ describe("IPC handler envelopes", () => {
           { sender: { mainFrame: frame }, senderFrame: frame },
         );
         expect(() => unwrapIpcEnvelope(envelope)).toThrow(
-          "trusted Dyad renderer",
+          "trusted Samba Builder renderer",
         );
       }
 
@@ -395,7 +397,7 @@ describe("IPC handler envelopes", () => {
           event,
         );
         expect(() => unwrapIpcEnvelope(envelope)).toThrow(
-          "trusted Dyad renderer",
+          "trusted Samba Builder renderer",
         );
       }
     } finally {
@@ -444,7 +446,9 @@ describe("IPC handler envelopes", () => {
       { sender: { mainFrame: frame }, senderFrame: frame },
     );
 
-    expect(() => unwrapIpcEnvelope(envelope)).toThrow("trusted Dyad renderer");
+    expect(() => unwrapIpcEnvelope(envelope)).toThrow(
+      "trusted Samba Builder renderer",
+    );
     expect(inputValidation).not.toHaveBeenCalled();
     expect(mocks.sendTelemetryException).not.toHaveBeenCalled();
   });
@@ -506,7 +510,9 @@ describe("IPC handler envelopes", () => {
       sender: { mainFrame: frame },
       senderFrame: frame,
     });
-    expect(() => unwrapIpcEnvelope(envelope)).toThrow("trusted Dyad renderer");
+    expect(() => unwrapIpcEnvelope(envelope)).toThrow(
+      "trusted Samba Builder renderer",
+    );
   });
 
   it("rejects remote origins in logged typed handlers too", async () => {
@@ -531,7 +537,9 @@ describe("IPC handler envelopes", () => {
       { sender: { mainFrame: frame }, senderFrame: frame },
     );
 
-    expect(() => unwrapIpcEnvelope(envelope)).toThrow("trusted Dyad renderer");
+    expect(() => unwrapIpcEnvelope(envelope)).toThrow(
+      "trusted Samba Builder renderer",
+    );
     expect(implementation).not.toHaveBeenCalled();
     expect(mocks.sendTelemetryException).not.toHaveBeenCalled();
   });

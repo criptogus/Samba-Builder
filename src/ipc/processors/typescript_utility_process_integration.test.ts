@@ -218,7 +218,7 @@ describe("TypeScript utility process exclusion", () => {
       ...explorerResult,
       query: "first query",
     });
-    await vi.advanceTimersByTimeAsync(5 * 60 * 1000);
+    await vi.advanceTimersByTimeAsync(60_000);
     expect(firstExplorer.kill).toHaveBeenCalledOnce();
 
     const secondRequest = runCodeExplorer({

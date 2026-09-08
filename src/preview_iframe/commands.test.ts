@@ -87,7 +87,7 @@ describe("preview iframe command adapter", () => {
 
   // A link or a server redirect replaces the whole document without touching
   // history.pushState/replaceState, so the shim announces each load instead.
-  // Without it the preview keeps reporting the last route Dyad selected, and a
+  // Without it the preview keeps reporting the last route Samba Builder selected, and a
   // recording started afterwards opens there rather than where the flow began.
   it("routes a document load as an app-driven navigation", () => {
     const contentWindow = { postMessage: vi.fn() };

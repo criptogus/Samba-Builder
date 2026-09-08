@@ -991,7 +991,7 @@ describe("dyad recorder client", () => {
 
   it("uses data-dyad-id only as a source hint for a CSS fallback", () => {
     const r = setup();
-    // The attribute is a source location injected only by Dyad's dev plugin, so
+    // The attribute is a source location injected only by Samba Builder's dev plugin, so
     // a locator built from it points at a moving target the replayed build
     // doesn't even carry.
     r.setHtml(`<div data-dyad-id="src/App.tsx:12:4"><span></span></div>`);

@@ -25,7 +25,6 @@ const DEFAULT_CONFIGS = ["tsconfig.app.json", "tsconfig.json"];
 const WORKSPACE_CONFIG_DIRS = ["apps", "packages"];
 const WORKSPACE_CONFIG_NAMES = ["tsconfig.app.json", "tsconfig.json"];
 const MAX_WORKSPACE_CONFIGS_TO_CHECK = 40;
-const WORKER_IDLE_TIMEOUT_MS = 5 * 60 * 1000;
 const CRASH_LOOP_WINDOW_MS = 60 * 1000;
 
 export interface CodeExplorerAvailability {
@@ -232,7 +231,6 @@ interface CodeExplorerHost {
 let host: CodeExplorerHost | null = null;
 let hostGeneration = 0;
 let nextRequestId = 1;
-let idleTimer: NodeJS.Timeout | undefined;
 const pendingRequests = new Map<number, PendingRequest>();
 const typeScriptFingerprintByAppPath = new Map<string, string>();
 // Per-key serial queues preserve the previous per-session semantics: queries
@@ -356,7 +354,6 @@ async function sendToHost(
     throw keyUnavailableError();
   }
 
-  clearIdleTimer();
   const hostForRequest = getHost();
   await hostForRequest.ready;
 
@@ -387,7 +384,6 @@ async function sendToHost(
       hostForRequest.child.postMessage({ requestId, input });
     } catch (error) {
       pendingRequests.delete(requestId);
-      scheduleIdleKillIfIdle();
       reject(toCodeExplorerError(error));
     }
   });
@@ -433,7 +429,6 @@ function getHost(): CodeExplorerHost {
 
   const stopProcess = async (): Promise<void> => {
     intentionallyStopped = true;
-    clearIdleTimer();
     if (host === hostState) {
       // Detach before killing so no later request can post to a dying host.
       host = null;
@@ -482,7 +477,6 @@ function getHost(): CodeExplorerHost {
       return;
     }
     pendingRequests.delete(response.requestId);
-    scheduleIdleKillIfIdle();
     if (response.success) {
       request.resolve(response.data);
     } else {
@@ -517,7 +511,6 @@ function getHost(): CodeExplorerHost {
     }
     if (host === hostState) {
       host = null;
-      clearIdleTimer();
     }
     const failed = [...pendingRequests].filter(
       ([, request]) => request.hostGeneration === generation,
@@ -594,30 +587,4 @@ function recordHostDeathForKey(key: string): boolean {
     return true;
   }
   return false;
-}
-
-function clearIdleTimer(): void {
-  if (!idleTimer) return;
-  clearTimeout(idleTimer);
-  idleTimer = undefined;
-}
-
-// Idle policy: once no request is in flight, kill the whole host after 5
-// minutes, freeing the process baseline AND every cached index. The next
-// call lazily respawns it.
-function scheduleIdleKillIfIdle(): void {
-  if (pendingRequests.size > 0 || !host) {
-    return;
-  }
-  clearIdleTimer();
-  idleTimer = setTimeout(() => {
-    idleTimer = undefined;
-    if (!host || pendingRequests.size > 0) {
-      return;
-    }
-    logger.info("Killing idle code explorer host");
-    void host.stop().catch((error) => {
-      logger.error("Failed to stop idle code explorer host:", error);
-    });
-  }, WORKER_IDLE_TIMEOUT_MS);
 }

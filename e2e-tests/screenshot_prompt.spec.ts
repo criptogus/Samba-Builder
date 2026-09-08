@@ -55,7 +55,9 @@ test("file a bug report without a screenshot", async ({ po }) => {
   });
 
   await po.page.keyboard.press("Escape");
-  await expect(po.page.getByText("Need help with Dyad?")).toBeVisible();
+  await expect(
+    po.page.getByText("Need help with Samba Builder?"),
+  ).toBeVisible();
   await expect(po.page.getByText("Take a screenshot?")).not.toBeVisible();
 
   // The report that follows the back out is the point: a dismissal must not

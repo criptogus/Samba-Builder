@@ -129,7 +129,7 @@ export function registerCoolifyHandlers() {
       await probe.listServers();
       const normalized = instanceUrl.replace(/\/+$/, "");
       const previous = readSettings().coolify?.instanceUrl;
-      // Spread: the admin account for a server Dyad just installed is set
+      // Spread: the admin account for a server Samba Builder just installed is set
       // before there is any token for it, and this is the call that supplies
       // the token. Replacing would drop the password on the way in.
       writeSettings({
@@ -163,12 +163,12 @@ export function registerCoolifyHandlers() {
   });
 
   createTypedHandler(coolifyContracts.clearToken, async () => {
-    // Every field, not just the token. Dyad holds one Coolify at a time, so
+    // Every field, not just the token. Samba Builder holds one Coolify at a time, so
     // an address or an admin account left behind belongs to an instance
     // nothing is connected to any more — and the next connection would put a
     // stranger's password under its address. The screen that reaches this
     // shows all of it one last time and asks the user to confirm, because
-    // Dyad invented the password and is the only thing that has it.
+    // Samba Builder invented the password and is the only thing that has it.
     //
     // Every field named rather than an empty object: an absent key reads to
     // writeSettings as one a consumer read could not decrypt, and it hands
@@ -239,7 +239,7 @@ export function registerCoolifyHandlers() {
         current.kind === "provisioned" || current.kind === "deployed";
       if (!movedHost && hasApplication && current.domain && !domain) {
         throw new DyadError(
-          "A domain cannot be removed from Dyad once it is set. Change it to " +
+          "A domain cannot be removed from Samba Builder once it is set. Change it to " +
             "another domain here, or clear it in Coolify.",
           DyadErrorKind.Validation,
         );
@@ -265,7 +265,7 @@ export function registerCoolifyHandlers() {
    *
    * Coolify asks for a certificate as soon as a real domain is set, so a
    * domain configured ahead of DNS leaves TLS in a failed state that reads
-   * like a Dyad bug.
+   * like a Samba Builder bug.
    */
   createTypedHandler(
     coolifyContracts.checkDomain,

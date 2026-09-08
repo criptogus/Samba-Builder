@@ -354,14 +354,11 @@ fire during a hybrid run. Both are inert in production/dev/E2E and must stay:
   `process.env.DYAD_SKIP_MANAGED_PNPM_INSTALL === "true"` (the harness sets it).
   It only skips the _implicit_ convenience install; an explicit `installPnpm`
   handler call is unaffected, and production never sets the flag.
-- **Monaco eager init** — `src/components/chat/monaco.ts` runs `loader.init()` at
-  module load to register editor themes. The chat message tree imports it
-  transitively (`DyadWrite` → `FileEditor`), so a hybrid test pulls it in even
-  though it never renders an editor. The async (CDN) load gets **canceled on
-  teardown**, surfacing as a `Canceled` **unhandled rejection** that fails the
-  whole run (non-zero exit) even when every `it` passed. `monaco.ts` now guards
-  the `loader.init()` call behind `process.env.VITEST !== "true"`. Do not remove
-  this guard, and do not "fix" a `Canceled: Canceled` rejection by re-enabling it.
+- **Monaco initialization** — `src/components/chat/monaco.ts` exports a
+  `configureMonaco` callback used by the file and diff editors' `beforeMount`.
+  Importing chat modules no longer initializes Monaco or starts CDN requests.
+  Keep configuration on demand; do not restore module-level `loader.init()`
+  or introduce a test-only guard that hides eager loading in production.
 
 ---
 

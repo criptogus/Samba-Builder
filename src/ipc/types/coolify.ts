@@ -89,12 +89,12 @@ export const CoolifyStatusSchema = z.object({
    * tell that the token changed without ever being told what it is.
    */
   tokenId: z.string().nullable(),
-  /** The Coolify Dyad is connected to, or null once it has been forgotten. */
+  /** The Coolify Samba Builder is connected to, or null once it has been forgotten. */
   instanceUrl: z.string().nullable(),
   /**
-   * The address of a server Dyad set up and holds an admin account for, or
+   * The address of a server Samba Builder set up and holds an admin account for, or
    * null. Not a secret, and the panel needs it without the password: while
-   * this is set the only Coolify Dyad will connect to is this one, so it
+   * this is set the only Coolify Samba Builder will connect to is this one, so it
    * pins the address field and stands in the way of setting up another.
    */
   serverUrl: z.string().nullable(),

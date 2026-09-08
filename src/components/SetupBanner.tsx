@@ -20,12 +20,11 @@ import { usePostHog } from "posthog-js/react";
 import { useLanguageModelProviders } from "@/hooks/useLanguageModelProviders";
 import { useScrollAndNavigateTo } from "@/hooks/useScrollAndNavigateTo";
 // @ts-ignore
-import logo from "../../assets/logo.svg";
+import logo from "../../assets/logo-samba.png";
 // @ts-ignore
 import googleIcon from "../../assets/ai-logos/google-g-icon.svg";
 // @ts-ignore
 import openrouterLogo from "../../assets/ai-logos/openrouter-logo.png";
-import { SetupDyadProButton } from "./ProBanner";
 
 export function SetupBanner({
   variant = "inline",
@@ -61,11 +60,12 @@ export function SetupBanner({
       params: { provider: "openrouter" },
     });
   };
-  const handleDyadProSetupClick = () => {
-    posthog.capture("setup-flow:ai-provider-setup:dyad:click");
-    ipc.system.openExternalUrl(
-      "https://academy.dyad.sh/redirect-to-checkout?trialCode=7PRO30&utm_source=dyad-app&utm_medium=app&utm_campaign=setup-dialog-v2",
-    );
+  const handleDeepSeekSetupClick = () => {
+    posthog.capture("setup-flow:ai-provider-setup:deepseek:click");
+    navigate({
+      to: providerSettingsRoute.id,
+      params: { provider: "deepseek-samba" },
+    });
   };
 
   const handleOtherProvidersClick = () => {
@@ -103,10 +103,10 @@ export function SetupBanner({
         <div className="mx-auto max-w-2xl text-center">
           <h2 className="text-2xl font-semibold tracking-tight text-foreground">
             {hasProviderSetup
-              ? "Manage AI setup"
+              ? "Gerenciar configuração de IA"
               : variant === "dialog"
-                ? "You're almost ready to build"
-                : "Connect AI to start building"}
+                ? "Você está quase pronto para construir"
+                : "Conecte a IA para começar a construir"}
           </h2>
           {variant === "dialog" && hasPendingPrompt && !hasProviderSetup ? (
             <p className="mt-2 flex items-center justify-center gap-1.5 text-sm leading-6 text-muted-foreground">
@@ -114,43 +114,44 @@ export function SetupBanner({
                 aria-hidden="true"
                 className="size-4 shrink-0 text-primary"
               />
-              Your prompt is saved — it'll send as soon as you're connected.
+              Seu prompt está salvo — ele será enviado assim que você conectar.
             </p>
           ) : (
             <p className="mt-2 text-sm leading-6 text-muted-foreground">
               {hasProviderSetup
-                ? "Change how Dyad accesses AI."
-                : "Dyad uses AI to build your app."}
+                ? "Mude como o Samba Builder acessa a IA."
+                : "O Samba Builder usa IA para construir seu app."}
             </p>
           )}
         </div>
 
         <button
           type="button"
-          onClick={handleDyadProSetupClick}
+          onClick={handleDeepSeekSetupClick}
           className="mt-5 flex w-full cursor-pointer items-center justify-between gap-4 rounded-lg border border-primary/45 bg-primary/8 p-4 text-left transition-colors hover:bg-primary/12 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 dark:bg-primary/15 dark:hover:bg-primary/20"
         >
           <div className="flex min-w-0 items-center gap-3">
             <div className="flex size-11 shrink-0 items-center justify-center rounded-full bg-primary/10">
-              <img src={logo} alt="Dyad Logo" className="size-6" />
+              <img src={logo} alt="Samba Builder" className="size-6" />
             </div>
             <div className="min-w-0">
               <h3 className="text-lg font-semibold text-primary">
-                Start free Dyad Pro trial
+                DeepSeek (pré-configurado)
               </h3>
               <p className="mt-0.5 text-sm text-muted-foreground">
-                No API keys. Access leading models instantly.
+                Conecte a chave do gateway Samba para usar os modelos DeepSeek
+                V4.
               </p>
             </div>
           </div>
           <Button as="span" size="sm" className="shrink-0">
-            Start
+            Configurar
           </Button>
         </button>
 
         <div className="mt-4">
           <p className="mb-2 text-sm font-medium text-muted-foreground">
-            Or use your own API key
+            Ou use sua própria chave de API
           </p>
           <div className="grid gap-2 sm:grid-cols-3">
             <ProviderOptionButton
@@ -172,7 +173,7 @@ export function SetupBanner({
               icon={<img src={googleIcon} alt="Google" className="size-4" />}
             />
             <ProviderOptionButton
-              label="Other providers"
+              label="Outros provedores"
               onClick={handleOtherProvidersClick}
               icon={<Settings className="size-4 text-muted-foreground" />}
             />
@@ -180,7 +181,6 @@ export function SetupBanner({
         </div>
 
         <div className="mt-4 flex w-full flex-col items-center justify-around gap-2 text-xs sm:flex-row">
-          <SetupDyadProButton />
           <button
             type="button"
             onClick={() => {
@@ -196,7 +196,7 @@ export function SetupBanner({
                 className="ml-0.5 size-2 fill-current stroke-current"
               />
             </span>
-            Watch the walkthrough
+            Veja o passo a passo
           </button>
         </div>
       </div>

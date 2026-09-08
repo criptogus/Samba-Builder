@@ -14,6 +14,8 @@ import { FusesPlugin } from "@electron-forge/plugin-fuses";
 import { FuseV1Options, FuseVersion } from "@electron/fuses";
 import { AutoUnpackNativesPlugin } from "@electron-forge/plugin-auto-unpack-natives";
 import { readFileSync } from "fs";
+import { readFile, writeFile } from "node:fs/promises";
+import path from "node:path";
 import { createRequire } from "module";
 
 console.log("AZURE_CODE_SIGNING_DLIB", process.env.AZURE_CODE_SIGNING_DLIB);
@@ -147,6 +149,8 @@ const ignore = (file: string) => {
 };
 
 const isEndToEndTestBuild = process.env.E2E_TEST_BUILD === "true";
+const isLocalDesktopBuild =
+  process.env.SAMBA_LOCAL_DESKTOP_BUILD === "true" && !isEndToEndTestBuild;
 const isWindowsSigningEnabled = process.env.WINDOWS_SIGN === "true";
 const shouldSkipNativeRebuild = process.env.DYAD_SKIP_NATIVE_REBUILD === "true";
 const nativeRebuildModules = [
@@ -164,7 +168,11 @@ if (isWindowsSigningEnabled && !process.env.AZURE_CODE_SIGNING_DLIB) {
 }
 
 const config: ForgeConfig = {
+  outDir: isLocalDesktopBuild ? "out/desktop" : undefined,
   packagerConfig: {
+    name: "Samba Builder",
+    // Keep the existing application identity while correcting its display name.
+    appBundleId: "com.electron.dyad",
     // E2E test builds install local file: dependencies as links on Windows.
     // Dereference them so packaging does not require symlink privileges in the temp app.
     // Local file: native packages install as symlinks; dereference them so the
@@ -173,7 +181,20 @@ const config: ForgeConfig = {
     windowsSign: isWindowsSigningEnabled ? windowsSign : undefined,
     afterCopy: [
       (buildPath, _electronVersion, platform, arch, callback) => {
-        removeUnusedAppPackageFiles(buildPath, platform, arch).then(
+        const prepare = async () => {
+          await removeUnusedAppPackageFiles(buildPath, platform, arch);
+          // Local desktop packages keep the existing development profile when
+          // opened from Finder/Explorer. Release packages never contain this path.
+          if (isLocalDesktopBuild) {
+            const packagePath = path.join(buildPath, "package.json");
+            const metadata = JSON.parse(await readFile(packagePath, "utf8"));
+            metadata.sambaLocalUserDataPath = path.resolve(
+              process.env.DYAD_DEV_USER_DATA_DIR?.trim() || "userData",
+            );
+            await writeFile(packagePath, JSON.stringify(metadata, null, 2));
+          }
+        };
+        prepare().then(
           () => callback(),
           (error) => callback(error as Error),
         );
@@ -197,31 +218,39 @@ const config: ForgeConfig = {
     ],
     icon: "./assets/icon/logo",
 
-    osxSign: isEndToEndTestBuild
-      ? undefined
-      : ({
-          identity: process.env.APPLE_TEAM_ID,
-          // Surface the actual signing error instead of silently continuing
-          // (@electron/packager defaults continueOnError to true, which masks failures)
-          continueOnError: false,
-          // Skip provisioning profile search (not needed for Developer ID distribution,
-          // and the cwd scan crashes on broken symlinks like CLAUDE.md)
-          preEmbedProvisioningProfile: false,
-        } as Record<string, unknown>),
-    osxNotarize: isEndToEndTestBuild
-      ? undefined
-      : {
-          appleId: process.env.APPLE_ID!,
-          appleIdPassword: process.env.APPLE_PASSWORD!,
-          teamId: process.env.APPLE_TEAM_ID!,
-        },
+    osxSign:
+      isEndToEndTestBuild || isLocalDesktopBuild
+        ? undefined
+        : ({
+            identity: process.env.APPLE_TEAM_ID,
+            // Surface the actual signing error instead of silently continuing
+            // (@electron/packager defaults continueOnError to true, which masks failures)
+            continueOnError: false,
+            // Skip provisioning profile search (not needed for Developer ID distribution,
+            // and the cwd scan crashes on broken symlinks like CLAUDE.md)
+            preEmbedProvisioningProfile: false,
+          } as Record<string, unknown>),
+    osxNotarize:
+      isEndToEndTestBuild || isLocalDesktopBuild
+        ? undefined
+        : {
+            appleId: process.env.APPLE_ID!,
+            appleIdPassword: process.env.APPLE_PASSWORD!,
+            teamId: process.env.APPLE_TEAM_ID!,
+          },
     asar: {
       // Native modules and node-pty helper binaries must be loadable from disk.
       unpackDir:
         "{node_modules/dyad-keychain-reader,node_modules/node-pty,node_modules/mustardscript,node_modules/@mustardscript}",
     },
     ignore,
-    extraResource: ["node_modules/dugite/git", "node_modules/@vscode"],
+    extraResource: [
+      "quality-tools",
+      "node_modules/dugite/git",
+      "node_modules/@vscode",
+      "assets/icon/logo.png",
+      "docs/native-skills/THIRD_PARTY_NOTICES.md",
+    ],
     // ignore: [/node_modules\/(?!(better-sqlite3|bindings|file-uri-to-path)\/)/],
   },
   rebuildConfig: shouldSkipNativeRebuild

@@ -16,7 +16,7 @@ function entry(overrides: Partial<ConsoleEntry> = {}): ConsoleEntry {
     type: "server",
     message: "entry",
     timestamp: 1,
-    sourceName: "Dyad",
+    sourceName: "Samba Builder",
     ...overrides,
   };
 }

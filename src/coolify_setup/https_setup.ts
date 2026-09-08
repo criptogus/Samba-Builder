@@ -16,7 +16,7 @@ import {
 /**
  * Getting the new instance onto HTTPS, if it can be had.
  *
- * A stock Coolify serves plain HTTP, so Dyad's API token — which carries root
+ * A stock Coolify serves plain HTTP, so Samba Builder's API token — which carries root
  * abilities and can read database connection strings — would cross the network
  * in the clear on every deploy, not just once at setup.
  *
@@ -259,7 +259,7 @@ export async function domainPointsAtServer(
   const resolved = await resolve(domain);
   // A resolver that could not be reached is not a name with no records. Both
   // arrive with nothing to compare, but only the second is the domain saying
-  // where it points — the first is Dyad not having asked successfully, which
+  // where it points — the first is Samba Builder not having asked successfully, which
   // the caller has to be able to tell apart from an answer.
   if (resolved.failed) return "no-answer";
   const verdict = domainCheckVerdict({
@@ -292,7 +292,7 @@ export async function domainPointsAtServer(
 const logger = log.scope("coolify_https_setup");
 
 export interface HttpsOutcome {
-  /** What Dyad should store and talk to. */
+  /** What Samba Builder should store and talk to. */
   instanceUrl: string;
   secure: boolean;
   /** Present when HTTPS was attempted and did not arrive. */
@@ -404,7 +404,7 @@ export async function tryEnableHttps(
         instanceUrl: plainUrlFor(host),
         secure: false,
         reason:
-          `Dyad could not look up where ${domain} points, so it cannot tell ` +
+          `Samba Builder could not look up where ${domain} points, so it cannot tell ` +
           `whether a certificate for it would describe this machine. Check ` +
           `the domain resolves to ${host} and try again.`,
       };
@@ -418,7 +418,7 @@ export async function tryEnableHttps(
         instanceUrl: plainUrlFor(host),
         secure: false,
         reason:
-          `Dyad could not look up an address for ${host}, so it cannot tell ` +
+          `Samba Builder could not look up an address for ${host}, so it cannot tell ` +
           `whether ${domain} points at this server. Reach the server by an ` +
           `address or a name DNS can answer for, or set the domain in ` +
           `Coolify yourself.`,
@@ -434,7 +434,7 @@ export async function tryEnableHttps(
         instanceUrl: plainUrlFor(host),
         secure: false,
         reason:
-          `Dyad could not compare where ${domain} points with ${host}: the ` +
+          `Samba Builder could not compare where ${domain} points with ${host}: the ` +
           `addresses it has for them are in different families, so neither ` +
           `says anything about the other. Give the server's address in the ` +
           `same family as the domain's records, or set the domain in ` +

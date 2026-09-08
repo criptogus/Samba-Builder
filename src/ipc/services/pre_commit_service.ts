@@ -77,7 +77,7 @@ async function getCommitHookEnvironment(
     // Git stamps this when the commit starts, which is what this hook run
     // stands in for. The commit itself is created moments later.
     GIT_AUTHOR_DATE: formatGitRawDate(new Date()),
-    // Every commit Dyad creates is non-interactive (`gitCommit` always uses
+    // Every commit Samba Builder creates is non-interactive (`gitCommit` always uses
     // `-m`), so a hook that opens an editor must no-op instead of waiting on a
     // terminal that does not exist.
     GIT_EDITOR: ":",

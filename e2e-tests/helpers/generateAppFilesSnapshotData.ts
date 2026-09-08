@@ -8,7 +8,7 @@ export interface FileSnapshotData {
 }
 
 const STABLE_PLACEHOLDER_FILES = new Map([
-  ["pnpm-workspace.yaml", "[Dyad-managed pnpm workspace config]"],
+  ["pnpm-workspace.yaml", "[Samba Builder-managed pnpm workspace config]"],
 ]);
 
 const binaryExtensions = new Set([

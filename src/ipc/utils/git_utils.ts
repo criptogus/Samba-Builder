@@ -118,7 +118,7 @@ function getPorcelainPaths(line: string): string[] {
  * Filters out WSL-related PATH entries that can cause WSL interop issues.
  * On non-Windows platforms, returns undefined (use default environment).
  *
- * Issue: https://github.com/dyad-sh/dyad/issues/2194
+ * Issue: https://sambatech.com
  * When WSL is installed on Windows, the PATH can contain entries that cause
  * git commands to be intercepted by WSL's relay system, resulting in errors
  * like "execvpe(/bin/bash) failed: No such file or directory".
@@ -164,7 +164,7 @@ function getWindowsSanitizedEnv():
   };
 }
 
-/** Build caller overrides for Dugite without bypassing Dyad's platform fixes. */
+/** Build caller overrides for Dugite without bypassing Samba Builder's platform fixes. */
 function getSanitizedGitEnv(
   callerEnv?: Record<string, string | undefined>,
 ): Record<string, string | undefined> {
@@ -194,7 +194,7 @@ function getSanitizedGitEnv(
 }
 
 /**
- * Return the bundled Git executable and hardened environment used by Dyad.
+ * Return the bundled Git executable and hardened environment used by Samba Builder.
  * Use this for Git processes that need streaming or bounded execution and
  * therefore cannot go through {@link execGit}.
  */
@@ -590,7 +590,7 @@ export async function ensureGitLineEndingPolicy({
     try {
       await fsPromises.writeFile(
         gitattributesPath,
-        "# Normalize text files to LF so Dyad commits are stable across platforms.\n* text=auto eol=lf\n",
+        "# Normalize text files to LF so Samba Builder commits are stable across platforms.\n* text=auto eol=lf\n",
         { flag: "wx" },
       );
       logger.debug(`Created default .gitattributes in ${path}`);
@@ -744,7 +744,7 @@ export async function isGitStatusClean({
 }
 
 /**
- * Returns whether the user-visible working tree is clean. Dyad-managed runtime
+ * Returns whether the user-visible working tree is clean. Samba Builder-managed runtime
  * paths are deliberately ignored so every restore/recovery guard uses the
  * same definition of work that needs user acknowledgement.
  */
@@ -861,9 +861,9 @@ export async function inspectRepositoryHealth({
  * `git status --porcelain -- <path>` prints a line per differing path and
  * nothing at all when it matches HEAD, so an empty result means clean. Callers
  * that auto-commit a file they just rewrote use this BEFORE the rewrite: a file
- * the user was already editing must not have those edits folded into Dyad's
+ * the user was already editing must not have those edits folded into Samba Builder's
  * commit, because `git commit -- <path>` records the whole working-tree version
- * of that path, not just the hunk Dyad changed.
+ * of that path, not just the hunk Samba Builder changed.
  *
  * `--untracked-files=all` is passed explicitly rather than relying on the
  * default: a user with `status.showUntrackedFiles=no` would otherwise get an
@@ -2491,7 +2491,7 @@ async function renderSafeAgentDiff({
   const notices: string[] = [];
   if (sensitive.length > 0) {
     notices.push(
-      `[Diff omitted for sensitive or Dyad-managed paths: ${[...new Set(sensitive)].join(", ")}]`,
+      `[Diff omitted for sensitive or Samba Builder-managed paths: ${[...new Set(sensitive)].join(", ")}]`,
     );
   }
   if (omittedByCount) {

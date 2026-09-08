@@ -1,3 +1,5 @@
+import { ensureProjectFoundation } from "../services/project_foundation";
+import { createFromTeamTemplate } from "../services/project_templates/store";
 import path from "path";
 import fs from "fs-extra";
 import { app } from "electron";
@@ -20,6 +22,12 @@ export async function createFromTemplate({
   const settings = readSettings();
   const templateId = requestedTemplateId ?? settings.selectedTemplateId;
 
+  if (templateId.startsWith("team:")) {
+    await createFromTeamTemplate(templateId, fullAppPath);
+    await ensureProjectFoundation(fullAppPath);
+    return;
+  }
+
   if (templateId === "react") {
     const sourceScaffoldPath = path.join(__dirname, "..", "..", "scaffold");
     const repoScaffoldPath = path.join(process.cwd(), "scaffold");
@@ -27,6 +35,7 @@ export async function createFromTemplate({
       fs.existsSync(sourceScaffoldPath) ? sourceScaffoldPath : repoScaffoldPath,
       fullAppPath,
     );
+    await ensureProjectFoundation(fullAppPath);
     return;
   }
 
@@ -39,6 +48,7 @@ export async function createFromTemplate({
   }
   const repoCachePath = await cloneRepo(template.githubUrl);
   await copyRepoToApp(repoCachePath, fullAppPath);
+  await ensureProjectFoundation(fullAppPath);
 }
 
 async function cloneRepo(repoUrl: string): Promise<string> {
@@ -97,7 +107,7 @@ async function cloneRepo(repoUrl: string): Promise<string> {
       const response = await fetch(apiUrl, {
         method: "GET",
         headers: {
-          "User-Agent": "Dyad", // GitHub API requires this
+          "User-Agent": "Samba Builder", // GitHub API requires this
           Accept: "application/vnd.github.v3+json",
         },
       });

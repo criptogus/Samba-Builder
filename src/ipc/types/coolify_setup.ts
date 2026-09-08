@@ -58,7 +58,7 @@ export const SetupTargetSchema = SetupServerSchema.extend({
   /**
    * A domain the user owns, pointed at this server.
    *
-   * Optional because Dyad can derive one from the address. Supplying one is
+   * Optional because Samba Builder can derive one from the address. Supplying one is
    * better where they have it: it is theirs, and it does not draw on the free
    * shared service's certificate allowance.
    */
@@ -66,7 +66,7 @@ export const SetupTargetSchema = SetupServerSchema.extend({
 });
 
 /**
- * What Dyad found when it looked at the server, before touching it.
+ * What Samba Builder found when it looked at the server, before touching it.
  *
  * Reported rather than acted on, so the panel can explain the two problems a
  * user can fix immediately instead of failing several minutes into an install.
@@ -85,7 +85,7 @@ export const SetupResultSchema = z.object({
   /**
    * Whether that address is encrypted.
    *
-   * Dyad asks for a certificate and settles for plain HTTP when none arrives,
+   * Samba Builder asks for a certificate and settles for plain HTTP when none arrives,
    * so this is the outcome rather than a setting — and the token it carries has
    * root abilities and travels on every deploy.
    */
@@ -100,7 +100,7 @@ export const SetupResultSchema = z.object({
    */
   adminPassword: z.string(),
   /**
-   * Whether Dyad ended up holding a token, which is not the same as one
+   * Whether Samba Builder ended up holding a token, which is not the same as one
    * having been created: the address may be unencrypted with the offer to
    * keep it not taken, or storing it may have failed on this computer.
    * tokenUnavailableReason is what says Coolify's API was the thing that
@@ -110,7 +110,7 @@ export const SetupResultSchema = z.object({
   /**
    * Whether Coolify's API was switched on before anything went wrong.
    *
-   * Separate from tokenStored because Dyad enables the API first and mints
+   * Separate from tokenStored because Samba Builder enables the API first and mints
    * afterwards: a mint that fails leaves the API on, so the guidance to go
    * and enable it is wrong even though no token came back.
    */
@@ -120,18 +120,18 @@ export const SetupResultSchema = z.object({
 });
 
 /**
- * What Dyad can tell the user about getting into their own server.
+ * What Samba Builder can tell the user about getting into their own server.
  *
  * Two records, each carrying its own address, because they are facts about
- * two different things: the instance Dyad talks to, and a machine Dyad built.
+ * two different things: the instance Samba Builder talks to, and a machine Samba Builder built.
  * Usually the same server, but not always — an install whose token could not
  * be minted leaves an account behind while the user connects somewhere else.
  * Folded into one address they would have to be checked against each other
  * before either could be shown, and a check that guessed wrong would put one
  * server's password under another's address.
  *
- * Null where Dyad never had it: an instance connected by pasting a token has
- * no admin account Dyad created, and a server set up but not connected to has
+ * Null where Samba Builder never had it: an instance connected by pasting a token has
+ * no admin account Samba Builder created, and a server set up but not connected to has
  * no instance.
  */
 export const RevealedCredentialsSchema = z.object({
@@ -237,7 +237,7 @@ export const coolifySetupContracts = {
   }),
 
   /**
-   * The credentials for a server Dyad set up, on request.
+   * The credentials for a server Samba Builder set up, on request.
    *
    * A separate call rather than part of the status, so the panel can show
    * them long after the install that made them. The finished screen carries
@@ -253,7 +253,7 @@ export const coolifySetupContracts = {
   /**
    * What is going on right now, asked on mount rather than remembered.
    *
-   * DO NOT LOG this handler. A finished run carries the admin password Dyad
+   * DO NOT LOG this handler. A finished run carries the admin password Samba Builder
    * invented, the same secret `run` and `revealCredentials` are marked for —
    * and this hands back the identical payload, as does the `changed` event
    * that pushes it to every window.
@@ -269,7 +269,7 @@ export const coolifySetupContracts = {
    *
    * A token for an address that is not encrypted is held rather than stored
    * when the run ends, so that closing the screen, quitting, or a crash
-   * leaves Dyad unconnected rather than connected to something nobody agreed
+   * leaves Samba Builder unconnected rather than connected to something nobody agreed
    * to. This is the only way it reaches disk. Nothing to decline: not
    * accepting is simply never calling it.
    */

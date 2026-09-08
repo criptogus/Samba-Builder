@@ -17,7 +17,7 @@ type TrustedIpcHandlerOptions = {
 };
 
 /**
- * Registers an invoke handler that can only be called by the trusted Dyad
+ * Registers an invoke handler that can only be called by the trusted Samba Builder
  * renderer. This is the sole production entry point for `ipcMain.handle` so
  * new and legacy handlers cannot accidentally omit the renderer trust guard.
  *

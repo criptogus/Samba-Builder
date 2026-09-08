@@ -287,7 +287,7 @@ async function runSpec(
   );
   // Honor the modes the user picked in the Tests panel — including slow motion,
   // so a user watching the agent's runs gets the same pace as their own. With
-  // the preview experiment enabled, headed mode drives Dyad's native preview
+  // the preview experiment enabled, headed mode drives Samba Builder's native preview
   // view. A preview or narrowed run must stay serial.
   const settings = readSettings();
   const preview =

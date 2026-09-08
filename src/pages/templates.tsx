@@ -1,3 +1,4 @@
+import { TeamTemplatesRepository } from "@/components/TeamTemplatesRepository";
 import React, { useState } from "react";
 import { BackButton } from "@/components/ui/back-button";
 import { useSettings } from "@/hooks/useSettings";
@@ -22,7 +23,10 @@ const TemplatesPage: React.FC = () => {
   const officialTemplates =
     templates?.filter((template) => template.isOfficial) || [];
   const communityTemplates =
-    templates?.filter((template) => !template.isOfficial) || [];
+    templates?.filter((template) => !template.isOfficial && !template.isTeam) ||
+    [];
+
+  const teamTemplates = templates?.filter((template) => template.isTeam) || [];
 
   return (
     <div className="min-h-screen px-8 py-4">
@@ -38,6 +42,23 @@ const TemplatesPage: React.FC = () => {
           </p>
         </header>
 
+        <TeamTemplatesRepository />
+        {teamTemplates.length > 0 && (
+          <section className="mb-12">
+            <h2 className="text-2xl font-bold mb-6">Templates da equipe</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {teamTemplates.map((template) => (
+                <TemplateCard
+                  key={template.id}
+                  template={template}
+                  isSelected={template.id === selectedTemplateId}
+                  onSelect={handleTemplateSelect}
+                  onCreateApp={handleCreateApp}
+                />
+              ))}
+            </div>
+          </section>
+        )}
         {/* Official Templates Section */}
         {officialTemplates.length > 0 && (
           <section className="mb-12">

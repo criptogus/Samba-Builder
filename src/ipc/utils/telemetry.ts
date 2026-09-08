@@ -81,7 +81,7 @@ export function sendTelemetryException(
 }
 
 /**
- * Channels that talk to a server the user runs, rather than to Dyad's own.
+ * Channels that talk to a server the user runs, rather than to Samba Builder's own.
  *
  * Every prefix a self-hosted surface uses has to be listed. Setting a server up
  * is the same class as deploying to one and carries more: its failures quote

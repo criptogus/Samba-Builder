@@ -91,7 +91,7 @@ beforeEach(() => {
   gitAddMock.mockResolvedValue(undefined);
   gitCommitMock.mockResolvedValue("commit-hash");
   // The common case: the user wasn't editing client.ts, so the rewrite is
-  // Dyad's alone to commit.
+  // Samba Builder's alone to commit.
   isGitPathCleanMock.mockResolvedValue(true);
 });
 
@@ -240,7 +240,7 @@ describe("switchAppToPublishableKey", () => {
     expect(after).toContain(`"${PUBLISHABLE}"`);
   });
 
-  // Dyad's own one-line edit shouldn't land the user in the "uncommitted
+  // Samba Builder's own one-line edit shouldn't land the user in the "uncommitted
   // changes" banner over a change they didn't make.
   it("commits the rewritten client, scoped to that file alone", async () => {
     const appPath = makeApp(LEGACY_ANON);
@@ -378,7 +378,7 @@ describe("switchAppToPublishableKey", () => {
   });
 
   // `git commit -- <path>` records the whole working-tree version of that path,
-  // not the hunk Dyad changed, so committing a file the user was mid-edit in
+  // not the hunk Samba Builder changed, so committing a file the user was mid-edit in
   // would fold their work into a commit labelled as a key swap.
   it("leaves the rewrite uncommitted when client.ts already had user edits", async () => {
     const appPath = makeApp(LEGACY_ANON);

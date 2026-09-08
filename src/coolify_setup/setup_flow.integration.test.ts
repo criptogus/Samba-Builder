@@ -11,7 +11,7 @@ import {
 /**
  * The setup flow over a real SSH connection, without the app around it.
  *
- * Dyad's own SSH client talks to a real ssh2 server here, so preflight, the
+ * Samba Builder's own SSH client talks to a real ssh2 server here, so preflight, the
  * installer and the tinker transcripts these tests reach are parsed from the
  * shapes the library actually produces rather than ones a hand-written fake
  * finds convenient.

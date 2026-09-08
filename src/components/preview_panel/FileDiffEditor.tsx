@@ -1,7 +1,7 @@
 import { DiffEditor, type DiffOnMount } from "@monaco-editor/react";
 import type { editor as MonacoEditor } from "monaco-editor";
 import { useEffect, useRef } from "react";
-import "@/components/chat/monaco";
+import { configureMonaco } from "@/components/chat/monaco";
 import { useTheme } from "@/contexts/ThemeContext";
 import { getLanguage } from "@/utils/get_language";
 
@@ -59,6 +59,7 @@ export function FileDiffEditor({
   return (
     <div className="h-full w-full" data-testid="version-diff-editor">
       <DiffEditor
+        beforeMount={configureMonaco}
         height="100%"
         language={getLanguage(filePath)}
         original={oldContent}

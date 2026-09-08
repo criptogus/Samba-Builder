@@ -39,7 +39,14 @@ export class AppManagement {
       await telemetryLaterButton.click({ timeout: Timeout.MEDIUM });
     }
 
-    await this.page.getByRole("link", { name: "Apps" }).hover();
+    await this.page.getByRole("link", { name: "Apps", exact: true }).click();
+    if (
+      (await this.page
+        .locator('[data-slot="sidebar"][data-state]')
+        .getAttribute("data-state")) === "collapsed"
+    ) {
+      await this.page.getByRole("button", { name: "Toggle Menu" }).click();
+    }
     const viewAllAppsButton = this.page.getByTestId("view-all-apps-button");
     if (
       await viewAllAppsButton.isVisible({ timeout: 1_000 }).catch(() => false)
@@ -90,11 +97,11 @@ export class AppManagement {
     }
     return path.isAbsolute(appPath)
       ? appPath
-      : path.join(this.userDataDir, "dyad-apps", appPath);
+      : path.join(this.userDataDir, "samba-apps", appPath);
   }
 
   getAppPath({ appName }: { appName: string }) {
-    return path.join(this.userDataDir, "dyad-apps", appName);
+    return path.join(this.userDataDir, "samba-apps", appName);
   }
 
   async clickAppListItem({ appName }: { appName: string }) {

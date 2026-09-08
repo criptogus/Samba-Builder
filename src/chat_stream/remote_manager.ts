@@ -730,7 +730,7 @@ export class ChatStreamRemoteManager {
     this.runtimeDeps?.queryClient.invalidateQueries({
       queryKey: queryKeys.freeAgentQuota.status,
     });
-    // A chat can use Dyad Free independently of the global default model, so
+    // A chat can use Samba Builder Free independently of the global default model, so
     // refresh this lightweight quota query after every completed turn.
     this.runtimeDeps?.queryClient.invalidateQueries({
       queryKey: queryKeys.freeModelQuota.status,

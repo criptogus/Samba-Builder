@@ -31,7 +31,7 @@ const EVENTS: readonly PreviewIframeEvent[] = [
   // Same URL as the `replaceState` case above on purpose: both take the same
   // branch, so a second URL only multiplies the explored state space without
   // covering anything new. The behaviour that IS specific to `documentLoad` —
-  // provenance, and ignoring Dyad's own load — is asserted directly below.
+  // provenance, and ignoring Samba Builder's own load — is asserted directly below.
   {
     type: "NAVIGATED_IN_APP",
     kind: "documentLoad",
@@ -353,7 +353,7 @@ describe("preview iframe transition", () => {
     expect(selectIframeSrc(state, URL)).toBe(URL);
   });
 
-  it("distinguishes a route Dyad selected from one the app navigated to", () => {
+  it("distinguishes a route Samba Builder selected from one the app navigated to", () => {
     // The recorder reads this to decide whether the current route is a starting
     // point the user chose. An app-driven route is not, and recording it as the
     // session's opening `goto` would replay straight past the navigation that
@@ -383,14 +383,14 @@ describe("preview iframe transition", () => {
       }).state;
       expect(redirected.currentUrlSource).toBe("app");
 
-      // Going back through Dyad's chrome makes it the user's choice again.
+      // Going back through Samba Builder's chrome makes it the user's choice again.
       expect(
         transition(redirected, { type: "GO_BACK" }).state.currentUrlSource,
       ).toBe("dyad");
     }
 
-    // Dyad's own navigation loads a document too. That load reports the route
-    // Dyad just set, so it must not downgrade the selection it belongs to.
+    // Samba Builder's own navigation loads a document too. That load reports the route
+    // Samba Builder just set, so it must not downgrade the selection it belongs to.
     const ownLoad = transition(typedIn, {
       type: "NAVIGATED_IN_APP",
       kind: "documentLoad",

@@ -356,7 +356,7 @@ function buildTargetURL(clientReq) {
 /* ----------------------------------------------------------------------- */
 /* Cookie rewriting for the embedded preview iframe                        */
 /*                                                                         */
-/* In a packaged build the Dyad shell loads from file://, a cross-site     */
+/* In a packaged build the Samba Builder shell loads from file://, a cross-site     */
 /* top-level ancestor to the http://localhost preview. That makes the      */
 /* request's "site for cookies" cross-site, so the browser withholds       */
 /* default Lax/Strict cookies and auth sessions fail to stick. (Dev mode   */

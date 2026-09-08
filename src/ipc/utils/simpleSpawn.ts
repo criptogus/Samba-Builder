@@ -22,7 +22,7 @@ export async function simpleSpawn({
   cwd: string;
   successMessage: string;
   errorPrefix: string;
-  // Defaults to getPackageManagerCommandEnv() so Dyad-managed commands see
+  // Defaults to getPackageManagerCommandEnv() so Samba Builder-managed commands see
   // the managed pnpm and the Corepack project-spec disable without every
   // call site having to remember to pass it.
   env?: NodeJS.ProcessEnv;

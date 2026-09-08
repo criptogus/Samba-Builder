@@ -55,7 +55,7 @@ export const SESSION_DEBUG_SCHEMA_VERSION = 4;
 // -- System info --
 
 const DebugSystemInfoSchema = z.object({
-  /** Dyad application version (from package.json) */
+  /** Samba Builder application version (from package.json) */
   dyadVersion: z.string(),
   /** OS platform: "darwin", "win32", "linux" */
   platform: z.string(),
@@ -88,7 +88,7 @@ const DebugSettingsSchema = z.object({
   defaultChatMode: z.string().nullable(),
   /** Whether changes are auto-approved without review */
   autoApproveChanges: z.boolean().nullable(),
-  /** Whether Dyad Pro is enabled */
+  /** Whether Samba Builder is enabled */
   enableDyadPro: z.boolean().nullable(),
   /** Model-specific effort level */
   effortLevel: z.string(),

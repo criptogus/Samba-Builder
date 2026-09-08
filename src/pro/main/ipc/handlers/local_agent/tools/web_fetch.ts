@@ -88,7 +88,7 @@ export const webFetchTool: ToolDefinition<z.infer<typeof webFetchSchema>> = {
   defaultConsent: "always",
   usesEngineEndpoint: true,
 
-  // Requires Dyad Pro engine API
+  // Requires Samba Builder engine API
   isEnabled: (ctx) => ctx.isDyadPro,
 
   getConsentPreview: (args) => `Fetch URL: "${args.url}"`,

@@ -119,7 +119,7 @@ export function buildDesktopFile(command: ExecCommand): string {
   return [
     "[Desktop Entry]",
     "Type=Application",
-    "Name=Dyad",
+    "Name=Samba Builder",
     `Exec=${command.exec}`,
     // TryExec is a bare path; the spec doesn't allow it to be quoted or escaped.
     `TryExec=${command.tryExec}`,

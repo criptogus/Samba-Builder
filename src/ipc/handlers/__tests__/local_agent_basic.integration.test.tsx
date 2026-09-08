@@ -7,7 +7,8 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { fireEvent, screen, waitFor } from "@testing-library/react";
 import { asc, eq } from "drizzle-orm";
 
-import { apps, chats, messages } from "@/db/schema";
+import { getDyadAppPath } from "@/paths/paths";
+import { apps, chats, messages, projectTokenEvents } from "@/db/schema";
 import {
   deleteAppBlueprintForChat,
   getAppBlueprintForChat,
@@ -241,8 +242,25 @@ describe("local-agent basic flows (integration)", () => {
       const appRow = await harness.db.query.apps.findFirst({
         where: eq(apps.id, app.appId),
       });
+      expect(
+        harness.db
+          .select()
+          .from(projectTokenEvents)
+          .where(eq(projectTokenEvents.appId, app.appId))
+          .all().length,
+      ).toBeGreaterThan(0);
       expect(appRow?.name).toBe("Lumen Notes");
       expect(appRow?.needsAppBlueprint).toBe(false);
+      const docs = path.join(getDyadAppPath(appRow!.path), "project-docs");
+      expect(fs.existsSync(path.join(docs, "PRD.md"))).toBe(true);
+      expect(fs.existsSync(path.join(docs, "DESIGN_SYSTEM.md"))).toBe(true);
+      const approvals = fs.readdirSync(path.join(docs, "approvals"));
+      expect(approvals).toHaveLength(1);
+      const approved = JSON.parse(
+        fs.readFileSync(path.join(docs, "approvals", approvals[0]), "utf8"),
+      );
+      expect(approved.appName).toBe("Lumen Notes");
+      expect(approved.approvedAt).toBeTruthy();
     });
     await followUpEnd;
     expect(errorEvents()).toHaveLength(0);

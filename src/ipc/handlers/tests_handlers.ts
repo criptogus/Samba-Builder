@@ -1,3 +1,4 @@
+import { withTestEvidence } from "../services/test_evidence";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
@@ -835,11 +836,11 @@ export async function runAppTestsCore({
   // interpreted as a shell command. A line suffix (`file:line`) targets a
   // single test; the line is validated to be a positive integer at the IPC
   // boundary, so it can't smuggle a flag.
-  // Always select Dyad's config by name. Playwright auto-resolves
+  // Always select Samba Builder's config by name. Playwright auto-resolves
   // `playwright.config.ts` — the app's own file, which may not exist, may
   // hardcode a baseURL, or may point at a different testDir. Ours is the only
   // one that honors DYAD_TEST_BASE_URL, so it's passed explicitly rather than
-  // Dyad taking over the canonical config name.
+  // Samba Builder taking over the canonical config name.
   const args = ["test", "--config", DYAD_CONFIG_FILENAME];
   appendRequestedTestTarget(args, normalizedTestFile ?? undefined, testLine);
   // `-g <regex>` narrows the run to the tests whose title matches (same as the
@@ -1279,7 +1280,7 @@ export async function runAppTestsWithIsolation({
   ): RunAppTestsResult => {
     if (!envRestoreFailed) return result;
     const restoreMessage =
-      "Dyad couldn't restore your app's real database settings after the test run. Restore .env.local before running the app again.";
+      "Samba Builder couldn't restore your app's real database settings after the test run. Restore .env.local before running the app again.";
     return {
       ...result,
       // Appended rather than substituted: an isolation-setup failure explains
@@ -1341,305 +1342,311 @@ export async function runAppTestsWithIsolation({
         // run never queues behind that session's whole-lifetime claims.
         refuseWhenRecording: "run tests",
       },
-      async () => {
-        let prepared: PreparedIsolation | undefined;
-        try {
-          const app = await getApp(appId);
+      async () =>
+        withTestEvidence(
+          appId,
+          source,
+          async () => {
+            let prepared: PreparedIsolation | undefined;
+            try {
+              const app = await getApp(appId);
 
-          if (!app.testingEnabled) {
-            return {
-              appId,
-              results: [],
-              infraError: {
-                message:
-                  "Testing isn't enabled for this app. Enable it in the Tests panel before running tests.",
-              },
-            };
-          }
-
-          const runtimeMode = readSettings().runtimeMode2 ?? "host";
-
-          // Set up isolation so the run never mutates the user's real data:
-          // Neon apps get a throwaway copy-on-write branch, Supabase apps get
-          // a throwaway RLS-scoped test user, and no-DB apps run as-is.
-          prepared = await prepareIsolatedTestDatabase({
-            app,
-            emit,
-            runtimeMode,
-            signal: controller.signal,
-          });
-
-          // Isolation was required but couldn't be set up — dead-end safely
-          // rather than run against real data. teardown still runs in `finally`.
-          if (prepared.infraError) {
-            return {
-              appId,
-              results: [],
-              infraError: prepared.infraError,
-              isolation: prepared.isolation,
-            };
-          }
-
-          // Isolation may have restarted the dev server, so only now is the
-          // preview guaranteed to be settled on the URL the run will target.
-          let previewBaseUrl: string | undefined;
-          if (previewWindow) {
-            previewBaseUrl = getRunningTestBaseUrl(appId) ?? undefined;
-            const ready = previewBaseUrl
-              ? await waitForPreviewView(previewWindow, {
-                  url: previewBaseUrl,
-                  // A panel run was just started by someone looking at the
-                  // preview, so waiting out a slow mount is worth it. An agent
-                  // run falls back instead of failing, and pays this wait on
-                  // every call while the user is elsewhere — inside the app lock,
-                  // holding up other operations — so it gives up sooner.
-                  ...(source === "agent" ? { timeoutMs: 5_000 } : {}),
-                  signal: controller.signal,
-                })
-              : ({ ok: false, reason: "the app isn't running" } as const);
-
-            if (!ready.ok) {
-              if ("aborted" in ready && ready.aborted) {
-                // Stop pressed during the wait. Reporting a preview problem
-                // here would blame the panel for the user's own decision.
-                return {
-                  appId,
-                  results: [],
-                  infraError: { message: "Test run stopped." },
-                  isolation: prepared.isolation,
-                };
-              }
-              if (source === "agent") {
-                // Nothing opened the native view — the user is looking at
-                // another app, another window, or a page with no preview at
-                // all. The agent can't put them back, so failing here would
-                // fail every run_tests call for as long as they stay there,
-                // taking the whole fix loop with it. Run the tests in an
-                // ordinary browser instead: less to watch, but a real result.
-                emit(
-                  `The preview panel isn't showing this app (${ready.reason}); running the tests in a separate browser instead.\n`,
-                  "setup",
-                );
-                previewWindow = undefined;
-                previewBaseUrl = undefined;
-                // Nothing is going to drive that view now, so stop holding it.
-                releasePreviewReservation();
-                // The renderer may already have switched to the native view on
-                // the "started" event; without this it stays there, locked, for
-                // a run happening in a browser window elsewhere.
-                emitRunState(event, {
-                  appId,
-                  runId,
-                  source,
-                  state: "preview-fallback",
-                  preview: true,
-                  testFile: normalizedTestFile ?? undefined,
-                  testLine,
-                  grep,
-                });
-              } else {
+              if (!app.testingEnabled) {
                 return {
                   appId,
                   results: [],
                   infraError: {
-                    message: `The preview panel isn't showing this app (${ready.reason}). Run the tests from the Tests panel with Headed on and stay on the Preview tab, then try again.`,
+                    message:
+                      "Testing isn't enabled for this app. Enable it in the Tests panel before running tests.",
+                  },
+                };
+              }
+
+              const runtimeMode = readSettings().runtimeMode2 ?? "host";
+
+              // Set up isolation so the run never mutates the user's real data:
+              // Neon apps get a throwaway copy-on-write branch, Supabase apps get
+              // a throwaway RLS-scoped test user, and no-DB apps run as-is.
+              prepared = await prepareIsolatedTestDatabase({
+                app,
+                emit,
+                runtimeMode,
+                signal: controller.signal,
+              });
+
+              // Isolation was required but couldn't be set up — dead-end safely
+              // rather than run against real data. teardown still runs in `finally`.
+              if (prepared.infraError) {
+                return {
+                  appId,
+                  results: [],
+                  infraError: prepared.infraError,
+                  isolation: prepared.isolation,
+                };
+              }
+
+              // Isolation may have restarted the dev server, so only now is the
+              // preview guaranteed to be settled on the URL the run will target.
+              let previewBaseUrl: string | undefined;
+              if (previewWindow) {
+                previewBaseUrl = getRunningTestBaseUrl(appId) ?? undefined;
+                const ready = previewBaseUrl
+                  ? await waitForPreviewView(previewWindow, {
+                      url: previewBaseUrl,
+                      // A panel run was just started by someone looking at the
+                      // preview, so waiting out a slow mount is worth it. An agent
+                      // run falls back instead of failing, and pays this wait on
+                      // every call while the user is elsewhere — inside the app lock,
+                      // holding up other operations — so it gives up sooner.
+                      ...(source === "agent" ? { timeoutMs: 5_000 } : {}),
+                      signal: controller.signal,
+                    })
+                  : ({ ok: false, reason: "the app isn't running" } as const);
+
+                if (!ready.ok) {
+                  if ("aborted" in ready && ready.aborted) {
+                    // Stop pressed during the wait. Reporting a preview problem
+                    // here would blame the panel for the user's own decision.
+                    return {
+                      appId,
+                      results: [],
+                      infraError: { message: "Test run stopped." },
+                      isolation: prepared.isolation,
+                    };
+                  }
+                  if (source === "agent") {
+                    // Nothing opened the native view — the user is looking at
+                    // another app, another window, or a page with no preview at
+                    // all. The agent can't put them back, so failing here would
+                    // fail every run_tests call for as long as they stay there,
+                    // taking the whole fix loop with it. Run the tests in an
+                    // ordinary browser instead: less to watch, but a real result.
+                    emit(
+                      `The preview panel isn't showing this app (${ready.reason}); running the tests in a separate browser instead.\n`,
+                      "setup",
+                    );
+                    previewWindow = undefined;
+                    previewBaseUrl = undefined;
+                    // Nothing is going to drive that view now, so stop holding it.
+                    releasePreviewReservation();
+                    // The renderer may already have switched to the native view on
+                    // the "started" event; without this it stays there, locked, for
+                    // a run happening in a browser window elsewhere.
+                    emitRunState(event, {
+                      appId,
+                      runId,
+                      source,
+                      state: "preview-fallback",
+                      preview: true,
+                      testFile: normalizedTestFile ?? undefined,
+                      testLine,
+                      grep,
+                    });
+                  } else {
+                    return {
+                      appId,
+                      results: [],
+                      infraError: {
+                        message: `The preview panel isn't showing this app (${ready.reason}). Run the tests from the Tests panel with Headed on and stay on the Preview tab, then try again.`,
+                      },
+                      isolation: prepared.isolation,
+                    };
+                  }
+                }
+              }
+
+              let previewViewClosed = false;
+              const automation = previewWindow
+                ? beginPreviewAutomation(previewWindow, {
+                    onViewDestroyed: () => {
+                      previewViewClosed = true;
+                    },
+                  })
+                : null;
+
+              if (previewWindow && !automation) {
+                // The view went away between the wait above and this call. Running
+                // anyway would drive a page nothing is guarding: no destroyed-view
+                // notification, and `showPreviewView` would navigate it mid-run.
+                return {
+                  appId,
+                  results: [],
+                  infraError: {
+                    message:
+                      "The preview panel closed before the run could start. Open the Preview tab and try again.",
                   },
                   isolation: prepared.isolation,
                 };
               }
-            }
-          }
 
-          let previewViewClosed = false;
-          const automation = previewWindow
-            ? beginPreviewAutomation(previewWindow, {
-                onViewDestroyed: () => {
-                  previewViewClosed = true;
-                },
-              })
-            : null;
-
-          if (previewWindow && !automation) {
-            // The view went away between the wait above and this call. Running
-            // anyway would drive a page nothing is guarding: no destroyed-view
-            // notification, and `showPreviewView` would navigate it mid-run.
-            return {
-              appId,
-              results: [],
-              infraError: {
-                message:
-                  "The preview panel closed before the run could start. Open the Preview tab and try again.",
-              },
-              isolation: prepared.isolation,
-            };
-          }
-
-          let previewBroker: PreviewCdpBroker | undefined;
-          let previewCdpEndpoint: string | undefined;
-          let previewCdpToken: string | undefined;
-          if (automation) {
-            const target = automation.getWebContents();
-            if (!target) {
-              return {
-                appId,
-                results: [],
-                infraError: {
-                  message:
-                    "The preview panel closed before automation could attach. Open the Preview tab and try again.",
-                },
-                isolation: prepared.isolation,
-              };
-            }
-            try {
-              previewBroker = new PreviewCdpBroker();
-              await previewBroker.start();
-              await previewBroker.setTarget(target);
-              const connection = previewBroker.connectionInfo;
-              previewCdpEndpoint = connection.endpoint;
-              previewCdpToken = connection.token;
-            } catch (error) {
-              await previewBroker?.close().catch(() => {});
-              automation.end();
-              return {
-                appId,
-                results: [],
-                infraError: {
-                  message: `Couldn't attach automation to the preview: ${error instanceof Error ? error.message : String(error)}`,
-                },
-                isolation: prepared.isolation,
-              };
-            }
-          }
-
-          const automationWindow = previewWindow;
-          const automationBaseUrl = previewBaseUrl;
-          const rotatePreviewView =
-            automation && automationWindow && automationBaseUrl
-              ? async (remainingMs?: number) => {
-                  // Rotation destroys the current WebContentsView. Detach its
-                  // debugger first so the broker recognizes that loss as an
-                  // intentional handoff rather than an unexpected target
-                  // failure that should close the endpoint.
-                  previewBroker?.releaseTarget();
-                  const rotated = automation.rotate({
-                    url: automationBaseUrl,
-                  });
-                  if (!rotated.ok) {
-                    throw new Error(rotated.reason);
-                  }
-                  const ready = await waitForPreviewView(automationWindow, {
-                    url: automationBaseUrl,
-                    timeoutMs: Math.max(
-                      1,
-                      Math.min(remainingMs ?? 15_000, 15_000),
-                    ),
-                    signal: controller.signal,
-                  });
-                  if (!ready.ok) {
-                    throw new Error(ready.reason);
-                  }
-                  const replacement = automation.getWebContents();
-                  if (!replacement) {
-                    throw new Error("the rotated preview was destroyed");
-                  }
-                  await previewBroker?.setTarget(replacement);
+              let previewBroker: PreviewCdpBroker | undefined;
+              let previewCdpEndpoint: string | undefined;
+              let previewCdpToken: string | undefined;
+              if (automation) {
+                const target = automation.getWebContents();
+                if (!target) {
+                  return {
+                    appId,
+                    results: [],
+                    infraError: {
+                      message:
+                        "The preview panel closed before automation could attach. Open the Preview tab and try again.",
+                    },
+                    isolation: prepared.isolation,
+                  };
                 }
-              : undefined;
+                try {
+                  previewBroker = new PreviewCdpBroker();
+                  await previewBroker.start();
+                  await previewBroker.setTarget(target);
+                  const connection = previewBroker.connectionInfo;
+                  previewCdpEndpoint = connection.endpoint;
+                  previewCdpToken = connection.token;
+                } catch (error) {
+                  await previewBroker?.close().catch(() => {});
+                  automation.end();
+                  return {
+                    appId,
+                    results: [],
+                    infraError: {
+                      message: `Couldn't attach automation to the preview: ${error instanceof Error ? error.message : String(error)}`,
+                    },
+                    isolation: prepared.isolation,
+                  };
+                }
+              }
 
-          let result: RunAppTestsResult;
-          try {
-            result = await runAppTestsCore({
-              appId,
-              testFile: normalizedTestFile ?? undefined,
-              testLine,
-              grep,
-              headed,
-              parallel,
-              slowMo,
-              signal: controller.signal,
-              timeoutMs,
-              onOutput: emit,
-              testEnv: prepared.testCredentials,
-              previewCdpEndpoint,
-              previewCdpToken,
-              rotatePreviewView,
-              // The run turned out to need its own browser, so stop holding
-              // the preview view frozen (no navigation, no hiding) for it.
-              onPreviewFallback: () => {
-                automation?.end();
-                // ...and tell the renderer, or the user is left staring at a
-                // native "Test view" with every control locked by the run
-                // while the tests actually execute in a separate Playwright
-                // window. The only other signal is a warning line in the test
-                // output, which is collapsed by default.
-                emitRunState(event, {
+              const automationWindow = previewWindow;
+              const automationBaseUrl = previewBaseUrl;
+              const rotatePreviewView =
+                automation && automationWindow && automationBaseUrl
+                  ? async (remainingMs?: number) => {
+                      // Rotation destroys the current WebContentsView. Detach its
+                      // debugger first so the broker recognizes that loss as an
+                      // intentional handoff rather than an unexpected target
+                      // failure that should close the endpoint.
+                      previewBroker?.releaseTarget();
+                      const rotated = automation.rotate({
+                        url: automationBaseUrl,
+                      });
+                      if (!rotated.ok) {
+                        throw new Error(rotated.reason);
+                      }
+                      const ready = await waitForPreviewView(automationWindow, {
+                        url: automationBaseUrl,
+                        timeoutMs: Math.max(
+                          1,
+                          Math.min(remainingMs ?? 15_000, 15_000),
+                        ),
+                        signal: controller.signal,
+                      });
+                      if (!ready.ok) {
+                        throw new Error(ready.reason);
+                      }
+                      const replacement = automation.getWebContents();
+                      if (!replacement) {
+                        throw new Error("the rotated preview was destroyed");
+                      }
+                      await previewBroker?.setTarget(replacement);
+                    }
+                  : undefined;
+
+              let result: RunAppTestsResult;
+              try {
+                result = await runAppTestsCore({
                   appId,
-                  runId,
-                  source,
-                  state: "preview-fallback",
-                  preview: true,
                   testFile: normalizedTestFile ?? undefined,
                   testLine,
                   grep,
+                  headed,
+                  parallel,
+                  slowMo,
+                  signal: controller.signal,
+                  timeoutMs,
+                  onOutput: emit,
+                  testEnv: prepared.testCredentials,
+                  previewCdpEndpoint,
+                  previewCdpToken,
+                  rotatePreviewView,
+                  // The run turned out to need its own browser, so stop holding
+                  // the preview view frozen (no navigation, no hiding) for it.
+                  onPreviewFallback: () => {
+                    automation?.end();
+                    // ...and tell the renderer, or the user is left staring at a
+                    // native "Test view" with every control locked by the run
+                    // while the tests actually execute in a separate Playwright
+                    // window. The only other signal is a warning line in the test
+                    // output, which is collapsed by default.
+                    emitRunState(event, {
+                      appId,
+                      runId,
+                      source,
+                      state: "preview-fallback",
+                      preview: true,
+                      testFile: normalizedTestFile ?? undefined,
+                      testLine,
+                      grep,
+                    });
+                  },
                 });
-              },
-            });
-          } finally {
-            await previewBroker?.close().catch((error) => {
-              logger.warn(
-                `Failed to close preview automation broker: ${error}`,
-              );
-            });
-            automation?.end();
-          }
-
-          if (previewViewClosed) {
-            // The CDP target vanished mid-run. Losing it usually doesn't abort
-            // Playwright: it reports a screenful of "Target closed" test
-            // failures and exits with a perfectly parseable report, so gating
-            // this on `infraError` let the common case through as a wall of
-            // failures the user's app never caused. None of it is a verdict on
-            // the app, so it must not read as one — or count against the agent's
-            // fix budget.
-            result = {
-              ...result,
-              infraError: {
-                message:
-                  "The preview was closed while tests were running, so the run was interrupted.",
-              },
-            };
-          }
-          return { ...result, isolation: prepared.isolation };
-        } finally {
-          // Always restore the app to its real database, even on the
-          // infraError early-return, abort, or throw. `teardown` is safe to
-          // call exactly once; on the infraError path it's a NOOP (isolation
-          // already restored).
-          if (prepared) {
-            try {
-              // Announce the teardown before it starts. It restores
-              // `.env.local`, restarts the dev server and deletes the temporary
-              // branch/user, takes no AbortSignal, and routinely outlasts the
-              // process kill by a wide margin (the Neon branch delete retries
-              // with backoff). Without this the UI reports "running" for the
-              // whole wait. Skipped for `none`, whose teardown is a NOOP that
-              // would only flash the label.
-              if (prepared.isolation.mode !== "none") {
-                emitProgress("cleaning-up", prepared.isolation);
+              } finally {
+                await previewBroker?.close().catch((error) => {
+                  logger.warn(
+                    `Failed to close preview automation broker: ${error}`,
+                  );
+                });
+                automation?.end();
               }
-              // Fail closed across the await: a teardown that throws has said
-              // nothing about whether the env came back, and "unknown" has to
-              // read the same as "no".
-              envRestoreFailed = true;
-              envRestoreFailed = !(await prepared.teardown()).envRestored;
-            } catch (error) {
-              logger.error(
-                `Failed to tear down isolated test environment for app ${appId}: ${error}`,
-              );
+
+              if (previewViewClosed) {
+                // The CDP target vanished mid-run. Losing it usually doesn't abort
+                // Playwright: it reports a screenful of "Target closed" test
+                // failures and exits with a perfectly parseable report, so gating
+                // this on `infraError` let the common case through as a wall of
+                // failures the user's app never caused. None of it is a verdict on
+                // the app, so it must not read as one — or count against the agent's
+                // fix budget.
+                result = {
+                  ...result,
+                  infraError: {
+                    message:
+                      "The preview was closed while tests were running, so the run was interrupted.",
+                  },
+                };
+              }
+              return { ...result, isolation: prepared.isolation };
+            } finally {
+              // Always restore the app to its real database, even on the
+              // infraError early-return, abort, or throw. `teardown` is safe to
+              // call exactly once; on the infraError path it's a NOOP (isolation
+              // already restored).
+              if (prepared) {
+                try {
+                  // Announce the teardown before it starts. It restores
+                  // `.env.local`, restarts the dev server and deletes the temporary
+                  // branch/user, takes no AbortSignal, and routinely outlasts the
+                  // process kill by a wide margin (the Neon branch delete retries
+                  // with backoff). Without this the UI reports "running" for the
+                  // whole wait. Skipped for `none`, whose teardown is a NOOP that
+                  // would only flash the label.
+                  if (prepared.isolation.mode !== "none") {
+                    emitProgress("cleaning-up", prepared.isolation);
+                  }
+                  // Fail closed across the await: a teardown that throws has said
+                  // nothing about whether the env came back, and "unknown" has to
+                  // read the same as "no".
+                  envRestoreFailed = true;
+                  envRestoreFailed = !(await prepared.teardown()).envRestored;
+                } catch (error) {
+                  logger.error(
+                    `Failed to tear down isolated test environment for app ${appId}: ${error}`,
+                  );
+                }
+              }
             }
-          }
-        }
-      },
+          },
+          withEnvRestoreWarning,
+        ),
     );
     finalResult = withEnvRestoreWarning(finalResult);
     return finalResult;

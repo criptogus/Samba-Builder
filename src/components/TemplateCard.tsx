@@ -79,13 +79,19 @@ export const TemplateCard: React.FC<TemplateCardProps> = ({
         `}
       >
         <div className="relative">
-          <img
-            src={template.imageUrl}
-            alt={template.title}
-            className={`w-full h-52 object-cover transition-opacity duration-300 group-hover:opacity-80 ${
-              isSelected ? "opacity-75" : ""
-            }`}
-          />
+          {template.isTeam ? (
+            <div className="w-full h-52 bg-muted flex items-center justify-center text-2xl font-semibold">
+              {template.title.slice(0, 2).toUpperCase()}
+            </div>
+          ) : (
+            <img
+              src={template.imageUrl}
+              alt={template.title}
+              className={`w-full h-52 object-cover transition-opacity duration-300 group-hover:opacity-80 ${
+                isSelected ? "opacity-75" : ""
+              }`}
+            />
+          )}
           {isSelected && (
             <span className="absolute top-3 right-3 bg-blue-600 text-white text-xs font-bold px-3 py-1.5 rounded-md shadow-lg">
               Selected
@@ -103,6 +109,11 @@ export const TemplateCard: React.FC<TemplateCardProps> = ({
             >
               {template.title}
             </h2>
+            {template.isTeam && (
+              <span className="text-xs rounded-full bg-muted px-2 py-1">
+                Equipe
+              </span>
+            )}
             {template.isOfficial && !template.isExperimental && (
               <span
                 className={`text-xs font-semibold px-2 py-0.5 rounded-full ${

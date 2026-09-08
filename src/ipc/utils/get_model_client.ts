@@ -19,7 +19,10 @@ import { getEnvVar } from "./read_env";
 import { getMaxTokens, getTemperature } from "./token_utils";
 import log from "electron-log";
 import { FREE_OPENROUTER_MODEL_NAMES } from "../shared/language_model_constants";
-import { getLanguageModelProviders } from "../shared/language_model_helpers";
+import {
+  getLanguageModelProviders,
+  getLanguageModelsByProviders,
+} from "../shared/language_model_helpers";
 import { resolveBuiltinModelAlias } from "../shared/remote_language_model_catalog";
 import { LanguageModelProvider } from "@/ipc/types";
 import {
@@ -145,12 +148,15 @@ export async function getModelClient(
   const dyadApiKey = settings.enableDyadPro
     ? getProviderApiKeyForRequest(
         settings.providerSettings?.auto?.apiKey?.value,
-        "Dyad",
+        "Samba Builder",
       )
     : undefined;
-  const isDyadProEnabledForRequest = Boolean(
-    dyadApiKey && settings.enableDyadPro,
-  );
+  // Samba Builder: produto BYOK puro — SEM backend de engine gerenciado
+  // (herança do Dyad autenticava por cookie de sessão; sem sessão logada o
+  // engine responde "No cookie auth credentials found"). O caminho do engine
+  // fica permanentemente desligado: o modelo vai SEMPRE direto ao provider
+  // conectado via API (chave do usuário).
+  const isDyadProEnabledForRequest = false;
 
   if (
     model.provider === "auto" &&
@@ -158,7 +164,7 @@ export async function getModelClient(
     !isDyadProEnabledForRequest
   ) {
     throw new DyadError(
-      "Auto (balanced) requires Dyad Pro. Switch to another model or enable Dyad Pro.",
+      "Auto (balanced) requer um modelo conectado. Selecione Auto ou um modelo conectado via API.",
       DyadErrorKind.Auth,
     );
   }
@@ -175,15 +181,17 @@ export async function getModelClient(
 
   if (isFreeProModel(model) && (!settings.enableDyadPro || !dyadApiKey)) {
     throw new DyadError(
-      "Dyad Free requires an active Dyad Pro API key. Switch to another model or enable Dyad Pro.",
+      "Samba Builder Free requires an active Samba Builder API key. Switch to another model or enable Samba Builder.",
       DyadErrorKind.Auth,
     );
   }
 
-  // Handle Dyad Pro override
-  if (isDyadProEnabledForRequest) {
+  // Handle Samba Builder override — só quando existe a chave do engine (backend
+  // cloud da Samba/Dyad). Sem chave (produto sem backend próprio), o provider é
+  // usado direto com a chave BYOK do usuário — evita AI_LoadAPIKeyError.
+  if (isDyadProEnabledForRequest && dyadApiKey) {
     const dyadEngineUrl = process.env.DYAD_ENGINE_URL;
-    // Check if the selected provider supports Dyad Pro (has a gateway prefix) OR
+    // Check if the selected provider supports Samba Builder (has a gateway prefix) OR
     // we're using local engine.
     // IMPORTANT: some providers like OpenAI have an empty string gateway prefix,
     // so we do a nullish and not a truthy check here.
@@ -206,11 +214,11 @@ export async function getModelClient(
       });
 
       logger.debug(
-        `\x1b[1;97;44m Using Dyad Pro API key for model: ${model.name} \x1b[0m`,
+        `\x1b[1;97;44m Using Samba Builder API key for model: ${model.name} \x1b[0m`,
       );
 
       logger.debug(
-        `\x1b[1;30;42m Using Dyad Pro engine: ${dyadEngineUrl ?? "<prod>"} \x1b[0m`,
+        `\x1b[1;30;42m Using Samba Builder engine: ${dyadEngineUrl ?? "<prod>"} \x1b[0m`,
       );
 
       // Do not use free variant (for openrouter).
@@ -230,7 +238,7 @@ export async function getModelClient(
       };
     } else {
       logger.warn(
-        `Dyad Pro enabled, but provider ${model.provider} does not have a gateway prefix defined. Falling back to direct provider connection.`,
+        `Samba Builder enabled, but provider ${model.provider} does not have a gateway prefix defined. Falling back to direct provider connection.`,
       );
       // Fall through to regular provider logic if gateway prefix is missing
     }
@@ -314,9 +322,32 @@ export async function getModelClient(
         );
       }
     }
+    // Samba Builder: o modo auto resolve SEMPRE para um modelo cujo provider
+    // esteja conectado via API (chave salva ou env var) — catálogo E custom
+    // models (language_models do DB). Nunca tenta modelo sem conexão.
+    const byokModelsByProvider = await getLanguageModelsByProviders();
+    for (const provider of allProviders) {
+      const byokApiKey =
+        settings.providerSettings?.[provider.id]?.apiKey?.value ||
+        (provider.envVarName ? getEnvVar(provider.envVarName) : undefined);
+      if (!byokApiKey) {
+        continue;
+      }
+      const byokModels = byokModelsByProvider[provider.id];
+      if (byokModels?.length) {
+        const byokModel = byokModels[0];
+        logger.log(
+          `[auto] provider conectado via API: ${provider.id} model: ${byokModel.apiName}`,
+        );
+        return await getModelClient(
+          { provider: provider.id, name: byokModel.apiName },
+          settings,
+        );
+      }
+    }
     // If no models have API keys, throw an error
     throw new Error(
-      "No API keys available for any model supported by the 'auto' provider.",
+      "Nenhum provider conectado via API. Conecte um provider (ex.: DeepSeek) em Settings → Providers e adicione a chave de API.",
     );
   }
   return {
@@ -441,7 +472,7 @@ async function getProModelClient({
         // The stream's call options are computed for the PRIMARY selection, so
         // give each chain entry the options it would have received had IT been
         // selected: its own temperature and output cap from the catalog.
-        // Provider-family thinking options are already injected by the Dyad
+        // Provider-family thinking options are already injected by the Samba Builder
         // Engine fetch wrapper from this entry's providerId; adding e.g.
         // providerOptions.google here would be ignored because these AI SDK
         // model instances read the dyad-engine provider-options key.
@@ -528,6 +559,24 @@ function getRegularModelClient(
               : undefined),
           providerConfig.name ?? providerConfig.id,
         );
+  // Samba Builder (BYOK): provider sem chave conectada NUNCA recebe request —
+  // o backend do provider responde erros confusos (ex.: OpenRouter devolve
+  // "No cookie auth credentials found"). Erro claro e acionável no lugar.
+  // (Modo de teste com fetch mockado não exige chave — o fake LLM responde.)
+  const providerRequiresKey = ![
+    "azure",
+    "ollama",
+    "lmstudio",
+    "vertex",
+    "bedrock",
+  ].includes(providerId);
+  const hasTestFetchOverride = Boolean(getModelClientFetchOption().fetch);
+  if (providerRequiresKey && !apiKey && !hasTestFetchOverride) {
+    throw new DyadError(
+      `O provider ${providerConfig.name ?? providerId} não está conectado (chave de API ausente). Adicione a chave em Settings → Providers ou selecione um modelo conectado (ex.: DeepSeek).`,
+      DyadErrorKind.Auth,
+    );
+  }
   // Create client based on provider ID or type
   switch (providerId) {
     case "openai": {

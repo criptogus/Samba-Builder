@@ -88,7 +88,7 @@ function readPnpmLockfileVersion(appPath: string): number | null {
  * state the app's legacy pnpm cannot read: a pre-9.0 lockfile (which the
  * managed pnpm rewrites incompatibly on install) or a `packageManager` pin at
  * or below pnpm 8 (whose corepack/CI installs cannot read the 9.0 lockfile
- * Dyad produces).
+ * Samba Builder produces).
  */
 export function isPnpmVersionMigrationNeeded(appPath: string): boolean {
   const signal = getPackageManagerSignal(appPath);
@@ -138,8 +138,8 @@ async function restorePackageJson(
 }
 
 /**
- * Migrates the app to the Dyad-managed pnpm in one visible step: updates the
- * `packageManager` pin to the version Dyad actually runs, reinstalls so the
+ * Migrates the app to the Samba Builder-managed pnpm in one visible step: updates the
+ * `packageManager` pin to the version Samba Builder actually runs, reinstalls so the
  * lockfile is rewritten to the matching format, and commits both together so
  * the repo's self-description, lockfile, and CI/deploy behavior agree.
  */
@@ -151,7 +151,7 @@ export async function applyPnpmVersionMigration({
   const pnpmSupport = await getPnpmMinimumReleaseAgeSupport();
   if (!pnpmSupport.available || !pnpmSupport.version) {
     throw new DyadError(
-      "pnpm is not available, so the project cannot be migrated. Restart Dyad and try again.",
+      "pnpm is not available, so the project cannot be migrated. Restart Samba Builder and try again.",
       DyadErrorKind.External,
     );
   }
@@ -165,7 +165,7 @@ export async function applyPnpmVersionMigration({
     )
   ) {
     throw new DyadError(
-      `The available pnpm (${pnpmSupport.version}) is older than pnpm ${COMPATIBLE_PNPM_LOCKFILE_MAJOR}, so the project cannot be migrated. Restart Dyad and try again.`,
+      `The available pnpm (${pnpmSupport.version}) is older than pnpm ${COMPATIBLE_PNPM_LOCKFILE_MAJOR}, so the project cannot be migrated. Restart Samba Builder and try again.`,
       DyadErrorKind.External,
     );
   }
@@ -174,7 +174,7 @@ export async function applyPnpmVersionMigration({
   const allowBuildsResult = await ensurePnpmAllowBuildsConfigured({ appPath });
 
   // Update the pin before reinstalling so pnpm writes a lockfile that matches
-  // the package metadata Dyad will commit. If the install fails, restore the
+  // the package metadata Samba Builder will commit. If the install fails, restore the
   // original package.json so the failed migration does not hide future prompts.
   let originalPackageJsonContent: string;
   try {
@@ -194,7 +194,8 @@ export async function applyPnpmVersionMigration({
     await simpleSpawnWithDeniedPnpmBuildSelfHeal({
       command: `pnpm ${PNPM_INSTALL_POLICY_ARGS.join(" ")} install`,
       cwd: appPath,
-      successMessage: "Reinstalled dependencies with the Dyad-managed pnpm",
+      successMessage:
+        "Reinstalled dependencies with the Samba Builder-managed pnpm",
       errorPrefix: "Failed to reinstall dependencies with pnpm",
     });
   } catch (error) {
@@ -211,7 +212,7 @@ export async function applyPnpmVersionMigration({
 
   // Old-lockfile apps commonly carry unlisted build-script deps; record any
   // builds this install skipped so plain `pnpm install` stays green outside
-  // Dyad (this also commits pnpm-workspace.yaml when it changes).
+  // Samba Builder (this also commits pnpm-workspace.yaml when it changes).
   const ignoredBuilds = await resolvePnpmIgnoredBuilds(appPath);
   const { deniedBuilds } = await recordAndReportDeniedPnpmBuilds({
     appPath,

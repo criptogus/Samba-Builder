@@ -57,7 +57,7 @@ export function isCoolifyStatus(error: unknown, status: number): boolean {
  * How an application should be built and served.
  *
  * Almost every field is left undefined: railpack reads the app and decides for
- * itself, and a field Dyad does not send is one Coolify keeps as configured
+ * itself, and a field Samba Builder does not send is one Coolify keeps as configured
  * rather than having replaced on every deploy. See buildConfigForFramework for
  * what is still worth saying.
  */
@@ -295,7 +295,7 @@ export class CoolifyClient {
     if (!Array.isArray(body)) {
       throw new DyadError(
         `Coolify did not return a list of ${what}. This instance may be a ` +
-          `version Dyad does not understand.`,
+          `version Samba Builder does not understand.`,
         DyadErrorKind.External,
       );
     }
@@ -314,7 +314,7 @@ export class CoolifyClient {
     if (parsed.length === 0 && body.length > 0) {
       throw new DyadError(
         `Coolify returned ${what} in an unexpected shape. This instance may ` +
-          `be a version Dyad does not understand.`,
+          `be a version Samba Builder does not understand.`,
         DyadErrorKind.External,
       );
     }
@@ -424,10 +424,10 @@ export class CoolifyClient {
     if (patch.build) {
       body.build_pack = patch.build.buildPack;
       body.ports_exposes = patch.build.portsExposes;
-      // Only what Dyad actually has a value for. A field it says nothing
+      // Only what Samba Builder actually has a value for. A field it says nothing
       // about is left out of the request entirely, so a setting the user or
       // the app put there survives a redeploy instead of being replaced by a
-      // default Dyad invented.
+      // default Samba Builder invented.
       if (patch.build.startCommand !== undefined) {
         body.start_command = patch.build.startCommand;
       }

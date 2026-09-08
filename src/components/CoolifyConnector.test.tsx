@@ -272,7 +272,7 @@ describe("the instance and the app are separate sections", () => {
   }
 
   it("asks before forgetting anything", async () => {
-    // Signing out throws away the password Dyad invented, and pressing the
+    // Signing out throws away the password Samba Builder invented, and pressing the
     // button is not the same as having read that.
     connected(null);
     const clearToken = watchClearToken();
@@ -323,12 +323,12 @@ const NO_TOKEN = {
 };
 
 /** Installed, and its API token could not be minted — so no token, but a
-    server whose account Dyad is the only holder of. */
+    server whose account Samba Builder is the only holder of. */
 const SERVER_NO_TOKEN = {
   status: { ...NO_TOKEN.status, serverUrl: "http://203.0.113.5:8000" },
 };
 
-describe("a server Dyad set up but has no token for", () => {
+describe("a server Samba Builder set up but has no token for", () => {
   it("will not set up another over the top of it", async () => {
     // Installing again replaces the only copy of this one's password, so it
     // is not something a screen offers on the way past.
@@ -340,7 +340,7 @@ describe("a server Dyad set up but has no token for", () => {
   });
 
   it("offers signing out as the way to a different Coolify", async () => {
-    // The only state where Dyad holds a Coolify and has no token to give up,
+    // The only state where Samba Builder holds a Coolify and has no token to give up,
     // so without this there is nothing here that reaches the account.
     deploy.value = SERVER_NO_TOKEN;
     render(<CoolifyConnector appId={1} />);
@@ -587,7 +587,7 @@ describe("a server Dyad set up but has no token for", () => {
   });
 
   it("has nothing to sign out of when the run never got that far", async () => {
-    // A failure before the account was written leaves Dyad holding nothing,
+    // A failure before the account was written leaves Samba Builder holding nothing,
     // so the way to forget it is an offer to forget what does not exist.
     deploy.value = NO_TOKEN;
     setup.state = {
@@ -607,7 +607,7 @@ describe("a server Dyad set up but has no token for", () => {
 
   it("can be connected to from the card that refuses a new install", async () => {
     // The address cannot be typed into here, so a form that never filled it
-    // in would leave signing out — which forgets the password Dyad is the
+    // in would leave signing out — which forgets the password Samba Builder is the
     // only holder of — as the only way on from that card.
     deploy.value = SERVER_NO_TOKEN;
     const user = userEvent.setup();
@@ -643,7 +643,7 @@ describe("a server Dyad set up but has no token for", () => {
     await user.click(
       screen.getByRole("button", { name: "I already have Coolify installed" }),
     );
-    // Named for where it goes. Dyad set this server up, so offering to set
+    // Named for where it goes. Samba Builder set this server up, so offering to set
     // one up "yet" describes somebody else's situation.
     expect(screen.getByTestId("coolify-no-instance").textContent).toBe(
       "Back to the installer",
@@ -698,7 +698,7 @@ describe("where someone with no Coolify lands", () => {
 
   it("still shows what it knows about a server with no token yet", async () => {
     // Installing a server whose token could not be minted lands here, and the
-    // account Dyad made is the only way into it.
+    // account Samba Builder made is the only way into it.
     deploy.value = NO_TOKEN;
     const user = userEvent.setup();
     render(<CoolifyConnector appId={1} />);
@@ -951,7 +951,9 @@ describe("the server and project pickers while discovery is in flight", () => {
     const user = userEvent.setup();
     render(<CoolifyConnector appId={1} />);
 
-    expect(screen.queryByText(/has no servers Dyad can see/)).toBeNull();
+    expect(
+      screen.queryByText(/has no servers Samba Builder can see/),
+    ).toBeNull();
     await user.click(screen.getByTestId("coolify-server-select"));
     expect(screen.getByText("Loading servers...")).toBeTruthy();
   });

@@ -32,7 +32,13 @@ describe("planningQuestionnaireTool", () => {
 
   it("uses product-focused language in its example", () => {
     expect(planningQuestionnaireTool.description).toContain(
-      "look and feel and key product features",
+      "actual user problem before choosing features or visual style",
+    );
+    expect(planningQuestionnaireTool.description).toContain(
+      "one high-impact question",
+    );
+    expect(planningQuestionnaireTool.description).toContain(
+      "accept uncertainty",
     );
     expect(planningQuestionnaireTool.description).not.toContain("tech stack");
   });

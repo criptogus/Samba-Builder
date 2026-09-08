@@ -43,7 +43,7 @@ vi.mock("@/paths/paths", () => ({
   getDyadAppPath: vi.fn((appPath: string) => {
     const path = require("node:path");
     if (path.isAbsolute(appPath)) return appPath;
-    return path.join("/home/user/dyad-apps", appPath);
+    return path.join("/home/user/samba-apps", appPath);
   }),
 }));
 
@@ -120,7 +120,7 @@ describe("cleanupOldMediaFiles", () => {
     const recentMtimeMs = now - 5 * 24 * 60 * 60 * 1000;
 
     dbMocks.from.mockResolvedValue([{ path: "my-app" }]);
-    const appPath = path.join("/home/user/dyad-apps", "my-app");
+    const appPath = path.join("/home/user/samba-apps", "my-app");
     const mediaDir = path.join(appPath, ".dyad/media");
 
     fsMocks.readdir.mockImplementation((dirPath: string) => {
@@ -224,7 +224,7 @@ describe("cleanupOldMediaFiles", () => {
       expect.stringContaining("old-file.png"),
     );
     expect(mediaPathMocks.pruneAttachmentManifest).toHaveBeenCalledWith(
-      path.join("/home/user/dyad-apps", "my-app"),
+      path.join("/home/user/samba-apps", "my-app"),
     );
   });
 
@@ -240,7 +240,11 @@ describe("cleanupOldMediaFiles", () => {
     fsMocks.stat.mockResolvedValue({ isFile: () => true, mtimeMs: oldMtimeMs });
     fsMocks.unlink.mockResolvedValue(undefined);
     mediaPathMocks.pruneAttachmentManifest.mockRejectedValue(pruneError);
-    const mediaDir = path.join("/home/user/dyad-apps", "my-app", ".dyad/media");
+    const mediaDir = path.join(
+      "/home/user/samba-apps",
+      "my-app",
+      ".dyad/media",
+    );
 
     await cleanupOldMediaFiles();
 

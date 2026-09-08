@@ -19,6 +19,10 @@ export const queryKeys = {
     all: ["factory"] as const,
     gate: (appId: number) => ["factory", "gate", appId] as const,
   },
+  nativeAgents: {
+    status: ["native-agents", "status"] as const,
+    run: (id?: string) => ["native-agents", "run", id] as const,
+  },
   subagents: {
     all: ["subagents"] as const,
     byChat: ({ chatId }: { chatId: number }) => ["subagents", chatId] as const,
@@ -201,6 +205,8 @@ export const queryKeys = {
   // App Files
   // ─────────────────────────────────────────────────────────────────────────────
   appFiles: {
+    byApp: ({ appId }: { appId: number }) =>
+      ["app-files", "content", appId] as const,
     all: ["app-files"] as const,
     content: ({
       appId,
@@ -316,6 +322,10 @@ export const queryKeys = {
   // ─────────────────────────────────────────────────────────────────────────────
   // Vercel Deployments
   // ─────────────────────────────────────────────────────────────────────────────
+  aws: {
+    deploy: (appId: number) => ["aws", "deploy", appId] as const,
+    status: (appId: number) => ["aws", "status", appId] as const,
+  },
   vercel: {
     all: ["vercel"] as const,
     deployments: ({ appId }: { appId: number }) =>
@@ -349,9 +359,9 @@ export const queryKeys = {
       ] as const,
     /** What the main process is doing with a server right now. */
     setup: ["coolify", "setup"] as const,
-    /** The public half of the key Dyad puts on servers it sets up. */
+    /** The public half of the key Samba Builder puts on servers it sets up. */
     serverKey: ["coolify", "serverKey"] as const,
-    /** What Dyad knows about signing in to the server it set up. */
+    /** What Samba Builder knows about signing in to the server it set up. */
     credentials: ["coolify", "credentials"] as const,
     /** Every instance's list, for invalidating after a token change. */
     discoveryAll: ["coolify", "discovery"] as const,
@@ -476,6 +486,13 @@ export const queryKeys = {
   // ─────────────────────────────────────────────────────────────────────────────
   media: {
     all: ["media"] as const,
+  },
+  // ─────────────────────────────────────────────────────────────────────────────
+  // Governance (project draft/in_review/approved cycle)
+  // ─────────────────────────────────────────────────────────────────────────────
+  governance: {
+    status: ({ appPath }: { appPath: string }) =>
+      ["governance", "status", appPath] as const,
   },
 } as const;
 

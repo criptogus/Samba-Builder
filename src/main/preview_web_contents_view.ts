@@ -290,7 +290,7 @@ function createEntry(window: BrowserWindow, key: number): PreviewViewEntry {
   const view = new WebContentsView({
     webPreferences: {
       // The previewed app is untrusted, user-generated code. It gets no
-      // preload, no Node, and no access to Dyad's IPC surface.
+      // preload, no Node, and no access to Samba Builder's IPC surface.
       sandbox: true,
       contextIsolation: true,
       nodeIntegration: false,
@@ -820,7 +820,7 @@ export function beginPreviewAutomation(
       destroyEntry(key, window);
 
       if (resolveKey(window) !== key) {
-        return { ok: false, reason: "the Dyad window was closed" };
+        return { ok: false, reason: "the Samba Builder window was closed" };
       }
 
       const replacement = createEntry(window, key);

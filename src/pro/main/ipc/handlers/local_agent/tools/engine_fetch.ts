@@ -1,6 +1,6 @@
 /**
- * Shared utility for making fetch requests to the Dyad engine API.
- * Handles common headers including Authorization and X-Dyad-Request-Id.
+ * Shared utility for making fetch requests to the Samba Builder engine API.
+ * Handles common headers including Authorization and X-Samba Builder-Request-Id.
  */
 
 import { readSettings } from "@/main/settings";
@@ -30,7 +30,7 @@ export const DEFAULT_ENGINE_FETCH_TIMEOUT_MS = 300_000;
 export class EngineFetchTimeoutError extends DyadError {
   constructor(endpoint: string, timeoutMs = DEFAULT_ENGINE_FETCH_TIMEOUT_MS) {
     super(
-      `Dyad engine request to ${endpoint} timed out after ${timeoutMs}ms`,
+      `Samba Builder engine request to ${endpoint} timed out after ${timeoutMs}ms`,
       DyadErrorKind.External,
     );
     this.name = "EngineFetchTimeoutError";
@@ -46,14 +46,14 @@ function createCallerCancellationError(cause: unknown): DyadError {
 }
 
 /**
- * Fetch wrapper for Dyad engine API calls.
- * Automatically adds Authorization and X-Dyad-Request-Id headers.
+ * Fetch wrapper for Samba Builder engine API calls.
+ * Automatically adds Authorization and X-Samba Builder-Request-Id headers.
  *
  * @param ctx - The agent context containing the request ID
  * @param endpoint - The API endpoint path (e.g., "/tools/web-search")
  * @param options - Fetch options (method, body, additional headers, etc.)
  * @returns The fetch Response
- * @throws Error if Dyad Pro API key is not configured
+ * @throws Error if Samba Builder API key is not configured
  */
 export async function engineFetch(
   ctx: Pick<AgentContext, "dyadRequestId" | "abortSignal">,
@@ -72,7 +72,10 @@ export async function engineFetch(
   const apiKey = settings.providerSettings?.auto?.apiKey?.value;
 
   if (!apiKey) {
-    throw new DyadError("Dyad Pro API key is required", DyadErrorKind.Auth);
+    throw new DyadError(
+      "Samba Builder API key is required",
+      DyadErrorKind.Auth,
+    );
   }
 
   const {
@@ -126,7 +129,7 @@ export async function engineFetch(
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${apiKey}`,
-        "X-Dyad-Request-Id": ctx.dyadRequestId,
+        "X-Samba Builder-Request-Id": ctx.dyadRequestId,
         ...extraHeaders,
       },
     });

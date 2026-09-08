@@ -1,3 +1,6 @@
+import { recordProjectTokenUsage } from "@/ipc/services/project_accounting";
+import { assertDeliveryAgentBudget } from "@/ipc/services/delivery_usage";
+import { subagentCapacity, activeSubagentCount } from "./capacity";
 import crypto from "node:crypto";
 import { stepCountIs, streamText, type ModelMessage, type ToolSet } from "ai";
 import { and, asc, desc, eq, inArray, isNull, or } from "drizzle-orm";
@@ -17,7 +20,7 @@ import { getModelClient } from "@/ipc/utils/get_model_client";
 import { getAiHeaders, getProviderOptions } from "@/ipc/utils/provider_options";
 import { withLock } from "@/ipc/utils/lock_utils";
 import { fastTextOutput } from "@/ipc/utils/stream_text_utils";
-import { getBuiltinLanguageModelCatalog } from "@/ipc/shared/remote_language_model_catalog";
+import { selectSubagentModel } from "./model_selection";
 import {
   appOperationCoordinator,
   readAppResource,
@@ -468,7 +471,7 @@ export async function spawnModelSubagent(params: {
       DyadErrorKind.Validation,
     );
   }
-  await preflightPersonaModel(params.persona);
+  await preflightPersonaModel(params.persona, params.ctx.chatId);
 
   const normalizedScope =
     params.persona === "implementer"
@@ -565,7 +568,7 @@ export async function startReview(params: {
   allowWhenAutoReviewDisabled?: boolean;
 }): Promise<SubagentThreadSummary> {
   assertPro("reviewer");
-  await preflightPersonaModel("reviewer");
+  await preflightPersonaModel("reviewer", params.chatId);
   if (
     params.invocationSource === "auto_review" &&
     !params.allowWhenAutoReviewDisabled &&
@@ -1603,6 +1606,7 @@ async function runThread(
         ? {
             text: await runExploreCodeSubagent({
               args: { query: explorerAssignment, intent: "explain" },
+              modelSelection: pinnedThreadModel(thread),
               ctx: {
                 ...rootCtx,
                 mutationActivityOwner: mutationOwner,
@@ -1611,7 +1615,8 @@ async function runThread(
                 abortSignal: controller.signal,
               },
               tools,
-              onUsage: (usage) => recordModelUsage(threadId, usage),
+              beforeModelStep: () => assertDeliveryAgentBudget(appId),
+              onStepUsage: (usage) => recordModelUsage(threadId, usage),
               onFinalized: ({ usedFallback }) => {
                 usedExplorerFallback = usedFallback;
               },
@@ -1767,8 +1772,12 @@ async function runModel(
   params: RunModelParams,
 ): Promise<{ text: string; hitStepLimit: boolean }> {
   assertPro(params.persona);
+  assertDeliveryAgentBudget(params.appId);
   const claimedRootMessageIds = new Set<number>();
-  const settings = personaModelSettings(params.persona);
+  const settings = {
+    ...readSettings(),
+    selectedModel: pinnedThreadModel(await getThread(params.threadId)),
+  };
   const modelInfo = await getModelClient(settings.selectedModel, settings);
   const history = await buildModelHistory(params.threadId, params.assignment);
   let streamError: unknown;
@@ -1796,6 +1805,7 @@ async function runModel(
     tools: params.tools,
     prepareStep: async ({ messages: stepMessages }) => {
       assertPro(params.persona);
+      assertDeliveryAgentBudget(params.appId);
       const pending = await db.query.agentMessages.findMany({
         where: and(
           eq(agentMessages.threadId, params.threadId),
@@ -1820,14 +1830,30 @@ async function runModel(
     onError: ({ error }) => {
       streamError ??= error;
     },
+    onStepFinish: async (step) => {
+      await recordModelUsage(params.threadId, {
+        inputTokens: step.usage.inputTokens ?? 0,
+        outputTokens: step.usage.outputTokens ?? 0,
+        provider:
+          modelInfo.modelClient.builtinProviderId ??
+          settings.selectedModel.provider,
+        model:
+          typeof modelInfo.modelClient.model === "string"
+            ? modelInfo.modelClient.model
+            : modelInfo.modelClient.model.modelId,
+        inputUnknown: step.usage.inputTokens === undefined,
+        outputUnknown: step.usage.outputTokens === undefined,
+        toolCallCount: step.toolCalls.length,
+      });
+    },
     stopWhen: stepCountIs(maxStepsFor(params.persona)),
     abortSignal: params.abortSignal,
   });
   // Race aggregation against the abort signal. Actor-scoped cancellation in
   // cancelSubagent closes the exact generation and waits for its tracked
   // mutation tokens without blocking unrelated turns.
-  const [text, usage, steps] = await raceWithAbort(
-    Promise.all([result.text, result.totalUsage, result.steps]),
+  const [text, steps] = await raceWithAbort(
+    Promise.all([result.text, result.steps]),
     params.abortSignal,
   );
   if (streamError) throw streamError;
@@ -1837,14 +1863,7 @@ async function runModel(
       .set({ consumed: true })
       .where(inArray(agentMessages.id, [...claimedRootMessageIds]));
   }
-  await recordModelUsage(params.threadId, {
-    inputTokens: usage.inputTokens ?? 0,
-    outputTokens: usage.outputTokens ?? 0,
-    toolCallCount: steps.reduce(
-      (count, step) => count + step.toolCalls.length,
-      0,
-    ),
-  });
+
   return {
     text,
     hitStepLimit: steps.length >= maxStepsFor(params.persona),
@@ -1871,10 +1890,24 @@ async function recordModelUsage(
   usage: {
     inputTokens: number;
     outputTokens: number;
+    provider?: string;
+    model?: string;
+    inputUnknown?: boolean;
+    outputUnknown?: boolean;
     toolCallCount: number;
   },
 ): Promise<void> {
   const thread = await getThread(threadId);
+  recordProjectTokenUsage(
+    thread.chatId,
+    usage.provider ?? thread.provider,
+    usage.model ?? thread.model,
+    "subagent",
+    {
+      inputTokens: usage.inputUnknown ? undefined : usage.inputTokens,
+      outputTokens: usage.outputUnknown ? undefined : usage.outputTokens,
+    },
+  );
   await db
     .update(agentThreads)
     .set({
@@ -1887,37 +1920,34 @@ async function recordModelUsage(
   emit(thread.chatId, threadId);
 }
 
-function personaModelSettings(persona: SubagentPersona) {
-  const defaults = MODELS[persona];
-  return {
-    ...readSettings(),
-    selectedModel: {
-      provider: defaults.provider,
-      name: defaults.name,
-      effortLevel: defaults.effort,
-    },
-    thinkingBudget: defaults.effort,
-  };
+function pinnedThreadModel(thread: typeof agentThreads.$inferSelect) {
+  return selectSubagentModel(thread.contextJson?.modelSelection, {
+    provider: thread.provider,
+    name: thread.model,
+    effortLevel: thread.reasoningEffort,
+  });
 }
 
-async function preflightPersonaModel(persona: SubagentPersona): Promise<void> {
+async function personaModelSelection(persona: SubagentPersona, chatId: number) {
   const defaults = MODELS[persona];
-  const catalog = await getBuiltinLanguageModelCatalog();
-  const available = catalog.modelsByProvider[defaults.provider]?.some(
-    (model) => model.apiName === defaults.name,
-  );
-  if (!available) {
-    throw new DyadError(
-      `${persona} requires ${defaults.name}, which is not currently available. Check your Dyad Pro model access and try again.`,
-      DyadErrorKind.Precondition,
-    );
-  }
+  const chat = await db.query.chats.findFirst({ where: eq(chats.id, chatId) });
+  return selectSubagentModel(chat?.modelSelection, {
+    provider: defaults.provider,
+    name: defaults.name,
+    effortLevel: defaults.effort,
+  });
+}
+
+async function preflightPersonaModel(
+  persona: SubagentPersona,
+  chatId: number,
+): Promise<void> {
+  const selectedModel = await personaModelSelection(persona, chatId);
   try {
-    const settings = personaModelSettings(persona);
-    await getModelClient(settings.selectedModel, settings);
+    await getModelClient(selectedModel, { ...readSettings(), selectedModel });
   } catch (error) {
     throw new DyadError(
-      `${persona} could not start because ${defaults.name} is not configured. Check your Dyad Pro model access and try again.`,
+      `${persona} could not start because ${selectedModel.name} is not configured. Check your Samba Builder model access and try again.`,
       DyadErrorKind.Precondition,
       { cause: error },
     );
@@ -2000,10 +2030,10 @@ export function shouldDrainMutationOnAbort(persona: SubagentPersona): boolean {
 
 function systemPrompt(persona: SubagentPersona): string {
   if (persona === "reviewer")
-    return "You are Dyad Reviewer. Be independent, concise, evidence-based, and read-only.";
+    return "You are Samba Builder Reviewer. Be independent, concise, evidence-based, and read-only.";
   if (persona === "implementer")
-    return "You are Dyad Implementer. Complete the focused assignment using only provided tools. Treat assigned paths as the expected focus, but cross them when correctness requires it and report every changed file and unresolved issue.";
-  return "You are Dyad Explorer. Investigate read-only, cite files and evidence, and return a concise report with confidence and recommended next action.";
+    return "You are Samba Builder Implementer. Complete the focused assignment using only provided tools. Treat assigned paths as the expected focus, but cross them when correctness requires it and report every changed file and unresolved issue.";
+  return "You are Samba Builder Explorer. Investigate read-only, cite files and evidence, and return a concise report with confidence and recommended next action.";
 }
 
 export function resolveSubagentSystemPrompt(
@@ -2025,7 +2055,10 @@ async function createThread(params: {
   contextJson: Record<string, unknown>;
   review?: ReviewTarget;
 }) {
-  const defaults = MODELS[params.persona];
+  const selectedModel = await personaModelSelection(
+    params.persona,
+    params.chatId,
+  );
   const [row] = await db
     .insert(agentThreads)
     .values({
@@ -2035,11 +2068,11 @@ async function createThread(params: {
       taskName: params.taskName,
       assignment: params.assignment,
       status: "queued",
-      provider: defaults.provider,
-      model: defaults.name,
-      reasoningEffort: defaults.effort,
+      provider: selectedModel.provider,
+      model: selectedModel.name,
+      reasoningEffort: selectedModel.effortLevel,
       invocationSource: params.invocationSource,
-      contextJson: params.contextJson,
+      contextJson: { ...params.contextJson, modelSelection: selectedModel },
       reviewBaseCommit: params.review?.baseCommit,
       reviewTargetCommit: params.review?.targetCommit,
       reviewDiffHash: params.review?.hash,
@@ -2296,8 +2329,8 @@ function assertPro(persona?: SubagentPersona): void {
   if (!isDyadProEnabled(readSettings())) {
     throw new DyadError(
       persona
-        ? `${persona} sub-agents require Dyad Pro.`
-        : "Sub-agents require Dyad Pro.",
+        ? `${persona} sub-agents require Samba Builder.`
+        : "Sub-agents require Samba Builder.",
       DyadErrorKind.Auth,
     );
   }
@@ -2409,7 +2442,7 @@ function errorMessage(error: unknown): string {
 
 function boundDurableReport(value: string): string {
   if (value.length <= MAX_DURABLE_REPORT_CHARS) return value;
-  return `${value.slice(0, MAX_DURABLE_REPORT_CHARS)}\n\n[Report truncated by Dyad]`;
+  return `${value.slice(0, MAX_DURABLE_REPORT_CHARS)}\n\n[Report truncated by Samba Builder]`;
 }
 
 export function isReusableReviewStatus(status: string): boolean {
@@ -2612,7 +2645,10 @@ function drainRuns(chatId: number): void {
   if (subagentDisposalRegistry.isAdmissionClosed(chatId)) return;
   const active = activeRunsByChat.get(chatId) ?? new Set<string>();
   activeRunsByChat.set(chatId, active);
-  while (active.size < 3) {
+  while (
+    activeSubagentCount(activeRunsByChat) <
+    subagentCapacity(readSettings().maxConcurrentSubagents)
+  ) {
     const index = pendingRuns.findIndex((item) => item.chatId === chatId);
     if (index < 0) break;
     const [item] = pendingRuns.splice(index, 1);
@@ -2644,7 +2680,12 @@ function drainRuns(chatId: number): void {
         const previousCleanupTimer = followupCleanupTimers.get(item.threadId);
         if (previousCleanupTimer) clearTimeout(previousCleanupTimer);
         followupCleanupTimers.set(item.threadId, cleanupTimer);
-        drainRuns(chatId);
+        // Capacity is shared across projects and windows; wake other queued chats too.
+        for (const pendingChatId of new Set(
+          pendingRuns.map((run) => run.chatId),
+        )) {
+          drainRuns(pendingChatId);
+        }
       });
     void subagentDisposalRegistry.trackActiveRun(chatId, run);
   }
@@ -2674,7 +2715,7 @@ function watchEntitlement(
       threadId,
       "entitlement_revoked",
       null,
-      "Dyad Pro entitlement was revoked while this sub-agent was running.",
+      "Samba Builder entitlement was revoked while this sub-agent was running.",
     ).catch((error) =>
       logger.error(
         `Failed to persist entitlement revocation for ${threadId}`,

@@ -7,7 +7,9 @@
 (function () {
   // Check if Service Workers are supported
   if (!("serviceWorker" in navigator)) {
-    console.warn("[Dyad] Service Workers are not supported in this browser");
+    console.warn(
+      "[Samba Builder] Service Workers are not supported in this browser",
+    );
     return;
   }
 
@@ -15,15 +17,21 @@
   navigator.serviceWorker
     .register("/dyad-sw.js", { scope: "/" })
     .then((registration) => {
-      console.log("[Dyad] Service Worker registered:", registration.scope);
+      console.log(
+        "[Samba Builder] Service Worker registered:",
+        registration.scope,
+      );
 
       // Handle updates
       registration.addEventListener("updatefound", () => {
-        console.log("[Dyad] Service Worker update found");
+        console.log("[Samba Builder] Service Worker update found");
       });
     })
     .catch((error) => {
-      console.error("[Dyad] Service Worker registration failed:", error);
+      console.error(
+        "[Samba Builder] Service Worker registration failed:",
+        error,
+      );
     });
 
   // Listen for messages from the Service Worker
@@ -32,12 +40,12 @@
     try {
       window.parent.postMessage(event.data, "*");
     } catch (e) {
-      console.error("[Dyad] Failed to forward message to parent:", e);
+      console.error("[Samba Builder] Failed to forward message to parent:", e);
     }
   });
 
   // Also listen for messages from the active Service Worker controller
   if (navigator.serviceWorker.controller) {
-    console.log("[Dyad] Service Worker controller already active");
+    console.log("[Samba Builder] Service Worker controller already active");
   }
 })();

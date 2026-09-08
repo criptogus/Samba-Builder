@@ -217,7 +217,7 @@ export const createChatCompletionHandler =
     fakeLlmLog("* Received messages", messages);
 
     if (hasInvalidApiKey(req)) {
-      // The Dyad engine (a LiteLLM proxy) reports auth failures as an SSE
+      // The Samba Builder engine (a LiteLLM proxy) reports auth failures as an SSE
       // error event on an HTTP 200 response rather than an HTTP 401.
       if (prefix === "engine") {
         res.setHeader("Content-Type", "text/event-stream; charset=utf-8");

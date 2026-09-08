@@ -259,6 +259,26 @@ describe("runExploreCodeSubagent", () => {
     expect(report).toContain("used bundled TypeScript 6.0.3");
   });
 
+  it("uses the pinned chat model for client, token limits and temperature", async () => {
+    const modelSelection = {
+      provider: "deepseek",
+      name: "deepseek-chat",
+      effortLevel: "medium",
+    };
+    await runExploreCodeSubagent({
+      args: { query: "widget save flow", intent: "locate" },
+      ctx: createMockContext(),
+      modelSelection,
+    });
+    expect(mocks.getModelClient).toHaveBeenCalledWith(
+      modelSelection,
+      expect.objectContaining({ selectedModel: modelSelection }),
+      modelSelection,
+    );
+    expect(mocks.getMaxTokens).toHaveBeenCalledWith(modelSelection);
+    expect(mocks.getTemperature).toHaveBeenCalledWith(modelSelection);
+  });
+
   it("uses a domain-neutral system prompt with no benchmark vocabulary", async () => {
     await runExploreCodeSubagent({
       args: { query: "widget save flow", intent: "locate" },
@@ -1048,14 +1068,14 @@ describe("runExploreCodeSubagent", () => {
     );
   });
 
-  it("fails clearly when Dyad Pro is unavailable", async () => {
+  it("fails clearly when Samba Builder is unavailable", async () => {
     mocks.readSettings.mockReturnValue({ enableDyadPro: false });
     await expect(
       runExploreCodeSubagent({
         args: { query: "widget save flow", intent: "locate" },
         ctx: createMockContext(),
       }),
-    ).rejects.toThrow(/Dyad Pro/);
+    ).rejects.toThrow(/Samba Builder/);
   });
 
   it("keeps benchmark-derived domain literals out of production explorer code", async () => {

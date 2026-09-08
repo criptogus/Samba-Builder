@@ -149,7 +149,7 @@ describe("GitHub import dialog (integration)", () => {
     ).toContain("defineConfig");
   }, 90_000);
 
-  it("skips the tagger upgrade when 'Optimize for Dyad' is unchecked", async () => {
+  it("skips the tagger upgrade when 'Optimize for Samba Builder' is unchecked", async () => {
     await harness.github.resetRepos();
     writeSettings({
       githubAccessToken: { value: "fake_access_token_12345" },
@@ -173,7 +173,7 @@ describe("GitHub import dialog (integration)", () => {
       target: { value: "no-optimize-vite-app" },
     });
 
-    // Reveal the advanced options so the "Optimize for Dyad" checkbox mounts,
+    // Reveal the advanced options so the "Optimize for Samba Builder" checkbox mounts,
     // then uncheck it (it defaults to checked).
     fireEvent.click(screen.getByRole("button", { name: "Advanced options" }));
     const optimizeCheckbox = await screen.findByRole("checkbox");

@@ -10,7 +10,7 @@
     "webpack-loader"
   ],
   "license": "Apache-2.0",
-  "author": "Dyad",
+  "author": "Samba Builder",
   "files": [
     "dist"
   ],

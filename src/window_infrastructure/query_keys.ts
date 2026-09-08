@@ -6,10 +6,18 @@ export function queryKeysForInvalidationScope(
   scope: QueryInvalidationScope,
 ): readonly QueryKey[] {
   switch (scope.family) {
+    case "templates":
+      return [queryKeys.templates.all];
     case "apps":
       return [queryKeys.apps.all];
     case "chats":
       return [queryKeys.chats.all];
+    case "delivery":
+      return [
+        ["project-delivery"],
+        ["delivery-attention"],
+        ["delivery-approvals"],
+      ];
     case "app-collections":
       return [queryKeys.appCollections.all];
     case "media":
@@ -29,6 +37,12 @@ export function queryKeysForInvalidationScope(
         scope.appId === undefined
           ? queryKeys.coolify.all
           : queryKeys.coolify.status({ appId: scope.appId }),
+      ];
+    case "app-files":
+      return [
+        scope.appId === undefined
+          ? queryKeys.appFiles.all
+          : queryKeys.appFiles.byApp({ appId: scope.appId }),
       ];
     case "versions":
       return [

@@ -1,3 +1,4 @@
+import { recordProjectTokenUsage } from "@/ipc/services/project_accounting";
 import { v4 as uuidv4 } from "uuid";
 import { app, type IpcMainInvokeEvent, type WebContents } from "electron";
 import { createTypedHandler } from "./base";
@@ -137,6 +138,10 @@ import { prompts as promptsTable } from "../../db/schema";
 import { inArray } from "drizzle-orm";
 import { replacePromptReference } from "../utils/replacePromptReference";
 import { replaceSlashSkillReference } from "../utils/replaceSlashSkillReference";
+import {
+  parseNativeSkillRequest,
+  nativeSkillContext,
+} from "@/shared/load_native_skill";
 import { resolveMediaMentions } from "../utils/resolve_media_mentions";
 import { parsePlanFile, validatePlanId } from "./planUtils";
 import { ensureDyadGitignored } from "./gitignoreUtils";
@@ -1330,10 +1335,17 @@ export function registerChatStreamHandlers() {
 
       // Build the full AI prompt. Attachment-specific instructions are added
       // to the user message, never the system prompt.
-      let userPrompt = req.prompt;
+      let nativeRequest: ReturnType<typeof parseNativeSkillRequest>;
+      try {
+        nativeRequest = parseNativeSkillRequest(req.prompt);
+      } catch (error) {
+        throw new DyadError(String(error), DyadErrorKind.Validation);
+      }
+      let userPrompt = nativeRequest.prompt;
       // Build the display prompt (with <dyad-attachment> tags for inline rendering)
       // This separates what the user sees from what the AI receives.
       let displayUserPrompt: string | undefined;
+      if (nativeRequest.slugs.length) displayUserPrompt = req.prompt;
       if (displayAttachmentInfo) {
         displayUserPrompt = req.prompt + displayAttachmentInfo;
       }
@@ -1374,6 +1386,12 @@ export function registerChatStreamHandlers() {
       } catch (e) {
         logger.error("Failed to expand slash skill references:", e);
       }
+
+      // Load only explicitly selected bundled instructions, after custom prompt
+      // expansion. Native content cannot recursively activate other skills.
+      const selectedNativeContext = await nativeSkillContext(
+        nativeRequest.slugs,
+      );
 
       // Resolve @media: mentions to image attachments
       const mediaRefs = parseMediaMentions(userPrompt);
@@ -1732,7 +1750,7 @@ ${componentSnippet}
         streamId: req.streamId,
         effectiveChatMode: selectedChatMode,
       } satisfies ChatStreamChunkPayload);
-      // Only Dyad Pro requests have request ids.
+      // Only Samba Builder requests have request ids.
       if (settings.enableDyadPro) {
         // Generate requestId early so it can be saved with the message
         dyadRequestId = uuidv4();
@@ -1995,7 +2013,7 @@ ${componentSnippet}
           }
         }
 
-        // For Dyad Pro + Deep Context, we set to 200 chat turns (+1)
+        // For Samba Builder + Deep Context, we set to 200 chat turns (+1)
         // this is to enable more cache hits. Practically, users should
         // rarely go over this limit because they will hit the model's
         // context window limit.
@@ -2205,6 +2223,9 @@ ${componentSnippet}
           reinstallAndRestartAppToolAvailable,
           runBuildToolAvailable,
         });
+        // Turn-local system context avoids persisting expanded instructions in
+        // the agent's replay history. Only vetted, bundled content enters here.
+        systemPrompt += selectedNativeContext;
 
         // Add information for any legacy caller that still injects full
         // referenced-app codebases.
@@ -2501,6 +2522,17 @@ This conversation includes one or more image attachments. When the user uploads 
             system: systemPromptOverride,
             tools,
             messages: chatMessages.filter((m) => m.content),
+            onStepFinish: (step) => {
+              recordProjectTokenUsage(
+                req.chatId,
+                modelClient.builtinProviderId ?? selectedModel.provider,
+                typeof modelClient.model === "string"
+                  ? modelClient.model
+                  : modelClient.model.modelId,
+                "build",
+                step.usage,
+              );
+            },
             onFinish: async (response) => {
               const totalTokens = response.usage?.totalTokens;
 
@@ -2650,7 +2682,7 @@ This conversation includes one or more image attachments. When the user uploads 
               //
               // This is OK because those intents should always happen in a new chat
               // and new chats will default to non-ask modes.
-              systemPrompt: readOnlySystemPrompt + sambaFactoryPrompt,
+              systemPrompt: readOnlySystemPrompt + sambaFactoryPrompt + selectedNativeContext,
               dyadRequestId: dyadRequestId ?? "[no-request-id]",
               readOnly: true,
               messageOverride: isSummarizeIntent ? chatMessages : undefined,
@@ -2698,7 +2730,7 @@ This conversation includes one or more image attachments. When the user uploads 
             abortController,
             {
               placeholderMessageId: placeholderAssistantMessage.id,
-              systemPrompt: planModeSystemPrompt + sambaFactoryPrompt,
+              systemPrompt: planModeSystemPrompt + sambaFactoryPrompt + selectedNativeContext,
               dyadRequestId: dyadRequestId ?? "[no-request-id]",
               planModeOnly: true,
               messageOverride: isSummarizeIntent ? chatMessages : undefined,

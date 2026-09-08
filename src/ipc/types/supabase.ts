@@ -194,6 +194,17 @@ export const supabaseContracts = {
     output: z.void(),
   }),
 
+  /**
+   * Direct connection to Supabase with a Personal Access Token (sb_pat_…).
+   * No OAuth / Dyad proxy involved: the token is validated against the
+   * Supabase Management API and stored for every organization it can reach.
+   */
+  connectWithAccessToken: defineContract({
+    channel: "supabase:connect-with-access-token",
+    input: z.object({ accessToken: z.string().min(1) }),
+    output: z.object({ organizations: z.number().int().nonnegative() }),
+  }),
+
   listAllProjects: defineContract({
     channel: "supabase:list-all-projects",
     input: z.void(),
@@ -287,7 +298,7 @@ export const supabaseContracts = {
    *
    * Declares `invalidates` because the handler rewrites a file and may commit
    * it: the mutation's own `onSuccess` refreshes only the window that fired it,
-   * and Dyad can have the same app open in another.
+   * and Samba Builder can have the same app open in another.
    */
   switchAppToPublishableKey: defineContract({
     channel: "supabase:switch-app-to-publishable-key",

@@ -322,7 +322,7 @@ describe("runServerSetup", () => {
 
     expect(result.apiEnabled).toBe(true);
     expect(result.tokenUnavailableReason).toBe(
-      "Coolify stopped answering while Dyad was making a token.",
+      "Coolify stopped answering while Samba Builder was making a token.",
     );
   });
 
@@ -512,7 +512,7 @@ describe("runServerSetup", () => {
 
   it("hands over the account as soon as it exists, not at the end", async () => {
     // Everything after this point can fail on a server that is installed and
-    // running. Dyad invented this password and never showed it, so a caller
+    // running. Samba Builder invented this password and never showed it, so a caller
     // that only learns it on success cannot store what it never received.
     const server = fakeServer();
     const seen: Array<{ password: string; dashboardUrl: string }> = [];
@@ -736,7 +736,7 @@ describe("runServerSetup", () => {
 
     expect(result.token).toBeNull();
     expect(result.tokenUnavailableReason).toBe(
-      "Coolify did not answer while Dyad was opening its API.",
+      "Coolify did not answer while Samba Builder was opening its API.",
     );
     expect(result.credentials.password).toBeTruthy();
     // The step that would have opened it is the one that failed, so it is

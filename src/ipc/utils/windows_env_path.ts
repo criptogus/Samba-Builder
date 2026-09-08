@@ -176,9 +176,9 @@ export function mergeWindowsPathSegments(
   registryPath: string,
 ): string {
   // Keep true session-only additions first (e.g. a version manager's env from
-  // the shell that launched Dyad), then use the freshly read registry ordering
+  // the shell that launched Samba Builder), then use the freshly read registry ordering
   // for every registry-known entry. This preserves Windows machine-before-user
-  // precedence when a new machine PATH entry appears while Dyad is running.
+  // precedence when a new machine PATH entry appears while Samba Builder is running.
   const seen = new Set<string>();
   const segments: string[] = [];
   const currentSegments = currentPath
@@ -222,10 +222,10 @@ export function mergeWindowsPathSegments(
  * Windows registry, or null when the registry could not be read.
  *
  * A process only receives a copy of the environment at launch. When the user
- * installs Node.js while Dyad is running, the installer updates PATH in the
+ * installs Node.js while Samba Builder is running, the installer updates PATH in the
  * registry and broadcasts a settings change, but already-running processes
  * (and their children) keep the stale copy. Re-reading the registry is the
- * only way to pick up the new entries without restarting Dyad.
+ * only way to pick up the new entries without restarting Samba Builder.
  */
 export async function readRefreshedWindowsPath(
   currentPath: string,

@@ -1,3 +1,8 @@
+import { registerManagementHandlers } from "./handlers/management_handlers";
+import { registerDeliveryHandlers } from "./handlers/delivery_handlers";
+import { registerNativeAgentHandlers } from "./handlers/native_agent_handlers";
+import { registerMeetingsHandlers } from "./handlers/meetings_handlers";
+import { registerAwsHandlers } from "./handlers/aws_handlers";
 import { registerAppHandlers } from "./handlers/app_handlers";
 import { registerChatHandlers } from "./handlers/chat_handlers";
 import { registerChatStreamHandlers } from "./handlers/chat_stream_handlers";
@@ -49,6 +54,7 @@ import { registerAppBlueprintHandlers } from "./handlers/app_blueprint_handlers"
 import { registerAppCollectionHandlers } from "./handlers/app_collection_handlers";
 import { registerTerminalHandlers } from "./handlers/terminal_handlers";
 import { registerTestsHandlers } from "./handlers/tests_handlers";
+import { registerDesignSystemHandlers } from "./handlers/design_system_handlers";
 import { registerTestAssertionHandlers } from "./handlers/test_assertion_handlers";
 import { registerRecordingHandlers } from "./handlers/recording_handlers";
 import { registerUserInputHandlers } from "./handlers/user_input_handlers";
@@ -76,6 +82,9 @@ export function registerIpcHandlers() {
   registerConnectionFlowHandlers();
   registerGithubHandlers();
   registerGithubBranchHandlers();
+  registerAwsHandlers();
+  registerMeetingsHandlers();
+  registerNativeAgentHandlers();
   registerVercelHandlers();
   registerNodeHandlers();
   registerProblemsHandlers();
@@ -115,8 +124,11 @@ export function registerIpcHandlers() {
   registerMiscHandlers();
   registerAppBlueprintHandlers();
   registerAppCollectionHandlers();
+  registerDeliveryHandlers();
+  registerManagementHandlers();
   registerTerminalHandlers();
   registerTestsHandlers();
+  registerDesignSystemHandlers();
   registerTestAssertionHandlers();
   registerRecordingHandlers();
   registerUserInputHandlers();

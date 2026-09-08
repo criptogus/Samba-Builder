@@ -1,3 +1,5 @@
 export function getDyadEngineBaseUrl(): string {
-  return process.env.DYAD_ENGINE_URL ?? "https://engine.dyad.sh/v1";
+  // Samba Builder: zero backend do Dyad — sem URL de engine. Se algo tentar
+  // criar o engine (fluxo morto), falha localmente em vez de falar com o Dyad.
+  return process.env.DYAD_ENGINE_URL ?? "";
 }

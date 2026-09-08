@@ -1335,58 +1335,10 @@ describe("handleLocalAgentStream", () => {
     });
   });
 
-  describe("Pro status validation", () => {
-    it("should send error when Dyad Pro is not enabled", async () => {
-      // Arrange
-      const { event, getMessagesByChannel } = createFakeEvent();
-      mockSettings = buildTestSettings({ enableDyadPro: false });
-
-      // Act
-      await handleLocalAgentStream(
-        event,
-        { chatId: 1, prompt: "test" },
-        new AbortController(),
-        {
-          placeholderMessageId: 10,
-          systemPrompt: "You are helpful",
-          dyadRequestId,
-        },
-      );
-
-      // Assert
-      const errorMessages = getMessagesByChannel("chat:response:error");
-      expect(errorMessages).toHaveLength(1);
-      expect(errorMessages[0].args[0]).toMatchObject({
-        chatId: 1,
-        error: expect.stringContaining("Agent v2 requires Dyad Pro"),
-      });
-    });
-
-    it("should send error when API key is missing even if Pro is enabled", async () => {
-      // Arrange
-      const { event, getMessagesByChannel } = createFakeEvent();
-      mockSettings = buildTestSettings({
-        enableDyadPro: true,
-        hasApiKey: false,
-      });
-
-      // Act
-      await handleLocalAgentStream(
-        event,
-        { chatId: 1, prompt: "test" },
-        new AbortController(),
-        {
-          placeholderMessageId: 10,
-          systemPrompt: "You are helpful",
-          dyadRequestId,
-        },
-      );
-
-      // Assert
-      const errorMessages = getMessagesByChannel("chat:response:error");
-      expect(errorMessages).toHaveLength(1);
-    });
-  });
+  // Samba Builder: sem plano Pro/backend — a validação de status Pro do Dyad
+  // (exigir enableDyadPro/chave do engine) foi removida do produto. O agente
+  // roda com o modelo BYOK do usuário; o describe "Pro status validation"
+  // (2 testes) foi removido por testar comportamento eliminado.
 
   describe("Chat lookup", () => {
     it("should throw error when chat is not found", async () => {

@@ -67,7 +67,7 @@ describe("recent models", () => {
     ]);
   });
 
-  it("excludes Dyad-managed models from effective history", () => {
+  it("excludes Samba Builder-managed models from effective history", () => {
     expect(
       getEffectiveRecentModels(
         [

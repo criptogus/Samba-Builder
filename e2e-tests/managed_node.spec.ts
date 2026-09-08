@@ -164,7 +164,7 @@ test("managed Node exposes install, preference, and removal controls in Settings
       timeout: Timeout.LONG,
     })
     .toBe("managed");
-  await expect(runtimeSettings.getByText(/Dyad-managed/)).toBeVisible({
+  await expect(runtimeSettings.getByText(/Samba Builder-managed/)).toBeVisible({
     timeout: Timeout.LONG,
   });
 
@@ -236,7 +236,7 @@ test("managed Node install persists after a renderer reload", async ({
       timeout: Timeout.MEDIUM,
     })
     .toBe("managed");
-  await expect(runtimeSettings.getByText(/Dyad-managed/)).toBeVisible({
+  await expect(runtimeSettings.getByText(/Samba Builder-managed/)).toBeVisible({
     timeout: Timeout.LONG,
   });
   await expect(

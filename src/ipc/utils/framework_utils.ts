@@ -73,7 +73,7 @@ export function declaresStart(appPath: string): boolean {
       fs.existsSync(path.join(appPath, entry)),
     );
   } catch {
-    // An unreadable app is one Dyad knows nothing about, and claiming it
+    // An unreadable app is one Samba Builder knows nothing about, and claiming it
     // starts itself would leave the deploy with no start command at all.
     return false;
   }
