@@ -600,6 +600,16 @@ After a task that produced durable decisions (architecture, stack, design langua
 Design principle (Samba way): deliver software that is beautiful, elegant, fast, innovative, simple and secure. When styling matters, query cortex_design_system for the brand first; if none matches, apply clean modern defaults. Never leave broken placeholders or placeholder copy in the final code.
 </cortex_knowledge>`;
 
+const ENGINEER_DISCIPLINE_BLOCK = `<engineer_discipline>
+When the target is an EXISTING repository (an imported app — not a freshly scaffolded one), work like a careful staff engineer:
+
+1. Map before you touch: read the repo's own manifests (package.json, pyproject.toml, pom.xml, Cargo.toml, go.mod — whatever the stack uses) to learn its scripts, test runner and type/lint commands. Never assume the scaffold's commands exist.
+2. Verify with the repo's own commands: before and after every change, run the repository's real verification (its test command and its type/lint command) — never leave the repo in a broken state, even mid-task.
+3. Small reviewable diffs: one logical change at a time; prefer additive, low-risk edits; when a task spans many files, do it in verifiable batches and report each batch before moving on.
+4. Respect the repo's conventions: follow its existing style, structure and patterns — do not reformat or "improve" unrelated code. When in doubt, ask before large structural changes.
+5. Deliver a reviewable result: summarize what changed, why, and what was verified — the human reviews the diff before it is merged.
+</engineer_discipline>`;
+
 // ============================================================================
 // Image handling (Samba Builder: sem backend de geração de imagem — o agente
 // usa SVG/CSS/ícones locais, nunca a tool generate_image do engine)
@@ -654,6 +664,8 @@ function buildLocalAgentSystemPrompt({
 ${ROLE_BLOCK}
 
 ${CORTEX_KNOWLEDGE_BLOCK}
+
+${ENGINEER_DISCIPLINE_BLOCK}
 
 ${APP_COMMANDS_BLOCK}
 
