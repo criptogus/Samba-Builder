@@ -31,11 +31,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import {
-  CheckIcon,
-  ChevronRightIcon,
-  LockIcon,
-} from "lucide-react";
+import { CheckIcon, ChevronRightIcon, LockIcon } from "lucide-react";
 import { ProviderIcon } from "@/components/ProviderIcon";
 import {
   Dialog,
@@ -1536,7 +1532,6 @@ export function ModelPicker() {
               )}
             </>
           )}
-
         </DropdownMenuContent>
       </DropdownMenu>
 

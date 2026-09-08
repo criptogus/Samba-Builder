@@ -1,3 +1,6 @@
+import { EngineeringPanel } from "./EngineeringPanel";
+import { DeliveryTestEvidence } from "./DeliveryTestEvidence";
+import { FoundationReview } from "./FoundationReview";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { ClipboardList, ListChecks, ShieldCheck, BookOpen } from "lucide-react";
 import { useState, useEffect } from "react";
@@ -156,6 +159,7 @@ function DeliveryEditor({
         ...plan.tasks,
         {
           id: crypto.randomUUID(),
+          kind: "task",
           title: taskTitle.trim(),
           owner: plan.owner,
           acceptance: "",
@@ -282,6 +286,9 @@ function DeliveryEditor({
                 {plan.tasks.length}
               </span>
             </TabsTrigger>
+            <TabsTrigger value="engineering" className="gap-2">
+              Engenharia
+            </TabsTrigger>
             <TabsTrigger value="review" className="gap-2">
               <ShieldCheck className="size-4" />
               Revisão
@@ -343,6 +350,7 @@ function DeliveryEditor({
                     ...plan,
                     tasks: criteria.map((criterion) => ({
                       id: crypto.randomUUID(),
+                      kind: "task",
                       title: criterion.slice(0, 300),
                       owner: plan.owner,
                       acceptance: criterion,
@@ -432,6 +440,31 @@ function DeliveryEditor({
                         }
                       />
                       <select
+                        aria-label={`Tipo de ${task.title}`}
+                        className="rounded border bg-background p-1 text-xs"
+                        value={task.kind ?? "task"}
+                        onChange={(e) =>
+                          update({
+                            ...plan,
+                            tasks: plan.tasks.map((t) =>
+                              t.id === task.id
+                                ? {
+                                    ...t,
+                                    kind: e.target.value as
+                                      | "task"
+                                      | "feature"
+                                      | "bug",
+                                  }
+                                : t,
+                            ),
+                          })
+                        }
+                      >
+                        <option value="task">Tarefa</option>
+                        <option value="feature">Funcionalidade</option>
+                        <option value="bug">Correção</option>
+                      </select>
+                      <select
                         aria-label={`Status de ${task.title}`}
                         className="rounded border bg-background p-1 text-xs"
                         value={task.status}
@@ -511,6 +544,9 @@ function DeliveryEditor({
               ))}
             </div>
           </TabsContent>
+          <TabsContent value="engineering">
+            <EngineeringPanel appId={appId} plan={plan} onChange={update} />
+          </TabsContent>
           <TabsContent value="review" className="mt-0">
             <h3 className="text-sm font-medium">
               Qualidade e aprovação por versão
@@ -547,6 +583,11 @@ function DeliveryEditor({
                 Este formulário não executa testes nem substitui a aprovação do
                 cliente.
               </p>
+              <DeliveryTestEvidence
+                appId={appId}
+                reviewCommit={plan.reviewCommit}
+              />
+              <FoundationReview appId={appId} plan={plan} onChange={update} />
               {qualityAreas.map((area) => (
                 <label key={area} className="block space-y-1 text-sm">
                   <span>{checkNames[area]}</span>

@@ -527,9 +527,8 @@ export function ProviderSettingsPage({ provider }: ProviderSettingsPageProps) {
               <h3 className="font-medium">Modo automático</h3>
               <p className="text-sm text-gray-600 dark:text-gray-400">
                 O Auto usa automaticamente o modelo de qualquer provider
-                conectado abaixo (ex: DeepSeek). Basta colar a chave do
-                provider que você usa — sem assinatura. O Auto não tem chave
-                própria.
+                conectado abaixo (ex: DeepSeek). Basta colar a chave do provider
+                que você usa — sem assinatura. O Auto não tem chave própria.
               </p>
             </div>
           ) : (

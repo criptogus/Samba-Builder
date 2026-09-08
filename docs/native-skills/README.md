@@ -7,6 +7,7 @@ Abra Library → Prompts → Skills nativas. Busque uma tarefa, veja as instruç
 /samba-spec Quero um portal de agendamento para clínicas.
 /samba-debug /samba-tdd Corrija a falha de login e comprove a correção.
 /samba-design Melhore a página inicial preservando a identidade da marca.
+/samba-design /samba-motion /samba-security Crie uma interface expressiva, acessível e segura.
 /samba-performance Investigue o consumo de memória durante o preview.
 ```
 
@@ -14,6 +15,8 @@ As 15 opções incluem PM Samba, especificação, plano, depuração, TDD, revis
 
 ## Ativação e limites
 
+- Os prompts comuns já incluem critérios proporcionais de produto, design, segurança, desempenho e evidência; as skills detalhadas continuam opcionais.
+- Limite agregado de 12.000 caracteres nas seções selecionadas, além do limite individual de 6.000. Combinações grandes são rejeitadas com explicação, sem truncar instruções.
 - Até 3 skills distintas no início de cada mensagem; repetições são deduplicadas. Uma quarta é rejeitada com erro visível, sem truncamento silencioso.
 - Menções no meio do texto, blocos de código, citações e conteúdo de anexos/prompts salvos não ativam skills nativas.
 - Os 15 slugs do catálogo são reservados. Prompts pessoais com outros slugs continuam disponíveis; um prompt pessoal com um slug idêntico deve ser renomeado.

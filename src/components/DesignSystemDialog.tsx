@@ -17,9 +17,7 @@ import {
 function errorMessage(err: unknown): string {
   const m = err instanceof Error ? err.message : String(err);
   // The CLI error envelope is wrapped by Electron with a verbose prefix.
-  return m
-    .replace(/^Error invoking remote method '[^']+': Error: /, "")
-    .trim();
+  return m.replace(/^Error invoking remote method '[^']+': Error: /, "").trim();
 }
 
 /**
@@ -183,7 +181,10 @@ export function DesignSystemPanelContent({ appId }: { appId: number }) {
                       {template.name}
                     </p>
                     <p className="truncate text-xs text-muted-foreground">
-                      {[template.from && `from ${template.from}`, ...template.tags]
+                      {[
+                        template.from && `from ${template.from}`,
+                        ...template.tags,
+                      ]
                         .filter(Boolean)
                         .join(" · ") || template.slug}
                     </p>
@@ -212,9 +213,7 @@ export function DesignSystemPanelContent({ appId }: { appId: number }) {
           role="status"
           data-testid="design-system-feedback"
           className={`text-sm ${
-            feedback.kind === "success"
-              ? "text-foreground"
-              : "text-destructive"
+            feedback.kind === "success" ? "text-foreground" : "text-destructive"
           }`}
         >
           {feedback.kind === "success" ? "✓ " : "✕ "}

@@ -92,7 +92,9 @@ it("extracts the current project design system with the given name and refreshes
 it("surfaces a CLI error message when extraction fails", async () => {
   api.listTemplates.mockResolvedValue({ templates: [] });
   api.extractTemplate.mockRejectedValue(
-    new Error("Error invoking remote method 'design-system:extract': Error: boom"),
+    new Error(
+      "Error invoking remote method 'design-system:extract': Error: boom",
+    ),
   );
 
   renderPanel();

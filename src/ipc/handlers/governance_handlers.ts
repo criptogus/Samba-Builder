@@ -4,7 +4,10 @@ import { promisify } from "node:util";
 import { getDyadAppPath, getElectron } from "@/paths/paths";
 import { DyadError, DyadErrorKind } from "@/errors/dyad_error";
 import { createTypedHandler } from "./base";
-import { governanceContracts, type GovernanceStatus } from "../types/governance";
+import {
+  governanceContracts,
+  type GovernanceStatus,
+} from "../types/governance";
 import {
   detectGovernanceMode,
   readGovernanceRoles,
@@ -23,9 +26,7 @@ function resolveGateScript(): string {
   const appPath = electronApp?.getAppPath?.();
   if (appPath)
     candidates.push(path.join(appPath, "samba", "governance", "gate.py"));
-  candidates.push(
-    path.join(process.cwd(), "samba", "governance", "gate.py"),
-  );
+  candidates.push(path.join(process.cwd(), "samba", "governance", "gate.py"));
   const found = resolveGovernanceGateScript(candidates);
   if (!found) {
     throw new DyadError(
@@ -71,14 +72,11 @@ function assembleStatus(opts: {
 }
 
 export function registerGovernanceHandlers(): void {
-  createTypedHandler(
-    governanceContracts.get,
-    async (_, { appPath }) => {
-      const appDir = getDyadAppPath(appPath);
-      const actingAs = await resolveActingUser(appDir);
-      return assembleStatus({ appDir, actingAs });
-    },
-  );
+  createTypedHandler(governanceContracts.get, async (_, { appPath }) => {
+    const appDir = getDyadAppPath(appPath);
+    const actingAs = await resolveActingUser(appDir);
+    return assembleStatus({ appDir, actingAs });
+  });
 
   createTypedHandler(
     governanceContracts.run,

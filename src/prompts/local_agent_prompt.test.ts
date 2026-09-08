@@ -434,7 +434,9 @@ describe("local_agent_prompt", () => {
     );
     expect(prompt).toContain("write_app_blueprint");
     expect(prompt).toContain("planning_questionnaire");
-    expect(prompt).toContain("Ask 1-5 focused questions (usually 2-3)");
+    expect(prompt).toContain(
+      "Ask ONE focused question at a time (at most three closely related questions)",
+    );
     expect(prompt).toContain(
       "Every radio or checkbox question must have 1-3 options",
     );

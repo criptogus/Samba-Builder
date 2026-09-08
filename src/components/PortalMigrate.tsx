@@ -40,9 +40,7 @@ export const PortalMigrate = ({ appId }: PortalMigrateProps) => {
   };
 
   const openDocs = () => {
-    ipc.system.openExternalUrl(
-      "https://sambatech.com",
-    );
+    ipc.system.openExternalUrl("https://sambatech.com");
   };
 
   return (

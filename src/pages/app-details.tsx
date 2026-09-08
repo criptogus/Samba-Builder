@@ -1,3 +1,4 @@
+import { ProjectManagementPanel } from "@/components/ProjectManagementPanel";
 import { ProjectDeliveryPanel } from "@/components/ProjectDeliveryPanel";
 import { SaveProjectTemplateButton } from "@/components/SaveProjectTemplateButton";
 import { useNavigate, useSearch } from "@tanstack/react-router";
@@ -62,6 +63,7 @@ import { useDebounce } from "@/hooks/useDebounce";
 import { useCheckName } from "@/hooks/useCheckName";
 import { useAppFolderPreview } from "@/hooks/useAppFolderPreview";
 import { AppUpgrades } from "@/components/AppUpgrades";
+import { DesignSystemDialog } from "@/components/DesignSystemDialog";
 import { CapacitorControls } from "@/components/CapacitorControls";
 import { GithubCollaboratorManager } from "@/components/GithubCollaboratorManager";
 import { useAddAppToFavorite } from "@/hooks/useAddAppToFavorite";
@@ -523,7 +525,49 @@ export default function AppDetailsPage() {
           </Popover>
         </div>
 
+        <section
+          className="mb-6 rounded-xl border border-border bg-card p-5"
+          aria-label="Base e repositório do projeto"
+        >
+          <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
+            <div>
+              <h2 className="text-sm font-semibold">Base do projeto</h2>
+              <p className="mt-1 text-sm text-muted-foreground">
+                PRD, arquitetura, stack, design system e manutenção em
+                project-docs nos novos projetos.
+              </p>
+              <p className="mt-1 text-xs text-muted-foreground">
+                Documentos começam como rascunho e evoluem com o briefing e o
+                código. Projetos anteriores mantêm seus arquivos.
+              </p>
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => ipc.system.showItemInFolder(currentAppPath)}
+            >
+              Abrir arquivos
+            </Button>
+          </div>
+          <p className="mb-3 text-sm font-medium">
+            {selectedApp.githubRepo
+              ? "Repositório conectado · sincronize cada entrega"
+              : "Etapa pendente · crie ou conecte o repositório GitHub da equipe"}
+          </p>
+          <div className="border border-border rounded-lg p-4">
+            <GitHubConnector appId={appId} folderName={selectedApp.path} />
+            {selectedApp.githubOrg && selectedApp.githubRepo && appId && (
+              <div className="pt-4 border-t border-gray-100 dark:border-gray-800">
+                <GithubCollaboratorManager appId={appId} />
+              </div>
+            )}
+          </div>
+        </section>
         <ProjectDeliveryPanel key={selectedApp.id} appId={selectedApp.id} />
+        <ProjectManagementPanel
+          key={`management-${selectedApp.id}`}
+          appId={selectedApp.id}
+        />
         <details
           open={!!providerFilter}
           className="mt-6 rounded-xl border border-border bg-card p-5"
@@ -650,14 +694,6 @@ export default function AppDetailsPage() {
               </div>
             </div>
             <div className="mt-4 flex flex-col gap-2">
-              <div className="border border-border rounded-lg p-4">
-                <GitHubConnector appId={appId} folderName={selectedApp.path} />
-                {selectedApp.githubOrg && selectedApp.githubRepo && appId && (
-                  <div className="pt-4 border-t border-gray-100 dark:border-gray-800">
-                    <GithubCollaboratorManager appId={appId} />
-                  </div>
-                )}
-              </div>
               {/* When providerFilter is set, show the selected connector only if the other provider isn't already active */}
               {providerFilter === "supabase" &&
                 appId &&
@@ -708,6 +744,7 @@ export default function AppDetailsPage() {
               )}
               {appId && <CapacitorControls appId={appId} />}
               <AppUpgrades appId={appId} />
+              {appId && <DesignSystemDialog appId={appId} />}
             </div>
           </div>
         </details>

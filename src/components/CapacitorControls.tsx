@@ -136,9 +136,7 @@ export function CapacitorControls({ appId }: CapacitorControlsProps) {
               size="sm"
               onClick={() => {
                 // TODO: Add actual help link
-                ipc.system.openExternalUrl(
-                  "https://sambatech.com",
-                );
+                ipc.system.openExternalUrl("https://sambatech.com");
               }}
               className="text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 flex items-center gap-1"
             >

@@ -1,3 +1,16 @@
+import { assertEngineeringReady } from "../services/engineering_readiness";
+import {
+  installQualityTools,
+  cancelQuality,
+  listQualityRuns,
+  runQuality,
+  qualityArtifacts,
+} from "../services/project_quality";
+import { projectTestExecutions } from "@/db/schema";
+import {
+  inspectFoundation,
+  assertFoundationReviewed,
+} from "../services/foundation_review";
 import { readDeliveryCommit } from "../services/delivery_readiness";
 import { getDeliveryAgentUsage } from "../services/delivery_usage";
 import { eq, desc } from "drizzle-orm";
@@ -33,6 +46,78 @@ async function currentCommit(appId: number) {
 }
 
 export function registerDeliveryHandlers() {
+  createTypedHandler(deliveryContracts.installQuality, async () =>
+    installQualityTools(),
+  );
+  createTypedHandler(deliveryContracts.cancelQuality, async () =>
+    cancelQuality(),
+  );
+  createTypedHandler(deliveryContracts.qualityRuns, async (_, { appId }) => {
+    appRow(appId);
+    return listQualityRuns(appId);
+  });
+  createTypedHandler(deliveryContracts.runQuality, async (_, input) =>
+    appOperationCoordinator.run(
+      {
+        appId: input.appId,
+        operation: "quality-check",
+        resources: [
+          readAppResource("app-path"),
+          readAppResource("repository"),
+          readAppResource("runtime"),
+          "metadata",
+        ],
+        refuseWhenRecording: "verificar qualidade",
+      },
+      () => runQuality(input.appId, input.kind, input),
+    ),
+  );
+  createTypedHandler(deliveryContracts.qualityArtifacts, async (_, input) =>
+    appOperationCoordinator.run(
+      {
+        appId: input.appId,
+        operation: "quality-artifacts",
+        resources: [
+          readAppResource("app-path"),
+          readAppResource("repository"),
+          "metadata",
+        ],
+      },
+      () => qualityArtifacts(input.appId, input.id, input.approve),
+    ),
+  );
+
+  createTypedHandler(deliveryContracts.testEvidence, async (_, { appId }) => {
+    appRow(appId);
+    return getHandlerContext()
+      .db.select({
+        id: projectTestExecutions.id,
+        startedAt: projectTestExecutions.startedAt,
+        finishedAt: projectTestExecutions.finishedAt,
+        commit: projectTestExecutions.commit,
+        source: projectTestExecutions.source,
+        status: projectTestExecutions.status,
+        passed: projectTestExecutions.passed,
+        failed: projectTestExecutions.failed,
+        inconclusive: projectTestExecutions.inconclusive,
+        files: projectTestExecutions.files,
+      })
+      .from(projectTestExecutions)
+      .where(eq(projectTestExecutions.appId, appId))
+      .orderBy(desc(projectTestExecutions.startedAt))
+      .limit(30)
+      .all();
+  });
+  createTypedHandler(deliveryContracts.foundation, async (_, { appId }) =>
+    appOperationCoordinator.run(
+      {
+        appId,
+        operation: "inspect-foundation",
+        resources: [readAppResource("app-path"), readAppResource("repository")],
+      },
+      () => inspectFoundation(getDyadAppPath(appRow(appId).path)),
+    ),
+  );
   createTypedHandler(deliveryContracts.approvals, async (_, { appId }) => {
     appRow(appId);
     return getHandlerContext()
@@ -109,11 +194,35 @@ export function registerDeliveryHandlers() {
           resources: [
             readAppResource("app-path"),
             readAppResource("repository"),
+            "metadata",
           ],
           refuseWhenRecording: "salvar a entrega",
         },
         async () => {
           appRow(appId);
+          const saved = getHandlerContext()
+            .db.select()
+            .from(projectDeliveries)
+            .where(eq(projectDeliveries.appId, appId))
+            .get();
+          if (
+            saved &&
+            JSON.parse(saved.data).foundationRequired &&
+            !plan.foundationRequired
+          )
+            return fail(
+              "A revisão da base é obrigatória para este projeto.",
+              DyadErrorKind.Precondition,
+            );
+          if (
+            saved &&
+            JSON.parse(saved.data).engineeringRequired &&
+            !plan.engineeringRequired
+          )
+            return fail(
+              "A política de engenharia é obrigatória para este projeto.",
+              DyadErrorKind.Precondition,
+            );
           if (plan.stage === "approved" || plan.stage === "delivered") {
             const blockers = deliveryBlockers(plan);
             if (blockers.length)
@@ -122,7 +231,17 @@ export function registerDeliveryHandlers() {
               return fail(
                 "Registre quem aprovou e a evidência da aprovação recebida.",
               );
+            await assertFoundationReviewed(
+              getDyadAppPath(appRow(appId).path),
+              plan,
+            );
             const head = await currentCommit(appId);
+            await assertEngineeringReady(
+              appId,
+              plan,
+              head,
+              getDyadAppPath(appRow(appId).path),
+            );
             if (head !== plan.reviewCommit || head !== plan.approvalCommit)
               return fail(
                 "A aprovação não corresponde à versão atual. Faça uma nova revisão.",

@@ -122,3 +122,18 @@ As 14 skills nativas são sínteses/adaptações para as ferramentas e permissõ
 - Tipo: Framework de vídeo e skills.
 - Licença observada: Runtime: Remotion License; packages/agent-plugin: MIT.
 - Decisão: Skill própria de criação/verificação em projetos Remotion. Runtime/Chromium/FFmpeg não incluídos; uso depende da instalação e dos termos aplicáveis.
+
+## Revisão de qualidade — 2026-09-06
+
+- [Vercel React Best Practices](https://github.com/vercel-labs/agent-skills/tree/063bee94c3f4df8453406c830b0a7df0f2860278/skills/react-best-practices): a skill declara MIT em seu frontmatter; a API não informa licença global do repositório. Prioridades de waterfalls, bundle e cache orientaram a redação própria de samba-performance. Sem copiar o catálogo de regras, instalar scripts ou adicionar dependências.
+- [Superpowers — verification-before-completion](https://github.com/obra/superpowers/blob/b36e0829c6d0140e93cfef2ca599b1b07d4a7797/skills/verification-before-completion/SKILL.md): MIT, aviso já preservado. Princípio de conclusão com evidência incorporado à revisão e ao padrão comum, proporcional ao escopo e às ferramentas disponíveis.
+- [OWASP ASVS](https://owasp.org/www-project-application-security-verification-standard/): referência pública de verificação. As orientações de segurança são redação própria, sem reprodução do standard nem promessa de conformidade/certificação ASVS.
+- [Anthropic frontend-design](https://github.com/anthropics/skills/tree/main/skills/frontend-design): consultado como referência de direção visual; nenhum arquivo, ativo, script ou texto da skill foi incorporado nesta revisão.
+
+A revisão não baixa nem executa conteúdo remoto em tempo de uso. Os arquivos locais e os testes são a versão efetiva do comportamento; popularidade dos repositórios não é evidência de qualidade das aplicações geradas.
+
+## Movimento e direção de arte — revisão de 6 de setembro de 2026
+
+`/samba-motion` é uma síntese original: coreografia, interrupção, tokens, fallback estático e manutenção. Referências técnicas consultadas: [Motion — acessibilidade](https://motion.dev/docs/react-accessibility) e [web.dev — animações eficientes](https://web.dev/articles/animations-guide). Nenhum componente pago, ativo visual ou código de exemplo foi incorporado. CSS é a primeira opção; a biblioteca existente é usada quando o comportamento exige coordenação adicional.
+
+O padrão de geração agora inclui direção de arte e movimento sem seleção manual. As skills detalhadas continuam disponíveis por comando ou catálogo e carregadas sob demanda. Esses controles orientam o modelo; não constituem evidência de que qualquer aplicação gerada alcançou qualidade estética superior.

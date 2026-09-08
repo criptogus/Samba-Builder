@@ -279,9 +279,7 @@ function SecurityHeader({
                   className="size-8 text-muted-foreground"
                   aria-label="Open Security Review documentation"
                   onClick={() =>
-                    ipc.system.openExternalUrl(
-                      "https://sambatech.com",
-                    )
+                    ipc.system.openExternalUrl("https://sambatech.com")
                   }
                 />
               }

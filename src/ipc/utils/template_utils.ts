@@ -1,8 +1,5 @@
 import { cachedTeamTemplates } from "../services/project_templates/store";
-import {
-  type Template,
-  localTemplatesData,
-} from "../../shared/templates";
+import { type Template, localTemplatesData } from "../../shared/templates";
 
 // In-memory cache for API templates
 let apiTemplatesCache: Template[] | null = null;

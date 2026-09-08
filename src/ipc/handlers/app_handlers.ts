@@ -1,6 +1,13 @@
+import { emptyDeliveryPlan } from "@/delivery/model";
 import { app, dialog } from "electron";
 import { closeDatabase, db, getDatabaseFilePaths } from "../../db";
-import { apps, chats, messages, versions } from "../../db/schema";
+import {
+  apps,
+  chats,
+  messages,
+  versions,
+  projectDeliveries,
+} from "../../db/schema";
 import { desc, eq, inArray, like } from "drizzle-orm";
 import { createTypedHandler } from "./base";
 import { appContracts } from "../types/app";
@@ -908,6 +915,16 @@ export function registerAppHandlers() {
 
       await createFromTemplate({
         fullAppPath,
+      });
+
+      await db.insert(projectDeliveries).values({
+        appId: app.id,
+        revision: 1,
+        data: JSON.stringify({
+          ...emptyDeliveryPlan(),
+          foundationRequired: true,
+          engineeringRequired: true,
+        }),
       });
 
       // Ensure `.dyad/` is gitignored before the initial commit so the agent's

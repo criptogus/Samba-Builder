@@ -35,43 +35,48 @@ export function registerDesignSystemHandlers() {
     return { templates: parseListTemplatesOutput(stdout) };
   });
 
-  createTypedHandler(designSystemContracts.extractTemplate, async (_, params) => {
-    const app = await getApp(params.appId);
-    const appDir = getDyadAppPath(app.path);
-    const scriptPath = resolveDesignSystemToolkitPath();
+  createTypedHandler(
+    designSystemContracts.extractTemplate,
+    async (_, params) => {
+      const app = await getApp(params.appId);
+      const appDir = getDyadAppPath(app.path);
+      const scriptPath = resolveDesignSystemToolkitPath();
 
-    // Extract the app's design system to a temp JSON, then save it as a
-    // template under the requested name.
-    const tmpJson = path.join(
-      os.tmpdir(),
-      `samba-design-system-${Date.now()}-${Math.random().toString(36).slice(2)}.json`,
-    );
-    try {
-      await runDesignToolkit(scriptPath, [
-        "extract",
-        appDir,
-        "--name",
-        params.name,
-        "--out",
-        tmpJson,
-      ]);
-      const saveOut = await runDesignToolkit(scriptPath, [
-        "save-template",
-        tmpJson,
-        "--name",
-        params.name,
-      ]);
-      const slug = parseSavedSlug(saveOut) || params.name;
-      logger.info(`Extracted design system '${params.name}' (${slug}) from ${appDir}`);
-      return { slug, name: params.name };
-    } finally {
+      // Extract the app's design system to a temp JSON, then save it as a
+      // template under the requested name.
+      const tmpJson = path.join(
+        os.tmpdir(),
+        `samba-design-system-${Date.now()}-${Math.random().toString(36).slice(2)}.json`,
+      );
       try {
-        fs.unlinkSync(tmpJson);
-      } catch {
-        // Best-effort cleanup of the temp file.
+        await runDesignToolkit(scriptPath, [
+          "extract",
+          appDir,
+          "--name",
+          params.name,
+          "--out",
+          tmpJson,
+        ]);
+        const saveOut = await runDesignToolkit(scriptPath, [
+          "save-template",
+          tmpJson,
+          "--name",
+          params.name,
+        ]);
+        const slug = parseSavedSlug(saveOut) || params.name;
+        logger.info(
+          `Extracted design system '${params.name}' (${slug}) from ${appDir}`,
+        );
+        return { slug, name: params.name };
+      } finally {
+        try {
+          fs.unlinkSync(tmpJson);
+        } catch {
+          // Best-effort cleanup of the temp file.
+        }
       }
-    }
-  });
+    },
+  );
 
   createTypedHandler(designSystemContracts.applyTemplate, async (_, params) => {
     const app = await getApp(params.appId);

@@ -29,7 +29,7 @@ import { gitService } from "../services/git_service";
 
 const logger = log.scope("template_handlers");
 
-const PRESERVED_TEMPLATE_PATHS = new Set([".git", ".dyad"]);
+const PRESERVED_TEMPLATE_PATHS = new Set([".git", ".dyad", "project-docs"]);
 
 function shouldPreservePath(name: string): boolean {
   return PRESERVED_TEMPLATE_PATHS.has(name) || name.startsWith(".env");
@@ -121,6 +121,14 @@ async function applyTemplateInPlace({
         appWasStopped = true;
       }
 
+      // Keep authored foundation documents rather than replacing them with scaffold drafts.
+      const foundationPath = path.join(appPath, "project-docs");
+      if (fs.existsSync(foundationPath)) {
+        await fsPromises.rm(path.join(stagedTemplatePath, "project-docs"), {
+          recursive: true,
+          force: true,
+        });
+      }
       await clearAppDirectoryForTemplateSwap(appPath);
       await fsPromises.cp(stagedTemplatePath, appPath, { recursive: true });
     } catch (error) {

@@ -1,3 +1,4 @@
+import { EngineeringPolicySchema } from "./quality";
 import { z } from "zod";
 export const deliveryStages = [
   "briefing",
@@ -7,6 +8,8 @@ export const deliveryStages = [
   "delivered",
 ] as const;
 export const DeliveryTaskSchema = z.object({
+  requirementIds: z.array(z.string()).max(150).optional(),
+  kind: z.enum(["task", "feature", "bug"]).optional(),
   id: z.string().uuid(),
   title: z.string().trim().min(1).max(300),
   owner: z.string().max(150),
@@ -21,6 +24,27 @@ export const qualityAreas = [
   "responsive",
 ] as const;
 export const DeliveryPlanSchema = z.object({
+  engineeringPolicy: EngineeringPolicySchema.optional(),
+  engineeringRequired: z.boolean().optional(),
+  foundationRequired: z.boolean().optional(),
+  foundationReviews: z
+    .array(
+      z.object({
+        file: z.enum([
+          "PRD.md",
+          "ARCHITECTURE.md",
+          "TECH_STACK.md",
+          "DESIGN_SYSTEM.md",
+          "TESTING.md",
+          "OPERATIONS.md",
+        ]),
+        digest: z.string().regex(/^[a-f0-9]{64}$/),
+        reviewer: z.string().trim().min(1).max(150),
+        note: z.string().trim().min(1).max(3000),
+      }),
+    )
+    .max(6)
+    .optional(),
   subagentTokenBudget: z.number().int().min(0).max(1000000000).default(0),
   client: z.string().max(200),
   owner: z.string().max(150),

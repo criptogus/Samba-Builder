@@ -73,7 +73,11 @@ export function readGovernanceRoles(appDir: string): GovernanceRoles {
     }
     if (current && /^\s{4}-\s+/.test(raw)) {
       roles[current].push(
-        raw.slice(4).trim().replace(/^['"]|['"]$/g, "").trim(),
+        raw
+          .slice(4)
+          .trim()
+          .replace(/^['"]|['"]$/g, "")
+          .trim(),
       );
     }
   }
@@ -143,7 +147,11 @@ export async function runGovernanceGate(opts: {
     });
     return { ok: true, exitCode: 0, output: (stdout || "").trim() };
   } catch (err) {
-    const e = err as { code?: string | number; stdout?: string; stderr?: string };
+    const e = err as {
+      code?: string | number;
+      stdout?: string;
+      stderr?: string;
+    };
     if (e.code === "ENOENT") {
       throw new Error(
         "python3 não encontrado no PATH — o gate de governança precisa de Python.",

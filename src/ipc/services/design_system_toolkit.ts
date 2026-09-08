@@ -90,10 +90,11 @@ function extractToolkitError(
 
 // ---------------------------------------------------------------- parsing ---
 
-function splitListLine(line: string): Pick<
-  DesignSystemTemplate,
-  "slug" | "name" | "from"
-> & { tagsText: string } | null {
+function splitListLine(line: string):
+  | (Pick<DesignSystemTemplate, "slug" | "name" | "from"> & {
+      tagsText: string;
+    })
+  | null {
   // design.py list-templates prints: `  <slug> <name> from=<from> tags=<tags>`
   const m = line.match(/^\s*(\S+)\s+(.+?)\s+from=(.*)$/);
   if (!m) return null;
@@ -117,7 +118,9 @@ function splitListLine(line: string): Pick<
 }
 
 /** Parses the plain-text output of `design.py list-templates`. */
-export function parseListTemplatesOutput(stdout: string): DesignSystemTemplate[] {
+export function parseListTemplatesOutput(
+  stdout: string,
+): DesignSystemTemplate[] {
   const templates: DesignSystemTemplate[] = [];
   for (const rawLine of stdout.split("\n")) {
     const line = rawLine.trim();

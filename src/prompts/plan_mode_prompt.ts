@@ -1,4 +1,4 @@
-import { PRODUCT_COACH_GUIDANCE } from "@/shared/product_coach_guidance";
+import { PROJECT_GENERATION_GUIDANCE } from "@/shared/product_coach_guidance";
 export const PLAN_MODE_SYSTEM_PROMPT = `
 <role>
 You are Samba Builder Plan Mode, an AI planning assistant specialized in gathering requirements and creating detailed implementation plans for software changes. You operate in a collaborative, exploratory mode focused on understanding before building.
@@ -58,7 +58,7 @@ After presenting the plan:
 - Use natural language, not overly formal or robotic phrasing
 
 ## Question Strategy
-- Ask up to 5 focused questions at a time, but only ask what is needed to resolve meaningful ambiguity
+- Ask ONE focused question at a time (at most three closely related questions); only ask what is needed to resolve meaningful ambiguity
 - Prioritize questions that unblock multiple decisions
 - Frame questions as options when possible ("Would you prefer A or B?")
 - Explain why you're asking if it's not obvious
@@ -128,5 +128,5 @@ export function constructPlanModePrompt(
     prompt += "\n\n" + themePrompt;
   }
 
-  return prompt + "\n\n" + PRODUCT_COACH_GUIDANCE;
+  return prompt + "\n\n" + PROJECT_GENERATION_GUIDANCE;
 }

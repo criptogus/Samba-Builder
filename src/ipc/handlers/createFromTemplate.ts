@@ -1,3 +1,4 @@
+import { ensureProjectFoundation } from "../services/project_foundation";
 import { createFromTeamTemplate } from "../services/project_templates/store";
 import path from "path";
 import fs from "fs-extra";
@@ -23,6 +24,7 @@ export async function createFromTemplate({
 
   if (templateId.startsWith("team:")) {
     await createFromTeamTemplate(templateId, fullAppPath);
+    await ensureProjectFoundation(fullAppPath);
     return;
   }
 
@@ -33,6 +35,7 @@ export async function createFromTemplate({
       fs.existsSync(sourceScaffoldPath) ? sourceScaffoldPath : repoScaffoldPath,
       fullAppPath,
     );
+    await ensureProjectFoundation(fullAppPath);
     return;
   }
 
@@ -45,6 +48,7 @@ export async function createFromTemplate({
   }
   const repoCachePath = await cloneRepo(template.githubUrl);
   await copyRepoToApp(repoCachePath, fullAppPath);
+  await ensureProjectFoundation(fullAppPath);
 }
 
 async function cloneRepo(repoUrl: string): Promise<string> {

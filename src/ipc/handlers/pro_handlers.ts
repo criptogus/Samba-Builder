@@ -1,15 +1,9 @@
-import fetch from "node-fetch"; // Electron main process might need node-fetch
 import { shell } from "electron";
 import log from "electron-log";
 import { createLoggedHandler } from "./safe_handle";
 import { createLoggedTypedHandler } from "./base";
 import { readSettings } from "../../main/settings"; // Assuming settings are read this way
-import {
-  SubscriptionStatusSchema,
-  systemContracts,
-  UserBudgetInfo,
-  UserBudgetInfoSchema,
-} from "@/ipc/types";
+import { systemContracts, UserBudgetInfo } from "@/ipc/types";
 import { IS_TEST_BUILD } from "../utils/test_utils";
 import { z } from "zod";
 import {
@@ -72,19 +66,8 @@ function validateAudioTranscriptionRequest(input: TranscribeAudioParams) {
   }
 }
 
-function getUserInfoUrl() {
-  // Overridable so tests point at the fake LLM server instead of the real API.
-  if (process.env.DYAD_USER_INFO_URL) {
-    return process.env.DYAD_USER_INFO_URL;
-  }
-  return "https://api.dyad.sh/v1/user/info";
-}
-
 function getSubscriptionStatusUrl() {
-  return (
-    process.env.DYAD_SUBSCRIPTION_STATUS_URL ??
-    "https://sambatech.com"
-  );
+  return process.env.DYAD_SUBSCRIPTION_STATUS_URL ?? "https://sambatech.com";
 }
 
 function getSubscriptionStatusApiKey() {

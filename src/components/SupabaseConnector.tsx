@@ -561,9 +561,7 @@ export function SupabaseConnector({ appId }: { appId: number }) {
         data-testid="supabase-token-connect-card"
       >
         <CardHeader>
-          <CardTitle>
-            {t("integrations.supabase.addOrganization")}
-          </CardTitle>
+          <CardTitle>{t("integrations.supabase.addOrganization")}</CardTitle>
           <CardDescription>
             Connect Supabase with a Personal Access Token.
           </CardDescription>
