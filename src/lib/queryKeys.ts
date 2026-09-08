@@ -483,6 +483,13 @@ export const queryKeys = {
   media: {
     all: ["media"] as const,
   },
+  // ─────────────────────────────────────────────────────────────────────────────
+  // Governance (project draft/in_review/approved cycle)
+  // ─────────────────────────────────────────────────────────────────────────────
+  governance: {
+    status: ({ appPath }: { appPath: string }) =>
+      ["governance", "status", appPath] as const,
+  },
 } as const;
 
 // ─────────────────────────────────────────────────────────────────────────────
