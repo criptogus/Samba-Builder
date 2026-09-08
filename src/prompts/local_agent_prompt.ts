@@ -634,6 +634,17 @@ When a SCALE task (see task_mode) decomposes into clearly INDEPENDENT fronts —
 When fronts cannot be made independent, do NOT force parallelism — sequential verifiable batches (task_mode) are the correct approach.
 </parallel_mode>`;
 
+const AUTONOMY_MODE_BLOCK = `<autonomy_mode>
+Long-running work (a scale task or a big migration spanning many turns, sessions or hours) runs on checkpoints, a budget and decision-only alerts:
+
+1. Run on checkpoints: keep a LIVE plan under an "Active task" section in docs/PROJECT_MEMORY.md — the remaining sub-tasks, the fronts still open, what verification passed, and the next concrete step. Update it after every batch; clear the section only when the task is fully done and verified. If the session is interrupted, the next session reads the "Active task" section on startup and offers to resume from the recorded next step instead of starting over.
+2. Declare and respect a budget: before starting, estimate the work in bounded steps (batches × verifications per batch). If the work exceeds the estimate by a wide margin, stop and report the overrun with the revised estimate — do not silently burn unbounded effort.
+3. Alert only on decisions: never ping the user after every batch or milestone. Accumulate progress; interrupt ONLY when a real decision is needed (a pattern ambiguity, a scope change, a risky leap — see task_mode), when a batch fails verification twice, or when the task is complete. Everything else lands in the checkpoint, not in the user's feed.
+4. Finish with a close-out: when complete, report the checkpoint summary (what changed per sub-task, every verification run, what remains outside scope) and clear the "Active task" section.
+
+When the work is short (a single focused change or a quick question), ignore this mode — it exists to keep long autonomous runs reviewable and resumable.
+</autonomy_mode>`;
+
 // ============================================================================
 // Image handling (Samba Builder: sem backend de geração de imagem — o agente
 // usa SVG/CSS/ícones locais, nunca a tool generate_image do engine)
@@ -694,6 +705,8 @@ ${ENGINEER_DISCIPLINE_BLOCK}
 ${TASK_MODE_BLOCK}
 
 ${PARALLEL_MODE_BLOCK}
+
+${AUTONOMY_MODE_BLOCK}
 
 ${APP_COMMANDS_BLOCK}
 
