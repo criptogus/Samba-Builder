@@ -1,5 +1,4 @@
 import { z } from "zod";
-import type { CreateProjectRequestBody } from "@dyad-sh/supabase-management-js";
 import {
   defineContract,
   defineEvent,
@@ -133,14 +132,16 @@ export const SUPABASE_PROJECT_NAME_MAX_LENGTH = 64;
 
 export type SupabaseRegionId = (typeof SUPABASE_REGIONS)[number]["id"];
 
-// Type-only, so nothing from the SDK reaches the renderer bundle. Fails the
-// typecheck naming the offender if the list above and the region enum in the
-// Management API spec ever diverge, in either direction.
-//
-// If a `@dyad-sh/supabase-management-js` bump fails the typecheck here, that is
-// this guard doing its job: Supabase added or renamed a region, and
-// `SUPABASE_REGIONS` above needs the same edit.
+// Guard local: `SUPABASE_REGIONS` é a fonte da verdade das regiões aceitas.
+// Se o Supabase adicionar/renomear uma região, atualizar SUPABASE_REGIONS
+// (o create path repassa a rejeição da API com a explicação dela).
 type AssertNever<T extends never> = T;
+type CreateProjectRequestBody = {
+  name: string;
+  organization_id: string;
+  plan?: string;
+  region: SupabaseRegionId;
+};
 type _EveryApiRegionIsOffered = AssertNever<
   Exclude<CreateProjectRequestBody["region"], SupabaseRegionId>
 >;

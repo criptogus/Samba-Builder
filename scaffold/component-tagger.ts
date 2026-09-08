@@ -7,11 +7,16 @@ import type { Plugin } from "vite";
 const VALID_EXTENSIONS = new Set([".jsx", ".tsx"]);
 
 /**
- * Returns a Vite / esbuild plug-in.
+ * Returns a Vite / esbuild plug-in that tags JSX components with stable
+ * `data-samba-id` / `data-samba-name` attributes so the visual editor and the
+ * test recorder can select components in the live preview.
+ *
+ * Samba Builder (BYOK): plugin local embutido no scaffold — zero dependência
+ * externa no editor visual.
  */
-export default function dyadTagger(): Plugin {
+export default function sambaTagger(): Plugin {
   return {
-    name: "vite-plugin-dyad-tagger",
+    name: "vite-plugin-samba-tagger",
     apply: "serve",
     enforce: "pre",
 
@@ -42,29 +47,29 @@ export default function dyadTagger(): Plugin {
               const tagName = node.name.name as string;
               if (!tagName) return;
 
-              // ── 2. Check whether the tag already has data-dyad-id ───────────────
+              // ── 2. Check whether the tag already has data-samba-id ──────────────
               const alreadyTagged = node.attributes?.some(
                 (attr: any) =>
                   attr.type === "JSXAttribute" &&
-                  attr.name?.name === "data-dyad-id",
+                  attr.name?.name === "data-samba-id",
               );
               if (alreadyTagged) return;
 
               // ── 3. Build the id "relative/file.jsx:line:column" ─────────────────
               const loc = node.loc?.start;
               if (!loc) return;
-              const dyadId = `${fileRelative}:${loc.line}:${loc.column}`;
+              const sambaId = `${fileRelative}:${loc.line}:${loc.column}`;
 
               // ── 4. Inject the attributes just after the tag name ────────────────
               if (node.name.end != null) {
                 ms.appendLeft(
                   node.name.end,
-                  ` data-dyad-id="${dyadId}" data-dyad-name="${tagName}"`,
+                  ` data-samba-id="${sambaId}" data-samba-name="${tagName}"`,
                 );
               }
             } catch (error) {
               console.warn(
-                `[dyad-tagger] Warning: Failed to process JSX node in ${id}:`,
+                `[samba-tagger] Warning: Failed to process JSX node in ${id}:`,
                 error,
               );
             }
@@ -80,7 +85,7 @@ export default function dyadTagger(): Plugin {
         };
       } catch (error) {
         console.warn(
-          `[dyad-tagger] Warning: Failed to transform ${id}:`,
+          `[samba-tagger] Warning: Failed to transform ${id}:`,
           error,
         );
         return null;

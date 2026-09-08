@@ -7,7 +7,7 @@ import { readSettings } from "../main/settings";
 import {
   SupabaseManagementAPI,
   SupabaseManagementAPIError,
-} from "@dyad-sh/supabase-management-js";
+} from "./supabase_management_api";
 import log from "electron-log";
 import { IS_TEST_BUILD } from "../ipc/utils/test_utils";
 import { SUPABASE_PROJECT_CREATED_BUT_UNLINKED } from "../ipc/types/supabase";

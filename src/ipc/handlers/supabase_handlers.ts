@@ -37,7 +37,7 @@ import { assertNoNeonProject } from "../utils/neon_utils";
 import { runOAuthReturnExchange } from "./connection_flow_handlers";
 import { IS_TEST_BUILD } from "../utils/test_utils";
 import { safeSend } from "../utils/safe_sender";
-import { SupabaseManagementAPIError } from "@dyad-sh/supabase-management-js";
+import { SupabaseManagementAPIError } from "../../supabase_admin/supabase_management_api";
 import { isRateLimitError } from "../utils/retryWithRateLimit";
 import { isGenericFetchFailedError } from "@/lib/posthogTelemetry";
 import { queryInvalidationBus } from "@/window_infrastructure/main/query_invalidation_bus";

@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { SupabaseManagementAPIError } from "@dyad-sh/supabase-management-js";
+import { SupabaseManagementAPIError } from "./supabase_management_api";
 import {
   classifyManagementApiError,
   createSupabaseProject,

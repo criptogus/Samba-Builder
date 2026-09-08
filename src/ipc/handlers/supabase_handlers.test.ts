@@ -8,7 +8,7 @@ import { SambaError, SambaErrorKind } from "@/errors/samba_error";
 import { SUPABASE_PROJECT_CREATED_BUT_UNLINKED } from "@/ipc/types";
 import { queryInvalidationBus } from "@/window_infrastructure/main/query_invalidation_bus";
 import { activeRecordings } from "@/ipc/services/recording_registry";
-import { SupabaseManagementAPIError } from "@dyad-sh/supabase-management-js";
+import { SupabaseManagementAPIError } from "../../supabase_admin/supabase_management_api";
 import { RateLimitError } from "@/ipc/utils/retryWithRateLimit";
 import {
   type HandlerTestHarness,
