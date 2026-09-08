@@ -28,6 +28,28 @@ const logger = log.scope("language_model_handlers");
 const handle = createLoggedHandler(logger);
 const handleTyped = createLoggedTypedHandler(logger);
 
+export function looksLikeAnApiKey(value: string): boolean {
+  const trimmed = value.trim();
+  // Typical key shapes: short prefix + dash + long token (sk-…, xoxb-…),
+  // plus dashless/underscore formats (AKIA…, ghp_…). Legit env var NAMES
+  // are UPPER_SNAKE (underscores, no dashes) and never start with these
+  // key prefixes, so false positives stay at zero.
+  return (
+    /^[A-Za-z0-9]{2,12}-[A-Za-z0-9_-]{12,}$/.test(trimmed) ||
+    /^AKIA[A-Z0-9]{16}$/.test(trimmed) ||
+    /^ghp_[A-Za-z0-9]{20,}$/.test(trimmed)
+  );
+}
+
+function assertValidEnvVarName(envVarName: string | undefined): void {
+  if (envVarName && looksLikeAnApiKey(envVarName)) {
+    throw new SambaError(
+      "O campo 'environment variable name' recebeu o que parece ser uma chave de API. Cole a chave no campo 'API Key' do provider — este campo espera o NOME de uma variável de ambiente (ex.: DEEPSEEK_API_KEY), não a chave.",
+      SambaErrorKind.Validation,
+    );
+  }
+}
+
 export function registerLanguageModelHandlers() {
   handle(
     "get-language-model-providers",
@@ -65,6 +87,7 @@ export function registerLanguageModelHandlers() {
           SambaErrorKind.Validation,
         );
       }
+      assertValidEnvVarName(envVarName);
 
       // Check if a provider with this ID already exists
       const existingProvider = db
@@ -268,6 +291,7 @@ export function registerLanguageModelHandlers() {
           SambaErrorKind.Validation,
         );
       }
+      assertValidEnvVarName(envVarName);
 
       // Check if the provider being edited exists. Legacy providers (created
       // before the "custom::" prefix existed) are stored without the prefix;
