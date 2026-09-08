@@ -120,7 +120,13 @@ export async function getLanguageModels({
       })
       .from(languageModelsSchema)
       .where(
-        isCustomProvider({ providerId })
+        // Match on the provider's real type (from the DB) instead of the
+        // "custom::" prefix: legacy providers created before the prefix
+        // existed are stored with a bare id but ARE custom. Prefix-only
+        // detection treated them as builtin, queried builtin_provider_id,
+        // found nothing, and left the provider with zero models — which made
+        // the auto model resolver report "Nenhum provider conectado".
+        provider.type === "custom"
           ? eq(languageModelsSchema.customProviderId, providerId)
           : eq(languageModelsSchema.builtinProviderId, providerId),
       );
