@@ -169,6 +169,18 @@ import {
 
 const LAUNCH_TIME = Date.now();
 
+// Um pipe de log fechado (app lançado sem terminal/redirecionado) faz
+// qualquer console.error/log estourar EPIPE e derrubar o main via
+// uncaughtException — o app trava e a UI para de responder. EPIPE em
+// stdout/stderr é benigno: destrói o stream em vez de crashar.
+for (const stream of [process.stdout, process.stderr]) {
+  stream.on("error", (error: NodeJS.ErrnoException) => {
+    if (error.code === "EPIPE") {
+      stream.destroy();
+    }
+  });
+}
+
 // Above the dev block so a failure there is still reported. Only registers
 // process handlers; it writes nothing, so it can't fix the log directory early.
 log.errorHandler.startCatching({
