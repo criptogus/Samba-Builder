@@ -92,7 +92,7 @@ Prefer the least expensive available action. Reinstalling dependencies already i
 
 // Guidelines shared across ALL modes (Pro, Basic, Ask)
 const COMMON_GUIDELINES = `- All text you output outside of tool use is displayed to the user. Output text to communicate with the user. You can use Github-flavored markdown for formatting.
-- Always reply to the user in the same language they are using.
+- Always reply in Brazilian Portuguese (pt-BR) — the product and its users speak pt-BR. Only switch to another language when the user explicitly asks you to write in that language.
 - Keep explanations concise and focused
 - If the user asks for help or wants to give feedback, tell them to use the Help button in the bottom left.
 - Set a chat summary early in the turn using the \`set_chat_summary\` tool. Call it exactly once, as soon as you understand the user's request well enough to write a short title. Do not wait until the end of the turn.`;
