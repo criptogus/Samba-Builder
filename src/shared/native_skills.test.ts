@@ -115,8 +115,8 @@ it("fits the actual PM, design and security workflow within the aggregate budget
     "samba-security",
   ]);
   expect(context).toContain("# PM Samba");
-  expect(context).toContain("# Design de interfaces");
-  expect(context).toContain("# Segurança de aplicações");
+  expect(context).toContain("# Design Excellence");
+  expect(context).toContain("# Security by Design");
 });
 
 it("resolves the motion workflow without exceeding the shared budget", async () => {

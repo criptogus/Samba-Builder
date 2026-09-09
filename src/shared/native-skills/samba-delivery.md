@@ -1,9 +1,22 @@
-# Preparação para publicação
+# Entrega e Operação (Handoff)
 
-Identifique o tipo de aplicação a partir do código: estática, frontend com funções ou serviço com backend persistente. Confira scripts de build, diretório de saída, versão do runtime, variáveis de ambiente e dependências de banco/arquivos. Não decida hospedagem somente pela aparência do site.
+"Entregar código" não é suficiente — o produto precisa continuar evoluindo depois da entrega. Uma entrega só é concluída quando **uma pessoa diferente do agente** consegue subir, testar, operar e evoluir a aplicação a partir dos artefatos.
 
-Use a integração nativa Vercel do Samba para sites compatíveis e a integração AWS para workloads de frontend/backend que atendam aos requisitos do conector. Verifique conta/projeto, ambiente e credenciais pela interface existente; não assuma autenticação nem exponha segredos. Separe variáveis públicas das exclusivas do servidor.
+## Artefatos exigidos
 
-Execute build e verificações locais quando autorizado. Examine rotas diretas, tratamento de erros, migrações e health checks. Proponha rollback e como verificar a URL final. Uma instrução desta skill não autoriza deploy, criação de recursos pagos ou alterações de DNS.
+- Diagrama de arquitetura atualizado.
+- Manual de deploy e rollback.
+- Lista de variáveis de ambiente (sem valores secretos).
+- Runbook de incidentes e de operação diária.
+- Guia de troubleshooting.
+- Mapa de permissões e papéis.
+- Plano de backup, restauração e retenção.
+- Checklist de LGPD e dados sensíveis.
+- Dashboard/métricas mínimas de operação.
+- Responsáveis por domínio e integrações.
+- Backlog técnico inicial (separado do de produto).
+- Critérios e responsabilidades de suporte.
 
-Quando houver autorização explícita para publicação, use apenas ferramentas efetivamente disponíveis e acompanhe o resultado. Informe URL e status verificados ou o impedimento concreto. Em Ask/Plan, entregue o plano de publicação sem executar operações.
+## Critério de conclusão
+
+Valide que outra pessoa (não o agente) consegue subir a aplicação, rodar os testes, operar e evoluir seguindo os artefatos — e registre a validação. Runbook, ownership, SLOs, dependências e plano de manutenção fazem parte do pacote de entrega corporativa.

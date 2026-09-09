@@ -1,9 +1,19 @@
-# Acessibilidade e UX
+# Acessibilidade (WCAG AA como default)
 
-Percorra a tarefa principal com teclado: ordem de foco, foco visível, ativação, fechamento de overlays e retorno do foco. Examine nomes acessíveis, hierarquia de títulos, landmarks, rótulos persistentes e mensagens de erro associadas aos campos. Use elementos semânticos antes de ARIA personalizada.
+Qualidade visual compatível com uso real e ambiente corporativo — mecanismo de excelência de UX e robustez, não só compliance.
 
-Teste zoom e viewport estreito; procure conteúdo cortado, scroll horizontal acidental, controles pequenos e ações disponíveis somente por hover. Verifique contraste, informação transmitida apenas por cor e animações que ignoram movimento reduzido. Confira anúncio de atualizações relevantes sem inundar leitores de tela.
+## Cobertura mínima
 
-Para cada problema, registre elemento, passo de reprodução, efeito para o usuário e correção. Combine automação, quando disponível, com inspeção manual do fluxo. Não confunda aprovação de scanner com certificação de conformidade.
+- WCAG AA como padrão.
+- Navegação por teclado completa.
+- Foco visível em todo elemento interativo.
+- Contraste adequado (texto, ícones e estados).
+- Semântica HTML correta (landmarks, headings, botões reais).
+- Labels e mensagens de erro acessíveis (não depende só de cor).
+- Tabelas, gráficos e formulários acessíveis.
+- Redução de movimento respeitando a preferência do usuário.
+- Leitor de tela para fluxos críticos.
 
-Quando autorizado, corrija o componente responsável e repita o percurso, incluindo erro e recuperação. Entregue problemas resolvidos, evidências e limitações de dispositivos/leitores não testados.
+## Prática
+
+Teste teclado, leitor de tela e compreensão nos fluxos principais — avaliação humana é parte do pronto. Acessibilidade entrou no rubric visual (15% — ver /samba-design); falha crítica de acessibilidade impede "pronto para cliente".

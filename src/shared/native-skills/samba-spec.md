@@ -1,9 +1,27 @@
-# Especificação de produto
+# Especificação de Produto (PRD como contrato)
 
-Parta do pedido e do código existente. Identifique o usuário, o problema, o fluxo principal e as restrições já informadas. Declare suposições; pergunte apenas o que muda materialmente a solução e não pode ser inferido. Não acrescente etapas de aprovação já satisfeitas pelo pedido.
+O PRD é a origem rastreável de design, arquitetura, segurança, teste e aceite — não só uma descrição de funcionalidade. Sem ele, uma feature "parece pronta" sem estar pronta em segurança, teste e governança.
 
-Entregue uma especificação curta com: objetivo; escopo e exclusões; jornadas ordenadas por valor; critérios de aceitação observáveis; estados vazio, carregando e erro; dados e permissões; riscos e dependências. Use exemplos dado/quando/então para falhas importantes, além do caminho feliz. Separe necessidades de escolhas técnicas.
+## Conteúdo obrigatório
 
-Mapeie cada critério para uma tarefa implementável e sua forma de verificação. Identifique dependências e uma primeira fatia vertical utilizável. Evite tarefas genéricas como “fazer backend”. Se a implementação estiver autorizada e o modo permitir, execute a primeira fatia e avance pelas demais. Em Ask/Plan, entregue a análise no chat sem modificar arquivos. Não invoque hooks, scripts ou outros agentes por causa desta skill.
+- Problema, público, hipótese de valor e métrica de sucesso.
+- Personas ou perfis de acesso.
+- Jornada principal e jornadas de exceção.
+- Requisitos funcionais priorizados.
+- Requisitos não funcionais: disponibilidade, performance, privacidade, segurança, acessibilidade, localidade, auditoria.
+- Dados sensíveis tratados pelo produto.
+- Integrações e dependências.
+- Critérios de aceite testáveis.
+- Riscos e decisões que exigem aprovação humana.
+- Escopo fora da versão (ver /samba-scope-guard).
+- Plano de rollout, migração e rollback.
 
-Conclusão: informe requisitos atendidos, evidências e lacunas. Não declare um recurso completo se o fluxo só funciona com dados simulados.
+## Matriz requisito → evidência (dentro do PRD)
+
+| Requisito                | Módulo     | Risco   | Teste             | Evidência de aceite                       |
+| ------------------------ | ---------- | ------- | ----------------- | ----------------------------------------- |
+| Usuário aprova despesa   | Financeiro | Alto    | E2E + autorização | Registro de auditoria + teste de perfil   |
+| Gestor exporta relatório | Relatórios | Médio   | Integração        | Arquivo gerado com filtros aplicados      |
+| Admin muda permissões    | IAM        | Crítico | E2E + segurança   | Negativa de acesso para usuário sem papel |
+
+Cada requisito da matriz só fecha com a evidência da linha preenchida (ver /samba-quality-engineering). A classificação de risco do projeto (baixo/médio/alto/crítico) define o peso do processo (ver /samba-governance).

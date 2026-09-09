@@ -1,21 +1,32 @@
-# Mapa do projeto
+# Architecture Fitness
 
-Comece pelos manifests, árvore de diretórios, pontos de entrada e documentação existente. Exclua dependências, builds, arquivos gerados e binários. Pesquise nomes antes de ler arquivos grandes; siga apenas as dependências necessárias para a pergunta.
+Arquitetura de produto — não só escolha de stack. O default é um **monólito modular bem tipado com fronteiras de domínio explícitas**; microserviços só quando houver gargalo, ownership ou escala comprovados.
 
-Mapeie responsabilidades, fronteiras e fluxo de dados de uma jornada concreta. Para cada nó ou conexão, cite um arquivo ou símbolo que a sustente. Separe relações confirmadas de inferências; não invente um grafo apenas a partir dos nomes dos diretórios.
+## Entregáveis por projeto
 
-Entregue um mapa compacto, preferencialmente Mermaid quando suportado, uma descrição do fluxo principal e os pontos de extensão. Para uma mudança proposta, liste produtores, consumidores, contratos afetados e testes de maior valor. Identifique acoplamento e duplicação com exemplos, sem propor reescrita total por padrão.
+1. **Context map** — usuários, sistemas externos, fontes de verdade, integrações e fronteiras de confiança.
+2. **Diagrama de containers** — frontend, backend, banco, filas, storage, autenticação, observabilidade, integrações.
+3. **Decisões de arquitetura (ADRs curtos)** — alternativas consideradas e razão da escolha; registre no repo.
+4. **Módulos por domínio de negócio**, não por tipo técnico — apresentação, aplicação, domínio e infraestrutura separados.
+5. **Contratos de API tipados e versionados** — validação de schema nas bordas.
+6. **Estratégia de dados** — ownership, migrations, índices, retenção, auditoria e backup.
+7. **Estratégia assíncrona** — eventos, retries, idempotência, dead-letter queue quando aplicável.
+8. **Escalabilidade proporcional à fase** — nada de distribuir cedo demais.
 
-Se autorizado a salvar documentação, inclua revisão/data e como atualizar o mapa. Caso contrário, apresente no chat. Esta skill não instala indexador, dashboard ou watcher e não lê o repositório inteiro em memória.
+## Regra de ouro (bloqueante)
 
-## Projetar um sistema novo e comprovar capacidade
+Nenhuma feature relevante pode introduzir: acesso direto ao banco dentro da UI, regra de negócio dentro de controller, segredo em frontend, ou chamada externa sem timeout, retry e tratamento de falha.
 
-Antes de escolher infraestrutura, registre na política de engenharia o perfil de risco, pico de usuários, volume e crescimento dos dados, orçamento mensal, disponibilidade pretendida e os tempos toleráveis de recuperação e perda de dados. Trate números sugeridos como hipóteses, com responsável e teste de validação. Se o produto não armazena dados, justifique por que restauração de banco não se aplica.
+## Defaults por necessidade
 
-Desenhe contexto e contêineres C4 proporcionais à solução e ligue cada componente a contratos e arquivos reais. Compare opções em ADR: modularidade, persistência, consistência, operação e custo. Comece pela menor arquitetura que atende às metas; só separe serviços quando a carga, o isolamento ou a autonomia operacional justificarem o custo.
+| Necessidade                        | Default                                                                                                  |
+| ---------------------------------- | -------------------------------------------------------------------------------------------------------- |
+| SaaS B2B inicial                   | Monólito modular + Postgres + fila simples + storage + auth gerenciada                                   |
+| App interno corporativo            | Monólito modular + RBAC + trilha de auditoria + SSO quando necessário                                    |
+| Produto com IA                     | Camada de orquestração separada, jobs assíncronos, observabilidade de prompts/modelos, controle de custo |
+| Integrações críticas               | Adaptadores por fornecedor, contratos tipados, retries, circuit breaker, logs de correlação              |
+| Alto volume/domínios independentes | Extrair serviço só com gargalo/ownership/escala comprovados                                              |
 
-Em dados privados, crie requisitos e testes negativos de autorização: principal autenticado, outro usuário, outra organização e papel sem permissão, incluindo chamadas diretas ao servidor. Para operação crítica, registre também requisitos de carga/concorrência e recuperação, com testes executáveis e resultados associados à versão. Simule falhas externas, repetição de eventos, tempo limite e retomada sem duplicar efeitos. Não confunda um GET rápido com capacidade comprovada sob pico.
+## Anti-acoplamento
 
-Defina sinais de saúde, métricas e alertas com responsável e procedimento de resposta. Registre migrations, compatibilidade e rollback, retenção e restauração. Execute testes de carga apenas em ambiente autorizado e isolado; nunca ensaie restauração sobre dados de produção. Se ainda não existe ambiente ou dado de teste, registre a lacuna; não invente prova operacional.
-
-Cada requisito deve apontar para tarefas, arquivos no Git e uma execução que verifique seu aceite. A vinculação humana de um teste não prova automaticamente sua cobertura: revise as asserções e preserve evidências relevantes. Atualize PRD, arquitetura, operações e decisões junto do código.
+Imports cruzados arbitrários entre módulos são proibidos — cada módulo expõe uma API pública. Domínio livre de framework quando o custo justificar. Meça dependências cíclicas e tamanho de módulos. Feature flags para rollout seguro. Uma feature que altera mais de um domínio precisa declarar impactos, contratos e plano de migração antes de ser implementada. Ver /samba-quality-engineering para os testes de contrato.

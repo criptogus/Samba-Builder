@@ -159,10 +159,59 @@ export const nativeSkills: readonly NativeSkill[] = [
   },
   {
     slug: "samba-delivery",
-    title: "Preparação para publicação",
+    title: "Entrega e operação",
     category: "Integrações",
-    description: "Verifica build, ambiente e requisitos para Vercel ou AWS.",
+    description:
+      "Pacote de handoff corporativo: runbooks, deploy/rollback, ownership, SLOs e critério de conclusão (outra pessoa consegue operar).",
     sources: ["github/spec-kit", "affaan-m/ECC"],
-    prerequisite: "Conta e conector Vercel/AWS configurados.",
+    prerequisite: null,
+  },
+  {
+    slug: "samba-art-direction",
+    title: "Direção de arte",
+    category: "Design",
+    description:
+      "Produtos visualmente autores: moodboard, direção visual, tokens, densidade, motion com propósito e gate de screenshots em 3 breakpoints.",
+    sources: [
+      "nextlevelbuilder/ui-ux-pro-max-skill",
+      "VoltAgent/awesome-design-md",
+    ],
+    prerequisite: null,
+  },
+  {
+    slug: "samba-quality-engineering",
+    title: "Qualidade com evidência",
+    category: "Engenharia",
+    description:
+      "Pirâmide de testes por risco e matriz requisito→evidência: prova a qualidade executando e registrando, nunca afirmando.",
+    sources: ["obra/superpowers", "github/spec-kit"],
+    prerequisite: null,
+  },
+  {
+    slug: "samba-governance",
+    title: "Governança corporativa",
+    category: "Engenharia",
+    description:
+      "RBAC, mínimo privilégio, auditoria append-only, dupla aprovação para alto risco e classificação de risco proporcional do projeto.",
+    sources: ["github/spec-kit"],
+    prerequisite: null,
+  },
+  {
+    slug: "samba-observability",
+    title: "Observabilidade",
+    category: "Engenharia",
+    description:
+      "Logs estruturados, correlação, métricas, SLOs, dashboards e telemetria de execuções de IA com privacidade por padrão.",
+    sources: ["vercel-labs/agent-skills"],
+    prerequisite: null,
+  },
+  {
+    slug: "samba-scope-guard",
+    title: "Controle de escopo",
+    category: "Produto",
+    description:
+      "Escopo com custo técnico explícito: impacto, segurança e manutenção registrados; feature creep vira decisão, não trabalho silencioso.",
+    sources: ["github/spec-kit"],
+    prerequisite: null,
   },
 ];
