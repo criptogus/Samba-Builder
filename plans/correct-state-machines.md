@@ -673,8 +673,7 @@ interface PreparedRequest<Admission, Outcome> {
   readonly admission: Promise<Admission>;
   readonly settled: Promise<Outcome | NotAdmitted>;
   readonly retry:
-    | { kind: "disabled" }
-    | { kind: "enabled"; dispatch(): Promise<Admission> };
+    { kind: "disabled" } | { kind: "enabled"; dispatch(): Promise<Admission> };
 }
 ```
 

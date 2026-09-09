@@ -202,19 +202,21 @@ export function PluginDetailPage({ serverId }: { serverId: number }) {
               </div>
             </div>
             <div className="flex items-center gap-2 shrink-0">
-              {s.oauthEnabled && !s.oauthConnected && !setupIncomplete && (
-                // Only one OAuth flow can run at a time (shared
-                // connect slot), so Connect is blocked while any
-                // server is connecting; the label only spins for this
-                // server's own flow.
-                <Button
-                  variant="default"
-                  onClick={() => onConnect(s.id)}
-                  disabled={connectingServerId !== null}
-                >
-                  {connectingServerId === s.id ? "Connecting…" : "Connect"}
-                </Button>
-              )}
+              {s.oauthEnabled &&
+                !s.oauthConnected &&
+                !setupIncomplete && (
+                  // Only one OAuth flow can run at a time (shared
+                  // connect slot), so Connect is blocked while any
+                  // server is connecting; the label only spins for this
+                  // server's own flow.
+                  <Button
+                    variant="default"
+                    onClick={() => onConnect(s.id)}
+                    disabled={connectingServerId !== null}
+                  >
+                    {connectingServerId === s.id ? "Connecting…" : "Connect"}
+                  </Button>
+                )}
               {s.oauthEnabled && s.oauthConnected && !setupIncomplete && (
                 <Button
                   variant="outline"
@@ -287,24 +289,25 @@ export function PluginDetailPage({ serverId }: { serverId: number }) {
             setupPersistsSecret &&
             oauthStorageEncrypted === false && <OauthPlaintextStorageAlert />}
 
-          {needsSetup && !setupBlockedByUnreadable && (
-            // Keyed by server so switching between two setup-needing
-            // servers starts each from its own blank fields, never
-            // carrying one server's typed credentials into another.
-            <PluginSetupSection
-              key={s.id}
-              server={s}
-              inputs={setupInputs}
-              isSaving={isUpdatingServer}
-              onSave={async (update) => {
-                await updateServer(update);
-                // An OAuth server goes straight into its connect flow
-                // after setup, like the one-click add; key-based servers
-                // just enable and discover.
-                if (s.oauthEnabled) void onConnect(s.id);
-              }}
-            />
-          )}
+          {needsSetup &&
+            !setupBlockedByUnreadable && (
+              // Keyed by server so switching between two setup-needing
+              // servers starts each from its own blank fields, never
+              // carrying one server's typed credentials into another.
+              <PluginSetupSection
+                key={s.id}
+                server={s}
+                inputs={setupInputs}
+                isSaving={isUpdatingServer}
+                onSave={async (update) => {
+                  await updateServer(update);
+                  // An OAuth server goes straight into its connect flow
+                  // after setup, like the one-click add; key-based servers
+                  // just enable and discover.
+                  if (s.oauthEnabled) void onConnect(s.id);
+                }}
+              />
+            )}
 
           {setupPending && (
             <div className="mt-4 text-sm text-muted-foreground">

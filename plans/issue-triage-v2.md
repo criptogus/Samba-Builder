@@ -140,6 +140,7 @@ Proposed title: `[session report] No description (Samba 1.9.0, Windows)`
 > - Empty session report. 1.9.0 (current 1.13.0), win32, auto:auto, Build mode. Screenshot status: none.
 > - Only error in logs: Squirrel Update.exe CheckForUpdate returned HTTP 404. Same signature in #4181, #4185, #4174 and 20 others, all empty reports on old versions. Treated as background noise for the reporter; tracked for the team in the Windows updater issue.
 > - No defect identified from this report. Playbook: "background updater error".
+>
 > </details>
 
 **#4456, an empty 1.13.0 report whose logs show Node.js missing**
@@ -165,6 +166,7 @@ Today: title rewritten well ("Node.js/pnpm not recognized on Windows"), but the 
 > - 1.13.0 (current), win32, auto:free, Ask mode. Screenshot status: captured, no image attached.
 > - Log: `'node' is not recognized as an internal or external command` from runShellCommand; managed pnpm install exited 1. Node Path reports `C:\Program Files\nodejs\node.exe`, so Node is installed but not on PATH (compare #3612, corrupted PATH entry).
 > - Playbook: "Node.js not found on Windows". Confidence: high.
+>
 > </details>
 
 **#4392, a Pro user whose own Anthropic key isn't used once credits run out**
@@ -184,6 +186,7 @@ Today: comment links #4388 as a low-confidence duplicate. Maintainer answers by 
 > - Pro user, 1.12.0. "Failed to verify" on Anthropic BYOK after credits hit 0.
 > - Same answer given by hand in #4388 (daily chat limit). Two reports in one week; consider falling back to the user's own key automatically when credits are 0, or a clearer message.
 > - Playbook: "Pro credits ran out, wants own key". Confidence: high.
+>
 > </details>
 
 ## The playbook

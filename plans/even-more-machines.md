@@ -1450,14 +1450,14 @@ transition atomically before the park resolves.
    on the registry (kind `questionnaire`); plan_handlers.ts:196-201's
    `respondToQuestionnaire` is DELETED in favor of unified respond (NotFound
    semantics — the bug-3 fix). DELETE the renderer 5-min timer
-   (QuestionnaireInput.tsx:90-105), the nested fade timeouts (~:203), and
+   (QuestionnaireInput.tsx:90-105), the nested fade timeouts (~~:203), and
    `questionnaireSubmittedChatIdsAtom` (planAtoms.ts:37): the confirmation
    renders from a short-lived settled entry the projection adapter retains
    (`settledAt` + one adapter-owned timer + CSS transition).
    `pendingQuestionnaireAtom` becomes a derived view; DELETE the
    `plan:questionnaire` listener leg in usePlanEvents.ts:74-82 and the
    sweep leg (registerRendererIpcListeners.ts:147-152). Repoint
-   useNotificationHandler's questionnaire leg (~:387) at the new events.
+   useNotificationHandler's questionnaire leg (~~:387) at the new events.
    Test: main times out → `settled(timed-out)` broadcast clears the panel;
    a subsequent submit gets NotFound and shows no confirmation.
 4. **Continuation port** (medium; gated on Phase 1 PR 3). add_integration

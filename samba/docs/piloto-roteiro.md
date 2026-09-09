@@ -3,7 +3,7 @@
 Roteiro operacional para rodar o **fluxo D1–D5 completo com UM cliente real**: um
 repo existente, uma tarefa de engenharia real (migração/refactor/manutenção), o
 Córtex do domínio do cliente, a entrega governada. O case resultante é o
-"case Nubank" da Samba — o benchmark de venda de *engenharia de código com IA*.
+"case Nubank" da Samba — o benchmark de venda de _engenharia de código com IA_.
 
 > Pré-requisito do produto: o Samba Builder com a main atual (D1–D5) + o app
 > instalado. Nada aqui exige backend — é BYOK (a chave do cliente ou a nossa).
@@ -24,8 +24,8 @@ Córtex do domínio do cliente, a entrega governada. O case resultante é o
 ## 2. Setup (meio dia)
 
 1. **Importar o repo** no Samba Builder (GitHub ou pasta local) — vira um app.
-2. **Mapear** — 1ª tarefa de reconhecimento: o agente registra o *Repository
-   map* no `PROJECT_MEMORY.md` (estrutura, comandos de verificação, convenções).
+2. **Mapear** — 1ª tarefa de reconhecimento: o agente registra o _Repository
+   map_ no `PROJECT_MEMORY.md` (estrutura, comandos de verificação, convenções).
 3. **Córtex do cliente:** criar a base de conhecimento do domínio (arquitetura,
    padrões, histórico) — o que a equipe do cliente ensina uma vez.
 4. **Benchmark (D2):** registrar 2–3 tarefas pequenas de calibragem com o
@@ -39,7 +39,7 @@ Córtex do domínio do cliente, a entrega governada. O case resultante é o
 2. **Frentes independentes (D4):** quando o plano decompõe limpo, o coordenador
    paraleliza com workers via `spawn_agent` e entrega um diff consolidado.
 3. **Autonomia longa (D5):** o agente roda com checkpoint ao vivo (seção
-   *Active task* no PROJECT_MEMORY), orçamento declarado e alerta só nas
+   _Active task_ no PROJECT_MEMORY), orçamento declarado e alerta só nas
    decisões — o cliente acompanha por marcos, não por passo.
 4. **Governança:** cada lote/diff passa pela aprovação do cliente no painel de
    Governança (nunca merge silencioso) — `python3 samba/governance/gate.py`.
@@ -48,13 +48,13 @@ Córtex do domínio do cliente, a entrega governada. O case resultante é o
 
 ## 4. Métricas a registrar (o placar)
 
-| Métrica | Como medir |
-|---|---|
-| Taxa de 1ª tentativa | `python3 samba/benchmark/benchmark.py report --client <nome>` |
-| Horas de engenheiro economizadas | estimativa do cliente × horas do piloto |
-| Qualidade | `score.py` (0–100) + revisão do cliente |
-| Tempo até a entrega | calendário do piloto |
-| Diffs rejeitados / retrabalho | contagem nas rodadas de aprovação |
+| Métrica                          | Como medir                                                    |
+| -------------------------------- | ------------------------------------------------------------- |
+| Taxa de 1ª tentativa             | `python3 samba/benchmark/benchmark.py report --client <nome>` |
+| Horas de engenheiro economizadas | estimativa do cliente × horas do piloto                       |
+| Qualidade                        | `score.py` (0–100) + revisão do cliente                       |
+| Tempo até a entrega              | calendário do piloto                                          |
+| Diffs rejeitados / retrabalho    | contagem nas rodadas de aprovação                             |
 
 ## 5. Critérios de saída (do roadmap D6)
 
@@ -80,6 +80,6 @@ Córtex do domínio do cliente, a entrega governada. O case resultante é o
 
 ---
 
-*O piloto é a prova do "nível Devin" com o posicionamento Samba: local-first,
+_O piloto é a prova do "nível Devin" com o posicionamento Samba: local-first,
 domínio do cliente no Córtex, humano aprovando — e o case vira o benchmark de
-venda de engenharia de código com IA.*
+venda de engenharia de código com IA._

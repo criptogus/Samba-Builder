@@ -451,10 +451,11 @@ Errors: 0
 ### By Arm
 
 Pricing assumption: primary `gpt-5.5` input/cached/output = $5/$0.5/$30 per 1M; value `gpt-5.4-mini` input/cached/output = $0.75/$0.075/$4.5 per 1M.
-| Arm | OK | Explore available | Explore used | Primary uncached input | Primary cached input | Primary output | Primary total | Primary cost | Value uncached input | Value cached input | Value output | Value total | Value cost | Combined total | Combined cost | Primary tool calls | Value tool calls | Total tool calls | Avg elapsed ms |
-| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| baseline | 24/24 | 0/24 | 0/24 | 6629990 | 20308480 | 153837 | 27092307 | $47.9193 | 0 | 0 | 0 | 0 | $0.0000 | 27092307 | $47.9193 | 1162 | 0 | 1162 | 124870 |
-| explore | 24/24 | 24/24 | 24/24 | 4854838 | 16079872 | 126405 | 21061115 | $36.1063 | 21929 | 41600 | 5138 | 68667 | $0.0427 | 21129782 | $36.1490 | 956 | 111 | 1067 | 95123 |
+
+| Arm      |    OK | Explore available | Explore used | Primary uncached input | Primary cached input | Primary output | Primary total | Primary cost | Value uncached input | Value cached input | Value output | Value total | Value cost | Combined total | Combined cost | Primary tool calls | Value tool calls | Total tool calls | Avg elapsed ms |
+| -------- | ----: | ----------------: | -----------: | ---------------------: | -------------------: | -------------: | ------------: | -----------: | -------------------: | -----------------: | -----------: | ----------: | ---------: | -------------: | ------------: | -----------------: | ---------------: | ---------------: | -------------: |
+| baseline | 24/24 |              0/24 |         0/24 |                6629990 |             20308480 |         153837 |      27092307 |     $47.9193 |                    0 |                  0 |            0 |           0 |    $0.0000 |       27092307 |      $47.9193 |               1162 |                0 |             1162 |         124870 |
+| explore  | 24/24 |             24/24 |        24/24 |                4854838 |             16079872 |         126405 |      21061115 |     $36.1063 |                21929 |              41600 |         5138 |       68667 |    $0.0427 |       21129782 |      $36.1490 |                956 |              111 |             1067 |          95123 |
 
 ### Quality Metrics
 

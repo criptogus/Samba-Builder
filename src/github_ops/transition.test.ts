@@ -76,9 +76,10 @@ function eventsFor(state: GithubOpsState): readonly GithubOpsEvent[] {
       ? state.op
       : ({ type: "push", mode: "normal" } satisfies GithubOperation);
   return [
-    ...REPRESENTATIVE_OPS.map(
-      (op): GithubOpsEvent => ({ type: "OP_REQUESTED", op }),
-    ),
+    ...REPRESENTATIVE_OPS.map((op): GithubOpsEvent => ({
+      type: "OP_REQUESTED",
+      op,
+    })),
     { type: "OP_SUCCEEDED", op: activeOp },
     {
       type: "OP_FAILED",

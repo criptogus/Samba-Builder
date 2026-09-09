@@ -22,12 +22,12 @@ cadeia de bugs do provider DeepSeek (`deepseek-samba`).
 
 ## Erros e significados
 
-| Erro | Causa | Correção |
-|---|---|---|
-| `Nenhum provider conectado via API…` | O modo auto não achou nenhum provider com chave E modelos | 1) Chave salva no campo API Key? 2) Provider tem modelos? 3) Bug do prefixo (abaixo) — já corrigido |
-| `Provider with ID "X" not found` (no edit) | Provider **legado** (id sem o prefixo `custom::`) não era achado pelo lookup prefixado | Corrigido: o lookup aceita id cru OU prefixado |
-| "Ready" no card MAS erro no chat | O filtro de modelos tratava o provider legado como builtin (consulta `builtin_provider_id` = NULL → zero modelos) | Corrigido: filtro usa o tipo real do provider (do banco) |
-| Chave some do `user-settings.json` | Escrita parcial sobrescrevia o mapa de providers inteiro (spread raso) | Corrigido: merge por provider; remoção explícita via `undefined` |
+| Erro                                       | Causa                                                                                                             | Correção                                                                                            |
+| ------------------------------------------ | ----------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| `Nenhum provider conectado via API…`       | O modo auto não achou nenhum provider com chave E modelos                                                         | 1) Chave salva no campo API Key? 2) Provider tem modelos? 3) Bug do prefixo (abaixo) — já corrigido |
+| `Provider with ID "X" not found` (no edit) | Provider **legado** (id sem o prefixo `custom::`) não era achado pelo lookup prefixado                            | Corrigido: o lookup aceita id cru OU prefixado                                                      |
+| "Ready" no card MAS erro no chat           | O filtro de modelos tratava o provider legado como builtin (consulta `builtin_provider_id` = NULL → zero modelos) | Corrigido: filtro usa o tipo real do provider (do banco)                                            |
+| Chave some do `user-settings.json`         | Escrita parcial sobrescrevia o mapa de providers inteiro (spread raso)                                            | Corrigido: merge por provider; remoção explícita via `undefined`                                    |
 
 ## Arquitetura: o prefixo `custom::` e os providers legados
 

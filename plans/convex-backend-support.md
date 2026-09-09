@@ -114,26 +114,28 @@ UI (ConvexConnector.tsx) → IPC Contracts (convex.ts) → Handlers (convex_hand
 ### Components Affected
 
 **New files (6 + template):**
-| File | Purpose | Size |
-|------|---------|------|
-| `src/ipc/types/convex.ts` | IPC contracts (connect, disconnect, get-info, deploy, get-schema) | Small |
-| `src/ipc/handlers/convex_handlers.ts` | Handler implementations | Medium |
-| `src/convex_admin/convex_management_client.ts` | Deploy key validation, deployment status checks via HTTP API | Small |
-| `src/convex_admin/convex_context.ts` | Context generator — reads `convex/schema.ts`, formats for AI prompt | Small |
-| `src/prompts/convex_prompt.ts` | Convex-specific system prompt (high-fidelity port from Chef's `convexGuidelines.ts` + `solutionConstraints.ts`) | Large |
-| `src/components/ConvexConnector.tsx` | Deploy key paste UI + connected state (no separate integration file needed — scope is smaller than Supabase) | Medium |
-| Convex template repo | Fork of Chef's template, adapted for Samba: `convex/`, `ConvexProvider`, `concurrently` start scripts, Tailwind | Medium |
+
+| File                                           | Purpose                                                                                                         | Size   |
+| ---------------------------------------------- | --------------------------------------------------------------------------------------------------------------- | ------ |
+| `src/ipc/types/convex.ts`                      | IPC contracts (connect, disconnect, get-info, deploy, get-schema)                                               | Small  |
+| `src/ipc/handlers/convex_handlers.ts`          | Handler implementations                                                                                         | Medium |
+| `src/convex_admin/convex_management_client.ts` | Deploy key validation, deployment status checks via HTTP API                                                    | Small  |
+| `src/convex_admin/convex_context.ts`           | Context generator — reads `convex/schema.ts`, formats for AI prompt                                             | Small  |
+| `src/prompts/convex_prompt.ts`                 | Convex-specific system prompt (high-fidelity port from Chef's `convexGuidelines.ts` + `solutionConstraints.ts`) | Large  |
+| `src/components/ConvexConnector.tsx`           | Deploy key paste UI + connected state (no separate integration file needed — scope is smaller than Supabase)    | Medium |
+| Convex template repo                           | Fork of Chef's template, adapted for Samba: `convex/`, `ConvexProvider`, `concurrently` start scripts, Tailwind | Medium |
 
 Note: No `convex_return_handler.ts` needed (no OAuth). No separate `ConvexIntegration.tsx` needed (folded into ConvexConnector since scope is simpler). Deploy key storage is per-app in the `apps` table, NOT in global settings.
 
 **Modified files:**
-| File | Change | Size |
-|------|--------|------|
-| `src/db/schema.ts` | Add `convexDeploymentUrl`, `convexProjectSlug`, `convexTeamSlug` to `apps` table | Small |
-| `src/ipc/handlers/chat_stream_handlers.ts` | Add Convex context injection branch (parallel to Supabase block ~line 726) | Small |
-| `src/pro/main/ipc/handlers/local_agent/tool_definitions.ts` | Add Convex agent tools | Medium |
-| `src/prompts/local_agent_prompt.ts` | Add Convex-aware instructions | Small |
-| `src/pages/app-details.tsx` | Add ConvexConnector to integrations section | Small |
+
+| File                                                        | Change                                                                           | Size   |
+| ----------------------------------------------------------- | -------------------------------------------------------------------------------- | ------ |
+| `src/db/schema.ts`                                          | Add `convexDeploymentUrl`, `convexProjectSlug`, `convexTeamSlug` to `apps` table | Small  |
+| `src/ipc/handlers/chat_stream_handlers.ts`                  | Add Convex context injection branch (parallel to Supabase block ~line 726)       | Small  |
+| `src/pro/main/ipc/handlers/local_agent/tool_definitions.ts` | Add Convex agent tools                                                           | Medium |
+| `src/prompts/local_agent_prompt.ts`                         | Add Convex-aware instructions                                                    | Small  |
+| `src/pages/app-details.tsx`                                 | Add ConvexConnector to integrations section                                      | Small  |
 
 ### Data Model Changes
 
