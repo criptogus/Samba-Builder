@@ -54,7 +54,7 @@ export function boundUtf8String(
   const suffixByteLength = getUtf8ByteLength(truncationSuffix);
   const prefixLimit = Math.max(0, maxBytes - suffixByteLength);
 
-  for (let index = 0; index < value.length;) {
+  for (let index = 0; index < value.length; ) {
     const codePoint = value.codePointAt(index) ?? 0;
     const codeUnitLength = codePoint > 0xffff ? 2 : 1;
     const codePointByteLength = utf8CodePointByteLength(codePoint);
@@ -71,7 +71,7 @@ export function boundUtf8String(
         let boundedSuffixByteLength = 0;
         let suffixEnd = 0;
 
-        for (let suffixIndex = 0; suffixIndex < truncationSuffix.length;) {
+        for (let suffixIndex = 0; suffixIndex < truncationSuffix.length; ) {
           const suffixCodePoint =
             truncationSuffix.codePointAt(suffixIndex) ?? 0;
           const codeUnitLength = suffixCodePoint > 0xffff ? 2 : 1;
@@ -103,7 +103,7 @@ export function boundUtf8String(
 
 export function getUtf8ByteLength(value: string): number {
   let byteLength = 0;
-  for (let index = 0; index < value.length;) {
+  for (let index = 0; index < value.length; ) {
     const codePoint = value.codePointAt(index) ?? 0;
     byteLength += utf8CodePointByteLength(codePoint);
     index += codePoint > 0xffff ? 2 : 1;

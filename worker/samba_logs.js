@@ -31,7 +31,7 @@
 
   function utf8ByteLength(value) {
     let byteLength = 0;
-    for (let index = 0; index < value.length;) {
+    for (let index = 0; index < value.length; ) {
       const codePoint = value.codePointAt(index) ?? 0;
       byteLength += utf8CodePointByteLength(codePoint);
       index += codePoint > 0xffff ? 2 : 1;
@@ -47,7 +47,7 @@
     const suffixByteLength = utf8ByteLength(VALUE_TRUNCATION_SUFFIX);
     const prefixLimit = Math.max(0, maxBytes - suffixByteLength);
 
-    for (let index = 0; index < value.length;) {
+    for (let index = 0; index < value.length; ) {
       const codePoint = value.codePointAt(index) ?? 0;
       const nextIndex = index + (codePoint > 0xffff ? 2 : 1);
       byteLength += utf8CodePointByteLength(codePoint);

@@ -1,4 +1,5 @@
 import { EngineeringPolicySchema } from "./quality";
+import { evidenceBlockers, EvidenceItemSchema } from "./evidence";
 import { z } from "zod";
 export const deliveryStages = [
   "briefing",
@@ -75,6 +76,8 @@ export const DeliveryPlanSchema = z.object({
     accessibility: z.string().max(5000),
     responsive: z.string().max(5000),
   }),
+  /** Samba Delivery Standard — evidência estruturada por gate (ver evidence.ts). */
+  evidenceItems: z.array(EvidenceItemSchema).max(60).default([]),
   reviewCommit: z.string().max(64),
   reviewer: z.string().max(150),
   approvalNote: z.string().max(5000),
@@ -93,6 +96,7 @@ export const emptyDeliveryPlan = (): DeliveryPlan => ({
   stage: "briefing",
   tasks: [],
   checks: { flows: "", security: "", accessibility: "", responsive: "" },
+  evidenceItems: [],
   reviewCommit: "",
   reviewer: "",
   approvalNote: "",
@@ -115,6 +119,14 @@ export function deliveryBlockers(plan: DeliveryPlan): string[] {
     result.push("Registre as evidências das quatro verificações de qualidade.");
   if (!plan.reviewCommit)
     result.push("Vincule a revisão a uma versão salva no Git.");
+  // Samba Delivery Standard: quando a política de engenharia define o perfil de
+  // risco, os gates obrigatórios do perfil precisam de evidência estruturada
+  // com status "passed" — "parece pronto" nunca é critério de conclusão.
+  const profile = plan.engineeringPolicy?.profile;
+  if (profile) {
+    for (const blocker of evidenceBlockers(plan.evidenceItems, profile))
+      result.push(`Evidência (perfil ${profile}): ${blocker}`);
+  }
   return result;
 }
 export function deliveryAttention(

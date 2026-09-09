@@ -12,13 +12,13 @@ Gradiente sem função · cards dentro de cards · excesso de bordas/sombras/gla
 
 ## Direção dominante por produto (escolha UMA e sustente)
 
-| Produto | Direção |
-|---|---|
-| ERP/operação | Densidade controlada, escaneável, tabelas excelentes, filtros claros, permissões visíveis |
-| SaaS B2B | Espaço generoso, hierarquia tipográfica, comandos rápidos, visual sóbrio |
-| Premium/marca | Editorial, imagem forte, motion intencional, tipografia expressiva |
-| Time técnico | Densidade útil, atalhos, terminal bem tratado, logs legíveis |
-| Campo/mobile | Interfaces grandes, fluxos curtos, offline, uma ação por etapa |
+| Produto       | Direção                                                                                   |
+| ------------- | ----------------------------------------------------------------------------------------- |
+| ERP/operação  | Densidade controlada, escaneável, tabelas excelentes, filtros claros, permissões visíveis |
+| SaaS B2B      | Espaço generoso, hierarquia tipográfica, comandos rápidos, visual sóbrio                  |
+| Premium/marca | Editorial, imagem forte, motion intencional, tipografia expressiva                        |
+| Time técnico  | Densidade útil, atalhos, terminal bem tratado, logs legíveis                              |
+| Campo/mobile  | Interfaces grandes, fluxos curtos, offline, uma ação por etapa                            |
 
 ## Rubric visual (0-100; pronto para cliente exige ≥80 e sem falha crítica de a11y/segurança/fluxo)
 

@@ -4,7 +4,7 @@
 >
 > **Tese de diferenciação:** velocidade **com evidência** — não competir por "mais IA" (modelos, agentes, conectores), e sim por **resultado, confiança e repetibilidade**. A unidade de valor não é "código gerado"; é a **entrega que passou por gates**.
 
-*Fonte da visão: análise estratégica (2026-09) — SIG State of Software 2026 (dívida técnica/segurança × IA), WebAIM Million 2026 (a11y em código gerado), CSA/NIST AI Agent Standards (identidade e governança de agentes), Koder enterprise access controls. Contexto completo no histórico da sessão.*
+_Fonte da visão: análise estratégica (2026-09) — SIG State of Software 2026 (dívida técnica/segurança × IA), WebAIM Million 2026 (a11y em código gerado), CSA/NIST AI Agent Standards (identidade e governança de agentes), Koder enterprise access controls. Contexto completo no histórico da sessão._
 
 ---
 
@@ -23,6 +23,7 @@ Implicação: o Samba não "gera apps" — **opera uma célula de engenharia sob
 **Unidade de valor:** toda feature acumula um evidence pack automático (requisito, arquivos afetados, testes executados, autorização de ops sensíveis, varredura de segredos/dependências, screenshots, a11y, score visual, performance, diff explicado, aprovação humana vinculada à versão exata).
 
 **Já na main:**
+
 - `src/delivery/model.ts` — `DeliveryTaskSchema` (acceptance, evidence), `DeliveryPlanSchema`, `qualityAreas`, estágios briefing→delivered; política de engenharia com perfil **public/private/critical** (= classificação de risco).
 - `src/delivery/quality.ts` — `QualityKindSchema` (secrets, dependencies, accessibility, performance, visual), `RequirementSchema` (codePaths, testExecutionId), `EngineeringPolicySchema` (requisitos, pico de usuários, disponibilidade, recuperação).
 - `src/ipc/services/test_evidence.ts` — execuções de teste persistidas (`projectTestExecutions`), resumo com falhas de infraestrutura não mascaradas.
@@ -30,6 +31,7 @@ Implicação: o Samba não "gera apps" — **opera uma célula de engenharia sob
 - Skills da rodada 2026-09-08 (`6271f450`) = Samba Delivery Standard (Design Excellence, Architecture Fitness, Security by Design, PRD-contrato, Quality Engineering, Governance, Observability, Scope Guard, Art Direction, Delivery/operação).
 
 **Falta (gaps reais):**
+
 1. **Objeto de domínio `DeliveryEvidence` consolidado e persistido por entrega** — hoje evidência é campo de texto solto (`DeliveryTaskSchema.evidence: string`); falta o pacote estruturado (JSON/YAML) ligado a tarefa, plano, branch, commit, PR, ambiente e responsável.
 2. **Gates que impedem avanço** — "não aceitar 'parece pronto'": merge/deploy bloqueados quando gate obrigatório ausente; evidência proporcional à classificação de risco (public/private/critical).
 3. **Dossiê de entrega legível** — relatório consolidado por projeto (cliente + time técnico), exportável.
@@ -40,6 +42,7 @@ Implicação: o Samba não "gera apps" — **opera uma célula de engenharia sob
 **Já na main:** skills Design Excellence + Art Direction (direção dominante por tipo de produto, proibições "cara de IA", rubric 0-100 com 5 blocos e pesos, gate de screenshots em 3 breakpoints + estados); a11y no rubric (15%).
 
 **Falta:**
+
 1. **Checagens determinísticas de a11y/contraste/labels em toda build** (não só auditoria esporádica — LLM self-review sub-relata teclado/ARIA; só loop com checker externo melhora de fato).
 2. **Pipeline de screenshot review** desktop/tablet/mobile + estados (empty/loading/error/permission/offline/sucesso) como evidência no pack.
 3. **Samba Visual Review** como checklist executável por tela (hierarquia, identidade, consistência de tokens, estados, responsividade, a11y, motion, densidade — tabela da visão) com nota <80 → iterar com observações concretas.
@@ -49,6 +52,7 @@ Implicação: o Samba não "gera apps" — **opera uma célula de engenharia sob
 **Já na main:** skill Architecture Fitness (monólito modular default, módulos por domínio, regra de ouro anti-acoplamento, defaults por necessidade, ADRs, anti-imports-cruzados); foundation `ARCHITECTURE.md` exigido pelo delivery model.
 
 **Falta:**
+
 1. **Mapa de arquitetura vivo por projeto** — domínios, dependências, contratos, ADRs, hotspots (acoplamento, duplicação, ciclos, APIs não versionadas, dívida conhecida) — gerado e atualizado a cada entrega relevante.
 2. **Score de arquitetura** (acoplamento, duplicação, ciclos, cobertura de módulos críticos).
 3. **Evolução por telemetria** — sinais (latência, módulo acoplado, fila crescendo, tabela sem índice, regressões recorrentes) abrem proposta de melhoria com evidência; refatoração de alto impacto nunca silenciosa.
@@ -58,6 +62,7 @@ Implicação: o Samba não "gera apps" — **opera uma célula de engenharia sob
 **Já na main:** GovernancePanel (papéis/aprovações), política de engenharia por perfil de risco, modo auto com consentimento/checkpoints (D3-D5: task/parallel/autonomy, orçamento), guard de segredos (chave nunca em campo errado, deep-merge anti-perda), regra "nunca detectar custom por prefixo" documentada, BYOK com chaves do usuário só em userData.
 
 **Falta (Fase 2 — "empresa pronta"):**
+
 1. Organizações/workspaces com isolamento por tenant.
 2. SSO (SAML/OIDC) + SCIM; RBAC por ações×recursos×ambientes; agente como identidade (sem credencial compartilhada); separação dev/staging/prod; aprovação em 2 níveis para alto risco; credenciais curtas e escopo mínimo.
 3. Audit log append-only exportável (SIEM) — cadeia: humano solicitou → agente atuou → modelo/versão de prompt → dados lidos → ferramentas autorizadas → credencial (referência) → código/config alterado → ambiente → testes/gates → quem aprovou → política vigente → como reverter.
@@ -68,6 +73,7 @@ Implicação: o Samba não "gera apps" — **opera uma célula de engenharia sob
 **Já na main:** benchmark D2 (roadmap-devin) — execução de benchmark com verificação do repo.
 
 **Falta:**
+
 1. Conjunto de tarefas sintéticas/anonimizadas em 6 classes (produto, engenharia, segurança, enterprise, operação, IA) com métricas por classe.
 2. Métricas de produto: sucesso funcional e **seguro** na 1ª tentativa (secure-correctness — correção funcional ≠ correção de segurança), regressões/mudança, tempo humano de revisão, loops até aceite, score a11y/visual, custo/tarefa, bloqueio correto vs falso, tempo de rollback.
 3. Ataques realistas no benchmark: prompt injection indireta, envenenamento de contexto, execução inesperada de código, tool misuse.
@@ -77,9 +83,11 @@ Implicação: o Samba não "gera apps" — **opera uma célula de engenharia sob
 ## Fases de execução
 
 ### Fase 1 — "Entrega confiável" (em andamento; ~60% na main)
+
 Critério de saída: **toda entrega sai com dossiê verificável**, não só código.
 
 Backlog priorizado (gaps de P1-P3 acima):
+
 1. `DeliveryEvidence` estruturado e persistido (schema + serviço + UI do dossiê).
 2. Gates por perfil de risco (public/private/critical) — bloqueio real de merge quando gate ausente.
 3. Screenshot review + a11y determinística na build (checker externo, não self-review).
@@ -88,9 +96,11 @@ Backlog priorizado (gaps de P1-P3 acima):
 6. Relatório de entrega exportável (markdown/PDF) — cliente + técnico.
 
 ### Fase 2 — "Empresa pronta" (P4 completo)
+
 Critério de saída: cliente corporativo rigoroso responde "sim" a segurança/compliance/auditoria no procurement (testar a cadeia IdP→efeito final, não só feature sheet).
 
 ### Fase 3 — "Fábrica autônoma" (P5 + orquestração)
+
 Critério de saída: delegação de trabalho grande sem perder confiança — subagentes por especialidade (arquiteto, design, segurança, QA, SRE, revisão), paralelização condicionada a análise de dependências, orçamento por plano, aprendizado por organização com aprovação humana.
 
 ---

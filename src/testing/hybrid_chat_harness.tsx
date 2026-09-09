@@ -1103,13 +1103,15 @@ export async function setupHybridChatHarness(
 
     const setChatAttachments = (attachments: ChatAttachmentSeed[]) => {
       const store = getActiveStore();
-      const fileAttachments = attachments.map((attachment): FileAttachment => ({
-        file: new File([attachment.content], attachment.name, {
-          type: attachment.mimeType ?? "text/plain",
-          lastModified: attachment.lastModified,
+      const fileAttachments = attachments.map(
+        (attachment): FileAttachment => ({
+          file: new File([attachment.content], attachment.name, {
+            type: attachment.mimeType ?? "text/plain",
+            lastModified: attachment.lastModified,
+          }),
+          type: attachment.type ?? "chat-context",
         }),
-        type: attachment.type ?? "chat-context",
-      }));
+      );
       act(() => {
         store.set(attachmentsAtom, fileAttachments);
       });

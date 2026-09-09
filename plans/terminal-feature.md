@@ -268,24 +268,24 @@ PtySession>`. Each session wraps a `node-pty` process, an in-memory
 
 ### Components affected
 
-| File | Change |
+| File                                           | Change                                                                                                                                                                            |
 | ---------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------- |
-| `src/components/chat/ChatHeader.tsx` | Add `SquareTerminal` toggle button at line ~217, left of preview-toggle. Wire to `terminalOpenByChatIdAtom`. |
-| `src/components/ChatPanel.tsx` | Conditionally render lazy `TerminalPanel` instead of MessagesList+ChatInput. Wrap both branches in `AnimatePresence` for the drawer. |
-| `src/components/chat/TerminalPanel.tsx` | **New**. xterm.js + addons; subscribes to PTY stream; sends user input back; handles resize, theme, focus. Props: `appId`, `chatId`, `onExit`, `size: "full"                      | "split-bottom"`(only`"full"` used in v1). |
-| `src/components/chat/TerminalEscapeBanner.tsx` | **New**. Slim banner with click-to-exit + chord shortcut display. |
-| `src/atoms/terminalAtoms.ts` | **New**. `terminalOpenByChatIdAtom: PrimitiveAtom<Map<number, boolean>>`, `terminalFontSizeAtom: PrimitiveAtom<number>`. |
-| `src/hooks/useTerminalSession.ts` | **New**. Renderer hook to open/attach/detach a session for an `appId`; manages stream subscription with strict cleanup. |
-| `src/hooks/useReducedMotion.ts` | **New** (or use framer-motion's). Shared hook; document with a comment that future animations should use it. |
-| `src/ipc/utils/pty_session_manager.ts` | **New**. Singleton, owns `Map<appId, PtySession>`. Reuses `spawnPty` from `pty_command_runner.ts`. |
-| `src/ipc/handlers/terminal_handlers.ts` | **New**. Typed handlers: `terminal:open`, `terminal:close`, `terminal:kill`, `terminal:write`, `terminal:resize`, `terminal:serialize`. Registers streaming channels per session. |
-| `src/ipc/contracts/terminal_contracts.ts` | **New**. Zod schemas for the control-plane RPCs above. |
-| `src/ipc/ipc_host.ts` | Register `registerTerminalHandlers()`. |
-| `src/ipc/handlers/app_handlers.ts` | On app delete, call `PtySessionManager.killForApp(appId)`. |
-| `src/preload.ts` | Expose terminal namespace + stream channel subscription helpers. |
-| `src/i18n/locales/*.json` | New strings: toggle button, banner, empty states, errors. |
-| `package.json` | Add `@xterm/xterm`, `@xterm/addon-fit`, `@xterm/addon-search`, `@xterm/addon-web-links`, `@xterm/addon-unicode11`, `@xterm/addon-clipboard`, `@xterm/addon-serialize`. |
-| `forge.config.ts` | Verify no extra native build steps (xterm is renderer-only; node-pty already builds). |
+| `src/components/chat/ChatHeader.tsx`           | Add `SquareTerminal` toggle button at line ~217, left of preview-toggle. Wire to `terminalOpenByChatIdAtom`.                                                                      |
+| `src/components/ChatPanel.tsx`                 | Conditionally render lazy `TerminalPanel` instead of MessagesList+ChatInput. Wrap both branches in `AnimatePresence` for the drawer.                                              |
+| `src/components/chat/TerminalPanel.tsx`        | **New**. xterm.js + addons; subscribes to PTY stream; sends user input back; handles resize, theme, focus. Props: `appId`, `chatId`, `onExit`, `size: "full"                      | "split-bottom"`(only`"full"` used in v1). |
+| `src/components/chat/TerminalEscapeBanner.tsx` | **New**. Slim banner with click-to-exit + chord shortcut display.                                                                                                                 |
+| `src/atoms/terminalAtoms.ts`                   | **New**. `terminalOpenByChatIdAtom: PrimitiveAtom<Map<number, boolean>>`, `terminalFontSizeAtom: PrimitiveAtom<number>`.                                                          |
+| `src/hooks/useTerminalSession.ts`              | **New**. Renderer hook to open/attach/detach a session for an `appId`; manages stream subscription with strict cleanup.                                                           |
+| `src/hooks/useReducedMotion.ts`                | **New** (or use framer-motion's). Shared hook; document with a comment that future animations should use it.                                                                      |
+| `src/ipc/utils/pty_session_manager.ts`         | **New**. Singleton, owns `Map<appId, PtySession>`. Reuses `spawnPty` from `pty_command_runner.ts`.                                                                                |
+| `src/ipc/handlers/terminal_handlers.ts`        | **New**. Typed handlers: `terminal:open`, `terminal:close`, `terminal:kill`, `terminal:write`, `terminal:resize`, `terminal:serialize`. Registers streaming channels per session. |
+| `src/ipc/contracts/terminal_contracts.ts`      | **New**. Zod schemas for the control-plane RPCs above.                                                                                                                            |
+| `src/ipc/ipc_host.ts`                          | Register `registerTerminalHandlers()`.                                                                                                                                            |
+| `src/ipc/handlers/app_handlers.ts`             | On app delete, call `PtySessionManager.killForApp(appId)`.                                                                                                                        |
+| `src/preload.ts`                               | Expose terminal namespace + stream channel subscription helpers.                                                                                                                  |
+| `src/i18n/locales/*.json`                      | New strings: toggle button, banner, empty states, errors.                                                                                                                         |
+| `package.json`                                 | Add `@xterm/xterm`, `@xterm/addon-fit`, `@xterm/addon-search`, `@xterm/addon-web-links`, `@xterm/addon-unicode11`, `@xterm/addon-clipboard`, `@xterm/addon-serialize`.            |
+| `forge.config.ts`                              | Verify no extra native build steps (xterm is renderer-only; node-pty already builds).                                                                                             |
 
 ### Data model changes
 

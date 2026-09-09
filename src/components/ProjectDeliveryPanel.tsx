@@ -1,5 +1,6 @@
 import { EngineeringPanel } from "./EngineeringPanel";
 import { DeliveryTestEvidence } from "./DeliveryTestEvidence";
+import { EvidenceGates } from "./EvidenceGates";
 import { FoundationReview } from "./FoundationReview";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { ClipboardList, ListChecks, ShieldCheck, BookOpen } from "lucide-react";
@@ -583,6 +584,7 @@ function DeliveryEditor({
                 Este formulário não executa testes nem substitui a aprovação do
                 cliente.
               </p>
+              <EvidenceGates plan={plan} onChange={update} />
               <DeliveryTestEvidence
                 appId={appId}
                 reviewCommit={plan.reviewCommit}

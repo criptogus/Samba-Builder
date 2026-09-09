@@ -1458,32 +1458,31 @@ export function TestsPanel() {
             </DialogContent>
           </Dialog>
         )}
-        {testingEnabled &&
-          !isRunning && (
-            // The title sits on the wrapper, not the button: Chromium suppresses
-            // pointer events on a disabled control, so a title there never
-            // surfaces — leaving a greyed-out Record with no reason given, which
-            // is exactly when the reason matters most.
-            <span
-              title={recordButtonTitle}
-              data-testid="tests-record-button-hint"
+        {testingEnabled && !isRunning && (
+          // The title sits on the wrapper, not the button: Chromium suppresses
+          // pointer events on a disabled control, so a title there never
+          // surfaces — leaving a greyed-out Record with no reason given, which
+          // is exactly when the reason matters most.
+          <span
+            title={recordButtonTitle}
+            data-testid="tests-record-button-hint"
+          >
+            <button
+              onClick={startRecording}
+              disabled={!canStartRecording}
+              aria-label="Record a test in the preview"
+              data-testid="tests-record-button"
+              className={cn(
+                "flex items-center gap-1.5 text-sm px-3 py-1.5 rounded-md cursor-pointer transition-colors",
+                "text-purple-700 dark:text-purple-300 hover:bg-purple-100 dark:hover:bg-purple-900/40",
+                !canStartRecording && "opacity-40 cursor-not-allowed",
+              )}
             >
-              <button
-                onClick={startRecording}
-                disabled={!canStartRecording}
-                aria-label="Record a test in the preview"
-                data-testid="tests-record-button"
-                className={cn(
-                  "flex items-center gap-1.5 text-sm px-3 py-1.5 rounded-md cursor-pointer transition-colors",
-                  "text-purple-700 dark:text-purple-300 hover:bg-purple-100 dark:hover:bg-purple-900/40",
-                  !canStartRecording && "opacity-40 cursor-not-allowed",
-                )}
-              >
-                <CircleDot size={14} />
-                Record
-              </button>
-            </span>
-          )}
+              <CircleDot size={14} />
+              Record
+            </button>
+          </span>
+        )}
         {isRunning ? (
           // During `cleaning-up` the tests are already gone and only the
           // isolation teardown remains, so there is nothing left to stop. The

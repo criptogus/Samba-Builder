@@ -21,12 +21,10 @@ type SafeRemoteSession = Omit<
 type SafeRemoteFallback =
   | Extract<BranchSwitchFallback, { type: "closed" }>
   | {
-      [
-        Kind in Exclude<
-          BranchSwitchFallback["type"],
-          "closed" | "recovery-required"
-        >
-      ]: {
+      [Kind in Exclude<
+        BranchSwitchFallback["type"],
+        "closed" | "recovery-required"
+      >]: {
         readonly type: Kind;
         readonly session: SafeRemoteSession;
       };
@@ -40,18 +38,16 @@ type SafeRemoteFallback =
 type SafeRemotePreviewState =
   | { readonly type: "closed" }
   | {
-      [
-        Kind in Exclude<
-          PreviewState["type"],
-          | "closed"
-          | "restoring"
-          | "switching-branch"
-          | "recovery-required"
-          | "restore-recovery-required"
-          | "validating-current-repository"
-          | "checkpointing-current-repository"
-        >
-      ]: {
+      [Kind in Exclude<
+        PreviewState["type"],
+        | "closed"
+        | "restoring"
+        | "switching-branch"
+        | "recovery-required"
+        | "restore-recovery-required"
+        | "validating-current-repository"
+        | "checkpointing-current-repository"
+      >]: {
         readonly type: Kind;
         readonly session: SafeRemoteSession;
       };
