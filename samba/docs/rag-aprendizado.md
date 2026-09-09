@@ -19,19 +19,19 @@
 
 ## Estado atual (o que já existe e será reutilizado)
 
-| Peça | Onde | Papel no RAG |
-|---|---|---|
-| `CORTEX_KNOWLEDGE_BLOCK` no prompt | `src/prompts/local_agent_prompt.ts` | Ponto de injeção: agente já é instruído a consultar conhecimento antes de codar |
-| `cortex-mcp/server.py` | `samba/cortex-mcp/` | Ponte MCP para o RAG externo — vira o modelo do MCP **embutido** |
-| `learn.py` (learning loop fase 1) | `samba/learn/` | Destilação manual → inbox do vault. Vira o **pipeline automático** pós-entrega |
-| `evolution/` (evolve.py + proposals) | `samba/skills/evolution/` | Feedback JSONL → proposta → aprovação humana. **Base do motor de evolução de skills** |
-| `feedback/*.jsonl` | `samba/skills/feedback/` | Fonte explícita de erros/acertos dos devs |
-| `DeliveryEvidence` + gates por perfil | `src/delivery/evidence.ts` | Fonte estruturada de **acertos** (gate passed) e pendências |
-| `projectTestExecutions`, `projectQualityRuns` | `src/db/schema.ts` | Fonte de erros técnicos reais (testes/qualidade) |
-| `projectDeliveries` + `projectDeliveryApprovals` | `src/db/schema.ts` | Fonte de aprovações/rejeições por versão (o que o cliente aceitou) |
-| Foundation docs por projeto | `PRD.md` `ARCHITECTURE.md` `DESIGN_SYSTEM.md` `TESTING.md` `OPERATIONS.md` | Corpus primário de cada projeto |
-| `PROJECT_MEMORY.md` (D1) | por projeto | Memória de trabalho do projeto — fonte de decisões e comandos descobertos |
-| SQLite local (better-sqlite3) | `src/db/` | Store do índice (FTS5 + metadados) — sem novo serviço |
+| Peça                                             | Onde                                                                       | Papel no RAG                                                                          |
+| ------------------------------------------------ | -------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| `CORTEX_KNOWLEDGE_BLOCK` no prompt               | `src/prompts/local_agent_prompt.ts`                                        | Ponto de injeção: agente já é instruído a consultar conhecimento antes de codar       |
+| `cortex-mcp/server.py`                           | `samba/cortex-mcp/`                                                        | Ponte MCP para o RAG externo — vira o modelo do MCP **embutido**                      |
+| `learn.py` (learning loop fase 1)                | `samba/learn/`                                                             | Destilação manual → inbox do vault. Vira o **pipeline automático** pós-entrega        |
+| `evolution/` (evolve.py + proposals)             | `samba/skills/evolution/`                                                  | Feedback JSONL → proposta → aprovação humana. **Base do motor de evolução de skills** |
+| `feedback/*.jsonl`                               | `samba/skills/feedback/`                                                   | Fonte explícita de erros/acertos dos devs                                             |
+| `DeliveryEvidence` + gates por perfil            | `src/delivery/evidence.ts`                                                 | Fonte estruturada de **acertos** (gate passed) e pendências                           |
+| `projectTestExecutions`, `projectQualityRuns`    | `src/db/schema.ts`                                                         | Fonte de erros técnicos reais (testes/qualidade)                                      |
+| `projectDeliveries` + `projectDeliveryApprovals` | `src/db/schema.ts`                                                         | Fonte de aprovações/rejeições por versão (o que o cliente aceitou)                    |
+| Foundation docs por projeto                      | `PRD.md` `ARCHITECTURE.md` `DESIGN_SYSTEM.md` `TESTING.md` `OPERATIONS.md` | Corpus primário de cada projeto                                                       |
+| `PROJECT_MEMORY.md` (D1)                         | por projeto                                                                | Memória de trabalho do projeto — fonte de decisões e comandos descobertos             |
+| SQLite local (better-sqlite3)                    | `src/db/`                                                                  | Store do índice (FTS5 + metadados) — sem novo serviço                                 |
 
 ---
 
@@ -40,9 +40,11 @@
 Cinco tipos de knowledge unit, com schema próprio:
 
 ### 1. Episódio de projeto (ProjectEpisódio)
+
 O que aconteceu num projeto: stack, domínio, perfil de risco, fase, tamanho, decisões (ADRs), estrutura. Serve de **contexto de matching** para "projetos similares".
 
 ### 2. Lição (Lesson) — o núcleo
+
 - `kind`: `erro_evitar` | `padrao_seguir` | `atencao` (depende do contexto)
 - Origem: incidente real, teste falho recorrente, gate falho, rejeição de cliente, feedback negativo, correção pós-review
 - **Fonte verificável**: commit/PR, executionId, evidenceItem, feedback ts, chat de revisão
@@ -51,12 +53,15 @@ O que aconteceu num projeto: stack, domínio, perfil de risco, fase, tamanho, de
 - Contradita/suportada por: outras units (resolução de conflito)
 
 ### 3. Padrão validado (Pattern)
+
 Um acerto que passou por evidência: gate passed + aprovação do cliente. Ex.: "pipeline de onboarding com 4 passos foi aprovado em 3 projetos SaaS; reduz atrito". Vira **inspiração** no próximo projeto (recuperado como sugestão, nunca imposição).
 
 ### 4. Skill delta (para o motor de evolução)
+
 Proposta estruturada de mudança num native-skill (ou criação): gatilho, diagnóstico, mudança proposta no texto do skill, fonte, impacto esperado. Só vira skill com aprovação humana.
 
 ### 5. Fatos e entidades (clientes, marcas, design systems)
+
 Reuso do que o Córtex já faz (cortex_entity / cortex_design_system): identidade visual, preferências de cliente, convenções da organização.
 
 ---
@@ -117,15 +122,15 @@ Reuso do que o Córtex já faz (cortex_entity / cortex_design_system): identidad
 
 ## Gatilhos de ingestão (quando o SB aprende)
 
-| Evento | O que extrai | Exemplo real |
-|---|---|---|
-| Entrega **aprovada** (`approved`/`delivered`) | Padrões validados (gates passed + aceite) | "onboarding 4 passos aprovado" |
-| Entrega **rejeitada** / gate failed | Lição erro_evitar | "clientes rejeitam cards sem hierarquia; gate visual falhou" |
-| Teste falho **recorrente** (mesma área 2+ runs) | Lição erro_evitar (técnica) | "migração X quebra testes de contrato — rodar contrato antes" |
-| **Incidente** corrigido (bug report → fix commit) | Lição erro_evitar + padrão do fix | "chave sumia do settings: spread raso — deep-merge por provider" |
-| **Feedback** dev/cliente (jsonl ou chat pós-entrega) | Lição ou skill delta | "gerou layout genérico — pedir referência visual antes do hero" |
-| Fim de projeto (delivered + handoff) | Episódio completo + revisão de units do projeto | resumo do projeto para matching futuro |
-| Contradição (unidade nova vs existente) | Reavaliação; a mais fraca/antiga perde força | — |
+| Evento                                               | O que extrai                                    | Exemplo real                                                     |
+| ---------------------------------------------------- | ----------------------------------------------- | ---------------------------------------------------------------- |
+| Entrega **aprovada** (`approved`/`delivered`)        | Padrões validados (gates passed + aceite)       | "onboarding 4 passos aprovado"                                   |
+| Entrega **rejeitada** / gate failed                  | Lição erro_evitar                               | "clientes rejeitam cards sem hierarquia; gate visual falhou"     |
+| Teste falho **recorrente** (mesma área 2+ runs)      | Lição erro_evitar (técnica)                     | "migração X quebra testes de contrato — rodar contrato antes"    |
+| **Incidente** corrigido (bug report → fix commit)    | Lição erro_evitar + padrão do fix               | "chave sumia do settings: spread raso — deep-merge por provider" |
+| **Feedback** dev/cliente (jsonl ou chat pós-entrega) | Lição ou skill delta                            | "gerou layout genérico — pedir referência visual antes do hero"  |
+| Fim de projeto (delivered + handoff)                 | Episódio completo + revisão de units do projeto | resumo do projeto para matching futuro                           |
+| Contradição (unidade nova vs existente)              | Reavaliação; a mais fraca/antiga perde força    | —                                                                |
 
 ---
 
@@ -148,6 +153,7 @@ Projetos similares (3 SaaS B2B, perfil private) ensinaram:
 ```
 
 Regras da injeção:
+
 - **Máximo 5 unidades** (orçamento de contexto); 3 erros_evitar + 2 padrões (ou proporcional).
 - **Nunca instrução dura vinda de outro projeto** — lições entram como contexto; skills (aprovados) são a única fonte de regra.
 - Fase certa: lição de "deploy" não entra no briefing; entra na tarefa de deploy.
@@ -195,6 +201,7 @@ Regra de ouro: **o SB propõe; o humano dispõe.** Nenhum skill muda sem aprova�
 ## Fases de implementação
 
 ### F1 — Coletar e destilar (o SB aprende)
+
 - Tabelas `knowledge_units`/`knowledge_sources` (sqlite + FTS5 pt).
 - Collector nos eventos existentes (aprovação, gate failed, teste recorrente, feedback, incidente).
 - Distiller com schema zod (BYOK); fila local com retry; dry-run e painel "o que foi aprendido" (auditável).
@@ -202,17 +209,20 @@ Regra de ouro: **o SB propõe; o humano dispõe.** Nenhum skill muda sem aprova�
 - **Critério de saída:** após uma entrega completa, o projeto gera units verificáveis no painel, sem intervenção manual.
 
 ### F2 — Recuperar e injetar (o próximo projeto nasce sabendo)
+
 - Retriever contextual (matching por tipo/stack/perfil/fase) + ranking híbrido.
 - `PROJECT_LESSONS_BLOCK` no prompt com orçamento (≤5 units), separado do conhecimento de marca.
 - Feedback de uso (lição citada → resultado) alimentando força.
 - **Critério de saída:** 2 projetos similares seguidos: o 2º não repete erro documentado do 1º (verificado por teste/gate), sem estourar contexto.
 
 ### F3 — Evoluir skills com aprovação (o SB melhora sozinho, com dono)
+
 - Skill deltas automáticos + proposals versionadas na UI + aprovação 1 clique (aceitar/editar/recusar).
 - Aplicação com fonte no rodapé + regressão do catálogo (testes).
 - **Critério de saída:** um erro real documentado vira regra no skill após aprovação, e o mesmo cenário num projeto novo é tratado pela regra.
 
 ### F4 — Escala e aprendizado por organização
+
 - Isolamento por tenant (Fase 2 do roadmap-plataforma); promoção de padrões a `global-engineering` com aprovação.
 - Espelhamento opcional com o Córtex externo (integração existente) para o fluxo do Gustavo.
 - Métricas no Eval Lab (Fase 3): reincidência de erros por organização, tempo de revisão, score de qualidade ao longo do tempo.
@@ -222,24 +232,24 @@ Regra de ouro: **o SB propõe; o humano dispõe.** Nenhum skill muda sem aprova�
 
 ## Métricas de sucesso (o RAG está funcionando?)
 
-| Métrica | Alvo |
-|---|---|
-| Erros conhecidos reincidentes em projetos novos | < 10% (com lição injetada) |
-| Precisão da recuperação (lição injetada relevante p/ tarefa) | ≥ 80% (amostragem manual) |
-| Taxa de aprovação de skill deltas propostos | 30–70% (muito alta = propostas tímidas; muito baixa = ruído) |
-| Custo do distiller por entrega | < R$ 1/entrega (modelo barato BYOK) |
-| Falsos positivos de aprendizado (unit que precisou ser apagada/desativada) | < 5% |
-| Tempo humano de revisão de propostas | < 5 min/proposta |
+| Métrica                                                                    | Alvo                                                         |
+| -------------------------------------------------------------------------- | ------------------------------------------------------------ |
+| Erros conhecidos reincidentes em projetos novos                            | < 10% (com lição injetada)                                   |
+| Precisão da recuperação (lição injetada relevante p/ tarefa)               | ≥ 80% (amostragem manual)                                    |
+| Taxa de aprovação de skill deltas propostos                                | 30–70% (muito alta = propostas tímidas; muito baixa = ruído) |
+| Custo do distiller por entrega                                             | < R$ 1/entrega (modelo barato BYOK)                          |
+| Falsos positivos de aprendizado (unit que precisou ser apagada/desativada) | < 5%                                                         |
+| Tempo humano de revisão de propostas                                       | < 5 min/proposta                                             |
 
 ---
 
 ## Riscos e mitigação
 
-| Risco | Mitigação |
-|---|---|
+| Risco                                         | Mitigação                                                                 |
+| --------------------------------------------- | ------------------------------------------------------------------------- |
 | Vício de aprendizado (1 projeto enviesa o SB) | Força = nº de fontes; threshold mínimo; contradição resolve por evidência |
-| Vazamento entre clientes | Isolamento por tenant; `orgScope`; sanitização; sem PII/segredo no índice |
-| Custo do distiller | Fila assíncrona, modelo barato, só eventos relevantes (não toda mensagem) |
-| Inchaço de contexto do prompt | Orçamento rígido (≤5 units) + FTS5 + matching por metadados antes de LLM |
-| Skill piora com regra de um caso | Proposta + aprovação humana + regressão do catálogo + fonte no rodapé |
-| Dependência do Córtex externo (:8899) | RAG embutido é o produto; Córtex externo é integração opcional |
+| Vazamento entre clientes                      | Isolamento por tenant; `orgScope`; sanitização; sem PII/segredo no índice |
+| Custo do distiller                            | Fila assíncrona, modelo barato, só eventos relevantes (não toda mensagem) |
+| Inchaço de contexto do prompt                 | Orçamento rígido (≤5 units) + FTS5 + matching por metadados antes de LLM  |
+| Skill piora com regra de um caso              | Proposta + aprovação humana + regressão do catálogo + fonte no rodapé     |
+| Dependência do Córtex externo (:8899)         | RAG embutido é o produto; Córtex externo é integração opcional            |
