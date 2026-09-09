@@ -20,7 +20,7 @@ export const SKILL_ROUTES: Record<FactoryMode, string[]> = {
 export function getSkills(mode: FactoryMode) {
   return SKILL_ROUTES[mode].map((id) => ({
     id,
-    version: "1.0.0",
+    version: "2.0.0",
     content: bundled[`../../../skills/${id}/SKILL.md`] ?? "",
   }));
 }

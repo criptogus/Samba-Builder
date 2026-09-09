@@ -217,7 +217,7 @@ function sanitizeNode(
           break;
         }
         const propertyOverhead =
-          separatorBytes + keyResult.jsonBytes + 1 /* colon */;
+          separatorBytes + keyResult.jsonBytes + 1; /* colon */
         const remaining = maxJsonBytes - bytes - propertyOverhead;
         if (remaining < 4) {
           state.omittedItems += 1;

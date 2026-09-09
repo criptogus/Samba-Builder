@@ -374,12 +374,8 @@ const spec = defineMachineSpec({
   }),
 
   effects: defineEffects({
-    StartRuntime: correlatedEffect({
-      /* ... */
-    }),
-    PublishStatus: fireAndForgetEffect({
-      /* ... */
-    }),
+    StartRuntime: correlatedEffect({/* ... */}),
+    PublishStatus: fireAndForgetEffect({/* ... */}),
   }),
 
   outcomes: defineOutcomes({

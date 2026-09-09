@@ -113,12 +113,7 @@ interface ObservedCandidate {
   path: string;
   range: { start: number; end: number } | null;
   source:
-    | "compiler"
-    | "grep"
-    | "read_file"
-    | "list_files"
-    | "framework"
-    | "index";
+    "compiler" | "grep" | "read_file" | "list_files" | "framework" | "index";
   symbols: Array<{ name: string; kind: string; line: number }>;
   evidence: {
     summary: string;

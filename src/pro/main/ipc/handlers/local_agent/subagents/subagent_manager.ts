@@ -351,18 +351,16 @@ export async function getSubagentMessages(chatId: number, threadId: string) {
     where: eq(agentMessages.threadId, threadId),
     orderBy: [asc(agentMessages.sequence)],
   });
-  return rows.map(
-    (row): SubagentMessage => ({
-      id: row.id,
-      threadId: row.threadId,
-      sequence: row.sequence,
-      messageId: row.messageId,
-      role: row.role,
-      content: row.content,
-      consumed: row.consumed,
-      createdAt: row.createdAt,
-    }),
-  );
+  return rows.map((row): SubagentMessage => ({
+    id: row.id,
+    threadId: row.threadId,
+    sequence: row.sequence,
+    messageId: row.messageId,
+    role: row.role,
+    content: row.content,
+    consumed: row.consumed,
+    createdAt: row.createdAt,
+  }));
 }
 
 export async function getSubagentActivities(
@@ -1876,12 +1874,10 @@ export function prepareSubagentStepMessages(
 ): ModelMessage[] {
   return sanitizeStepMessages([
     ...stepMessages,
-    ...rootMessages.map(
-      (message): ModelMessage => ({
-        role: "user",
-        content: `Root message: ${message}`,
-      }),
-    ),
+    ...rootMessages.map((message): ModelMessage => ({
+      role: "user",
+      content: `Root message: ${message}`,
+    })),
   ]).messages;
 }
 
@@ -1999,15 +1995,13 @@ export function buildBoundedModelHistory(params: {
     history.push({ role: "user", content: params.originalAssignment });
   }
   history.push(
-    ...bounded.map(
-      (message): ModelMessage => ({
-        role: message.role === "assistant" ? "assistant" : "user",
-        content:
-          message.role === "system"
-            ? `System note: ${message.content}`
-            : message.content,
-      }),
-    ),
+    ...bounded.map((message): ModelMessage => ({
+      role: message.role === "assistant" ? "assistant" : "user",
+      content:
+        message.role === "system"
+          ? `System note: ${message.content}`
+          : message.content,
+    })),
   );
   history.push({ role: "user", content: params.currentAssignment });
   return history;

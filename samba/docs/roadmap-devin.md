@@ -11,6 +11,7 @@
 ## A tese
 
 O Devin entrega 4 capacidades sobre um **codebase existente**:
+
 1. **Operar** — entender um repo grande e editar com segurança (navegar, refatorar, migrar);
 2. **Aprender** — especializar-se no padrão do domínio (fine-tuning; no caso Nubank: 2x conclusão, 4x velocidade);
 3. **Escalar** — executar tarefas de engenharia de verdade por horas, em lotes, com verificação;
@@ -29,7 +30,7 @@ especializamos por cliente — que é exatamente onde a Samba entrega valor.
 
 ## A ordem (rígida)
 
-*opera → aprende → escala → paraleliza → autonomia → piloto*
+_opera → aprende → escala → paraleliza → autonomia → piloto_
 
 Cada fase só começa quando a anterior produz a sua métrica — a ordem é a
 proteção contra o erro em escala: não paralelizamos o que ainda não aprendemos,
@@ -39,11 +40,12 @@ não damos autonomia ao que ainda não verificamos.
 
 ## D1 — Operar o que existe (o coração do "nível Devin")
 
-**Outcome:** *Enable a Samba e seus clientes a delegar trabalho de engenharia
+**Outcome:** _Enable a Samba e seus clientes a delegar trabalho de engenharia
 sobre repositórios existentes — não só apps novos — para que projetos legados
-(migrações, refactors, bugs) saiam do gargalo de engenheiro-hora.*
+(migrações, refactors, bugs) saiam do gargalo de engenheiro-hora._
 
 **O que muda hoje:** o agente só constrói a partir do scaffold. Passa a:
+
 - **Importar** um repo real (git clone via GitHub nativo/URL) como alvo de trabalho;
 - **Mapear** o repo antes de tocar: arquitetura, padrões, pontos de risco — o Córtex indexa o repo (units de estrutura por projeto);
 - **Executar tarefas de engenharia** (bug fix, refactor dirigido, migração de padrão) usando o que já existe: explorer/implementer, typecheck/testes como guarda antes de cada mudança;
@@ -60,11 +62,12 @@ aprovado sem edição manual do engenheiro (baseline 0 → alvo 50%+ no piloto).
 
 ## D2 — Aprender o domínio (o "fine-tuning pobre")
 
-**Outcome:** *Enable o agente a ficar visivelmente melhor a cada tarefa dentro
+**Outcome:** _Enable o agente a ficar visivelmente melhor a cada tarefa dentro
 de um cliente — medido por benchmark — para que a especialização (o que o Devin
-faz com pesos) seja alcançada com curadoria + RAG, sem depender do modelo.*
+faz com pesos) seja alcançada com curadoria + RAG, sem depender do modelo._
 
 **O que construir:**
+
 - **Benchmark por cliente**: um eval set do domínio (exemplos bons e ruins de
   tarefas daquele cliente — como o eval set da Nubank), rodado a cada ciclo;
 - **Padrões no Córtex**: as lições de cada tarefa concluída (o que funcionou, o
@@ -84,11 +87,12 @@ ciclo do benchmark (o efeito Nubank: 2x conclusão, 4x velocidade).
 
 ## D3 — Escalar tarefas (o "job" do engenheiro)
 
-**Outcome:** *Enable o time do cliente a delegar migrações e refactors inteiros
+**Outcome:** _Enable o time do cliente a delegar migrações e refactors inteiros
 — não só tarefas únicas — para que semanas virem dias sem multiplicar
-engenheiros.*
+engenheiros._
 
 **O que construir:**
+
 - **Modo tarefa**: o usuário descreve o padrão (ex.: "migrar data classes de X
   para Y, respeitando imports e edge cases" — o caso Nubank);
 - O agente **planeja as subtarefas** (a lista com dependências e critérios de
@@ -106,11 +110,12 @@ caso: 8–12x); % de lotes aprovados sem correção manual.
 
 ## D4 — Paralelizar (o "exército de Devins")
 
-**Outcome:** *Enable a Samba a executar N frentes independentes de uma migração
+**Outcome:** _Enable a Samba a executar N frentes independentes de uma migração
 ao mesmo tempo — com um coordenador e um humano aprovando — para que o tempo de
-entrega caia ~1/N com qualidade estável.*
+entrega caia ~1/N com qualidade estável._
 
 **O que construir:**
+
 - **Orquestrador de workers**: o coordenador divide o plano (D3) em frentes
   independentes, cada worker roda num **worktree/workspace isolado** (a regra do
   git multi-agente: nunca dois agentes no mesmo working tree);
@@ -132,10 +137,11 @@ frentes < 5%; qualidade (score) estável vs. execução sequencial.
 
 ## D5 — Autonomia longa com supervisão
 
-**Outcome:** *Enable o usuário a delegar e voltar — com o trabalho visível,
-orçado e retomável — para que a supervisão seja gestão, não operação.*
+**Outcome:** _Enable o usuário a delegar e voltar — com o trabalho visível,
+orçado e retomável — para que a supervisão seja gestão, não operação._
 
 **O que construir:**
+
 - **Sessões longas com checkpoints**: o agente trabalha por horas com estado
   persistente (plano, progresso, decisões — o PROJECT_MEMORY evolui para o
   "diário de execução");
@@ -155,10 +161,10 @@ decisão por lote, não por arquivo); % de sessões que terminam sem retrabalho.
 
 ## D6 — O engenheiro da Samba (piloto e posicionamento)
 
-**Outcome:** *Enable a Samba a vender "engenharia de código com IA" — não só
+**Outcome:** _Enable a Samba a vender "engenharia de código com IA" — não só
 "app builder" — provando o fluxo completo num cliente real, para que o produto
 suba de posição (de ferramenta de criação para agente de engenharia do
-cliente).*
+cliente)._
 
 **O que é:** o piloto real atravessa D1–D5 com UM cliente: um repo existente,
 uma migração/refactor real, o Córtex do domínio do cliente, a entrega governada.
@@ -172,14 +178,14 @@ case documentado para vendas.
 
 ## Métricas consolidadas (o placar do "nível Devin")
 
-| Pilar | Métrica | Referência (Devin/Nubank) |
-|---|---|---|
-| D1 Operar | % tarefas concluídas com testes verdes + diff aprovado sem edição manual | 50%+ no piloto |
-| D2 Aprender | taxa de 1ª tentativa sobe por ciclo do benchmark por cliente | 2x conclusão / 4x velocidade |
-| D3 Escalar | volume de mudanças por hora de engenheiro | 8–12x / 20x custo |
-| D4 Paralelizar | tempo de migração ~1/N com qualidade estável | "army of Devins" |
-| D5 Autonomia | horas autônomas por intervenção humana | gestão, não operação |
-| D6 Piloto | case real com métricas registradas | o case vira o produto de venda |
+| Pilar          | Métrica                                                                  | Referência (Devin/Nubank)      |
+| -------------- | ------------------------------------------------------------------------ | ------------------------------ |
+| D1 Operar      | % tarefas concluídas com testes verdes + diff aprovado sem edição manual | 50%+ no piloto                 |
+| D2 Aprender    | taxa de 1ª tentativa sobe por ciclo do benchmark por cliente             | 2x conclusão / 4x velocidade   |
+| D3 Escalar     | volume de mudanças por hora de engenheiro                                | 8–12x / 20x custo              |
+| D4 Paralelizar | tempo de migração ~1/N com qualidade estável                             | "army of Devins"               |
+| D5 Autonomia   | horas autônomas por intervenção humana                                   | gestão, não operação           |
+| D6 Piloto      | case real com métricas registradas                                       | o case vira o produto de venda |
 
 ## Princípios (herdados do roadmap-hermes — inegociáveis)
 
@@ -207,6 +213,6 @@ case documentado para vendas.
 - **Ordem tentadora**: o paralelo (D4) parece o atalho — é o mais caro de
   reverter se entrar antes do D2.
 
-*Estado: D0 (fundação) concluída — agente local, verificação, subagentes,
+_Estado: D0 (fundação) concluída — agente local, verificação, subagentes,
 Córtex, memória, score, governança, autopilot. Próximo passo executável: D1
-(importar repo real como alvo do agente) + D2 (benchmark por cliente).*
+(importar repo real como alvo do agente) + D2 (benchmark por cliente)._

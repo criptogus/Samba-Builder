@@ -33,9 +33,7 @@ only.
     {
       "key": "other",
       "name": "<name>",
-      "chats": [
-        /* same chat shape */
-      ],
+      "chats": [/* same chat shape */],
     },
   ],
   "chats": [

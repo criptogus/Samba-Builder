@@ -1,4 +1,4 @@
-# Samba Skills OS — v1
+# Samba Skills OS — v2
 
 Os oito skills P0 são embutidos no aplicativo por Vite e roteados por `packages/samba-factory/src/skills.ts`. Pacotes são Apache-2.0 e independentes de src/pro. Cada mudança de comportamento exige versão e eval.
 

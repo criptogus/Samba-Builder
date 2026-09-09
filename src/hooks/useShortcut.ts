@@ -8,8 +8,10 @@ export function useShortcut(
   iframeRef?: React.RefObject<HTMLIFrameElement | null>,
 ): void {
   useEffect(() => {
-    const isModifierActive = (modKey: boolean | undefined, eventKey: boolean) =>
-      modKey ? eventKey : true;
+    const isModifierActive = (
+      modKey: boolean | undefined,
+      eventKey: boolean,
+    ) => (modKey ? eventKey : true);
 
     const validateShortcut = (
       eventKey: string,

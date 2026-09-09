@@ -203,55 +203,59 @@ const canRun = hasSambaProKey() && fixtures.length > 0 && optedIn;
 
   for (const job of jobs) {
     const name = `${job.fixture.name} · ${job.model} · rep${job.rep}`;
-    it.concurrent(name, async () => {
-      const base: RunRecord = {
-        fixture: job.fixture.name,
-        model: job.model,
-        rep: job.rep,
-      };
-      try {
-        await gate(async () => {
-          const model = getEvalModel("openai", job.model);
-          const run = await runCompaction({ model, fixture: job.fixture });
-          const structural = structuralChecks(
-            run.summary,
-            fixtureTranscript(job.fixture),
-          );
-          const judgeModel = getEvalModel("openai", GPT_5_4);
-          const factGrid = await judgeFactGrid({
-            judgeModel,
-            fixture: job.fixture,
-            summary: run.summary,
+    it.concurrent(
+      name,
+      async () => {
+        const base: RunRecord = {
+          fixture: job.fixture.name,
+          model: job.model,
+          rep: job.rep,
+        };
+        try {
+          await gate(async () => {
+            const model = getEvalModel("openai", job.model);
+            const run = await runCompaction({ model, fixture: job.fixture });
+            const structural = structuralChecks(
+              run.summary,
+              fixtureTranscript(job.fixture),
+            );
+            const judgeModel = getEvalModel("openai", GPT_5_4);
+            const factGrid = await judgeFactGrid({
+              judgeModel,
+              fixture: job.fixture,
+              summary: run.summary,
+            });
+            const probes = await runProbes({
+              probeModel: judgeModel,
+              judgeModel,
+              fixture: job.fixture,
+              summary: run.summary,
+            });
+            recordRun({
+              ...base,
+              scores: computeScores(job.fixture, factGrid, probes),
+              structural,
+              factGrid,
+              probes,
+              input_tokens: run.inputTokens,
+              output_tokens: run.outputTokens,
+              wall_ms: run.wallMs,
+              summary: run.summary,
+            });
           });
-          const probes = await runProbes({
-            probeModel: judgeModel,
-            judgeModel,
-            fixture: job.fixture,
-            summary: run.summary,
-          });
+        } catch (error) {
           recordRun({
             ...base,
-            scores: computeScores(job.fixture, factGrid, probes),
-            structural,
-            factGrid,
-            probes,
-            input_tokens: run.inputTokens,
-            output_tokens: run.outputTokens,
-            wall_ms: run.wallMs,
-            summary: run.summary,
+            error:
+              error instanceof Error
+                ? `${error.message}\n${error.stack}`
+                : String(error),
           });
-        });
-      } catch (error) {
-        recordRun({
-          ...base,
-          error:
-            error instanceof Error
-              ? `${error.message}\n${error.stack}`
-              : String(error),
-        });
-      }
-      expect(true).toBe(true);
-    }, 1_200_000);
+        }
+        expect(true).toBe(true);
+      },
+      1_200_000,
+    );
   }
 });
 

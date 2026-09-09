@@ -2387,7 +2387,7 @@ async function listAgentDiffEntries({
   const fields = rawFields.filter(Boolean);
   const entries: DiffEntry[] = [];
   let incomplete = false;
-  for (let index = 0; index < fields.length; ) {
+  for (let index = 0; index < fields.length;) {
     const status = fields[index++];
     const pathCount = status.startsWith("R") || status.startsWith("C") ? 2 : 1;
     if (fields.length - index < pathCount) {
