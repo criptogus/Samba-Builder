@@ -10,6 +10,7 @@ import {
 } from "react";
 import { Virtuoso } from "react-virtuoso";
 import ChatMessage from "./ChatMessage";
+import { RepoAuditActions } from "../RepoAuditActions";
 import { OpenRouterSetupBanner, SetupBanner } from "../SetupBanner";
 
 import { useStreamChat } from "@/hooks/useStreamChat";
@@ -730,9 +731,23 @@ export const MessagesList = forwardRef<HTMLDivElement, MessagesListProps>(
           data-testid="messages-list"
         >
           <div className="flex flex-col items-center justify-center h-full max-w-2xl mx-auto">
-            <div className="flex flex-1 items-center justify-center text-gray-500">
-              No messages yet
-            </div>
+            {appId !== null && selectedChatId !== null ? (
+              <div className="flex flex-1 flex-col items-center justify-center gap-4 text-center">
+                <p className="text-sm font-medium text-foreground">
+                  Projeto importado — comece com uma auditoria ou faça sua
+                  primeira pergunta
+                </p>
+                <RepoAuditActions chatId={selectedChatId} appId={appId} />
+                <p className="text-xs text-muted-foreground">
+                  As auditorias usam os skills do Samba Builder (arquitetura,
+                  segurança, UX/UI…) para analisar o repositório.
+                </p>
+              </div>
+            ) : (
+              <div className="flex flex-1 items-center justify-center text-muted-foreground">
+                Sem mensagens ainda
+              </div>
+            )}
           </div>
         </div>
       );
