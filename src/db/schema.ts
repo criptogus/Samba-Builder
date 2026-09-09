@@ -943,3 +943,38 @@ export const projectQualityRuns = sqliteTable(
     index("project_quality_app_time").on(table.appId, table.createdAt),
   ],
 );
+
+/**
+ * RAG de aprendizado contínuo — knowledge units destiladas dos projetos.
+ * Cada unit é uma lição/padrão com fonte verificável, contexto de aplicação e
+ * força (nº de fontes/ocorrências). Nunca contém segredos nem PII (sanitizado
+ * na coleta). Ver samba/docs/rag-aprendizado.md.
+ */
+export const knowledgeUnits = sqliteTable(
+  "knowledge_units",
+  {
+    id: text("id").primaryKey(),
+    /** kind: episodio | erro_evitar | padrao_validado | skill_delta. */
+    kind: text("kind").notNull(),
+    appId: integer("app_id")
+      .notNull()
+      .references(() => apps.id, { onDelete: "cascade" }),
+    orgScope: text("org_scope").notNull().default("organization"),
+    /** força: nº de ocorrências/fontes independentes. */
+    force: integer("force").notNull().default(1),
+    title: text("title").notNull(),
+    body: text("body").notNull(),
+    /** Contexto de aplicação (perfil de risco, fase, área) — JSON. */
+    context: text("context").notNull().default("{}"),
+    /** Fonte verificável (commit, executionId, approval, gate) — JSON. */
+    source: text("source").notNull(),
+    status: text("status").notNull().default("active"),
+    createdAt: integer("created_at").notNull(),
+    /** Reavaliação: units contraditas perdem força/expiraram. */
+    expiresAt: integer("expires_at"),
+  },
+  (table) => [
+    index("knowledge_units_app_kind_idx").on(table.appId, table.kind),
+    index("knowledge_units_kind_status_idx").on(table.kind, table.status),
+  ],
+);

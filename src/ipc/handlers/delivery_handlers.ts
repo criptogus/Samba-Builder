@@ -7,6 +7,7 @@ import {
   qualityArtifacts,
 } from "../services/project_quality";
 import { projectTestExecutions } from "@/db/schema";
+import { collectFromDeliverySave } from "../services/knowledge_collector";
 import {
   inspectFoundation,
   assertFoundationReviewed,
@@ -249,7 +250,7 @@ export function registerDeliveryHandlers() {
               );
           }
           const { db } = getHandlerContext();
-          return db.transaction((tx) => {
+          const savedOutcome = db.transaction((tx) => {
             const previous = tx
               .select()
               .from(projectDeliveries)
@@ -295,8 +296,22 @@ export function registerDeliveryHandlers() {
                 set: next,
               })
               .run();
-            return { appId, revision: next.revision, plan };
+            return { appId, revision: next.revision, plan, previousPlan };
           });
+          // RAG de aprendizado (F1): após o commit, coleta knowledge units dos
+          // eventos reais deste save (aprovação nova, gate falho novo).
+          // Best-effort e idempotente — nunca quebra o fluxo de entrega.
+          try {
+            const { previousPlan } = savedOutcome;
+            collectFromDeliverySave(appId, plan, previousPlan);
+          } catch {
+            // coletor já trata os próprios erros; aqui é rede de segurança.
+          }
+          return {
+            appId: savedOutcome.appId,
+            revision: savedOutcome.revision,
+            plan: savedOutcome.plan,
+          };
         },
       ),
   );
