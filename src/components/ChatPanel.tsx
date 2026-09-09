@@ -24,13 +24,14 @@ import { VersionPane } from "./chat/VersionPane";
 import { FreeAgentQuotaBanner } from "./chat/FreeAgentQuotaBanner";
 import { NotificationBanner } from "./chat/NotificationBanner";
 import { SupabaseLegacyKeyBanner } from "./chat/SupabaseLegacyKeyBanner";
+import { SpecialistAgentsDialog } from "./SpecialistAgentsDialog";
 import { Button } from "@/components/ui/button";
 import {
   Tooltip,
   TooltipTrigger,
   TooltipContent,
 } from "@/components/ui/tooltip";
-import { ArrowDown } from "lucide-react";
+import { ArrowDown, Bot } from "lucide-react";
 import { useSettings } from "@/hooks/useSettings";
 import { useFreeAgentQuota } from "@/hooks/useFreeAgentQuota";
 import { useChatMode } from "@/hooks/useChatMode";
@@ -121,6 +122,7 @@ export function ChatPanel({
   // and state for the scroll button UI which needs re-renders.
   const isAtBottomRef = useRef(true);
   const [showScrollButton, setShowScrollButton] = useState(false);
+  const [showSpecialists, setShowSpecialists] = useState(false);
 
   const scrollToBottom = useCallback(
     (behavior: ScrollBehavior = "smooth"): boolean => {
@@ -470,6 +472,20 @@ export function ChatPanel({
                   )}
                   <SupabaseLegacyKeyBanner appId={selectedAppId} />
                   <NotificationBanner />
+                  {chatId !== null && selectedAppId !== null && (
+                    <div className="flex justify-end px-1">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setShowSpecialists(true)}
+                        title="Criar tarefa para um especialista (arquitetura, cybersec, UX/UI…)"
+                      >
+                        <Bot className="mr-1.5 h-3.5 w-3.5" />
+                        Especialistas
+                      </Button>
+                    </div>
+                  )}
                   <ChatInput chatId={chatId} />
                 </motion.div>
               )}
@@ -511,6 +527,14 @@ export function ChatPanel({
           </motion.div>
         )}
       </AnimatePresence>
+      {chatId != null && selectedAppId != null && (
+        <SpecialistAgentsDialog
+          isOpen={showSpecialists}
+          onClose={() => setShowSpecialists(false)}
+          chatId={chatId}
+          appId={selectedAppId}
+        />
+      )}
     </div>
   );
 }
