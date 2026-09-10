@@ -142,6 +142,7 @@ import {
   parseNativeSkillRequest,
   nativeSkillContext,
 } from "@/shared/load_native_skill";
+import { projectLessonsPromptBlock } from "@/ipc/services/knowledge_retriever";
 import { resolveMediaMentions } from "../utils/resolve_media_mentions";
 import { parsePlanFile, validatePlanId } from "./planUtils";
 import { ensureSambaGitignored } from "./gitignoreUtils";
@@ -1389,9 +1390,14 @@ export function registerChatStreamHandlers() {
 
       // Load only explicitly selected bundled instructions, after custom prompt
       // expansion. Native content cannot recursively activate other skills.
-      const selectedNativeContext = await nativeSkillContext(
-        nativeRequest.slugs,
-      );
+      const selectedNativeContext =
+        (await nativeSkillContext(nativeRequest.slugs)) +
+        // RAG fase 2: licões de projetos anteriores com contexto parecido (o que
+        // funcionou e o que deu errado), com fonte verificavel. Best-effort:
+        // base vazia ou indisponivel devolve string vazia.
+        (await projectLessonsPromptBlock({
+          signals: [...nativeRequest.slugs, chat.app.name],
+        }));
 
       // Resolve @media: mentions to image attachments
       const mediaRefs = parseMediaMentions(userPrompt);
