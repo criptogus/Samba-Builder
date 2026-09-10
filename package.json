@@ -2,7 +2,7 @@
   "name": "samba-builder",
   "productName": "Samba Builder",
   "version": "1.14.0-beta.1",
-  "description": "Construtor de apps com IA da SambaTech — fork do Dyad, alimentado pelo Córtex",
+  "description": "Construtor de apps com IA da SambaTech, alimentado pelo Córtex",
   "keywords": [],
   "license": "Apache-2.0",
   "author": {
@@ -28,7 +28,7 @@
     "samba:score": "python3 samba/quality/score.py",
     "samba:governance": "python3 samba/governance/gate.py",
     "start:onboarding": "node scripts/start-onboarding.mjs",
-    "start:out-of-quota": "cross-env NODE_ENV=development DYAD_SIMULATE_FREE_AGENT_QUOTA_EXCEEDED=true npm start",
+    "start:out-of-quota": "cross-env NODE_ENV=development SAMBA_SIMULATE_FREE_AGENT_QUOTA_EXCEEDED=true npm start",
     "copy-data-to-dev": "node scripts/copy-data-to-dev.mjs",
     "start:expired-sub": "node scripts/start-subscription-status.mjs payment_past_due",
     "start:ending-sub": "node scripts/start-subscription-status.mjs subscription_ending",

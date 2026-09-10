@@ -53,7 +53,7 @@ sobre repositórios existentes — não só apps novos — para que projetos leg
 
 **Alavancas prontas:** subagente explorer (navegação de código), tools de
 verificação (`run_type_check`/testes), GitHub nativo (device flow), scaffold de
-import (base do Dyad), memória por projeto.
+import (base do upstream), memória por projeto.
 
 **Métrica:** % de tarefas de engenharia concluídas com testes verdes e diff
 aprovado sem edição manual do engenheiro (baseline 0 → alvo 50%+ no piloto).

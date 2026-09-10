@@ -6,13 +6,13 @@ Ambiente local da Samba para construir aplicações de clientes com IA. Evolui o
 
 **Última versão: [releases/latest](https://github.com/criptogus/Samba-Builder/releases/latest)** · detalhes e instalação em [DOWNLOAD.md](DOWNLOAD.md)
 
-| Plataforma | Download direto |
-| --- | --- |
-| **macOS** (Apple Silicon · Intel) | [arm64](https://github.com/criptogus/Samba-Builder/releases/download/v1.14.0/dyad-darwin-arm64-1.14.0.zip) · [x64](https://github.com/criptogus/Samba-Builder/releases/download/v1.14.0/dyad-darwin-x64-1.14.0.zip) |
-| **Windows** 10/11 (x64) | [instalador .exe](https://github.com/criptogus/Samba-Builder/releases/download/v1.14.0/dyad-1.14.0.Setup.exe) |
-| **Linux** | [.deb](https://github.com/criptogus/Samba-Builder/releases/download/v1.14.0/dyad_1.14.0_amd64.deb) · [.rpm](https://github.com/criptogus/Samba-Builder/releases/download/v1.14.0/dyad-1.14.0-1.x86_64.rpm) · [.AppImage](https://github.com/criptogus/Samba-Builder/releases/download/v1.14.0/dyad_1.14.0_x86_64.AppImage) |
+| Plataforma                        | Download direto                                                                                                                                                                                                                                                                                                                                       |
+| --------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **macOS** (Apple Silicon · Intel) | [arm64](https://github.com/criptogus/Samba-Builder/releases/download/v1.14.0/SambaBuilder-1.14.0-arm64.zip) · [x64](https://github.com/criptogus/Samba-Builder/releases/download/v1.14.0/SambaBuilder-1.14.0-x64.zip)                                                                                                                                 |
+| **Windows** 10/11 (x64)           | [instalador .exe](https://github.com/criptogus/Samba-Builder/releases/download/v1.14.0/SambaBuilder-1.14.0-Setup.exe)                                                                                                                                                                                                                                 |
+| **Linux**                         | [.deb](https://github.com/criptogus/Samba-Builder/releases/download/v1.14.0/samba-builder_1.14.0_amd64.deb) · [.rpm](https://github.com/criptogus/Samba-Builder/releases/download/v1.14.0/samba-builder-1.14.0-1.x86_64.rpm) · [.AppImage](https://github.com/criptogus/Samba-Builder/releases/download/v1.14.0/samba-builder-1.14.0-x86_64.AppImage) |
 
-> Repositório privado: o download exige uma conta com acesso. Os nomes dos arquivos ainda usam o prefixo legado do fork (`dyad-*`); a próxima publicação passa a usar `Samba-Builder-*`.
+> Repositório privado: o download exige uma conta com acesso.
 
 ## Fábrica
 

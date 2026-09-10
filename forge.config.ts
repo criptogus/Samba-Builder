@@ -263,22 +263,28 @@ const config: ForgeConfig = {
       // @ts-expect-error - incorrect types exported by MakerSquirrel
       isWindowsSigningEnabled
         ? {
+            name: "samba-builder",
             windowsSign,
             setupIcon: "./assets/icon/logo.ico",
           }
         : {
+            name: "samba-builder",
             setupIcon: "./assets/icon/logo.ico",
           },
     ),
     new MakerZIP({}, ["darwin"]),
     new MakerRpm({
       options: {
+        name: "samba-builder",
+        productName: "Samba Builder",
         mimeType: ["x-scheme-handler/sambabuilder"],
         icon: "./assets/icon/logo.png",
       },
     }),
     new MakerDeb({
       options: {
+        name: "samba-builder",
+        productName: "Samba Builder",
         mimeType: ["x-scheme-handler/sambabuilder"],
         icon: "./assets/icon/logo.png",
       },
