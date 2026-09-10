@@ -5,6 +5,7 @@ import { escapeXmlAttr, escapeXmlContent } from "./types";
 import { runBufferedProcess } from "@/ipc/utils/buffered_process";
 import { getPackageManagerCommandEnv } from "@/ipc/utils/socket_firewall";
 import { prependPathSegment } from "@/ipc/utils/managed_tools";
+import { withProjectNodeEnv } from "@/ipc/utils/node_runtime";
 import { classifyRepoCommand, describeCommandRisk } from "./command_risk";
 
 const REPO_COMMAND_TIMEOUT_MS = 5 * 60 * 1000;
@@ -57,7 +58,7 @@ export const runRepoCommandTool: ToolDefinition<
       command,
       cwd: ctx.appPath,
       env: prependPathSegment(
-        getPackageManagerCommandEnv(),
+        withProjectNodeEnv(ctx.appPath, getPackageManagerCommandEnv()),
         path.join(ctx.appPath, "node_modules", ".bin"),
       ),
       timeoutMs: REPO_COMMAND_TIMEOUT_MS,

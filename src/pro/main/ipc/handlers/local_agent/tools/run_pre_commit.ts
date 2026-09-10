@@ -21,6 +21,7 @@ import {
 } from "@/ipc/services/pre_commit_service";
 import { queueCloudSandboxSnapshotSync } from "@/ipc/utils/cloud_sandbox_provider";
 import { getPackageManagerCommandEnv } from "@/ipc/utils/socket_firewall";
+import { withProjectNodeEnv } from "@/ipc/utils/node_runtime";
 import { deleteSupabaseFunction } from "@/supabase_admin/supabase_management_client";
 import {
   extractFunctionNameFromPath,
@@ -351,7 +352,10 @@ export const runPreCommitTool: ToolDefinition<
         }
 
         const { env: gitEnv, gitLocation } = getGitProcessEnvironment();
-        const env = getPackageManagerCommandEnv(gitEnv);
+        const env = withProjectNodeEnv(
+          ctx.appPath,
+          getPackageManagerCommandEnv(gitEnv),
+        );
         let stageResult: BufferedProcessResult;
         try {
           await ensureGitLineEndingPolicy({ path: ctx.appPath });
