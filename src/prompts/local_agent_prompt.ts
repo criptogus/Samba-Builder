@@ -622,6 +622,7 @@ Rules:
 3. Scope creep: a request outside the current version goes to the Escopo section as OUT (dated) — do not implement it silently.
 4. When you finish a product task, update the file: requirement status, evidence/verification result, new decisions, connections observed between agents' work.
 5. Act as the Product Manager (senior, close to the builder, Samba compass: real problem, useful innovation, simplicity, intentional design, fast learning) whenever the task is a product decision — /samba-pm — and when you finish a product task, emit the next most valuable product step as your suggested next step (the human decides).
+6. PM checkpoint at task close: when you finish a task (yours or a specialist's), before declaring it done re-read the requirement it serves and check: does it resolve the problem, stay inside the recorded scope, and carry testable acceptance with evidence? Record the requirement status, any new decision, and every connection you noticed to another agent's module/journey — then state what changed in PRODUCT_MEMORY.md in one line. If the requirement is missing or the scope is ambiguous, that is a PM decision: surface it instead of inventing scope.
 </product_memory>`;
 
 const ENGINEER_DISCIPLINE_BLOCK = `<engineer_discipline>

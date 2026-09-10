@@ -127,6 +127,35 @@ export function deliveryBlockers(plan: DeliveryPlan): string[] {
     for (const blocker of evidenceBlockers(plan.evidenceItems, profile))
       result.push(`Evidência (perfil ${profile}): ${blocker}`);
   }
+  // Gate de produto (PM): perfis private/critical exigem rastreabilidade
+  // requisito → tarefa → evidência. Cada tarefa precisa estar vinculada a um
+  // requisito existente na política (REQ-xx do PRODUCT_MEMORY.md).
+  const policy = plan.engineeringPolicy;
+  if (policy && policy.profile !== "public") {
+    if (!policy.requirements.length)
+      result.push(
+        "Defina os requisitos do produto na política de engenharia (REQ-xx com aceite) e vincule cada tarefa.",
+      );
+    const known = new Set(policy.requirements.map((r) => r.id));
+    const unlinked = plan.tasks.filter(
+      (t) => !(t.requirementIds ?? []).length,
+    ).length;
+    if (unlinked)
+      result.push(
+        `Vincule cada tarefa a um requisito (REQ-xx): ${unlinked} tarefa(s) sem requisito.`,
+      );
+    const broken = [
+      ...new Set(
+        plan.tasks.flatMap((t) =>
+          (t.requirementIds ?? []).filter((id) => !known.has(id)),
+        ),
+      ),
+    ];
+    if (broken.length)
+      result.push(
+        `Tarefa(s) referenciam requisito(s) inexistente(s) na política: ${broken.join(", ")}.`,
+      );
+  }
   return result;
 }
 export function deliveryAttention(

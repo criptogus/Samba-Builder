@@ -520,6 +520,36 @@ function DeliveryEditor({
                         />
                       </label>
                     ))}
+                    <label className="block text-xs space-y-1">
+                      <span>
+                        Requisitos de produto (ex.: REQ-01, REQ-02 — ver
+                        PRODUCT_MEMORY.md)
+                      </span>
+                      <Input
+                        aria-label={`Requisitos de ${task.title}`}
+                        value={(task.requirementIds ?? []).join(", ")}
+                        placeholder="REQ-01, REQ-02"
+                        onChange={(e) => {
+                          const ids = e.target.value
+                            .split(/[,\s]+/)
+                            .map((s) => s.trim())
+                            .filter(Boolean);
+                          update({
+                            ...plan,
+                            tasks: plan.tasks.map((t) =>
+                              t.id === task.id
+                                ? {
+                                    ...t,
+                                    requirementIds: ids.length
+                                      ? ids
+                                      : undefined,
+                                  }
+                                : t,
+                            ),
+                          });
+                        }}
+                      />
+                    </label>
                     <Button
                       size="sm"
                       variant="ghost"
