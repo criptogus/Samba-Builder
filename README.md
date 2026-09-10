@@ -4,16 +4,11 @@ Ambiente local da Samba para construir aplicações de clientes com IA. Evolui o
 
 ## Baixar o app
 
-Os instaladores são gerados pelo workflow **[Release app](https://github.com/criptogus/Samba-Builder/actions/workflows/release.yml)** (Actions → _Release app_ → _Run workflow_), que publica macOS (Apple Silicon e Intel), Windows e Linux como **rascunho** para revisão em [releases](https://github.com/criptogus/Samba-Builder/releases).
+**macOS (Apple Silicon):** [SambaBuilder-1.14.0-beta.1-arm64.zip](https://github.com/criptogus/Samba-Builder/releases/download/v1.14.0-beta.1/SambaBuilder-1.14.0-beta.1-arm64.zip) · 180 MB · [página da versão](https://github.com/criptogus/Samba-Builder/releases/tag/v1.14.0-beta.1) · [todas as versões](https://github.com/criptogus/Samba-Builder/releases)
 
-Ainda não há publicação neste repositório — os links aparecem aqui assim que a primeira release for publicada.
+O build não é assinado (sem certificado Apple no projeto): na primeira abertura use **botão direito → Abrir**, ou rode `xattr -cr "/Applications/Samba Builder.app"` uma vez.
 
-Para gerar o instalador na sua máquina (macOS):
-
-```sh
-npm ci
-npm run make   # gera o pacote em out/make/
-```
+> **Windows e Linux** ainda não publicados: o workflow *Release app* gera as três plataformas, mas está bloqueado por pendência de **billing do GitHub Actions** na conta. Detalhes e como gerar localmente em [DOWNLOAD.md](DOWNLOAD.md).
 
 ## Fábrica
 
