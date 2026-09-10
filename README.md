@@ -4,15 +4,16 @@ Ambiente local da Samba para construir aplicações de clientes com IA. Evolui o
 
 ## Baixar o app
 
-**Última versão: [releases/latest](https://github.com/criptogus/Samba-Builder/releases/latest)** · detalhes e instalação em [DOWNLOAD.md](DOWNLOAD.md)
+Os instaladores são gerados pelo workflow **[Release app](https://github.com/criptogus/Samba-Builder/actions/workflows/release.yml)** (Actions → *Release app* → *Run workflow*), que publica macOS (Apple Silicon e Intel), Windows e Linux como **rascunho** para revisão em [releases](https://github.com/criptogus/Samba-Builder/releases).
 
-| Plataforma                        | Download direto                                                                                                                                                                                                                                                                                                                                       |
-| --------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **macOS** (Apple Silicon · Intel) | [arm64](https://github.com/criptogus/Samba-Builder/releases/download/v1.14.0/SambaBuilder-1.14.0-arm64.zip) · [x64](https://github.com/criptogus/Samba-Builder/releases/download/v1.14.0/SambaBuilder-1.14.0-x64.zip)                                                                                                                                 |
-| **Windows** 10/11 (x64)           | [instalador .exe](https://github.com/criptogus/Samba-Builder/releases/download/v1.14.0/SambaBuilder-1.14.0-Setup.exe)                                                                                                                                                                                                                                 |
-| **Linux**                         | [.deb](https://github.com/criptogus/Samba-Builder/releases/download/v1.14.0/samba-builder_1.14.0_amd64.deb) · [.rpm](https://github.com/criptogus/Samba-Builder/releases/download/v1.14.0/samba-builder-1.14.0-1.x86_64.rpm) · [.AppImage](https://github.com/criptogus/Samba-Builder/releases/download/v1.14.0/samba-builder-1.14.0-x86_64.AppImage) |
+Ainda não há publicação neste repositório — os links aparecem aqui assim que a primeira release for publicada.
 
-> Repositório privado: o download exige uma conta com acesso.
+Para gerar o instalador na sua máquina (macOS):
+
+```sh
+npm ci
+npm run make   # gera o pacote em out/make/
+```
 
 ## Fábrica
 
