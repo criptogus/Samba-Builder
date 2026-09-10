@@ -1,0 +1,55 @@
+# Project Memory — Samba Builder
+
+Memória técnica do projeto (repo importado). Produto vive em `docs/PRODUCT_MEMORY.md`.
+
+## Repository map
+
+Fork do Dyad: app desktop Electron que gera e roda apps com agentes de IA.
+
+- **Stack:** Electron 40 (pin exato), React 19, TypeScript 6 (`tsgo`), Vite 6 (configs separadas: `vite.main`, `vite.preload`, `vite.renderer`, `vite.sandbox-worker`, `vite.code-explorer-worker`, `vite.supabase-dependency-analysis-worker`), electron-forge (package/make/publish), Drizzle ORM + better-sqlite3 (DB local), Tailwind 4 + shadcn/Base UI, TanStack Router/Query, jotai (→ hooks), zod 4 como contrato de IPC, vitest (unit) + Playwright (e2e), oxlint/oxfmt.
+- **Entrypoints:** `src/main_bootstrap.ts` → `src/main.ts` (main process), `src/preload.ts` (contextBridge com allowlist de canais derivada dos contratos), `src/renderer.tsx` + `src/router.ts` (renderer), `workers/` (2 workers TS), `samba/` (tooling Python), `scaffold/` (template das apps geradas), `packages/` (`pg-schema-classifier`, `ts-pg-schema-diff`, `samba-factory`).
+- **Mapa de `src/` (2.255 arq., 772 de teste):** `ipc` 599 (contratos `ipc/types`, handlers `ipc/handlers`, `ipc/utils`, serviços `ipc/services`) · `components` 491 · `pro` 180 (local agent, subagents, tools) · `hooks` 139 · `shared` 72 · `distributed_machines` 46 · `state_machines` 34 · `main` 30 (infra Electron) · `window_infrastructure` 29 · `coolify_setup`/`coolify_deploy` 42 · `app_run` + `app_wiring` 23 · `i18n` 28 · `testing` 22 (harnesses).
+- **Outros:** `rules/` (31 regras de engenharia), `docs/adrs/` (+ `docs/adr/`), `docs/architecture.md`, `plans/` (92 planos), `e2e-tests/` (145 specs), `helpers` de teste e evals em `src/__tests__/evals`.
+- **Escala:** 3.524 arquivos rastreados; `src/db/schema.ts` com 946 linhas; maiores handlers: `chat_stream_handlers.ts` (130 KB), `app_handlers.ts` (94 KB), `git_utils.ts` (94 KB), `local_agent_handler.ts` (103 KB).
+
+## Comandos de verificação (do próprio repo)
+
+| Objetivo | Comando |
+| --- | --- |
+| Tipos | `npm run ts` (tsgo no app + tsc nos workers) |
+| Lint/format | `npm run presubmit` (`oxfmt --check` + `oxlint --fix`) |
+| Unit | `npm test` (node --test dos scripts + `vitest run`) |
+| E2E | `npm run pre:e2e` (build E2E) → `npm run e2e` (Playwright, 4 shards no CI) |
+| Evals | `npm run eval` |
+| Deps | `npm audit --audit-level=high` |
+
+**Estado da importação:** `node_modules/` ausente; sem `.env`/`.env.test`. Nenhum comando de build/teste pode rodar antes de `npm ci`; o `npm audit` funcionou a partir do `package-lock.json`.
+
+## Convenções observadas
+
+- **IPC:** handler de produção passa por `registerTrustedIpcHandler` (`src/ipc/handlers/trusted_handle.ts`) → `assertTrustedRenderer` (`src/ipc/utils/renderer_security.ts`, valida frame principal + origem confiável). Contratos zod via `createTypedHandler` (`src/ipc/handlers/base.ts`). Exceção: `first_prompt_handlers.ts` registra com `ipcMain.on` manual (valida explicitamente, mas fora do helper).
+- **Segredos:** `safeStorage` (`src/ipc/utils/secret_storage.ts`, `src/main/settings.ts`), com fallback base64 `plain:` e `encryptionType: "plaintext"` quando o keyring não está disponível.
+- **Isolamento de renderer não confiável:** preview em `WebContentsView` sandbox (`src/main/preview_web_contents_view.ts`) e hardening central de janelas (`src/main/window_security.ts`).
+- **Estilo de teste:** spec junto do código (`.test.ts`/`.spec.ts`), harnesses em `src/testing/`, evals em `src/__tests__/evals/`.
+- **Lint legado:** coexistem `biome.json`, `.oxlintrc.json`, `.eslintrc.json`, `.prettierrc` e `.oxfmtrc.json`.
+
+## Auditoria de segurança — baseline (estática, primeira sessão)
+
+Achados priorizados (detalhe e correções na auditoria em chat):
+
+- **A1** Electron `40.0.0` fixo com 30+ advisories herdadas (fix em `40.10.6`, mesma major).
+- **A2** Segredos em base64/plaintext quando `safeStorage` indisponível (`secret_storage.ts`, `settings.ts`).
+- **A3** `createLoggedHandler` loga `JSON.stringify(args)` sem redação (caminho legado de 16 módulos).
+- **M1** Sem CSP no renderer privilegiado (`index.html` + nenhum `onHeadersReceived`).
+- **M2** Host key SSH do Coolify com TOFU só em memória (`coolify_setup_handlers.ts`).
+- **M3** `shell: true` ao executar `installCommand`/`startCommand` do app (`app_runtime_service.ts:548`, `runShellCommand.ts:15`).
+- **M4** `docs/adrs/0003` (RBAC + policy layer + vault) segue "Proposed": distância entre intenção e código nos modos cloud/distributed.
+- **M5** 49 vulnerabilidades de dependência (24 high, 10 moderate, 15 low); sem job de auditoria no CI e sem Dependabot/Renovate.
+- **B1** `first_prompt_handlers.ts` fora do helper truste. **B2** `GITHUB_CLIENT_ID` hardcoded (client id de device flow, público). **B5** `.samba/` adicionado ao `.gitignore` ainda não commitado.
+
+Defesas verificadas: trust guard de IPC, allowlist de canais no preload, contratos zod, sem `dangerouslySetInnerHTML` em `src/`, preview isolado com CSP no proxy, redação em telemetria/erros de git e MCP, guardas de traversal com testes negativos, credenciais git nunca na URL do remote.
+
+## Pendências desta importação
+
+- Instalar dependências (`npm ci`) e rodar `npm run presubmit`, `npm run ts`, `npm test` para estabelecer a linha de base verde/vermelha.
+- Não revisado a fundo nesta sessão: scripts Python (`samba/`), NATIVE (`native/keychain-reader`), `scaffold/`, histórico git (scan de segredos só na árvore de trabalho).
