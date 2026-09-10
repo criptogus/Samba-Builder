@@ -111,6 +111,24 @@ describe("selectProjectLessons", () => {
     expect(first).toEqual(second);
   });
 
+  it("rewards a lesson that already helped and demotes one that already failed", () => {
+    const lessons = selectProjectLessons(
+      [
+        unit({ id: "falhou", workedCount: 0, failedCount: 1 }),
+        unit({ id: "neutra" }),
+        unit({ id: "ajudou", workedCount: 2, failedCount: 0 }),
+      ],
+      { now: NOW },
+    );
+    expect(lessons.map((lesson) => lesson.id)).toEqual([
+      "ajudou",
+      "neutra",
+      "falhou",
+    ]);
+    expect(lessons[0].reasons).toContain("já ajudou");
+    expect(lessons[2].reasons).toContain("já falhou");
+  });
+
   it("prefers recent lessons when everything else is equal", () => {
     const lessons = selectProjectLessons(
       [

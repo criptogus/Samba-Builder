@@ -49,6 +49,8 @@ export function toLessonUnits(
     createdAt: number;
     status: string;
     expiresAt: number | null;
+    workedCount?: number;
+    failedCount?: number;
   }[],
 ): LessonUnit[] {
   return rows
@@ -63,6 +65,8 @@ export function toLessonUnits(
       createdAt: row.createdAt,
       status: row.status,
       expiresAt: row.expiresAt,
+      workedCount: row.workedCount,
+      failedCount: row.failedCount,
     }));
 }
 
@@ -73,13 +77,20 @@ export interface ProjectLessonsQuery {
   now?: number;
 }
 
+export interface ProjectLessonsForTurn {
+  /** Bloco pronto ("" quando não há lição aplicável). */
+  block: string;
+  /** IDs injetados — o que o feedback de uso (fase 3) precisa registrar. */
+  unitIds: string[];
+}
+
 /**
- * Bloco `<project_lessons>` para concatenar no contexto do turno. Devolve ""
- * quando não há lição aplicável — nunca um bloco vazio.
+ * Lições do turno: o bloco para o prompt **e** os IDs injetados (para o
+ * feedback de uso). Nunca lança.
  */
-export async function projectLessonsPromptBlock(
+export async function projectLessonsForTurn(
   query: ProjectLessonsQuery = {},
-): Promise<string> {
+): Promise<ProjectLessonsForTurn> {
   try {
     const rows = await db
       .select({
@@ -92,6 +103,8 @@ export async function projectLessonsPromptBlock(
         createdAt: knowledgeUnits.createdAt,
         status: knowledgeUnits.status,
         expiresAt: knowledgeUnits.expiresAt,
+        workedCount: knowledgeUnits.workedCount,
+        failedCount: knowledgeUnits.failedCount,
       })
       .from(knowledgeUnits)
       .orderBy(desc(knowledgeUnits.force), desc(knowledgeUnits.createdAt))
@@ -104,9 +117,20 @@ export async function projectLessonsPromptBlock(
     });
 
     const block = renderProjectLessonsBlock(lessons);
-    return block ? `\n\n${block}` : "";
+    return {
+      block: block ? `\n\n${block}` : "",
+      unitIds: block ? lessons.map((lesson) => lesson.id) : [],
+    };
   } catch {
     // Best-effort: aprender não pode impedir o trabalho de acontecer.
-    return "";
+    return { block: "", unitIds: [] };
   }
+}
+
+/** Compatibilidade: só o bloco, para quem não precisa registrar o uso. */
+export async function projectLessonsPromptBlock(
+  query: ProjectLessonsQuery = {},
+): Promise<string> {
+  const { block } = await projectLessonsForTurn(query);
+  return block;
 }

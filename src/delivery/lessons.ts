@@ -16,6 +16,7 @@
  */
 
 import type { KnowledgeKind } from "./knowledge";
+import { feedbackAdjustment } from "./lesson_feedback";
 
 export interface LessonUnit {
   id: string;
@@ -29,6 +30,9 @@ export interface LessonUnit {
   createdAt: number;
   status: string;
   expiresAt?: number | null;
+  /** Feedback de uso (fase 3). Opcional: lições antigas não têm esses números. */
+  workedCount?: number;
+  failedCount?: number;
 }
 
 export interface LessonQuery {
@@ -143,6 +147,17 @@ export function selectProjectLessons(
     const cappedForce = Math.min(Math.max(unit.force, 1), 5);
     score += (cappedForce - 1) * 0.4;
     if (cappedForce > 1) reasons.push(`${cappedForce} fontes`);
+
+    // Fase 3: o que já funcionou em turnos reais vale mais; o que já falhou,
+    // menos — e o que falhou mais do que ajudou nem chega aqui (contraditado).
+    const feedback = feedbackAdjustment({
+      usedCount: 0,
+      workedCount: unit.workedCount ?? 0,
+      failedCount: unit.failedCount ?? 0,
+    });
+    if ((unit.workedCount ?? 0) > 0) reasons.push("já ajudou");
+    if ((unit.failedCount ?? 0) > 0) reasons.push("já falhou");
+    score += feedback;
 
     const age = Math.max(0, now - unit.createdAt);
     score += Math.max(0, 1 - age / NINETY_DAYS_MS);

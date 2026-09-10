@@ -142,7 +142,11 @@ import {
   parseNativeSkillRequest,
   nativeSkillContext,
 } from "@/shared/load_native_skill";
-import { projectLessonsPromptBlock } from "@/ipc/services/knowledge_retriever";
+import { projectLessonsForTurn } from "@/ipc/services/knowledge_retriever";
+import {
+  recordLessonOutcome,
+  recordLessonUsage,
+} from "@/ipc/services/knowledge_feedback";
 import { resolveMediaMentions } from "../utils/resolve_media_mentions";
 import { parsePlanFile, validatePlanId } from "./planUtils";
 import { ensureSambaGitignored } from "./gitignoreUtils";
@@ -1390,14 +1394,21 @@ export function registerChatStreamHandlers() {
 
       // Load only explicitly selected bundled instructions, after custom prompt
       // expansion. Native content cannot recursively activate other skills.
-      const selectedNativeContext =
-        (await nativeSkillContext(nativeRequest.slugs)) +
-        // RAG fase 2: licões de projetos anteriores com contexto parecido (o que
-        // funcionou e o que deu errado), com fonte verificavel. Best-effort:
-        // base vazia ou indisponivel devolve string vazia.
-        (await projectLessonsPromptBlock({
-          signals: [...nativeRequest.slugs, chat.app.name],
-        }));
+      const nativeContext = await nativeSkillContext(nativeRequest.slugs);
+      // RAG fase 2 e 3: licões de projetos anteriores com contexto parecido (o
+      // que funcionou e o que deu errado) + registro de quais entraram neste
+      // turno, para o feedback de uso. Best-effort nas duas pontas.
+      const projectLessons = await projectLessonsForTurn({
+        signals: [...nativeRequest.slugs, chat.app.name],
+      });
+      const selectedNativeContext = nativeContext + projectLessons.block;
+      if (projectLessons.unitIds.length) {
+        void recordLessonUsage({
+          unitIds: projectLessons.unitIds,
+          appId: chat.app.id,
+          chatId: chat.id,
+        });
+      }
 
       // Resolve @media: mentions to image attachments
       const mediaRefs = parseMediaMentions(userPrompt);
@@ -2708,6 +2719,11 @@ This conversation includes one or more image attachments. When the user uploads 
               neonProviderToolsAvailable: initialNeonProviderToolsAvailable,
             },
           );
+          // Fase 3: o desfecho do turno alimenta a força das lições usadas.
+          void recordLessonOutcome({
+            chatId: chat.id,
+            outcome: streamSuccess ? "worked" : "failed",
+          });
           if (!streamSuccess) {
             logger.warn(
               "Ask mode local agent stream did not complete successfully",
@@ -2821,6 +2837,11 @@ This conversation includes one or more image attachments. When the user uploads 
                 hasScriptReadableAttachment(storedAttachments),
             },
           );
+          // Fase 3: o desfecho do turno alimenta a força das lições usadas.
+          void recordLessonOutcome({
+            chatId: chat.id,
+            outcome: streamSuccess ? "worked" : "failed",
+          });
           if (streamSuccess) {
             reservedFreeAgentQuotaMessageId = null;
           }
