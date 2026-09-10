@@ -87,6 +87,7 @@ jobs:
           echo "CXX=clang++-18" >> "$GITHUB_ENV"
       - name: Detect signing credentials
         id: signing
+        shell: bash
         env:
           PRESENT_APPLE_CERT: ${{ secrets.MACOS_CERT_P12 }}
           PRESENT_AZURE_CLIENT: ${{ secrets.AZURE_CLIENT_ID }}
