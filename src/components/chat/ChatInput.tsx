@@ -22,6 +22,7 @@ import {
   Mic,
   MicOff,
   Sparkles,
+  ArrowRight,
 } from "lucide-react";
 import type React from "react";
 import { useCallback, useEffect, useRef, useState, useMemo } from "react";
@@ -1376,7 +1377,7 @@ function KeepGoingButton() {
 // Sugestão de próximo passo emitida pelo agente ao finalizar uma tarefa —
 // texto clicável que envia o prompt sugerido e continua a evolução.
 export function NextStepButton({ action }: { action: NextStepAction }) {
-  const { streamMessage } = useStreamChat();
+  const { streamMessage, isStreaming } = useStreamChat();
   const chatId = useAtomValue(selectedChatIdAtom);
   const onClick = () => {
     if (!chatId) {
@@ -1388,11 +1389,25 @@ export function NextStepButton({ action }: { action: NextStepAction }) {
       chatId,
     });
   };
+  // Cartão de próximo passo: a sugestão precisa ser vista, não garimpada no
+  // fim de uma mensagem longa. Um clique continua a partir daqui.
   return (
-    <SuggestionButton onClick={onClick} tooltipText={action.prompt}>
-      <Sparkles className="w-3.5 h-3.5 mr-1.5 text-primary" />
-      {action.prompt}
-    </SuggestionButton>
+    <Tooltip>
+      <TooltipTrigger
+        render={
+          <button
+            type="button"
+            disabled={isStreaming}
+            onClick={onClick}
+            className="group my-1 flex w-full cursor-pointer items-center gap-2 rounded-lg border border-primary/25 bg-primary/5 px-3 py-2 text-left text-sm transition-colors hover:border-primary/50 hover:bg-primary/10 disabled:cursor-not-allowed disabled:opacity-60"
+          />
+        }
+      >
+        <ArrowRight className="h-4 w-4 shrink-0 text-primary transition-transform group-hover:translate-x-0.5" />
+        <span className="min-w-0 flex-1 truncate">{action.prompt}</span>
+      </TooltipTrigger>
+      <TooltipContent>{action.prompt}</TooltipContent>
+    </Tooltip>
   );
 }
 
