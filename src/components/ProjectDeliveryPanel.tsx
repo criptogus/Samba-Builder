@@ -18,6 +18,7 @@ import { ipc } from "@/ipc/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Badge } from "@/components/ui/badge";
 import { ProductCoachButton } from "./ProductCoachButton";
 import { MeetingBriefingButton } from "./MeetingBriefingButton";
 import {
@@ -202,11 +203,22 @@ function DeliveryEditor({
           >
             Plano de entrega
           </h2>
-          <p className="text-xs text-muted-foreground">
-            {dirty
-              ? "Alterações protegidas neste dispositivo · salve para confirmar"
-              : "Salvo no aplicativo"}
-          </p>
+          <div className="mt-1 flex flex-wrap items-center gap-2">
+            <Badge variant="secondary" className="text-[11px] font-medium">
+              {stageNames[plan.stage]}
+            </Badge>
+            {plan.tasks.length > 0 && (
+              <span className="text-xs text-muted-foreground">
+                {plan.tasks.filter((t) => t.status === "done").length}/
+                {plan.tasks.length} tarefas concluídas
+              </span>
+            )}
+            <span className="text-xs text-muted-foreground">
+              {dirty
+                ? "· alterações não salvas neste dispositivo"
+                : "· salvo no aplicativo"}
+            </span>
+          </div>
         </div>
         <Button disabled={busy || !dirty} onClick={() => void save()}>
           {busy ? "Aguarde…" : "Salvar plano"}
@@ -327,16 +339,31 @@ function DeliveryEditor({
               <div className="grid gap-4 md:grid-cols-2">
                 {(
                   [
-                    ["brief", "Briefing do cliente"],
-                    ["scope", "Escopo da entrega"],
-                    ["acceptance", "Critérios de aceite"],
+                    [
+                      "brief",
+                      "Briefing do cliente",
+                      "O que o cliente pediu, com as palavras e o contexto dele.",
+                    ],
+                    [
+                      "scope",
+                      "Escopo da entrega",
+                      "O que entra nesta versão — e o que fica explicitamente de fora.",
+                    ],
+                    [
+                      "acceptance",
+                      "Critérios de aceite",
+                      "Uma linha por critério verificável. Cada linha pode virar uma tarefa.",
+                    ],
                   ] as const
-                ).map(([key, label]) => (
+                ).map(([key, label, help]) => (
                   <label
                     key={key}
                     className="block space-y-2 text-sm first:md:col-span-2"
                   >
                     <span>{label}</span>
+                    <span className="block text-xs text-muted-foreground">
+                      {help}
+                    </span>
                     <Textarea
                       value={plan[key]}
                       onChange={(e) => field(key, e.target.value)}
@@ -378,11 +405,28 @@ function DeliveryEditor({
             </div>
           </TabsContent>
           <TabsContent value="tasks" className="mt-0">
-            <h3 className="text-sm font-medium">
-              Tarefas e bloqueios ·{" "}
-              {plan.tasks.filter((t) => t.status === "done").length}/
-              {plan.tasks.length}
-            </h3>
+            <h3 className="text-sm font-medium">Tarefas e bloqueios</h3>
+            {plan.tasks.length > 0 && (
+              <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
+                {(() => {
+                  const count = (
+                    status: "todo" | "doing" | "blocked" | "done",
+                  ) => plan.tasks.filter((t) => t.status === status).length;
+                  return (
+                    <>
+                      <span>{count("todo")} a fazer</span>
+                      <span>{count("doing")} em andamento</span>
+                      {count("blocked") > 0 && (
+                        <span className="font-medium text-amber-600 dark:text-amber-400">
+                          {count("blocked")} bloqueada(s)
+                        </span>
+                      )}
+                      <span>{count("done")} concluída(s)</span>
+                    </>
+                  );
+                })()}
+              </div>
+            )}
             <div className="mt-3 space-y-3">
               <div className="flex gap-2">
                 <Input
@@ -402,185 +446,197 @@ function DeliveryEditor({
               </div>
               {plan.tasks.length === 0 && (
                 <p className="rounded-lg border border-dashed p-6 text-center text-sm text-muted-foreground">
-                  Adicione uma tarefa ou transforme os critérios do briefing em
-                  tarefas.
+                  Nenhuma tarefa ainda. Adicione acima ou volte ao Briefing e
+                  gere tarefas a partir dos critérios de aceite.
                 </p>
               )}
-              {plan.tasks.map((task) => (
-                <details
-                  data-task-id={task.id}
-                  key={task.id}
-                  className="group rounded-lg border border-border"
-                >
-                  <summary className="flex cursor-pointer list-none items-center gap-3 px-4 py-3 text-sm [&::-webkit-details-marker]:hidden">
-                    <ListChecks className="size-4 shrink-0 text-muted-foreground" />
-                    <span className="min-w-0 flex-1 truncate font-medium">
-                      {task.title}
-                    </span>
-                    <span className="rounded-md bg-muted px-2 py-1 text-xs text-muted-foreground">
-                      {
+              {[...plan.tasks]
+                .map((task, index) => ({ task, index }))
+                .sort((a, b) => {
+                  const order = {
+                    blocked: 0,
+                    doing: 1,
+                    todo: 2,
+                    done: 3,
+                  } as const;
+                  const diff = order[a.task.status] - order[b.task.status];
+                  return diff !== 0 ? diff : a.index - b.index;
+                })
+                .map(({ task }) => (
+                  <details
+                    data-task-id={task.id}
+                    key={task.id}
+                    className="group rounded-lg border border-border"
+                  >
+                    <summary className="flex cursor-pointer list-none items-center gap-3 px-4 py-3 text-sm [&::-webkit-details-marker]:hidden">
+                      <ListChecks className="size-4 shrink-0 text-muted-foreground" />
+                      <span className="min-w-0 flex-1 truncate font-medium">
+                        {task.title}
+                      </span>
+                      <span className="rounded-md bg-muted px-2 py-1 text-xs text-muted-foreground">
                         {
-                          todo: "A fazer",
-                          doing: "Em andamento",
-                          blocked: "Bloqueada",
-                          done: "Concluída",
-                        }[task.status]
-                      }
-                    </span>
-                    <span className="text-xs text-muted-foreground group-open:hidden">
-                      Editar
-                    </span>
-                  </summary>
-                  <div className="space-y-3 border-t border-border p-4">
-                    <div className="flex flex-wrap items-start justify-between gap-2">
-                      <Input
-                        aria-label="Título da tarefa"
-                        maxLength={300}
-                        value={task.title}
-                        onChange={(e) =>
-                          update({
-                            ...plan,
-                            tasks: plan.tasks.map((t) =>
-                              t.id === task.id
-                                ? { ...t, title: e.target.value }
-                                : t,
-                            ),
-                          })
+                          {
+                            todo: "A fazer",
+                            doing: "Em andamento",
+                            blocked: "Bloqueada",
+                            done: "Concluída",
+                          }[task.status]
                         }
-                      />
-                      <select
-                        aria-label={`Tipo de ${task.title}`}
-                        className="rounded border bg-background p-1 text-xs"
-                        value={task.kind ?? "task"}
-                        onChange={(e) =>
-                          update({
-                            ...plan,
-                            tasks: plan.tasks.map((t) =>
-                              t.id === task.id
-                                ? {
-                                    ...t,
-                                    kind: e.target.value as
-                                      | "task"
-                                      | "feature"
-                                      | "bug",
-                                  }
-                                : t,
-                            ),
-                          })
-                        }
-                      >
-                        <option value="task">Tarefa</option>
-                        <option value="feature">Funcionalidade</option>
-                        <option value="bug">Correção</option>
-                      </select>
-                      <select
-                        aria-label={`Status de ${task.title}`}
-                        className="rounded border bg-background p-1 text-xs"
-                        value={task.status}
-                        onChange={(e) =>
-                          update({
-                            ...plan,
-                            tasks: plan.tasks.map((t) =>
-                              t.id === task.id
-                                ? {
-                                    ...t,
-                                    status: e.target.value as typeof t.status,
-                                  }
-                                : t,
-                            ),
-                          })
-                        }
-                      >
-                        {Object.entries({
-                          todo: "A fazer",
-                          doing: "Em andamento",
-                          blocked: "Bloqueada",
-                          done: "Concluída",
-                        }).map(([value, label]) => (
-                          <option key={value} value={value}>
-                            {label}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                    {(
-                      [
-                        ["owner", "Responsável pela tarefa"],
-                        ["acceptance", "Aceite da tarefa"],
-                        ["evidence", "Evidências ou bloqueio"],
-                      ] as const
-                    ).map(([key, label]) => (
-                      <label key={key} className="block text-xs space-y-1">
-                        <span>{label}</span>
-                        <Textarea
-                          rows={1}
-                          value={task[key]}
+                      </span>
+                      <span className="text-xs text-muted-foreground group-open:hidden">
+                        Editar
+                      </span>
+                    </summary>
+                    <div className="space-y-3 border-t border-border p-4">
+                      <div className="flex flex-wrap items-start justify-between gap-2">
+                        <Input
+                          aria-label="Título da tarefa"
+                          maxLength={300}
+                          value={task.title}
                           onChange={(e) =>
                             update({
                               ...plan,
                               tasks: plan.tasks.map((t) =>
                                 t.id === task.id
-                                  ? { ...t, [key]: e.target.value }
+                                  ? { ...t, title: e.target.value }
                                   : t,
                               ),
                             })
                           }
                         />
+                        <select
+                          aria-label={`Tipo de ${task.title}`}
+                          className="rounded border bg-background p-1 text-xs"
+                          value={task.kind ?? "task"}
+                          onChange={(e) =>
+                            update({
+                              ...plan,
+                              tasks: plan.tasks.map((t) =>
+                                t.id === task.id
+                                  ? {
+                                      ...t,
+                                      kind: e.target.value as
+                                        | "task"
+                                        | "feature"
+                                        | "bug",
+                                    }
+                                  : t,
+                              ),
+                            })
+                          }
+                        >
+                          <option value="task">Tarefa</option>
+                          <option value="feature">Funcionalidade</option>
+                          <option value="bug">Correção</option>
+                        </select>
+                        <select
+                          aria-label={`Status de ${task.title}`}
+                          className="rounded border bg-background p-1 text-xs"
+                          value={task.status}
+                          onChange={(e) =>
+                            update({
+                              ...plan,
+                              tasks: plan.tasks.map((t) =>
+                                t.id === task.id
+                                  ? {
+                                      ...t,
+                                      status: e.target.value as typeof t.status,
+                                    }
+                                  : t,
+                              ),
+                            })
+                          }
+                        >
+                          {Object.entries({
+                            todo: "A fazer",
+                            doing: "Em andamento",
+                            blocked: "Bloqueada",
+                            done: "Concluída",
+                          }).map(([value, label]) => (
+                            <option key={value} value={value}>
+                              {label}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                      {(
+                        [
+                          ["owner", "Responsável pela tarefa"],
+                          ["acceptance", "Aceite da tarefa"],
+                          ["evidence", "Evidências ou bloqueio"],
+                        ] as const
+                      ).map(([key, label]) => (
+                        <label key={key} className="block text-xs space-y-1">
+                          <span>{label}</span>
+                          <Textarea
+                            rows={1}
+                            value={task[key]}
+                            onChange={(e) =>
+                              update({
+                                ...plan,
+                                tasks: plan.tasks.map((t) =>
+                                  t.id === task.id
+                                    ? { ...t, [key]: e.target.value }
+                                    : t,
+                                ),
+                              })
+                            }
+                          />
+                        </label>
+                      ))}
+                      <label className="block text-xs space-y-1">
+                        <span>
+                          Requisitos de produto (ex.: REQ-01, REQ-02 — ver
+                          PRODUCT_MEMORY.md)
+                        </span>
+                        <Input
+                          aria-label={`Requisitos de ${task.title}`}
+                          value={(task.requirementIds ?? []).join(", ")}
+                          placeholder="REQ-01, REQ-02"
+                          onChange={(e) => {
+                            const ids = e.target.value
+                              .split(/[,\s]+/)
+                              .map((s) => s.trim())
+                              .filter(Boolean);
+                            update({
+                              ...plan,
+                              tasks: plan.tasks.map((t) =>
+                                t.id === task.id
+                                  ? {
+                                      ...t,
+                                      requirementIds: ids.length
+                                        ? ids
+                                        : undefined,
+                                    }
+                                  : t,
+                              ),
+                            });
+                          }}
+                        />
                       </label>
-                    ))}
-                    <label className="block text-xs space-y-1">
-                      <span>
-                        Requisitos de produto (ex.: REQ-01, REQ-02 — ver
-                        PRODUCT_MEMORY.md)
-                      </span>
-                      <Input
-                        aria-label={`Requisitos de ${task.title}`}
-                        value={(task.requirementIds ?? []).join(", ")}
-                        placeholder="REQ-01, REQ-02"
-                        onChange={(e) => {
-                          const ids = e.target.value
-                            .split(/[,\s]+/)
-                            .map((s) => s.trim())
-                            .filter(Boolean);
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        disabled={dirty}
+                        onClick={() => void handoff(task.id)}
+                      >
+                        Preparar execução no chat
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() =>
                           update({
                             ...plan,
-                            tasks: plan.tasks.map((t) =>
-                              t.id === task.id
-                                ? {
-                                    ...t,
-                                    requirementIds: ids.length
-                                      ? ids
-                                      : undefined,
-                                  }
-                                : t,
-                            ),
-                          });
-                        }}
-                      />
-                    </label>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      disabled={dirty}
-                      onClick={() => void handoff(task.id)}
-                    >
-                      Preparar execução no chat
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() =>
-                        update({
-                          ...plan,
-                          tasks: plan.tasks.filter((t) => t.id !== task.id),
-                        })
-                      }
-                    >
-                      Remover tarefa
-                    </Button>
-                  </div>
-                </details>
-              ))}
+                            tasks: plan.tasks.filter((t) => t.id !== task.id),
+                          })
+                        }
+                      >
+                        Remover tarefa
+                      </Button>
+                    </div>
+                  </details>
+                ))}
             </div>
           </TabsContent>
           <TabsContent value="engineering">
@@ -787,46 +843,51 @@ function DeliveryEditor({
             <h3 className="text-sm font-medium">
               Decisões e memória do projeto
             </h3>
-            <Button
-              className="mt-3"
-              variant="outline"
-              size="sm"
-              disabled={dirty || !plan.decisions.trim()}
-              onClick={async () => {
-                setBusy(true);
-                try {
-                  await ipc.prompt.create({
-                    slug: undefined,
-                    title:
-                      "Padrões de entrega — " +
-                      (plan.client || "Projeto " + appId),
-                    description:
-                      "Decisões reutilizáveis registradas no projeto " + appId,
-                    content: plan.decisions,
-                  });
-                  showSuccess("Decisões salvas na biblioteca de prompts.");
-                } catch (e) {
-                  showError(e);
-                } finally {
-                  setBusy(false);
-                }
-              }}
-            >
-              Salvar decisões na biblioteca
-            </Button>
             <label className="mt-3 block text-sm space-y-1">
               <span>Decisões técnicas, padrões e aprendizados</span>
+              <span className="block text-xs text-muted-foreground">
+                O que ficou decidido neste projeto — acompanha cada tarefa
+                preparada no chat.
+              </span>
               <Textarea
                 rows={4}
                 value={plan.decisions}
                 onChange={(e) => field("decisions", e.target.value)}
               />
             </label>
-            <p className="mt-2 text-xs text-muted-foreground">
-              As decisões acompanham cada tarefa preparada no chat. Para
-              compartilhar padrões entre projetos, use a biblioteca de skills e
-              templates.
-            </p>
+            <div className="mt-3 flex flex-wrap items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={dirty || !plan.decisions.trim()}
+                onClick={async () => {
+                  setBusy(true);
+                  try {
+                    await ipc.prompt.create({
+                      slug: undefined,
+                      title:
+                        "Padrões de entrega — " +
+                        (plan.client || "Projeto " + appId),
+                      description:
+                        "Decisões reutilizáveis registradas no projeto " +
+                        appId,
+                      content: plan.decisions,
+                    });
+                    showSuccess("Decisões salvas na biblioteca de prompts.");
+                  } catch (e) {
+                    showError(e);
+                  } finally {
+                    setBusy(false);
+                  }
+                }}
+              >
+                Salvar decisões na biblioteca
+              </Button>
+              <span className="text-xs text-muted-foreground">
+                Para compartilhar padrões entre projetos, use a biblioteca de
+                skills e templates.
+              </span>
+            </div>
           </TabsContent>
         </Tabs>
       </fieldset>
