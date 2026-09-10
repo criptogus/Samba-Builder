@@ -152,6 +152,8 @@ const isEndToEndTestBuild = process.env.E2E_TEST_BUILD === "true";
 const isLocalDesktopBuild =
   process.env.SAMBA_LOCAL_DESKTOP_BUILD === "true" && !isEndToEndTestBuild;
 const isWindowsSigningEnabled = process.env.WINDOWS_SIGN === "true";
+// Sem credencial Apple no fork, publica artefato sem assinatura em vez de quebrar o release.
+const shouldSkipCodeSigning = process.env.SKIP_CODE_SIGNING === "true";
 const shouldSkipNativeRebuild =
   process.env.SAMBA_SKIP_NATIVE_REBUILD === "true";
 const nativeRebuildModules = [
@@ -218,7 +220,7 @@ const config: ForgeConfig = {
     icon: "./assets/icon/logo",
 
     osxSign:
-      isEndToEndTestBuild || isLocalDesktopBuild
+      isEndToEndTestBuild || isLocalDesktopBuild || shouldSkipCodeSigning
         ? undefined
         : ({
             identity: process.env.APPLE_TEAM_ID,
@@ -230,7 +232,7 @@ const config: ForgeConfig = {
             preEmbedProvisioningProfile: false,
           } as Record<string, unknown>),
     osxNotarize:
-      isEndToEndTestBuild || isLocalDesktopBuild
+      isEndToEndTestBuild || isLocalDesktopBuild || shouldSkipCodeSigning
         ? undefined
         : {
             appleId: process.env.APPLE_ID!,

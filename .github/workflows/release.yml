@@ -85,15 +85,24 @@ jobs:
           sudo apt-get install -y clang-18
           echo "CC=clang-18" >> "$GITHUB_ENV"
           echo "CXX=clang++-18" >> "$GITHUB_ENV"
+      - name: Detect signing credentials
+        id: signing
+        env:
+          PRESENT_APPLE_CERT: ${{ secrets.MACOS_CERT_P12 }}
+          PRESENT_AZURE_CLIENT: ${{ secrets.AZURE_CLIENT_ID }}
+        run: |
+          if [ -n "$PRESENT_APPLE_CERT" ]; then echo "apple=true" >> "$GITHUB_OUTPUT"; else echo "apple=false" >> "$GITHUB_OUTPUT"; fi
+          if [ -n "$PRESENT_AZURE_CLIENT" ]; then echo "azure=true" >> "$GITHUB_OUTPUT"; else echo "azure=false" >> "$GITHUB_OUTPUT"; fi
+
       - name: add macos cert
-        if: contains(matrix.os.name, 'macos')
+        if: contains(matrix.os.name, 'macos') && steps.signing.outputs.apple == 'true'
         env:
           MACOS_CERT_P12: ${{ secrets.MACOS_CERT_P12 }}
           MACOS_CERT_PASSWORD: ${{ secrets.MACOS_CERT_PASSWORD }}
         run: chmod +x tools/add-macos-cert.sh && . ./tools/add-macos-cert.sh
       # Windows only
       - name: Install Azure Trusted Signing
-        if: contains(matrix.os.name, 'windows')
+        if: contains(matrix.os.name, 'windows') && steps.signing.outputs.azure == 'true'
         shell: powershell
         run: |
           # Install via NuGet instead of winget (winget is slow/unreliable in CI)
@@ -113,7 +122,7 @@ jobs:
           }
 
       - name: Find Windows 11 SDK SignTool
-        if: contains(matrix.os.name, 'windows')
+        if: contains(matrix.os.name, 'windows') && steps.signing.outputs.azure == 'true'
         shell: powershell
         run: |
           $sdkPath = "C:\Program Files (x86)\Windows Kits\10\bin"
@@ -131,7 +140,7 @@ jobs:
           }
 
       - name: Create Azure signing metadata
-        if: contains(matrix.os.name, 'windows')
+        if: contains(matrix.os.name, 'windows') && steps.signing.outputs.azure == 'true'
         shell: pwsh
         run: |
           @'
@@ -161,7 +170,8 @@ jobs:
           AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
           AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
           AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
-          WINDOWS_SIGN: ${{ contains(matrix.os.name, 'windows') && 'true' || '' }}
+          WINDOWS_SIGN: ${{ steps.signing.outputs.azure == 'true' && 'true' || '' }}
+          SKIP_CODE_SIGNING: ${{ steps.signing.outputs.apple != 'true' && 'true' || '' }}
 
       - name: Generate release provenance manifest
         env:
