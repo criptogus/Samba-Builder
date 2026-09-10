@@ -1,25 +1,42 @@
 # Baixar o Samba Builder
 
-## Estado atual
+## Publicado
 
-**Ainda não há instalador publicado neste repositório.** Nenhuma release ou tag foi publicada em `criptogus/Samba-Builder` — a página [releases](https://github.com/criptogus/Samba-Builder/releases) está vazia até a primeira publicação acontecer.
+| Plataforma | Arquivo | Download |
+| --- | --- | --- |
+| **macOS — Apple Silicon** | `SambaBuilder-1.14.0-beta.1-arm64.zip` (180 MB) | [baixar](https://github.com/criptogus/Samba-Builder/releases/download/v1.14.0-beta.1/SambaBuilder-1.14.0-beta.1-arm64.zip) |
+| macOS — Intel | — | aguardando o workflow de release |
+| Windows 10/11 (x64) | — | aguardando o workflow de release |
+| Linux (`.deb`/`.rpm`/`.AppImage`) | — | aguardando o workflow de release |
 
-## Caminho oficial (todas as plataformas)
+Versão atual: **[v1.14.0-beta.1](https://github.com/criptogus/Samba-Builder/releases/tag/v1.14.0-beta.1)** (pré-lançamento) · [todas as versões](https://github.com/criptogus/Samba-Builder/releases).
 
-O workflow **[Release app](https://github.com/criptogus/Samba-Builder/actions/workflows/release.yml)** gera os instaladores e os publica como **rascunho** para revisão:
+### Instalar no macOS
 
-1. **Actions → Release app → Run workflow** (branch `main`).
-2. Ao terminar, revise o rascunho em [releases](https://github.com/criptogus/Samba-Builder/releases) e publique.
-3. Os arquivos aparecem por plataforma:
+1. Baixe o `.zip` e extraia.
+2. Arraste **Samba Builder.app** para *Aplicativos*.
+3. O build **não é assinado** (não há certificado Apple configurado): na primeira abertura use **botão direito → Abrir**, ou rode uma vez:
 
-| Plataforma              | Arquivo gerado                           |
-| ----------------------- | ---------------------------------------- |
-| macOS — Apple Silicon   | `SambaBuilder-<versão>-arm64.zip`        |
-| macOS — Intel           | `SambaBuilder-<versão>-x64.zip`          |
-| Windows 10/11 (x64)     | `SambaBuilder-<versão>-Setup.exe`        |
-| Linux — Debian/Ubuntu   | `samba-builder_<versão>_amd64.deb`       |
-| Linux — Fedora/openSUSE | `samba-builder-<versão>-1.x86_64.rpm`    |
-| Linux — portátil        | `samba-builder-<versão>-x86_64.AppImage` |
+   ```sh
+   xattr -cr "/Applications/Samba Builder.app"
+   ```
+
+Integridade — SHA-256 do arquivo publicado: `4d43f1ed51219e558015561842c8a26d86f83f869bada14d550266e54b03ecdc`
+
+### Por que Windows e Linux ainda não estão aqui
+
+O workflow **[Release app](https://github.com/criptogus/Samba-Builder/actions/workflows/release.yml)** gera macOS (Apple Silicon e Intel), Windows e Linux e publica como rascunho para revisão. No momento **nenhum job do GitHub Actions inicia** nesta conta: o próprio GitHub responde `The job was not started because recent account payments have failed or your spending limit needs to be increased`. Resolvido o billing em *Settings → Billing & plans*, o workflow produz as três plataformas — e o macOS Intel junto.
+
+Nomes dos arquivos que o workflow publica:
+
+| Plataforma | Arquivo |
+| --- | --- |
+| macOS — Apple Silicon | `SambaBuilder-<versão>-arm64.zip` |
+| macOS — Intel | `SambaBuilder-<versão>-x64.zip` |
+| Windows 10/11 (x64) | `SambaBuilder-<versão>-Setup.exe` |
+| Linux — Debian/Ubuntu | `samba-builder_<versão>_amd64.deb` |
+| Linux — Fedora/openSUSE | `samba-builder-<versão>-1.x86_64.rpm` |
+| Linux — portátil | `samba-builder-<versão>-x86_64.AppImage` |
 
 O repositório é **privado**: o download exige uma conta com acesso.
 
