@@ -5,6 +5,7 @@ import {
   GitBranch,
   Info,
   SquareTerminal,
+  MessageSquare,
 } from "lucide-react";
 import { PanelRightClose } from "lucide-react";
 import { useTranslation } from "react-i18next";
@@ -211,15 +212,23 @@ export function ChatHeader({
       )}
 
       {/* Why is this pt-0.5? Because the loading bar is h-1 (it always takes space) and we want the vertical spacing to be consistent.*/}
-      <div className="@container flex items-center justify-between pb-1.5 pt-0.5">
-        <div className="flex items-center space-x-2">
+      <div className="@container flex items-center justify-between border-b border-border pb-1.5 pt-0.5">
+        <div className="flex min-w-0 items-center space-x-2">
+          <div className="flex items-center gap-1.5 pl-3">
+            <MessageSquare
+              size={15}
+              className="shrink-0 text-muted-foreground"
+            />
+            <span className="text-sm font-medium">{t("header.chatArea")}</span>
+          </div>
           <Button
             onClick={handleNewChat}
             variant="ghost"
-            className="hidden @2xs:flex items-center justify-start gap-2 mx-2 py-3"
+            size="sm"
+            className="hidden @2xs:flex items-center justify-start gap-1.5 py-1.5"
             data-testid="new-chat-button"
           >
-            <PlusCircle size={16} />
+            <PlusCircle size={15} />
             <span>{t("newChat")}</span>
           </Button>
           <Button

@@ -339,7 +339,8 @@
     "switchToMainBranch": "Mudar para a branch main",
     "checkingOut": "Fazendo checkout...",
     "masterRenamed": "Branch master renomeada para main",
-    "versionCount": "Versão {{count}}"
+    "versionCount": "Versão {{count}}",
+    "chatArea": "Chat"
   },
   "errorBox": {
     "accessWithSambaPro": "Acessar com Samba Builder",
