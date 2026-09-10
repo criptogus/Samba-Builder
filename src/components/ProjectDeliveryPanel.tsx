@@ -9,6 +9,7 @@ import {
   CheckCircle2,
   ClipboardList,
   ListChecks,
+  PackageCheck,
   ShieldCheck,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -19,6 +20,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
+import { DeliveryPackDialog } from "@/components/DeliveryPackDialog";
+import { useLoadApps } from "@/hooks/useLoadApps";
 import { ProductCoachButton } from "./ProductCoachButton";
 import { MeetingBriefingButton } from "./MeetingBriefingButton";
 import {
@@ -67,6 +70,10 @@ function DeliveryEditor({
   record: { appId: number; revision: number; plan: DeliveryPlan };
 }) {
   const { appId } = record;
+  const { apps } = useLoadApps();
+  const appName =
+    apps.find((app) => app.id === appId)?.name ?? `Projeto ${appId}`;
+  const [showDeliveryPack, setShowDeliveryPack] = useState(false);
   const draftKey = `samba.delivery:${getActiveWindowSessionId()}:${appId}`;
   const [initial] = useState(() => {
     try {
@@ -703,6 +710,14 @@ function DeliveryEditor({
               >
                 Preparar validação no chat
               </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowDeliveryPack(true)}
+              >
+                <PackageCheck size={15} />
+                Exportar pacote de entrega
+              </Button>
 
               <details
                 className="rounded-lg border p-3"
@@ -932,6 +947,14 @@ function DeliveryEditor({
           pode ser contabilizado.
         </p>
       </details>
+
+      <DeliveryPackDialog
+        open={showDeliveryPack}
+        onOpenChange={setShowDeliveryPack}
+        appName={appName}
+        plan={plan}
+        approvals={approvals.data}
+      />
     </section>
   );
 }

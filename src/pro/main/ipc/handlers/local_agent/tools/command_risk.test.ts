@@ -81,7 +81,9 @@ describe("classifyRepoCommand", () => {
     expect(risk).not.toBeNull();
     expect(risk!.kind).toBe("publish");
     // e um dry-run local não isenta a cláusula seguinte
-    expect(classifyRepoCommand("npm test --dry-run && git push")).not.toBeNull();
+    expect(
+      classifyRepoCommand("npm test --dry-run && git push"),
+    ).not.toBeNull();
   });
 
   it("is case-insensitive and tolerates extra whitespace", () => {

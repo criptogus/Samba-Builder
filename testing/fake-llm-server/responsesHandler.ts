@@ -427,7 +427,8 @@ export const createResponsesHandler =
       });
     }
 
-    if (!consentMatch && localAgentTurn?.text) messageContent = localAgentTurn.text;
+    if (!consentMatch && localAgentTurn?.text)
+      messageContent = localAgentTurn.text;
 
     // Non-streaming response
     if (!stream) {

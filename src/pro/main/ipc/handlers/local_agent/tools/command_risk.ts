@@ -50,14 +50,12 @@ const RISK_PATTERNS: RiskPattern[] = [
   },
   {
     kind: "publish",
-    test:
-      /(^|\s|[;&|(])(docker\s+push|vercel\s+(deploy|--prod)|netlify\s+deploy|firebase\s+(deploy|hosting:channel:deploy)|fly\s+deploy|wrangler\s+(deploy|publish))(\s|$)/,
+    test: /(^|\s|[;&|(])(docker\s+push|vercel\s+(deploy|--prod)|netlify\s+deploy|firebase\s+(deploy|hosting:channel:deploy)|fly\s+deploy|wrangler\s+(deploy|publish))(\s|$)/,
     reason: "isto publica a aplicação em um ambiente fora desta máquina.",
   },
   {
     kind: "publish",
-    test:
-      /(^|\s|[;&|(])(terraform|tofu)\s+apply|(^|\s|[;&|(])kubectl\s+(apply|delete)|(^|\s|[;&|(])aws\s+(s3\s+sync|deploy)/,
+    test: /(^|\s|[;&|(])(terraform|tofu)\s+apply|(^|\s|[;&|(])kubectl\s+(apply|delete)|(^|\s|[;&|(])aws\s+(s3\s+sync|deploy)/,
     reason: "isto altera infraestrutura/produção fora desta máquina.",
   },
 
@@ -80,8 +78,7 @@ const RISK_PATTERNS: RiskPattern[] = [
   },
   {
     kind: "destroy",
-    test:
-      /(^|\s|[;&|(])git\s+(filter-branch|filter-repo)(\s|$)/,
+    test: /(^|\s|[;&|(])git\s+(filter-branch|filter-repo)(\s|$)/,
     reason: "isto reescreve o histórico do repositório.",
   },
   {
@@ -98,8 +95,7 @@ const RISK_PATTERNS: RiskPattern[] = [
   // --- Rede / saída de dados ---
   {
     kind: "network",
-    test:
-      /(^|\s|[;&|(])(curl|wget|http|httpie)\s/,
+    test: /(^|\s|[;&|(])(curl|wget|http|httpie)\s/,
     reason:
       "comando de rede: pode enviar dados do projeto para fora desta máquina.",
   },
@@ -129,8 +125,7 @@ const RISK_PATTERNS: RiskPattern[] = [
   // --- Instalação (altera dependências do projeto) ---
   {
     kind: "install",
-    test:
-      /(^|\s|[;&|(])(npm|pnpm|yarn)\s+(i|install|add|ci)(\s|$)/,
+    test: /(^|\s|[;&|(])(npm|pnpm|yarn)\s+(i|install|add|ci)(\s|$)/,
     reason: "isto instala/atualiza dependências do projeto.",
   },
   {
@@ -175,6 +170,9 @@ export function classifyRepoCommand(command: string): CommandRisk | null {
 }
 
 /** Texto do pedido de consentimento para um comando classificado. */
-export function describeCommandRisk(command: string, risk: CommandRisk): string {
+export function describeCommandRisk(
+  command: string,
+  risk: CommandRisk,
+): string {
   return `${command}\n\n${risk.reason}`;
 }

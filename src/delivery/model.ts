@@ -132,11 +132,13 @@ export function deliveryBlockers(plan: DeliveryPlan): string[] {
   // requisito existente na política (REQ-xx do PRODUCT_MEMORY.md).
   const policy = plan.engineeringPolicy;
   if (policy && policy.profile !== "public") {
-    if (!policy.requirements.length)
+    // Política parcial (plano antigo/importado) não pode derrubar os bloqueios.
+    const requirements = policy.requirements ?? [];
+    if (!requirements.length)
       result.push(
         "Defina os requisitos do produto na política de engenharia (REQ-xx com aceite) e vincule cada tarefa.",
       );
-    const known = new Set(policy.requirements.map((r) => r.id));
+    const known = new Set(requirements.map((r) => r.id));
     const unlinked = plan.tasks.filter(
       (t) => !(t.requirementIds ?? []).length,
     ).length;
