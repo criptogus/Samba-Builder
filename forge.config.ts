@@ -174,6 +174,9 @@ const config: ForgeConfig = {
   outDir: isLocalDesktopBuild ? "out/desktop" : undefined,
   packagerConfig: {
     name: "Samba Builder",
+    // O binário Linux/Windows precisa se chamar como o package.json (`samba-builder`):
+    // é o nome que o Forge e os makers procuram. O nome de exibição segue "Samba Builder".
+    executableName: "samba-builder",
     // Keep the existing application identity while correcting its display name.
     appBundleId: "com.sambatech.builder",
     // E2E test builds install local file: dependencies as links on Windows.
