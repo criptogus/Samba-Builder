@@ -62,6 +62,19 @@ type DialogScreen = "main" | "review" | "upload-complete";
 
 const SCREEN_ORDER: DialogScreen[] = ["main", "review", "upload-complete"];
 
+/**
+ * Local reference shown for a session report. The upload path to Samba's
+ * servers was removed (no data leaves the machine), so this is generated
+ * client-side purely as a human-readable handle for the report the user files.
+ */
+function createLocalSessionId(): string {
+  const raw =
+    typeof globalThis.crypto?.randomUUID === "function"
+      ? globalThis.crypto.randomUUID()
+      : `${Date.now().toString(36)}${Math.random().toString(36).slice(2)}`;
+  return `local:${raw.replace(/-/g, "").slice(0, 12)}`;
+}
+
 const screenVariants = {
   enter: (direction: number) => ({
     x: direction > 0 ? 80 : -80,
@@ -395,10 +408,13 @@ export function HelpDialog() {
   };
 
   const handleSubmitChatLogs = async () => {
-    // Samba Builder: sem backend próprio — os logs NÃO são enviados a servidor
-    // externo (o upload para o servidor do Samba foi removido). O suporte é
-    // acionado pelo contato da Samba.
-    ipc.system.openExternalUrl("https://sambatech.com");
+    // Samba Builder: sem backend próprio — o bundle da sessão NÃO é enviado a
+    // servidor externo (o upload para o servidor do Samba foi removido). O
+    // relatório é montado localmente e identificado por uma referência local;
+    // o suporte é acionado pelo contato da Samba no GitHub.
+    if (!debugBundle) return;
+    setSessionId(createLocalSessionId());
+    navigateTo("upload-complete");
   };
 
   const handleCancelReview = () => {

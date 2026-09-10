@@ -437,12 +437,12 @@ if (fs.existsSync(gitDir)) {
 // https://www.electronjs.org/docs/latest/tutorial/launch-app-from-url-in-another-app#main-process-mainjs
 if (process.defaultApp) {
   if (process.argv.length >= 2) {
-    app.setAsDefaultProtocolClient("samba", process.execPath, [
+    app.setAsDefaultProtocolClient("sambabuilder", process.execPath, [
       path.resolve(process.argv[1]),
     ]);
   }
 } else {
-  app.setAsDefaultProtocolClient("samba");
+  app.setAsDefaultProtocolClient("sambabuilder");
 }
 
 export async function onReady() {

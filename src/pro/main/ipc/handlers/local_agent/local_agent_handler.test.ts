@@ -189,6 +189,13 @@ vi.mock("electron-log", () => ({
   },
 }));
 
+// Project token accounting hits the DB directly and uses a top-level
+// electron-log `warn` (not the scoped logger). It is orthogonal to the
+// local-agent stream behavior under test, so stub it out.
+vi.mock("@/ipc/services/project_accounting", () => ({
+  recordProjectTokenUsage: vi.fn(),
+}));
+
 // Track database operations
 const dbOperations: {
   updates: Array<{ table: string; id: number; data: Record<string, unknown> }>;

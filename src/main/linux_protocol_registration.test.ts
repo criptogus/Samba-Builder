@@ -122,7 +122,7 @@ describe("buildDesktopFile", () => {
       tryExec: "/opt/samba/samba",
     });
 
-    expect(contents).toContain("MimeType=x-scheme-handler/samba;");
+    expect(contents).toContain("MimeType=x-scheme-handler/sambabuilder;");
     expect(contents).toContain(`Exec="/opt/samba/samba" %u`);
     expect(contents).toContain("TryExec=/opt/samba/samba");
     expect(contents).toContain("NoDisplay=true");

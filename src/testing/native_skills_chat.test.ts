@@ -58,7 +58,7 @@ it("loads web-performance guidance only on the selected request", async () => {
   );
   expect(result.eventsFor("chat:response:error")).toHaveLength(0);
   const dump = readFileSync(result.getServerDump().dumpPath, "utf8");
-  expect(dump).toContain("# Desempenho de aplicações e memória");
-  expect(dump).toContain("App Router, Pages Router ou Vite");
-  expect(dump).not.toContain("# Segurança de aplicações");
+  expect(dump).toContain("# Performance e Resiliência");
+  expect(dump).toContain("Meça gargalos com carga comparável");
+  expect(dump).not.toContain("# Security by Design");
 });

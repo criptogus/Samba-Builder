@@ -49,9 +49,14 @@ import {
   stopAppGarbageCollection,
 } from "@/ipc/utils/process_manager";
 import { configureTrustedRenderer } from "@/ipc/utils/renderer_security";
+import {
+  getTestFetchOption,
+  setModelClientFetchForTesting,
+} from "@/ipc/utils/test_fetch_override";
 import { writeSettings } from "@/main/settings";
 import type { UserSettings } from "@/lib/schemas";
 import { asc, eq } from "drizzle-orm";
+import { fetch as undiciFetch } from "undici";
 
 import { generateAppFilesSnapshotData } from "../../e2e-tests/helpers/generateAppFilesSnapshotData";
 import {
@@ -244,6 +249,7 @@ export async function setupChatFlowHarness(
   const envSnapshot = snapshotHarnessEnv();
   let fakeLlm: FakeLlmServerHandle | undefined;
   let tmpRoot: string | undefined;
+  let installedFetchOverride = false;
 
   try {
     if (!electronMock?.ipcHandlers) {
@@ -251,6 +257,20 @@ export async function setupChatFlowHarness(
         "setupChatFlowHarness requires { electronMock } — the hoisted object " +
           'passed to vi.mock("electron", ...). See CHAT_FLOW_HARNESS.md.',
       );
+    }
+
+    // The BYOK provider-key guard refuses a provider with no connected API key
+    // unless a test fetch override is present (the fake LLM server needs no
+    // key). The hybrid harness installs undici's fetch before delegating here;
+    // when this node harness is used directly, install it now so requests to
+    // the fake server are allowed through.
+    if (!getTestFetchOption().fetch) {
+      setModelClientFetchForTesting(
+        undiciFetch as unknown as Parameters<
+          typeof setModelClientFetchForTesting
+        >[0],
+      );
+      installedFetchOverride = true;
     }
 
     // NODE_ENV must be "development" before app modules are imported; the hoisted
@@ -510,6 +530,10 @@ export async function setupChatFlowHarness(
         electronMock.ipcHandlers.clear();
         electronMock.ipcListeners?.clear();
         restoreHarnessEnv(envSnapshot);
+        if (installedFetchOverride) {
+          setModelClientFetchForTesting(undefined);
+          installedFetchOverride = false;
+        }
         activeChatFlowHarness = false;
         for (const release of releaseActorAdmissions.reverse()) {
           release();
@@ -566,6 +590,10 @@ export async function setupChatFlowHarness(
     electronMock.ipcHandlers.clear();
     electronMock.ipcListeners?.clear();
     restoreHarnessEnv(envSnapshot);
+    if (installedFetchOverride) {
+      setModelClientFetchForTesting(undefined);
+      installedFetchOverride = false;
+    }
     throw error;
   }
 }

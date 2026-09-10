@@ -251,11 +251,11 @@ export function createSambaEngine(
           headers: {
             ...outgoingHeaders,
             ...(modifiedRequestId && {
-              "X-Samba Builder-Request-Id": modifiedRequestId,
+              "X-Samba-Request-Id": modifiedRequestId,
             }),
             ...(includeFreeQuotaKey &&
               requestId && {
-                "X-Samba Builder-Free-Quota-Key": requestId,
+                "X-Samba-Free-Quota-Key": requestId,
               }),
           },
           body: JSON.stringify(parsedBody),
@@ -399,7 +399,7 @@ export async function transcribeWithSambaEngine(
     method: "POST",
     headers: {
       Authorization: `Bearer ${apiKey}`,
-      "X-Samba Builder-Request-Id": requestId,
+      "X-Samba-Request-Id": requestId,
       ...options.headers,
     },
     body: formData,

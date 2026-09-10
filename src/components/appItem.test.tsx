@@ -55,14 +55,14 @@ describe("AppItem", () => {
 
     fireEvent.contextMenu(screen.getByTestId("app-list-item-Product app"));
 
-    expect(screen.queryByText("Open in New Window")).toBeNull();
+    expect(screen.queryByText("Abrir em nova janela")).toBeNull();
   });
 
   it("explicitly duplicates an app surface when the experiment is enabled", async () => {
     renderAppItem(true);
 
     fireEvent.contextMenu(screen.getByTestId("app-list-item-Product app"));
-    fireEvent.click(await screen.findByText("Open in New Window"));
+    fireEvent.click(await screen.findByText("Abrir em nova janela"));
 
     await waitFor(() =>
       expect(mocks.openEntityInNewWindow).toHaveBeenCalledWith({

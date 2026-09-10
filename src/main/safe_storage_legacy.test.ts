@@ -87,6 +87,15 @@ function makeFakeReader(map: Record<string, string>): FakeReader {
   };
 }
 
+function isInProcessKeychainReaderAddonAvailable(): boolean {
+  try {
+    require("samba-keychain-reader");
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 function assertInProcessKeychainReaderAddonAvailable(): void {
   try {
     require("samba-keychain-reader");
@@ -810,6 +819,8 @@ describe.skipIf(process.platform !== "darwin")(
     afterAll(() => {
       try {
         execFileSync("security", ["delete-keychain", keychainPath]);
+      } catch {
+        // Keychain already gone (or never created): nothing to clean up.
       } finally {
         fs.rmSync(tmpDir, { recursive: true, force: true });
       }
@@ -891,8 +902,9 @@ describe.skipIf(process.platform !== "darwin")(
   },
 );
 
-describe.skipIf(process.platform !== "darwin")(
-  "InProcessKeychainPasswordReader (darwin integration)",
+describe.skipIf(
+  process.platform !== "darwin" || !isInProcessKeychainReaderAddonAvailable(),
+)("InProcessKeychainPasswordReader (darwin integration)",
   () => {
     const tmpDir = fs.mkdtempSync(
       path.join(os.tmpdir(), "samba-safe-storage-in-process-"),
@@ -943,6 +955,8 @@ describe.skipIf(process.platform !== "darwin")(
     afterAll(() => {
       try {
         execFileSync("security", ["delete-keychain", keychainPath]);
+      } catch {
+        // Keychain already gone (or never created): nothing to clean up.
       } finally {
         fs.rmSync(tmpDir, { recursive: true, force: true });
       }

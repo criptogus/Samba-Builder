@@ -9,7 +9,6 @@ import { selectedChatIdAtom } from "@/atoms/chatAtoms";
 const mocks = vi.hoisted(() => ({
   getSystemDebugInfo: vi.fn(),
   getSessionDebugBundle: vi.fn(),
-  uploadToSignedUrl: vi.fn(),
   openExternalUrl: vi.fn(),
   takeScreenshot: vi.fn(),
   showInfo: vi.fn(),
@@ -20,7 +19,6 @@ vi.mock("@/ipc/types", () => ({
     system: {
       getSystemDebugInfo: mocks.getSystemDebugInfo,
       openExternalUrl: mocks.openExternalUrl,
-      uploadToSignedUrl: mocks.uploadToSignedUrl,
       takeScreenshot: mocks.takeScreenshot,
     },
     misc: { getSessionDebugBundle: mocks.getSessionDebugBundle },
@@ -149,12 +147,20 @@ function OpenHelpDialog() {
   );
 }
 
-/** Walks the upload flow up to the screen that offers to create the issue. */
+/**
+ * Session reference shown on the upload-complete screen, captured as the flow
+ * is walked. The uploader no longer talks to a server, so the reference is
+ * generated locally and cannot be hard-coded in assertions.
+ */
+let uploadedSessionId = "";
+
+/** Walks the (now local-only) session-report flow up to the issue screen. */
 async function reachUploadCompleteScreen() {
   render(<OpenHelpDialog />);
   fireEvent.click(await screen.findByText("Upload Chat Session"));
   fireEvent.click(await screen.findByRole("button", { name: /^Upload$/ }));
   await screen.findByText("Upload Complete");
+  uploadedSessionId = screen.getByText(/^local:/).textContent ?? "";
 }
 
 function bodyOfOpenedIssue(): string {
@@ -171,17 +177,6 @@ describe("HelpDialog screenshot prompt", () => {
     vi.clearAllMocks();
     mocks.getSystemDebugInfo.mockResolvedValue(debugInfo);
     mocks.getSessionDebugBundle.mockResolvedValue(bundle);
-    mocks.uploadToSignedUrl.mockResolvedValue(undefined);
-    vi.stubGlobal(
-      "fetch",
-      vi.fn().mockResolvedValue({
-        ok: true,
-        json: async () => ({
-          uploadUrl: "https://upload.test/signed",
-          filename: "abc.json",
-        }),
-      }),
-    );
   });
 
   it("offers the screenshot prompt before creating a session issue", async () => {
@@ -203,7 +198,7 @@ describe("HelpDialog screenshot prompt", () => {
 
     await waitFor(() => expect(mocks.openExternalUrl).toHaveBeenCalled());
     const body = bodyOfOpenedIssue();
-    expect(body).toContain("Session ID: v2:abc");
+    expect(body).toContain(`Session ID: ${uploadedSessionId}`);
     expect(body).toContain("Screenshot status: declined");
   });
 
@@ -216,7 +211,7 @@ describe("HelpDialog screenshot prompt", () => {
 
     await waitFor(() => expect(mocks.openExternalUrl).toHaveBeenCalled());
     const body = bodyOfOpenedIssue();
-    expect(body).toContain("Session ID: v2:abc");
+    expect(body).toContain(`Session ID: ${uploadedSessionId}`);
     expect(body).toContain("Screenshot status: captured");
   });
 
@@ -230,7 +225,7 @@ describe("HelpDialog screenshot prompt", () => {
     // Back where they were, with the session ID they just uploaded intact and
     // one click from filing, rather than stranded with the upload orphaned.
     expect(await screen.findByText("Upload Complete")).toBeTruthy();
-    expect(screen.getByText("v2:abc")).toBeTruthy();
+    expect(screen.getByText(uploadedSessionId)).toBeTruthy();
     expect(screen.queryByText("Take a screenshot?")).toBeNull();
     expect(mocks.openExternalUrl).not.toHaveBeenCalled();
 
@@ -238,7 +233,7 @@ describe("HelpDialog screenshot prompt", () => {
     fireEvent.click(screen.getByText("Create GitHub Issue"));
     fireEvent.click(await screen.findByText("Create issue without screenshot"));
     await waitFor(() => expect(mocks.openExternalUrl).toHaveBeenCalled());
-    expect(bodyOfOpenedIssue()).toContain("Session ID: v2:abc");
+    expect(bodyOfOpenedIssue()).toContain(`Session ID: ${uploadedSessionId}`);
   });
 
   it("reports progress outside the prompt once it is answered", async () => {
@@ -292,7 +287,7 @@ describe("HelpDialog screenshot prompt", () => {
     await waitFor(() => expect(mocks.openExternalUrl).toHaveBeenCalled());
 
     // The arriving report files correctly and does not touch what is on screen.
-    expect(bodyOfOpenedIssue()).toContain("Session ID: v2:abc");
+    expect(bodyOfOpenedIssue()).toContain(`Session ID: ${uploadedSessionId}`);
     expect(screen.getByText("Need help with Samba Builder?")).toBeTruthy();
   });
 
@@ -340,9 +335,9 @@ describe("HelpDialog screenshot prompt", () => {
     const bodies = mocks.openExternalUrl.mock.calls.map(
       (call) => new URL(call[0] as string).searchParams.get("body") ?? "",
     );
-    expect(bodies.some((body) => body.includes("Session ID: v2:abc"))).toBe(
-      true,
-    );
+    expect(
+      bodies.some((body) => body.includes(`Session ID: ${uploadedSessionId}`)),
+    ).toBe(true);
     expect(
       bodies.some((body) => body.includes("## Bug Description (required)")),
     ).toBe(true);

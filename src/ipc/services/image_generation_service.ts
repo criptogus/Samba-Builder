@@ -179,7 +179,7 @@ export class ImageGenerationService {
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${apiKey}`,
-          "X-Samba Builder-Request-Id": requestId,
+          "X-Samba-Request-Id": requestId,
         },
         body: JSON.stringify({
           prompt: fullPrompt,

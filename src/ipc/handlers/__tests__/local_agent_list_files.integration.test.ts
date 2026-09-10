@@ -180,6 +180,15 @@ describe("local-agent list_files (integration)", () => {
     git("add", "-A");
     git("commit", "-m", "init");
 
+    // The fixture's .gitignore keeps `.samba/` out of git, so an ignored plan
+    // file can never be committed with the fixture. Create it on disk here —
+    // list_files must surface it only when include_ignored=true.
+    fs.mkdirSync(path.join(appDir, ".samba", "plans"), { recursive: true });
+    fs.writeFileSync(
+      path.join(appDir, ".samba", "plans", "test-plan.md"),
+      "# Test plan\n",
+    );
+
     const [appRow] = await harness.db
       .insert(apps)
       .values({ name: "minimal-with-samba", path: appDir })

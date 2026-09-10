@@ -46,6 +46,9 @@ describe("agent Git utilities", () => {
   beforeEach(async () => {
     repo = await fs.promises.mkdtemp(path.join(os.tmpdir(), "agent-git-"));
     await git(repo, "init", "-b", "main");
+    // Neutralize ambient global excludes (e.g. a user-level `**/.env`) so the
+    // repository's tracked set is exactly what this test writes.
+    await git(repo, "config", "core.excludesFile", os.devNull);
     await git(repo, "config", "user.name", "Test User");
     await git(repo, "config", "user.email", "test@example.com");
     await fs.promises.writeFile(path.join(repo, "file.txt"), "base\n");

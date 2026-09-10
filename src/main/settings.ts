@@ -623,6 +623,8 @@ function readExistingSettingsFile(
     if (supabase.organizations) {
       for (const orgId in supabase.organizations) {
         const org = supabase.organizations[orgId];
+        const hadAccessToken = Boolean(org.accessToken);
+        const hadRefreshToken = Boolean(org.refreshToken);
         const accessToken = org.accessToken
           ? resolveStoredSecret(
               org.accessToken,
@@ -640,17 +642,26 @@ function readExistingSettingsFile(
             )
           : undefined;
 
-        // In preserve mode a failed decrypt returns the ciphertext (truthy), so the
-        // org is only dropped when a token field is genuinely absent. In drop mode a
-        // failed decrypt returns undefined, keeping the original "drop the whole org"
-        // behavior for the consumer-facing read.
-        if (!accessToken || !refreshToken) {
+        // A token that is absent is not a failure: Personal Access Token orgs
+        // carry no refresh token, and dropping them here would make a PAT
+        // connection vanish on the next read. Drop the org only when it holds
+        // no credentials at all, or when a token that IS stored failed to
+        // resolve (locked ciphertext on the consumer-facing read).
+        if (
+          (!hadAccessToken && !hadRefreshToken) ||
+          (hadAccessToken && !accessToken) ||
+          (hadRefreshToken && !refreshToken)
+        ) {
           delete supabase.organizations[orgId];
           continue;
         }
 
-        org.accessToken = accessToken;
-        org.refreshToken = refreshToken;
+        if (accessToken) {
+          org.accessToken = accessToken;
+        }
+        if (refreshToken) {
+          org.refreshToken = refreshToken;
+        }
       }
     }
   }

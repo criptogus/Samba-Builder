@@ -177,7 +177,7 @@ export function createSambaMediaProtocolHandler({
             requestedVersion === thumbnail.sourceVersion
               ? "private, max-age=31536000, immutable"
               : "no-store",
-          "X-Samba Builder-Thumbnail-Cache": thumbnail.cacheHit
+          "X-Samba-Thumbnail-Cache": thumbnail.cacheHit
             ? "hit"
             : "miss",
         },

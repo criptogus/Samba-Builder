@@ -418,7 +418,7 @@ export const createResponsesHandler =
       if (disconnected || res.destroyed) return;
     }
 
-    if (stream && localAgentTurn?.toolCalls?.length) {
+    if (stream && !consentMatch && localAgentTurn?.toolCalls?.length) {
       return streamResponsesToolCalls({
         res,
         baseResponseFields,
@@ -427,7 +427,7 @@ export const createResponsesHandler =
       });
     }
 
-    if (localAgentTurn?.text) messageContent = localAgentTurn.text;
+    if (!consentMatch && localAgentTurn?.text) messageContent = localAgentTurn.text;
 
     // Non-streaming response
     if (!stream) {
