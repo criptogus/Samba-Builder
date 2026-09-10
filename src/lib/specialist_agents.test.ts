@@ -8,7 +8,7 @@ describe("specialist agents — skills transformados em agentes", () => {
     const ids = specialistAgents.map((a) => a.id);
     expect(new Set(ids).size).toBe(ids.length);
     for (const agent of specialistAgents) {
-      expect(agent.emoji.trim()).not.toBe("");
+      expect(agent.icon.trim()).not.toBe("");
       expect(agent.tagline.trim().length).toBeGreaterThan(5);
       expect(agent.description.trim().length).toBeGreaterThan(20);
       expect(agent.tasks.length).toBeGreaterThanOrEqual(2);

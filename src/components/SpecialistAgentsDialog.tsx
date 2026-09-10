@@ -13,7 +13,47 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { ArrowLeft, Send, Users } from "lucide-react";
+import {
+  ArrowLeft,
+  Send,
+  Users,
+  Building2,
+  ClipboardList,
+  Cloud,
+  FlaskConical,
+  Gauge,
+  Network,
+  Palette,
+  ScanSearch,
+  ShieldCheck,
+  Smartphone,
+  type LucideIcon,
+} from "lucide-react";
+import { nativeSkills } from "@/shared/native_skills";
+
+const agentIcons: Record<string, LucideIcon> = {
+  Network,
+  ShieldCheck,
+  Palette,
+  FlaskConical,
+  Gauge,
+  Building2,
+  ClipboardList,
+  ScanSearch,
+  Smartphone,
+  Cloud,
+};
+
+/** Nome amigável do skill (título do catálogo) em vez do slug técnico. */
+function skillLabel(slug: string): string {
+  return nativeSkills.find((s) => s.slug === slug)?.title ?? slug;
+}
+
+/** Ícone do agente, consistente com a iconografia do app (lucide). */
+function AgentIcon({ icon, className }: { icon: string; className?: string }) {
+  const Icon = agentIcons[icon] ?? Users;
+  return <Icon className={className} aria-hidden="true" />;
+}
 
 /**
  * Agentes especialistas: skills do Samba Builder transformados em
@@ -80,7 +120,7 @@ export function SpecialistAgentsDialog({
                 >
                   <ArrowLeft className="h-4 w-4" />
                 </Button>
-                <span>{agent.emoji}</span> {agent.name}
+                <AgentIcon icon={agent.icon} className="h-4 w-4" /> {agent.name}
               </>
             ) : (
               <>
@@ -104,8 +144,11 @@ export function SpecialistAgentsDialog({
                 onClick={() => setAgent(a)}
                 className="flex items-start gap-3 rounded-md border p-3 text-left hover:bg-accent/50 transition-colors"
               >
-                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-muted text-xl">
-                  {a.emoji}
+                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-muted">
+                  <AgentIcon
+                    icon={a.icon}
+                    className="h-4.5 w-4.5 text-muted-foreground"
+                  />
                 </span>
                 <span className="min-w-0">
                   <span className="block text-sm font-medium">{a.name}</span>
@@ -120,7 +163,7 @@ export function SpecialistAgentsDialog({
           <div className="space-y-3 p-4">
             {agent.skills.length > 0 && (
               <p className="text-xs text-muted-foreground">
-                Skills: {agent.skills.map((s) => `/${s}`).join(" · ")}
+                Especialidades: {agent.skills.map(skillLabel).join(" · ")}
               </p>
             )}
             <div className="space-y-2">

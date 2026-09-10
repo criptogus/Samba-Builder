@@ -448,6 +448,7 @@ export function ChatPanel({
                             render={
                               <Button
                                 onClick={handleScrollButtonClick}
+                                aria-label={t("scrollToBottom")}
                                 size="icon"
                                 className="rounded-full shadow-lg hover:shadow-xl transition-all border border-border/50 backdrop-blur-sm bg-background/95 hover:bg-accent"
                                 variant="outline"
@@ -473,10 +474,10 @@ export function ChatPanel({
                   <SupabaseLegacyKeyBanner appId={selectedAppId} />
                   <NotificationBanner />
                   {chatId !== null && selectedAppId !== null && (
-                    <div className="flex justify-end px-1">
+                    <div className="flex justify-start px-1">
                       <Button
                         type="button"
-                        variant="outline"
+                        variant="secondary"
                         size="sm"
                         onClick={() => setShowSpecialists(true)}
                         title="Criar tarefa para um especialista (arquitetura, cybersec, UX/UI…)"

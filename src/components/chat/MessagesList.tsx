@@ -733,15 +733,16 @@ export const MessagesList = forwardRef<HTMLDivElement, MessagesListProps>(
           <div className="flex flex-col items-center justify-center h-full max-w-2xl mx-auto">
             {appId !== null && selectedChatId !== null ? (
               <div className="flex flex-1 flex-col items-center justify-center gap-4 text-center">
-                <p className="text-sm font-medium text-foreground">
-                  Projeto importado — comece com uma auditoria ou faça sua
-                  primeira pergunta
-                </p>
+                <div className="space-y-1">
+                  <p className="text-base font-medium text-foreground">
+                    Comece por uma auditoria do projeto
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    Análises guiadas pelos especialistas do Samba Builder. Ou
+                    escreva sua primeira pergunta abaixo.
+                  </p>
+                </div>
                 <RepoAuditActions chatId={selectedChatId} appId={appId} />
-                <p className="text-xs text-muted-foreground">
-                  As auditorias usam os skills do Samba Builder (arquitetura,
-                  segurança, UX/UI…) para analisar o repositório.
-                </p>
               </div>
             ) : (
               <div className="flex flex-1 items-center justify-center text-muted-foreground">

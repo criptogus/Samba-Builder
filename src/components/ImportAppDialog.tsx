@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 import { ipc } from "@/ipc/types";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { showError, showSuccess, showWarning } from "@/lib/toast";
-import { Folder, X, Loader2, Info, PartyPopper } from "lucide-react";
+import { Folder, X, Loader2, Info, CheckCircle2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -371,7 +371,7 @@ export function ImportAppDialog({ isOpen, onClose }: ImportAppDialogProps) {
         {imported ? (
           <div className="px-6 py-8 flex flex-col items-center text-center gap-5">
             <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
-              <PartyPopper className="h-6 w-6 text-primary" />
+              <CheckCircle2 className="h-6 w-6 text-primary" />
             </div>
             <div className="space-y-1">
               <p className="text-base font-semibold">

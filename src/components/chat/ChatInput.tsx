@@ -1,8 +1,6 @@
-import { ProductCoachButton } from "@/components/ProductCoachButton";
+import { CreateWithMenu } from "./CreateWithMenu";
 import { appendProductBrief } from "@/product_coach/model";
-import { NativeAgentsButton } from "@/components/NativeAgentsButton";
 import { appendMeetingBriefing } from "@/shared/meeting_briefing";
-import { MeetingBriefingButton } from "@/components/MeetingBriefingButton";
 import {
   StopCircleIcon,
   X,
@@ -1017,20 +1015,17 @@ export function ChatInput({ chatId }: { chatId?: number }) {
           <div
             role="group"
             aria-label="Ferramentas de criação"
-            className="flex flex-wrap gap-0.5 border-b border-border/60 px-2 py-1.5 [&_button]:h-8 [&_button]:px-2 [&_button]:text-xs [&_svg]:size-3.5"
+            className="flex flex-wrap gap-0.5 border-b border-border/60 px-2 py-1 [&_button]:text-xs"
           >
-            <ProductCoachButton
-              key={chatId ?? "chat"}
+            <CreateWithMenu
               draftKey={`chat:${chatId ?? "new"}`}
               idea={inputValue}
+              appId={appId ?? undefined}
               disabled={isStreaming}
-              onPrepared={(brief) =>
+              onProductBrief={(brief) =>
                 setInputValue((current) => appendProductBrief(current, brief))
               }
-            />
-            {appId && <NativeAgentsButton appId={appId} />}
-            <MeetingBriefingButton
-              onPrepared={(prompt) =>
+              onMeetingBrief={(prompt) =>
                 setInputValue(appendMeetingBriefing(inputValue, prompt))
               }
             />
@@ -1551,7 +1546,7 @@ function ChatInputActions({
           <Button
             className="px-8"
             size="sm"
-            variant="outline"
+            variant="default"
             onClick={onApprove}
             disabled={!isApprovable || isApproving || isRejecting}
             data-testid="approve-proposal-button"
@@ -1564,9 +1559,9 @@ function ChatInputActions({
             {t("approve")}
           </Button>
           <Button
-            className="px-8"
             size="sm"
             variant="outline"
+            className="px-8 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
             onClick={onReject}
             disabled={!isApprovable || isApproving || isRejecting}
             data-testid="reject-proposal-button"
@@ -1627,20 +1622,22 @@ function ChatInputActions({
                 <h4 className="font-semibold mb-1">{t("packagesAdded")}</h4>
                 <ul className="space-y-1">
                   {proposal.packagesAdded.map((pkg, index) => (
-                    <li
-                      key={index}
-                      className="flex items-center space-x-2"
-                      onClick={() => {
-                        ipc.system.openExternalUrl(getNpmPackagePageUrl(pkg));
-                      }}
-                    >
-                      <Package
-                        size={16}
-                        className="text-muted-foreground flex-shrink-0"
-                      />
-                      <span className="cursor-pointer text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300">
-                        {pkg}
-                      </span>
+                    <li key={index}>
+                      <button
+                        type="button"
+                        className="flex items-center space-x-2 text-left hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                        onClick={() => {
+                          ipc.system.openExternalUrl(getNpmPackagePageUrl(pkg));
+                        }}
+                      >
+                        <Package
+                          size={16}
+                          className="text-muted-foreground flex-shrink-0"
+                        />
+                        <span className="cursor-pointer text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300">
+                          {pkg}
+                        </span>
+                      </button>
                     </li>
                   ))}
                 </ul>
@@ -1789,8 +1786,18 @@ function SqlQueryItem({ query }: { query: SqlQuery }) {
 
   return (
     <li
-      className="bg-(--background-lightest) hover:bg-(--background-lighter) rounded-lg px-3 py-2 border border-border cursor-pointer"
+      role="button"
+      tabIndex={0}
+      aria-expanded={isExpanded}
+      className="bg-(--background-lightest) hover:bg-(--background-lighter) rounded-lg px-3 py-2 border border-border cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
       onClick={() => setIsExpanded(!isExpanded)}
+      onKeyDown={(event) => {
+        const { key } = event;
+        if (key === "Enter" || key === " ") {
+          event.preventDefault();
+          setIsExpanded(!isExpanded);
+        }
+      }}
     >
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">

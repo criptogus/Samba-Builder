@@ -4,13 +4,29 @@ import { AgentConsentBanner } from "./AgentConsentBanner";
 
 vi.mock("react-i18next", () => ({
   useTranslation: () => ({
-    t: (key: string) =>
-      ({
+    t: (key: string, opts?: Record<string, unknown>) => {
+      const dict: Record<string, string> = {
         changesDatabaseSchema: "Changes database schema",
         destructiveDataChange: "Destructive data change",
         aiReviewingRequest:
           "AI is reviewing this request to decide if it's safe to auto-approve…",
-      })[key] ?? key,
+        consentTitle: "Allow {{tool}} to run?",
+        consentFromLabel: "from",
+        consentQueuePosition: "({{current}} of {{total}})",
+        consentRequestedBy: "Requested by {{persona}}",
+        consentAllowOnce: "Allow once",
+        consentAllowAlways: "Always allow",
+        consentDecline: "Decline",
+        consentShowMore: "Show more",
+        consentShowLess: "Show less",
+        consentClose: "Close",
+      };
+      let value = dict[key] ?? key;
+      if (opts)
+        for (const [name, raw] of Object.entries(opts))
+          value = value.replace(`{{${name}}}`, String(raw));
+      return value;
+    },
   }),
 }));
 

@@ -18,8 +18,8 @@ export type SpecialistTask = {
 export type SpecialistAgent = {
   id: string;
   name: string;
-  /** Avatar: emoji renderizado em círculo. */
-  emoji: string;
+  /** Ícone lucide do agente (consistente com a iconografia do app). */
+  icon: string;
   tagline: string;
   /** Para o dev (inclusive junior) entender o que o especialista resolve. */
   description: string;
@@ -31,7 +31,7 @@ export const specialistAgents: SpecialistAgent[] = [
   {
     id: "architect",
     name: "Arquiteto",
-    emoji: "🏗️",
+    icon: "Network",
     tagline: "Estrutura, módulos e evolução do código",
     description:
       "Analisa a arquitetura do projeto, aponta riscos de manutenção, propõe decisões (ADRs) e planos de refatoração seguros.",
@@ -63,7 +63,7 @@ export const specialistAgents: SpecialistAgent[] = [
   {
     id: "cybersec",
     name: "Cyber Security",
-    emoji: "🛡️",
+    icon: "ShieldCheck",
     tagline: "Segurança por design em cada camada",
     description:
       "Caça vulnerabilidades e segredos expostos, revisa autorização e modela ameaças — com correções priorizadas por risco.",
@@ -102,7 +102,7 @@ export const specialistAgents: SpecialistAgent[] = [
   {
     id: "ux-ui",
     name: "Designer UX/UI",
-    emoji: "🎨",
+    icon: "Palette",
     tagline: "Direção de arte, usabilidade e acessibilidade",
     description:
       "Torna a interface bonita, consistente e acessível: auditoria visual, responsividade, estados e identidade — com evidências de tela.",
@@ -141,7 +141,7 @@ export const specialistAgents: SpecialistAgent[] = [
   {
     id: "quality",
     name: "Engenheiro de Qualidade",
-    emoji: "✅",
+    icon: "FlaskConical",
     tagline: "Testes que provam — com evidência",
     description:
       "Planeja e escreve a pirâmide de testes por risco, cobre fluxos críticos e investiga testes que falham — com resultado real executado.",
@@ -173,7 +173,7 @@ export const specialistAgents: SpecialistAgent[] = [
   {
     id: "performance",
     name: "Performance",
-    emoji: "⚡",
+    icon: "Gauge",
     tagline: "Rápido e resiliente desde o desenho",
     description:
       "Audita carregamento, latência e resiliência; aplica timeouts, retries, cache e degradação graciosa onde faz diferença.",
@@ -205,7 +205,7 @@ export const specialistAgents: SpecialistAgent[] = [
   {
     id: "enterprise",
     name: "Consultor Enterprise",
-    emoji: "🏢",
+    icon: "Building2",
     tagline: "Governança, observabilidade e operação",
     description:
       "Prepara o produto para cliente corporativo: papéis e aprovações, trilha de auditoria, logs e métricas, deploy com rollback e runbooks.",
@@ -237,7 +237,7 @@ export const specialistAgents: SpecialistAgent[] = [
   {
     id: "pm",
     name: "Product Manager",
-    emoji: "📋",
+    icon: "ClipboardList",
     tagline: "Requisito, escopo e aceite claros",
     description:
       "Transforma ideias vagas em PRDs rastreáveis com critérios de aceite, mantém o escopo sob controle e liga requisito a teste e evidência.",
@@ -269,7 +269,7 @@ export const specialistAgents: SpecialistAgent[] = [
   {
     id: "reviewer",
     name: "Revisor de Código",
-    emoji: "🔍",
+    icon: "ScanSearch",
     tagline: "Olhar crítico com evidência",
     description:
       "Revisa mudanças como um engenheiro sênior e investiga bugs pela causa raiz — sem chutar.",
@@ -294,7 +294,7 @@ export const specialistAgents: SpecialistAgent[] = [
   {
     id: "mobile",
     name: "Apps Nativos / Mobile",
-    emoji: "📱",
+    icon: "Smartphone",
     tagline: "React Native, Flutter e plataformas móveis",
     description:
       "Especialista em aplicativos móveis e nativos: auditoria de projeto mobile, adaptação de fluxos para telas pequenas e boas práticas da plataforma.",
@@ -319,7 +319,7 @@ export const specialistAgents: SpecialistAgent[] = [
   {
     id: "devops",
     name: "DevOps / AWS",
-    emoji: "☁️",
+    icon: "Cloud",
     tagline: "Deploy, infraestrutura e cloud",
     description:
       "Prepara deploy, CI/CD, infraestrutura e cloud (AWS): do Docker ao pipeline, com custo e segurança em mente.",

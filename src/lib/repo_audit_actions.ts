@@ -8,7 +8,9 @@
 export type RepoAuditAction = {
   id: string;
   label: string;
-  emoji: string;
+  icon: string;
+  /** A auditoria recomendada quando o dev não sabe por onde começar. */
+  recommended?: boolean;
   description: string;
   prompt: string;
 };
@@ -17,7 +19,8 @@ export const repoAuditActions: RepoAuditAction[] = [
   {
     id: "repo-review",
     label: "Review do repositório",
-    emoji: "🔍",
+    icon: "ScanSearch",
+    recommended: true,
     description:
       "Revisão geral: bugs, qualidade, dívida técnica e riscos, priorizados por severidade.",
     prompt:
@@ -26,7 +29,7 @@ export const repoAuditActions: RepoAuditAction[] = [
   {
     id: "technical-analysis",
     label: "Análise técnica",
-    emoji: "🧪",
+    icon: "Microscope",
     description:
       "Análise aprofundada: stack, estrutura, dependências, padrões de código, testes e pontos frágeis.",
     prompt:
@@ -35,7 +38,7 @@ export const repoAuditActions: RepoAuditAction[] = [
   {
     id: "architecture-analysis",
     label: "Análise de arquitetura",
-    emoji: "🏗️",
+    icon: "Network",
     description:
       "Módulos, fronteiras, acoplamento, contratos e decisões de arquitetura — com riscos de manutenção.",
     prompt:
@@ -44,7 +47,7 @@ export const repoAuditActions: RepoAuditAction[] = [
   {
     id: "ux-ui-audit",
     label: "Auditoria de UX e UI",
-    emoji: "🎨",
+    icon: "Palette",
     description:
       "Direção de arte, design system, consistência visual, estados de interface e acessibilidade.",
     prompt:
@@ -53,7 +56,7 @@ export const repoAuditActions: RepoAuditAction[] = [
   {
     id: "cybersec-audit",
     label: "Auditoria de Cybersec",
-    emoji: "🛡️",
+    icon: "ShieldCheck",
     description:
       "Segurança por design: segredos expostos, autorização, validação, dependências vulneráveis e testes negativos.",
     prompt:
@@ -62,7 +65,7 @@ export const repoAuditActions: RepoAuditAction[] = [
   {
     id: "quality-audit",
     label: "Qualidade e testes",
-    emoji: "🧩",
+    icon: "FlaskConical",
     description:
       "Pirâmide de testes, cobertura dos fluxos críticos e evidência executável por risco.",
     prompt:
@@ -71,7 +74,7 @@ export const repoAuditActions: RepoAuditAction[] = [
   {
     id: "performance-audit",
     label: "Performance e resiliência",
-    emoji: "⚡",
+    icon: "Gauge",
     description:
       "Orçamento de performance, timeouts, retries, filas, cache e degradação graciosa.",
     prompt:
@@ -80,7 +83,7 @@ export const repoAuditActions: RepoAuditAction[] = [
   {
     id: "production-readiness",
     label: "Pronto para produção?",
-    emoji: "🚀",
+    icon: "Rocket",
     description:
       "Gap operacional: governança, observabilidade, deploy/rollback, runbooks e auditoria.",
     prompt:
