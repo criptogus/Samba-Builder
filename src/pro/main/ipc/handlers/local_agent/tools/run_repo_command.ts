@@ -5,6 +5,7 @@ import { escapeXmlAttr, escapeXmlContent } from "./types";
 import { runBufferedProcess } from "@/ipc/utils/buffered_process";
 import { getPackageManagerCommandEnv } from "@/ipc/utils/socket_firewall";
 import { prependPathSegment } from "@/ipc/utils/managed_tools";
+import { classifyRepoCommand, describeCommandRisk } from "./command_risk";
 
 const REPO_COMMAND_TIMEOUT_MS = 5 * 60 * 1000;
 const REPO_COMMAND_MAX_OUTPUT_BYTES = 200_000;
@@ -38,7 +39,14 @@ export const runRepoCommandTool: ToolDefinition<
   inputSchema: runRepoCommandSchema,
   defaultConsent: "always",
 
-  getConsentPreview: (args) => `Run in repo: ${args.command}`,
+  getConsentPreview: (args) => `Rodar no repositório: ${args.command}`,
+
+  // Publicar, destruir, sair da máquina ou mexer em dependências não passa em
+  // silêncio — mesmo com esta ferramenta marcada como "sempre permitir".
+  getIrreversibleRisk: (args) => {
+    const risk = classifyRepoCommand(args.command);
+    return risk ? describeCommandRisk(args.command, risk) : null;
+  },
 
   execute: async ({ command }, ctx: AgentContext) => {
     ctx.onXmlStream(

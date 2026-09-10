@@ -47,7 +47,33 @@ describe("requireToolConsentOrThrow", () => {
       toolDescription: "Project-wide description",
       inputPreview: "Preview",
       metadata: null,
+      riskWarning: null,
     });
+  });
+
+  it("forwards an irreversibility warning so 'sempre' cannot silence it", async () => {
+    const requireConsent = vi.fn().mockResolvedValue(true);
+    const definition = {
+      name: "run_repo_command",
+      description: "Run a repo command",
+      inputSchema: z.object({ command: z.string() }),
+      defaultConsent: "always",
+      getConsentPreview: (args) => `Run: ${args.command}`,
+      getIrreversibleRisk: (args) =>
+        args.command.includes("push") ? "publica commits" : null,
+      execute: vi.fn(),
+    } satisfies ToolDefinition;
+    const ctx = { ...({} as AgentContext), requireConsent };
+
+    await requireToolConsentOrThrow(
+      definition,
+      { command: "git push origin main" },
+      ctx,
+    );
+
+    expect(requireConsent).toHaveBeenCalledWith(
+      expect.objectContaining({ riskWarning: "publica commits" }),
+    );
   });
 });
 

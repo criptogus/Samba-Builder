@@ -240,6 +240,7 @@ describe("executeSandboxScriptTool", () => {
         toolDescription: writeFileTool.description,
         inputPreview: "Write to src/out.txt",
         metadata: null,
+        riskWarning: null,
       });
       expect(ctx.fileEditTracker["src/out.txt"]).toEqual({
         write_file: 1,
