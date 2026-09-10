@@ -3,7 +3,15 @@ import { DeliveryTestEvidence } from "./DeliveryTestEvidence";
 import { EvidenceGates } from "./EvidenceGates";
 import { FoundationReview } from "./FoundationReview";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { ClipboardList, ListChecks, ShieldCheck, BookOpen } from "lucide-react";
+import {
+  AlertTriangle,
+  BookOpen,
+  CheckCircle2,
+  ClipboardList,
+  ListChecks,
+  ShieldCheck,
+} from "lucide-react";
+import { cn } from "@/lib/utils";
 import { useState, useEffect } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { ipc } from "@/ipc/types";
@@ -582,7 +590,37 @@ function DeliveryEditor({
             <h3 className="text-sm font-medium">
               Qualidade e aprovação por versão
             </h3>
-            <div className="mt-3 space-y-3">
+            <div className="mt-3 space-y-4">
+              {/* Estado da aprovação em destaque: o que falta, não um muro de campos. */}
+              <div
+                className={cn(
+                  "rounded-lg border p-3",
+                  blockers.length
+                    ? "border-amber-500/40 bg-amber-50/60 dark:border-amber-500/30 dark:bg-amber-950/20"
+                    : "border-emerald-600/40 bg-emerald-50/60 dark:border-emerald-500/30 dark:bg-emerald-950/20",
+                )}
+              >
+                <div className="flex items-center gap-2">
+                  {blockers.length ? (
+                    <AlertTriangle className="h-4 w-4 shrink-0 text-amber-600 dark:text-amber-400" />
+                  ) : (
+                    <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-600 dark:text-emerald-400" />
+                  )}
+                  <p className="text-sm font-medium">
+                    {blockers.length
+                      ? "Para aprovar, falta:"
+                      : "Tudo pronto para aprovar"}
+                  </p>
+                </div>
+                {blockers.length > 0 && (
+                  <ul className="mt-2 list-disc space-y-0.5 pl-5 text-xs text-muted-foreground">
+                    {blockers.map((b) => (
+                      <li key={b}>{b}</li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+
               <Button
                 variant="outline"
                 size="sm"
@@ -609,116 +647,140 @@ function DeliveryEditor({
               >
                 Preparar validação no chat
               </Button>
-              <p className="text-xs text-muted-foreground">
-                Registre verificações realmente executadas e seus resultados.
-                Este formulário não executa testes nem substitui a aprovação do
-                cliente.
-              </p>
-              <EvidenceGates plan={plan} onChange={update} />
-              <DeliveryTestEvidence
-                appId={appId}
-                reviewCommit={plan.reviewCommit}
-              />
-              <FoundationReview appId={appId} plan={plan} onChange={update} />
-              {qualityAreas.map((area) => (
-                <label key={area} className="block space-y-1 text-sm">
-                  <span>{checkNames[area]}</span>
-                  <Textarea
-                    value={plan.checks[area]}
-                    onChange={(e) =>
-                      update({
-                        ...plan,
-                        checks: { ...plan.checks, [area]: e.target.value },
-                      })
-                    }
-                    placeholder="Teste realizado, resultado e referência da evidência"
-                  />
-                </label>
-              ))}
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={async () => {
-                  setBusy(true);
-                  try {
-                    const commit = await ipc.delivery.snapshot({ appId });
-                    update({
-                      ...plan,
-                      reviewCommit: commit,
-                      approvalCommit: "",
-                      reviewer: "",
-                      approvalNote: "",
-                      stage: "review",
-                    });
-                  } catch (e) {
-                    showError(e);
-                  } finally {
-                    setBusy(false);
-                  }
-                }}
+
+              <details
+                className="rounded-lg border p-3"
+                open={blockers.some((b) => b.includes("Evidência"))}
               >
-                Vincular versão Git atual
-              </Button>
-              <p className="break-all text-xs text-muted-foreground">
-                Versão revisada: {plan.reviewCommit || "Nenhuma"}
-              </p>
-              {(
-                [
-                  ["reviewer", "Nome de quem aprovou"],
-                  ["approvalNote", "Evidência da aprovação recebida"],
-                ] as const
-              ).map(([key, label]) => (
-                <label key={key} className="block text-sm space-y-1">
-                  <span>{label}</span>
-                  <Textarea
-                    rows={2}
-                    value={plan[key]}
-                    onChange={(e) => field(key, e.target.value)}
+                <summary className="cursor-pointer text-sm font-medium">
+                  Controles exigidos pelo perfil de risco
+                </summary>
+                <div className="mt-3">
+                  <EvidenceGates plan={plan} onChange={update} />
+                </div>
+              </details>
+
+              <details className="rounded-lg border p-3">
+                <summary className="cursor-pointer text-sm font-medium">
+                  Verificações registradas
+                </summary>
+                <div className="mt-3 space-y-3">
+                  <p className="text-xs text-muted-foreground">
+                    Registre verificações realmente executadas e seus
+                    resultados. Este formulário não executa testes nem substitui
+                    a aprovação do cliente.
+                  </p>
+                  <DeliveryTestEvidence
+                    appId={appId}
+                    reviewCommit={plan.reviewCommit}
                   />
-                </label>
-              ))}
-              <Button
-                variant="outline"
-                size="sm"
-                disabled={
-                  blockers.length > 0 ||
-                  !plan.reviewer.trim() ||
-                  !plan.approvalNote.trim()
-                }
-                onClick={() =>
-                  update({
-                    ...plan,
-                    approvalCommit: plan.reviewCommit,
-                    stage: "approved",
-                  })
-                }
-              >
-                Registrar aprovação desta versão
-              </Button>
-              {approvals.data && approvals.data.length > 0 && (
-                <div className="space-y-2 text-xs">
-                  <h4 className="font-medium">
-                    Últimos registros de aprovação
-                  </h4>
-                  {approvals.data.map((item) => (
-                    <div key={item.id} className="rounded border p-2">
-                      <p>
-                        {item.reviewer} ·{" "}
-                        {new Date(item.createdAt).toLocaleDateString()}
-                      </p>
-                      <p className="break-all">{item.commit}</p>
-                      <p className="whitespace-pre-wrap">{item.note}</p>
-                    </div>
+                  <FoundationReview
+                    appId={appId}
+                    plan={plan}
+                    onChange={update}
+                  />
+                  {qualityAreas.map((area) => (
+                    <label key={area} className="block space-y-1 text-sm">
+                      <span>{checkNames[area]}</span>
+                      <Textarea
+                        value={plan.checks[area]}
+                        onChange={(e) =>
+                          update({
+                            ...plan,
+                            checks: { ...plan.checks, [area]: e.target.value },
+                          })
+                        }
+                        placeholder="Teste realizado, resultado e referência da evidência"
+                      />
+                    </label>
                   ))}
                 </div>
-              )}
-              {blockers.length > 0 && (
-                <ul className="list-disc pl-5 text-xs text-muted-foreground">
-                  {blockers.map((b) => (
-                    <li key={b}>{b}</li>
+              </details>
+
+              <details className="rounded-lg border p-3" open>
+                <summary className="cursor-pointer text-sm font-medium">
+                  Aprovação por versão
+                </summary>
+                <div className="mt-3 space-y-3">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={async () => {
+                      setBusy(true);
+                      try {
+                        const commit = await ipc.delivery.snapshot({ appId });
+                        update({
+                          ...plan,
+                          reviewCommit: commit,
+                          approvalCommit: "",
+                          reviewer: "",
+                          approvalNote: "",
+                          stage: "review",
+                        });
+                      } catch (e) {
+                        showError(e);
+                      } finally {
+                        setBusy(false);
+                      }
+                    }}
+                  >
+                    Vincular versão Git atual
+                  </Button>
+                  <p className="break-all text-xs text-muted-foreground">
+                    Versão revisada: {plan.reviewCommit || "Nenhuma"}
+                  </p>
+                  {(
+                    [
+                      ["reviewer", "Nome de quem aprovou"],
+                      ["approvalNote", "Evidência da aprovação recebida"],
+                    ] as const
+                  ).map(([key, label]) => (
+                    <label key={key} className="block text-sm space-y-1">
+                      <span>{label}</span>
+                      <Textarea
+                        rows={2}
+                        value={plan[key]}
+                        onChange={(e) => field(key, e.target.value)}
+                      />
+                    </label>
                   ))}
-                </ul>
-              )}
+                  <Button
+                    variant={blockers.length === 0 ? "default" : "outline"}
+                    size="sm"
+                    disabled={
+                      blockers.length > 0 ||
+                      !plan.reviewer.trim() ||
+                      !plan.approvalNote.trim()
+                    }
+                    onClick={() =>
+                      update({
+                        ...plan,
+                        approvalCommit: plan.reviewCommit,
+                        stage: "approved",
+                      })
+                    }
+                  >
+                    Registrar aprovação desta versão
+                  </Button>
+                  {approvals.data && approvals.data.length > 0 && (
+                    <div className="space-y-2 text-xs">
+                      <h4 className="font-medium">
+                        Últimos registros de aprovação
+                      </h4>
+                      {approvals.data.map((item) => (
+                        <div key={item.id} className="rounded border p-2">
+                          <p>
+                            {item.reviewer} ·{" "}
+                            {new Date(item.createdAt).toLocaleDateString()}
+                          </p>
+                          <p className="break-all">{item.commit}</p>
+                          <p className="whitespace-pre-wrap">{item.note}</p>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </details>
             </div>
           </TabsContent>
           <TabsContent value="knowledge" className="mt-0">

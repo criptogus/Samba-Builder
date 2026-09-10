@@ -13,6 +13,8 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
 import {
   ArrowLeft,
   Send,
@@ -75,6 +77,28 @@ export function SpecialistAgentsDialog({
 }) {
   const [agent, setAgent] = useState<SpecialistAgent | null>(null);
   const [custom, setCustom] = useState("");
+  const [query, setQuery] = useState("");
+  const [recentIds, setRecentIds] = useState<string[]>(() => {
+    try {
+      const raw = localStorage.getItem("samba.specialists.recent");
+      const parsed = raw ? JSON.parse(raw) : [];
+      return Array.isArray(parsed) ? parsed.slice(0, 3) : [];
+    } catch {
+      return [];
+    }
+  });
+
+  const rememberAgent = (id: string) => {
+    setRecentIds((current) => {
+      const next = [id, ...current.filter((x) => x !== id)].slice(0, 3);
+      try {
+        localStorage.setItem("samba.specialists.recent", JSON.stringify(next));
+      } catch {
+        // persistência é conveniência; falha não bloqueia a escolha
+      }
+      return next;
+    });
+  };
   const { streamMessage } = useStreamChat();
   const [sending, setSending] = useState(false);
 
@@ -136,28 +160,72 @@ export function SpecialistAgentsDialog({
         </DialogHeader>
 
         {!agent ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 p-4">
-            {specialistAgents.map((a) => (
-              <button
-                key={a.id}
-                type="button"
-                onClick={() => setAgent(a)}
-                className="flex items-start gap-3 rounded-md border p-3 text-left hover:bg-accent/50 transition-colors"
-              >
-                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-muted">
-                  <AgentIcon
-                    icon={a.icon}
-                    className="h-4.5 w-4.5 text-muted-foreground"
-                  />
-                </span>
-                <span className="min-w-0">
-                  <span className="block text-sm font-medium">{a.name}</span>
-                  <span className="block truncate text-xs text-muted-foreground">
-                    {a.tagline}
-                  </span>
-                </span>
-              </button>
-            ))}
+          <div className="space-y-3 p-4">
+            <Input
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Buscar especialista (ex.: segurança, mobile, dados)"
+              aria-label="Buscar especialista"
+              className="h-9 text-sm"
+            />
+            {(() => {
+              const q = query.trim().toLowerCase();
+              const matches = specialistAgents.filter(
+                (a) =>
+                  !q ||
+                  `${a.name} ${a.tagline} ${a.description} ${a.skills.join(" ")}`
+                    .toLowerCase()
+                    .includes(q),
+              );
+              const ordered = [
+                ...matches.filter((a) => recentIds.includes(a.id)),
+                ...matches.filter((a) => !recentIds.includes(a.id)),
+              ];
+              if (!ordered.length)
+                return (
+                  <p className="py-6 text-center text-sm text-muted-foreground">
+                    Nenhum especialista para “{query}”.
+                  </p>
+                );
+              return (
+                <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                  {ordered.map((a) => (
+                    <button
+                      key={a.id}
+                      type="button"
+                      onClick={() => {
+                        rememberAgent(a.id);
+                        setAgent(a);
+                      }}
+                      className="flex items-start gap-3 rounded-lg border p-3 text-left transition-colors hover:bg-accent/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    >
+                      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-muted">
+                        <AgentIcon
+                          icon={a.icon}
+                          className="h-4.5 w-4.5 text-muted-foreground"
+                        />
+                      </span>
+                      <span className="min-w-0">
+                        <span className="flex items-center gap-2 text-sm font-medium">
+                          {a.name}
+                          {recentIds.includes(a.id) && (
+                            <Badge
+                              variant="secondary"
+                              className="text-[10px] font-medium"
+                            >
+                              Recente
+                            </Badge>
+                          )}
+                        </span>
+                        <span className="block truncate text-xs text-muted-foreground">
+                          {a.tagline}
+                        </span>
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              );
+            })()}
           </div>
         ) : (
           <div className="space-y-3 p-4">

@@ -471,8 +471,9 @@ export function ChatPanel({
                       }
                     />
                   )}
+                  {/* Um aviso por vez: o de ação necessária vence o informativo. */}
                   <SupabaseLegacyKeyBanner appId={selectedAppId} />
-                  <NotificationBanner />
+                  {!showFreeAgentQuotaBanner && <NotificationBanner />}
                   {chatId !== null && selectedAppId !== null && (
                     <div className="flex justify-start px-1">
                       <Button

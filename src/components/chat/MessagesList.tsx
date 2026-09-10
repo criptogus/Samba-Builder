@@ -312,8 +312,11 @@ function FooterComponent({ context }: { context?: FooterContext }) {
           currentChatMessageId,
         });
       } else {
+        console.warn(
+          "undo: mensagem sem commit de origem (sem snapshot automático)",
+        );
         showWarning(
-          "No source commit hash found for message. Need to manually undo code changes",
+          "Não encontrei a versão de origem desta mensagem para desfazer automaticamente. Abra o histórico de versões e restaure a anterior.",
         );
       }
     } catch (error) {
