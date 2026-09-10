@@ -882,8 +882,7 @@ export function ChatInput({ chatId }: { chatId?: number }) {
             "relative flex flex-col border border-border rounded-xl bg-card transition-colors duration-150 focus-within:ring-2 focus-within:ring-primary/15",
             "focus-within:border-primary/30 focus-within:ring-1 focus-within:ring-primary/20",
             isDraggingOver && "ring-2 ring-blue-500 border-blue-500",
-            (showBanner || showPromo || isCancellationRequested) &&
-              "rounded-t-none border-t-0",
+            (showBanner || showPromo || isCancellationRequested) && "mt-1",
           )}
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}

@@ -567,8 +567,8 @@ function FooterComponent({ context }: { context?: FooterContext }) {
         >
           <div className="max-w-3xl w-full mx-auto">
             <div className="flex items-center gap-1.5 text-sm text-muted-foreground py-2">
-              <CheckCircle2 className="h-4 w-4 text-green-500" />
-              Answers submitted
+              <CheckCircle2 className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+              Respostas enviadas
             </div>
           </div>
         </div>
