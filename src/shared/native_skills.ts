@@ -76,6 +76,15 @@ export const nativeSkills: readonly NativeSkill[] = [
     prerequisite: null,
   },
   {
+    slug: "samba-database",
+    title: "Banco de dados e migrations",
+    category: "Engenharia",
+    description:
+      "Modela esquemas relacionais, índices eficientes, RLS e migrations seguras sem perda de dados ou downtime.",
+    sources: ["drizzle-team/drizzle-orm", "supabase/supabase"],
+    prerequisite: null,
+  },
+  {
     slug: "samba-design",
     title: "Design de interfaces",
     category: "Design",

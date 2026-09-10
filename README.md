@@ -4,7 +4,7 @@ Ambiente local da Samba para construir aplicações de clientes com IA. Evolui o
 
 ## Baixar o app
 
-Os instaladores são gerados pelo workflow **[Release app](https://github.com/criptogus/Samba-Builder/actions/workflows/release.yml)** (Actions → *Release app* → *Run workflow*), que publica macOS (Apple Silicon e Intel), Windows e Linux como **rascunho** para revisão em [releases](https://github.com/criptogus/Samba-Builder/releases).
+Os instaladores são gerados pelo workflow **[Release app](https://github.com/criptogus/Samba-Builder/actions/workflows/release.yml)** (Actions → _Release app_ → _Run workflow_), que publica macOS (Apple Silicon e Intel), Windows e Linux como **rascunho** para revisão em [releases](https://github.com/criptogus/Samba-Builder/releases).
 
 Ainda não há publicação neste repositório — os links aparecem aqui assim que a primeira release for publicada.
 

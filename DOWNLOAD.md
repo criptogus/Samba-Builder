@@ -12,14 +12,14 @@ O workflow **[Release app](https://github.com/criptogus/Samba-Builder/actions/wo
 2. Ao terminar, revise o rascunho em [releases](https://github.com/criptogus/Samba-Builder/releases) e publique.
 3. Os arquivos aparecem por plataforma:
 
-| Plataforma | Arquivo gerado |
-| --- | --- |
-| macOS — Apple Silicon | `SambaBuilder-<versão>-arm64.zip` |
-| macOS — Intel | `SambaBuilder-<versão>-x64.zip` |
-| Windows 10/11 (x64) | `SambaBuilder-<versão>-Setup.exe` |
-| Linux — Debian/Ubuntu | `samba-builder_<versão>_amd64.deb` |
-| Linux — Fedora/openSUSE | `samba-builder-<versão>-1.x86_64.rpm` |
-| Linux — portátil | `samba-builder-<versão>-x86_64.AppImage` |
+| Plataforma              | Arquivo gerado                           |
+| ----------------------- | ---------------------------------------- |
+| macOS — Apple Silicon   | `SambaBuilder-<versão>-arm64.zip`        |
+| macOS — Intel           | `SambaBuilder-<versão>-x64.zip`          |
+| Windows 10/11 (x64)     | `SambaBuilder-<versão>-Setup.exe`        |
+| Linux — Debian/Ubuntu   | `samba-builder_<versão>_amd64.deb`       |
+| Linux — Fedora/openSUSE | `samba-builder-<versão>-1.x86_64.rpm`    |
+| Linux — portátil        | `samba-builder-<versão>-x86_64.AppImage` |
 
 O repositório é **privado**: o download exige uma conta com acesso.
 
@@ -40,4 +40,4 @@ Para rodar em desenvolvimento, sem empacotar: `npm start`.
 
 - macOS 12+ (Apple Silicon ou Intel), Windows 10/11 (x64) ou Linux x86_64 com FUSE (para o AppImage).
 - Node.js **24** na máquina — o Builder usa o seu runtime para os comandos dos projetos e escolhe automaticamente a versão que cada projeto exige em `engines.node`.
-- Chaves de IA são suas (BYOK): configure no aplicativo em *Settings → Providers*. Nada é enviado para servidores nossos.
+- Chaves de IA são suas (BYOK): configure no aplicativo em _Settings → Providers_. Nada é enviado para servidores nossos.

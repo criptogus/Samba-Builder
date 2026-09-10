@@ -111,7 +111,16 @@ const CustomMenuItem = forwardRef<
         >
           {label}
         </span>
-        <span className="truncate text-sm">{value}</span>
+        <div className="flex flex-col min-w-0">
+          <span className="truncate text-sm font-medium">
+            {item.data?.title ? `${item.data.title} (/${value})` : value}
+          </span>
+          {item.data?.description && (
+            <span className="truncate text-[11px] text-muted-foreground">
+              {item.data.description}
+            </span>
+          )}
+        </div>
       </div>
     </li>
   );
@@ -400,7 +409,12 @@ export function LexicalChatInput({
       }))
       .filter((item) => item.value != null && item.value !== "");
     result["/"] = [
-      ...nativeSkills.map((skill) => ({ value: skill.slug, type: "skill" })),
+      ...nativeSkills.map((skill) => ({
+        value: skill.slug,
+        type: "skill",
+        title: skill.title,
+        description: skill.description,
+      })),
       ...skillItems.filter(
         (item) => !nativeSkills.some((skill) => skill.slug === item.value),
       ),
