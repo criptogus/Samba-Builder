@@ -4,7 +4,7 @@ Before opening a pull request, please open an issue and discuss whether the chan
 
 - For a high-level overview of how Samba works, please see the [Architecture Guide](./docs/architecture.md). Understanding the architecture will help ensure your contributions align with the overall design of the project.
 - For a detailed architecture on how the new local agent mode (aka Agent v2) works, please read the [Agent Architecture Guide](./docs/agent_architecture.md)
-- For an in-depth overview of the Samba codebase, see the DeepWiki documentation [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/samba-sh/samba)
+- For the release process, see [docs/RELEASING.md](./docs/RELEASING.md); for the delivery standard and evidence, [docs/samba-delivery-workflow.md](./docs/samba-delivery-workflow.md).
 
 > **Note:** By submitting a contribution within `src/pro`, you agree that such contribution is licensed under the Fair Source License (FSL) used by that directory.
 

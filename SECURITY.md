@@ -6,4 +6,8 @@ We will provide security fixes for the latest version of Samba and encourage Sam
 
 ## Reporting a Vulnerability
 
-Please file security vulnerabilities by using [report a vulnerability](https://github.com/samba-sh/samba/security/advisories/new). Please do not file security vulnerabilities as a regular issue as the information could be used to exploit Samba users.
+Report privately through **this repository's** security advisories:
+
+https://github.com/criptogus/Samba-Builder/security/advisories/new
+
+Do not open a public issue for a vulnerability — the information could be used to exploit users. Do not report through any upstream project's channel: this product is maintained and fixed here, and its code (including `src/pro` and the local agent tools) is not the upstream's responsibility.

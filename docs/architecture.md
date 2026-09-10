@@ -1,52 +1,87 @@
-# Samba Architecture
+# Arquitetura do Samba Builder
 
-This doc describes how the Samba desktop app works at a high-level. If something is out of date, please feel free to suggest a change via a pull request.
+Como o produto funciona por dentro, para quem vai evoluir o código. Se algo aqui estiver desatualizado, corrija o documento junto com o código — este arquivo é parte da entrega.
 
-## Overview
+> Este é o documento do **fork**. Para o histórico/contexto do projeto original (Electron, IPC, ciclo de um pedido), veja as seções abaixo — elas continuam válidas — mas ignore links e nomes de repositório do upstream: aqui o produto é o Samba Builder.
 
-Samba is an Electron app that is a local, open-source alternative to AI app builders like Lovable, v0, and Bolt. While the specifics of how other AI app builders are constructed aren't publicly documented, there is available information like [system prompts](https://github.com/x1xhlol/system-prompts-and-models-of-ai-tools) about these other app builders.
+## O que o produto é
 
-## Electron Architecture
+Um app **Electron** de desktop que constrói aplicações de clientes com IA, com o diferencial de uma **camada de fábrica** em volta do loop de geração:
 
-If you're not familiar with Electron apps, they are similar to a full-stack JavaScript app where there's a client-side called the **renderer process** which executes the UI code like React and then there's a Node.js process called the **main process** which is comparable to the server-side portion of a full-stack app. The main process is privileged, meaning it has access to the filesystem and other system resources, whereas the renderer process is sandboxed. The renderer process can communicate to the main process using [IPCs](https://en.wikipedia.org/wiki/Inter-process_communication) which is similar to how the browser communicates to the server using HTTP requests.
+- **Briefing → plano aprovado → marca → execução → segurança → handoff**, com evidência registrada em cada etapa.
+- **Córtex** (o second brain local): base de conhecimento do projeto + RAG, que injeta lições aprendidas no prompt e aprende com o resultado de cada turno.
+- **Tudo local e BYOK**: as chaves de IA são do usuário, o backend roda na máquina, o código do cliente vive em repositórios normais (editáveis fora da ferramenta).
 
-## Life of a request
+## Modelo de processo (Electron)
 
-The core workflow of Samba is that a user sends a prompt to the AI which edits the code and is reflected in the preview. We'll break this down step-by-step.
+O app tem dois lados:
 
-1. **Constructing an LLM request** - the LLM request that Samba sends consists of much more than the prompt (i.e. user input). It includes, by default, the entire codebase as well as a detailed [system prompt](https://github.com/samba-sh/samba/blob/main/src/prompts/system_prompt.ts) which gives the LLM instructions to respond in a specific XML-like format (e.g. `<samba-write path="path/to/file.ts">console.log("hi")</samba-write>`).
-2. **Stream the LLM response to the UI** - It's important to provide visual feedback to the user otherwise they're waiting for several minutes without knowing what's happening so we stream the LLM response and show the LLM response. We have a specialized [Markdown parser](https://github.com/samba-sh/samba/blob/main/src/components/chat/SambaMarkdownParser.tsx) which parses these `<samba-*>` tags like the `<samba-write>` tag shown earlier, so we can display the LLM output in a nice UI rather than just printing out raw XML-like text.
-3. **Process the LLM response** - Once the LLM response has finished, and the user has approved the changes, the [response processor](https://github.com/samba-sh/samba/blob/main/src/ipc/processors/response_processor.ts) in the main process applies these changes. Essentially each `<samba-*>` tag described in the [system prompt](https://github.com/samba-sh/samba/blob/main/src/prompts/system_prompt.ts) maps to specific logic in the response processor, e.g. writing a file, deleting a file, adding a new NPM package, etc.
+- **renderer** — a UI React (sandboxed, sem acesso ao sistema);
+- **main** — o processo Node privilegiado (filesystem, processos, banco, git).
 
-To recap, Samba essentially tells the LLM about a bunch of tools like writing files using the `<samba-*>` tags, the renderer process displays these Samba tags in a nice UI and the main process executes these Samba tags to apply the changes.
+Eles conversam por **IPC**. O IPC é a fronteira de segurança do produto: tudo que sai do renderer é pedido, não permissão.
 
-## FAQ
+- Frontend: React + **TanStack Router** (não Next/React Router) e **TanStack Query** para tudo que é apoiado em IPC.
+- Primitivos de UI: **Base UI** (`@base-ui/react`), nunca Radix.
+- Erros de main que **não são bug** (validação, entidade ausente, auth, recusa do usuário) são lançados como `SambaError` com `SambaErrorKind`, para ficarem fora da telemetria de exceção. Ver `rules/samba-errors.md`.
 
-### Why not use actual tool calls?
+## Onde cada coisa vive
 
-One thing that may seem strange is that we don't use actual function calling/tool calling capabilities of the AI and instead use these XML-like syntax which simulate tool calling. This is something I observed from studying the [system prompts](https://github.com/x1xhlol/system-prompts-and-models-of-ai-tools) of other app builders.
+| Área                                            | Caminho                                 |
+| ----------------------------------------------- | --------------------------------------- |
+| Processo principal, janelas, paths, settings    | `src/main`, `src/paths`                 |
+| Handlers e serviços de IPC                      | `src/ipc`                               |
+| **Local agent**: tools, execução, consentimento | `src/pro/main/ipc/handlers/local_agent` |
+| Prompts do agente e blocos injetados            | `src/prompts`                           |
+| Padrão de entrega e evidência                   | `src/delivery`                          |
+| Skills nativas (contrato do produto)            | `src/shared/native-skills`              |
+| Fábrica, qualidade, governança, Córtex MCP      | `samba/`                                |
+| Pacotes com suíte própria                       | `packages/`                             |
+| Regras por área (leia antes de mexer)           | `rules/`                                |
+| Testes E2E (Playwright/Electron)                | `e2e-tests/`                            |
+| Documentação de produto (pt-BR)                 | `samba/docs`, `docs/`                   |
 
-I think the two main reasons to use this XML-like format instead of actual tool calling is that:
+## Ciclo de vida de um pedido
 
-1. You can call many tools at once, although some models allow [parallel calls](https://platform.openai.com/docs/guides/function-calling/parallel-function-calling#parallel-function-calling), many don't.
-2. There's also [evidence](https://aider.chat/2024/08/14/code-in-json.html) that forcing LLMs to return code in JSON (which is essentially what tool calling would entail here) negatively affects the quality.
+1. **Modo.** O chat opera em modos distintos (Agent, Build, Ask, Plan) — ver `rules/chat-modes.md`. O modo define o que o agente pode fazer, não só como responde.
+2. **Montagem do prompt.** O pedido vai ao modelo junto com o contexto do projeto e os blocos injetados — incluindo as lições do Córtex para aquele projeto (`<project_lessons>`, montado em `src/delivery/lessons.ts` e injetado no stream do chat).
+3. **Agente local.** No modo de execução, o agente roda um loop com **tools** (ler/escrever arquivos, rodar comandos, instalar dependências, consultar o banco, crawl). Cada tool declara o que faz e se modifica estado (`modifiesState`), o que alimenta os guardas de leitura/plano.
+4. **Aplicação.** As edições acontecem no diretório do projeto do cliente. O agente não "descreve" a mudança: ele a aplica e roda a verificação.
+5. **Verificação e evidência.** Typecheck, testes, verificação de segurança e análise de dependências do projeto; o resultado vira **evidência** no padrão de entrega (`src/delivery`), com o pacote exportável que responde: o que foi combinado, o que foi verificado, o que falta.
+6. **Aprendizado.** Ao fim do turno, o desfecho (funcionou / não funcionou) realimenta a lição usada — lição que ajuda ganha força; que atrapalha perde, e só é contraditada com evidência.
 
-However, many AI editors _do_ heavily rely on tool calling and this is something that we're evaluating, particularly with upcoming MCP support.
+## Consentimento: aprovação onde não dá para voltar
 
-### Why isn't Samba more agentic?
+A regra do produto é **pedir aprovação exatamente onde a ação é irreversível** — publicar (`git push`, `npm publish`, deploy), destruir (`push --force`, `reset --hard`, `rm -rf`), sair para a rede (`curl`, `ssh`, `rsync`), usar `sudo` ou mexer em dependências.
 
-Many other systems (e.g. Cursor) are much more agentic than Samba. For example, they will call many tools and do things like create a plan, use command-line tools to search through the codebase, run linters and tests and automatically fix the code based on those output.
+Dois detalhes que definem o comportamento:
 
-Samba, on the other hand, has a relatively simple agentic loop. We will fix TypeScript compiler errors if Auto-fix problems is enabled, but otherwise it's usually a single request to the AI.
+- A classificação é feita por **cláusula de comando** (`src/pro/main/ipc/handlers/local_agent/tools/command_risk.ts`): `npm test && git push` é barrado pelo `git push`. `--dry-run` não pede aprovação.
+- Um aviso de risco **fura o "sempre permitir"** do usuário: memória não é consentimento para o irreversível.
 
-The biggest issue with complex agentic workflows is that they can get very expensive very quickly! It's not uncommon to see users report spending a few dollars with a single request because under the hood, that single user requests turns into dozens of LLM requests. To keep Samba as cost-efficient as possible, we've avoided complex agentic workflows at least until the cost of LLMs is more affordable.
+## Node do projeto
 
-### Why does Samba send the entire codebase with each AI request?
+O app roda em Electron, mas os comandos do **projeto do cliente** precisam do Node que aquele projeto declara. `src/ipc/utils/node_runtime.ts` lê `engines.node`, escolhe a maior versão instalada que satisfaz e a coloca à frente do `PATH` dos comandos e do preview. Sem isso, projetos modernos falham com `EBADENGINE` antes de qualquer coisa útil rodar.
 
-Sending the right context to the AI has been rightfully emphasized as important, so much so that the term ["context engineering"](https://www.philschmid.de/context-engineering) is now in vogue.
+## Onde o conhecimento vive
 
-Sending the entire codebase is the simplest approach and quite effective for small codebases. Another approach is for the user to explicitly select the part of the codebase to use as context. This can be done through the [select component](https://www.samba.sh/docs/releases/0.8.0) feature or [manual context management](https://www.samba.sh/docs/guides/large-apps#manual-context-management).
+Fora do `.app`, no `userData`:
 
-However, both of these approaches require users to manually select the right files which isn't always practical. Samba's [Smart Context](https://www.samba.sh/docs/guides/ai-models/pro-modes#smart-context) feature essentially uses smaller models to filter out the most important files in the given chat. That said, we are constantly experimenting with new approaches to context selection as it's quite a difficult problem.
+- `sqlite.db` — projetos, chats, mensagens, unidades de conhecimento do Córtex (`knowledge_units`, `knowledge_usage`), MCPs;
+- `user-settings.json` — preferências e credenciais (as chaves nunca entram no repositório).
 
-One approach that we don't use is a more agentic-style like what Claude Code and Cursor does where it iteratively searches and navigates through a codebase using tool calls. The main reason we don't do this is due to cost (see the above question: [Why isn't Samba more agentic](#why-isnt-samba-more-agentic)).
+Consequência prática para quem mexe em release/instalação: trocar o bundle **não** toca no conhecimento; apagar o `userData` apaga tudo. Ver [RELEASING.md](RELEASING.md).
+
+## Por que o Samba Builder é agêntico (e como isso se paga)
+
+O projeto original evitava agentes por custo. Aqui o loop agêntico existe porque é **governado**: orçamento por turno, modos que restringem o que o agente pode fazer, modelo local quando faz sentido (BYOK) e gates que verificam o resultado em vez de confiar no relato do modelo.
+
+O custo é controlado por: escolha de modelo por tarefa, limites de iteração, cache diário de geração de narrativa e a regra de que tarefas de volume rodam na API direta, não no caminho caro.
+
+## Leitura obrigatória antes de mexer
+
+- `AGENTS.md` (este diretório) e os `rules/*.md` da área que você toca.
+- `docs/samba-delivery-workflow.md` — o padrão de entrega.
+- `docs/samba-engineering-quality.md` — o que conta como pronto.
+- `docs/samba-test-evidence.md` — como a evidência de teste é registrada.
+- `docs/RELEASING.md` — publicar.

@@ -176,13 +176,39 @@ See [rules/e2e-testing.md](rules/e2e-testing.md) for full E2E testing guidance, 
 
 **Debugging E2E test failures with screenshots:** When an E2E test fails and you can't determine the cause from the error message alone, use the `/samba:debug-with-playwright` skill to add screenshots at key points in the test. Playwright's built-in `screenshot: "on"` does NOT work with Electron — you must use manual `page.screenshot()` calls. The skill walks you through adding debug screenshots, running the test, viewing the captured PNGs, and cleaning up afterward.
 
+## Releasing
+
+See [docs/RELEASING.md](docs/RELEASING.md). Short version: bump the version in `package.json`, make sure the `release` environment exists in the repository, dispatch the **Release app** workflow (`workflow_dispatch`), review the draft and publish it. Signing is **optional and detected**: without Apple/Azure credentials the build produces unsigned artifacts instead of failing, and the tag of an already-published release is never moved — publish a new version instead.
+
+## Where things live
+
+| Area                                      | Path                                                   |
+| ----------------------------------------- | ------------------------------------------------------ |
+| Electron main process / IPC               | `src/main`, `src/ipc`                                  |
+| Renderer (React, TanStack Router + Query) | `src/app`, `src/components`, `src/atoms`               |
+| Local agent: tools, prompts, consent      | `src/pro/main/ipc/handlers/local_agent`, `src/prompts` |
+| Delivery standard and evidence            | `src/delivery`, `docs/samba-delivery-workflow.md`      |
+| Native skills, factory, quality gates     | `src/shared/native-skills`, `samba/`                   |
+| Product docs (pt-BR)                      | `samba/docs/`, `docs/`                                 |
+| Per-area agent rules                      | `rules/` (index above)                                 |
+
+## Full verification
+
+```sh
+npm run verify   # presubmit (fmt:check + lint) + ts + test
+```
+
+The suite is large (~7.9k tests) and memory-hungry — close the running app first. Some failures/skips are pre-existing on `main`: confirm against a clean `main` worktree before blaming your change.
+
 ## Git workflow
 
-When pushing changes and creating PRs:
+This repository **is the product**: `criptogus/Samba-Builder` (private). Never push to, open PRs against, or otherwise interact with the upstream projects (`samba-sh/samba`, `wwwillchen/samba`); the `upstream` remote is historical only.
 
-1. If the branch already has an associated PR, push to whichever remote the branch is tracking.
-2. If the branch hasn't been pushed before, default to pushing to `origin` (the fork `wwwillchen/samba`), then create a PR from the fork to the upstream repo (`samba-sh/samba`).
-3. If you cannot push to the fork due to permissions, push directly to `upstream` (`samba-sh/samba`) as a last resort.
+- Work on `main` of this repository and push to `origin`: `git push origin HEAD:main`.
+- If the push is rejected, the remote moved — `git fetch origin && git merge origin/main`, resolve, push again. Other agents commit here concurrently, so expect this.
+- Commit as `Gustavo Caetano <git@sambatech.com>`.
+- Never force-push `main`, and never delete the app `userData` (projects, chats, Córtex lessons, MCP config and keys live in `sqlite.db` **outside** the `.app`).
+- **Zero legacy naming:** nothing in this product may reference the original project outside the legal credits (`LICENSE`, `NOTICE`, `CLA.md`, `src/pro/LICENSE`) — not in artifact names, UI strings, docs, comments or env vars.
 
 ### Skipping automated review
 
