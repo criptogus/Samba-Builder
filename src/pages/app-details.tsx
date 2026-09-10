@@ -1,5 +1,7 @@
 import { ProjectManagementPanel } from "@/components/ProjectManagementPanel";
 import { ProjectDeliveryPanel } from "@/components/ProjectDeliveryPanel";
+import { GovernancePanel } from "@/components/GovernancePanel";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { SaveProjectTemplateButton } from "@/components/SaveProjectTemplateButton";
 import { useNavigate, useSearch } from "@tanstack/react-router";
 import { normalizePath } from "../../shared/normalizePath";
@@ -122,6 +124,9 @@ export default function AppDetailsPage() {
   const [newCopyAppName, setNewCopyAppName] = useState("");
   const [isChangeLocationDialogOpen, setIsChangeLocationDialogOpen] =
     useState(false);
+  const [activeDetailsTab, setActiveDetailsTab] = useState<string>(
+    search.provider ? "integrations" : "overview",
+  );
 
   const queryClient = useQueryClient();
   const setSelectedAppId = useSetAtom(selectedAppIdAtom);
@@ -525,229 +530,302 @@ export default function AppDetailsPage() {
           </Popover>
         </div>
 
-        <section
-          className="mb-6 rounded-xl border border-border bg-card p-5"
-          aria-label="Base e repositório do projeto"
+        <Tabs
+          value={activeDetailsTab}
+          onValueChange={setActiveDetailsTab}
+          className="w-full"
         >
-          <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
-            <div>
-              <h2 className="text-sm font-semibold">Base do projeto</h2>
-              <p className="mt-1 text-sm text-muted-foreground">
-                PRD, arquitetura, stack, design system e manutenção em
-                project-docs nos novos projetos.
-              </p>
-              <p className="mt-1 text-xs text-muted-foreground">
-                Documentos começam como rascunho e evoluem com o briefing e o
-                código. Projetos anteriores mantêm seus arquivos.
-              </p>
-            </div>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => ipc.system.showItemInFolder(currentAppPath)}
+          <TabsList className="mb-6 flex flex-wrap gap-2 border-b border-border pb-2 bg-transparent h-auto p-0">
+            <TabsTrigger
+              value="overview"
+              className="rounded-md px-3.5 py-1.5 text-sm font-medium border border-transparent data-[state=active]:border-border data-[state=active]:bg-muted data-[state=active]:text-foreground"
             >
-              Abrir arquivos
-            </Button>
-          </div>
-          <p className="mb-3 text-sm font-medium">
-            {selectedApp.githubRepo
-              ? "Repositório conectado · sincronize cada entrega"
-              : "Etapa pendente · crie ou conecte o repositório GitHub da equipe"}
-          </p>
-          <div className="border border-border rounded-lg p-4">
-            <GitHubConnector appId={appId} folderName={selectedApp.path} />
-            {selectedApp.githubOrg && selectedApp.githubRepo && appId && (
-              <div className="pt-4 border-t border-gray-100 dark:border-gray-800">
-                <GithubCollaboratorManager appId={appId} />
-              </div>
-            )}
-          </div>
-        </section>
-        <ProjectDeliveryPanel key={selectedApp.id} appId={selectedApp.id} />
-        <ProjectManagementPanel
-          key={`management-${selectedApp.id}`}
-          appId={selectedApp.id}
-        />
-        <details
-          open={!!providerFilter}
-          className="mt-6 rounded-xl border border-border bg-card p-5"
-        >
-          <summary className="cursor-pointer text-sm font-medium">
-            Configuração do projeto · arquivos e integrações
-          </summary>
-          <div className="mt-5 space-y-5">
-            {latestScreenshotUrl && !screenshotLoadFailed && (
-              <button
-                type="button"
-                onClick={handleOpenInChat}
-                disabled={chatsLoading || isOpeningChat}
-                aria-label={`Open ${selectedApp.name} in Chat`}
-                data-testid="app-details-screenshot-open-in-chat"
-                className="group relative mb-4 block aspect-video w-full max-w-sm overflow-hidden rounded-lg border border-border bg-muted cursor-pointer transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-default disabled:opacity-60"
-              >
-                <img
-                  src={latestScreenshotUrl}
-                  alt={`Preview of ${selectedApp?.name ?? "app"}`}
-                  onError={() => setScreenshotLoadFailed(true)}
-                  className="h-full w-full object-contain transition-transform duration-200 group-hover:scale-[1.02] group-disabled:scale-100"
-                />
-                <div className="pointer-events-none absolute inset-0 flex items-center justify-center bg-black/0 opacity-0 transition-all duration-200 group-hover:bg-black/15 group-hover:opacity-100 group-disabled:opacity-0">
-                  <span className="flex items-center gap-2 rounded-md bg-background/95 px-3 py-1.5 text-sm font-medium text-foreground shadow-md">
-                    Open in Chat
-                    <MessageCircle className="h-4 w-4" />
-                  </span>
-                </div>
-              </button>
-            )}
+              Visão Geral
+            </TabsTrigger>
+            <TabsTrigger
+              value="delivery"
+              className="rounded-md px-3.5 py-1.5 text-sm font-medium border border-transparent data-[state=active]:border-border data-[state=active]:bg-muted data-[state=active]:text-foreground"
+            >
+              Entrega & Gestão
+            </TabsTrigger>
+            <TabsTrigger
+              value="governance"
+              className="rounded-md px-3.5 py-1.5 text-sm font-medium border border-transparent data-[state=active]:border-border data-[state=active]:bg-muted data-[state=active]:text-foreground"
+            >
+              Governança
+            </TabsTrigger>
+            <TabsTrigger
+              value="integrations"
+              className="rounded-md px-3.5 py-1.5 text-sm font-medium border border-transparent data-[state=active]:border-border data-[state=active]:bg-muted data-[state=active]:text-foreground"
+            >
+              Design System & Integrações
+            </TabsTrigger>
+          </TabsList>
 
-            <div className="grid grid-cols-2 gap-3 text-sm mb-4">
-              <div>
-                <span className="block text-gray-500 dark:text-gray-400 mb-0.5 text-xs">
-                  Created
-                </span>
-                <span>
-                  {new Date(selectedApp.createdAt).toLocaleDateString()}
-                </span>
-              </div>
-              <div>
-                <span className="block text-gray-500 dark:text-gray-400 mb-0.5 text-xs">
-                  Last Updated
-                </span>
-                <span>
-                  {new Date(selectedApp.updatedAt).toLocaleDateString()}
-                </span>
-              </div>
-              <div className="col-span-2">
-                <span className="block text-gray-500 dark:text-gray-400 mb-0.5 text-xs">
-                  Path
-                </span>
-                <div className="flex items-center gap-1">
-                  <Tooltip>
-                    <TooltipTrigger
-                      render={
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="ml-[-8px] p-0.5 h-auto cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-                          onClick={() => {
-                            ipc.system.showItemInFolder(currentAppPath);
-                          }}
-                        />
-                      }
-                    >
-                      <Folder className="h-3.5 w-3.5" />
-                    </TooltipTrigger>
-                    <TooltipContent>Show in folder</TooltipContent>
-                  </Tooltip>
-                  <span className="text-sm break-all">{currentAppPath}</span>
+          {/* ABA 1: VISÃO GERAL */}
+          <TabsContent value="overview" className="space-y-6">
+            <section
+              className="rounded-xl border border-border bg-card p-5"
+              aria-label="Base e repositório do projeto"
+            >
+              <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
+                <div>
+                  <h2 className="text-sm font-semibold">Base do projeto</h2>
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    PRD, arquitetura, stack, design system e manutenção em
+                    project-docs nos novos projetos.
+                  </p>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    Documentos começam como rascunho e evoluem com o briefing e
+                    o código.
+                  </p>
                 </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => ipc.system.showItemInFolder(currentAppPath)}
+                >
+                  Abrir arquivos
+                </Button>
               </div>
-              <div className="col-span-2">
-                <span className="block text-gray-500 dark:text-gray-400 mb-0.5 text-xs">
-                  Collection
-                </span>
-                <div className="flex items-center gap-1">
-                  <Folder className="h-3.5 w-3.5 text-muted-foreground" />
-                  <span
-                    className="text-sm"
-                    data-testid="app-details-collection-name"
-                  >
-                    {currentCollection?.name ?? "No collection yet"}
+              <p className="mb-3 text-sm font-medium">
+                {selectedApp.githubRepo
+                  ? "Repositório conectado · sincronize cada entrega"
+                  : "Etapa pendente · crie ou conecte o repositório GitHub da equipe"}
+              </p>
+              <div className="border border-border rounded-lg p-4">
+                <GitHubConnector appId={appId} folderName={selectedApp.path} />
+                {selectedApp.githubOrg && selectedApp.githubRepo && appId && (
+                  <div className="pt-4 border-t border-gray-100 dark:border-gray-800">
+                    <GithubCollaboratorManager appId={appId} />
+                  </div>
+                )}
+              </div>
+            </section>
+
+            <div className="rounded-xl border border-border bg-card p-5">
+              <h2 className="text-sm font-semibold mb-4">
+                Informações do Aplicativo
+              </h2>
+              {latestScreenshotUrl && !screenshotLoadFailed && (
+                <button
+                  type="button"
+                  onClick={handleOpenInChat}
+                  disabled={chatsLoading || isOpeningChat}
+                  aria-label={`Open ${selectedApp.name} in Chat`}
+                  data-testid="app-details-screenshot-open-in-chat"
+                  className="group relative mb-4 block aspect-video w-full max-w-sm overflow-hidden rounded-lg border border-border bg-muted cursor-pointer transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-default disabled:opacity-60"
+                >
+                  <img
+                    src={latestScreenshotUrl}
+                    alt={`Preview of ${selectedApp?.name ?? "app"}`}
+                    onError={() => setScreenshotLoadFailed(true)}
+                    className="h-full w-full object-contain transition-transform duration-200 group-hover:scale-[1.02] group-disabled:scale-100"
+                  />
+                  <div className="pointer-events-none absolute inset-0 flex items-center justify-center bg-black/0 opacity-0 transition-all duration-200 group-hover:bg-black/15 group-hover:opacity-100 group-disabled:opacity-0">
+                    <span className="flex items-center gap-2 rounded-md bg-background/95 px-3 py-1.5 text-sm font-medium text-foreground shadow-md">
+                      Open in Chat
+                      <MessageCircle className="h-4 w-4" />
+                    </span>
+                  </div>
+                </button>
+              )}
+
+              <div className="grid grid-cols-2 gap-3 text-sm">
+                <div>
+                  <span className="block text-gray-500 dark:text-gray-400 mb-0.5 text-xs">
+                    Created
                   </span>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="ml-1 h-auto text-muted-foreground cursor-pointer hover:bg-transparent hover:text-foreground transition-colors"
-                    onClick={() => setIsAssignCollectionDialogOpen(true)}
-                    data-testid="app-details-edit-collection-button"
-                  >
-                    {selectedApp.collectionId == null ? (
-                      <Plus className="h-3.5 w-3.5" />
-                    ) : (
-                      <Pencil className="h-3.5 w-3.5" />
-                    )}
-                  </Button>
-                  {selectedApp.collectionId != null && (
+                  <span>
+                    {new Date(selectedApp.createdAt).toLocaleDateString()}
+                  </span>
+                </div>
+                <div>
+                  <span className="block text-gray-500 dark:text-gray-400 mb-0.5 text-xs">
+                    Last Updated
+                  </span>
+                  <span>
+                    {new Date(selectedApp.updatedAt).toLocaleDateString()}
+                  </span>
+                </div>
+                <div className="col-span-2">
+                  <span className="block text-gray-500 dark:text-gray-400 mb-0.5 text-xs">
+                    Path
+                  </span>
+                  <div className="flex items-center gap-1">
+                    <Tooltip>
+                      <TooltipTrigger
+                        render={
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="ml-[-8px] p-0.5 h-auto cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                            onClick={() => {
+                              ipc.system.showItemInFolder(currentAppPath);
+                            }}
+                          />
+                        }
+                      >
+                        <Folder className="h-3.5 w-3.5" />
+                      </TooltipTrigger>
+                      <TooltipContent>Show in folder</TooltipContent>
+                    </Tooltip>
+                    <span className="text-sm break-all">{currentAppPath}</span>
+                  </div>
+                </div>
+                <div className="col-span-2">
+                  <span className="block text-gray-500 dark:text-gray-400 mb-0.5 text-xs">
+                    Collection
+                  </span>
+                  <div className="flex items-center gap-1">
+                    <Folder className="h-3.5 w-3.5 text-muted-foreground" />
+                    <span
+                      className="text-sm"
+                      data-testid="app-details-collection-name"
+                    >
+                      {currentCollection?.name ?? "No collection yet"}
+                    </span>
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="-ml-2 h-auto text-muted-foreground cursor-pointer hover:bg-transparent hover:text-destructive transition-colors"
-                      onClick={async () => {
-                        try {
-                          await assignApps({
-                            collectionId: null,
-                            appIds: [selectedApp.id],
-                          });
-                          showSuccess("Removed from collection");
-                        } catch (error) {
-                          showError(error);
-                        }
-                      }}
-                      title="Remove from collection"
-                      aria-label="Remove from collection"
-                      data-testid="app-details-remove-collection-button"
+                      className="ml-1 h-auto text-muted-foreground cursor-pointer hover:bg-transparent hover:text-foreground transition-colors"
+                      onClick={() => setIsAssignCollectionDialogOpen(true)}
+                      data-testid="app-details-edit-collection-button"
                     >
-                      <Trash2 className="h-3.5 w-3.5" />
+                      {selectedApp.collectionId == null ? (
+                        <Plus className="h-3.5 w-3.5" />
+                      ) : (
+                        <Pencil className="h-3.5 w-3.5" />
+                      )}
                     </Button>
-                  )}
+                    {selectedApp.collectionId != null && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="-ml-2 h-auto text-muted-foreground cursor-pointer hover:bg-transparent hover:text-destructive transition-colors"
+                        onClick={async () => {
+                          try {
+                            await assignApps({
+                              collectionId: null,
+                              appIds: [selectedApp.id],
+                            });
+                            showSuccess("Removed from collection");
+                          } catch (error) {
+                            showError(error);
+                          }
+                        }}
+                        title="Remove from collection"
+                        aria-label="Remove from collection"
+                        data-testid="app-details-remove-collection-button"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </Button>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
-            <div className="mt-4 flex flex-col gap-2">
-              {/* When providerFilter is set, show the selected connector only if the other provider isn't already active */}
-              {providerFilter === "supabase" &&
-                appId &&
-                !selectedApp?.neonProjectId && (
-                  <SupabaseConnector appId={appId} />
-                )}
-              {providerFilter === "supabase" &&
-                appId &&
-                selectedApp?.neonProjectId && (
-                  <UnavailableIntegrationCard provider="supabase" />
-                )}
-              {providerFilter === "neon" &&
-                appId &&
-                !selectedApp?.supabaseProjectId && (
-                  <NeonConnector appId={appId} />
-                )}
-              {providerFilter === "neon" &&
-                appId &&
-                selectedApp?.supabaseProjectId && (
-                  <UnavailableIntegrationCard provider="neon" />
-                )}
-              {/* When no providerFilter, show both with existing mutual exclusion */}
-              {!providerFilter && (
-                <>
-                  {appId &&
-                    !selectedApp?.neonProjectId &&
-                    !selectedApp?.supabaseProjectId && (
-                      <div className="flex items-start gap-2 rounded-md border border-muted bg-muted/30 px-3 py-2 text-xs text-muted-foreground">
-                        <Info className="h-4 w-4 shrink-0 mt-0.5" />
-                        <span>
-                          {t("integrations.mutualExclusion.chooseOne")}
-                        </span>
-                      </div>
-                    )}
-                  {appId && !selectedApp?.neonProjectId && (
-                    <SupabaseConnector appId={appId} />
-                  )}
-                  {appId && selectedApp?.neonProjectId && (
-                    <UnavailableIntegrationCard provider="supabase" />
-                  )}
-                  {appId && !selectedApp?.supabaseProjectId && (
-                    <NeonConnector appId={appId} />
-                  )}
-                  {appId && selectedApp?.supabaseProjectId && (
-                    <UnavailableIntegrationCard provider="neon" />
-                  )}
-                </>
-              )}
-              {appId && <CapacitorControls appId={appId} />}
-              <AppUpgrades appId={appId} />
+          </TabsContent>
+
+          {/* ABA 2: ENTREGA & GESTÃO */}
+          <TabsContent value="delivery" className="space-y-6">
+            <ProjectDeliveryPanel key={selectedApp.id} appId={selectedApp.id} />
+            <ProjectManagementPanel
+              key={`management-${selectedApp.id}`}
+              appId={selectedApp.id}
+            />
+          </TabsContent>
+
+          {/* ABA 3: GOVERNANÇA */}
+          <TabsContent value="governance" className="space-y-6">
+            <div className="rounded-xl border border-border bg-card p-5">
+              <div className="mb-4">
+                <h2 className="text-sm font-semibold">
+                  Governança & Portões do Projeto
+                </h2>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  Controle formal de estágios (draft, in_review, approved,
+                  staging, production) e papéis da equipe com hash encadeado.
+                </p>
+              </div>
+              <GovernancePanel appPath={currentAppPath} />
+            </div>
+          </TabsContent>
+
+          {/* ABA 4: DESIGN SYSTEM & INTEGRAÇÕES */}
+          <TabsContent value="integrations" className="space-y-6">
+            <div className="rounded-xl border border-border bg-card p-5">
+              <div className="mb-4">
+                <h2 className="text-sm font-semibold">
+                  Design System SambaTech (Córtex)
+                </h2>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  Tokens de cor, tipografia e diretrizes de design sincronizados
+                  com o Córtex para manter a elegância do projeto.
+                </p>
+              </div>
               {appId && <DesignSystemDialog appId={appId} />}
             </div>
-          </div>
-        </details>
+
+            <div className="rounded-xl border border-border bg-card p-5">
+              <h2 className="text-sm font-semibold mb-4">
+                Banco de Dados e Infraestrutura
+              </h2>
+              <div className="space-y-4">
+                {/* When providerFilter is set, show the selected connector only if the other provider isn't already active */}
+                {providerFilter === "supabase" &&
+                  appId &&
+                  !selectedApp?.neonProjectId && (
+                    <SupabaseConnector appId={appId} />
+                  )}
+                {providerFilter === "supabase" &&
+                  appId &&
+                  selectedApp?.neonProjectId && (
+                    <UnavailableIntegrationCard provider="supabase" />
+                  )}
+                {providerFilter === "neon" &&
+                  appId &&
+                  !selectedApp?.supabaseProjectId && (
+                    <NeonConnector appId={appId} />
+                  )}
+                {providerFilter === "neon" &&
+                  appId &&
+                  selectedApp?.supabaseProjectId && (
+                    <UnavailableIntegrationCard provider="neon" />
+                  )}
+                {/* When no providerFilter, show both with existing mutual exclusion */}
+                {!providerFilter && (
+                  <>
+                    {appId &&
+                      !selectedApp?.neonProjectId &&
+                      !selectedApp?.supabaseProjectId && (
+                        <div className="flex items-start gap-2 rounded-md border border-muted bg-muted/30 px-3 py-2 text-xs text-muted-foreground">
+                          <Info className="h-4 w-4 shrink-0 mt-0.5" />
+                          <span>
+                            {t("integrations.mutualExclusion.chooseOne")}
+                          </span>
+                        </div>
+                      )}
+                    {appId && !selectedApp?.neonProjectId && (
+                      <SupabaseConnector appId={appId} />
+                    )}
+                    {appId && selectedApp?.neonProjectId && (
+                      <UnavailableIntegrationCard provider="supabase" />
+                    )}
+                    {appId && !selectedApp?.supabaseProjectId && (
+                      <NeonConnector appId={appId} />
+                    )}
+                    {appId && selectedApp?.supabaseProjectId && (
+                      <UnavailableIntegrationCard provider="neon" />
+                    )}
+                  </>
+                )}
+                {appId && <CapacitorControls appId={appId} />}
+                <AppUpgrades appId={appId} />
+              </div>
+            </div>
+          </TabsContent>
+        </Tabs>
 
         {/* Rename Dialog */}
         <Dialog open={isRenameDialogOpen} onOpenChange={setIsRenameDialogOpen}>

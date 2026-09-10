@@ -96,7 +96,8 @@ const screenTransition = {
 // GitHub issue helpers (shared between Report a Bug & Upload Chat Session)
 // =============================================================================
 
-const GITHUB_ISSUES_BASE = "https://sambatech.com" as const;
+const GITHUB_ISSUES_BASE =
+  "https://github.com/criptogus/Samba-Builder/issues/new" as const;
 
 function openGitHubIssue(params: {
   title: string;

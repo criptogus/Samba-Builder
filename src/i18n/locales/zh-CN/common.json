@@ -73,5 +73,19 @@
     "resumeSubscription": "恢复订阅",
     "openActionError": "无法打开 Academy。请重试。",
     "dismiss": "关闭账单通知"
+  },
+  "sidebar": {
+    "factory": "工厂",
+    "apps": "应用",
+    "settings": "设置",
+    "library": "库",
+    "templates": "模板",
+    "plugins": "插件",
+    "help": "帮助",
+    "servicesHealth": "Samba 服务状态",
+    "serviceOnline": "在线",
+    "serviceOffline": "离线",
+    "cortexService": "Córtex RAG (:8899)",
+    "hermesService": "Hermes Gateway (:8642)"
   }
 }

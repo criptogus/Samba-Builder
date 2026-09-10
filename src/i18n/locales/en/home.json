@@ -875,6 +875,11 @@
     "updated": "Updated",
     "more": "Show more projects",
     "localHint": "Projects on this computer · Organized using your existing collections.",
-    "intakeLabel": "New project · Client brief"
+    "intakeLabel": "New project · Client brief",
+    "intakeTitle": "What do you want to build?",
+    "intakeSubtitle": "Describe your idea. Samba Builder will turn it into a working app.",
+    "manageAiSetup": "Manage AI setup",
+    "connectAiToBuild": "Connect AI to build — takes a minute",
+    "allAppsAndCollections": "All collections & apps"
   }
 }

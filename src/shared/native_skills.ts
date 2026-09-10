@@ -214,4 +214,22 @@ export const nativeSkills: readonly NativeSkill[] = [
     sources: ["github/spec-kit"],
     prerequisite: null,
   },
+  {
+    slug: "samba-ops",
+    title: "Operação pós-publicação",
+    category: "Integrações",
+    description:
+      "Verifica o app no ar, diagnostica regressão, decide rollback e documenta runbooks.",
+    sources: ["bregman-arie/devops-sre-skills", "NotHarshhaa/devops-skills"],
+    prerequisite: "App publicado com URL e ambiente verificáveis.",
+  },
+  {
+    slug: "samba-simplify",
+    title: "Simplificação de código",
+    category: "Engenharia",
+    description:
+      "Reduz complexidade e melhora clareza preservando o comportamento observável.",
+    sources: ["addyosmani/agent-skills"],
+    prerequisite: null,
+  },
 ];

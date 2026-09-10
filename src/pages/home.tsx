@@ -179,11 +179,10 @@ export default function HomePage() {
                 id="project-intake-title"
                 className="max-w-xl text-2xl font-semibold tracking-tight text-foreground"
               >
-                What do you want to build?
+                {t("delivery.intakeTitle")}
               </h2>
               <p className="mt-2 max-w-xl text-sm leading-6 text-muted-foreground">
-                Describe your idea. Samba Builder will turn it into a working
-                app.
+                {t("delivery.intakeSubtitle")}
               </p>
             </div>
             <HomeChatInput
@@ -218,8 +217,8 @@ export default function HomePage() {
                   >
                     <Zap aria-hidden="true" className="size-3.5" />
                     {hasConfiguredAiProvider
-                      ? "Manage AI setup"
-                      : "Connect AI to build — takes a minute"}
+                      ? t("delivery.manageAiSetup")
+                      : t("delivery.connectAiToBuild")}
                   </button>
                 </div>
               )}

@@ -41,5 +41,26 @@ export function factoryArtifacts(
       null,
       2,
     ),
+    "samba/learning-report.md": `# Learning Loop — ${project.name}\n\nCliente: ${project.client}\nData: ${new Date().toISOString()}\n\n## Resumo do Projeto\n- Modo inicial: ${project.mode}\n- Problema resolvido: ${plan?.problem ?? "Não especificado"}\n- Stack tecnológica: ${plan?.stack ?? "Não especificada"}\n\n## Conhecimento & Decisões Registradas\n${project.knowledge || "Nenhuma nota de conhecimento registrada."}\n\n## Tarefas Concluídas\n${
+      plan?.tasks
+        .filter((t) => t.status === "done")
+        .map((t) => `- ${t.title} (${t.acceptance})`)
+        .join("\n") || "Nenhuma tarefa marcada como concluída."
+    }\n\n## Mudanças e Desvios de Escopo\n${project.changes.map((c) => `- [${c.status}] ${c.request}`).join("\n") || "Nenhuma mudança registrada."}\n`,
+    "samba/learn-record.json": JSON.stringify(
+      {
+        project: project.name,
+        client: project.client,
+        appId: project.appId,
+        date: new Date().toISOString(),
+        stack: plan?.stack,
+        tasksCompleted: plan?.tasks.filter((t) => t.status === "done").length,
+        totalTasks: plan?.tasks.length,
+        knowledge: project.knowledge,
+        changesCount: project.changes.length,
+      },
+      null,
+      2,
+    ),
   };
 }

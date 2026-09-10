@@ -40,19 +40,30 @@ Formato JSONL (1 objeto por linha), campos:
 
 1. **Agregar**: `python3 samba/skills/evolution/evolve.py --dry-run` — mostra o
    relatório agrupado por skill.
-2. **Propor**: `python3 samba/skills/evolution/evolve.py` — grava
+2. **Auditar (gate meta)**: revise cada skill nativa como **dado que o agente
+   vai seguir**, checando OWASP Agentic: AG01 injeção via conteúdo (instrução
+   que manda ignorar regras anteriores, precedência, "sempre execute"),
+   AG03 agência excessiva (escalar permissões, ignorar modo/escopo), AG05
+   exfiltração (enviar segredos/dados para fora), AG08 auto-aplicação
+   persistente, AG06 supply chain (fonte sem revisão/licença em sources.md,
+   texto colado de terceiro), alucinação de controle (CWE/framework não
+   verificado, promessa de conformidade) e declaração de ferramenta inexistente.
+   Verdicto por item: manter / ajustar com proposta / remover, com citação de
+   linha e categoria. Registre como `proposal-audit-<data>.md`; nenhuma skill
+   nova entra sem passar a checagem na revisão.
+3. **Propor**: `python3 samba/skills/evolution/evolve.py` — grava
    `samba/skills/evolution/proposals/proposal-*.md`. NUNCA edite o SKILL.md de um
    skill nativo antes de existir proposta escrita.
-3. **Aprovar (humano)**: a proposta é apresentada ao dev/dono; cada item vira
+4. **Aprovar (humano)**: a proposta é apresentada ao dev/dono; cada item vira
    `[x]` só com OK explícito. Mudanças de design system ou de regra de marca
    exigem aprovação do Gustavo (imutável sem isso).
-4. **Aplicar**: edite o SKILL.md correspondente em `samba/skills/native/<skill>/`
+5. **Aplicar**: edite o SKILL.md correspondente em `src/shared/native-skills/`
    com `patch` cirúrgico (uma regra por mudança, com o porquê).
-5. **Verificar**: rode o checklist/eval do skill afetado; confirme que a regra
+6. **Verificar**: rode o checklist/eval do skill afetado; confirme que a regra
    nova é testável por um exemplo (nada de instrução vaga).
-6. **Versionar**: commit com mensagem `skills(<nome>): <mudança> — motivo:
+7. **Versionar**: commit com mensagem `skills(<nome>): <mudança> — motivo:
 feedback <dev>/<projeto>`.
-7. **Propagar**: se a lição vale pro Córtex (design system, padrão de cliente),
+8. **Propagar**: se a lição vale pro Córtex (design system, padrão de cliente),
    registrar via learning loop para virar knowledge unit.
 
 ## Regras

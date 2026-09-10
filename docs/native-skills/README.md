@@ -11,7 +11,7 @@ Abra Library → Prompts → Skills nativas. Busque uma tarefa, veja as instruç
 /samba-performance Investigue o consumo de memória durante o preview.
 ```
 
-As 15 opções incluem PM Samba, especificação, plano, depuração, TDD, revisão, segurança, design, acessibilidade, arquitetura, desempenho, documentos, MCP, vídeo e publicação. As instruções são curadas para o Samba, independentes do provedor de IA; não são instalações completas dos repositórios de referência.
+As 18 opções incluem PM Samba, especificação, plano, depuração, TDD, revisão, segurança, design, acessibilidade, movimento, arquitetura, desempenho, documentos, MCP, vídeo, publicação, operação e simplificação. As instruções são curadas para o Samba, independentes do provedor de IA; não são instalações completas dos repositórios de referência.
 
 ## Ativação e limites
 
@@ -19,7 +19,7 @@ As 15 opções incluem PM Samba, especificação, plano, depuração, TDD, revis
 - Limite agregado de 12.000 caracteres nas seções selecionadas, além do limite individual de 6.000. Combinações grandes são rejeitadas com explicação, sem truncar instruções.
 - Até 3 skills distintas no início de cada mensagem; repetições são deduplicadas. Uma quarta é rejeitada com erro visível, sem truncamento silencioso.
 - Menções no meio do texto, blocos de código, citações e conteúdo de anexos/prompts salvos não ativam skills nativas.
-- Os 15 slugs do catálogo são reservados. Prompts pessoais com outros slugs continuam disponíveis; um prompt pessoal com um slug idêntico deve ser renomeado.
+- Os 18 slugs do catálogo são reservados. Prompts pessoais com outros slugs continuam disponíveis; um prompt pessoal com um slug idêntico deve ser renomeado.
 - O histórico exibe o comando original. Só a requisição atual recebe as instruções expandidas; mensagens seguintes não recarregam a skill automaticamente.
 - Ask/Plan permanecem sem escrita. A seleção não muda o modo, a lista de ferramentas, as permissões, nem autoriza publicação ou agentes extras.
 

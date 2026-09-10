@@ -73,5 +73,19 @@
     "resumeSubscription": "Retomar assinatura",
     "openActionError": "Não foi possível abrir a Academy. Tente novamente.",
     "dismiss": "Dispensar aviso de cobrança"
+  },
+  "sidebar": {
+    "factory": "Fábrica",
+    "apps": "Apps",
+    "settings": "Configurações",
+    "library": "Biblioteca",
+    "templates": "Modelos",
+    "plugins": "Plugins",
+    "help": "Ajuda",
+    "servicesHealth": "Status dos Serviços Samba",
+    "serviceOnline": "Online",
+    "serviceOffline": "Offline",
+    "cortexService": "Córtex RAG (:8899)",
+    "hermesService": "Hermes Gateway (:8642)"
   }
 }

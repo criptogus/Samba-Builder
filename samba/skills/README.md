@@ -2,8 +2,7 @@
 
 **PM Samba:** skill nativa original para descobrir um problema real, escolher um diferencial útil e orientar um produto simples, com design marcante. Use `/samba-pm` no início da mensagem ou encontre **PM Samba** em Library → Prompts → Skills nativas. [Instruções e versão portátil](../../src/shared/native-skills/samba-pm/SKILL.md).
 
-Skills nativos que fazem o agente do Samba Builder produzir apps **incríveis**, e o
-loop que os **evolui automaticamente** com o feedback dos devs.
+Skills nativas curadas em `src/shared/native-skills/`, com propostas de evolução a partir de feedback. O script de evolução gera propostas; não aplica regras automaticamente nem comprova a qualidade das aplicações. A referência do comportamento instalado é [docs/native-skills](../../docs/native-skills/README.md).
 
 ## Arquitetura: como um skill vira "nativo"
 
@@ -11,7 +10,7 @@ O fork do Samba monta o system prompt do agente em `src/prompts/` (system_prompt
 local_agent_prompt, guides por framework). Dois pontos de injeção nativa:
 
 1. **Diretrizes sempre ativas** — seção de "princípios Samba" no prompt montado do
-   fork (ex: `samba/prompts/` interpolado no local_agent_prompt). É onde entram os
+   fork (atualmente `PROJECT_GENERATION_GUIDANCE` de `src/shared/product_coach_guidance.ts`). É onde entram os
    skills de processo/qualidade que valem para TODO build (curadoria abaixo).
 2. **Contexto por app** — `AGENTS.md`/`DESIGN.md` gravados na raiz de cada app
    gerado (o agente do Samba já respeita AI rules do projeto). É onde entram o

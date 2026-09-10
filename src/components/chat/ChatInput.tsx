@@ -21,7 +21,6 @@ import {
   Lock,
   Mic,
   MicOff,
-  Sparkles,
   ArrowRight,
 } from "lucide-react";
 import type React from "react";

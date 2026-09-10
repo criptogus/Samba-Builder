@@ -4,12 +4,43 @@ import { loadNativeSkill } from "@/shared/load_native_skill";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ipc } from "@/ipc/types";
+import { useNavigate } from "@tanstack/react-router";
+import { useSelectChat } from "@/hooks/useSelectChat";
+import { useAtomValue } from "jotai";
+import { selectedAppIdAtom } from "@/atoms/appAtoms";
+import { Copy, MessageSquarePlus } from "lucide-react";
 
 export function NativeSkillsLibrary() {
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState<string | null>(null);
   const [body, setBody] = useState("");
   const [status, setStatus] = useState("");
+  const selectedAppId = useAtomValue(selectedAppIdAtom);
+  const { selectChat } = useSelectChat();
+  const navigate = useNavigate();
+
+  const handleUseInChat = async (slug: string) => {
+    const commandText = `/${slug} `;
+    if (selectedAppId) {
+      try {
+        const chatId = await ipc.chat.createChat({ appId: selectedAppId });
+        selectChat({
+          chatId,
+          appId: selectedAppId,
+          prefillInput: commandText,
+        });
+        return;
+      } catch {}
+    }
+    // If no app is active or creating chat fails, copy and route to home/apps
+    try {
+      await navigator.clipboard.writeText(commandText);
+      setStatus(`Comando /${slug} copiado! Selecione um app para iniciar.`);
+    } catch {
+      setStatus(`Use /${slug} no início da sua mensagem no chat.`);
+    }
+    navigate({ to: "/" });
+  };
   useEffect(() => {
     let active = true;
     setBody("");
@@ -64,17 +95,28 @@ export function NativeSkillsLibrary() {
                 Pré-requisito: {skill.prerequisite}
               </p>
             )}
-            <Button
-              variant="outline"
-              aria-expanded={selected === skill.slug}
-              onClick={() =>
-                setSelected(selected === skill.slug ? null : skill.slug)
-              }
-            >
-              {selected === skill.slug
-                ? "Fechar instruções"
-                : `Ver ${skill.title}`}
-            </Button>
+            <div className="flex flex-wrap gap-2 pt-1">
+              <Button
+                size="sm"
+                className="gap-1.5"
+                onClick={() => void handleUseInChat(skill.slug)}
+              >
+                <MessageSquarePlus className="size-3.5" />
+                Usar no Chat
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                aria-expanded={selected === skill.slug}
+                onClick={() =>
+                  setSelected(selected === skill.slug ? null : skill.slug)
+                }
+              >
+                {selected === skill.slug
+                  ? "Fechar instruções"
+                  : `Ver ${skill.title}`}
+              </Button>
+            </div>
             {selected === skill.slug && (
               <div className="space-y-3">
                 <pre
@@ -84,6 +126,9 @@ export function NativeSkillsLibrary() {
                   {body || "Carregando..."}
                 </pre>
                 <Button
+                  variant="secondary"
+                  size="sm"
+                  className="gap-1.5"
                   onClick={async () => {
                     try {
                       await navigator.clipboard.writeText(`/${skill.slug} `);
@@ -93,6 +138,7 @@ export function NativeSkillsLibrary() {
                     }
                   }}
                 >
+                  <Copy className="size-3.5" />
                   Copiar comando
                 </Button>
                 <p role="status" className="text-sm">

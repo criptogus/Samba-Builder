@@ -129,7 +129,7 @@ def main() -> int:
         f.write(report)
         f.write(
             "\n---\n## Aprovação\n"
-            "- [ ] Revisar cada proposta e editar o SKILL.md correspondente em `samba/skills/native/`\n"
+            "- [ ] Revisar cada proposta e editar o SKILL.md correspondente em `src/shared/native-skills/`\n"
             "- [ ] Rodar o eval/checklist do skill afetado antes de promover\n"
             "- [ ] Mover o feedback processado para `feedback/processed/`\n"
         )

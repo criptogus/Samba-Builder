@@ -813,6 +813,11 @@
     "updated": "更新日期",
     "more": "显示更多项目",
     "localHint": "此计算机上的项目 · 按现有集合组织。",
-    "intakeLabel": "新建项目 · 客户简报"
+    "intakeLabel": "新建项目 · 客户简报",
+    "intakeTitle": "您想构建什么？",
+    "intakeSubtitle": "描述您的想法。Samba Builder 将把它变成一个可用的应用。",
+    "manageAiSetup": "管理 AI 设置",
+    "connectAiToBuild": "连接 AI 开始构建 — 只需一分钟",
+    "allAppsAndCollections": "查看所有集合和应用"
   }
 }

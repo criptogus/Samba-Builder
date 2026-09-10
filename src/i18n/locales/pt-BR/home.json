@@ -875,6 +875,11 @@
     "updated": "Atualizado",
     "more": "Mostrar mais projetos",
     "localHint": "Projetos neste computador · Organizados pelas suas coleções existentes.",
-    "intakeLabel": "Novo projeto · Briefing do cliente"
+    "intakeLabel": "Novo projeto · Briefing do cliente",
+    "intakeTitle": "O que você quer construir?",
+    "intakeSubtitle": "Descreva sua ideia. O Samba Builder transformará em um app funcional.",
+    "manageAiSetup": "Gerenciar configuração de IA",
+    "connectAiToBuild": "Conectar IA para construir — leva 1 minuto",
+    "allAppsAndCollections": "Ver todas as coleções e apps"
   }
 }

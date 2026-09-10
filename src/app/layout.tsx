@@ -177,7 +177,7 @@ function RootLayoutContent({ children }: { children: ReactNode }) {
   // Sync i18n language with persisted user setting
   useEffect(() => {
     const parsed = LanguageSchema.safeParse(settings?.language);
-    const language = parsed.success ? parsed.data : "en";
+    const language = parsed.success ? parsed.data : "pt-BR";
     if (i18n.language !== language) {
       i18n.changeLanguage(language);
     }

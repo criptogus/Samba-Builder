@@ -38,6 +38,31 @@ import {
   isSidebarItemActive,
   shouldShowSelectedAppChatList,
 } from "./app-sidebar-state";
+import { useTranslation } from "react-i18next";
+import { useServicesHealth } from "@/hooks/useServicesHealth";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+
+const itemLabelKey: Record<
+  AppSidebarItemTitle,
+  | "sidebar.factory"
+  | "sidebar.apps"
+  | "sidebar.settings"
+  | "sidebar.library"
+  | "sidebar.templates"
+  | "sidebar.plugins"
+> = {
+  Fábrica: "sidebar.factory",
+  Apps: "sidebar.apps",
+  Settings: "sidebar.settings",
+  Library: "sidebar.library",
+  Templates: "sidebar.templates",
+  Plugins: "sidebar.plugins",
+};
 
 // Menu items.
 const items = [
@@ -148,6 +173,7 @@ function AppSidebarRailButton({
 }
 
 export function AppSidebar() {
+  const { t } = useTranslation("common");
   const { state } = useSidebar();
   const setHelpDialog = useSetAtom(helpDialogAtom);
   const selectedAppId = useAtomValue(selectedAppIdAtom);
@@ -170,6 +196,8 @@ export function AppSidebar() {
     setSelectedChatId(null);
     navigate({ to: "/" });
   };
+  const health = useServicesHealth();
+
   return (
     <Sidebar collapsible="icon" className="border-r border-sidebar-border">
       <SidebarContent className="overflow-hidden">
@@ -183,7 +211,7 @@ export function AppSidebar() {
                     <SidebarMenuItem key={item.title}>
                       <AppSidebarRailButton
                         icon={item.icon}
-                        label={item.title}
+                        label={t(itemLabelKey[item.title])}
                         to={item.to}
                         isActive={isSidebarItemActive({
                           title: item.title,
@@ -217,10 +245,91 @@ export function AppSidebar() {
       </SidebarContent>
       <SidebarFooter className="px-1 items-start">
         <SidebarMenu>
+          <SidebarMenuItem className="mb-1">
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger
+                  render={
+                    <div
+                      role="status"
+                      aria-label={t("sidebar.servicesHealth")}
+                      className="group/health flex h-8 w-16 cursor-help items-center justify-center gap-1.5 rounded-md border border-sidebar-border/60 bg-sidebar-accent/40 text-[10px] text-muted-foreground hover:bg-sidebar-accent"
+                    />
+                  }
+                >
+                  <span
+                    className={cn(
+                      "size-2 rounded-full transition-colors",
+                      health.cortex
+                        ? "bg-emerald-500"
+                        : "bg-zinc-400 dark:bg-zinc-600",
+                    )}
+                  />
+                  <span
+                    className={cn(
+                      "size-2 rounded-full transition-colors",
+                      health.hermes
+                        ? "bg-emerald-500"
+                        : "bg-zinc-400 dark:bg-zinc-600",
+                    )}
+                  />
+                </TooltipTrigger>
+                <TooltipContent side="right" className="space-y-1 text-xs">
+                  <p className="font-semibold text-foreground">
+                    {t("sidebar.servicesHealth")}
+                  </p>
+                  <div className="flex items-center gap-2">
+                    <span
+                      className={cn(
+                        "size-2 rounded-full",
+                        health.cortex
+                          ? "bg-emerald-500"
+                          : "bg-muted-foreground",
+                      )}
+                    />
+                    <span>{t("sidebar.cortexService")}:</span>
+                    <strong
+                      className={
+                        health.cortex
+                          ? "text-emerald-500"
+                          : "text-muted-foreground"
+                      }
+                    >
+                      {health.cortex
+                        ? t("sidebar.serviceOnline")
+                        : t("sidebar.serviceOffline")}
+                    </strong>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span
+                      className={cn(
+                        "size-2 rounded-full",
+                        health.hermes
+                          ? "bg-emerald-500"
+                          : "bg-muted-foreground",
+                      )}
+                    />
+                    <span>{t("sidebar.hermesService")}:</span>
+                    <strong
+                      className={
+                        health.hermes
+                          ? "text-emerald-500"
+                          : "text-muted-foreground"
+                      }
+                    >
+                      {health.hermes
+                        ? t("sidebar.serviceOnline")
+                        : t("sidebar.serviceOffline")}
+                    </strong>
+                  </div>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </SidebarMenuItem>
           <SidebarMenuItem>
             <AppSidebarRailButton
               icon={HelpCircle}
-              label="Help"
+              label={t("sidebar.help")}
               isExpanded={state === "expanded"}
               onClick={() => setHelpDialog({ open: true })}
             />
