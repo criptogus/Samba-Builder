@@ -13,6 +13,7 @@ import {
 import { ipc } from "@/ipc/types";
 import { useTranslation } from "react-i18next";
 import { showError } from "@/lib/toast";
+import { memo } from "react";
 
 type AppItemProps = {
   app: ListedApp;
@@ -21,7 +22,8 @@ type AppItemProps = {
   enableMultiWindow: boolean;
 };
 
-export function AppItem({
+// ⚡ Bolt: Memoized to prevent unnecessary re-renders in AppList
+export const AppItem = memo(function AppItem({
   app,
   handleAppClick,
   selectedAppId,
@@ -87,4 +89,4 @@ export function AppItem({
       )}
     </SidebarMenuItem>
   );
-}
+});
