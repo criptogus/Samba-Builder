@@ -137,6 +137,8 @@ export function ModelsSection({ providerId }: ModelsSectionProps) {
                         handleEditClick(model);
                       }}
                       className="text-blue-500 hover:text-blue-700 hover:bg-blue-100 dark:hover:bg-blue-900/50 h-8 w-8"
+                      aria-label="Edit custom model"
+                      title="Edit custom model"
                     >
                       <svg
                         className="h-4 w-4"
@@ -161,6 +163,8 @@ export function ModelsSection({ providerId }: ModelsSectionProps) {
                       }}
                       disabled={isDeleting}
                       className="text-red-500 hover:text-red-700 hover:bg-red-100 dark:hover:bg-red-900/50 h-8 w-8"
+                      aria-label="Delete custom model"
+                      title="Delete custom model"
                     >
                       <TrashIcon className="h-4 w-4" />
                     </Button>
