@@ -86,6 +86,31 @@ Nomes publicados (sem resquício de nome do upstream):
 | Linux Fedora/openSUSE | `samba-builder-<versão>-1.x86_64.rpm`    |
 | Linux portátil        | `samba-builder-<versão>-x86_64.AppImage` |
 
+### Quando o job de publicação não inicia (bloqueio de billing)
+
+Se os builds passarem mas o **Publish Release** não rodar, o GitHub responde algo como:
+
+> The job was not started because recent account payments have failed or your spending limit needs to be increased.
+
+Os artefatos **já estão construídos** no run (retidos por 1 dia), então dá para publicar sem refazer build:
+
+```sh
+# 1. baixe os quatro artefatos do run
+gh run download <run-id> -R criptogus/Samba-Builder --dir /tmp/sb-rel
+
+# 2. os instaladores ficam em */make/**; renomeie para o padrão publicado (sem espaços):
+#    "Samba Builder-<versão> Setup.exe"  ->  SambaBuilder-<versão>-Setup.exe
+
+# 3. a tag já existe (criada pelo prepare); crie a release com os arquivos
+gh release create v<versão> -R criptogus/Samba-Builder --prerelease \
+  --title "Samba Builder <versão> — macOS, Windows e Linux" \
+  --notes-file notas.md <arquivos...>
+
+# 4. confirme baixando um arquivo de volta e comparando o SHA-256
+```
+
+Consequências: a tag fica **publicada** (a próxima release exige bump — seção 5) e o `Publish Release` daquele run continua vermelho até o billing ser resolvido. Não é falha de build.
+
 ## 7. Instalar um build não assinado
 
 macOS:
@@ -111,5 +136,7 @@ O `SAMBA_LOCAL_DESKTOP_BUILD=true` também desliga a assinatura, então serve pa
 - **Runner do Windows usa PowerShell.** Qualquer passo com sintaxe bash precisa de `shell: bash` explícito — sem isso o job morre antes de buildar (aconteceu com o passo de detecção de credenciais).
 - **Nunca aponte os scripts de assinatura para contas de terceiros.** O workflow herdado referenciava o certificado Apple e a conta Azure do projeto original; este fork não tem (nem deve ter) essas credenciais. A detecção existe justamente para não depender delas.
 - **`npm run publish`/`make` no CI usam `npm run clean`** internamente; localmente, rode `clean` se o `out/` estiver velho.
+- **Attestation não existe em repositório privado de conta pessoal.** O passo `actions/attest` falha com _Feature not available for user-owned private repositories_ — por isso ele é condicional (`if: github.event.repository.private == false`). Em repositório público volta a rodar sozinho.
+- **Nome de exibição ≠ nome do binário.** O `packagerConfig.name` ("Samba Builder") é o nome que aparece para o usuário; os makers procuram o executável pelo nome do `package.json`. Sem `executableName: "samba-builder"` o Linux falha com `could not find the Electron app binary at out/Samba Builder-linux-x64/samba-builder`.
 - **Minutos de CI:** macOS custa ~10× Linux. O release completo usa 4 runners, sendo 2 de macOS.
 - **Repositório privado:** o download exige conta com acesso.
