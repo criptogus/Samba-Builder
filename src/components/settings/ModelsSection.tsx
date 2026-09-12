@@ -132,6 +132,7 @@ export function ModelsSection({ providerId }: ModelsSectionProps) {
                     <Button
                       variant="ghost"
                       size="icon"
+                      aria-label={`Edit ${model.displayName} model`}
                       onClick={(e) => {
                         e.stopPropagation();
                         handleEditClick(model);
@@ -155,6 +156,7 @@ export function ModelsSection({ providerId }: ModelsSectionProps) {
                     <Button
                       variant="ghost"
                       size="icon"
+                      aria-label={`Delete ${model.displayName} model`}
                       onClick={(e) => {
                         e.stopPropagation();
                         handleDeleteClick(model.apiName);

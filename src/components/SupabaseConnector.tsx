@@ -853,6 +853,7 @@ export function SupabaseConnector({ appId }: { appId: number }) {
                     <Button
                       variant="outline"
                       size="icon"
+                      aria-label="Refresh projects"
                       onClick={() => refetchProjects()}
                       disabled={isFetchingProjects}
                     />
