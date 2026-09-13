@@ -1,5 +1,5 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useMemo, useState } from "react";
 
 import { ipc } from "@/ipc/types";
 import { queryKeys } from "@/lib/queryKeys";
@@ -64,8 +64,13 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     root.classList.add(isDarkMode ? "dark" : "light");
   }, [isDarkMode, theme]);
 
+  const value = useMemo(
+    () => ({ theme, isDarkMode, setTheme }),
+    [theme, isDarkMode, setTheme]
+  );
+
   return (
-    <ThemeContext.Provider value={{ theme, isDarkMode, setTheme }}>
+    <ThemeContext.Provider value={value}>
       {children}
     </ThemeContext.Provider>
   );

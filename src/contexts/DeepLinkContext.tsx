@@ -3,6 +3,7 @@ import React, {
   useCallback,
   useContext,
   useEffect,
+  useMemo,
   useState,
 } from "react";
 import { useNavigate } from "@tanstack/react-router";
@@ -43,13 +44,16 @@ export function DeepLinkProvider({ children }: { children: React.ReactNode }) {
 
   const clearLastDeepLink = useCallback(() => setLastDeepLink(null), []);
 
+  const value = useMemo(
+    () => ({
+      lastDeepLink,
+      clearLastDeepLink,
+    }),
+    [lastDeepLink, clearLastDeepLink]
+  );
+
   return (
-    <DeepLinkContext.Provider
-      value={{
-        lastDeepLink,
-        clearLastDeepLink,
-      }}
-    >
+    <DeepLinkContext.Provider value={value}>
       {children}
     </DeepLinkContext.Provider>
   );
