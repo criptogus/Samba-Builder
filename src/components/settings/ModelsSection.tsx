@@ -136,6 +136,7 @@ export function ModelsSection({ providerId }: ModelsSectionProps) {
                         e.stopPropagation();
                         handleEditClick(model);
                       }}
+                      aria-label={`Edit model ${model.displayName}`}
                       className="text-blue-500 hover:text-blue-700 hover:bg-blue-100 dark:hover:bg-blue-900/50 h-8 w-8"
                     >
                       <svg
@@ -160,6 +161,7 @@ export function ModelsSection({ providerId }: ModelsSectionProps) {
                         handleDeleteClick(model.apiName);
                       }}
                       disabled={isDeleting}
+                      aria-label={`Delete model ${model.displayName}`}
                       className="text-red-500 hover:text-red-700 hover:bg-red-100 dark:hover:bg-red-900/50 h-8 w-8"
                     >
                       <TrashIcon className="h-4 w-4" />
