@@ -1,0 +1,3 @@
+## 2024-03-20 - Missing ARIA labels on icon-only DialogTriggers
+**Learning:** Found a pattern in this codebase where icon-only `DialogTrigger` buttons (e.g., using `variant="ghost"`, `size="icon"`) often rely solely on the `title` attribute for accessibility. While `title` provides a tooltip on hover, it's not a complete replacement for `aria-label` which is specifically needed by screen readers to announce the button's purpose when it has no text content.
+**Action:** Always check icon-only buttons (especially `DialogTrigger` and `AlertDialogTrigger`) for an explicit `aria-label`, even if a `title` attribute is present. Add `aria-label` matching or expanding upon the `title` text.
