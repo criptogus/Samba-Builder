@@ -12,19 +12,20 @@ import {
 } from "@/components/ui/context-menu";
 import { ipc } from "@/ipc/types";
 import { useTranslation } from "react-i18next";
+import React from "react";
 import { showError } from "@/lib/toast";
 
 type AppItemProps = {
   app: ListedApp;
   handleAppClick: (id: number) => void;
-  selectedAppId: number | null;
+  isSelected: boolean;
   enableMultiWindow: boolean;
 };
 
-export function AppItem({
+export const AppItem = React.memo(function AppItem({
   app,
   handleAppClick,
-  selectedAppId,
+  isSelected,
   enableMultiWindow,
 }: AppItemProps) {
   const { t } = useTranslation("home");
@@ -34,7 +35,7 @@ export function AppItem({
         variant="ghost"
         onClick={() => handleAppClick(app.id)}
         className={`flex w-full justify-start gap-2 py-3 text-left hover:bg-sidebar-accent/80 ${
-          selectedAppId === app.id
+          isSelected
             ? "bg-sidebar-accent text-sidebar-accent-foreground"
             : ""
         }`}
@@ -87,4 +88,4 @@ export function AppItem({
       )}
     </SidebarMenuItem>
   );
-}
+});
