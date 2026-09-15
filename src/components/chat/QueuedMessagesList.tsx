@@ -68,6 +68,7 @@ function QueuedMessageItemRow({
             onClick={onEdit}
             className="p-1 hover:bg-muted rounded cursor-pointer"
             title="Edit"
+            aria-label="Edit queued message"
           >
             <Pencil size={14} className="text-muted-foreground" />
           </button>
@@ -83,6 +84,7 @@ function QueuedMessageItemRow({
                 index === 0 && "opacity-30 cursor-not-allowed",
               )}
               title="Move up"
+              aria-label="Move queued message up"
             >
               <ArrowUp size={14} className="text-muted-foreground" />
             </button>
@@ -95,6 +97,7 @@ function QueuedMessageItemRow({
                 index === total - 1 && "opacity-30 cursor-not-allowed",
               )}
               title="Move down"
+              aria-label="Move queued message down"
             >
               <ArrowDown size={14} className="text-muted-foreground" />
             </button>
@@ -106,6 +109,11 @@ function QueuedMessageItemRow({
             onClick={() => void onDelete()}
             className="p-1 hover:bg-muted rounded cursor-pointer"
             title={isRejectableMachineEntry ? "Reject and delete" : "Delete"}
+            aria-label={
+              isRejectableMachineEntry
+                ? "Reject and delete queued message"
+                : "Delete queued message"
+            }
           >
             <Trash2 size={14} className="text-red-500" />
           </button>
@@ -193,6 +201,10 @@ export function QueuedMessagesList({
             onClick={() => setIsExpanded(!isExpanded)}
             className="p-1 hover:bg-muted rounded cursor-pointer"
             title={isExpanded ? "Collapse" : "Expand"}
+            aria-label={
+              isExpanded ? "Collapse queued messages" : "Expand queued messages"
+            }
+            aria-expanded={isExpanded}
           >
             {isExpanded ? (
               <ChevronUp className="w-4 h-4 text-muted-foreground" />

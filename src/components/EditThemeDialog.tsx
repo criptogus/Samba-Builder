@@ -122,6 +122,7 @@ export function EditThemeDialog({
           className={cn(buttonVariants({ variant: "ghost", size: "icon" }))}
           data-testid="edit-theme-button"
           title="Edit theme"
+          aria-label="Edit theme"
         >
           <Edit2 className="h-4 w-4" />
         </DialogTrigger>
