@@ -855,6 +855,7 @@ export function SupabaseConnector({ appId }: { appId: number }) {
                       size="icon"
                       onClick={() => refetchProjects()}
                       disabled={isFetchingProjects}
+                      aria-label={t("integrations.supabase.refreshProjects")}
                     />
                   }
                 >
