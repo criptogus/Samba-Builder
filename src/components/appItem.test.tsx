@@ -44,7 +44,7 @@ describe("AppItem", () => {
           } as ListedApp
         }
         handleAppClick={vi.fn()}
-        selectedAppId={null}
+        isSelected={false}
         enableMultiWindow={enableMultiWindow}
       />,
     );

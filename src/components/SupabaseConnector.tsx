@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   acknowledgeConnectionFlow,
   cancelConnectionFlow,
@@ -323,26 +323,28 @@ export function SupabaseConnector({ appId }: { appId: number }) {
   const createErrorForThisApp = createErrors[appId]?.message ?? null;
 
   // Group projects by organization for display
-  const groupedProjects = projects.reduce(
-    (acc, project) => {
-      const orgKey = project.organizationSlug;
-      if (!acc[orgKey]) {
-        // Find the organization info to get the name
-        const orgInfo = organizations.find(
-          (o) => o.organizationSlug === project.organizationSlug,
-        );
-        acc[orgKey] = {
-          orgLabel:
-            orgInfo?.name ||
-            `Organization ${project.organizationSlug.slice(0, 8)}`,
-          projects: [],
-        };
-      }
-      acc[orgKey].projects.push(project);
-      return acc;
-    },
-    {} as Record<string, { orgLabel: string; projects: SupabaseProject[] }>,
-  );
+  const groupedProjects = useMemo(() => {
+    // Fast lookup for organizations
+    const orgMap = new Map(organizations.map((o) => [o.organizationSlug, o]));
+
+    return projects.reduce(
+      (acc, project) => {
+        const orgKey = project.organizationSlug;
+        if (!acc[orgKey]) {
+          const orgInfo = orgMap.get(project.organizationSlug);
+          acc[orgKey] = {
+            orgLabel:
+              orgInfo?.name ||
+              `Organization ${project.organizationSlug.slice(0, 8)}`,
+            projects: [],
+          };
+        }
+        acc[orgKey].projects.push(project);
+        return acc;
+      },
+      {} as Record<string, { orgLabel: string; projects: SupabaseProject[] }>,
+    );
+  }, [projects, organizations]);
 
   const handleAddAccount = async () => {
     try {
