@@ -1,7 +1,7 @@
 {
   "name": "samba-builder",
   "productName": "Samba Builder",
-  "version": "1.14.0-beta.4",
+  "version": "1.14.0-beta.5",
   "description": "Construtor de apps com IA da SambaTech, alimentado pelo Córtex",
   "keywords": [],
   "license": "Apache-2.0",
