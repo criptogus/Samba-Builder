@@ -86,6 +86,42 @@ describe("release workflow", () => {
     expect(publishStep.run).toContain("--draft=false");
   });
 
+  it("publica a nota de versão do repositório antes de tornar a release pública", () => {
+    const parsed = parseYaml(readWorkflow()) as {
+      jobs: Record<
+        string,
+        { steps: Array<{ name?: string; run?: string; env?: Record<string, string> }> }
+      >;
+    };
+    const steps = parsed.jobs.publish.steps;
+    const names = steps.map((step) => step.name);
+
+    const notesIndex = names.indexOf("Attach release notes");
+    expect(notesIndex).toBeGreaterThan(-1);
+    expect(notesIndex).toBeLessThan(names.indexOf("Publish the release (remove draft)"));
+
+    const notesStep = steps[notesIndex];
+    expect(notesStep.run).toContain("--notes-file");
+    expect(notesStep.run).toContain("docs/releases/v${RELEASE_VERSION}.md");
+    // Sem arquivo, avisa no log em vez de derrubar o release.
+    expect(notesStep.run).toContain("::warning::");
+  });
+
+  it("existe uma nota de versão para a versão atual do package.json", () => {
+    const pkg = JSON.parse(
+      fs.readFileSync(path.join(process.cwd(), "package.json"), "utf8"),
+    ) as { version: string };
+    const notesPath = path.join(
+      process.cwd(),
+      "docs",
+      "releases",
+      `v${pkg.version}.md`,
+    );
+
+    expect(fs.existsSync(notesPath)).toBe(true);
+    expect(fs.readFileSync(notesPath, "utf8")).toContain(`# Samba Builder ${pkg.version}`);
+  });
+
   it("recusa build quando a tag não corresponde à versão do package.json", () => {
     const workflow = fs
       .readFileSync(

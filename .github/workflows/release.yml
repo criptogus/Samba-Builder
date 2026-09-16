@@ -255,6 +255,22 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: node scripts/verify-release-assets.js
+      # A nota de versão vive no repositório (`docs/releases/v<versão>.md`):
+      # versionada, revisável no pull request e publicada junto com a release —
+      # é o texto que o app abre em "novidades desta versão". Sem o arquivo, a
+      # release sai sem descrição (avisando no log) em vez de falhar.
+      - name: Attach release notes
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RELEASE_TAG: ${{ needs.prepare-release.outputs.tag }}
+          RELEASE_VERSION: ${{ needs.prepare-release.outputs.version }}
+        run: |
+          NOTES_FILE="docs/releases/v${RELEASE_VERSION}.md"
+          if [ -f "${NOTES_FILE}" ]; then
+            gh release edit "${RELEASE_TAG}" --notes-file "${NOTES_FILE}"
+          else
+            echo "::warning::Sem nota de versão em ${NOTES_FILE}; a release ficou sem descrição."
+          fi
       # Só no caminho da tag a release vira pública — depois de tudo verificado,
       # para o feed de update nunca ver uma release incompleta. O disparo manual
       # continua terminando em draft, como antes.

@@ -68,6 +68,8 @@ Diagnóstico de 2026-09-08, em ordem de decisividade:
 
 **Versões (2026-09-08):** instalado no Mac mini `1.14.0-beta.1`; repositório em **`1.14.0-beta.2`** (`package.json` + as duas ocorrências em `package-lock.json`: `version` e `packages[""].version`). `npm run bump` é interativo e ainda cria branch/commit/push/PR — em ambiente sem push, suba a versão nos três lugares à mão. A tag `v1.14.0-beta.2` é a primeira oferecível como atualização (o workflow valida tag × versão).
 
+**Release notes (2026-09-08):** o app **não** lê nota de arquivo — `doesReleaseNoteExist` faz `HEAD` em `github.com/criptogus/Samba-Builder/releases/tag/v<versão>` e abre a página. Então a nota é o **corpo da release**: vive versionada em `docs/releases/v<versão>.md` e o job `publish` a anexa com `gh release edit --notes-file` **antes** de tirar o draft (passo "Attach release notes"). Sem o arquivo, a release sai sem descrição e o log avisa — não falha. `src/__tests__/release_workflow.test.ts` exige que exista nota para a versão atual do `package.json`, então bump sem nota quebra o teste (era o que faltava para "preparar a nota antes da tag").
+
 ## Mapa da integração com GitHub (interface e main)
 
 - **Interface:** `src/components/GitHubConnector.tsx` (conectar repo/org), `GitHubIntegration.tsx` (conectar/desconectar conta), `GithubBranchManager.tsx` (branches: criar, trocar, renomear, deletar, pull), `GithubCollaboratorManager.tsx` (colaboradores), `chat/CommitDialogActions.tsx` + `chat/CommitButtonLabel.tsx` (fluxo de commit do chat) e `GithubPullRequestActions.tsx` (pull request da branch atual — REQ-31).

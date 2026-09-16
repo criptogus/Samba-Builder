@@ -39,7 +39,10 @@ Mesmo com o app novo (que já contém o updater), o OTA depende de três coisas 
 
 Quando o canal estiver resolvido (repo público/alcançável + credenciais Apple como secrets), a publicação é:
 
-1. subir a versão em `package.json` (precisa ser maior que a instalada);
+1. subir a versão em `package.json` (precisa ser maior que a instalada) **e escrever a nota em
+   `docs/releases/v<versão>.md`** — o workflow anexa esse arquivo como descrição da release; sem ele a release sai
+   sem texto (com aviso no log). O teste `src/__tests__/release_workflow.test.ts` falha se a versão do
+   `package.json` não tiver a nota correspondente;
 2. empurrar a tag `v<versão>` — o workflow confere que a tag corresponde à versão e **falha** se não corresponder;
 3. ao terminar, a release é publicada sem draft (prerelease quando a versão tem sufixo `-beta`, por exemplo).
 
