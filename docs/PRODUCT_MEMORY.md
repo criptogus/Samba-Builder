@@ -78,7 +78,7 @@ Plano que originou estas decisões: [`plans/kilocode-parity-plan.md`](../plans/k
   justificadas), mas **falta a metade determinística** (regras mecânicas que não dependem de o modelo lembrar) e
   **falta medir** (não temos nenhum número de precisão, cobertura ou custo do Reviewer). Adotados como requisitos:
   `REQ-25` (pré-passe de regras), `REQ-26` (cobertura explícita — "cortar caminho" em changesets grandes é o
-  defeito nº 1 na lista deles), `REQ-27` (ancorar finding contra o diff, contra *position drift*), `REQ-28` (modo
+  defeito nº 1 na lista deles), `REQ-27` (ancorar finding contra o diff, contra _position drift_), `REQ-28` (modo
   scan para apps importados) e `REQ-29` (placar de qualidade com fixture de defeitos plantados).
   **Decisão que muda escopo:** `REQ-30` revisa a exclusão anterior de code reviews de PR — o OCR demonstra um
   caminho **sem infra nossa** (CLI + GitHub Action com chave do usuário), coerente com local-first/BYOK. Fica
@@ -107,12 +107,21 @@ Plano que originou estas decisões: [`plans/kilocode-parity-plan.md`](../plans/k
   implementadas: nunca na branch padrão, idempotente (PR já aberto é reaproveitado, não duplicado) e melhor esforço
   — falha ao abrir o PR **não** derruba o push. O link chega ao app por evento e vira aviso com a URL.
 
-- **2026-09-08** — "Sync com o GitHub" passou a fazer jus ao nome (`REQ-33`). O botão já se chamava *Sync to
-  GitHub*, mas **só empurrava**. Agora existe a operação `sync` na máquina de `github_ops`, encadeada como
+- **2026-09-08** — "Sync com o GitHub" passou a fazer jus ao nome (`REQ-33`). O botão já se chamava _Sync to
+  GitHub_, mas **só empurrava**. Agora existe a operação `sync` na máquina de `github_ops`, encadeada como
   composto: **pull primeiro, push só se o pull der certo** (`compositeNext`). Motivo de ser operação própria: a
   máquina descarta pedidos novos enquanto roda, então disparar pull e push pela UI perderia o segundo. Conflito
   continua coberto pelo fluxo que já existia (`continuationOperation` devolve o próprio sync, então depois de
   resolver o conflito o sync refaz o pull e só então envia).
+
+- **2026-09-08** — Canal de atualização do app definido: **releases deste repositório no GitHub**, servidas pelo
+  serviço público do Electron — **sem backend do Samba**. O updater tinha sido removido junto com a dependência do
+  backend do Samba, o que deixou o switch "auto-update" decorativo (ligava e nada acontecia). O app só consulta
+  quando está **empacotado**, fora de build de teste e com a opção ligada; a interface passou a mostrar a versão
+  instalada e o estado da última verificação. Decisão de processo que acompanha: a release sai de **tag**
+  `v<versão>` e é publicada **sem draft** apenas nesse caminho (o disparo manual continua terminando em draft, para
+  conferência). Pendências de infraestrutura que ainda bloqueiam o OTA na prática: repositório do canal acessível
+  publicamente e build assinado/notarizado no macOS.
 
 ## Escopo (versão atual)
 
@@ -128,37 +137,37 @@ por decisão de produto) · orquestração tipo Gastown · agentes gerenciados p
 
 ## Requisitos
 
-| ID | Requisito | Aceite (resumo) | Status | Dono |
-|----|-----------|-----------------|--------|------|
-| REQ-01 | Núcleo de extensões declarativas (descoberta por escopo projeto/usuário + validação) | Extensões válidas listadas; frontmatter inválido ignorado com log e sem quebrar o app | entregue | agente |
-| REQ-02 | Contrato IPC + estado das extensões com enforcement no main | Payload inválido do renderer rejeitado com `SambaError` | entregue (listagem) | agente |
-| REQ-03 | Skills sob demanda por `description` (além do slash atual `/samba-*`) | Skill de projeto entra no contexto sem slash, só na etapa relevante; escopo por modo respeitado; skill de terceiro não ganha tools | entregue (catálogo no prompt + tool `load_skill`) | agente |
-| REQ-04 | Workflows: slash commands de projeto/usuário com frontmatter | `/comando` injeta instrução e respeita `agent`; comando inexistente não altera o prompt | proposto | a definir |
-| REQ-05 | Permissões declarativas `allow`/`ask`/`deny` + "aprovar sempre" + `external_directory` | `edit: {"*.env": deny}` bloqueia no main, com erro recuperável e mostra a regra; "aprovar sempre" persiste | proposto | a definir |
-| REQ-06 | Agentes custom em Markdown (`primary`/`subagent`/`all`) | Agente de projeto aparece no seletor sem quebrar os 4 modos built-in | proposto | a definir |
-| REQ-07 | Subagentes custom com `@agente` e execução em background | `@agente` invoca sessão isolada; tarefa longa retorna depois sem travar o turno | proposto | a definir |
-| REQ-08 | Goals de sessão (`/goal`) com status e relatório | Estado sobrevive a restart; pause/resume/clear consistentes; relatório final no chat | proposto | a definir |
-| REQ-09 | Checkpoints com "reverter para aqui" | Reverter para o turno N restaura o workspace, com banner visível e revert reversível | proposto | a definir |
-| REQ-10 | Tools `apply_patch` e `todoread` | Patch unificado aplicado com verificação; lista de todos legível pelo agente | proposto | a definir |
-| REQ-11 | Indexação semântica opt-in (chunks + embeddings + busca vetorial) | Desligada não gera embedding algum; ligada, busca por significado acha o arquivo sem termo exato | proposto | a definir |
-| REQ-12 | Marketplace estendido: instalar skill e agente além de MCP | Item instalado por escopo (projeto/global) e descoberto pelo sistema de extensões | proposto | a definir |
-| REQ-13 | Agent Manager (sessões paralelas em worktrees + diff) | Sessões isoladas em worktrees, diff vs. branch pai visível | proposto | a definir |
-| REQ-14 | Enhance prompt | Prompt reescrito antes do envio, com prévia e opção de desfazer | proposto | a definir |
-| REQ-15 | Geração de mensagem de commit | Mensagem clara no padrão conventional commits, revisável antes de commitar | proposto | a definir |
-| REQ-20 | Guardas de higiene de loop (chamada repetida idêntica + timeout por tool) | Repetição sem mudança de estado gera aviso ao modelo; tool com limite declarado falha com erro recuperável no prazo | entregue | agente |
-| REQ-21 | Registry de catálogos de skills com formato único por nome | Duas fontes com o mesmo nome resolvem para uma só, com o motivo registrado; nenhuma fonte, nenhum acesso do modelo | entregue (formato único; precedência já vinha da Fase 0) | agente |
-| REQ-22 | Spill de resultados grandes (preview + localizador, sem perder o original) | Resultado de 2 MB vira preview + caminho do íntegro, legível depois; falha de escrita entrega o original | entregue (ligado ao `read_file`) | agente |
-| REQ-23 | Catálogos gerados do código (tools e seams) | Comando gera os catálogos e o CI falha se o arquivo commitado divergir do código | entregue (catálogo de tools; seams pendente) | agente |
-| REQ-24 | Workflow como script de orquestração (subagentes em sandbox) | Script escrito pelo modelo distribui trabalho para subagentes e devolve valor final, sob a política de arquivos da sessão | proposto | a definir |
-| REQ-25 | Pré-passe determinístico no Reviewer (regras antes do modelo) | Diff com `service_role` no browser gera finding mesmo se o modelo falhar; diff limpo não gera ruído | entregue (6 regras + placar) | agente |
-| REQ-26 | Cobertura explícita no resultado do review | "6 de 10 arquivos revisados" com motivo por exclusão; arquivo não coberto nem excluído rebaixa para `partial` | entregue (por arquivo declarado, não por linha) | agente |
-| REQ-27 | Ancoragem de cada finding contra os hunks do diff | Finding em linha fora do diff é marcado como não ancorado, com contagem no relatório | entregue | agente |
-| REQ-28 | Modo scan: revisar arquivos sem diff | App importado (sem alterações) pode ser auditado por arquivo/diretório com o mesmo formato e limites | proposto | a definir |
-| REQ-29 | Placar de qualidade do Reviewer (precision, F1, tokens, tempo) | Fixture com defeitos plantados produz o placar; regressão de precisão aparece no número | proposto | a definir |
-| REQ-30 | Revisão fora do app via CLI/Action com BYOK | Decisão humana: revisa a exclusão anterior de code reviews de PR, agora que existe caminho sem servidor nosso | proposto (decisão) | a definir |
-| REQ-31 | Pull request da branch atual: abrir e mesclar pela interface | Abrir PR compara a branch atual com a padrão do repositório e devolve o link; merge pede confirmação e falha com o motivo quando o GitHub recusa | entregue (abrir e mesclar manuais) | agente |
-| REQ-32 | Abrir PR automaticamente depois do push (inclusive o push que encerra sync ou rebase) | Opção desligada por padrão; abre PR da branch enviada contra a branch padrão, nunca da padrão para ela mesma, nunca duplicando PR aberto, e falha do PR não derruba o push | entregue | agente |
-| REQ-33 | Sync com o GitHub: baixar antes de enviar | Sync existe no botão do conector e no menu de branches; faz pull e só então push; conflito no pull interrompe o push e entra no fluxo de resolução existente | entregue | agente |
+| ID     | Requisito                                                                              | Aceite (resumo)                                                                                                                                                            | Status                                                   | Dono      |
+| ------ | -------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------- | --------- |
+| REQ-01 | Núcleo de extensões declarativas (descoberta por escopo projeto/usuário + validação)   | Extensões válidas listadas; frontmatter inválido ignorado com log e sem quebrar o app                                                                                      | entregue                                                 | agente    |
+| REQ-02 | Contrato IPC + estado das extensões com enforcement no main                            | Payload inválido do renderer rejeitado com `SambaError`                                                                                                                    | entregue (listagem)                                      | agente    |
+| REQ-03 | Skills sob demanda por `description` (além do slash atual `/samba-*`)                  | Skill de projeto entra no contexto sem slash, só na etapa relevante; escopo por modo respeitado; skill de terceiro não ganha tools                                         | entregue (catálogo no prompt + tool `load_skill`)        | agente    |
+| REQ-04 | Workflows: slash commands de projeto/usuário com frontmatter                           | `/comando` injeta instrução e respeita `agent`; comando inexistente não altera o prompt                                                                                    | proposto                                                 | a definir |
+| REQ-05 | Permissões declarativas `allow`/`ask`/`deny` + "aprovar sempre" + `external_directory` | `edit: {"*.env": deny}` bloqueia no main, com erro recuperável e mostra a regra; "aprovar sempre" persiste                                                                 | proposto                                                 | a definir |
+| REQ-06 | Agentes custom em Markdown (`primary`/`subagent`/`all`)                                | Agente de projeto aparece no seletor sem quebrar os 4 modos built-in                                                                                                       | proposto                                                 | a definir |
+| REQ-07 | Subagentes custom com `@agente` e execução em background                               | `@agente` invoca sessão isolada; tarefa longa retorna depois sem travar o turno                                                                                            | proposto                                                 | a definir |
+| REQ-08 | Goals de sessão (`/goal`) com status e relatório                                       | Estado sobrevive a restart; pause/resume/clear consistentes; relatório final no chat                                                                                       | proposto                                                 | a definir |
+| REQ-09 | Checkpoints com "reverter para aqui"                                                   | Reverter para o turno N restaura o workspace, com banner visível e revert reversível                                                                                       | proposto                                                 | a definir |
+| REQ-10 | Tools `apply_patch` e `todoread`                                                       | Patch unificado aplicado com verificação; lista de todos legível pelo agente                                                                                               | proposto                                                 | a definir |
+| REQ-11 | Indexação semântica opt-in (chunks + embeddings + busca vetorial)                      | Desligada não gera embedding algum; ligada, busca por significado acha o arquivo sem termo exato                                                                           | proposto                                                 | a definir |
+| REQ-12 | Marketplace estendido: instalar skill e agente além de MCP                             | Item instalado por escopo (projeto/global) e descoberto pelo sistema de extensões                                                                                          | proposto                                                 | a definir |
+| REQ-13 | Agent Manager (sessões paralelas em worktrees + diff)                                  | Sessões isoladas em worktrees, diff vs. branch pai visível                                                                                                                 | proposto                                                 | a definir |
+| REQ-14 | Enhance prompt                                                                         | Prompt reescrito antes do envio, com prévia e opção de desfazer                                                                                                            | proposto                                                 | a definir |
+| REQ-15 | Geração de mensagem de commit                                                          | Mensagem clara no padrão conventional commits, revisável antes de commitar                                                                                                 | proposto                                                 | a definir |
+| REQ-20 | Guardas de higiene de loop (chamada repetida idêntica + timeout por tool)              | Repetição sem mudança de estado gera aviso ao modelo; tool com limite declarado falha com erro recuperável no prazo                                                        | entregue                                                 | agente    |
+| REQ-21 | Registry de catálogos de skills com formato único por nome                             | Duas fontes com o mesmo nome resolvem para uma só, com o motivo registrado; nenhuma fonte, nenhum acesso do modelo                                                         | entregue (formato único; precedência já vinha da Fase 0) | agente    |
+| REQ-22 | Spill de resultados grandes (preview + localizador, sem perder o original)             | Resultado de 2 MB vira preview + caminho do íntegro, legível depois; falha de escrita entrega o original                                                                   | entregue (ligado ao `read_file`)                         | agente    |
+| REQ-23 | Catálogos gerados do código (tools e seams)                                            | Comando gera os catálogos e o CI falha se o arquivo commitado divergir do código                                                                                           | entregue (catálogo de tools; seams pendente)             | agente    |
+| REQ-24 | Workflow como script de orquestração (subagentes em sandbox)                           | Script escrito pelo modelo distribui trabalho para subagentes e devolve valor final, sob a política de arquivos da sessão                                                  | proposto                                                 | a definir |
+| REQ-25 | Pré-passe determinístico no Reviewer (regras antes do modelo)                          | Diff com `service_role` no browser gera finding mesmo se o modelo falhar; diff limpo não gera ruído                                                                        | entregue (6 regras + placar)                             | agente    |
+| REQ-26 | Cobertura explícita no resultado do review                                             | "6 de 10 arquivos revisados" com motivo por exclusão; arquivo não coberto nem excluído rebaixa para `partial`                                                              | entregue (por arquivo declarado, não por linha)          | agente    |
+| REQ-27 | Ancoragem de cada finding contra os hunks do diff                                      | Finding em linha fora do diff é marcado como não ancorado, com contagem no relatório                                                                                       | entregue                                                 | agente    |
+| REQ-28 | Modo scan: revisar arquivos sem diff                                                   | App importado (sem alterações) pode ser auditado por arquivo/diretório com o mesmo formato e limites                                                                       | proposto                                                 | a definir |
+| REQ-29 | Placar de qualidade do Reviewer (precision, F1, tokens, tempo)                         | Fixture com defeitos plantados produz o placar; regressão de precisão aparece no número                                                                                    | proposto                                                 | a definir |
+| REQ-30 | Revisão fora do app via CLI/Action com BYOK                                            | Decisão humana: revisa a exclusão anterior de code reviews de PR, agora que existe caminho sem servidor nosso                                                              | proposto (decisão)                                       | a definir |
+| REQ-31 | Pull request da branch atual: abrir e mesclar pela interface                           | Abrir PR compara a branch atual com a padrão do repositório e devolve o link; merge pede confirmação e falha com o motivo quando o GitHub recusa                           | entregue (abrir e mesclar manuais)                       | agente    |
+| REQ-32 | Abrir PR automaticamente depois do push (inclusive o push que encerra sync ou rebase)  | Opção desligada por padrão; abre PR da branch enviada contra a branch padrão, nunca da padrão para ela mesma, nunca duplicando PR aberto, e falha do PR não derruba o push | entregue                                                 | agente    |
+| REQ-33 | Sync com o GitHub: baixar antes de enviar                                              | Sync existe no botão do conector e no menu de branches; faz pull e só então push; conflito no pull interrompe o push e entra no fluxo de resolução existente               | entregue                                                 | agente    |
 
 ### Evidências da Fase 0 (2026-09-08)
 
