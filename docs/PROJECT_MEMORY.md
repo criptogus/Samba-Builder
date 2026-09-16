@@ -47,6 +47,26 @@ src/prompts/local_agent_prompt{,_skill_catalog}.test.ts src/ipc/utils/token_util
 src/components/ProjectExtensions.test.tsx` → **203 testes**; tipos limpos nos arquivos tocados;
 `oxlint`/`oxfmt --check` limpos; `npm run gen:tool-catalog -- --check` atualizado.
 
+## Reviewer — regras, cobertura e ancoragem (entregue 2026-09-08)
+
+Inspirado no `plans/code-review-learnings.md` (Open Code Review). Três camadas novas, todas sem dependência nova:
+
+- **`review_ruleset.ts`** (REQ-25): extrai as linhas **adicionadas** do diff (com número no arquivo novo) e roda 6
+  regras conservadoras — XSS via `dangerouslySetInnerHTML`/`innerHTML`, SQL por concatenação, service role no
+  cliente, segredo em variável pública (`VITE_`/`NEXT_PUBLIC_`), segredo literal, tabela nova sem RLS (esta olha o
+  diff inteiro). Cada achado tem id estável (`rule:<id>`) e vai para o mesmo schema dos achados do modelo.
+- **`review_finalize.ts`** (REQ-26/27): o revisor passa a **declarar** `reviewed_files`; arquivo enviado e não
+  declarado rebaixa o status para `partial` e aparece no relatório. Cada achado do modelo é conferido contra as
+  linhas adicionadas do diff — posição fora do diff vira "não confirmada", com contagem, em vez de posição falsa.
+- **Fiação**: `subagent_manager.ts` trocou `parseReviewResult(report, target.files)` por
+  `finalizeReview({ target, rawOutput })`, e o texto durável do chat passa a ser o relatório final (regras +
+  cobertura + achados), não mais o texto bruto do modelo.
+
+**Placar (REQ-29, parcial):** `review_ruleset.test.ts` tem defeitos plantados — recall 100% nas 6 regras e **zero
+achados** num diff limpo realista (JSX com `map`, `VITE_API_URL`, query parametrizada, migração com RLS). O placar
+do **modelo** (precisão/F1/custo) continua pendente. `REQ-28` (modo scan sem diff) e `REQ-30` (CLI/Action —
+decisão do humano) não começaram.
+
 ## Comandos de verificação (do próprio repo)
 
 | Objetivo | Comando |

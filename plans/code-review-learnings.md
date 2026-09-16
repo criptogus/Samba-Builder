@@ -1,5 +1,9 @@
 # O que aprender com o Open Code Review (Alibaba) para o nosso Reviewer
 
+> **Status (2026-09-08):** o viável sem instalar nada foi implementado — `REQ-25` (regras determinísticas),
+> `REQ-26` (cobertura declarada) e `REQ-27` (ancoragem de linha) estão no código, com placar do ruleset. Continuam
+> abertos: `REQ-28` (modo scan), o placar do **modelo** em `REQ-29` e `REQ-30` (decisão do humano).
+>
 > Análise de 2026-09-08 a partir de evidência direta do repositório
 > [`alibaba/open-code-review`](https://github.com/alibaba/open-code-review) (branch `main`): metadados, README,
 > layout de `docs/`, `internal/` e raiz — e da leitura do nosso próprio Reviewer. Nada aqui foi implementado.

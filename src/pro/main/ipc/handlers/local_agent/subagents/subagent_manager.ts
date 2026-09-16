@@ -39,6 +39,7 @@ import { sanitizeStepMessages } from "../prepare_step_utils";
 import type { AgentContext } from "../tools/types";
 import { runExploreCodeSubagent } from "../tools/explore_code_subagent";
 import { buildReviewTarget, type ReviewTarget } from "./review_target";
+import { finalizeReview } from "./review_finalize";
 import {
   closeAndDisposeTurnsForChat,
   closeMutationActor,
@@ -1718,14 +1719,17 @@ async function runReview(
       abortSignal: controller.signal,
     });
     const report = reviewResult.text;
-    const parsed = parseReviewResult(report, target.files);
+    // REQ-25/26/27: regras determinísticas, cobertura declarada e ancoragem de
+    // linha entram no relatório final — o texto bruto do modelo deixa de ser a
+    // saída do review.
+    const parsed = finalizeReview({ target, rawOutput: report });
     const { target: currentTarget } = await buildCoordinatedReviewTarget({
       chatId: thread.chatId,
       baseCommit: target.baseCommit,
       targetCommit: target.targetCommit,
     });
     if (currentTarget.hash !== target.hash) {
-      await appendAssistantMessage(threadId, boundDurableReport(report));
+      await appendAssistantMessage(threadId, boundDurableReport(parsed.report));
       await finishThread(
         threadId,
         "review_outdated",
@@ -1735,7 +1739,7 @@ async function runReview(
       shouldContinue = true;
       return;
     }
-    await appendAssistantMessage(threadId, boundDurableReport(report));
+    await appendAssistantMessage(threadId, boundDurableReport(parsed.report));
     await finishThread(
       threadId,
       parsed.status === "partial" ? "partial" : "completed",

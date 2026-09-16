@@ -84,6 +84,14 @@ Plano que originou estas decisões: [`plans/kilocode-parity-plan.md`](../plans/k
   caminho **sem infra nossa** (CLI + GitHub Action com chave do usuário), coerente com local-first/BYOK. Fica
   registrado como decisão do humano, não assumida por mim.
 
+- **2026-09-08** — Reviewer com as três camadas do estudo do Open Code Review **entregues** (`REQ-25`, `REQ-26`,
+  `REQ-27`): pré-passe determinístico de 6 regras sobre as linhas adicionadas do diff; o revisor passa a **declarar
+  os arquivos que revisou**, e arquivo enviado sem declaração rebaixa o status para `partial`; cada achado do modelo
+  é conferido contra o diff, e posição fora dele aparece como "não confirmada" em vez de posição falsa. O relatório
+  do chat agora é o relatório final (regras + cobertura + achados), não o texto bruto do modelo. Placar do ruleset:
+  recall 100% nos defeitos plantados e zero ruído num diff limpo. Ficaram de fora: `REQ-28` (modo scan), o placar
+  do **modelo** em `REQ-29` e `REQ-30` (decisão do humano).
+
 ## Escopo (versão atual)
 
 **Dentro:** Fases 0–3 do plano (`REQ-01` a `REQ-15`, mais os incrementos `REQ-20` a `REQ-24` vindos do estudo do
@@ -120,9 +128,9 @@ por decisão de produto) · orquestração tipo Gastown · agentes gerenciados p
 | REQ-22 | Spill de resultados grandes (preview + localizador, sem perder o original) | Resultado de 2 MB vira preview + caminho do íntegro, legível depois; falha de escrita entrega o original | entregue (ligado ao `read_file`) | agente |
 | REQ-23 | Catálogos gerados do código (tools e seams) | Comando gera os catálogos e o CI falha se o arquivo commitado divergir do código | entregue (catálogo de tools; seams pendente) | agente |
 | REQ-24 | Workflow como script de orquestração (subagentes em sandbox) | Script escrito pelo modelo distribui trabalho para subagentes e devolve valor final, sob a política de arquivos da sessão | proposto | a definir |
-| REQ-25 | Pré-passe determinístico no Reviewer (regras antes do modelo) | Diff com `service_role` no browser gera finding mesmo se o modelo falhar; diff limpo não gera ruído | proposto | a definir |
-| REQ-26 | Cobertura explícita no resultado do review | "6 de 10 arquivos revisados" com motivo por exclusão; arquivo não coberto nem excluído rebaixa para `partial` | proposto | a definir |
-| REQ-27 | Ancoragem de cada finding contra os hunks do diff | Finding em linha fora do diff é marcado como não ancorado, com contagem no relatório | proposto | a definir |
+| REQ-25 | Pré-passe determinístico no Reviewer (regras antes do modelo) | Diff com `service_role` no browser gera finding mesmo se o modelo falhar; diff limpo não gera ruído | entregue (6 regras + placar) | agente |
+| REQ-26 | Cobertura explícita no resultado do review | "6 de 10 arquivos revisados" com motivo por exclusão; arquivo não coberto nem excluído rebaixa para `partial` | entregue (por arquivo declarado, não por linha) | agente |
+| REQ-27 | Ancoragem de cada finding contra os hunks do diff | Finding em linha fora do diff é marcado como não ancorado, com contagem no relatório | entregue | agente |
 | REQ-28 | Modo scan: revisar arquivos sem diff | App importado (sem alterações) pode ser auditado por arquivo/diretório com o mesmo formato e limites | proposto | a definir |
 | REQ-29 | Placar de qualidade do Reviewer (precision, F1, tokens, tempo) | Fixture com defeitos plantados produz o placar; regressão de precisão aparece no número | proposto | a definir |
 | REQ-30 | Revisão fora do app via CLI/Action com BYOK | Decisão humana: revisa a exclusão anterior de code reviews de PR, agora que existe caminho sem servidor nosso | proposto (decisão) | a definir |

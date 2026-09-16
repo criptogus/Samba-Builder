@@ -7,6 +7,10 @@ const findingSchema = z.object({
   title: z.string().min(1).max(200),
   impact: z.string().min(1).max(2_000),
   remediation: z.string().min(1).max(2_000),
+  /** Origem do achado: `model` (revisor) ou `rule:<id>` (pré-passe determinístico). */
+  origin: z.string().min(1).max(60).optional(),
+  /** Achado cuja linha não pertence ao diff revisado (REQ-27). */
+  unanchored: z.boolean().optional(),
 });
 
 const reviewerOutputSchema = z
@@ -14,6 +18,11 @@ const reviewerOutputSchema = z
     status: z.enum(["findings", "no_findings", "partial"]),
     findings: z.array(findingSchema).max(100),
     summary: z.string().min(1).max(2_000),
+    /**
+     * Arquivos que o revisor declara ter revisado (REQ-26). Sem isso não há
+     * como distinguir "revisou tudo" de "cortou caminho" em changesets grandes.
+     */
+    reviewed_files: z.array(z.string().min(1).max(500)).max(500).optional(),
   })
   .superRefine((value, context) => {
     if (value.status === "findings" && value.findings.length === 0) {
@@ -42,8 +51,9 @@ export interface ParsedReviewResult extends ReviewerOutput {
 }
 
 export const STRUCTURED_REVIEW_INSTRUCTIONS = `Return JSON only, with this exact shape:
-{"status":"findings|no_findings|partial","findings":[{"severity":"critical|high|medium|low","path":"reviewed/file.ts","line":123,"title":"short title","impact":"concrete impact","remediation":"specific remediation"}],"summary":"short summary"}
-Only report actionable defects introduced by the reviewed diff. Paths must exactly match a reviewed file. Use status "no_findings" only with an empty findings array. Use status "partial" if you cannot fully review the target.`;
+{"status":"findings|no_findings|partial","findings":[{"severity":"critical|high|medium|low","path":"reviewed/file.ts","line":123,"title":"short title","impact":"concrete impact","remediation":"specific remediation"}],"reviewed_files":["reviewed/file.ts"],"summary":"short summary"}
+Only report actionable defects introduced by the reviewed diff. Paths must exactly match a reviewed file. Use status "no_findings" only with an empty findings array. Use status "partial" if you cannot fully review the target.
+List in "reviewed_files" every changed file you actually opened, using the exact paths from the diff. A file you skipped must not appear there: the report compares this list against the files sent, so claiming a file you did not read is worse than declaring the review partial.`;
 
 /**
  * Parses Reviewer output as untrusted data. Invalid or out-of-scope output can
