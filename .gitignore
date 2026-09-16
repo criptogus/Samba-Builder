@@ -129,3 +129,7 @@ benchmark-results/
 benchmarks/code-explorer/repos/
 
 /work/quality-tools/
+
+# Camada privada de trabalho: documentos internos, caminhos pessoais do autor e
+# roteiros de negocio. Nao faz parte do produto e nao deve ser publicada.
+samba/

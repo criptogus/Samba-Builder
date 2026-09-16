@@ -59,7 +59,7 @@ jobs:
         run: node scripts/pr-review/build-context.mjs
 
       - name: Install Codex CLI
-        run: npm install -g @openai/codex@latest
+        run: npm install -g @openai/codex@0.154.0
 
       - name: Write Codex auth file
         env:
