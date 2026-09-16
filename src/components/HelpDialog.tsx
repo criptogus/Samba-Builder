@@ -18,6 +18,7 @@ import {
   MessageSquareIcon,
   CopyIcon,
   Loader2Icon,
+  DownloadIcon,
 } from "lucide-react";
 import { ipc } from "@/ipc/types";
 import {
@@ -247,6 +248,25 @@ export function HelpDialog() {
   const [sessionId, setSessionId] = useState("");
   const [isHelpBotOpen, setIsHelpBotOpen] = useState(false);
   const [isScreenshotPromptOpen, setIsScreenshotPromptOpen] = useState(false);
+  // Checagem de versão dentro da ajuda: o app não se atualiza sozinho, então o
+  // resultado é informativo — avisa e leva ao download.
+  const [updateResult, setUpdateResult] = useState<Awaited<
+    ReturnType<typeof ipc.system.checkForUpdates>
+  > | null>(null);
+  const [isCheckingUpdates, setIsCheckingUpdates] = useState(false);
+
+  const handleCheckUpdates = async () => {
+    setIsCheckingUpdates(true);
+    try {
+      setUpdateResult(await ipc.system.checkForUpdates());
+    } catch (error) {
+      showError(
+        error instanceof Error ? error.message : "Could not check for updates",
+      );
+    } finally {
+      setIsCheckingUpdates(false);
+    }
+  };
   const [promptSource, setPromptSource] =
     useState<ScreenshotPromptSource>("report-bug");
   // What the screenshot prompt should file once the reporter answers it.
@@ -521,6 +541,71 @@ export function HelpDialog() {
         If you need help or want to report an issue, here are some options:
       </DialogDescription>
       <div className="flex flex-col w-full mt-4 space-y-5">
+        {/* Versão em destaque: é a primeira coisa útil que se procura aqui. O
+            app não se atualiza sozinho — avisa e leva ao download. */}
+        <div className="rounded-lg border border-primary/40 bg-primary/5 p-4 space-y-3">
+          <div className="flex items-center gap-2">
+            <DownloadIcon className="h-4 w-4 text-primary" />
+            <span className="text-sm font-semibold">Version and updates</span>
+          </div>
+          <p className="text-sm text-muted-foreground">
+            Samba Builder never updates itself. Check here whether a newer
+            version is published — the download opens in your browser.
+          </p>
+          <Button
+            variant="outline"
+            className="w-full"
+            disabled={isCheckingUpdates}
+            onClick={() => void handleCheckUpdates()}
+          >
+            {isCheckingUpdates ? (
+              <>
+                <Loader2Icon className="mr-2 h-4 w-4 animate-spin" /> Checking…
+              </>
+            ) : (
+              <>
+                <DownloadIcon className="mr-2 h-4 w-4" /> Check for updates
+              </>
+            )}
+          </Button>
+          {updateResult?.status === "update-available" && (
+            <div className="space-y-2">
+              <p className="text-sm font-medium">
+                New version available: {updateResult.latestVersion}
+              </p>
+              <Button
+                className="w-full"
+                onClick={() => {
+                  if (updateResult.releaseUrl) {
+                    void ipc.system.openExternalUrl(updateResult.releaseUrl);
+                  }
+                }}
+              >
+                Download {updateResult.latestVersion}
+              </Button>
+            </div>
+          )}
+          {updateResult?.status === "up-to-date" && (
+            <p className="flex items-center gap-2 text-sm text-muted-foreground">
+              <CheckIcon className="h-4 w-4 text-green-500" />
+              You are on the latest published version
+              {updateResult.latestVersion
+                ? ` (${updateResult.latestVersion})`
+                : ""}
+              .
+            </p>
+          )}
+          {updateResult?.status === "unavailable" && (
+            <p className="flex items-center gap-2 text-sm text-muted-foreground">
+              <AlertCircleIcon className="h-4 w-4 text-amber-500" />
+              Could not check right now
+              {updateResult.reason === "no-access"
+                ? " — the releases repository needs your GitHub account connected."
+                : "."}
+            </p>
+          )}
+        </div>
+
         {/* Suporte — sem backend próprio: o chat de ajuda (que falava com o
             servidor do Samba) foi substituído pelo contato da Samba */}
         <Button
