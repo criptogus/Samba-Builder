@@ -72,6 +72,18 @@ Plano que originou estas decisões: [`plans/kilocode-parity-plan.md`](../plans/k
   web-first com servidor local, adotar o framework Cordis como runtime (copiamos as ideias, não a dependência) e
   permitir que o agente defina plugins em memória agora (Fase 4+, exige versionamento imutável e política de arquivos).
 
+- **2026-09-08** — Estudo do **Open Code Review** (`plans/code-review-learnings.md`) sobre o nosso Reviewer
+  (subagente `reviewer`). Diagnóstico: temos a metade "LLM" da arquitetura híbrida deles e um rigor de formato
+  melhor que o comum (saída tratada como não confiável, allowlist de caminhos, orçamento de diff com exclusões
+  justificadas), mas **falta a metade determinística** (regras mecânicas que não dependem de o modelo lembrar) e
+  **falta medir** (não temos nenhum número de precisão, cobertura ou custo do Reviewer). Adotados como requisitos:
+  `REQ-25` (pré-passe de regras), `REQ-26` (cobertura explícita — "cortar caminho" em changesets grandes é o
+  defeito nº 1 na lista deles), `REQ-27` (ancorar finding contra o diff, contra *position drift*), `REQ-28` (modo
+  scan para apps importados) e `REQ-29` (placar de qualidade com fixture de defeitos plantados).
+  **Decisão que muda escopo:** `REQ-30` revisa a exclusão anterior de code reviews de PR — o OCR demonstra um
+  caminho **sem infra nossa** (CLI + GitHub Action com chave do usuário), coerente com local-first/BYOK. Fica
+  registrado como decisão do humano, não assumida por mim.
+
 ## Escopo (versão atual)
 
 **Dentro:** Fases 0–3 do plano (`REQ-01` a `REQ-15`, mais os incrementos `REQ-20` a `REQ-24` vindos do estudo do
@@ -108,6 +120,12 @@ por decisão de produto) · orquestração tipo Gastown · agentes gerenciados p
 | REQ-22 | Spill de resultados grandes (preview + localizador, sem perder o original) | Resultado de 2 MB vira preview + caminho do íntegro, legível depois; falha de escrita entrega o original | entregue (ligado ao `read_file`) | agente |
 | REQ-23 | Catálogos gerados do código (tools e seams) | Comando gera os catálogos e o CI falha se o arquivo commitado divergir do código | entregue (catálogo de tools; seams pendente) | agente |
 | REQ-24 | Workflow como script de orquestração (subagentes em sandbox) | Script escrito pelo modelo distribui trabalho para subagentes e devolve valor final, sob a política de arquivos da sessão | proposto | a definir |
+| REQ-25 | Pré-passe determinístico no Reviewer (regras antes do modelo) | Diff com `service_role` no browser gera finding mesmo se o modelo falhar; diff limpo não gera ruído | proposto | a definir |
+| REQ-26 | Cobertura explícita no resultado do review | "6 de 10 arquivos revisados" com motivo por exclusão; arquivo não coberto nem excluído rebaixa para `partial` | proposto | a definir |
+| REQ-27 | Ancoragem de cada finding contra os hunks do diff | Finding em linha fora do diff é marcado como não ancorado, com contagem no relatório | proposto | a definir |
+| REQ-28 | Modo scan: revisar arquivos sem diff | App importado (sem alterações) pode ser auditado por arquivo/diretório com o mesmo formato e limites | proposto | a definir |
+| REQ-29 | Placar de qualidade do Reviewer (precision, F1, tokens, tempo) | Fixture com defeitos plantados produz o placar; regressão de precisão aparece no número | proposto | a definir |
+| REQ-30 | Revisão fora do app via CLI/Action com BYOK | Decisão humana: revisa a exclusão anterior de code reviews de PR, agora que existe caminho sem servidor nosso | proposto (decisão) | a definir |
 
 ### Evidências da Fase 0 (2026-09-08)
 
@@ -149,6 +167,13 @@ catálogo MCP, consumo de `AI_RULES.md`, undo/redo git por chat.
   tabela `mcp_catalog` (`src/db/schema.ts`) — estender o mesmo fluxo em vez de criar um segundo.
 - **Governança/entrega:** features de produto entram no fluxo de `docs/samba-delivery-workflow.md` e nas evidências
   de `docs/samba-test-evidence.md`.
+- **Reviewer ↔ prompts de segurança ↔ subagentes:** as regras determinísticas do `REQ-25` devem reusar as regras
+  que já existem como texto de prompt (`SUPABASE_SERVICE_ROLE_BROWSER_RULE`, `SUPABASE_GRANTS_AND_RLS_RULE`,
+  `NEON_NO_BROWSER_DATABASE_URL_RULE`) e o alvo/orçamento que já existe em
+  `src/pro/main/ipc/handlers/local_agent/subagents/review_target.ts`. Quem mexer no prompt do Reviewer precisa
+  revalidar o placar do `REQ-29`, senão a mudança de qualidade fica invisível.
+- **Análise externa de review:** `plans/code-review-learnings.md` (Open Code Review) — ler junto com este arquivo
+  antes de mudar o Reviewer; a decisão pendente é o `REQ-30`.
 - **Aprendizados externos ↔ roadmap:** `plans/kilocode-parity-plan.md` diz **quais** features faltam (paridade com
   Kilo) e `plans/deepseek-harness-learnings.md` diz **como estruturá-las** (seams explícitas, famílias pequenas,
   guardas de loop, spill, catálogos gerados). Ao mexer em skills, workflows ou permissões, consultar os dois: o
