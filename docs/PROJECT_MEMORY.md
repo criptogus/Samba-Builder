@@ -47,6 +47,14 @@ src/prompts/local_agent_prompt{,_skill_catalog}.test.ts src/ipc/utils/token_util
 src/components/ProjectExtensions.test.tsx` → **203 testes**; tipos limpos nos arquivos tocados;
 `oxlint`/`oxfmt --check` limpos; `npm run gen:tool-catalog -- --check` atualizado.
 
+## Mapa da integração com GitHub (interface e main)
+
+- **Interface:** `src/components/GitHubConnector.tsx` (conectar repo/org), `GitHubIntegration.tsx` (conectar/desconectar conta), `GithubBranchManager.tsx` (branches: criar, trocar, renomear, deletar, pull), `GithubCollaboratorManager.tsx` (colaboradores), `chat/CommitDialogActions.tsx` + `chat/CommitButtonLabel.tsx` (fluxo de commit do chat) e `GithubPullRequestActions.tsx` (pull request da branch atual — REQ-31).
+- **Máquina de operações:** `src/github_ops/` (`state.ts` com `GithubOperation`, `transition.ts`, `projection.ts`, `transport.ts`, `capabilities.ts`). Operações longas (push/pull/rebase/merge/switch) passam por ela; **chamadas simples** de API seguem o padrão do `GithubCollaboratorManager` (client direto + react-query).
+- **Contratos:** `src/ipc/types/github.ts` — `github:list-repos`, `get-repo-branches`, `is-repo-available`, `list-local-branches`, `list-remote-branches`, `list-collaborators`, `invite-collaborator`, `remove-collaborator`, `clone-repo-from-url`, **`get-pull-request`**, **`create-pull-request`**, **`merge-pull-request`**; git: `get-uncommitted-files`, `get-uncommitted-file-diff`, `commit-changes`, `cancel-commit`, `discard-changes`.
+- **Main:** `src/ipc/handlers/github_handlers.ts` (token em `settings.githubAccessToken`, base da API em `getGitHubApiBase()`, que vira o servidor fake nos builds de teste), `src/ipc/utils/git_utils.ts` (`gitPush`, `gitMerge`, `gitCreateBranch`, `gitCurrentBranch`, `gitSetRemoteUrl`…) e `src/ipc/services/github/pull_request.ts` (regras puras de PR).
+- **Não existe:** criação/merge de PR na máquina de operações ou como comportamento automático — hoje a ação é manual, na tela de branches.
+
 ## Reviewer — regras, cobertura e ancoragem (entregue 2026-09-08)
 
 Inspirado no `plans/code-review-learnings.md` (Open Code Review). Três camadas novas, todas sem dependência nova:

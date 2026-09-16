@@ -26,6 +26,19 @@ import { gitService } from "../services/git_service";
 import * as schema from "../../db/schema";
 import fs from "node:fs";
 import { getSambaAppPath, isAppLocationAccessible } from "../../paths/paths";
+import { gitCurrentBranch } from "../utils/git_utils";
+import {
+  buildCreatePullRequestBody,
+  isExistingPullRequestError,
+  isMergeBlockedStatus,
+  normalizeMergeResult,
+  normalizePullRequest,
+  normalizePullRequestList,
+} from "../services/github/pull_request";
+import type {
+  MergePullRequestResult,
+  PullRequestSummary,
+} from "../types/github";
 import { db } from "../../db";
 import { apps } from "../../db/schema";
 import { eq } from "drizzle-orm";
@@ -1364,6 +1377,203 @@ async function handleCloneRepoFromUrl(
 }
 
 // --- Registration ---
+// --- Pull requests (REQ-31) ---
+
+/**
+ * Conta conectada + repositório vinculado em um único lugar: é o que permite a
+ * interface oferecer "abrir pull request" já sabendo se a ação é possível.
+ */
+async function requireGithubRepoAccess(appId: number): Promise<{
+  appPath: string;
+  owner: string;
+  repo: string;
+  accessToken: string;
+}> {
+  const accessToken = readSettings().githubAccessToken?.value;
+  if (!accessToken) {
+    throw new SambaError("Not authenticated with GitHub.", SambaErrorKind.Auth);
+  }
+  const app = await db.query.apps.findFirst({ where: eq(apps.id, appId) });
+  if (!app || !app.githubOrg || !app.githubRepo) {
+    throw new SambaError(
+      "App is not linked to a GitHub repo.",
+      SambaErrorKind.Precondition,
+    );
+  }
+  return {
+    appPath: getSambaAppPath(app.path),
+    owner: app.githubOrg,
+    repo: app.githubRepo,
+    accessToken,
+  };
+}
+
+async function githubApi(
+  path: string,
+  accessToken: string,
+  init?: { method?: string; body?: unknown },
+): Promise<{ status: number; ok: boolean; payload: unknown }> {
+  const response = await fetch(`${getGitHubApiBase()}${path}`, {
+    method: init?.method ?? "GET",
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      Accept: "application/vnd.github+json",
+      ...(init?.body ? { "Content-Type": "application/json" } : {}),
+    },
+    ...(init?.body ? { body: JSON.stringify(init.body) } : {}),
+  });
+  const text = await response.text();
+  let payload: unknown = null;
+  try {
+    payload = text ? JSON.parse(text) : null;
+  } catch {
+    payload = null;
+  }
+  return { status: response.status, ok: response.ok, payload };
+}
+
+function githubErrorMessage(payload: unknown, status: number): string {
+  const value = payload as { message?: unknown } | null;
+  if (value && typeof value.message === "string" && value.message) {
+    return value.message;
+  }
+  return `GitHub responded with ${status}.`;
+}
+
+async function readDefaultBranch(
+  owner: string,
+  repo: string,
+  accessToken: string,
+): Promise<string> {
+  const response = await githubApi(`/repos/${owner}/${repo}`, accessToken);
+  const value = response.payload as { default_branch?: unknown } | null;
+  const branch =
+    value && typeof value.default_branch === "string"
+      ? value.default_branch
+      : "";
+  if (!response.ok || !branch) {
+    throw new Error(
+      `Failed to read the repository default branch: ${githubErrorMessage(response.payload, response.status)}`,
+    );
+  }
+  return branch;
+}
+
+async function handleGetPullRequest(
+  _event: IpcMainInvokeEvent,
+  { appId }: { appId: number },
+): Promise<PullRequestSummary | null> {
+  const { appPath, owner, repo, accessToken } =
+    await requireGithubRepoAccess(appId);
+  const branch = await gitCurrentBranch({ path: appPath });
+  if (!branch) {
+    throw new SambaError(
+      "Could not determine the current branch.",
+      SambaErrorKind.Precondition,
+    );
+  }
+  const response = await githubApi(
+    `/repos/${owner}/${repo}/pulls?state=open&head=${encodeURIComponent(`${owner}:${branch}`)}`,
+    accessToken,
+  );
+  if (!response.ok) {
+    throw new Error(
+      `Failed to read the pull request: ${githubErrorMessage(response.payload, response.status)}`,
+    );
+  }
+  return normalizePullRequestList(response.payload)[0] ?? null;
+}
+
+async function handleCreatePullRequest(
+  _event: IpcMainInvokeEvent,
+  params: {
+    appId: number;
+    title: string;
+    body?: string;
+    base?: string;
+    draft?: boolean;
+  },
+): Promise<PullRequestSummary> {
+  const { appPath, owner, repo, accessToken } = await requireGithubRepoAccess(
+    params.appId,
+  );
+  const head = await gitCurrentBranch({ path: appPath });
+  if (!head) {
+    throw new SambaError(
+      "Could not determine the current branch.",
+      SambaErrorKind.Precondition,
+    );
+  }
+  const base =
+    params.base?.trim() || (await readDefaultBranch(owner, repo, accessToken));
+  const body = buildCreatePullRequestBody({
+    title: params.title,
+    body: params.body,
+    head,
+    base,
+    draft: params.draft,
+  });
+
+  const response = await githubApi(
+    `/repos/${owner}/${repo}/pulls`,
+    accessToken,
+    {
+      method: "POST",
+      body,
+    },
+  );
+  if (!response.ok) {
+    const message = githubErrorMessage(response.payload, response.status);
+    if (isExistingPullRequestError(response.status, message)) {
+      throw new SambaError(
+        `A pull request from ${head} is already open.`,
+        SambaErrorKind.Conflict,
+      );
+    }
+    throw new Error(`Failed to create the pull request: ${message}`);
+  }
+  return normalizePullRequest(response.payload);
+}
+
+async function handleMergePullRequest(
+  _event: IpcMainInvokeEvent,
+  params: {
+    appId: number;
+    number: number;
+    method?: "merge" | "squash" | "rebase";
+  },
+): Promise<MergePullRequestResult> {
+  const { owner, repo, accessToken } = await requireGithubRepoAccess(
+    params.appId,
+  );
+  const response = await githubApi(
+    `/repos/${owner}/${repo}/pulls/${params.number}/merge`,
+    accessToken,
+    {
+      method: "PUT",
+      body: { merge_method: params.method ?? "merge" },
+    },
+  );
+  const message = githubErrorMessage(response.payload, response.status);
+  if (isMergeBlockedStatus(response.status)) {
+    throw new SambaError(
+      `GitHub refused the merge for now: ${message} Resolve conflicts or pending checks and try again.`,
+      SambaErrorKind.Conflict,
+    );
+  }
+  if (!response.ok) {
+    throw new Error(`Failed to merge the pull request: ${message}`);
+  }
+  const result = normalizeMergeResult(response.payload);
+  if (!result.merged) {
+    throw new SambaError(
+      `GitHub did not merge the pull request: ${result.message || "no reason given."}`,
+      SambaErrorKind.Conflict,
+    );
+  }
+  return result;
+}
+
 export function registerGithubHandlers() {
   // The GitHub device flow is started/cancelled through the generic
   // connection-flow IPC (per-provider registry, invocation-correlated), so no
@@ -1411,6 +1621,24 @@ export function registerGithubHandlers() {
     githubContracts.removeCollaborator,
     async (event, params) => {
       return handleRemoveCollaborator(event, params);
+    },
+  );
+
+  createTypedHandler(githubContracts.getPullRequest, async (event, params) => {
+    return handleGetPullRequest(event, params);
+  });
+
+  createTypedHandler(
+    githubContracts.createPullRequest,
+    async (event, params) => {
+      return handleCreatePullRequest(event, params);
+    },
+  );
+
+  createTypedHandler(
+    githubContracts.mergePullRequest,
+    async (event, params) => {
+      return handleMergePullRequest(event, params);
     },
   );
 

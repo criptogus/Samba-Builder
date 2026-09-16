@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { useGithubBranchInventory } from "@/github_ops/useGithubBranchInventory";
 import { useGithubOps } from "@/github_ops/useGithubOps";
+import { GithubPullRequestActions } from "@/components/GithubPullRequestActions";
 import { cn } from "@/lib/utils";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -259,6 +260,8 @@ export function GithubBranchManager({ appId }: BranchManagerProps) {
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
+
+        <GithubPullRequestActions appId={appId} branch={currentBranch} />
 
         <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
           <DialogContent>

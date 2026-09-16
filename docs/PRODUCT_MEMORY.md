@@ -92,6 +92,15 @@ Plano que originou estas decisões: [`plans/kilocode-parity-plan.md`](../plans/k
   recall 100% nos defeitos plantados e zero ruído num diff limpo. Ficaram de fora: `REQ-28` (modo scan), o placar
   do **modelo** em `REQ-29` e `REQ-30` (decisão do humano).
 
+- **2026-09-08** — Integração com GitHub ganhou **pull request da branch atual** (`REQ-31`): abrir PR (a branch
+  atual comparada com a branch padrão do repositório) e mesclar, na tela onde já se gerencia branch. Endpoints
+  novos `github:get-pull-request`, `github:create-pull-request` e `github:merge-pull-request`; regras de montagem,
+  validação da resposta e classificação de erro (PR já existente, merge bloqueado) em
+  `src/ipc/services/github/pull_request.ts`. O merge é explícito e confirmado, porque altera o repositório remoto.
+  **Decisão pendente (humana):** "abrir PR automaticamente ao fim de cada tarefa" é mudança de comportamento e
+  precisa de gatilho definido (fim do turno? depois de commit e push?) e de ser opt-in — hoje a ação é manual por
+  escolha consciente, não por limitação técnica.
+
 ## Escopo (versão atual)
 
 **Dentro:** Fases 0–3 do plano (`REQ-01` a `REQ-15`, mais os incrementos `REQ-20` a `REQ-24` vindos do estudo do
@@ -134,6 +143,8 @@ por decisão de produto) · orquestração tipo Gastown · agentes gerenciados p
 | REQ-28 | Modo scan: revisar arquivos sem diff | App importado (sem alterações) pode ser auditado por arquivo/diretório com o mesmo formato e limites | proposto | a definir |
 | REQ-29 | Placar de qualidade do Reviewer (precision, F1, tokens, tempo) | Fixture com defeitos plantados produz o placar; regressão de precisão aparece no número | proposto | a definir |
 | REQ-30 | Revisão fora do app via CLI/Action com BYOK | Decisão humana: revisa a exclusão anterior de code reviews de PR, agora que existe caminho sem servidor nosso | proposto (decisão) | a definir |
+| REQ-31 | Pull request da branch atual: abrir e mesclar pela interface | Abrir PR compara a branch atual com a padrão do repositório e devolve o link; merge pede confirmação e falha com o motivo quando o GitHub recusa | entregue (abrir e mesclar manuais) | agente |
+| REQ-32 | Abrir PR automaticamente ao fim de cada tarefa | Decisão humana: exige gatilho (fim do turno ou depois de commit e push) e opt-in explícito, para não criar PR sem o usuário pedir | proposto (decisão) | a definir |
 
 ### Evidências da Fase 0 (2026-09-08)
 

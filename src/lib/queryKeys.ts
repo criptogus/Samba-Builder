@@ -445,6 +445,7 @@ export const queryKeys = {
   github: {
     all: ["github"] as const,
     repos: ["github", "repos"] as const,
+    pullRequest: (appId: number) => ["github", "pull-request", appId] as const,
   },
 
   // ─────────────────────────────────────────────────────────────────────────────

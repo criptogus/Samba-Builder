@@ -133,6 +133,27 @@ export const CloneRepoResultSchema = z.union([
 // GitHub Contracts
 // =============================================================================
 
+/** Pull request da branch atual, como a interface precisa dele. */
+export const PullRequestSummarySchema = z.object({
+  number: z.number().int().positive(),
+  url: z.string(),
+  title: z.string(),
+  state: z.string(),
+  head: z.string(),
+  base: z.string(),
+  draft: z.boolean(),
+});
+export type PullRequestSummary = z.infer<typeof PullRequestSummarySchema>;
+
+export const MergePullRequestResultSchema = z.object({
+  merged: z.boolean(),
+  message: z.string(),
+  sha: z.string().nullable(),
+});
+export type MergePullRequestResult = z.infer<
+  typeof MergePullRequestResultSchema
+>;
+
 // Note: the GitHub device flow (start/cancel + state updates) goes through
 // the connection-flow contracts (`connection_flow.ts`) — it is driven by the
 // flowId-correlated state machine shared with Supabase/Neon.
@@ -189,6 +210,37 @@ export const githubContracts = {
     channel: "github:clone-repo-from-url",
     input: CloneRepoParamsSchema,
     output: CloneRepoResultSchema,
+  }),
+
+  // Pull request da branch atual (REQ-31). `getPullRequest` devolve `null`
+  // quando não há PR aberto para a branch, para a UI poder oferecer "abrir".
+  getPullRequest: defineContract({
+    channel: "github:get-pull-request",
+    input: z.object({ appId: z.number() }),
+    output: PullRequestSummarySchema.nullable(),
+  }),
+
+  createPullRequest: defineContract({
+    channel: "github:create-pull-request",
+    input: z.object({
+      appId: z.number(),
+      title: z.string().trim().min(1).max(200),
+      body: z.string().max(20_000).optional(),
+      /** Destino; se omitido, usa a branch padrão do repositório. */
+      base: z.string().trim().min(1).max(200).optional(),
+      draft: z.boolean().optional(),
+    }),
+    output: PullRequestSummarySchema,
+  }),
+
+  mergePullRequest: defineContract({
+    channel: "github:merge-pull-request",
+    input: z.object({
+      appId: z.number(),
+      number: z.number().int().positive(),
+      method: z.enum(["merge", "squash", "rebase"]).optional(),
+    }),
+    output: MergePullRequestResultSchema,
   }),
 } as const;
 

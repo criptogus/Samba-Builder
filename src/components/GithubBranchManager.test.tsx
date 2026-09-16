@@ -28,6 +28,12 @@ vi.mock("@/github_ops/useGithubOps", () => ({
   }),
 }));
 
+// A linha de pull request tem teste próprio e precisa de react-query + client
+// do GitHub; aqui o alvo é a projeção da máquina de branches.
+vi.mock("@/components/GithubPullRequestActions", () => ({
+  GithubPullRequestActions: () => null,
+}));
+
 describe("GithubBranchManager machine projection", () => {
   beforeEach(() => {
     mocks.send.mockReset();
