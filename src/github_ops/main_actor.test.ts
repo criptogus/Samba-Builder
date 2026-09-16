@@ -16,7 +16,7 @@ import {
 } from "@/ipc/services/github_ops_definition";
 import { githubOpsClientDefinition } from "./client_definition";
 import { MAX_GITHUB_OPS_VERIFICATION_ERROR_LENGTH } from "./error_message";
-import type { GithubOpsIgnoreReason } from "./state";
+import type { GithubOperation, GithubOpsIgnoreReason } from "./state";
 import {
   githubOpsKey,
   type GithubOpsActorState,
@@ -629,6 +629,80 @@ describe("main-hosted github_ops actor", () => {
 
     expect(service.getGitState).toHaveBeenCalledWith(7);
     expect(replacement.getSnapshot().state.type).toBe("rebase-paused");
+  });
+
+  it("mantém o sync pendente quando o pull acha conflito e só envia depois de resolver", async () => {
+    service.getConflicts.mockResolvedValue(["src/conflicted.ts"]);
+    let syncAttempts = 0;
+    service.run.mockImplementation(((_appId: number, op: GithubOperation) => {
+      if (op.type === "sync") {
+        syncAttempts += 1;
+        if (syncAttempts === 1) {
+          // O pull do primeiro sync encontrou conflito de merge.
+          return Promise.reject(
+            Object.assign(
+              new Error(
+                "CONFLICT (content): Merge conflict in src/conflicted.ts",
+              ),
+              { code: "MERGE_CONFLICT" },
+            ),
+          );
+        }
+      }
+      return Promise.resolve();
+    }) as never);
+
+    const { actorA } = createHarness();
+    await actorA.resync();
+
+    await actorA.dispatch({
+      type: "OP_REQUESTED",
+      op: { type: "sync" },
+      operationId: "sync-with-conflict",
+    });
+    await flush();
+
+    // O pull falhou: a máquina sabe que a operação pendente é o sync e,
+    // principalmente, NADA foi enviado ao remoto.
+    expect(actorA.getSnapshot().state).toMatchObject({
+      type: "conflicted",
+      files: ["src/conflicted.ts"],
+      origin: { type: "sync" },
+    });
+    expect(service.run.mock.calls.map(([, op]) => op.type)).toEqual(["sync"]);
+
+    // O conflito foi resolvido e a verificação não encontra mais nada.
+    service.getConflicts.mockResolvedValue([]);
+    await actorA.dispatch({
+      type: "RESOLVE_WITH_AI_STARTED",
+      claimId: "sync-claim",
+    });
+    await actorA.dispatch({
+      type: "CONFLICT_RESOLUTION_STARTED",
+      claimId: "sync-claim",
+      chatId: 42,
+    });
+    await actorA.dispatch({ type: "CONFLICT_RESOLUTION_FINISHED", chatId: 42 });
+    await flush();
+
+    expect(actorA.getSnapshot().state).toMatchObject({
+      type: "conflicted",
+      resolution: "ready-to-sync",
+    });
+
+    // Continuar refaz o sync inteiro: pull de novo e só então o push.
+    await actorA.dispatch({
+      type: "OP_REQUESTED",
+      op: { type: "sync" },
+      operationId: "sync-after-conflict",
+    });
+    await flush();
+
+    expect(service.run.mock.calls.map(([, op]) => op.type)).toEqual([
+      "sync",
+      "sync",
+      "push",
+    ]);
   });
 
   it("suppresses failures from superseded repository probes", async () => {
