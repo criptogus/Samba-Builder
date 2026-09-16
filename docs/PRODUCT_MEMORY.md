@@ -37,6 +37,17 @@ Plano que originou estas decisões: [`plans/kilocode-parity-plan.md`](../plans/k
 - **2026-09-08** — `@testing-library/dom` passa a ser declarado em `devDependencies`. Motivo: é peer de
   `@testing-library/react` e não estava no `package.json` deste fork, o que quebrava **todos** os testes de
   componente (falha pré-existente, reproduzida em `NativeSkillsLibrary.test.tsx` antes da correção).
+- **2026-09-08** — Corrigido o aviso "This chat context is running out" que continuava aparecendo depois de resumir.
+  Causa: o banner comparava `maxTokensUsed` — o **pico do último turno**, persistido em
+  `src/ipc/handlers/token_count_handlers.ts:270` — com a janela do modelo, e o turno de "Summarize to new chat" lê a
+  conversa antiga inteira; o pico continuava alto no chat novo e pequeno. Correção: o pico de um turno de summarize é
+  ignorado (`resolveActualMaxTokens` em `src/ipc/utils/token_utils.ts`), então o aviso volta a refletir o que o chat
+  realmente vai enviar. Decisão: avisar sobre limite/custo de contexto continua sendo o objetivo, mas nunca com um
+  número que não corresponde ao próximo pedido.
+- **2026-09-08** — `REQ-03` (skills sob demanda) com o núcleo pronto: tool `load_skill` lista e carrega skills de
+  `.samba/skills` (projeto) e da pasta de extensões do usuário, com precedência de projeto, revalidação no disco e
+  limites de tamanho. Falta para fechar o requisito: injetar só os **metadados** das skills no prompt do agente,
+  cartão de UI para a chamada da tool e respeitar o campo `modes` por modo de chat.
 
 ## Escopo (versão atual)
 
@@ -55,7 +66,7 @@ por decisão de produto) · orquestração tipo Gastown · agentes gerenciados p
 |----|-----------|-----------------|--------|------|
 | REQ-01 | Núcleo de extensões declarativas (descoberta por escopo projeto/usuário + validação) | Extensões válidas listadas; frontmatter inválido ignorado com log e sem quebrar o app | entregue | agente |
 | REQ-02 | Contrato IPC + estado das extensões com enforcement no main | Payload inválido do renderer rejeitado com `SambaError` | entregue (listagem) | agente |
-| REQ-03 | Skills sob demanda por `description` (além do slash atual `/samba-*`) | Skill de projeto entra no contexto sem slash, só na etapa relevante; escopo por modo respeitado; skill de terceiro não ganha tools | proposto | a definir |
+| REQ-03 | Skills sob demanda por `description` (além do slash atual `/samba-*`) | Skill de projeto entra no contexto sem slash, só na etapa relevante; escopo por modo respeitado; skill de terceiro não ganha tools | em_andamento (tool `load_skill` entregue) | agente |
 | REQ-04 | Workflows: slash commands de projeto/usuário com frontmatter | `/comando` injeta instrução e respeita `agent`; comando inexistente não altera o prompt | proposto | a definir |
 | REQ-05 | Permissões declarativas `allow`/`ask`/`deny` + "aprovar sempre" + `external_directory` | `edit: {"*.env": deny}` bloqueia no main, com erro recuperável e mostra a regra; "aprovar sempre" persiste | proposto | a definir |
 | REQ-06 | Agentes custom em Markdown (`primary`/`subagent`/`all`) | Agente de projeto aparece no seletor sem quebrar os 4 modos built-in | proposto | a definir |
@@ -78,6 +89,17 @@ por decisão de produto) · orquestração tipo Gastown · agentes gerenciados p
   `testing/fake-llm-server/*` por falta de `@types/express` — pré-requisito de ambiente já documentado no
   `AGENTS.md` (rodar `npm install` dentro de `testing/fake-llm-server/`), não relacionado a esta fase.
 - Ainda **não** coberto: autoria/instalação de extensão pela UI (entra em REQ-03/REQ-12) e E2E da Library.
+
+### Evidências do REQ-03 e do aviso de contexto (2026-09-08)
+
+- `npx vitest run src/pro/main/ipc/handlers/local_agent/tools/load_skill.spec.ts src/ipc/services/extensions src/ipc/utils/token_utils.test.ts`
+  → **49 testes verdes** (8 da tool, 19 das extensões, 22 de tokens).
+- Testes novos do banner adicionados em `src/ipc/handlers/__tests__/context_limit_banner.integration.test.tsx`; a suíte é
+  **integration** e só roda onde o harness tem `testing/fake-llm-server/node_modules` — neste ambiente ela não executa
+  (mesmo pré-requisito do `AGENTS.md`).
+- Limite de ambiente encontrado: suítes que abrem banco falham com `better-sqlite3` compilado para outro ABI
+  (`NODE_MODULE_VERSION 143` vs 137) — é preciso `npm rebuild better-sqlite3`. Falha pré-existente, reproduzida em
+  `read_chat.spec.ts`/`search_chats.spec.ts`/`explore_chat_history_subagent.spec.ts`, sem relação com estas mudanças.
 
 Já existentes (não são requisitos novos): context condensing/compaction, todo list na UI, voice-to-text,
 catálogo MCP, consumo de `AI_RULES.md`, undo/redo git por chat.

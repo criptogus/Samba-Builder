@@ -4,6 +4,7 @@ import {
   getCompactionThreshold,
   getTemperature,
   estimateToolResultTokens,
+  resolveActualMaxTokens,
   shouldTriggerCompaction,
 } from "@/ipc/utils/token_utils";
 import { findLanguageModel } from "@/ipc/utils/findLanguageModel";
@@ -175,5 +176,61 @@ describe("shouldTriggerCompaction", () => {
     expect(shouldTriggerCompaction(175_000, 200_000, "openai")).toBe(true);
     expect(shouldTriggerCompaction(174_999, 200_000, "openai")).toBe(false);
     expect(shouldTriggerCompaction(175_000, 200_000, "google")).toBe(true);
+  });
+});
+
+describe("resolveActualMaxTokens", () => {
+  const user = (content: string) => ({ role: "user", content });
+
+  it("reporta o uso do último turno normal", () => {
+    expect(
+      resolveActualMaxTokens([
+        user("crie a tela"),
+        { role: "assistant", content: "feito", maxTokensUsed: 42_000 },
+      ]),
+    ).toBe(42_000);
+  });
+
+  it("ignora o turno de summarize, que lê a conversa antiga inteira", () => {
+    expect(
+      resolveActualMaxTokens([
+        user("Summarize from chat-id=7"),
+        { role: "assistant", content: "resumo", maxTokensUsed: 110_000 },
+      ]),
+    ).toBeNull();
+  });
+
+  it("volta a reportar o uso no primeiro turno normal depois do summarize", () => {
+    expect(
+      resolveActualMaxTokens([
+        user("Summarize from chat-id=7"),
+        { role: "assistant", content: "resumo", maxTokensUsed: 110_000 },
+        user("ajuste o cabeçalho"),
+        { role: "assistant", content: "feito", maxTokensUsed: 12_000 },
+      ]),
+    ).toBe(12_000);
+  });
+
+  it("não inventa uso quando não há turno de assistente", () => {
+    expect(resolveActualMaxTokens([user("oi")])).toBeNull();
+    expect(resolveActualMaxTokens([])).toBeNull();
+  });
+
+  it("limpa o aviso quando a mensagem mais recente é um resumo de compactação", () => {
+    expect(
+      resolveActualMaxTokens([
+        user("tarefa longa"),
+        {
+          role: "assistant",
+          content: "muito trabalho",
+          maxTokensUsed: 190_000,
+        },
+        {
+          role: "assistant",
+          content: "<samba-compaction>resumo</samba-compaction>",
+          maxTokensUsed: null,
+        },
+      ]),
+    ).toBeNull();
   });
 });

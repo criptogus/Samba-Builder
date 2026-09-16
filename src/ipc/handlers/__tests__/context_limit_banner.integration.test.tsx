@@ -173,6 +173,65 @@ describe("context limit banner (integration)", () => {
     expect(screen.queryByTestId("context-limit-banner")).toBeNull();
   }, 60_000);
 
+  it("ignora o turno de summarize no uso real do contexto", async () => {
+    const chatId = await harness.createChat();
+    await harness.db.insert(messages).values([
+      {
+        chatId,
+        role: "user",
+        content: "Summarize from chat-id=999",
+        createdAt: new Date("2025-01-01T00:00:00Z"),
+      },
+      {
+        chatId,
+        role: "assistant",
+        content: "Resumo do chat anterior",
+        maxTokensUsed: 110_000,
+        createdAt: new Date("2025-01-01T00:01:00Z"),
+      },
+    ]);
+
+    const result = await countTokens(chatId);
+
+    expect(result.actualMaxTokens).toBeNull();
+  });
+
+  it("volta a reportar o uso real no turno normal depois do summarize", async () => {
+    const chatId = await harness.createChat();
+    await harness.db.insert(messages).values([
+      {
+        chatId,
+        role: "user",
+        content: "Summarize from chat-id=999",
+        createdAt: new Date("2025-01-01T00:00:00Z"),
+      },
+      {
+        chatId,
+        role: "assistant",
+        content: "Resumo do chat anterior",
+        maxTokensUsed: 110_000,
+        createdAt: new Date("2025-01-01T00:01:00Z"),
+      },
+      {
+        chatId,
+        role: "user",
+        content: "Agora ajuste o cabeçalho",
+        createdAt: new Date("2025-01-01T00:02:00Z"),
+      },
+      {
+        chatId,
+        role: "assistant",
+        content: "Feito.",
+        maxTokensUsed: 12_000,
+        createdAt: new Date("2025-01-01T00:03:00Z"),
+      },
+    ]);
+
+    const result = await countTokens(chatId);
+
+    expect(result.actualMaxTokens).toBe(12_000);
+  });
+
   it("counts the structured post-compaction history used by agentic Build", async () => {
     const chatId = await harness.createChat();
     await harness.db.insert(messages).values([

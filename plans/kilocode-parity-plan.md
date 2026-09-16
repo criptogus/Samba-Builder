@@ -92,6 +92,12 @@ novo `src/shared/extensions/*`, `src/ipc/handlers/` (novo handler registrado via
 
 ### Fase 1 — P0: skills sob demanda, workflows e permissões (~2–3 semanas)
 
+> **Status (2026-09-08): em andamento.** `REQ-03` tem o núcleo entregue — tool `load_skill`
+> (`src/pro/main/ipc/handlers/local_agent/tools/load_skill.ts`) que lista as skills disponíveis e carrega o corpo da
+> escolhida, lendo `.samba/skills/` do projeto e a pasta de extensões do usuário, com precedência de projeto, revalidação
+> no disco e limites de tamanho (`src/ipc/services/extensions/load.ts`). Falta: metadados no prompt (descoberta sem o
+> modelo precisar listar), cartão de UI e escopo por `modes`. `REQ-04` e `REQ-05` não começaram.
+
 **`REQ-03` Skills 2.0 (autoria + descoberta + carregamento sob demanda)**
 
 - Hoje só ativamos skill por slash explícito, num catálogo fixo. Falta: **skill do usuário/projeto**, escopo por

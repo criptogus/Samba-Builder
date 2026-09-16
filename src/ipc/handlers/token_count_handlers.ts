@@ -22,7 +22,11 @@ import {
 } from "../../supabase_admin/supabase_context";
 
 import { TokenCountParams, TokenCountResult } from "@/ipc/types";
-import { estimateTokens, getContextWindow } from "../utils/token_utils";
+import {
+  estimateTokens,
+  getContextWindow,
+  resolveActualMaxTokens,
+} from "../utils/token_utils";
 import { createLoggedHandler } from "./safe_handle";
 import { readSettings } from "@/main/settings";
 import {
@@ -263,11 +267,9 @@ export function registerTokenCountHandlers() {
         codebaseTokens +
         mentionedAppsTokens;
 
-      // Find the last assistant message since totalTokens is only set on assistant messages
-      const lastAssistantMessage = [...chat.messages]
-        .reverse()
-        .find((m) => m.role === "assistant");
-      const actualMaxTokens = lastAssistantMessage?.maxTokensUsed ?? null;
+      // O pico de tokens do turno de "Summarize to new chat" não descreve o
+      // contexto do chat novo — ver `resolveActualMaxTokens`.
+      const actualMaxTokens = resolveActualMaxTokens(chat.messages);
 
       return {
         estimatedTotalTokens: totalTokens,

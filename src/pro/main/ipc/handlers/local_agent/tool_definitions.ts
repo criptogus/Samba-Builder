@@ -59,6 +59,7 @@ import { planningQuestionnaireTool } from "./tools/planning_questionnaire";
 import { writePlanTool } from "./tools/write_plan";
 import { exitPlanTool } from "./tools/exit_plan";
 import { readGuideTool } from "./tools/read_guide";
+import { loadSkillTool } from "./tools/load_skill";
 import {
   buildExecuteSandboxScriptDescription,
   executeSandboxScriptTool,
@@ -180,6 +181,7 @@ export const TOOL_DEFINITIONS: readonly ToolDefinition[] = [
   restartAppTool,
   reinstallAndRestartAppTool,
   readGuideTool,
+  loadSkillTool,
   executeSandboxScriptTool,
   searchMcpToolsTool,
   getMcpToolSchemaTool,

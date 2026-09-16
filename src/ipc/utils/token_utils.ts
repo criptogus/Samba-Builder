@@ -116,3 +116,42 @@ export function shouldTriggerCompaction(
 ): boolean {
   return totalTokens >= getCompactionThreshold(contextWindow, provider);
 }
+
+/** Prefixo do prompt enviado pelo botão "Summarize to new chat". */
+export const SUMMARIZE_PROMPT_PREFIX = "Summarize from chat-id=";
+
+interface ContextUsageMessage {
+  role: string;
+  content: string;
+  maxTokensUsed?: number | null;
+}
+
+/**
+ * Uso real de contexto do último turno representativo da conversa.
+ *
+ * `maxTokensUsed` é um pico por turno do assistente, não o tamanho atual do
+ * contexto: ele continua alto depois de qualquer turno que leu muito de uma só
+ * vez. O caso mais visível é o turno de "Summarize to new chat", que lê a
+ * conversa anterior inteira para resumi-la — se esse pico contasse, o aviso de
+ * contexto reapareceria no chat novo (pequeno) e ficaria preso lá.
+ *
+ * Por isso o último turno de summarize é ignorado: o aviso volta a refletir o
+ * que este chat realmente vai enviar no próximo pedido.
+ */
+export function resolveActualMaxTokens(
+  messages: readonly ContextUsageMessage[],
+): number | null {
+  for (let index = messages.length - 1; index >= 0; index -= 1) {
+    const message = messages[index];
+    if (message.role !== "assistant") continue;
+    const triggeringUserMessage = messages
+      .slice(0, index)
+      .reverse()
+      .find((candidate) => candidate.role === "user");
+    if (triggeringUserMessage?.content.startsWith(SUMMARIZE_PROMPT_PREFIX)) {
+      continue;
+    }
+    return message.maxTokensUsed ?? null;
+  }
+  return null;
+}

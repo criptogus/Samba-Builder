@@ -12,6 +12,8 @@ Fork do Dyad: app desktop Electron que gera e roda apps com agentes de IA.
 - **Outros:** `rules/` (31 regras de engenharia), `docs/adrs/` (+ `docs/adr/`), `docs/architecture.md`, `plans/` (92 planos), `e2e-tests/` (145 specs), `helpers` de teste e evals em `src/__tests__/evals`.
 - **Escala:** 3.524 arquivos rastreados; `src/db/schema.ts` com 946 linhas; maiores handlers: `chat_stream_handlers.ts` (130 KB), `app_handlers.ts` (94 KB), `git_utils.ts` (94 KB), `local_agent_handler.ts` (103 KB).
 
+**Limites de verificação neste ambiente (pré-existentes, não do código):** (1) `npm run ts` falha em `testing/fake-llm-server/*` por falta de `@types/express`; (2) suítes `*.integration.*` do harness de chat falham por falta de `testing/fake-llm-server/node_modules` (`git-http-mock-server`, `express`, `cors`); (3) suítes que abrem banco falham com `better-sqlite3` compilado para outro ABI (`NODE_MODULE_VERSION 143` vs 137), exigindo `npm rebuild better-sqlite3`. Suítes unitárias sem banco e sem o harness de chat rodam normalmente.
+
 ## Comandos de verificação (do próprio repo)
 
 | Objetivo | Comando |
