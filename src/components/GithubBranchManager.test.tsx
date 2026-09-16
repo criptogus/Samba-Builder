@@ -178,6 +178,18 @@ describe("GithubBranchManager machine projection", () => {
     );
   });
 
+  it("dispara o sync completo pelo menu de branches", () => {
+    render(<GithubBranchManager appId={1} />);
+
+    fireEvent.click(screen.getByTestId("branch-actions-menu-trigger"));
+    fireEvent.click(screen.getByTestId("git-sync-button"));
+
+    expect(mocks.send).toHaveBeenCalledWith({
+      type: "OP_REQUESTED",
+      op: { type: "sync" },
+    });
+  });
+
   it("closes the merge dialog when conflict recovery takes over", async () => {
     const view = render(<GithubBranchManager appId={1} />);
 

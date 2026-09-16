@@ -87,6 +87,7 @@ export function GithubBranchManager({ appId }: BranchManagerProps) {
     isPulling,
     isRenamingBranch,
     isSwitchingBranch,
+    isSyncing,
     switchBlocked,
   } = projection;
 
@@ -245,6 +246,19 @@ export function GithubBranchManager({ appId }: BranchManagerProps) {
                 className={`mr-2 h-4 w-4 ${isFetching ? "animate-spin" : ""}`}
               />
               Refresh branches
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              onClick={() =>
+                // Mesma ação do botão do conector: baixa antes de enviar.
+                send({ type: "OP_REQUESTED", op: { type: "sync" } })
+              }
+              disabled={!canMutateBranches}
+              data-testid="git-sync-button"
+            >
+              <RefreshCw
+                className={`mr-2 h-4 w-4 ${isSyncing ? "animate-spin" : ""}`}
+              />
+              Sync with GitHub
             </DropdownMenuItem>
             <DropdownMenuItem
               onClick={() =>
