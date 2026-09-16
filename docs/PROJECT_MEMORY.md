@@ -64,6 +64,8 @@ Diagnóstico de 2026-09-08, em ordem de decisividade:
 
 **Para substituir o app instalado enquanto o OTA não fecha:** `docs/update-runbook.md` — qual comando gera o artefato certo (`npm run make`, assinado), por que `desktop:build` **não** serve para o Mac mini (pacote local sem assinatura, aponta para o `userData` do repo) e por que `npm run build` (build de E2E) nunca deve virar artefato de distribuição.
 
+**Release por tag (2026-09-08):** `.github/workflows/release.yml` agora dispara também em `push` de tag `v*`. No caminho da tag ela é a fonte da verdade — o job `prepare-release` **valida** `v${package.json.version}` (falha se não bater) em vez de criar a tag, e o job `publish` termina com "Publish the release (remove draft)" (`gh release edit --draft=false`, com `--prerelease` para versão com sufixo e `--latest` para estável), **depois** das três verificações existentes, para o feed nunca ver release incompleta. O disparo manual (`workflow_dispatch`) segue igual: cria a tag não publicada e termina em **draft**. Cobertura: `src/__tests__/release_workflow.test.ts` (inclui parse real do YAML, não só regex).
+
 ## Mapa da integração com GitHub (interface e main)
 
 - **Interface:** `src/components/GitHubConnector.tsx` (conectar repo/org), `GitHubIntegration.tsx` (conectar/desconectar conta), `GithubBranchManager.tsx` (branches: criar, trocar, renomear, deletar, pull), `GithubCollaboratorManager.tsx` (colaboradores), `chat/CommitDialogActions.tsx` + `chat/CommitButtonLabel.tsx` (fluxo de commit do chat) e `GithubPullRequestActions.tsx` (pull request da branch atual — REQ-31).

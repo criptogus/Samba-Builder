@@ -35,6 +35,16 @@ Mesmo com o app novo (que já contém o updater), o OTA depende de três coisas 
 3. no macOS, o **Squirrel exige assinatura válida** e correspondente entre a versão instalada e a nova: build
    assinado diferente (ou ad-hoc/ausente) não aplica a atualização.
 
+## Publicar pela tag (caminho normal, depois que o OTA estiver de pé)
+
+Quando o canal estiver resolvido (repo público/alcançável + credenciais Apple como secrets), a publicação é:
+
+1. subir a versão em `package.json` (precisa ser maior que a instalada);
+2. empurrar a tag `v<versão>` — o workflow confere que a tag corresponde à versão e **falha** se não corresponder;
+3. ao terminar, a release é publicada sem draft (prerelease quando a versão tem sufixo `-beta`, por exemplo).
+
+Sem a tag, o disparo manual continua disponível e termina em **draft** para conferência.
+
 ## Versão importa
 
 O updater compara versões: um build com a **mesma** versão do instalado nunca é oferecido como atualização. Antes

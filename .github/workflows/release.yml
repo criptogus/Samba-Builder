@@ -6,8 +6,15 @@ permissions:
   contents: read
 
 name: Release app
+# Duas portas: manual (`workflow_dispatch`, publica draft para conferência) e
+# **tag empurrada** (`v*`, caminho de release de verdade). Quando a tag existe,
+# ela é a fonte da verdade: o preparo a valida em vez de criá-la, e no fim a
+# release é publicada sem draft.
 on:
   workflow_dispatch:
+  push:
+    tags:
+      - "v*"
 
 concurrency:
   group: release-app-${{ github.ref }}
@@ -31,11 +38,31 @@ jobs:
         with:
           node-version: v24.13.1
           package-manager-cache: false # Do NOT use GitHub Actions cache in release builds: https://adnanthekhan.com/2024/12/21/cacheract-the-monster-in-your-build-cache/
-      - name: Create or update unpublished release tag
+      # Na tag empurrada, o tag já existe: só precisamos expor tag/versão e
+      # garantir que os dois combinam (senão o build sai com uma versão que não
+      # corresponde à tag, e o feed de update oferece algo que não é o que está
+      # marcado). No disparo manual, o comportamento antigo continua: cria/move a
+      # tag não publicada.
+      - name: Resolve release tag
         id: prepare
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: node scripts/prepare-release-tag.js prepare
+        run: |
+          if [ "${GITHUB_EVENT_NAME}" = "push" ]; then
+            TAG="${GITHUB_REF_NAME}"
+            VERSION="$(node -p "require('./package.json').version")"
+            if [ "v${VERSION}" != "${TAG}" ]; then
+              echo "::error::A tag ${TAG} não corresponde à versão ${VERSION} do package.json (esperado v${VERSION})."
+              exit 1
+            fi
+            {
+              echo "tag=${TAG}"
+              echo "version=${VERSION}"
+              echo "release_state=existing-tag"
+            } >> "${GITHUB_OUTPUT}"
+          else
+            node scripts/prepare-release-tag.js prepare
+          fi
 
   build:
     needs: prepare-release
@@ -228,3 +255,20 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: node scripts/verify-release-assets.js
+      # Só no caminho da tag a release vira pública — depois de tudo verificado,
+      # para o feed de update nunca ver uma release incompleta. O disparo manual
+      # continua terminando em draft, como antes.
+      - name: Publish the release (remove draft)
+        if: github.event_name == 'push'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RELEASE_TAG: ${{ needs.prepare-release.outputs.tag }}
+          RELEASE_VERSION: ${{ needs.prepare-release.outputs.version }}
+        run: |
+          ARGS=("--draft=false")
+          case "${RELEASE_VERSION}" in
+            *-*) ARGS+=("--prerelease") ;;
+            *)   ARGS+=("--latest") ;;
+          esac
+          gh release edit "${RELEASE_TAG}" "${ARGS[@]}"
+          gh release view "${RELEASE_TAG}" --json tagName,isDraft,isPrerelease
