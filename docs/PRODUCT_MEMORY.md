@@ -48,10 +48,21 @@ Plano que originou estas decisões: [`plans/kilocode-parity-plan.md`](../plans/k
   `.samba/skills` (projeto) e da pasta de extensões do usuário, com precedência de projeto, revalidação no disco e
   limites de tamanho. Falta para fechar o requisito: injetar só os **metadados** das skills no prompt do agente,
   cartão de UI para a chamada da tool e respeitar o campo `modes` por modo de chat.
+- **2026-09-08** — Estudo do **DeepSeek Harness** (`plans/deepseek-harness-learnings.md`) gerou quatro incrementos
+  adotados e quatro recusas conscientes. Adotados: (a) guardas de higiene de loop (chamada repetida + timeout por
+  tool) — independentes do roadmap e baratos; (b) publicar o **catálogo ordenado de skills no prompt** e evoluir a
+  descoberta para um **registry com formato único por nome**, fechando o `REQ-03` e alicerçando o `REQ-12`;
+  (c) **spill** de resultados grandes (preview + localizador em vez de truncar e perder); (d) **catálogos gerados do
+  código** (tool/seams) para eliminar a divergência entre `tool_definitions.ts`, a documentação e as estimativas de
+  tokens. Também adotada a lição de desenho do `goal`: **estado do objetivo** separado do **motor de continuação
+  opt-in**, com `/goal` atendido pelo app sem gastar turno do modelo (`REQ-08`). Recusados: tornar o produto
+  web-first com servidor local, adotar o framework Cordis como runtime (copiamos as ideias, não a dependência) e
+  permitir que o agente defina plugins em memória agora (Fase 4+, exige versionamento imutável e política de arquivos).
 
 ## Escopo (versão atual)
 
-**Dentro:** Fases 0–3 do plano (`REQ-01` a `REQ-15`) — fundação de extensões, skills sob demanda, workflows,
+**Dentro:** Fases 0–3 do plano (`REQ-01` a `REQ-15`, mais os incrementos `REQ-20` a `REQ-24` vindos do estudo do
+DeepSeek Harness — ver `plans/deepseek-harness-learnings.md`) — fundação de extensões, skills sob demanda, workflows,
 permissões, agentes/subagentes custom, goals, checkpoints, tools `apply_patch`/`todoread`, indexação semântica
 opt-in, marketplace estendido (skill/agente além de MCP), Agent Manager, enhance prompt e mensagem de commit.
 
@@ -79,6 +90,11 @@ por decisão de produto) · orquestração tipo Gastown · agentes gerenciados p
 | REQ-13 | Agent Manager (sessões paralelas em worktrees + diff) | Sessões isoladas em worktrees, diff vs. branch pai visível | proposto | a definir |
 | REQ-14 | Enhance prompt | Prompt reescrito antes do envio, com prévia e opção de desfazer | proposto | a definir |
 | REQ-15 | Geração de mensagem de commit | Mensagem clara no padrão conventional commits, revisável antes de commitar | proposto | a definir |
+| REQ-20 | Guardas de higiene de loop (chamada repetida idêntica + timeout por tool) | Repetição sem mudança de estado gera aviso ao modelo; tool com limite declarado falha com erro recuperável no prazo | proposto | a definir |
+| REQ-21 | Registry de catálogos de skills com formato único por nome | Duas fontes com o mesmo nome resolvem para uma só, com o motivo registrado; nenhuma fonte, nenhum acesso do modelo | proposto | a definir |
+| REQ-22 | Spill de resultados grandes (preview + localizador, sem perder o original) | Resultado de 2 MB vira preview + caminho do íntegro, legível depois; falha de escrita entrega o original | proposto | a definir |
+| REQ-23 | Catálogos gerados do código (tools e seams) | Comando gera os catálogos e o CI falha se o arquivo commitado divergir do código | proposto | a definir |
+| REQ-24 | Workflow como script de orquestração (subagentes em sandbox) | Script escrito pelo modelo distribui trabalho para subagentes e devolve valor final, sob a política de arquivos da sessão | proposto | a definir |
 
 ### Evidências da Fase 0 (2026-09-08)
 
@@ -120,6 +136,10 @@ catálogo MCP, consumo de `AI_RULES.md`, undo/redo git por chat.
   tabela `mcp_catalog` (`src/db/schema.ts`) — estender o mesmo fluxo em vez de criar um segundo.
 - **Governança/entrega:** features de produto entram no fluxo de `docs/samba-delivery-workflow.md` e nas evidências
   de `docs/samba-test-evidence.md`.
+- **Aprendizados externos ↔ roadmap:** `plans/kilocode-parity-plan.md` diz **quais** features faltam (paridade com
+  Kilo) e `plans/deepseek-harness-learnings.md` diz **como estruturá-las** (seams explícitas, famílias pequenas,
+  guardas de loop, spill, catálogos gerados). Ao mexer em skills, workflows ou permissões, consultar os dois: o
+  primeiro define o comportamento esperado, o segundo a fronteira entre núcleo e extensão.
 
 ## Riscos
 
