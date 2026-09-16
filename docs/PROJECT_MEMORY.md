@@ -47,6 +47,19 @@ src/prompts/local_agent_prompt{,_skill_catalog}.test.ts src/ipc/utils/token_util
 src/components/ProjectExtensions.test.tsx` → **203 testes**; tipos limpos nos arquivos tocados;
 `oxlint`/`oxfmt --check` limpos; `npm run gen:tool-catalog -- --check` atualizado.
 
+## Auto-update (por que o build do mac mini não recebia atualização)
+
+Diagnóstico de 2026-09-08, em ordem de decisividade:
+
+1. **O app não tinha updater.** `src/main.ts` registrava `logger.info("Auto-update enabled=", …)` e, se a opção estivesse ligada, apenas logava "Auto-update desativado" — o import do `update-electron-app` havia sido removido quando o fork cortou a dependência do backend do Samba. Consequência: o switch "Auto-update" em Configurações era **decorativo** (ligava a opção e nada acontecia).
+2. **O release só é publicado manualmente.** `.github/workflows/release.yml` dispara em `workflow_dispatch`, então merge no `main` não cria tag nem release — não existe artefato novo para baixar.
+3. **O repositório do canal devolve 404** na API pública (`api.github.com/repos/criptogus/Samba-Builder`), e o serviço público de update do Electron só atende repositório público. O feed próprio do Samba Cloud não existe neste fork.
+4. **As releases são publicadas como draft** (`publisher-github` com `draft: true`), e draft não aparece em feed de update até ser publicado — mais uma porta fechada.
+
+**Correção aplicada (lado do app):** `src/main/auto_update.ts` (política pura: só roda empacotado, fora de build de teste, e com a opção ligada) + `src/main.ts` chamando `updateElectronApp({ repo: "criptogus/Samba-Builder", … })` com `autoUpdater.on("error")` em nível de erro (o coletor de bug report descarta linhas `[info]`) e diálogo de atualização em pt-BR.
+
+**O que ainda falta para o mac mini atualizar de fato (infra/decisão):** (a) o repositório do canal precisa ser público/alcançável; (b) gerar release não-draft a partir do `main` (hoje é manual e draft); (c) assinatura/notarização válidas no build macOS — o Squirrel.Mac não aplica update em app sem assinatura correspondente (`forge.config.ts` já tem `osxSign`/`osxNotarize`, dependem de credenciais).
+
 ## Mapa da integração com GitHub (interface e main)
 
 - **Interface:** `src/components/GitHubConnector.tsx` (conectar repo/org), `GitHubIntegration.tsx` (conectar/desconectar conta), `GithubBranchManager.tsx` (branches: criar, trocar, renomear, deletar, pull), `GithubCollaboratorManager.tsx` (colaboradores), `chat/CommitDialogActions.tsx` + `chat/CommitButtonLabel.tsx` (fluxo de commit do chat) e `GithubPullRequestActions.tsx` (pull request da branch atual — REQ-31).

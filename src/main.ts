@@ -1,5 +1,6 @@
 import {
   app,
+  autoUpdater,
   BrowserWindow,
   dialog,
   Menu,
@@ -15,8 +16,14 @@ import { execFile } from "node:child_process";
 import { promisify } from "node:util";
 import { registerIpcHandlers } from "./ipc/ipc_host";
 import dotenv from "dotenv";
-// Samba Builder: sem auto-update (o update-electron-app consultava o backend
-// do Samba) — o import foi removido.
+// Samba Builder: o canal de atualização são as releases deste repositório no
+// GitHub (serviço público do Electron) — nenhum backend do Samba é consultado.
+import { makeUserNotifier, updateElectronApp } from "update-electron-app";
+import {
+  AUTO_UPDATE_INTERVAL,
+  AUTO_UPDATE_REPO,
+  shouldEnableAutoUpdate,
+} from "./main/auto_update";
 import log from "electron-log";
 import {
   getSettingsFilePath,
@@ -654,12 +661,33 @@ export async function onReady() {
   });
 
   logger.info("Auto-update enabled=", settings.enableAutoUpdate);
-  // Samba Builder: zero backend do Samba — sem auto-update over-the-air (o
-  // (sem auto-update: o produto é standalone e não consulta servidor remoto)
-  // samba-sh/samba). Atualizações são instaladas manualmente pelo usuário.
-  if (settings.enableAutoUpdate) {
+  if (
+    shouldEnableAutoUpdate({
+      enableAutoUpdate: settings.enableAutoUpdate,
+      isPackaged: app.isPackaged,
+      isTestBuild: IS_TEST_BUILD,
+    })
+  ) {
+    // Falha de update tem de aparecer em nível de erro: o coletor de bug report
+    // descarta linhas [info] e sobrariam só caudas de stack (rules/auto-update.md).
+    autoUpdater.on("error", (error) => {
+      logger.error("Auto-update error:", error);
+    });
+    updateElectronApp({
+      repo: AUTO_UPDATE_REPO,
+      updateInterval: AUTO_UPDATE_INTERVAL,
+      logger,
+      notifyUser: true,
+      onNotifyUser: makeUserNotifier({
+        title: "Atualização do Samba Builder",
+        detail:
+          "Uma nova versão foi baixada. Reinicie para aplicar a atualização.",
+        restartButtonText: "Reiniciar agora",
+        laterButtonText: "Depois",
+      }),
+    });
     logger.info(
-      "Auto-update desativado: Samba Builder não depende do servidor do Samba.",
+      `Auto-update ativo pelas releases de ${AUTO_UPDATE_REPO} (a cada ${AUTO_UPDATE_INTERVAL}).`,
     );
   }
 }

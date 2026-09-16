@@ -24,7 +24,7 @@ import {
 } from "./transport";
 
 const service = vi.hoisted(() => ({
-  run: vi.fn<() => Promise<void>>(),
+  run: vi.fn<(appId: number, op: GithubOperation) => Promise<void>>(),
   getGitState:
     vi.fn<
       () => Promise<{ mergeInProgress: boolean; rebaseInProgress: boolean }>
@@ -634,7 +634,7 @@ describe("main-hosted github_ops actor", () => {
   it("mantém o sync pendente quando o pull acha conflito e só envia depois de resolver", async () => {
     service.getConflicts.mockResolvedValue(["src/conflicted.ts"]);
     let syncAttempts = 0;
-    service.run.mockImplementation(((_appId: number, op: GithubOperation) => {
+    service.run.mockImplementation((_appId: number, op: GithubOperation) => {
       if (op.type === "sync") {
         syncAttempts += 1;
         if (syncAttempts === 1) {
@@ -650,7 +650,7 @@ describe("main-hosted github_ops actor", () => {
         }
       }
       return Promise.resolve();
-    }) as never);
+    });
 
     const { actorA } = createHarness();
     await actorA.resync();
