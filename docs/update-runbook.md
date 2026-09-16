@@ -47,6 +47,13 @@ Sem a tag, o disparo manual continua disponível e termina em **draft** para con
 
 ## Versão importa
 
-O updater compara versões: um build com a **mesma** versão do instalado nunca é oferecido como atualização. Antes
-de publicar a próxima, a versão em `package.json` precisa ser maior que a que está no Mac mini (hoje
-`1.14.0-beta.1`). Há um script no repositório para isso (`npm run bump`).
+O updater compara versões: um build com a **mesma** versão do instalado nunca é oferecido como atualização.
+
+- Instalado no Mac mini: `1.14.0-beta.1`.
+- Repositório: `1.14.0-beta.2` (já subido), então a tag `v1.14.0-beta.2` gera uma release **oferecível** como
+  atualização.
+
+Para os próximos: `npm run bump` é **interativo** (escolhe "Next beta" e, por conta própria, cria branch, commit,
+push e abre PR) — em ambiente sem empurrar para o remoto, suba a versão nos três lugares que o script toca:
+`package.json`, `package-lock.json` (`version`) e `package-lock.json` (`packages[""].version`). Subir só o
+`package.json` deixa o lockfile inconsistente.
