@@ -157,7 +157,7 @@ por decisão de produto) · orquestração tipo Gastown · agentes gerenciados p
 | REQ-29 | Placar de qualidade do Reviewer (precision, F1, tokens, tempo) | Fixture com defeitos plantados produz o placar; regressão de precisão aparece no número | proposto | a definir |
 | REQ-30 | Revisão fora do app via CLI/Action com BYOK | Decisão humana: revisa a exclusão anterior de code reviews de PR, agora que existe caminho sem servidor nosso | proposto (decisão) | a definir |
 | REQ-31 | Pull request da branch atual: abrir e mesclar pela interface | Abrir PR compara a branch atual com a padrão do repositório e devolve o link; merge pede confirmação e falha com o motivo quando o GitHub recusa | entregue (abrir e mesclar manuais) | agente |
-| REQ-32 | Abrir PR automaticamente depois do push | Opção desligada por padrão; abre PR da branch enviada contra a branch padrão, nunca da padrão para ela mesma, nunca duplicando PR aberto, e falha do PR não derruba o push | entregue | agente |
+| REQ-32 | Abrir PR automaticamente depois do push (inclusive o push que encerra sync ou rebase) | Opção desligada por padrão; abre PR da branch enviada contra a branch padrão, nunca da padrão para ela mesma, nunca duplicando PR aberto, e falha do PR não derruba o push | entregue | agente |
 | REQ-33 | Sync com o GitHub: baixar antes de enviar | Sync existe no botão do conector e no menu de branches; faz pull e só então push; conflito no pull interrompe o push e entra no fluxo de resolução existente | entregue | agente |
 
 ### Evidências da Fase 0 (2026-09-08)

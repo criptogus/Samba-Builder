@@ -179,6 +179,10 @@ export class GithubOpsService {
   private runUnlocked(appId: number, op: GithubOperation): Promise<void> {
     switch (op.type) {
       case "push":
+        // Este caso cobre também os pushes que **encerram um composto** — sync
+        // (`compositeNext` devolve push) e rebase. Como a máquina despacha um
+        // `run-op push` de verdade nesses fluxos, o pull request automático
+        // (REQ-32) vale para os três sem um segundo hook que possa divergir.
         return handlePushToGithub(MAIN_SERVICE_EVENT, {
           appId,
           force: op.mode === "force",

@@ -164,6 +164,22 @@ describe("GithubOpsService lifecycle", () => {
     expect(handlers.autoPullRequest).toHaveBeenCalledWith(7);
   });
 
+  it("no sync, o pull request automático só entra depois do push do composto", async () => {
+    handlers.push.mockResolvedValue(undefined);
+    const service = new GithubOpsService();
+
+    // 1) O sync começa baixando: baixar não é motivo para abrir PR.
+    await service.run(7, { type: "sync" });
+    expect(handlers.pull).toHaveBeenCalledOnce();
+    expect(handlers.autoPullRequest).not.toHaveBeenCalled();
+
+    // 2) A máquina encadeia `run-op push` (compositeNext) e é esse push — um
+    // push de verdade, igual ao avulso — que abre o PR.
+    await service.run(7, { type: "push", mode: "normal" });
+    expect(handlers.autoPullRequest).toHaveBeenCalledOnce();
+    expect(handlers.autoPullRequest).toHaveBeenCalledWith(7);
+  });
+
   it("não derruba o push quando o pull request automático falha", async () => {
     handlers.push.mockResolvedValue(undefined);
     handlers.autoPullRequest.mockRejectedValue(new Error("sem permissão"));
