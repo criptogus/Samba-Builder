@@ -195,18 +195,25 @@ export async function checkForRelease({
     assetName: null,
     reason: null,
   };
-  try {
-    const response = await fetchImpl(
+  const request = (useToken: boolean) =>
+    fetchImpl(
       `https://api.github.com/repos/${RELEASE_REPO}/releases?per_page=20`,
       {
         headers: {
           Accept: "application/vnd.github+json",
           "User-Agent": "Samba-Builder-Update-Check",
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          ...(useToken && token ? { Authorization: `Bearer ${token}` } : {}),
         },
         signal: AbortSignal.timeout(10_000),
       },
     );
+  try {
+    let response = await request(true);
+    // O repositório de releases é público: credencial expirada ou sem permissão
+    // não pode derrubar a checagem — se falhou com token, tenta sem ele.
+    if (!response.ok && token) {
+      response = await request(false);
+    }
     if (!response.ok) {
       return {
         ...base,

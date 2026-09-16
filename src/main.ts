@@ -1312,10 +1312,14 @@ const createApplicationMenu = () => {
                   ? "Verificar atualizações…"
                   : "Check for Updates…",
                 click: async () => {
+                  const token = readSettings().githubAccessToken?.value ?? null;
                   const result = await checkForRelease({
                     currentVersion: app.getVersion(),
-                    token: readSettings().githubAccessToken?.value ?? null,
+                    token,
                   });
+                  logger.info(
+                    `Checagem de atualização: status=${result.status} atual=${result.currentVersion} publicada=${result.latestVersion ?? "-"} motivo=${result.reason ?? "-"} credencial=${token ? "sim" : "não"}`,
+                  );
                   const content = describeReleaseCheck(result, app.getLocale());
                   const { response } = await dialog.showMessageBox({
                     type: content.type,

@@ -26,7 +26,10 @@ export function UpdateNotice() {
     queryFn: () => ipc.system.checkForUpdates(),
     enabled,
     retry: false,
-    staleTime: 60 * 60 * 1000,
+    // Não guardar resposta velha: a checagem é sob demanda e a release pode ter
+    // sido publicada um minuto atrás. Cache aqui já fez a tela mentir.
+    staleTime: 0,
+    refetchOnMount: "always",
   });
 
   const description = (
@@ -72,7 +75,17 @@ export function UpdateNotice() {
       <div className="space-y-1.5">
         {description}
         <p className={hint}>
-          {t("general.updateUpToDate", { version: data.currentVersion })}
+          {t("general.updateUpToDate", { version: data.currentVersion })}{" "}
+          <Button
+            variant="link"
+            size="sm"
+            className="h-auto p-0"
+            onClick={() => {
+              void refetch();
+            }}
+          >
+            {t("general.updateRetry")}
+          </Button>
         </p>
       </div>
     );

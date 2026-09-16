@@ -253,4 +253,35 @@ describe("checkForRelease", () => {
     ).mock.calls[0][1].headers as Record<string, string>;
     expect(headers.Authorization).toBe("Bearer tok");
   });
+
+  it("cai para consulta anônima quando a credencial não serve", async () => {
+    const sentHeaders: (Record<string, string> | undefined)[] = [];
+    const fetchImpl = vi.fn(async (_url: string, init?: RequestInit) => {
+      sentHeaders.push(init?.headers as Record<string, string>);
+      if (sentHeaders.length === 1) {
+        return { ok: false, status: 401, json: async () => ({}) };
+      }
+      return {
+        ok: true,
+        status: 200,
+        json: async () => [
+          { tag_name: "v1.14.0-beta.5", html_url: "u", assets: [] },
+        ],
+      };
+    }) as unknown as typeof fetch;
+
+    const result = await checkForRelease({
+      currentVersion: "1.14.0-beta.4",
+      token: "credencial-expirada",
+      platform: "darwin",
+      arch: "arm64",
+      fetchImpl,
+    });
+
+    expect(result.status).toBe("update-available");
+    expect(result.latestVersion).toBe("1.14.0-beta.5");
+    expect(sentHeaders).toHaveLength(2);
+    expect(sentHeaders[0]?.Authorization).toBe("Bearer credencial-expirada");
+    expect(sentHeaders[1]?.Authorization).toBeUndefined();
+  });
 });
