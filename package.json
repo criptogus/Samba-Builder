@@ -58,6 +58,7 @@
     "test:watch": "cross-env NODE_OPTIONS=--no-deprecation VITE_CJS_IGNORE_WARNING=true vitest",
     "test:ui": "cross-env NODE_OPTIONS=--no-deprecation VITE_CJS_IGNORE_WARNING=true vitest --ui",
     "extract-codebase": "ts-node scripts/extract-codebase.ts",
+    "gen:tool-catalog": "node scripts/gen-tool-catalog.mjs",
     "init-precommit": "husky",
     "build": "npm run pre:e2e",
     "pre:e2e": "cross-env E2E_TEST_BUILD=true npm run package",

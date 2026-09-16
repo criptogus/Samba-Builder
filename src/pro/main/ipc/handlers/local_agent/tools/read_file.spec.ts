@@ -13,6 +13,13 @@ import {
   AGENT_READ_FILE_TRUNCATION_NOTICE,
 } from "@/ipc/utils/bounded_text_file";
 
+const spillDirectory = vi.hoisted(() => ({ value: "" }));
+vi.mock("@/ipc/services/spill/spill_store", async (importOriginal) => {
+  const actual =
+    await importOriginal<typeof import("@/ipc/services/spill/spill_store")>();
+  return { ...actual, resolveSpillDirectory: () => spillDirectory.value };
+});
+
 // Mock electron-log
 vi.mock("electron-log", () => ({
   default: {
@@ -39,6 +46,7 @@ line 5`;
     testDir = await fs.promises.mkdtemp(
       path.join(os.tmpdir(), "read-file-test-"),
     );
+    spillDirectory.value = path.join(testDir, ".spill");
 
     await fs.promises.writeFile(
       path.join(testDir, "test.txt"),
@@ -316,21 +324,23 @@ line 5`;
       expect(result).toBe("attachment line 2\n");
     });
 
-    it("returns a bounded result with an explicit truncation notice", async () => {
-      await fs.promises.writeFile(
-        path.join(testDir, "large.txt"),
-        "a".repeat(AGENT_READ_FILE_RESULT_LIMIT_BYTES * 2),
-      );
+    it("guarda o restante em arquivo e devolve preview com localizador", async () => {
+      const fullContent = "a".repeat(AGENT_READ_FILE_RESULT_LIMIT_BYTES * 2);
+      await fs.promises.writeFile(path.join(testDir, "large.txt"), fullContent);
 
       const result = await readFileTool.execute(
         { path: "large.txt" },
         mockContext,
       );
 
-      expect(Buffer.byteLength(result, "utf8")).toBeLessThanOrEqual(
-        AGENT_READ_FILE_RESULT_LIMIT_BYTES,
+      expect(result).not.toContain("[Output truncated");
+      const locator = /está salvo em (.*?)\. Leia/.exec(result)?.[1];
+      expect(locator).toBeTruthy();
+      if (!locator) return;
+      expect(result.startsWith("a".repeat(1000))).toBe(true);
+      await expect(fs.promises.readFile(locator, "utf8")).resolves.toBe(
+        fullContent,
       );
-      expect(result.endsWith(AGENT_READ_FILE_TRUNCATION_NOTICE)).toBe(true);
     });
 
     it("streams a narrow range from an oversized file without truncating it", async () => {

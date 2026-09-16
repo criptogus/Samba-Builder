@@ -48,6 +48,19 @@ Plano que originou estas decisões: [`plans/kilocode-parity-plan.md`](../plans/k
   `.samba/skills` (projeto) e da pasta de extensões do usuário, com precedência de projeto, revalidação no disco e
   limites de tamanho. Falta para fechar o requisito: injetar só os **metadados** das skills no prompt do agente,
   cartão de UI para a chamada da tool e respeitar o campo `modes` por modo de chat.
+- **2026-09-08** — Segundo lote entregue, fechando as pendências do primeiro: **`REQ-03`** (o prompt do agent publica
+  o catálogo de skills em `<available_skills>`, com teto de 20 e aviso do restante; o corpo continua vindo sob
+  demanda pela tool `load_skill`) e **`REQ-20`** (guardas de loop: repetição idêntica vira lembrete no resultado e
+  chamadas longas ganham teto de tempo com erro claro). **Paridade de tokens preservada**: os quatro call sites de
+  `constructSystemPrompt` recebem o mesmo catálogo — se só um recebesse, o número mostrado ao usuário divergiria do
+  pedido enviado. Plan mode usa prompt próprio e ignora o parâmetro de propósito. Restam na Fase 3: `REQ-24`
+  (workflow como script) e o refinamento do `REQ-08`.
+- **2026-09-08** — Primeiro lote dos incrementos do `dsh` **entregue**: `REQ-21` (formato único de catálogo e
+  corpo, em `src/ipc/services/extensions/catalog.ts`, consumido pela tool `load_skill`), `REQ-22` (spill ligado ao
+  `read_file`: arquivo grande vira preview + localizador com o conteúdo íntegro, e falha de escrita volta ao
+  truncamento antigo) e `REQ-23` (catálogo de 51 tools gerado do código por `npm run gen:tool-catalog`, com
+  `--check` para CI). `REQ-03` segue **em_andamento** (falta publicar o catálogo no prompt) e `REQ-20`/`REQ-24`
+  não começaram — próximo passo registrado no checkpoint de `docs/PROJECT_MEMORY.md`.
 - **2026-09-08** — Estudo do **DeepSeek Harness** (`plans/deepseek-harness-learnings.md`) gerou quatro incrementos
   adotados e quatro recusas conscientes. Adotados: (a) guardas de higiene de loop (chamada repetida + timeout por
   tool) — independentes do roadmap e baratos; (b) publicar o **catálogo ordenado de skills no prompt** e evoluir a
@@ -77,7 +90,7 @@ por decisão de produto) · orquestração tipo Gastown · agentes gerenciados p
 |----|-----------|-----------------|--------|------|
 | REQ-01 | Núcleo de extensões declarativas (descoberta por escopo projeto/usuário + validação) | Extensões válidas listadas; frontmatter inválido ignorado com log e sem quebrar o app | entregue | agente |
 | REQ-02 | Contrato IPC + estado das extensões com enforcement no main | Payload inválido do renderer rejeitado com `SambaError` | entregue (listagem) | agente |
-| REQ-03 | Skills sob demanda por `description` (além do slash atual `/samba-*`) | Skill de projeto entra no contexto sem slash, só na etapa relevante; escopo por modo respeitado; skill de terceiro não ganha tools | em_andamento (tool `load_skill` entregue) | agente |
+| REQ-03 | Skills sob demanda por `description` (além do slash atual `/samba-*`) | Skill de projeto entra no contexto sem slash, só na etapa relevante; escopo por modo respeitado; skill de terceiro não ganha tools | entregue (catálogo no prompt + tool `load_skill`) | agente |
 | REQ-04 | Workflows: slash commands de projeto/usuário com frontmatter | `/comando` injeta instrução e respeita `agent`; comando inexistente não altera o prompt | proposto | a definir |
 | REQ-05 | Permissões declarativas `allow`/`ask`/`deny` + "aprovar sempre" + `external_directory` | `edit: {"*.env": deny}` bloqueia no main, com erro recuperável e mostra a regra; "aprovar sempre" persiste | proposto | a definir |
 | REQ-06 | Agentes custom em Markdown (`primary`/`subagent`/`all`) | Agente de projeto aparece no seletor sem quebrar os 4 modos built-in | proposto | a definir |
@@ -90,10 +103,10 @@ por decisão de produto) · orquestração tipo Gastown · agentes gerenciados p
 | REQ-13 | Agent Manager (sessões paralelas em worktrees + diff) | Sessões isoladas em worktrees, diff vs. branch pai visível | proposto | a definir |
 | REQ-14 | Enhance prompt | Prompt reescrito antes do envio, com prévia e opção de desfazer | proposto | a definir |
 | REQ-15 | Geração de mensagem de commit | Mensagem clara no padrão conventional commits, revisável antes de commitar | proposto | a definir |
-| REQ-20 | Guardas de higiene de loop (chamada repetida idêntica + timeout por tool) | Repetição sem mudança de estado gera aviso ao modelo; tool com limite declarado falha com erro recuperável no prazo | proposto | a definir |
-| REQ-21 | Registry de catálogos de skills com formato único por nome | Duas fontes com o mesmo nome resolvem para uma só, com o motivo registrado; nenhuma fonte, nenhum acesso do modelo | proposto | a definir |
-| REQ-22 | Spill de resultados grandes (preview + localizador, sem perder o original) | Resultado de 2 MB vira preview + caminho do íntegro, legível depois; falha de escrita entrega o original | proposto | a definir |
-| REQ-23 | Catálogos gerados do código (tools e seams) | Comando gera os catálogos e o CI falha se o arquivo commitado divergir do código | proposto | a definir |
+| REQ-20 | Guardas de higiene de loop (chamada repetida idêntica + timeout por tool) | Repetição sem mudança de estado gera aviso ao modelo; tool com limite declarado falha com erro recuperável no prazo | entregue | agente |
+| REQ-21 | Registry de catálogos de skills com formato único por nome | Duas fontes com o mesmo nome resolvem para uma só, com o motivo registrado; nenhuma fonte, nenhum acesso do modelo | entregue (formato único; precedência já vinha da Fase 0) | agente |
+| REQ-22 | Spill de resultados grandes (preview + localizador, sem perder o original) | Resultado de 2 MB vira preview + caminho do íntegro, legível depois; falha de escrita entrega o original | entregue (ligado ao `read_file`) | agente |
+| REQ-23 | Catálogos gerados do código (tools e seams) | Comando gera os catálogos e o CI falha se o arquivo commitado divergir do código | entregue (catálogo de tools; seams pendente) | agente |
 | REQ-24 | Workflow como script de orquestração (subagentes em sandbox) | Script escrito pelo modelo distribui trabalho para subagentes e devolve valor final, sob a política de arquivos da sessão | proposto | a definir |
 
 ### Evidências da Fase 0 (2026-09-08)

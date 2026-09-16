@@ -61,6 +61,12 @@ import { exitPlanTool } from "./tools/exit_plan";
 import { readGuideTool } from "./tools/read_guide";
 import { loadSkillTool } from "./tools/load_skill";
 import {
+  repeatedToolCallReminder,
+  repeatedToolCallsFor,
+  runToolWithTimeout,
+  toolTimeoutMs,
+} from "./loop_guard";
+import {
   buildExecuteSandboxScriptDescription,
   executeSandboxScriptTool,
 } from "./tools/execute_sandbox_script";
@@ -861,7 +867,18 @@ export function buildAgentToolSet(
             // Track file edit tool usage before execution to capture all attempts
             // (including failures) for retry/fallback telemetry
             trackFileEditTool(invocationCtx, tool.name, processedArgs);
-            const result = await tool.execute(processedArgs, invocationCtx);
+            // REQ-20: a repetição é contada antes da execução e o teto de tempo
+            // envolve a chamada. O lembrete entra só no resultado que o modelo
+            // vê — a contagem de mutações continua lendo o resultado limpo.
+            const repeatedCall = repeatedToolCallsFor(invocationCtx).note(
+              tool.name,
+              processedArgs,
+            );
+            const result = await runToolWithTimeout({
+              toolName: tool.name,
+              timeoutMs: toolTimeoutMs(tool.name),
+              run: () => tool.execute(processedArgs, invocationCtx),
+            });
 
             // Only completed mutations unblock run_tests. Failed tool calls are
             // still present in fileEditTracker for retry/fallback telemetry, but
@@ -885,6 +902,10 @@ export function buildAgentToolSet(
                 )),
             );
 
+            const modelResult = repeatedCall.repeated
+              ? result + repeatedToolCallReminder(tool.name, repeatedCall.count)
+              : result;
+
             if (toolCallId && invocationCtx.onToolActivity) {
               await invocationCtx.onToolActivity({
                 toolCallId,
@@ -892,11 +913,11 @@ export function buildAgentToolSet(
                 status: "completed",
                 presentationXml,
                 inputJson: processedArgs,
-                outputText: serializeActivityOutput(result),
+                outputText: serializeActivityOutput(modelResult),
               });
             }
 
-            return convertToolResultForAiSdk(result);
+            return convertToolResultForAiSdk(modelResult);
           };
 
           return mutationRequiresTracking

@@ -30,6 +30,7 @@ import {
   constructSystemPrompt,
   readAiRules,
 } from "../../prompts/system_prompt";
+import { buildSkillCatalogBlock } from "@/ipc/services/extensions/prompt_catalog";
 import {
   constructImplementerPrompt,
   resolveImplementerProvider,
@@ -2224,6 +2225,10 @@ ${componentSnippet}
           restartAppToolAvailable,
           reinstallAndRestartAppToolAvailable,
           runBuildToolAvailable,
+          // REQ-03: metadados das skills do app. O cálculo de tokens em
+          // `token_count_handlers` passa o mesmo catálogo, para o número que o
+          // usuário vê corresponder ao pedido que sai.
+          skillCatalog: await buildSkillCatalogBlock(updatedChat.app.path),
         });
         // Turn-local system context avoids persisting expanded instructions in
         // the agent's replay history. Only vetted, bundled content enters here.
@@ -2661,6 +2666,9 @@ This conversation includes one or more image attachments. When the user uploads 
             freeModelMode,
             codeExplorerAvailable,
             historyExplorerAvailable,
+            // Ask mode também expõe `load_skill`, então o catálogo precisa
+            // acompanhar — sem ele o modelo teria a tool e não saberia o quê ler.
+            skillCatalog: await buildSkillCatalogBlock(updatedChat.app.path),
           });
           if (rootDatabasePromptState === "supabase-disconnected") {
             readOnlySystemPrompt +=

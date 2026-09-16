@@ -6,6 +6,10 @@ import {
 } from "@/shared/extensions";
 import { resolveExtensionRoots } from "@/ipc/services/extensions/roots";
 import { listExtensions, loadExtension } from "@/ipc/services/extensions/load";
+import {
+  buildExtensionCatalog,
+  formatExtensionBody,
+} from "@/ipc/services/extensions/catalog";
 import { ToolDefinition } from "./types";
 
 const loadSkillSchema = z.object({
@@ -42,18 +46,13 @@ export const loadSkillTool: ToolDefinition<z.infer<typeof loadSkillSchema>> = {
     const roots = resolveExtensionRoots(ctx.appPath);
 
     if (!args.skill) {
-      const skills = await listExtensions(roots, "skill");
-      if (skills.length === 0) {
-        return "No skills are available in this project or on this machine.";
-      }
-      return [
-        "Available skills:",
-        ...skills.map((skill) => {
-          const modes =
-            skill.modes.length > 0 ? ` [modes: ${skill.modes.join(", ")}]` : "";
-          return `- ${skill.slug} (${skill.scope}): ${skill.description}${modes}`;
-        }),
-      ].join("\n");
+      const catalog = buildExtensionCatalog(
+        await listExtensions(roots, "skill"),
+        "skill",
+      );
+      return (
+        catalog || "No skills are available in this project or on this machine."
+      );
     }
 
     if (!EXTENSION_SLUG_PATTERN.test(args.skill)) {
@@ -65,12 +64,7 @@ export const loadSkillTool: ToolDefinition<z.infer<typeof loadSkillSchema>> = {
 
     try {
       const { entry, body } = await loadExtension(roots, "skill", args.skill);
-      return [
-        `Skill "${entry.slug}" (${entry.scope} · ${entry.relativePath}):`,
-        "<instructions>",
-        body,
-        "</instructions>",
-      ].join("\n");
+      return formatExtensionBody(entry, body);
     } catch (error) {
       if (
         error instanceof SambaError &&

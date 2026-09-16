@@ -51,6 +51,7 @@ import {
 } from "@/pro/main/ipc/handlers/local_agent/local_agent_handler";
 import { getCachedMcpToolDefs } from "@/pro/main/ipc/handlers/local_agent/tools/mcp_type_defs";
 import { resolveRootDatabasePromptState } from "@/shared/database_provider";
+import { buildSkillCatalogBlock } from "@/ipc/services/extensions/prompt_catalog";
 import { getAppBlueprintForChat } from "./app_blueprint_handlers";
 
 const logger = log.scope("token_count_handlers");
@@ -134,6 +135,11 @@ export function registerTokenCountHandlers() {
         planningQuestionnaireAvailable,
         appBlueprintQuestionnaireCompleted,
         appBlueprint,
+        // REQ-03: o mesmo catálogo que o pedido real recebe, senão a estimativa
+        // de contexto não corresponde ao que é enviado.
+        skillCatalog: await buildSkillCatalogBlock(
+          getSambaAppPath(chat.app.path),
+        ),
       });
       let supabaseContext = "";
       const supabaseProviderToolsAvailable = Boolean(

@@ -1,4 +1,5 @@
 import fs from "node:fs/promises";
+import path from "node:path";
 import { z } from "zod";
 import { ToolDefinition, AgentContext, escapeXmlAttr } from "./types";
 import { safeJoin } from "@/ipc/utils/path_utils";
@@ -9,11 +10,21 @@ import {
 } from "./resolve_app_context";
 import { resolveAttachmentLogicalPath } from "@/ipc/utils/media_path_utils";
 import {
+  AGENT_READ_FILE_RESULT_LIMIT_BYTES,
   AGENT_READ_FILE_TRUNCATION_NOTICE,
+  APP_FILE_EDITOR_LIMIT_BYTES,
   boundAgentReadFileContent,
   readContainedTextFile,
   readTextFileLines,
 } from "@/ipc/utils/bounded_text_file";
+import {
+  resolveSpillDirectory,
+  spillText,
+} from "@/ipc/services/spill/spill_store";
+import {
+  spillNotice,
+  spillOversizedText,
+} from "@/ipc/services/spill/spill_policy";
 import { SANDBOX_READ_FILE_LIMIT_BYTES } from "@/ipc/utils/sandbox/limits";
 import {
   isDotenvFilePath,
@@ -183,8 +194,43 @@ export const readFileTool: ToolDefinition<z.infer<typeof readFileSchema>> = {
         }),
     });
 
-    return result.truncated
-      ? result.content + AGENT_READ_FILE_TRUNCATION_NOTICE
-      : result.content;
+    if (!result.truncated) {
+      return result.content;
+    }
+
+    // REQ-22: em vez de descartar o resto, guardamos o arquivo inteiro e
+    // devolvemos um preview com localizador. Se a leitura completa (limitada
+    // pelo teto do editor) ou a escrita falharem, cai no aviso de truncamento
+    // de sempre — o resultado nunca piora por causa do spill.
+    try {
+      const fullText = await readContainedTextFile({
+        rootPath: targetAppPath,
+        filePath: fullFilePath,
+        displayPath,
+        maxBytes: APP_FILE_EDITOR_LIMIT_BYTES,
+        validateRealPath: (realPath, realRootPath) =>
+          assertSambaInternalAccessAllowed({
+            targetAppPath: realRootPath,
+            fullFilePath: realPath,
+            appName: args.app_name,
+          }),
+      });
+      const outcome = await spillOversizedText(fullText, {
+        maxInlineBytes: AGENT_READ_FILE_RESULT_LIMIT_BYTES,
+        store: (text) =>
+          spillText(text, {
+            directory: resolveSpillDirectory(),
+            sessionKey: `chat-${ctx.chatId}`,
+            label: path.basename(displayPath),
+          }),
+      });
+      if (outcome.spilled) {
+        return outcome.preview + spillNotice(outcome);
+      }
+    } catch {
+      // Mantém o truncamento com aviso abaixo.
+    }
+
+    return result.content + AGENT_READ_FILE_TRUNCATION_NOTICE;
   },
 };

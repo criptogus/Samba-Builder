@@ -14,6 +14,39 @@ Fork do Dyad: app desktop Electron que gera e roda apps com agentes de IA.
 
 **Limites de verificação neste ambiente (pré-existentes, não do código):** (1) `npm run ts` falha em `testing/fake-llm-server/*` por falta de `@types/express`; (2) suítes `*.integration.*` do harness de chat falham por falta de `testing/fake-llm-server/node_modules` (`git-http-mock-server`, `express`, `cors`); (3) suítes que abrem banco falham com `better-sqlite3` compilado para outro ABI (`NODE_MODULE_VERSION 143` vs 137), exigindo `npm rebuild better-sqlite3`. Suítes unitárias sem banco e sem o harness de chat rodam normalmente.
 
+## Active task — incrementos do DeepSeek Harness (retomar daqui)
+
+Plano: `plans/deepseek-harness-learnings.md`. Entregue em 2026-09-08 (130 testes verdes; tipos e lint limpos
+nos arquivos tocados):
+
+- **`REQ-21`** registry/formato único: `src/ipc/services/extensions/catalog.ts` — catálogo e corpo num só
+  formato, consumido pela tool `load_skill` (catálogo e tool não podem divergir).
+- **`REQ-22`** spill: `src/ipc/services/spill/{spill_store,spill_policy}.ts`, ligado no `read_file` — arquivo
+  maior que o limite vira preview + localizador com o conteúdo íntegro salvo; falha de escrita volta ao
+  truncamento antigo (o resultado nunca piora por causa do spill).
+- **`REQ-23`** catálogo gerado: `npm run gen:tool-catalog` (51 tools) e `--check` para CI;
+  `docs/tool-catalog.md` está no `ignorePatterns` do `.oxfmtrc.json` por ser gerado.
+
+- **`REQ-03`** catálogo de skills no prompt: `src/ipc/services/extensions/prompt_catalog.ts` monta o bloco
+  (teto de 20 skills + aviso do restante) e o prompt do agent o publica em `<available_skills>`. **Paridade de
+  tokens garantida**: os quatro call sites de `constructSystemPrompt` — três em `chat_stream_handlers.ts` e o
+  cálculo em `token_count_handlers.ts` — recebem o mesmo catálogo. O modo plan usa outro prompt e ignora o
+  parâmetro de propósito.
+- **`REQ-20`** guardas de loop: `src/pro/main/ipc/handlers/local_agent/loop_guard.ts` (chamada repetida idêntica
+  vira lembrete no resultado; teto de tempo por tool vira erro claro) ligado no ponto único de execução,
+  `tool_definitions.ts` (`tool.execute`). O lembrete entra só no resultado que o modelo vê — a contagem de
+  mutações continua lendo o resultado limpo.
+
+**Falta (Fase 3, sem data):** `REQ-24` workflow como script de orquestração e o refinamento do `REQ-08`
+(goal: estado durável × motor de continuação opt-in).
+
+Verificação: `npx vitest run src/ipc/services/extensions src/ipc/services/spill
+src/pro/main/ipc/handlers/local_agent/loop_guard.spec.ts
+src/pro/main/ipc/handlers/local_agent/tools/{load_skill.spec.ts,read_file.spec.ts,provider_tool_routing.test.ts}
+src/prompts/local_agent_prompt{,_skill_catalog}.test.ts src/ipc/utils/token_utils.test.ts
+src/components/ProjectExtensions.test.tsx` → **203 testes**; tipos limpos nos arquivos tocados;
+`oxlint`/`oxfmt --check` limpos; `npm run gen:tool-catalog -- --check` atualizado.
+
 ## Comandos de verificação (do próprio repo)
 
 | Objetivo | Comando |

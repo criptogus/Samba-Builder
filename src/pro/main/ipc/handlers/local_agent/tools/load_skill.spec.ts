@@ -100,9 +100,8 @@ describe("loadSkillTool", () => {
 
     const result = await loadSkillTool.execute({}, mockContext);
 
-    expect(result).toContain("Available skills:");
-    expect(result).toContain(
-      "revisar-login (project): Revisa o fluxo de login",
+    expect(result).toBe(
+      "Available skills:\n- revisar-login (skill · project): Revisa o fluxo de login",
     );
   });
 
@@ -126,7 +125,7 @@ describe("loadSkillTool", () => {
     );
 
     expect(result).toContain(
-      'Skill "revisar-login" (project · skills/revisar-login/SKILL.md):',
+      'skill "revisar-login" (project · skills/revisar-login/SKILL.md):',
     );
     expect(result).toContain(
       "<instructions>\nPassos da revisão\n</instructions>",
@@ -149,7 +148,7 @@ describe("loadSkillTool", () => {
     );
 
     expect(result).toContain(
-      'Skill "preferencias" (user · skills/preferencias.md):',
+      'skill "preferencias" (user · skills/preferencias.md):',
     );
     expect(result).toContain("Use 2 espaços");
   });

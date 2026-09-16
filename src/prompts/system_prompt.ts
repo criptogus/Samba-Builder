@@ -718,6 +718,7 @@ export const constructSystemPrompt = ({
   restartAppToolAvailable,
   reinstallAndRestartAppToolAvailable,
   runBuildToolAvailable,
+  skillCatalog,
 }: {
   aiRules: string | undefined;
   chatMode?: "build" | "ask" | "local-agent" | "plan";
@@ -774,6 +775,12 @@ export const constructSystemPrompt = ({
   restartAppToolAvailable?: boolean;
   reinstallAndRestartAppToolAvailable?: boolean;
   runBuildToolAvailable?: boolean;
+  /**
+   * Metadados das skills do app (REQ-03). Precisa ser passado por TODOS os
+   * chamadores que montam o prompt do mesmo turno — inclusive o cálculo de
+   * tokens em `token_count_handlers` — ou a estimativa diverge do que é enviado.
+   */
+  skillCatalog?: string;
 }) => {
   if (chatMode === "plan") {
     return constructPlanModePrompt(aiRules, themePrompt);
@@ -799,6 +806,7 @@ export const constructSystemPrompt = ({
       restartAppToolAvailable,
       reinstallAndRestartAppToolAvailable,
       runBuildToolAvailable,
+      skillCatalog,
     });
   }
 

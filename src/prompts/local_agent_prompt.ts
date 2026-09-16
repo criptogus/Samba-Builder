@@ -1024,6 +1024,12 @@ export function constructLocalAgentPrompt(
     restartAppToolAvailable?: boolean;
     reinstallAndRestartAppToolAvailable?: boolean;
     runBuildToolAvailable?: boolean;
+    /**
+     * Metadados das skills disponíveis (REQ-03), já formatados por
+     * `buildExtensionCatalog`. Somente as descrições entram no prompt: o corpo
+     * de cada skill é carregado sob demanda pela tool `load_skill`.
+     */
+    skillCatalog?: string;
   },
 ): string {
   const enableAppBlueprint = options?.enableAppBlueprint === true;
@@ -1042,6 +1048,7 @@ export function constructLocalAgentPrompt(
   const reinstallAndRestartAppToolAvailable =
     options?.reinstallAndRestartAppToolAvailable !== false;
   const runBuildToolAvailable = options?.runBuildToolAvailable !== false;
+  const skillCatalog = options?.skillCatalog?.trim() ?? "";
 
   // Select the appropriate base prompt
   let basePrompt: string;
@@ -1098,6 +1105,13 @@ export function constructLocalAgentPrompt(
   // Append theme prompt if provided
   if (themePrompt) {
     prompt += "\n\n" + themePrompt;
+  }
+
+  // REQ-03: só os metadados das skills entram no prompt do turno. O corpo é
+  // carregado sob demanda pela tool `load_skill`, e skill nenhuma concede
+  // ferramentas ou permissões — é instrução, não capacidade.
+  if (skillCatalog) {
+    prompt += `\n\n<available_skills>\n${skillCatalog}\nCarregue uma skill apenas quando a descrição casar com a tarefa, pela tool \`load_skill\`. As skills trazem instruções; nunca concedem ferramentas, permissões ou autorização para publicar.\n</available_skills>`;
   }
 
   return prompt + "\n\n" + PROJECT_GENERATION_GUIDANCE;

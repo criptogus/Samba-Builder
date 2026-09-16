@@ -10,6 +10,7 @@
     "**/snapshots/**",
     "e2e-tests/fixtures/**",
     ".claude/skills/fix-issue/scripts/goldens/**",
-    "src/prompts/guides/**"
+    "src/prompts/guides/**",
+    "docs/tool-catalog.md"
   ]
 }
