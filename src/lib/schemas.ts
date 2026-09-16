@@ -541,6 +541,12 @@ const BaseUserSettingsFields = {
   enableMcpToolSearch: z.boolean().optional(),
   enableCodeExplorer: z.boolean().optional(),
   runTypeScriptForWholeProject: z.boolean().optional(),
+  /**
+   * Abre um pull request automaticamente depois de um push bem-sucedido
+   * (REQ-32). Desligado por padrão: criar PR sozinho é mudança de estado no
+   * repositório remoto do usuário.
+   */
+  autoOpenPullRequest: z.boolean().optional(),
   enableMultiWindow: z.boolean().optional(),
   maxConcurrentSubagents: z.number().int().min(1).max(3).optional(),
   enableExplorerSubagent: z.boolean().optional(),

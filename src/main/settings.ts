@@ -69,6 +69,7 @@ export const DEFAULT_SETTINGS: UserSettings = {
   enableMcpToolSearch: true,
   enableCodeExplorer: true,
   runTypeScriptForWholeProject: false,
+  autoOpenPullRequest: false,
   enableMultiWindow: false,
   enableExplorerSubagent: true,
   enableAutoReview: false,

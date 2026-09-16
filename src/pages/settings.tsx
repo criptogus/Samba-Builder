@@ -10,6 +10,7 @@ import { useSettings } from "@/hooks/useSettings";
 import { useAppVersion } from "@/hooks/useAppVersion";
 import { BackButton } from "@/components/ui/back-button";
 import { GitHubIntegration } from "@/components/GitHubIntegration";
+import { AutoOpenPullRequestSwitch } from "@/components/AutoOpenPullRequestSwitch";
 import { VercelIntegration } from "@/components/VercelIntegration";
 import { SupabaseIntegration } from "@/components/SupabaseIntegration";
 import { CustomAppsFolderSelector } from "@/components/CustomAppsFolderSelector";
@@ -170,6 +171,9 @@ export default function SettingsPage() {
           >
             <div id={SETTING_IDS.github}>
               <GitHubIntegration />
+            </div>
+            <div id={SETTING_IDS.autoOpenPullRequest}>
+              <AutoOpenPullRequestSwitch />
             </div>
             <div id={SETTING_IDS.vercel}>
               <VercelIntegration />

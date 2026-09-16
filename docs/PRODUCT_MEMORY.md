@@ -101,6 +101,12 @@ Plano que originou estas decisões: [`plans/kilocode-parity-plan.md`](../plans/k
   precisa de gatilho definido (fim do turno? depois de commit e push?) e de ser opt-in — hoje a ação é manual por
   escolha consciente, não por limitação técnica.
 
+- **2026-09-08** — Pull request automático (`REQ-32`) ligado **atrás de uma opção desligada por padrão**
+  (Configurações → Integrações). Gatilho escolhido: **fim de um push bem-sucedido** — não o fim do turno, porque
+  um PR precisa da branch no remoto, e o produto **não** dá push sozinho (auto-push seria outra decisão). Guardas
+  implementadas: nunca na branch padrão, idempotente (PR já aberto é reaproveitado, não duplicado) e melhor esforço
+  — falha ao abrir o PR **não** derruba o push. O link chega ao app por evento e vira aviso com a URL.
+
 ## Escopo (versão atual)
 
 **Dentro:** Fases 0–3 do plano (`REQ-01` a `REQ-15`, mais os incrementos `REQ-20` a `REQ-24` vindos do estudo do
@@ -144,7 +150,7 @@ por decisão de produto) · orquestração tipo Gastown · agentes gerenciados p
 | REQ-29 | Placar de qualidade do Reviewer (precision, F1, tokens, tempo) | Fixture com defeitos plantados produz o placar; regressão de precisão aparece no número | proposto | a definir |
 | REQ-30 | Revisão fora do app via CLI/Action com BYOK | Decisão humana: revisa a exclusão anterior de code reviews de PR, agora que existe caminho sem servidor nosso | proposto (decisão) | a definir |
 | REQ-31 | Pull request da branch atual: abrir e mesclar pela interface | Abrir PR compara a branch atual com a padrão do repositório e devolve o link; merge pede confirmação e falha com o motivo quando o GitHub recusa | entregue (abrir e mesclar manuais) | agente |
-| REQ-32 | Abrir PR automaticamente ao fim de cada tarefa | Decisão humana: exige gatilho (fim do turno ou depois de commit e push) e opt-in explícito, para não criar PR sem o usuário pedir | proposto (decisão) | a definir |
+| REQ-32 | Abrir PR automaticamente depois do push | Opção desligada por padrão; abre PR da branch enviada contra a branch padrão, nunca da padrão para ela mesma, nunca duplicando PR aberto, e falha do PR não derruba o push | entregue | agente |
 
 ### Evidências da Fase 0 (2026-09-08)
 

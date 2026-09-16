@@ -9,6 +9,7 @@ import {
 const handlers = vi.hoisted(() => ({
   disconnect: vi.fn<() => Promise<void>>(),
   push: vi.fn<() => Promise<void>>(),
+  autoPullRequest: vi.fn<() => Promise<unknown>>(),
 }));
 
 vi.mock("../handlers/github_handlers", () => ({
@@ -21,6 +22,8 @@ vi.mock("../handlers/github_handlers", () => ({
   handleGetGitState: vi.fn(),
   handleGetMergeConflicts: vi.fn(),
   handleRebaseFromGithub: vi.fn(),
+  // PR automático (REQ-32): o push não pode depender dele.
+  ensurePullRequestAfterPush: handlers.autoPullRequest,
 }));
 
 vi.mock("../handlers/git_branch_handlers", () => ({
@@ -38,6 +41,8 @@ describe("GithubOpsService lifecycle", () => {
   beforeEach(() => {
     activeRecordings.clear();
     handlers.disconnect.mockReset();
+    handlers.autoPullRequest.mockReset();
+    handlers.autoPullRequest.mockResolvedValue(null);
     handlers.push.mockReset();
   });
 
@@ -135,5 +140,24 @@ describe("GithubOpsService lifecycle", () => {
     await expect(run).resolves.toBeUndefined();
     await settlement;
     expect(settled).toBe(true);
+  });
+
+  it("tenta o pull request automático depois do push", async () => {
+    handlers.push.mockResolvedValue(undefined);
+    const service = new GithubOpsService();
+
+    await service.run(7, { type: "push", mode: "normal" });
+
+    expect(handlers.autoPullRequest).toHaveBeenCalledWith(7);
+  });
+
+  it("não derruba o push quando o pull request automático falha", async () => {
+    handlers.push.mockResolvedValue(undefined);
+    handlers.autoPullRequest.mockRejectedValue(new Error("sem permissão"));
+    const service = new GithubOpsService();
+
+    await expect(
+      service.run(7, { type: "push", mode: "normal" }),
+    ).resolves.toBeUndefined();
   });
 });

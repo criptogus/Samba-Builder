@@ -7,6 +7,9 @@ const github = vi.hoisted(() => ({
   createPullRequest: vi.fn(),
   mergePullRequest: vi.fn(),
   openExternalUrl: vi.fn(),
+  onPullRequestOpened: vi.fn<
+    (callback: (payload: unknown) => void) => () => void
+  >(() => () => {}),
 }));
 const toast = vi.hoisted(() => ({ showSuccess: vi.fn(), showError: vi.fn() }));
 
@@ -18,6 +21,9 @@ vi.mock("@/ipc/types", () => ({
       mergePullRequest: github.mergePullRequest,
     },
     system: { openExternalUrl: github.openExternalUrl },
+    events: {
+      git: { onPullRequestOpened: github.onPullRequestOpened },
+    },
   },
 }));
 vi.mock("@/lib/toast", () => ({
@@ -160,4 +166,48 @@ it("mostra no aviso o erro devolvido pelo GitHub", async () => {
       }),
     ),
   );
+});
+
+type OpenedPayload = {
+  appId: number;
+  number: number;
+  url: string;
+  head: string;
+  base: string;
+};
+
+it("mostra o link quando o PR é aberto automaticamente no push", async () => {
+  github.getPullRequest.mockResolvedValue(null);
+  let emit: ((payload: OpenedPayload) => void) | null = null;
+  github.onPullRequestOpened.mockImplementation((callback) => {
+    emit = callback as (payload: OpenedPayload) => void;
+    return () => {};
+  });
+
+  renderActions();
+  await screen.findByTestId("pull-request-actions");
+
+  emit!({
+    appId: 1,
+    number: 9,
+    url: "https://github.com/acme/app/pull/9",
+    head: "feature/login",
+    base: "main",
+  });
+
+  await vi.waitFor(() =>
+    expect(toast.showSuccess).toHaveBeenCalledWith(
+      "Pull request #9 aberto: https://github.com/acme/app/pull/9",
+    ),
+  );
+
+  // Evento de outro app não vira aviso deste.
+  emit!({
+    appId: 2,
+    number: 10,
+    url: "https://github.com/acme/app/pull/10",
+    head: "outra",
+    base: "main",
+  });
+  expect(toast.showSuccess).toHaveBeenCalledTimes(1);
 });

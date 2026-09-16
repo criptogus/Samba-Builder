@@ -39,6 +39,10 @@ import type {
   MergePullRequestResult,
   PullRequestSummary,
 } from "../types/github";
+import {
+  autoPullRequestTitle,
+  shouldOpenPullRequestAfterPush,
+} from "../services/github/auto_pull_request";
 import { db } from "../../db";
 import { apps } from "../../db/schema";
 import { eq } from "drizzle-orm";
@@ -1472,9 +1476,19 @@ async function handleGetPullRequest(
       SambaErrorKind.Precondition,
     );
   }
+  return findOpenPullRequest({ owner, repo, branch, accessToken });
+}
+
+/** PR aberto da branch, se existir. É o que torna o fluxo automático idempotente. */
+async function findOpenPullRequest(params: {
+  owner: string;
+  repo: string;
+  branch: string;
+  accessToken: string;
+}): Promise<PullRequestSummary | null> {
   const response = await githubApi(
-    `/repos/${owner}/${repo}/pulls?state=open&head=${encodeURIComponent(`${owner}:${branch}`)}`,
-    accessToken,
+    `/repos/${params.owner}/${params.repo}/pulls?state=open&head=${encodeURIComponent(`${params.owner}:${params.branch}`)}`,
+    params.accessToken,
   );
   if (!response.ok) {
     throw new Error(
@@ -1482,6 +1496,62 @@ async function handleGetPullRequest(
     );
   }
   return normalizePullRequestList(response.payload)[0] ?? null;
+}
+
+/**
+ * Pull request automático depois de um push (REQ-32).
+ *
+ * Só roda quando o usuário ligou a opção (desligada por padrão), nunca na
+ * branch padrão e nunca duplicando um PR já aberto. Quem chama está no caminho
+ * de um push que já deu certo: por isso esta função **não** engole erro — mas o
+ * chamador trata como melhor esforço, para um PR que falha não derrubar o push.
+ */
+export async function ensurePullRequestAfterPush(
+  appId: number,
+): Promise<PullRequestSummary | null> {
+  const { appPath, owner, repo, accessToken } =
+    await requireGithubRepoAccess(appId);
+  const branch = await gitCurrentBranch({ path: appPath });
+  const defaultBranch = await readDefaultBranch(owner, repo, accessToken);
+
+  if (
+    !shouldOpenPullRequestAfterPush({
+      enabled: readSettings().autoOpenPullRequest === true,
+      pushedBranch: branch,
+      defaultBranch,
+    })
+  ) {
+    return null;
+  }
+
+  const existing = await findOpenPullRequest({
+    owner,
+    repo,
+    branch: branch!,
+    accessToken,
+  });
+  if (existing) return existing;
+
+  const response = await githubApi(
+    `/repos/${owner}/${repo}/pulls`,
+    accessToken,
+    {
+      method: "POST",
+      body: buildCreatePullRequestBody({
+        title: autoPullRequestTitle(branch!),
+        head: branch!,
+        base: defaultBranch,
+      }),
+    },
+  );
+  if (!response.ok) {
+    const message = githubErrorMessage(response.payload, response.status);
+    if (isExistingPullRequestError(response.status, message)) {
+      return findOpenPullRequest({ owner, repo, branch: branch!, accessToken });
+    }
+    throw new Error(`Failed to create the pull request: ${message}`);
+  }
+  return normalizePullRequest(response.payload);
 }
 
 async function handleCreatePullRequest(

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ExternalLink, GitPullRequestArrow } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -53,10 +53,23 @@ export function GithubPullRequestActions({
     retry: false,
   });
 
-  const invalidate = () =>
-    queryClient.invalidateQueries({
-      queryKey: queryKeys.github.pullRequest(appId),
+  const invalidate = useCallback(
+    () =>
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.github.pullRequest(appId),
+      }),
+    [appId, queryClient],
+  );
+
+  // O PR automático nasce no main (dentro da operação de push), então o link
+  // chega por evento: sem isso o usuário só descobriria abrindo o GitHub.
+  useEffect(() => {
+    return ipc.events.git.onPullRequestOpened((payload) => {
+      if (payload.appId !== appId) return;
+      void invalidate();
+      showSuccess(`Pull request #${payload.number} aberto: ${payload.url}`);
     });
+  }, [appId, invalidate]);
 
   const createMutation = useMutation({
     mutationFn: (params: { title: string }) =>

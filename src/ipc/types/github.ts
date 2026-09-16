@@ -284,6 +284,21 @@ export const gitEvents = {
     channel: "git:commit-progress",
     payload: CommitProgressSchema,
   }),
+  /**
+   * PR aberto automaticamente depois de um push (REQ-32). A ação nasce no main
+   * (dentro da operação de push), então o renderer recebe por evento para poder
+   * mostrar o link sem recarregar nada.
+   */
+  pullRequestOpened: defineEvent({
+    channel: "git:pull-request-opened",
+    payload: z.object({
+      appId: z.number(),
+      number: z.number().int().positive(),
+      url: z.string(),
+      head: z.string(),
+      base: z.string(),
+    }),
+  }),
 } as const;
 
 // =============================================================================

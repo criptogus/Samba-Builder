@@ -2,6 +2,7 @@ import type { IpcMainInvokeEvent } from "electron";
 import { SambaError, SambaErrorKind } from "@/errors/samba_error";
 import type { GithubOperation } from "@/github_ops/state";
 import {
+  ensurePullRequestAfterPush,
   handleAbortRebase,
   handleConnectToExistingRepo,
   handleContinueRebase,
@@ -12,6 +13,9 @@ import {
   handlePushToGithub,
   handleRebaseFromGithub,
 } from "../handlers/github_handlers";
+import { gitEvents } from "../types/github";
+import { broadcastToAllWindows } from "../utils/window_broadcast";
+import log from "electron-log";
 import {
   handleAbortMerge,
   handleCreateBranch,
@@ -150,6 +154,26 @@ export class GithubOpsService {
     await Promise.allSettled(pending);
   }
 
+  /**
+   * Melhor esforço: um PR automático que falha **não** pode derrubar o push que
+   * já deu certo. O link vai por evento para o renderer mostrar na hora.
+   */
+  private async openPullRequestAfterPush(appId: number): Promise<void> {
+    try {
+      const pullRequest = await ensurePullRequestAfterPush(appId);
+      if (!pullRequest) return;
+      broadcastToAllWindows(gitEvents.pullRequestOpened.channel, {
+        appId,
+        number: pullRequest.number,
+        url: pullRequest.url,
+        head: pullRequest.head,
+        base: pullRequest.base,
+      });
+    } catch (error) {
+      log.scope("github_ops").warn("Auto pull request failed:", error);
+    }
+  }
+
   private runUnlocked(appId: number, op: GithubOperation): Promise<void> {
     switch (op.type) {
       case "push":
@@ -157,7 +181,7 @@ export class GithubOpsService {
           appId,
           force: op.mode === "force",
           forceWithLease: op.mode === "lease",
-        });
+        }).then(() => this.openPullRequestAfterPush(appId));
       case "pull":
         return handlePullFromGithub(MAIN_SERVICE_EVENT, { appId });
       case "fetch":
