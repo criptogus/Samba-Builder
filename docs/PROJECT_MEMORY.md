@@ -62,6 +62,8 @@ Diagnóstico de 2026-09-08, em ordem de decisividade:
 
 **Também entregue — estado visível na interface:** `src/main/auto_update_status.ts` guarda o retrato (fase, horário da última verificação concluída, versão nova, erro) e avisa assinantes; `src/main.ts` registra os eventos do `autoUpdater` (`checking-for-update`, `update-available`, `update-not-available`, `update-downloaded`, `error`) e transmite cada mudança pelo evento `system:auto-update-status` — já exposto de graça pelo preload, porque `systemEvents` entra em `getReceiveChannels`. A leitura é o contrato `get-update-status` (schema em `src/ipc/types/system.ts`, handler em `app_handlers.ts`), exibido por `src/components/AutoUpdateStatus.tsx` na seção de auto-update em Configurações: a versão instalada vem de `useAppVersion()` e o resto da consulta + evento.
 
+**Para substituir o app instalado enquanto o OTA não fecha:** `docs/update-runbook.md` — qual comando gera o artefato certo (`npm run make`, assinado), por que `desktop:build` **não** serve para o Mac mini (pacote local sem assinatura, aponta para o `userData` do repo) e por que `npm run build` (build de E2E) nunca deve virar artefato de distribuição.
+
 ## Mapa da integração com GitHub (interface e main)
 
 - **Interface:** `src/components/GitHubConnector.tsx` (conectar repo/org), `GitHubIntegration.tsx` (conectar/desconectar conta), `GithubBranchManager.tsx` (branches: criar, trocar, renomear, deletar, pull), `GithubCollaboratorManager.tsx` (colaboradores), `chat/CommitDialogActions.tsx` + `chat/CommitButtonLabel.tsx` (fluxo de commit do chat) e `GithubPullRequestActions.tsx` (pull request da branch atual — REQ-31).
