@@ -659,6 +659,7 @@ export default function AppDetailsPage() {
                           <Button
                             variant="ghost"
                             size="icon"
+                            aria-label="Show in folder"
                             className="ml-[-8px] p-0.5 h-auto cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
                             onClick={() => {
                               ipc.system.showItemInFolder(currentAppPath);
