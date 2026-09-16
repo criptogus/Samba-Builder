@@ -3,6 +3,7 @@ import { useAddPromptDeepLink } from "@/hooks/useAddPromptDeepLink";
 import { CreatePromptDialog } from "@/components/CreatePromptDialog";
 import { LibraryCard } from "@/components/LibraryCard";
 import { NativeSkillsLibrary } from "@/components/NativeSkillsLibrary";
+import { ProjectExtensions } from "@/components/ProjectExtensions";
 
 export default function LibraryPage() {
   const { prompts, isLoading, createPrompt, updatePrompt, deletePrompt } =
@@ -25,6 +26,7 @@ export default function LibraryPage() {
         </div>
 
         <NativeSkillsLibrary />
+        <ProjectExtensions />
         <h2 className="text-xl font-semibold mb-4">Meus prompts</h2>
         {isLoading ? (
           <div>Loading...</div>

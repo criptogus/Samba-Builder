@@ -28,6 +28,15 @@ Plano que originou estas decisões: [`plans/kilocode-parity-plan.md`](../plans/k
   (`execute_sandbox_script`) + `run_repo_command` restrito a verificação é decisão de segurança, não lacuna.
 - **2026-09-08** — Enforcement de permissões sempre no processo main (`registerTrustedIpcHandler`), nunca na UI.
   Motivo: qualquer regra aplicada só no renderer é bypass.
+- **2026-09-08** — **Fase 0 entregue** (`REQ-01`, `REQ-02`): núcleo de extensões declarativas em
+  `src/shared/extensions.ts` + `src/ipc/services/extensions/`, contrato `extensions:list` e seção
+  "Extensões do projeto" na Library. Motivo: skills sob demanda (REQ-03), workflows (REQ-04) e agentes
+  custom (REQ-06) dependem deste núcleo. Escopos: projeto em `<app>/.samba/{skills,commands,agents}` e
+  usuário em `<userData>/extensions/{skills,commands,agents}`; projeto substitui usuário **com aviso**;
+  link simbólico é ignorado; conteúdo inválido vira aviso, nunca quebra a listagem.
+- **2026-09-08** — `@testing-library/dom` passa a ser declarado em `devDependencies`. Motivo: é peer de
+  `@testing-library/react` e não estava no `package.json` deste fork, o que quebrava **todos** os testes de
+  componente (falha pré-existente, reproduzida em `NativeSkillsLibrary.test.tsx` antes da correção).
 
 ## Escopo (versão atual)
 
@@ -44,8 +53,8 @@ por decisão de produto) · orquestração tipo Gastown · agentes gerenciados p
 
 | ID | Requisito | Aceite (resumo) | Status | Dono |
 |----|-----------|-----------------|--------|------|
-| REQ-01 | Núcleo de extensões declarativas (descoberta por escopo projeto/usuário + validação) | Extensões válidas listadas; frontmatter inválido ignorado com log e sem quebrar o app | proposto | a definir |
-| REQ-02 | Contrato IPC + estado das extensões com enforcement no main | Payload inválido do renderer rejeitado com `SambaError` | proposto | a definir |
+| REQ-01 | Núcleo de extensões declarativas (descoberta por escopo projeto/usuário + validação) | Extensões válidas listadas; frontmatter inválido ignorado com log e sem quebrar o app | entregue | agente |
+| REQ-02 | Contrato IPC + estado das extensões com enforcement no main | Payload inválido do renderer rejeitado com `SambaError` | entregue (listagem) | agente |
 | REQ-03 | Skills sob demanda por `description` (além do slash atual `/samba-*`) | Skill de projeto entra no contexto sem slash, só na etapa relevante; escopo por modo respeitado; skill de terceiro não ganha tools | proposto | a definir |
 | REQ-04 | Workflows: slash commands de projeto/usuário com frontmatter | `/comando` injeta instrução e respeita `agent`; comando inexistente não altera o prompt | proposto | a definir |
 | REQ-05 | Permissões declarativas `allow`/`ask`/`deny` + "aprovar sempre" + `external_directory` | `edit: {"*.env": deny}` bloqueia no main, com erro recuperável e mostra a regra; "aprovar sempre" persiste | proposto | a definir |
@@ -59,6 +68,16 @@ por decisão de produto) · orquestração tipo Gastown · agentes gerenciados p
 | REQ-13 | Agent Manager (sessões paralelas em worktrees + diff) | Sessões isoladas em worktrees, diff vs. branch pai visível | proposto | a definir |
 | REQ-14 | Enhance prompt | Prompt reescrito antes do envio, com prévia e opção de desfazer | proposto | a definir |
 | REQ-15 | Geração de mensagem de commit | Mensagem clara no padrão conventional commits, revisável antes de commitar | proposto | a definir |
+
+### Evidências da Fase 0 (2026-09-08)
+
+- `npx vitest run src/ipc/services/extensions src/components/ProjectExtensions.test.tsx src/components/NativeSkillsLibrary.test.tsx`
+  → **24 testes verdes em 4 arquivos** (9 descoberta, 10 frontmatter, 3 componente, 2 pré-existentes reparados).
+- `oxfmt --check` e `oxlint` sem avisos nos 13 arquivos tocados.
+- Type-check focado nos arquivos novos: 0 erros. `npm run ts` global ainda falha **apenas** em
+  `testing/fake-llm-server/*` por falta de `@types/express` — pré-requisito de ambiente já documentado no
+  `AGENTS.md` (rodar `npm install` dentro de `testing/fake-llm-server/`), não relacionado a esta fase.
+- Ainda **não** coberto: autoria/instalação de extensão pela UI (entra em REQ-03/REQ-12) e E2E da Library.
 
 Já existentes (não são requisitos novos): context condensing/compaction, todo list na UI, voice-to-text,
 catálogo MCP, consumo de `AI_RULES.md`, undo/redo git por chat.

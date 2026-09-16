@@ -23,7 +23,7 @@ Fork do Dyad: app desktop Electron que gera e roda apps com agentes de IA.
 | Evals | `npm run eval` |
 | Deps | `npm audit --audit-level=high` |
 
-**Estado da importação:** `node_modules/` ausente; sem `.env`/`.env.test`. Nenhum comando de build/teste pode rodar antes de `npm ci`; o `npm audit` funcionou a partir do `package-lock.json`.
+**Estado da importação:** `node_modules/` instalado. O install da plataforma usa `--legacy-peer-deps`, então **peer dependency não declarada no `package.json` não é instalada** (foi a causa de dois bloqueios reais: `@lexical/utils` no build do renderer e `@testing-library/dom` em todos os testes de componente). Sem `.env`/`.env.test`. O `engines.node` foi relaxado para `>=22 <26` porque o ambiente roda Node 22 e o `.npmrc` tem `engine-strict=true`. Vitest e `npm test` rodam; `npm run ts` falha em `testing/fake-llm-server/*` por falta de `@types/express` até rodar `npm install` dentro dessa pasta (ver `AGENTS.md`).
 
 ## Convenções observadas
 
@@ -51,5 +51,5 @@ Defesas verificadas: trust guard de IPC, allowlist de canais no preload, contrat
 
 ## Pendências desta importação
 
-- Instalar dependências (`npm ci`) e rodar `npm run presubmit`, `npm run ts`, `npm test` para estabelecer a linha de base verde/vermelha.
+- Estabelecer a linha de base completa: rodar `npm run ts` (bloqueado pelo item acima) e `npm test` integral; a suíte completa ainda não foi executada de ponta a ponta nesta máquina.
 - Não revisado a fundo nesta sessão: scripts Python (`samba/`), NATIVE (`native/keychain-reader`), `scaffold/`, histórico git (scan de segredos só na árvore de trabalho).

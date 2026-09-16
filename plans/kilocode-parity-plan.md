@@ -60,6 +60,14 @@ Legenda: **TEMOS** (não fazer nada) · **PARCIAL** (estender o que existe) · *
 
 ### Fase 0 — Fundação de extensibilidade (P0, ~1 semana)
 
+> **Status (2026-09-08): implementada.** `REQ-01` e `REQ-02` entregues: tipos e validação em
+> `src/shared/extensions.ts`, descoberta em `src/ipc/services/extensions/` (frontmatter + discovery),
+> contrato `extensions:list` (`src/ipc/types/extensions.ts`), handler
+> (`src/ipc/handlers/extensions_handlers.ts`) e a seção "Extensões do projeto" na Library
+> (`src/components/ProjectExtensions.tsx`). 24 testes verdes. O que **ainda não** existe desta fase:
+> instalar/remover extensão pela UI (depende de REQ-03/REQ-12) e persistência em banco (desnecessária:
+> o disco é a fonte da verdade, como no Kilo).
+
 **Por que primeiro:** três itens P0 (skills sob demanda, workflows, custom agents) dependem do **mesmo núcleo**:
 descobrir arquivos declarativos por escopo, validar, e injetar no prompt quando (e só quando) fizer sentido.
 Fazer isso uma vez evita três implementações divergentes.

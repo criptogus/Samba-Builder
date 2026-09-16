@@ -126,6 +126,13 @@ export {
   distributedMachineContracts,
   distributedMachineEvents,
 } from "./distributed_machines";
+export { extensionContracts } from "./extensions";
+export type {
+  ExtensionEntry,
+  ExtensionKind,
+  ExtensionScope,
+  ExtensionWarning,
+} from "../../shared/extensions";
 
 // =============================================================================
 // Client Exports
@@ -187,6 +194,7 @@ export {
   distributedMachineClient,
   distributedMachineEventClient,
 } from "./distributed_machines";
+export { extensionClient } from "./extensions";
 export {
   recordingClient,
   recordingContracts,
@@ -601,6 +609,7 @@ import {
   distributedMachineClient,
   distributedMachineEventClient,
 } from "./distributed_machines";
+import { extensionClient } from "./extensions";
 
 /**
  * Unified IPC client with all domains organized by namespace.
@@ -683,6 +692,7 @@ export const ipc = {
   firstPrompt: firstPromptClient,
   windowInfrastructure: windowInfrastructureClient,
   distributedMachine: distributedMachineClient,
+  extensions: extensionClient,
   imageGeneration: imageGenerationClient,
   previewView: {
     ...previewViewClient,

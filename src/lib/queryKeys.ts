@@ -23,6 +23,11 @@ export const queryKeys = {
     status: ["native-agents", "status"] as const,
     run: (id?: string) => ["native-agents", "run", id] as const,
   },
+  extensions: {
+    all: ["extensions"] as const,
+    list: ({ appId }: { appId?: number }) =>
+      ["extensions", "list", appId ?? null] as const,
+  },
   subagents: {
     all: ["subagents"] as const,
     byChat: ({ chatId }: { chatId: number }) => ["subagents", chatId] as const,
@@ -562,6 +567,7 @@ export type AppQueryKey =
       (typeof queryKeys.appUpgrades)[keyof typeof queryKeys.appUpgrades]
     >
   | QueryKeyOf<(typeof queryKeys.mcp)[keyof typeof queryKeys.mcp]>
+  | QueryKeyOf<(typeof queryKeys.extensions)[keyof typeof queryKeys.extensions]>
   | QueryKeyOf<(typeof queryKeys.supabase)[keyof typeof queryKeys.supabase]>
   | QueryKeyOf<(typeof queryKeys.github)[keyof typeof queryKeys.github]>
   | QueryKeyOf<(typeof queryKeys.migration)[keyof typeof queryKeys.migration]>
