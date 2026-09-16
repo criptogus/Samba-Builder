@@ -77,6 +77,7 @@ import { sameInvocationRef } from "@/state_machines/invocation_ref";
 import { userInputRegistry } from "@/user_input/main";
 import { clearLegacyWindowSessionPersistence } from "@/window_infrastructure/main/window_session";
 import { appRelaunchRequest } from "@/main/app_relaunch_request";
+import { getAutoUpdateStatus } from "@/main/auto_update_status";
 import { deleteTempTestUser } from "../utils/supabase_test_user";
 import {
   blockSubagentAdmissionsForChat,
@@ -2035,6 +2036,10 @@ export function registerAppHandlers() {
       versionPreviewService.endReset();
     }
   });
+
+  createTypedHandler(systemContracts.getUpdateStatus, async () =>
+    getAutoUpdateStatus(),
+  );
 
   createTypedHandler(systemContracts.getAppVersion, async () => {
     // Read version from package.json at project root

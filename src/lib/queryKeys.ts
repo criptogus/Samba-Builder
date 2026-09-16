@@ -43,6 +43,7 @@ export const queryKeys = {
   system: {
     all: ["system"] as const,
     appVersion: ["system", "appVersion"] as const,
+    updateStatus: ["system", "updateStatus"] as const,
     nodejsStatus: ["system", "nodejsStatus"] as const,
     nativeTheme: ["system", "nativeTheme"] as const,
     platform: ["system", "platform"] as const,

@@ -24,6 +24,7 @@ import { AutoExpandPreviewSwitch } from "@/components/AutoExpandPreviewSwitch";
 import { KeepPreviewsRunningSwitch } from "@/components/KeepPreviewsRunningSwitch";
 import { ChatEventNotificationSwitch } from "@/components/ChatEventNotificationSwitch";
 import { AutoUpdateSwitch } from "@/components/AutoUpdateSwitch";
+import { AutoUpdateStatus } from "@/components/AutoUpdateStatus";
 import { ReleaseChannelSelector } from "@/components/ReleaseChannelSelector";
 import { NeonIntegration } from "@/components/NeonIntegration";
 import { RuntimeModeSelector } from "@/components/RuntimeModeSelector";
@@ -450,6 +451,7 @@ export function GeneralSettings({ appVersion }: { appVersion: string | null }) {
           This will automatically update the app when new versions are
           available.
         </p>
+        <AutoUpdateStatus />
       </div>
 
       <div id={SETTING_IDS.releaseChannel}>

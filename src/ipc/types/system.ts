@@ -203,6 +203,24 @@ export type NativeThemeState = z.infer<typeof NativeThemeStateSchema>;
 // System Contracts
 // =============================================================================
 
+/** Estado da última verificação de atualização (ver `src/main/auto_update_status.ts`). */
+export const AutoUpdateStatusSchema = z.object({
+  enabled: z.boolean(),
+  phase: z.enum([
+    "disabled",
+    "checking",
+    "up-to-date",
+    "update-available",
+    "downloading",
+    "downloaded",
+    "error",
+  ]),
+  lastCheckedAt: z.string().nullable(),
+  version: z.string().nullable(),
+  message: z.string().nullable(),
+});
+export type AutoUpdateStatusSnapshot = z.infer<typeof AutoUpdateStatusSchema>;
+
 export const systemContracts = {
   // Window controls
   minimizeWindow: defineContract({
@@ -263,6 +281,12 @@ export const systemContracts = {
     channel: "get-app-version",
     input: z.void(),
     output: z.object({ version: z.string() }),
+  }),
+
+  getUpdateStatus: defineContract({
+    channel: "get-update-status",
+    input: z.void(),
+    output: AutoUpdateStatusSchema,
   }),
 
   // Node.js
@@ -435,6 +459,12 @@ export const systemEvents = {
   managedNodeInstallProgress: defineEvent({
     channel: "managed-node:install-progress",
     payload: ManagedNodeInstallProgressSchema,
+  }),
+
+  /** A verificação de atualização mudou de estado (main → renderer). */
+  autoUpdateStatus: defineEvent({
+    channel: "auto-update:status",
+    payload: AutoUpdateStatusSchema,
   }),
 } as const;
 

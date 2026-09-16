@@ -50,6 +50,13 @@ import {
 import { handleSupabaseOAuthReturn } from "./supabase_admin/supabase_return_handler";
 import { handleSambaProReturn } from "./main/pro";
 import { IS_TEST_BUILD } from "./ipc/utils/test_utils";
+import { broadcastToAllWindows } from "./ipc/utils/window_broadcast";
+import { systemEvents } from "./ipc/types/system";
+import {
+  onAutoUpdateStatusChange,
+  recordAutoUpdateCheck,
+  recordAutoUpdateStatus,
+} from "./main/auto_update_status";
 import { BackupManager } from "./backup_manager";
 import { db, getDatabasePath, initializeDatabase } from "./db";
 import { apps } from "./db/schema";
@@ -661,17 +668,50 @@ export async function onReady() {
   });
 
   logger.info("Auto-update enabled=", settings.enableAutoUpdate);
-  if (
-    shouldEnableAutoUpdate({
-      enableAutoUpdate: settings.enableAutoUpdate,
-      isPackaged: app.isPackaged,
-      isTestBuild: IS_TEST_BUILD,
-    })
-  ) {
+  const autoUpdateEnabled = shouldEnableAutoUpdate({
+    enableAutoUpdate: settings.enableAutoUpdate,
+    isPackaged: app.isPackaged,
+    isTestBuild: IS_TEST_BUILD,
+  });
+  // O estado é publicado mesmo quando desligado: a interface precisa poder
+  // dizer "atualização automática desligada" em vez de "nunca verificado".
+  recordAutoUpdateStatus({ enabled: autoUpdateEnabled });
+  if (autoUpdateEnabled) {
+    // Cada estado do updater vira um retrato que a interface mostra, e toda
+    // mudança é transmitida para a janela aberta.
+    onAutoUpdateStatusChange((status) => {
+      broadcastToAllWindows(systemEvents.autoUpdateStatus.channel, status);
+    });
+    autoUpdater.on("checking-for-update", () =>
+      recordAutoUpdateStatus({
+        enabled: true,
+        phase: "checking",
+        message: null,
+      }),
+    );
+    autoUpdater.on("update-available", () =>
+      recordAutoUpdateCheck({ enabled: true, phase: "update-available" }),
+    );
+    autoUpdater.on("update-not-available", () =>
+      recordAutoUpdateCheck({ enabled: true, phase: "up-to-date" }),
+    );
+    autoUpdater.on("update-downloaded", (_event, _notes, releaseName) =>
+      recordAutoUpdateCheck({
+        enabled: true,
+        phase: "downloaded",
+        version:
+          typeof releaseName === "string" && releaseName ? releaseName : null,
+      }),
+    );
     // Falha de update tem de aparecer em nível de erro: o coletor de bug report
     // descarta linhas [info] e sobrariam só caudas de stack (rules/auto-update.md).
     autoUpdater.on("error", (error) => {
       logger.error("Auto-update error:", error);
+      recordAutoUpdateCheck({
+        enabled: true,
+        phase: "error",
+        message: error instanceof Error ? error.message : String(error),
+      });
     });
     updateElectronApp({
       repo: AUTO_UPDATE_REPO,
