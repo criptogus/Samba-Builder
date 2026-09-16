@@ -70,6 +70,8 @@ Diagnóstico de 2026-09-08, em ordem de decisividade:
 
 **Release notes (2026-09-08):** o app **não** lê nota de arquivo — `doesReleaseNoteExist` faz `HEAD` em `github.com/criptogus/Samba-Builder/releases/tag/v<versão>` e abre a página. Então a nota é o **corpo da release**: vive versionada em `docs/releases/v<versão>.md` e o job `publish` a anexa com `gh release edit --notes-file` **antes** de tirar o draft (passo "Attach release notes"). Sem o arquivo, a release sai sem descrição e o log avisa — não falha. `src/__tests__/release_workflow.test.ts` exige que exista nota para a versão atual do `package.json`, então bump sem nota quebra o teste (era o que faltava para "preparar a nota antes da tag").
 
+**Instalar na própria máquina (2026-09-08):** `npm run desktop:install` (`scripts/install-desktop.mjs`) copia o pacote de `out/desktop` (gerado por `desktop:build`) para `~/Applications` por padrão, com `--destination` para trocar; recusa quando o pacote não existe (aponta `desktop:build`) e quando origem e destino coincidem. `desktopPackageDir` foi extraído de `scripts/start-desktop.mjs` para os dois scripts compartilharem o caminho do pacote. Teste em `scripts/install-desktop.test.mjs` — **adicionado à lista do `npm test`** (lista explícita de arquivos `node --test`; esquecer isso deixa o teste fora do CI).
+
 ## Mapa da integração com GitHub (interface e main)
 
 - **Interface:** `src/components/GitHubConnector.tsx` (conectar repo/org), `GitHubIntegration.tsx` (conectar/desconectar conta), `GithubBranchManager.tsx` (branches: criar, trocar, renomear, deletar, pull), `GithubCollaboratorManager.tsx` (colaboradores), `chat/CommitDialogActions.tsx` + `chat/CommitButtonLabel.tsx` (fluxo de commit do chat) e `GithubPullRequestActions.tsx` (pull request da branch atual — REQ-31).
@@ -105,14 +107,14 @@ decisão do humano) não começaram.
 
 ## Comandos de verificação (do próprio repo)
 
-| Objetivo | Comando |
-| --- | --- |
-| Tipos | `npm run ts` (tsgo no app + tsc nos workers) |
-| Lint/format | `npm run presubmit` (`oxfmt --check` + `oxlint --fix`) |
-| Unit | `npm test` (node --test dos scripts + `vitest run`) |
-| E2E | `npm run pre:e2e` (build E2E) → `npm run e2e` (Playwright, 4 shards no CI) |
-| Evals | `npm run eval` |
-| Deps | `npm audit --audit-level=high` |
+| Objetivo    | Comando                                                                    |
+| ----------- | -------------------------------------------------------------------------- |
+| Tipos       | `npm run ts` (tsgo no app + tsc nos workers)                               |
+| Lint/format | `npm run presubmit` (`oxfmt --check` + `oxlint --fix`)                     |
+| Unit        | `npm test` (node --test dos scripts + `vitest run`)                        |
+| E2E         | `npm run pre:e2e` (build E2E) → `npm run e2e` (Playwright, 4 shards no CI) |
+| Evals       | `npm run eval`                                                             |
+| Deps        | `npm audit --audit-level=high`                                             |
 
 **Estado da importação:** `node_modules/` instalado. O install da plataforma usa `--legacy-peer-deps`, então **peer dependency não declarada no `package.json` não é instalada** (foi a causa de dois bloqueios reais: `@lexical/utils` no build do renderer e `@testing-library/dom` em todos os testes de componente). Sem `.env`/`.env.test`. O `engines.node` foi relaxado para `>=22 <26` porque o ambiente roda Node 22 e o `.npmrc` tem `engine-strict=true`. Vitest e `npm test` rodam; `npm run ts` falha em `testing/fake-llm-server/*` por falta de `@types/express` até rodar `npm install` dentro dessa pasta (ver `AGENTS.md`).
 

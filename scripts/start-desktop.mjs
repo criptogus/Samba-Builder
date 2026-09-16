@@ -3,8 +3,13 @@ import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
+/** Pasta do pacote local (`out/desktop/<Nome>-<plataforma>-<arch>`). */
+export function desktopPackageDir(root, name, platform, arch) {
+  return path.join(root, "out", "desktop", `${name}-${platform}-${arch}`);
+}
+
 export function desktopExecutable(root, name, platform, arch) {
-  const base = path.join(root, "out", "desktop", `${name}-${platform}-${arch}`);
+  const base = desktopPackageDir(root, name, platform, arch);
   if (platform === "darwin") {
     return path.join(base, `${name}.app`, "Contents", "MacOS", name);
   }

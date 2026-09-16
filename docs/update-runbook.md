@@ -5,16 +5,33 @@ Vale enquanto o auto-update (OTA) não estiver funcionando de ponta a ponta. Ele
 
 ## Antes de tudo: qual build instalar
 
-| Comando | O que sai | Serve para o Mac mini? |
-| --- | --- | --- |
-| `npm run desktop:build` | pacote **local** em `out/desktop`, **sem assinatura**, com `sambaLocalUserDataPath` apontando para o `userData` do repositório | **Não.** É build de desenvolvimento: usaria um perfil que vive dentro do repo. |
-| `npm run make` | instaladores/zip em `out/make`, assinado e notarizado | **Sim** — é o artefato de distribuição. |
-| `npm run package` | app empacotado (sem os makers) | Só se você souber o que está fazendo; o caminho normal é `make`. |
-| `npm run build` | build de **E2E** (`pre:e2e`) | Não. É build de teste (ignora lock de instância, ativa modo de teste). |
+| Comando                 | O que sai                                                                                                                      | Serve para o Mac mini?                                                                                                                                                                                                    |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `npm run desktop:build` | pacote **local** em `out/desktop`, **sem assinatura**, com `sambaLocalUserDataPath` apontando para o `userData` do repositório | Para **distribuir** no Mac mini, **não** (perfil que vive dentro do repo + sem assinatura). Para **instalar nesta máquina**, sim — é o caminho sem credenciais Apple: `npm run desktop:build && npm run desktop:install`. |
+| `npm run make`          | instaladores/zip em `out/make`, assinado e notarizado                                                                          | **Sim** — é o artefato de distribuição.                                                                                                                                                                                   |
+| `npm run package`       | app empacotado (sem os makers)                                                                                                 | Só se você souber o que está fazendo; o caminho normal é `make`.                                                                                                                                                          |
+| `npm run build`         | build de **E2E** (`pre:e2e`)                                                                                                   | Não. É build de teste (ignora lock de instância, ativa modo de teste).                                                                                                                                                    |
 
 `make` e `package` exigem credenciais Apple (`APPLE_ID`, `APPLE_PASSWORD`, `APPLE_TEAM_ID`): em build que não é
 local o `forge.config.ts` liga assinatura e notarização com `continueOnError: false`, então **sem credencial o
 build falha** em vez de sair sem assinatura — de propósito.
+
+## Instalar nesta máquina (sem credenciais Apple)
+
+Para usar o produto no dia a dia na própria máquina de desenvolvimento, o pacote local basta:
+
+```sh
+npm run desktop:build      # gera out/desktop sem assinatura (dispensa credenciais)
+npm run desktop:install    # copia o app para ~/Applications
+```
+
+- Destino padrão é `~/Applications` (não exige senha de administrador); use
+  `npm run desktop:install -- --destination /Applications` se preferir o diretório do sistema.
+- O pacote **não é assinado nem notarizado**: o macOS pode pedir confirmação no primeiro lançamento. Para
+  distribuir para outras máquinas (Mac mini), o caminho é o release assinado (`npm run make`).
+- Feche o Samba Builder antes: o app recusa uma segunda instância e a cópia pode falhar com o app aberto.
+- Este pacote mantém o perfil de dados do repositório (`userData` dentro do repo) — é o desejado para a máquina
+  de desenvolvimento; o release assinado usa o perfil do sistema.
 
 ## Substituir o app instalado
 
