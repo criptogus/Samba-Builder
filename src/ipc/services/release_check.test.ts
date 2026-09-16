@@ -3,9 +3,71 @@ import { describe, expect, it, vi } from "vitest";
 import {
   checkForRelease,
   compareVersions,
+  describeReleaseCheck,
   pickReleaseAsset,
   selectLatestRelease,
 } from "./release_check";
+
+describe("describeReleaseCheck", () => {
+  const base = {
+    currentVersion: "1.14.0-beta.3",
+    latestVersion: "1.14.0-beta.3",
+    releaseUrl: "https://example.test/rel",
+    assetName: "SambaBuilder-1.14.0-beta.3-arm64.zip",
+    reason: null,
+  };
+
+  it("em pt-BR oferece baixar quando há versão nova", () => {
+    const content = describeReleaseCheck(
+      { ...base, status: "update-available", latestVersion: "1.14.0-beta.4" },
+      "pt-BR",
+    );
+    expect(content.title).toBe("Nova versão disponível");
+    expect(content.buttons[content.downloadButtonIndex]).toBe("Baixar");
+    expect(content.message).toContain("1.14.0-beta.4");
+  });
+
+  it("em inglês não mistura idioma", () => {
+    const content = describeReleaseCheck(
+      { ...base, status: "update-available", latestVersion: "1.14.0-beta.4" },
+      "en-US",
+    );
+    expect(content.title).toBe("New version available");
+    expect(content.buttons[content.downloadButtonIndex]).toBe("Download");
+  });
+
+  it("quando está atualizado não oferece download", () => {
+    const content = describeReleaseCheck(
+      { ...base, status: "up-to-date" },
+      "pt-BR",
+    );
+    expect(content.downloadButtonIndex).toBe(-1);
+    expect(content.message).toContain("1.14.0-beta.3");
+  });
+
+  it("explica o motivo quando não deu para verificar", () => {
+    const semAcesso = describeReleaseCheck(
+      { ...base, status: "unavailable", reason: "no-access" },
+      "pt-BR",
+    );
+    expect(semAcesso.type).toBe("warning");
+    expect(semAcesso.detail).toContain("GitHub");
+
+    const semRede = describeReleaseCheck(
+      { ...base, status: "unavailable", reason: "network" },
+      "en",
+    );
+    expect(semRede.detail).toContain("connection");
+  });
+
+  it("não quebra com motivo desconhecido", () => {
+    const content = describeReleaseCheck(
+      { ...base, status: "unavailable", reason: "http-500" },
+      "pt-BR",
+    );
+    expect(content.detail).toContain("http-500");
+  });
+});
 
 const ASSETS = [
   "SambaBuilder-1.14.0-beta.2-arm64.zip",

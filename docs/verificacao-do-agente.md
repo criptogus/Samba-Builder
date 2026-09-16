@@ -4,9 +4,9 @@
 
 O agente local **já é instruído** a verificar o que escreve:
 
-- `src/prompts/local_agent_prompt.ts:310` — *"After making code changes, use `run_type_checks` to verify that the changes are correct"*.
-- `local_agent_prompt.ts:633` — *"Verify with the repo's own commands: before and after every change, run the repository's real verification (its test command and its type/lint command) — never leave the repo in a broken state, even mid-task"*.
-- `local_agent_prompt.ts:643` — *"Execute in verifiable batches… after each batch run the repo's real verification"*.
+- `src/prompts/local_agent_prompt.ts:310` — _"After making code changes, use `run_type_checks` to verify that the changes are correct"_.
+- `local_agent_prompt.ts:633` — _"Verify with the repo's own commands: before and after every change, run the repository's real verification (its test command and its type/lint command) — never leave the repo in a broken state, even mid-task"_.
+- `local_agent_prompt.ts:643` — _"Execute in verifiable batches… after each batch run the repo's real verification"_.
 
 E as ferramentas existem: `run_type_checks`, `run_repo_command`, `run_build` (ver `tools/run_type_checks.ts` e `tools/run_repo_command.ts`). As mensagens de falha dessas ferramentas já empurram o modelo a corrigir e rodar de novo.
 
@@ -16,14 +16,14 @@ Consequência prática: erro entra no repositório e só aparece depois (num CI,
 
 ## O que já existe e serve de base
 
-| Peça | Onde | Serve para |
-|---|---|---|
-| Ferramenta de typecheck com mensagens de correção | `tools/run_type_checks.ts` | executar o check e devolver erro acionável |
-| Ferramenta de comando do repositório | `tools/run_repo_command.ts` | rodar o comando real do projeto |
-| Flag por app | `chat.app.testingEnabled` (`local_agent_handler.ts:966`) | saber se o projeto tem testes |
-| Aviso de limite de passos | `local_agent_handler.ts:2119-2130` | **modelo exato** de XML pós-turno persistido |
-| Coleta de XML pós-turno | `local_agent_handler.ts:2106` (`postTurnXmlParts`) | ponto de inserção |
-| Padrão de entrega com evidência | `src/delivery/*`, tabelas `project_deliveries` / `project_delivery_approvals` | onde declarar o estado da verificação |
+| Peça                                              | Onde                                                                          | Serve para                                   |
+| ------------------------------------------------- | ----------------------------------------------------------------------------- | -------------------------------------------- |
+| Ferramenta de typecheck com mensagens de correção | `tools/run_type_checks.ts`                                                    | executar o check e devolver erro acionável   |
+| Ferramenta de comando do repositório              | `tools/run_repo_command.ts`                                                   | rodar o comando real do projeto              |
+| Flag por app                                      | `chat.app.testingEnabled` (`local_agent_handler.ts:966`)                      | saber se o projeto tem testes                |
+| Aviso de limite de passos                         | `local_agent_handler.ts:2119-2130`                                            | **modelo exato** de XML pós-turno persistido |
+| Coleta de XML pós-turno                           | `local_agent_handler.ts:2106` (`postTurnXmlParts`)                            | ponto de inserção                            |
+| Padrão de entrega com evidência                   | `src/delivery/*`, tabelas `project_deliveries` / `project_delivery_approvals` | onde declarar o estado da verificação        |
 
 ## Desenho proposto
 

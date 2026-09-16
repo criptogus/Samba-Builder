@@ -7,6 +7,7 @@ import {
   net,
   nativeImage,
   crashReporter,
+  shell,
   type Event as ElectronEvent,
 } from "electron";
 import * as path from "node:path";
@@ -14,6 +15,10 @@ import { randomUUID } from "node:crypto";
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
 import { registerIpcHandlers } from "./ipc/ipc_host";
+import {
+  checkForRelease,
+  describeReleaseCheck,
+} from "./ipc/services/release_check";
 import dotenv from "dotenv";
 // Samba Builder: sem auto-update (o update-electron-app consultava o backend
 // do Samba) — o import foi removido.
@@ -1299,6 +1304,36 @@ const createApplicationMenu = () => {
             label: app.name,
             submenu: [
               { role: "about" as const },
+              { type: "separator" as const },
+              // Onde as pessoas procuram: sem este item, a checagem de versão
+              // existia só como uma linha em Configurações.
+              {
+                label: app.getLocale().toLowerCase().startsWith("pt")
+                  ? "Verificar atualizações…"
+                  : "Check for Updates…",
+                click: async () => {
+                  const result = await checkForRelease({
+                    currentVersion: app.getVersion(),
+                    token: readSettings().githubAccessToken?.value ?? null,
+                  });
+                  const content = describeReleaseCheck(result, app.getLocale());
+                  const { response } = await dialog.showMessageBox({
+                    type: content.type,
+                    title: content.title,
+                    message: content.message,
+                    detail: content.detail,
+                    buttons: content.buttons,
+                    defaultId: 0,
+                    cancelId: content.buttons.length - 1,
+                  });
+                  if (
+                    response === content.downloadButtonIndex &&
+                    result.releaseUrl
+                  ) {
+                    void shell.openExternal(result.releaseUrl);
+                  }
+                },
+              },
               { type: "separator" as const },
               { role: "services" as const },
               { type: "separator" as const },

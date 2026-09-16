@@ -248,3 +248,90 @@ export async function checkForRelease({
     };
   }
 }
+
+export interface UpdateDialogContent {
+  type: "info" | "warning";
+  title: string;
+  message: string;
+  detail: string;
+  buttons: string[];
+  /** Índice do botão que abre o download; −1 quando não há o que baixar. */
+  downloadButtonIndex: number;
+}
+
+const UNAVAILABLE_REASON: Record<string, { pt: string; en: string }> = {
+  "no-access": {
+    pt: "O repositório de releases exige credencial e o app não tem uma configurada. Conecte sua conta do GitHub em Configurações para que a checagem funcione.",
+    en: "The releases repository requires credentials and none is configured. Connect your GitHub account in Settings so the check can work.",
+  },
+  "rate-limit": {
+    pt: "O GitHub recusou a consulta por limite de requisições. Tente de novo em alguns minutos.",
+    en: "GitHub refused the request due to rate limiting. Try again in a few minutes.",
+  },
+  timeout: {
+    pt: "A consulta demorou demais para responder.",
+    en: "The request took too long to respond.",
+  },
+  network: {
+    pt: "Não foi possível falar com o GitHub (verifique a conexão).",
+    en: "Could not reach GitHub (check your connection).",
+  },
+  "no-releases": {
+    pt: "Ainda não há versão publicada para comparar.",
+    en: "There is no published version to compare against yet.",
+  },
+};
+
+/**
+ * Texto do diálogo do menu "Verificar atualizações", no idioma do sistema.
+ * É pura de propósito: a decisão de texto e de botão é testável sem Electron.
+ */
+export function describeReleaseCheck(
+  result: ReleaseCheckResult,
+  locale: string,
+): UpdateDialogContent {
+  const pt = locale.toLowerCase().startsWith("pt");
+  if (result.status === "update-available") {
+    return {
+      type: "info",
+      title: pt ? "Nova versão disponível" : "New version available",
+      message: pt
+        ? `A versão ${result.latestVersion} já está publicada.`
+        : `Version ${result.latestVersion} is available.`,
+      detail: pt
+        ? `Você está na ${result.currentVersion}. A instalação é manual — o botão abre a página de download.`
+        : `You are on ${result.currentVersion}. Installing is manual — the button opens the download page.`,
+      buttons: pt ? ["Baixar", "Depois"] : ["Download", "Later"],
+      downloadButtonIndex: 0,
+    };
+  }
+  if (result.status === "up-to-date") {
+    const latest = result.latestVersion ?? result.currentVersion;
+    return {
+      type: "info",
+      title: pt ? "Você está atualizado" : "You are up to date",
+      message: pt
+        ? `A versão mais recente publicada é a ${latest}.`
+        : `The latest published version is ${latest}.`,
+      detail: pt
+        ? `Rodando ${result.currentVersion}.`
+        : `Running ${result.currentVersion}.`,
+      buttons: ["OK"],
+      downloadButtonIndex: -1,
+    };
+  }
+  const reason = UNAVAILABLE_REASON[result.reason ?? ""] ?? {
+    pt: `A checagem não completou (${result.reason ?? "motivo desconhecido"}).`,
+    en: `The check did not complete (${result.reason ?? "unknown reason"}).`,
+  };
+  return {
+    type: "warning",
+    title: pt ? "Não foi possível verificar" : "Could not check for updates",
+    message: pt
+      ? "O app não conseguiu consultar as versões publicadas."
+      : "The app could not reach the published versions.",
+    detail: pt ? reason.pt : reason.en,
+    buttons: ["OK"],
+    downloadButtonIndex: -1,
+  };
+}
