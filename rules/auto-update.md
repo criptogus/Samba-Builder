@@ -1,13 +1,16 @@
-# Debug bundles e releases
+# Atualizações, debug bundles e releases
 
-Este produto **não tem auto-update**: o `update-electron-app` consultava o backend do projeto original e foi removido (ver o comentário em `src/main.ts`). Atualização acontece baixando a release nova em [releases](../../README.md#baixar-o-app).
+Este produto **não se atualiza sozinho**: os builds não são assinados, então o sistema operacional não permitiria uma instalação silenciosa. O que existe é um **aviso de nova versão**, ligado pelo usuário em Configurações: o app consulta a API de releases **deste** repositório e, havendo versão mais nova, mostra o número e um botão que abre a página de download. Instalar continua manual ([releases](../../README.md#baixar-o-app)).
 
-Leia esta regra quando mexer em **pacote de debug / relato de bug**, ou no **caminho de publicação e proveniência**.
+Leia esta regra quando mexer em **aviso de versão**, **pacote de debug / relato de bug**, ou no **caminho de publicação e proveniência**.
 
-## Não há feed de atualização
+## Aviso de versão (não confunda com auto-update)
 
-- Não procure `feedURL`, `RELEASES` nem `api.samba.sh` no código: nada disso existe aqui. Se um log de usuário mostrar `CheckForUpdate`/`Squirrel` falhando, é resíduo de uma instalação antiga ou do produto original — não é regressão deste repositório.
-- Consequência de produto: a instalação nova **não** se atualiza sozinha; quem publica precisa avisar quem usa. Ver [docs/RELEASING.md](../../docs/RELEASING.md).
+- Contrato IPC `system.checkForUpdates` → lógica em `src/ipc/services/release_check.ts`; comparação de versão e escolha do asset da plataforma são funções puras, cobertas por `release_check.test.ts`.
+- A consulta roda **no processo principal** porque o repositório é privado e o token do GitHub do usuário não pode chegar ao renderer. Sem token, sem rede ou sem permissão, a resposta é `unavailable` com motivo — a UI informa e oferece "tentar de novo", nunca quebra.
+- Pré-lançamento é mais antigo que a versão estável do mesmo núcleo (`1.14.0` > `1.14.0-beta.2`). A release mais nova é escolhida entre todas, inclusive pré-lançamentos, e o asset é filtrado por plataforma/arquitetura.
+- Não há `feedURL`, cliente Squirrel nem `api.samba.sh`: log antigo com `CheckForUpdate`/Squirrel falhando é resíduo de instalação anterior, não regressão deste repositório.
+- O `ReleaseChannelSelector` **não** participa da checagem: hoje é metadado de relato de bug.
 
 ## Relato de bug e pacote de debug
 

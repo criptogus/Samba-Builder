@@ -11,6 +11,16 @@ import { AppSizeTelemetrySchema } from "../../shared/app_size_telemetry";
 // System Schemas
 // =============================================================================
 
+/** Resultado da checagem de nova versão. Informativo: a instalação é manual. */
+export const ReleaseCheckResultSchema = z.object({
+  status: z.enum(["update-available", "up-to-date", "unavailable"]),
+  currentVersion: z.string(),
+  latestVersion: z.string().nullable(),
+  releaseUrl: z.string().nullable(),
+  assetName: z.string().nullable(),
+  reason: z.string().nullable(),
+});
+
 export const NodeSystemInfoSchema = z.object({
   nodeVersion: z.string().nullable(),
   pnpmVersion: z.string().nullable(),
@@ -409,6 +419,17 @@ export const systemContracts = {
     channel: "restart-samba",
     input: z.void(),
     output: z.void(),
+  }),
+
+  /**
+   * Checa se há versão mais nova publicada neste repositório.
+   * Roda no processo principal (o token do GitHub do usuário não vai ao renderer)
+   * e é informativo: o app avisa e abre o download, não instala sozinho.
+   */
+  checkForUpdates: defineContract({
+    channel: "check-for-updates",
+    input: z.void(),
+    output: ReleaseCheckResultSchema,
   }),
 } as const;
 

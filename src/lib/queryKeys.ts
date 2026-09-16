@@ -19,6 +19,10 @@ export const queryKeys = {
     all: ["factory"] as const,
     gate: (appId: number) => ["factory", "gate", appId] as const,
   },
+  updates: {
+    all: ["updates"] as const,
+    status: () => ["updates", "status"] as const,
+  },
   nativeAgents: {
     status: ["native-agents", "status"] as const,
     run: (id?: string) => ["native-agents", "run", id] as const,
