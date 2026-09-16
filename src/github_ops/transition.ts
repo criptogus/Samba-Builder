@@ -729,6 +729,10 @@ export function continuationOperation(
   switch (origin.type) {
     case "push":
       return origin;
+    case "sync":
+      // Depois de resolver o conflito, refazer o sync inteiro: o pull confirma
+      // que não sobrou nada pendente e o push só acontece se ele passar.
+      return origin;
     case "rebase":
     case "rebase-continue":
       return { type: "rebase-continue" };
@@ -811,6 +815,10 @@ function getBlockedSwitchResume(
 
 function compositeNext(op: GithubOperation): GithubOperation | undefined {
   switch (op.type) {
+    case "sync":
+      // Sincronizar é baixar e só então enviar: o pull roda primeiro e o push
+      // entra como próximo passo só se ele tiver dado certo.
+      return PUSH_NORMAL;
     case "rebase":
       return PUSH_NORMAL;
     case "create-branch":
@@ -838,6 +846,7 @@ function completionCommands(op: GithubOperation): GithubOpsCommand[] {
   switch (op.type) {
     case "push":
     case "pull":
+    case "sync":
     case "fetch":
     case "rebase":
     case "rebase-continue":
@@ -871,6 +880,11 @@ function successBannerContent(op: GithubOperation): GithubOpsBanner | null {
       };
     case "pull":
       return { kind: "success", message: "Pulled latest changes from remote" };
+    case "sync":
+      return {
+        kind: "success",
+        message: "Synced with GitHub: pulled the latest changes, then pushed",
+      };
     case "fetch":
       return { kind: "success", message: "Fetched latest remote branches" };
     case "rebase":

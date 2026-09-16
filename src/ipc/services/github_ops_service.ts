@@ -64,6 +64,8 @@ export function getGithubRecordingRefusal(
       return undefined;
     case "push":
       return "push to GitHub";
+    case "sync":
+      return "sync with GitHub";
     case "pull":
       return "pull from GitHub";
     case "fetch":
@@ -182,6 +184,10 @@ export class GithubOpsService {
           force: op.mode === "force",
           forceWithLease: op.mode === "lease",
         }).then(() => this.openPullRequestAfterPush(appId));
+      case "sync":
+        // Sincronizar começa baixando; o push entra como próximo passo do
+        // composto (`compositeNext`) só depois que o pull der certo.
+        return handlePullFromGithub(MAIN_SERVICE_EVENT, { appId });
       case "pull":
         return handlePullFromGithub(MAIN_SERVICE_EVENT, { appId });
       case "fetch":

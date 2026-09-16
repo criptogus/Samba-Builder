@@ -92,7 +92,7 @@ describe("github_ops capabilities", () => {
         cases: {
           canSync: {
             representativeEvents: () => ({
-              valid: [request({ type: "push", mode: "normal" })],
+              valid: [request({ type: "sync" })],
             }),
           },
           canDisconnect: {

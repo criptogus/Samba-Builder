@@ -22,6 +22,7 @@ const REPRESENTATIVE_OPS: readonly GithubOperation[] = [
   { type: "push", mode: "normal" },
   { type: "push", mode: "lease" },
   { type: "pull" },
+  { type: "sync" },
   { type: "fetch" },
   { type: "rebase" },
   { type: "rebase-continue" },
@@ -541,6 +542,37 @@ describe("github_ops transition", () => {
       type: "running",
       op: { type: "rebase-continue" },
       next: { type: "push", mode: "normal" },
+    });
+  });
+
+  it("sincroniza baixando do remoto antes de enviar", () => {
+    const started = transition(INITIAL_GITHUB_OPS_STATE, {
+      type: "OP_REQUESTED",
+      op: { type: "sync" },
+    });
+
+    expect(started.state).toMatchObject({
+      type: "running",
+      op: { type: "sync" },
+      next: { type: "push", mode: "normal" },
+    });
+    expect(commandsOf(started)).toEqual([
+      { type: "run-op", op: { type: "sync" } },
+    ]);
+
+    // Só depois que o pull dá certo o push entra.
+    const downloaded = transition(started.state, {
+      type: "OP_SUCCEEDED",
+      op: { type: "sync" },
+    });
+
+    expect(downloaded.state).toMatchObject({
+      type: "running",
+      op: { type: "push", mode: "normal" },
+    });
+    expect(commandsOf(downloaded)).toContainEqual({
+      type: "run-op",
+      op: { type: "push", mode: "normal" },
     });
   });
 

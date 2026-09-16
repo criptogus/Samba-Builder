@@ -64,7 +64,9 @@ export function projectGithubOps(state: GithubOpsState): GithubOpsProjection {
     isOperationInFlight: state.type === "running",
     isSyncing:
       state.type === "running" &&
-      (state.op.type === "push" || state.op.type === "rebase"),
+      (state.op.type === "push" ||
+        state.op.type === "sync" ||
+        state.op.type === "rebase"),
     conflicts: state.type === "conflicted" ? state.files : EMPTY_CONFLICTS,
     conflictRecoveryStage:
       state.type === "conflicted"

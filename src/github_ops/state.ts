@@ -33,6 +33,13 @@ export type ConnectRepositoryOperation =
 export type GithubOperation =
   | { type: "push"; mode: PushMode }
   | { type: "pull" }
+  /**
+   * Sincroniza com o remoto: baixa primeiro e, só se der certo, envia
+   * (`compositeNext` encadeia o push). Existe como operação própria porque a
+   * máquina descarta pedidos novos enquanto está rodando — disparar pull e push
+   * em sequência pela UI perderia o segundo.
+   */
+  | { type: "sync" }
   | { type: "fetch" }
   | { type: "rebase" }
   | { type: "rebase-continue" }

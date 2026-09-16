@@ -107,6 +107,13 @@ Plano que originou estas decisões: [`plans/kilocode-parity-plan.md`](../plans/k
   implementadas: nunca na branch padrão, idempotente (PR já aberto é reaproveitado, não duplicado) e melhor esforço
   — falha ao abrir o PR **não** derruba o push. O link chega ao app por evento e vira aviso com a URL.
 
+- **2026-09-08** — "Sync com o GitHub" passou a fazer jus ao nome (`REQ-33`). O botão já se chamava *Sync to
+  GitHub*, mas **só empurrava**. Agora existe a operação `sync` na máquina de `github_ops`, encadeada como
+  composto: **pull primeiro, push só se o pull der certo** (`compositeNext`). Motivo de ser operação própria: a
+  máquina descarta pedidos novos enquanto roda, então disparar pull e push pela UI perderia o segundo. Conflito
+  continua coberto pelo fluxo que já existia (`continuationOperation` devolve o próprio sync, então depois de
+  resolver o conflito o sync refaz o pull e só então envia).
+
 ## Escopo (versão atual)
 
 **Dentro:** Fases 0–3 do plano (`REQ-01` a `REQ-15`, mais os incrementos `REQ-20` a `REQ-24` vindos do estudo do
@@ -151,6 +158,7 @@ por decisão de produto) · orquestração tipo Gastown · agentes gerenciados p
 | REQ-30 | Revisão fora do app via CLI/Action com BYOK | Decisão humana: revisa a exclusão anterior de code reviews de PR, agora que existe caminho sem servidor nosso | proposto (decisão) | a definir |
 | REQ-31 | Pull request da branch atual: abrir e mesclar pela interface | Abrir PR compara a branch atual com a padrão do repositório e devolve o link; merge pede confirmação e falha com o motivo quando o GitHub recusa | entregue (abrir e mesclar manuais) | agente |
 | REQ-32 | Abrir PR automaticamente depois do push | Opção desligada por padrão; abre PR da branch enviada contra a branch padrão, nunca da padrão para ela mesma, nunca duplicando PR aberto, e falha do PR não derruba o push | entregue | agente |
+| REQ-33 | Sync com o GitHub: baixar antes de enviar | O botão Sync faz pull e só então push; conflito no pull interrompe o push e entra no fluxo de resolução existente | entregue | agente |
 
 ### Evidências da Fase 0 (2026-09-08)
 

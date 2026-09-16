@@ -9,6 +9,7 @@ import {
 const handlers = vi.hoisted(() => ({
   disconnect: vi.fn<() => Promise<void>>(),
   push: vi.fn<() => Promise<void>>(),
+  pull: vi.fn<() => Promise<void>>(),
   autoPullRequest: vi.fn<() => Promise<unknown>>(),
 }));
 
@@ -32,7 +33,7 @@ vi.mock("../handlers/git_branch_handlers", () => ({
   handleDeleteBranch: vi.fn(),
   handleFetchFromGithub: vi.fn(),
   handleMergeBranch: vi.fn(),
-  handlePullFromGithub: vi.fn(),
+  handlePullFromGithub: handlers.pull,
   handleRenameBranch: vi.fn(),
   handleSwitchBranch: vi.fn(),
 }));
@@ -41,6 +42,8 @@ describe("GithubOpsService lifecycle", () => {
   beforeEach(() => {
     activeRecordings.clear();
     handlers.disconnect.mockReset();
+    handlers.pull.mockReset();
+    handlers.pull.mockResolvedValue(undefined);
     handlers.autoPullRequest.mockReset();
     handlers.autoPullRequest.mockResolvedValue(null);
     handlers.push.mockReset();
@@ -140,6 +143,16 @@ describe("GithubOpsService lifecycle", () => {
     await expect(run).resolves.toBeUndefined();
     await settlement;
     expect(settled).toBe(true);
+  });
+
+  it("sincronizar começa baixando do remoto", async () => {
+    const service = new GithubOpsService();
+
+    await service.run(7, { type: "sync" });
+
+    expect(handlers.pull).toHaveBeenCalledWith(undefined, { appId: 7 });
+    // O push do sync é o próximo passo do composto, não desta chamada.
+    expect(handlers.push).not.toHaveBeenCalled();
   });
 
   it("tenta o pull request automático depois do push", async () => {

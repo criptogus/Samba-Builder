@@ -258,7 +258,8 @@ function ConnectedGitHubConnector({
           onClick={() =>
             send({
               type: "OP_REQUESTED",
-              op: { type: "push", mode: "normal" },
+              // Baixa antes de enviar: o botão dizia "Sync" mas só empurrava.
+              op: { type: "sync" },
             })
           }
           disabled={!canSync}

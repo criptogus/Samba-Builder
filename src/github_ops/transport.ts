@@ -91,6 +91,7 @@ export const GithubOperationSchema: z.ZodType<GithubOperation> =
   z.discriminatedUnion("type", [
     pushOperationSchema,
     z.object({ type: z.literal("pull") }).strict(),
+    z.object({ type: z.literal("sync") }).strict(),
     z.object({ type: z.literal("fetch") }).strict(),
     z.object({ type: z.literal("rebase") }).strict(),
     z.object({ type: z.literal("rebase-continue") }).strict(),
@@ -123,6 +124,7 @@ export const GithubOperationSchema: z.ZodType<GithubOperation> =
 const operationTypeSchema = z.enum([
   "push",
   "pull",
+  "sync",
   "fetch",
   "rebase",
   "rebase-continue",
