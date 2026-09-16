@@ -11,3 +11,8 @@ declare module "*.txt?raw" {
 }
 
 declare module "*.css";
+
+declare module "*.webp" {
+  const src: string;
+  export default src;
+}

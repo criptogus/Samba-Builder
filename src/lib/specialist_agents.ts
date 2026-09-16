@@ -26,7 +26,7 @@ export type SpecialistAgent = {
   persona: string;
   /** Ícone lucide do agente (consistente com a iconografia do app). */
   icon: string;
-  /** Chave de retrato SVG em SpecialistAvatar. */
+  /** Chave do retrato ilustrado em `assets/specialists/<id>.webp`. */
   portrait: string;
   tagline: string;
   /** Para o dev (inclusive junior) entender o que o especialista resolve. */
