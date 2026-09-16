@@ -32,6 +32,8 @@ import { useVersionPreview } from "@/hooks/useVersionPreview";
 import type { PreviewEvent } from "@/version_preview/state";
 import { ExtraCommitsRevertDialog } from "./ExtraCommitsRevertDialog";
 import { getExtraRevertedCommits } from "./revertImpact";
+import { SpecialistAvatarStack } from "@/components/SpecialistAvatar";
+import { specialistAgents } from "@/lib/specialist_agents";
 
 interface MessagesListProps {
   messages: Message[];
@@ -736,13 +738,20 @@ export const MessagesList = forwardRef<HTMLDivElement, MessagesListProps>(
           <div className="flex flex-col items-center justify-center h-full max-w-2xl mx-auto">
             {appId !== null && selectedChatId !== null ? (
               <div className="flex flex-1 flex-col items-center justify-center gap-4 text-center">
-                <div className="space-y-1">
+                <div className="space-y-2">
+                  <div className="flex justify-center">
+                    <SpecialistAvatarStack
+                      agents={specialistAgents}
+                      size="md"
+                      max={6}
+                    />
+                  </div>
                   <p className="text-base font-medium text-foreground">
                     Comece por uma auditoria do projeto
                   </p>
                   <p className="text-sm text-muted-foreground">
-                    Análises guiadas pelos especialistas do Samba Builder. Ou
-                    escreva sua primeira pergunta abaixo.
+                    Neri, Kai, Luna e o resto do time de especialistas guiam o
+                    que fazer a seguir. Ou escreva sua primeira pergunta abaixo.
                   </p>
                 </div>
                 <RepoAuditActions chatId={selectedChatId} appId={appId} />

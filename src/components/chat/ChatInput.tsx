@@ -23,6 +23,11 @@ import {
   MicOff,
   ArrowRight,
 } from "lucide-react";
+import { SpecialistAvatar } from "@/components/SpecialistAvatar";
+import {
+  composeSpecialistTaskPrompt,
+  getSpecialistAgent,
+} from "@/lib/specialist_agents";
 import type React from "react";
 import { useCallback, useEffect, useRef, useState, useMemo } from "react";
 import { useTranslation } from "react-i18next";
@@ -1376,20 +1381,31 @@ function KeepGoingButton() {
 // Sugestão de próximo passo emitida pelo agente ao finalizar uma tarefa —
 // texto clicável que envia o prompt sugerido e continua a evolução.
 export function NextStepButton({ action }: { action: NextStepAction }) {
+  const { t } = useTranslation("chat");
   const { streamMessage, isStreaming } = useStreamChat();
   const chatId = useAtomValue(selectedChatIdAtom);
+  const agent = getSpecialistAgent(action.specialist);
   const onClick = () => {
     if (!chatId) {
       console.error("No chat id found");
       return;
     }
     streamMessage({
-      prompt: action.prompt,
+      prompt: agent
+        ? composeSpecialistTaskPrompt(agent, action.prompt)
+        : action.prompt,
       chatId,
     });
   };
+  const accessibleName = agent
+    ? t("specialistRecommendsPrompt", {
+        name: agent.persona,
+        prompt: action.prompt,
+      })
+    : action.prompt;
   // Cartão de próximo passo: a sugestão precisa ser vista, não garimpada no
-  // fim de uma mensagem longa. Um clique continua a partir daqui.
+  // fim de uma mensagem longa. Um clique continua a partir daqui — e, se um
+  // especialista recomendou, o próximo turno já entra no papel dele.
   return (
     <Tooltip>
       <TooltipTrigger
@@ -1398,14 +1414,29 @@ export function NextStepButton({ action }: { action: NextStepAction }) {
             type="button"
             disabled={isStreaming}
             onClick={onClick}
-            className="group my-1 flex w-full cursor-pointer items-center gap-2 rounded-lg border border-primary/25 bg-primary/5 px-3 py-2 text-left text-sm transition-colors hover:border-primary/50 hover:bg-primary/10 disabled:cursor-not-allowed disabled:opacity-60"
+            aria-label={accessibleName}
+            className="group my-1 flex w-full cursor-pointer items-center gap-2.5 rounded-lg border border-primary/25 bg-primary/5 px-3 py-2 text-left text-sm transition-colors hover:border-primary/50 hover:bg-primary/10 disabled:cursor-not-allowed disabled:opacity-60"
           />
         }
       >
-        <ArrowRight className="h-4 w-4 shrink-0 text-primary transition-transform group-hover:translate-x-0.5" />
-        <span className="min-w-0 flex-1 truncate">{action.prompt}</span>
+        {agent ? (
+          <SpecialistAvatar agent={agent} size="sm" />
+        ) : (
+          <ArrowRight className="h-4 w-4 shrink-0 text-primary transition-transform group-hover:translate-x-0.5" />
+        )}
+        <span className="min-w-0 flex-1">
+          {agent && (
+            <span className="block text-[11px] font-medium text-muted-foreground">
+              {t("specialistRecommends", { name: agent.persona })}
+              <span className="font-normal"> · {agent.name}</span>
+            </span>
+          )}
+          <span className="block line-clamp-2">{action.prompt}</span>
+        </span>
       </TooltipTrigger>
-      <TooltipContent>{action.prompt}</TooltipContent>
+      <TooltipContent>
+        {agent ? `${agent.persona} · ${agent.tagline}` : action.prompt}
+      </TooltipContent>
     </Tooltip>
   );
 }

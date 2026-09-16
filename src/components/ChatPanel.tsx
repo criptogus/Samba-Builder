@@ -31,7 +31,9 @@ import {
   TooltipTrigger,
   TooltipContent,
 } from "@/components/ui/tooltip";
-import { ArrowDown, Bot } from "lucide-react";
+import { ArrowDown } from "lucide-react";
+import { SpecialistAvatarStack } from "@/components/SpecialistAvatar";
+import { specialistAgents } from "@/lib/specialist_agents";
 import { useSettings } from "@/hooks/useSettings";
 import { useFreeAgentQuota } from "@/hooks/useFreeAgentQuota";
 import { useChatMode } from "@/hooks/useChatMode";
@@ -483,7 +485,12 @@ export function ChatPanel({
                         onClick={() => setShowSpecialists(true)}
                         title="Criar tarefa para um especialista (arquitetura, cybersec, UX/UI…)"
                       >
-                        <Bot className="mr-1.5 h-3.5 w-3.5" />
+                        <SpecialistAvatarStack
+                          agents={specialistAgents}
+                          size="xs"
+                          max={4}
+                          className="mr-1.5"
+                        />
                         Especialistas
                       </Button>
                     </div>
