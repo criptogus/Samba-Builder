@@ -100,6 +100,8 @@
   "refreshApp": "Refresh app",
   "refreshAppDescription": "Refresh the application preview",
   "keepGoing": "Keep going",
+  "specialistRecommends": "{{name}} recommends",
+  "specialistRecommendsPrompt": "{{name}} recommends: {{prompt}}",
   "addTypeScript": "Add TypeScript",
   "tipProposal": "Tip proposal",
   "securityRisks": "Security Risks",

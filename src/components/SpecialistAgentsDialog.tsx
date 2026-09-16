@@ -1,9 +1,11 @@
 import { useState } from "react";
 import { useStreamChat } from "@/hooks/useStreamChat";
 import {
+  composeSpecialistTaskPrompt,
   specialistAgents,
   type SpecialistAgent,
 } from "@/lib/specialist_agents";
+import { SpecialistAvatar } from "@/components/SpecialistAvatar";
 import {
   Dialog,
   DialogContent,
@@ -15,46 +17,12 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import {
-  ArrowLeft,
-  Send,
-  Users,
-  Building2,
-  ClipboardList,
-  Cloud,
-  FlaskConical,
-  Gauge,
-  Network,
-  Palette,
-  ScanSearch,
-  ShieldCheck,
-  Smartphone,
-  type LucideIcon,
-} from "lucide-react";
+import { ArrowLeft, Send, Users } from "lucide-react";
 import { nativeSkills } from "@/shared/native_skills";
-
-const agentIcons: Record<string, LucideIcon> = {
-  Network,
-  ShieldCheck,
-  Palette,
-  FlaskConical,
-  Gauge,
-  Building2,
-  ClipboardList,
-  ScanSearch,
-  Smartphone,
-  Cloud,
-};
 
 /** Nome amigável do skill (título do catálogo) em vez do slug técnico. */
 function skillLabel(slug: string): string {
   return nativeSkills.find((s) => s.slug === slug)?.title ?? slug;
-}
-
-/** Ícone do agente, consistente com a iconografia do app (lucide). */
-function AgentIcon({ icon, className }: { icon: string; className?: string }) {
-  const Icon = agentIcons[icon] ?? Users;
-  return <Icon className={className} aria-hidden="true" />;
 }
 
 /**
@@ -121,11 +89,7 @@ export function SpecialistAgentsDialog({
   const sendCustom = async () => {
     const text = custom.trim();
     if (!text || !agent) return;
-    const prompt =
-      agent.skills.length > 0
-        ? `${agent.skills.map((s) => `/${s}`).join(" ")} ${text}`
-        : `Atue como especialista em ${agent.name} (${agent.tagline}). ${text}`;
-    await sendPrompt(prompt);
+    await sendPrompt(composeSpecialistTaskPrompt(agent, text));
   };
 
   return (
@@ -144,7 +108,13 @@ export function SpecialistAgentsDialog({
                 >
                   <ArrowLeft className="h-4 w-4" />
                 </Button>
-                <AgentIcon icon={agent.icon} className="h-4 w-4" /> {agent.name}
+                <SpecialistAvatar agent={agent} size="sm" />
+                <span>
+                  {agent.persona}
+                  <span className="ml-1.5 font-normal text-muted-foreground">
+                    · {agent.name}
+                  </span>
+                </span>
               </>
             ) : (
               <>
@@ -173,7 +143,7 @@ export function SpecialistAgentsDialog({
               const matches = specialistAgents.filter(
                 (a) =>
                   !q ||
-                  `${a.name} ${a.tagline} ${a.description} ${a.skills.join(" ")}`
+                  `${a.persona} ${a.name} ${a.tagline} ${a.description} ${a.skills.join(" ")}`
                     .toLowerCase()
                     .includes(q),
               );
@@ -199,15 +169,13 @@ export function SpecialistAgentsDialog({
                       }}
                       className="flex items-start gap-3 rounded-lg border p-3 text-left transition-colors hover:bg-accent/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                     >
-                      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-muted">
-                        <AgentIcon
-                          icon={a.icon}
-                          className="h-4.5 w-4.5 text-muted-foreground"
-                        />
-                      </span>
+                      <SpecialistAvatar agent={a} size="md" />
                       <span className="min-w-0">
                         <span className="flex items-center gap-2 text-sm font-medium">
-                          {a.name}
+                          {a.persona}
+                          <span className="font-normal text-muted-foreground">
+                            · {a.name}
+                          </span>
                           {recentIds.includes(a.id) && (
                             <Badge
                               variant="secondary"
@@ -254,7 +222,7 @@ export function SpecialistAgentsDialog({
             </div>
             <div className="space-y-2 pt-2">
               <p className="text-xs font-medium text-muted-foreground">
-                Ou descreva sua própria tarefa para o {agent.name}
+                Ou descreva sua própria tarefa para {agent.persona}
               </p>
               <Textarea
                 value={custom}

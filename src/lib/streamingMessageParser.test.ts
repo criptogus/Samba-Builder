@@ -113,6 +113,16 @@ describe("streamingMessageParser", () => {
     );
   });
 
+  it("parses the specialist attribute on next-step commands", () => {
+    const content =
+      '<samba-command type="next-step" specialist="cybersec" prompt="Audite o endpoint"></samba-command>';
+    const { blocks } = parseFullMessage(content);
+    const tag = blocks[0];
+    if (tag.kind !== "custom-tag") throw new Error("expected custom-tag");
+    expect(tag.attributes.specialist).toBe("cybersec");
+    expect(tag.attributes.prompt).toBe("Audite o endpoint");
+  });
+
   it("keeps the open-quote state across streaming chunks", () => {
     const content =
       '<samba-command type="next-step" prompt="subir para >=24 e <26"></samba-command>';

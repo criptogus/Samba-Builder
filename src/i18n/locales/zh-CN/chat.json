@@ -100,6 +100,8 @@
   "refreshApp": "刷新应用",
   "refreshAppDescription": "刷新应用预览",
   "keepGoing": "继续",
+  "specialistRecommends": "{{name}} 建议",
+  "specialistRecommendsPrompt": "{{name}} 建议：{{prompt}}",
   "addTypeScript": "添加 TypeScript",
   "tipProposal": "提案提示",
   "securityRisks": "安全风险",

@@ -6,6 +6,10 @@
  * precisa saber o que pedir: as opções explicam o que cada especialista faz.
  * Agentes sem skill dedicado (mobile, devops/aws) usam as ferramentas gerais
  * do agente com prompt especializado.
+ *
+ * Após uma tarefa substancial, o modelo emite next-steps atribuídos a estes
+ * ids (`specialist="cybersec"`). `recommendWhen` / `skipWhen` dizem quando
+ * aquele especialista tem voz — um designer não recomenda em task de backend.
  */
 
 export type SpecialistTask = {
@@ -18,11 +22,19 @@ export type SpecialistTask = {
 export type SpecialistAgent = {
   id: string;
   name: string;
+  /** Primeiro nome da persona — a "cara" do especialista no chat. */
+  persona: string;
   /** Ícone lucide do agente (consistente com a iconografia do app). */
   icon: string;
+  /** Chave de retrato SVG em SpecialistAvatar. */
+  portrait: string;
   tagline: string;
   /** Para o dev (inclusive junior) entender o que o especialista resolve. */
   description: string;
+  /** Quando este especialista deve emitir um próximo passo (instrução ao modelo). */
+  recommendWhen: string;
+  /** Quando NÃO deve falar — evita recomendações fora de domínio. */
+  skipWhen: string;
   skills: string[];
   tasks: SpecialistTask[];
 };
@@ -31,8 +43,13 @@ export const specialistAgents: SpecialistAgent[] = [
   {
     id: "architect",
     name: "Arquiteto",
+    persona: "Neri",
     icon: "Network",
+    portrait: "architect",
     tagline: "Estrutura, módulos e evolução do código",
+    recommendWhen:
+      "new modules, API boundaries, coupling, refactors, ADRs, or structural change",
+    skipWhen: "copy-only or purely visual CSS polish with no structural change",
     description:
       "Analisa a arquitetura do projeto, aponta riscos de manutenção, propõe decisões (ADRs) e planos de refatoração seguros.",
     skills: ["samba-architecture"],
@@ -63,8 +80,13 @@ export const specialistAgents: SpecialistAgent[] = [
   {
     id: "cybersec",
     name: "Cyber Security",
+    persona: "Kai",
     icon: "ShieldCheck",
+    portrait: "cybersec",
     tagline: "Segurança por design em cada camada",
+    recommendWhen:
+      "auth, secrets, user input, permissions, new endpoints, payments, or data exposure",
+    skipWhen: "purely visual CSS with no data, auth, or network change",
     description:
       "Caça vulnerabilidades e segredos expostos, revisa autorização e modela ameaças — com correções priorizadas por risco.",
     skills: ["samba-security"],
@@ -102,8 +124,14 @@ export const specialistAgents: SpecialistAgent[] = [
   {
     id: "ux-ui",
     name: "Designer UX/UI",
+    persona: "Luna",
     icon: "Palette",
+    portrait: "ux-ui",
     tagline: "Direção de arte, usabilidade e acessibilidade",
+    recommendWhen:
+      "screens, user flows, visual polish, accessibility, or responsive layout",
+    skipWhen:
+      "backend-only work (schema, SQL, server jobs, CI, infra) with no UI surface",
     description:
       "Torna a interface bonita, consistente e acessível: auditoria visual, responsividade, estados e identidade — com evidências de tela.",
     skills: ["samba-design", "samba-accessibility", "samba-art-direction"],
@@ -141,8 +169,13 @@ export const specialistAgents: SpecialistAgent[] = [
   {
     id: "quality",
     name: "Engenheiro de Qualidade",
+    persona: "Tess",
     icon: "FlaskConical",
+    portrait: "quality",
     tagline: "Testes que provam — com evidência",
+    recommendWhen:
+      "new behavior or logic that still lacks tests, flaky tests, or missing evidence",
+    skipWhen: "the finished work was itself a test-only change already proven",
     description:
       "Planeja e escreve a pirâmide de testes por risco, cobre fluxos críticos e investiga testes que falham — com resultado real executado.",
     skills: ["samba-quality-engineering", "samba-tdd"],
@@ -173,8 +206,13 @@ export const specialistAgents: SpecialistAgent[] = [
   {
     id: "performance",
     name: "Performance",
+    persona: "Aero",
     icon: "Gauge",
+    portrait: "performance",
     tagline: "Rápido e resiliente desde o desenho",
+    recommendWhen:
+      "loading, lists, queries, images, external calls, or timeouts",
+    skipWhen: "tiny copy or one-line changes with no hot path",
     description:
       "Audita carregamento, latência e resiliência; aplica timeouts, retries, cache e degradação graciosa onde faz diferença.",
     skills: ["samba-performance"],
@@ -205,8 +243,13 @@ export const specialistAgents: SpecialistAgent[] = [
   {
     id: "enterprise",
     name: "Consultor Enterprise",
+    persona: "Vera",
     icon: "Building2",
+    portrait: "enterprise",
     tagline: "Governança, observabilidade e operação",
+    recommendWhen:
+      "production readiness, logging, roles, audit, deploy, or runbooks",
+    skipWhen: "early prototype UI-only work with no operational surface",
     description:
       "Prepara o produto para cliente corporativo: papéis e aprovações, trilha de auditoria, logs e métricas, deploy com rollback e runbooks.",
     skills: ["samba-governance", "samba-observability", "samba-delivery"],
@@ -237,8 +280,13 @@ export const specialistAgents: SpecialistAgent[] = [
   {
     id: "pm",
     name: "Product Manager",
+    persona: "Sol",
     icon: "ClipboardList",
+    portrait: "pm",
     tagline: "Requisito, escopo e aceite claros",
+    recommendWhen:
+      "the next decision is product, scope, acceptance criteria, or a new capability",
+    skipWhen: "purely mechanical follow-ups (format, rename, leftover cleanup)",
     description:
       "Transforma ideias vagas em PRDs rastreáveis com critérios de aceite, mantém o escopo sob controle e liga requisito a teste e evidência.",
     skills: ["samba-pm", "samba-spec", "samba-scope-guard"],
@@ -269,8 +317,13 @@ export const specialistAgents: SpecialistAgent[] = [
   {
     id: "reviewer",
     name: "Revisor de Código",
+    persona: "Rio",
     icon: "ScanSearch",
+    portrait: "reviewer",
     tagline: "Olhar crítico com evidência",
+    recommendWhen:
+      "a non-trivial code change that should be critically re-read before shipping",
+    skipWhen: "analysis-only turns with no code change, or trivial one-liners",
     description:
       "Revisa mudanças como um engenheiro sênior e investiga bugs pela causa raiz — sem chutar.",
     skills: ["samba-review", "samba-debug"],
@@ -294,8 +347,13 @@ export const specialistAgents: SpecialistAgent[] = [
   {
     id: "mobile",
     name: "Apps Nativos / Mobile",
+    persona: "Nia",
     icon: "Smartphone",
+    portrait: "mobile",
     tagline: "React Native, Flutter e plataformas móveis",
+    recommendWhen:
+      "the work touched mobile, native, or small-viewport behavior",
+    skipWhen: "desktop/web-only backend or desktop-only layout work",
     description:
       "Especialista em aplicativos móveis e nativos: auditoria de projeto mobile, adaptação de fluxos para telas pequenas e boas práticas da plataforma.",
     skills: [],
@@ -319,8 +377,12 @@ export const specialistAgents: SpecialistAgent[] = [
   {
     id: "devops",
     name: "DevOps / AWS",
+    persona: "Atlas",
     icon: "Cloud",
+    portrait: "devops",
     tagline: "Deploy, infraestrutura e cloud",
+    recommendWhen: "deploy, CI, Docker, env, infra, cloud, or rollback",
+    skipWhen: "in-app feature UI/backend with no ops or environment change",
     description:
       "Prepara deploy, CI/CD, infraestrutura e cloud (AWS): do Docker ao pipeline, com custo e segurança em mente.",
     skills: [],
@@ -349,3 +411,42 @@ export const specialistAgents: SpecialistAgent[] = [
     ],
   },
 ];
+
+const specialistsById = new Map(
+  specialistAgents.map((agent) => [agent.id, agent]),
+);
+
+export function getSpecialistAgent(
+  id: string | undefined | null,
+): SpecialistAgent | undefined {
+  if (!id) return undefined;
+  return specialistsById.get(id);
+}
+
+/** Prefixa o pedido com os skills do especialista (ou o papel, se não houver skill). */
+export function composeSpecialistTaskPrompt(
+  agent: SpecialistAgent,
+  taskText: string,
+): string {
+  const text = taskText.trim();
+  if (agent.skills.length > 0) {
+    return `${agent.skills.map((s) => `/${s}`).join(" ")} ${text}`;
+  }
+  return `Atue como especialista em ${agent.name} (${agent.tagline}). ${text}`;
+}
+
+/**
+ * Instrução de next-step para o system prompt: cada sugestão vem de um
+ * especialista cujo domínio combina com o que acabou de ser feito.
+ */
+export function specialistNextStepGuideline(): string {
+  const catalog = specialistAgents
+    .map(
+      (agent) =>
+        `- ${agent.id} (${agent.persona} · ${agent.name}): recommend when ${agent.recommendWhen}. Skip when ${agent.skipWhen}.`,
+    )
+    .join("\n");
+  return `- When you FINISH a substantial task — real code written, verified and committed, OR a deep analysis/review the user asked for (never a trivial question or a single Q&A turn) — close with suggested next steps from specialist agents who would actually have something useful to say about what was just done. Emit 2-4 <samba-command type="next-step" specialist="<id>" prompt="..."></samba-command> tags at the very end. Each tag MUST include specialist="<id>" from the catalog below — that is whose face and voice the user sees. Pick specialists by domain fit, not by rotation: a designer (ux-ui) must not recommend after a pure backend/API/schema/SQL/CI task; mobile must not speak unless the work touched mobile/native/small-viewport; cybersec MAY recommend after auth, input, secrets, permissions, or new endpoints; architect after modules/coupling/structure; devops after deploy/CI/env/infra; quality after new untested behavior; pm when the next move is a product/scope decision; reviewer after a non-trivial code change. Prefer 2-4 different specialists. Each prompt must evolve the work meaningfully (a concrete next capability, polish, or the natural continuation of what was just done — e.g. after an analysis, the top recommended package as an implementable instruction), start with a verb, stay under ~90 characters, and be written in pt-BR so the user can click it to continue directly. Never end a substantial task with an open question as the only call to action — the clickable next steps ARE the call to action. Never use <, >, & or double quotes inside the prompt value (write them as words: "maior ou igual a 22", "menor que 26") — those characters break the tag and the suggestion disappears for the user. Do not emit next steps for trivial changes.
+Specialist catalog (use these ids exactly):
+${catalog}`;
+}
