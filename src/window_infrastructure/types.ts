@@ -62,6 +62,7 @@ export const ChatTabPresentationStateSchema = z.object({
    */
   previewRouteSource: z.enum(["none", "samba", "app"]).optional(),
   previewMode: z.enum([
+    "pm",
     "preview",
     "code",
     "problems",
