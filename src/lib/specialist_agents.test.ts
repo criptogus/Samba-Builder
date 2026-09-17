@@ -96,6 +96,15 @@ describe("specialist agents — skills transformados em agentes", () => {
     expect(composeSpecialistTaskPrompt(sec, "Audite o login")).toBe(
       "/samba-security Audite o login",
     );
+    expect(
+      composeSpecialistTaskPrompt(
+        sec,
+        "Audite autorização do endpoint",
+        "endpoint novo sem checagem de papel",
+      ),
+    ).toBe(
+      "/samba-security Kai notou: endpoint novo sem checagem de papel. Audite autorização do endpoint",
+    );
     const mobile = getSpecialistAgent("mobile")!;
     expect(
       composeSpecialistTaskPrompt(mobile, "Adapte o onboarding"),
@@ -105,9 +114,9 @@ describe("specialist agents — skills transformados em agentes", () => {
   it("guideline de next-step lista todos os ids e a regra de domínio", () => {
     const guideline = specialistNextStepGuideline();
     expect(guideline).toContain('specialist="<id>"');
-    expect(guideline).toContain(
-      "a designer (ux-ui) must not recommend after a pure backend",
-    );
+    expect(guideline).toContain("cybersec SHOULD speak");
+    expect(guideline).toContain("ux-ui SHOULD speak");
+    expect(guideline).toContain("NEVER emit ux-ui or mobile");
     for (const agent of specialistAgents) {
       expect(guideline).toContain(`- ${agent.id} (`);
     }

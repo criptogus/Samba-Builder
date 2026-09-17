@@ -102,6 +102,8 @@
   "keepGoing": "Continuar",
   "specialistRecommends": "{{name}} recomenda",
   "specialistRecommendsPrompt": "{{name}} recomenda: {{prompt}}",
+  "specialistHuddleTitle": "Seu time olhou o que você fez",
+  "specialistHuddleHint": "Cada especialista recomenda o próximo passo no próprio domínio.",
   "addTypeScript": "Adicionar TypeScript",
   "tipProposal": "Dica de proposta",
   "securityRisks": "Riscos de Segurança",

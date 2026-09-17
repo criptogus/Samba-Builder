@@ -102,6 +102,8 @@
   "keepGoing": "继续",
   "specialistRecommends": "{{name}} 建议",
   "specialistRecommendsPrompt": "{{name}} 建议：{{prompt}}",
+  "specialistHuddleTitle": "你的专家团队看过了刚才的工作",
+  "specialistHuddleHint": "每位专家只在自己的领域给出下一步。",
   "addTypeScript": "添加 TypeScript",
   "tipProposal": "提案提示",
   "securityRisks": "安全风险",

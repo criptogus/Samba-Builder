@@ -837,6 +837,8 @@ export interface NextStepAction {
   id: "next-step";
   prompt: string;
   specialist?: string;
+  /** Observação em primeira pessoa do especialista sobre o que acabou de ser feito. */
+  why?: string;
 }
 
 export interface ActionProposal {
