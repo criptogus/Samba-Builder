@@ -1,0 +1,24 @@
+# Revisões de mudança em massa que o git deve ignorar ao culpar linhas.
+#
+# O produto passou por cinco rebrands/renomeações em massa. Sem isto, o blame
+# dessas linhas aponta para quem renomeou a marca, não para quem escreveu a
+# lógica — e o histórico fica inútil justamente onde mais se precisa dele.
+#
+# Para usar localmente:
+#   git config blame.ignoreRevsFile .git-blame-ignore-revs
+# O GitHub respeita o arquivo automaticamente.
+
+# Rebrand v1: Samba Builder — nome, logo Samba, pt-BR default completo
+fc19611635ff7a40b661b33634a5bd59554ccd42
+
+# fix(rebrand): alt text do onboarding sem 'Dyad'
+ed138500803699f948661f5fd44886f70542b4e0
+
+# rebrand v3: remove todos os escritos 'Dyad' do app
+fb64396d6f4f39597d07ef6e8fd39a0d78f08851
+
+# feat(zero-dyad): desliga dependências do backend do projeto original
+88a93017ff3bb5b2b5060b87d1b830beb62a578a
+
+# chore(zero-dyad): nenhuma menção fora dos créditos legais
+ddaedcfaae4bec7da2b7b9a3357ecf45b2cf4e56
