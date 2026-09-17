@@ -113,6 +113,24 @@ describe("streamingMessageParser", () => {
     );
   });
 
+  it("parses samba-say and samba-invite tags", () => {
+    const content =
+      '<samba-say specialist="cybersec" about="done">Olhei o endpoint.</samba-say><samba-invite from="ux-ui" specialist="quality" prompt="Cubra a jornada"></samba-invite>';
+    const { blocks } = parseFullMessage(content);
+    expect(blocks).toHaveLength(2);
+    const say = blocks[0];
+    const invite = blocks[1];
+    if (say.kind !== "custom-tag" || invite.kind !== "custom-tag") {
+      throw new Error("expected custom-tag");
+    }
+    expect(say.tag).toBe("samba-say");
+    expect(say.attributes.specialist).toBe("cybersec");
+    expect(say.content).toBe("Olhei o endpoint.");
+    expect(invite.tag).toBe("samba-invite");
+    expect(invite.attributes.from).toBe("ux-ui");
+    expect(invite.attributes.specialist).toBe("quality");
+  });
+
   it("parses specialist and why on next-step commands", () => {
     const content =
       '<samba-command type="next-step" specialist="cybersec" why="endpoint novo sem checagem de papel" prompt="Audite o endpoint"></samba-command>';

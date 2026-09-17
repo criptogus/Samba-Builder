@@ -3,6 +3,7 @@ import type { ToolSet } from "ai";
 import { SambaError, SambaErrorKind, isSambaError } from "@/errors/samba_error";
 import type { SubagentThreadSummary } from "@/ipc/types";
 import { getErrorMessage } from "@/lib/errors";
+import { formatSambaSubagentTag } from "@/lib/specialist_agents";
 
 import { buildAgentToolSet, TOOL_DEFINITIONS } from "../tool_definitions";
 import {
@@ -50,6 +51,14 @@ const baseSpawnShape = {
     .default([])
     .describe(
       "Advisory relative paths or path prefixes expected to be in scope",
+    ),
+  specialist: z
+    .string()
+    .min(1)
+    .max(40)
+    .optional()
+    .describe(
+      "Optional specialist catalog id (cybersec, ux-ui, quality, …) so the chat shows that helper's face on this worker",
     ),
 };
 
@@ -273,7 +282,13 @@ export const spawnAgentTool: ToolDefinition<
       ctx.spawnedImplementerThreadIds.push(threadId);
     }
     ctx.onXmlComplete(
-      `<samba-subagent chat-id="${escapeXmlAttr(String(ctx.chatId))}" thread-id="${escapeXmlAttr(threadId)}" persona="${escapeXmlAttr(args.persona)}" task-name="${escapeXmlAttr(args.task_name)}"></samba-subagent>`,
+      formatSambaSubagentTag({
+        chatId: ctx.chatId,
+        threadId,
+        persona: args.persona,
+        taskName: args.task_name,
+        specialist: args.specialist,
+      }),
     );
     let subagent: SubagentThreadSummary;
     try {

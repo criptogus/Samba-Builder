@@ -69,6 +69,7 @@ import { SambaScript } from "./SambaScript";
 import { SambaGit } from "./SambaGit";
 import { SambaSubagent } from "./SambaSubagent";
 import { mapActionToButton } from "./ChatInput";
+import { SpecialistTalkHuddle } from "./SpecialistSpeech";
 import { SpecialistNextStepHuddle } from "./SpecialistNextSteps";
 import { SuggestedAction } from "@/lib/schemas";
 import {
@@ -427,6 +428,14 @@ const MemoClosedBlocks = React.memo(function MemoClosedBlocks({
   return (
     <>
       {segments.map((segment, segmentIndex) => {
+        if (segment.kind === "specialist-talk") {
+          return (
+            <SpecialistTalkHuddle
+              key={`talk-${segment.blocks[0]?.id ?? segmentIndex}`}
+              blocks={segment.blocks}
+            />
+          );
+        }
         if (segment.kind === "next-steps") {
           return (
             <SpecialistNextStepHuddle
@@ -546,6 +555,7 @@ function renderCustomTag(
           chatId={subagentChatId}
           threadId={attributes["thread-id"] || ""}
           persona={attributes.persona || "agent"}
+          specialist={attributes.specialist}
           taskName={attributes["task-name"] || "Sub-agent task"}
           renderActivity={(xml, activityId) => (
             <SambaMarkdownParser content={xml} messageId={activityId} />
@@ -553,6 +563,9 @@ function renderCustomTag(
         />
       );
     }
+    case "samba-say":
+    case "samba-invite":
+      return <SpecialistTalkHuddle blocks={[block]} />;
     case "samba-read":
       return (
         <SambaRead

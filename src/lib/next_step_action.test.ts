@@ -81,4 +81,54 @@ describe("segmentClosedBlocks", () => {
     expect(segments[2]).toMatchObject({ kind: "single" });
     expect(isNextStepCommandBlock(blocks[1])).toBe(true);
   });
+
+  it("agrupa samba-say e samba-invite consecutivos", () => {
+    const blocks: Block[] = [
+      {
+        kind: "markdown",
+        id: 1,
+        content: "Pronto.\n",
+        complete: true,
+      },
+      {
+        kind: "custom-tag",
+        id: 2,
+        tag: "samba-say",
+        attributes: { specialist: "ux-ui", about: "done" },
+        content: "Ajustei a hierarquia da home.",
+        complete: true,
+        inProgress: false,
+      },
+      {
+        kind: "markdown",
+        id: 3,
+        content: "\n",
+        complete: true,
+      },
+      {
+        kind: "custom-tag",
+        id: 4,
+        tag: "samba-invite",
+        attributes: {
+          from: "ux-ui",
+          specialist: "quality",
+          prompt: "Cubra a jornada com testes",
+        },
+        content: "",
+        complete: true,
+        inProgress: false,
+      },
+      nextStep(5, "quality"),
+    ];
+    const segments = segmentClosedBlocks(blocks);
+    expect(segments.map((s) => s.kind)).toEqual([
+      "single",
+      "specialist-talk",
+      "next-steps",
+    ]);
+    if (segments[1].kind !== "specialist-talk") {
+      throw new Error("expected talk huddle");
+    }
+    expect(segments[1].blocks.map((b) => b.id)).toEqual([2, 4]);
+  });
 });
