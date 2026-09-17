@@ -111,6 +111,11 @@ const Breadcrumb: React.FC<BreadcrumbProps> = ({
                   onClick={onSave}
                   disabled={!hasUnsavedChanges || isSaving}
                   className="h-6 w-6 p-0"
+                  aria-label={
+                    hasUnsavedChanges
+                      ? t("preview.saveChanges")
+                      : t("preview.noUnsavedChanges")
+                  }
                   data-testid="save-file-button"
                 />
               }

@@ -64,6 +64,7 @@ export function ContextLimitBanner({
               onClick={handleSummarize}
               variant="outline"
               size="sm"
+              aria-label="Summarize to new chat"
               className="h-6 px-2 text-xs border-amber-500/40 bg-amber-500/5 text-amber-600 dark:text-amber-500 hover:bg-amber-500/20 hover:border-amber-500/60"
             />
           }
