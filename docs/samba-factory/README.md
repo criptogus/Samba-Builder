@@ -4,6 +4,10 @@ A Fábrica adiciona ao Samba Builder um fluxo de cliente → briefing → plano 
 
 Esta entrega implementa a fundação funcional do PRD; não representa a conclusão de todos os itens de 90/180 dias. O [PRD original](./PRD-original.md) é o material fornecido pelo solicitante, não uma validação independente das afirmações sobre concorrentes.
 
+## Roadmap / Caminho 1
+
+O [Roadmap 90 dias — Caminho 1](./ROADMAP-90D-INTERNAL-FACTORY.md) define o ciclo atual do Samba Builder como **fábrica interna Samba** (BYOK, local-first, gates de segurança e handoff cliente-ready). Neste ciclo, o Builder **não** é posicionado como produto consumer tipo Lovable/Bolt. A productização white-label B2B (Caminho 2) só abre após critérios operacionais definidos no roadmap. O roadmap é spec executável para implementadores; os épicos E1–E6 estão priorizados e serão entregues em PRs separados.
+
 ## Usar
 
 1. Execute o Builder com Node 24: `npm ci`, `npm run init-precommit`, `npm start`.
