@@ -89,6 +89,7 @@
     "@base-ui/react": "^1.2.0",
     "@biomejs/biome": "^1.9.4",
     "@lexical/react": "^0.33.1",
+    "@lexical/utils": "^0.33.1",
     "@modelcontextprotocol/sdk": "^1.17.5",
     "@monaco-editor/react": "^4.7.0-rc.0",
     "@neondatabase/api-client": "^2.7.1",
