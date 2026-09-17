@@ -82,6 +82,8 @@ const SAMBA_CUSTOM_TAG_NAMES = [
   "samba-read-chat",
   "samba-explore-chat-history",
   "samba-subagent",
+  "samba-say",
+  "samba-invite",
 ];
 const SAMBA_CUSTOM_TAG_SET = new Set(SAMBA_CUSTOM_TAG_NAMES);
 

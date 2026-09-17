@@ -11,9 +11,11 @@ import {
   Square,
 } from "lucide-react";
 
+import { SpecialistAvatar } from "@/components/SpecialistAvatar";
 import { Button } from "@/components/ui/button";
 import { ipc, isSubagentActive, type SubagentStatus } from "@/ipc/types";
 import { queryKeys } from "@/lib/queryKeys";
+import { getSpecialistAgent } from "@/lib/specialist_agents";
 import { showError } from "@/lib/toast";
 import {
   SambaCard,
@@ -25,6 +27,7 @@ interface SambaSubagentProps {
   chatId: number;
   threadId: string;
   persona: string;
+  specialist?: string;
   taskName: string;
   renderActivity: (
     xml: string,
@@ -37,6 +40,7 @@ export function SambaSubagent({
   chatId,
   threadId,
   persona,
+  specialist,
   taskName,
   renderActivity,
 }: SambaSubagentProps) {
@@ -84,6 +88,10 @@ export function SambaSubagent({
   const report =
     typeof thread?.result?.report === "string" ? thread.result.report : null;
   const title = taskName || thread?.taskName || "Sub-agent task";
+  const specialistAgent = getSpecialistAgent(specialist);
+  const personaLabel = specialistAgent
+    ? `${specialistAgent.persona} · ${specialistAgent.name}`
+    : persona;
   const statusText = useMemo(
     () =>
       loadError
@@ -94,7 +102,21 @@ export function SambaSubagent({
 
   return (
     <SambaCard className="overflow-hidden">
-      <SambaCardHeader icon={<Bot size={15} />} accentColor="indigo">
+      <SambaCardHeader
+        icon={
+          specialistAgent ? (
+            <SpecialistAvatar
+              agent={specialistAgent}
+              size="xs"
+              decorative
+              className="ring-0"
+            />
+          ) : (
+            <Bot size={15} />
+          )
+        }
+        accentColor="indigo"
+      >
         <button
           type="button"
           className="flex min-w-0 flex-1 items-center gap-2 text-left"
@@ -110,7 +132,7 @@ export function SambaSubagent({
           <span className="min-w-0 flex-1">
             <span className="block truncate text-sm font-medium">{title}</span>
             <span className="block truncate text-xs text-muted-foreground">
-              <span className="capitalize">{persona}</span>
+              <span className="capitalize">{personaLabel}</span>
               {statusText ? ` · ${statusText}` : ""}
               {activities.length > 0
                 ? ` · ${activities.length} action${activities.length === 1 ? "" : "s"}`
@@ -137,7 +159,7 @@ export function SambaSubagent({
           <Button
             size="sm"
             variant="ghost"
-            aria-label={`Stop ${persona} ${title}`}
+            aria-label={`Stop ${personaLabel} ${title}`}
             disabled={cancelMutation.isPending}
             onClick={() => cancelMutation.mutate()}
           >

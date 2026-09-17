@@ -12,6 +12,8 @@
  * aquele especialista tem voz — um designer não recomenda em task de backend.
  */
 
+import { escapeXmlAttr } from "../../shared/xmlEscape";
+
 export type SpecialistTask = {
   id: string;
   label: string;
@@ -423,6 +425,22 @@ export function getSpecialistAgent(
   return specialistsById.get(id);
 }
 
+/** Markup do card de subagente no chat, com rosto quando o id do catálogo existe. */
+export function formatSambaSubagentTag(attrs: {
+  chatId: number | string;
+  threadId: string;
+  persona: string;
+  taskName: string;
+  specialist?: string;
+}): string {
+  const specialistId = attrs.specialist?.trim();
+  const specialistAttr =
+    specialistId && getSpecialistAgent(specialistId)
+      ? ` specialist="${escapeXmlAttr(specialistId)}"`
+      : "";
+  return `<samba-subagent chat-id="${escapeXmlAttr(String(attrs.chatId))}" thread-id="${escapeXmlAttr(attrs.threadId)}" persona="${escapeXmlAttr(attrs.persona)}" task-name="${escapeXmlAttr(attrs.taskName)}"${specialistAttr}></samba-subagent>`;
+}
+
 /** Prefixa o pedido com os skills do especialista (ou o papel, se não houver skill). */
 export function composeSpecialistTaskPrompt(
   agent: SpecialistAgent,
@@ -438,6 +456,26 @@ export function composeSpecialistTaskPrompt(
     return `${agent.skills.map((s) => `/${s}`).join(" ")} ${mission}`;
   }
   return `Atue como especialista em ${agent.name} (${agent.tagline}). ${mission}`;
+}
+
+/** Prompt quando um especialista chama outro para entrar na tarefa. */
+export function composeSpecialistInvitePrompt(
+  invitee: SpecialistAgent,
+  taskText: string,
+  why?: string,
+  from?: SpecialistAgent,
+): string {
+  const text = taskText.trim();
+  const noticed = why?.trim();
+  const caller = from?.persona;
+  const mission = caller
+    ? noticed
+      ? `${caller} chamou ${invitee.persona}: ${noticed}. ${text}`
+      : `${caller} chamou ${invitee.persona}. ${text}`
+    : noticed
+      ? `${invitee.persona} notou: ${noticed}. ${text}`
+      : text;
+  return composeSpecialistTaskPrompt(invitee, mission);
 }
 
 /**
@@ -460,6 +498,20 @@ Pick helpers by what was JUST done, not by rotation. Concrete fit:
 - After deploy/CI/Docker/env/infra: devops SHOULD speak. enterprise MAY speak about rollback/observability.
 - After non-trivial code change: reviewer MAY ask to re-read the diff. After untested new behavior: quality SHOULD speak. After product/scope ambiguity: pm SHOULD speak.
 Prefer 2-4 different specialists. Never end a substantial task with an open question as the only call to action — the clickable next steps ARE the call to action. Do not emit next steps for trivial changes.
+${specialistChatVoiceGuideline()}
 Specialist catalog (use these ids exactly):
 ${catalog}`;
+}
+
+/**
+ * Fala no chat (rosto + primeira pessoa) e convite multi-agente.
+ * spawn_agent continua explorer|implementer; o convite é a cara humana do handoff.
+ */
+export function specialistChatVoiceGuideline(): string {
+  return `- Speak as the specialists, not as a generic assistant recap. After substantial work (and when a specialist has something concrete to say mid-task), emit first-person speech the user sees with that helper's face:
+<samba-say specialist="<id>" about="done">1-3 short sentences in pt-BR. What THIS specialist just did or noticed, and why it matters.</samba-say>
+about="done" = what was finished and why it matters. about="next" = what still needs doing and why (use this when the specialist is flagging a gap they will not execute in this turn). Body text is first person, warm, concrete, under ~280 characters. Never use <, >, & or double quotes inside the body or attributes (write them as words). Prefer 1-3 samba-say tags per substantial turn, different specialists, matching the same domain-fit rules as next-steps (designer does not recap backend; cybersec does speak after a new endpoint). Do not repeat the same recap as both plain markdown and a samba-say — the tag IS the recap the user reads.
+- One specialist can call another into the current task. When a different domain should join NOW (tests after UI, security after a new API, review after a risky change), emit:
+<samba-invite from="<id>" specialist="<id>" why="..." prompt="..."></samba-invite>
+from is who is calling; specialist is who should join. why is a short first-person observation in pt-BR (under ~80 characters). prompt is the clickable join action in pt-BR, starts with a verb, under ~90 characters. Same character-escaping rules as next-step. At most 1-2 invites per turn. Concrete fit: after UI/UX, ux-ui MAY invite quality; after a new endpoint, architect or the acting helper MAY invite cybersec; after untested behavior, anyone MAY invite quality. Never invite a specialist whose skipWhen matches the work.`;
 }

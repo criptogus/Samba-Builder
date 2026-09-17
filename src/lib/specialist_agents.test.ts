@@ -1,8 +1,11 @@
 import { describe, expect, it } from "vitest";
 import {
+  composeSpecialistInvitePrompt,
   composeSpecialistTaskPrompt,
+  formatSambaSubagentTag,
   getSpecialistAgent,
   specialistAgents,
+  specialistChatVoiceGuideline,
   specialistNextStepGuideline,
 } from "./specialist_agents";
 import { nativeSkills } from "@/shared/native_skills";
@@ -111,12 +114,61 @@ describe("specialist agents — skills transformados em agentes", () => {
     ).toContain("Atue como especialista em Apps Nativos / Mobile");
   });
 
+  it("formatSambaSubagentTag inclui o rosto só com id do catálogo", () => {
+    expect(
+      formatSambaSubagentTag({
+        chatId: 7,
+        threadId: "explorer-1",
+        persona: "explorer",
+        taskName: "Trace auth",
+      }),
+    ).toBe(
+      '<samba-subagent chat-id="7" thread-id="explorer-1" persona="explorer" task-name="Trace auth"></samba-subagent>',
+    );
+    expect(
+      formatSambaSubagentTag({
+        chatId: 7,
+        threadId: "explorer-1",
+        persona: "explorer",
+        taskName: "Trace auth",
+        specialist: "cybersec",
+      }),
+    ).toContain('specialist="cybersec"');
+    expect(
+      formatSambaSubagentTag({
+        chatId: 7,
+        threadId: "explorer-1",
+        persona: "explorer",
+        taskName: "Trace auth",
+        specialist: "wizard",
+      }),
+    ).not.toContain("specialist=");
+  });
+
+  it("composeSpecialistInvitePrompt registra quem chamou quem", () => {
+    const tess = getSpecialistAgent("quality")!;
+    const luna = getSpecialistAgent("ux-ui")!;
+    expect(
+      composeSpecialistInvitePrompt(
+        tess,
+        "Cubra a jornada de onboarding com testes",
+        "as telas mudaram e a jornada ainda nao tem e2e",
+        luna,
+      ),
+    ).toBe(
+      "/samba-quality-engineering /samba-tdd Luna chamou Tess: as telas mudaram e a jornada ainda nao tem e2e. Cubra a jornada de onboarding com testes",
+    );
+  });
+
   it("guideline de next-step lista todos os ids e a regra de domínio", () => {
     const guideline = specialistNextStepGuideline();
     expect(guideline).toContain('specialist="<id>"');
     expect(guideline).toContain("cybersec SHOULD speak");
     expect(guideline).toContain("ux-ui SHOULD speak");
     expect(guideline).toContain("NEVER emit ux-ui or mobile");
+    expect(guideline).toContain("<samba-say");
+    expect(guideline).toContain("<samba-invite");
+    expect(specialistChatVoiceGuideline()).toContain("samba-invite");
     for (const agent of specialistAgents) {
       expect(guideline).toContain(`- ${agent.id} (`);
     }
