@@ -7,6 +7,11 @@ const { isPrereleaseVersion } = require("./release-version-utils.js");
 
 const PROVENANCE_ASSET_PREFIX = "release-provenance-";
 const PROVENANCE_ASSET_SUFFIX = ".json";
+const DEFAULT_REPOSITORY = "criptogus/Samba-Builder";
+
+// Cada plataforma publica um manifesto de proveniencia. Eles sao o contrato da
+// release: nome, digest e tamanho de todo asset sao conferidos contra eles.
+const REQUIRED_PLATFORMS = ["linux", "macos", "macos-intel", "windows"];
 
 function sha256(bytes) {
   return crypto.createHash("sha256").update(bytes).digest("hex");
@@ -25,6 +30,38 @@ function isProvenanceAsset(name) {
     name.startsWith(PROVENANCE_ASSET_PREFIX) &&
     name.endsWith(PROVENANCE_ASSET_SUFFIX)
   );
+}
+
+/**
+ * Resolve owner/repo a partir do ambiente do Actions (GITHUB_REPOSITORY).
+ *
+ * O script estava fixado no repositorio do projeto original, o que fazia a
+ * verificacao falhar com 404 em qualquer fork — a release procurada nunca
+ * existia no repositorio consultado.
+ */
+function resolveRepository(env = process.env, fallback = DEFAULT_REPOSITORY) {
+  const slug = env.GITHUB_REPOSITORY || fallback;
+  const [owner, repo] = String(slug).split("/");
+  if (!owner || !repo) {
+    throw new Error(`invalid repository slug: ${slug}`);
+  }
+  return { owner, repo };
+}
+
+/** Exige um manifesto de proveniencia por plataforma. */
+function verifyRequiredPlatforms(assets) {
+  const uploaded = new Set((assets ?? []).map((asset) => asset.name));
+  const missing = REQUIRED_PLATFORMS.map(
+    (platform) =>
+      `${PROVENANCE_ASSET_PREFIX}${platform}${PROVENANCE_ASSET_SUFFIX}`,
+  ).filter((name) => !uploaded.has(name));
+
+  if (missing.length > 0) {
+    throw new Error(
+      `Faltam manifestos de proveniencia: ${missing.join(", ")}. ` +
+        "Alguma plataforma nao completou o build.",
+    );
+  }
 }
 
 function verifyReleaseAssetProvenance(assets, provenanceDirectory) {
@@ -110,9 +147,8 @@ async function verifyReleaseAssets() {
 
     console.log(`🔍 Verifying release assets for version ${version}...`);
 
-    // GitHub API configuration
-    const owner = "samba-sh";
-    const repo = "samba";
+    // Repositorio: vem do ambiente do Actions (GITHUB_REPOSITORY), nunca fixo.
+    const { owner, repo } = resolveRepository();
     const token = process.env.GITHUB_TOKEN;
 
     if (!token) {
@@ -160,45 +196,20 @@ async function verifyReleaseAssets() {
       );
     }
 
-    // Handle different beta naming conventions across platforms
-    const normalizeVersionForPlatform = (version, platform) => {
-      if (!version.includes("beta")) {
-        return version;
-      }
-
-      switch (platform) {
-        case "rpm":
-        case "deb":
-          // RPM and DEB use dots: 0.14.0-beta.1 -> 0.14.0.beta.1
-          return version.replace("-beta.", ".beta.");
-        case "nupkg":
-          // NuGet removes the dot: 0.14.0-beta.1 -> 0.14.0-beta1
-          return version.replace("-beta.", "-beta");
-        default:
-          // Windows installer and macOS zips keep original format
-          return version;
-      }
-    };
-
-    // Define expected assets with platform-specific version handling
-    const expectedAssets = [
-      `samba-${normalizeVersionForPlatform(version, "rpm")}-1.x86_64.rpm`,
-      `samba-${normalizeVersionForPlatform(version, "nupkg")}-full.nupkg`,
-      `samba-${version}.Setup.exe`,
-      `samba-darwin-arm64-${version}.zip`,
-      `samba-darwin-x64-${version}.zip`,
-      `samba_${normalizeVersionForPlatform(version, "deb")}_amd64.deb`,
-      `samba_${version}_x86_64.AppImage`,
-      "RELEASES",
-      "release-provenance-linux.json",
-      "release-provenance-macos-intel.json",
-      "release-provenance-macos.json",
-      "release-provenance-windows.json",
-    ];
+    // Os manifestos de proveniencia sao o contrato da release. Os nomes dos
+    // binarios variam por plataforma (zip, exe, deb, rpm, AppImage, nupkg) e
+    // nao sao fixados aqui: o conteudo de cada asset e conferido contra a
+    // proveniencia, com nome, digest e tamanho exatos.
+    const expectedAssets = REQUIRED_PLATFORMS.map(
+      (platform) =>
+        `${PROVENANCE_ASSET_PREFIX}${platform}${PROVENANCE_ASSET_SUFFIX}`,
+    );
 
     console.log("📋 Expected assets:");
     expectedAssets.forEach((asset) => console.log(`  - ${asset}`));
     console.log("");
+
+    verifyRequiredPlatforms(assets);
 
     // Get actual asset names
     const actualAssets = assets.map((asset) => asset.name);
@@ -223,28 +234,14 @@ async function verifyReleaseAssets() {
       process.exit(1);
     }
 
-    // Extra assets are not covered by provenance and would make downstream
-    // trusted-release verification reject the release.
-    const unexpectedAssets = actualAssets.filter(
-      (actual) => !expectedAssets.includes(actual),
-    );
-
-    if (unexpectedAssets.length > 0) {
-      console.error("❌ VERIFICATION FAILED!");
-      console.error("📦 Unexpected assets:");
-      unexpectedAssets.forEach((asset) => console.error(`  - ${asset}`));
-      console.error("");
-      console.error(
-        "Remove stale assets from the draft and rerun the release.",
-      );
-      process.exit(1);
-    }
+    // Asset fora da proveniencia e rejeitado por verifyReleaseAssetProvenance,
+    // que exige conjunto exato: nada sobrando, nada faltando.
 
     verifyReleaseAssetProvenance(assets, path.join(__dirname, "..", "out"));
 
     console.log("✅ VERIFICATION PASSED!");
     console.log(
-      `🎉 All ${expectedAssets.length} expected assets are present in release ${tagName}`,
+      `🎉 As ${REQUIRED_PLATFORMS.length} plataformas publicaram e os ${assets.length} assets de ${tagName} batem com a proveniencia`,
     );
     console.log("");
     console.log("📊 Release Summary:");
@@ -262,4 +259,9 @@ if (require.main === module) {
   verifyReleaseAssets();
 }
 
-module.exports = { verifyReleaseAssetProvenance };
+module.exports = {
+  resolveRepository,
+  verifyRequiredPlatforms,
+  verifyReleaseAssetProvenance,
+  verifyReleaseAssets,
+};

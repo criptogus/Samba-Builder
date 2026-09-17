@@ -8,6 +8,11 @@ permissions:
 name: Release app
 on:
   workflow_dispatch:
+    inputs:
+      publish:
+        description: "Publicar a release ao final (desmarque para deixar como rascunho e revisar antes)"
+        type: boolean
+        default: true
 
 concurrency:
   group: release-app-${{ github.ref }}
@@ -243,3 +248,11 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: node scripts/verify-release-assets.js
+      # A release nasce como rascunho no preparo. Publicar aqui, depois da
+      # verificacao de proveniencia, mantem o guard de releases nao autorizadas
+      # satisfeito: o autor continua sendo github-actions[bot].
+      - name: Publish release
+        if: inputs.publish
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release edit "$RELEASE_TAG" --draft=false

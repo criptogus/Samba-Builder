@@ -285,3 +285,46 @@ describe("checkForRelease", () => {
     expect(sentHeaders[1]?.Authorization).toBeUndefined();
   });
 });
+
+describe("pickReleaseAsset", () => {
+  it("encontra o zip do CI, com a versão depois da arquitetura", () => {
+    const assets = [
+      "Samba.Builder-darwin-arm64-1.14.0-beta.6.zip",
+      "Samba.Builder-darwin-x64-1.14.0-beta.6.zip",
+      "Samba.Builder-1.14.0-beta.6.Setup.exe",
+      "samba-builder_1.14.0.beta.6_amd64.deb",
+    ];
+    expect(pickReleaseAsset(assets, "darwin", "arm64")).toBe(
+      "Samba.Builder-darwin-arm64-1.14.0-beta.6.zip",
+    );
+    expect(pickReleaseAsset(assets, "darwin", "x64")).toBe(
+      "Samba.Builder-darwin-x64-1.14.0-beta.6.zip",
+    );
+    expect(pickReleaseAsset(assets, "win32", "x64")).toBe(
+      "Samba.Builder-1.14.0-beta.6.Setup.exe",
+    );
+    expect(pickReleaseAsset(assets, "linux", "x64")).toBe(
+      "samba-builder_1.14.0.beta.6_amd64.deb",
+    );
+  });
+
+  it("continua encontrando o zip de build local, com a arquitetura no fim", () => {
+    expect(
+      pickReleaseAsset(
+        ["SambaBuilder-1.14.0-beta.6-arm64.zip"],
+        "darwin",
+        "arm64",
+      ),
+    ).toBe("SambaBuilder-1.14.0-beta.6-arm64.zip");
+  });
+
+  it("não devolve arquivo de outra plataforma", () => {
+    expect(
+      pickReleaseAsset(
+        ["Samba.Builder-darwin-arm64-1.14.0-beta.6.zip"],
+        "win32",
+        "x64",
+      ),
+    ).toBeNull();
+  });
+});

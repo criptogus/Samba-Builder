@@ -104,28 +104,56 @@ export function compareVersions(a: string, b: string): number {
   return 0;
 }
 
-/** Qual arquivo da release corresponde à plataforma/arquitetura atuais. */
+/**
+ * Qual arquivo da release corresponde à plataforma/arquitetura atuais.
+ *
+ * Os nomes variam: o CI publica no padrão do Electron Forge
+ * (`<produto>-<plataforma>-<arquitetura>-<versão>.<ext>`, com o nome-base
+ * sanitizado — espaço vira ponto) e builds locais saem como
+ * `<produto>-<versão>-<arquitetura>.zip`. Os filtros descem do mais específico
+ * para o mais genérico para aceitar os dois, sem chutar arquivo de outra
+ * plataforma.
+ */
 export function pickReleaseAsset(
   assetNames: string[],
   platform: NodeJS.Platform,
   arch: string,
 ): string | null {
-  const find = (test: (name: string) => boolean) =>
-    assetNames.find(test) ?? null;
+  const names = assetNames.filter((name) => typeof name === "string");
+  const archToken =
+    arch === "arm64"
+      ? /(^|[^a-z0-9])arm64([^a-z0-9]|$)/i
+      : arch === "x64"
+        ? /(^|[^a-z0-9])(x64|amd64|x86_64)([^a-z0-9]|$)/i
+        : null;
+  const ofPlatform = (name: string): boolean => {
+    if (platform === "darwin") {
+      return /darwin|mac/i.test(name);
+    }
+    if (platform === "win32") {
+      return /win|set\.exe$|\.exe$|\.nupkg$/i.test(name);
+    }
+    return /linux|appimage|\.deb$|\.rpm$/i.test(name);
+  };
+  const pick = (extension: RegExp): string | null => {
+    const withExtension = names.filter((name) => extension.test(name));
+    return (
+      withExtension.find(
+        (name) => ofPlatform(name) && (!archToken || archToken.test(name)),
+      ) ??
+      withExtension.find((name) => ofPlatform(name)) ??
+      withExtension.find((name) => !archToken || archToken.test(name)) ??
+      null
+    );
+  };
   if (platform === "darwin") {
-    return arch === "arm64"
-      ? find((name) => /-arm64\.zip$/i.test(name))
-      : find((name) => /-x64\.zip$/i.test(name));
+    return pick(/\.zip$/i);
   }
   if (platform === "win32") {
-    return find((name) => /Setup\.exe$/i.test(name));
+    return pick(/Setup\.exe$/i) ?? pick(/\.exe$/i) ?? pick(/\.nupkg$/i);
   }
   if (platform === "linux") {
-    return (
-      find((name) => /_amd64\.deb$/i.test(name)) ??
-      find((name) => /\.rpm$/i.test(name)) ??
-      find((name) => /\.AppImage$/i.test(name))
-    );
+    return pick(/\.deb$/i) ?? pick(/\.rpm$/i) ?? pick(/\.AppImage$/i);
   }
   return null;
 }
