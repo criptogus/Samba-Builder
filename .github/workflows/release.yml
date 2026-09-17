@@ -266,9 +266,16 @@ jobs:
           fi
           # Notas a partir dos commits: o app mostra "o que ha de novo" lendo o
           # corpo da release, e o rascunho do preparo nasce sem corpo — sem isto
-          # a tela aparece em branco.
-          NOTES="$(gh api -X POST "repos/${{ github.repository }}/releases/generate-notes" -f tag_name="$RELEASE_TAG" --jq .body)"
-          if [ -n "$NOTES" ]; then
-            gh release edit "$RELEASE_TAG" --notes "$NOTES"
+          # a tela aparece em branco. A geracao pronta do GitHub depende de PRs,
+          # e aqui o trabalho entra direto na main; entao montamos a lista pelo
+          # compare entre a release anterior e esta.
+          PREV="$(gh api "repos/${{ github.repository }}/releases?per_page=50" \
+            --jq "[.[] | select(.draft == false and .tag_name != \"$RELEASE_TAG\")][0].tag_name" 2>/dev/null || true)"
+          if [ -n "$PREV" ] && [ "$PREV" != "null" ]; then
+            NOTES="$(gh api "repos/${{ github.repository }}/compare/$PREV...$RELEASE_TAG" \
+              --jq '.commits[] | "- " + (.commit.message | split("\n")[0])' | head -50)"
+            if [ -n "$NOTES" ]; then
+              gh release edit "$RELEASE_TAG" --notes "$NOTES"
+            fi
           fi
           gh release edit "$RELEASE_TAG" --draft=false
