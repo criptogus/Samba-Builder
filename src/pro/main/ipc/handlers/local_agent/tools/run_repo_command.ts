@@ -22,15 +22,15 @@ const runRepoCommandSchema = z.object({
     ),
 });
 
-const description = `Run a verification command of the EXISTING repository you are working on (an imported app — not the scaffold). This is how you verify changes in a repo whose stack is not the Samba Builder scaffold:
+const description = `Run a command in the EXISTING repository you are working on (an imported app — not the scaffold). This is how you verify changes in a repo whose stack is not the Samba Builder scaffold, and how you run the repo's own git operations.
 
 - Discover the repo's own commands first by reading its manifests (package.json scripts, pyproject.toml, etc.)
 - Prefer the repo's existing test/lint/typecheck scripts; run them with the package manager the repo uses (npm/pnpm/yarn/python/cargo/...)
 - Run verification BEFORE and AFTER every change; never leave the repo in a broken state, even mid-task
-- One verification at a time; keep the command focused on what you changed when possible
+- One command at a time; keep it focused on what you changed when possible
 - The command runs in the repository directory with the user's Node runtime on PATH
 
-This tool is for verification only (tests, lint, typecheck). Do not use it to install dependencies or mutate the repo outside verification.`;
+Git commands are allowed here (inspecting remotes, fetching, pushing) — publishing, destroying data or touching dependencies is not silent: those ask the user first. If the user asks you to sync with GitHub and the repo has a remote, run the git command and report what actually happened; never answer with a limitation you have not tested.`;
 
 export const runRepoCommandTool: ToolDefinition<
   z.infer<typeof runRepoCommandSchema>

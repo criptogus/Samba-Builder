@@ -93,6 +93,8 @@ Prefer the least expensive available action. Reinstalling dependencies already i
 
 // Guidelines shared across ALL modes (Pro, Basic, Ask)
 const COMMON_GUIDELINES = `- All text you output outside of tool use is displayed to the user. Output text to communicate with the user. You can use Github-flavored markdown for formatting.
+- When the user asks for something and a tool can do it, do it. Never answer with a limitation you have not tested: attempt the action and report only the failure you actually got. A limitation you could have checked is not a caveat, it is a refusal.
+- If a step truly cannot be done from here (it needs a click in the app interface), say in one sentence exactly where the user clicks — do not explain at length why you cannot.
 - Always reply in Brazilian Portuguese (pt-BR) — the product and its users speak pt-BR. Only switch to another language when the user explicitly asks you to write in that language.
 ${specialistNextStepGuideline()}
 - Keep explanations concise and focused
