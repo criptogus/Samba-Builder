@@ -23,7 +23,9 @@ describe("describeReleaseCheck", () => {
       "pt-BR",
     );
     expect(content.title).toBe("Nova versão disponível");
-    expect(content.buttons[content.downloadButtonIndex]).toBe("Baixar");
+    expect(content.buttons[content.downloadButtonIndex]).toBe(
+      "Baixar e instalar",
+    );
     expect(content.message).toContain("1.14.0-beta.4");
   });
 
@@ -33,7 +35,9 @@ describe("describeReleaseCheck", () => {
       "en-US",
     );
     expect(content.title).toBe("New version available");
-    expect(content.buttons[content.downloadButtonIndex]).toBe("Download");
+    expect(content.buttons[content.downloadButtonIndex]).toBe(
+      "Download and install",
+    );
   });
 
   it("quando está atualizado não oferece download", () => {

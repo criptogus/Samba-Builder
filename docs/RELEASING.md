@@ -87,15 +87,15 @@ GITHUB_REPOSITORY=criptogus/Samba-Builder npm run verify-release
 
 Nomes publicados pelo CI (o Electron Forge sanitiza o nome-base: espaço vira ponto):
 
-| Plataforma            | Arquivo                                  |
-| --------------------- | ---------------------------------------- |
-| macOS Apple Silicon   | `Samba.Builder-darwin-arm64-<versão>.zip`    |
-| macOS Intel           | `Samba.Builder-darwin-x64-<versão>.zip`      |
-| Windows 10/11         | `Samba.Builder-<versão>.Setup.exe`           |
+| Plataforma            | Arquivo                                                          |
+| --------------------- | ---------------------------------------------------------------- |
+| macOS Apple Silicon   | `Samba.Builder-darwin-arm64-<versão>.zip`                        |
+| macOS Intel           | `Samba.Builder-darwin-x64-<versão>.zip`                          |
+| Windows 10/11         | `Samba.Builder-<versão>.Setup.exe`                               |
 | Windows (Squirrel)    | `samba-builder-<versão sem o ponto>beta-full.nupkg` + `RELEASES` |
-| Linux Debian/Ubuntu   | `samba-builder_<versão com .beta.>_amd64.deb` |
-| Linux Fedora/openSUSE | `samba-builder-<versão com .beta.>-1.x86_64.rpm` |
-| Linux portátil        | `Samba.Builder_<versão>_x86_64.AppImage`     |
+| Linux Debian/Ubuntu   | `samba-builder_<versão com .beta.>_amd64.deb`                    |
+| Linux Fedora/openSUSE | `samba-builder-<versão com .beta.>-1.x86_64.rpm`                 |
+| Linux portátil        | `Samba.Builder_<versão>_x86_64.AppImage`                         |
 
 ### Quando o job de publicação não inicia (bloqueio de billing)
 

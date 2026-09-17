@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
+import { UpdateInstallAction } from "@/components/UpdateInstallAction";
 import { useSettings } from "@/hooks/useSettings";
 import { ipc } from "@/ipc/types";
 import { queryKeys } from "@/lib/queryKeys";
@@ -56,16 +57,10 @@ export function UpdateNotice() {
           {t("general.updateAvailable", { version: data.latestVersion })}
         </p>
         {description}
-        <Button
-          size="sm"
-          onClick={() => {
-            if (data.releaseUrl) {
-              void ipc.system.openExternalUrl(data.releaseUrl);
-            }
-          }}
-        >
-          {t("general.updateDownload")}
-        </Button>
+        <UpdateInstallAction
+          version={data.latestVersion}
+          releaseUrl={data.releaseUrl}
+        />
       </div>
     );
   }

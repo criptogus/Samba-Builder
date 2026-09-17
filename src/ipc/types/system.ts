@@ -21,6 +21,27 @@ export const ReleaseCheckResultSchema = z.object({
   reason: z.string().nullable(),
 });
 
+/** Progresso da instalação de uma atualização (etapas iguais às do Node gerenciado). */
+export const UpdateInstallProgressSchema = z.object({
+  phase: z.enum([
+    "downloading",
+    "verifying",
+    "extracting",
+    "installing",
+    "done",
+  ]),
+  percent: z.number().min(0).max(100),
+});
+
+export type UpdateInstallProgress = z.infer<typeof UpdateInstallProgressSchema>;
+
+export const InstallUpdateResultSchema = z.object({
+  status: z.enum(["scheduled", "unsupported", "failed"]),
+  reason: z.string().nullable(),
+});
+
+export type InstallUpdateResult = z.infer<typeof InstallUpdateResultSchema>;
+
 export const NodeSystemInfoSchema = z.object({
   nodeVersion: z.string().nullable(),
   pnpmVersion: z.string().nullable(),
@@ -431,6 +452,17 @@ export const systemContracts = {
     input: z.void(),
     output: ReleaseCheckResultSchema,
   }),
+
+  /**
+   * Baixa a versão nova, confere o digest publicado, extrai e troca o bundle:
+   * o app fecha e reabre sozinho. Só no macOS — fora dele responde
+   * `unsupported` com o motivo, e a UI oferece a página da release.
+   */
+  installUpdate: defineContract({
+    channel: "install-update",
+    input: z.void(),
+    output: InstallUpdateResultSchema,
+  }),
 } as const;
 
 // =============================================================================
@@ -456,6 +488,11 @@ export const systemEvents = {
   managedNodeInstallProgress: defineEvent({
     channel: "managed-node:install-progress",
     payload: ManagedNodeInstallProgressSchema,
+  }),
+
+  updateInstallProgress: defineEvent({
+    channel: "update:install-progress",
+    payload: UpdateInstallProgressSchema,
   }),
 } as const;
 

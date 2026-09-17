@@ -19,6 +19,7 @@ import {
   checkForRelease,
   describeReleaseCheck,
 } from "./ipc/services/release_check";
+import { installLatestUpdate } from "./main/update_install_flow";
 import dotenv from "dotenv";
 // Samba Builder: sem auto-update (o update-electron-app consultava o backend
 // do Samba) — o import foi removido.
@@ -1330,11 +1331,45 @@ const createApplicationMenu = () => {
                     defaultId: 0,
                     cancelId: content.buttons.length - 1,
                   });
-                  if (
-                    response === content.downloadButtonIndex &&
-                    result.releaseUrl
-                  ) {
-                    void shell.openExternal(result.releaseUrl);
+                  if (response === content.downloadButtonIndex) {
+                    const pt = app.getLocale().toLowerCase().startsWith("pt");
+                    const instalacao = await installLatestUpdate({
+                      logger: {
+                        info: (message) => logger.info(message),
+                        warn: (message, error) => logger.warn(message, error),
+                      },
+                    });
+                    if (instalacao.status === "scheduled") {
+                      await dialog.showMessageBox({
+                        type: "info",
+                        message: pt
+                          ? "Baixando a versão nova"
+                          : "Downloading the new version",
+                        detail: pt
+                          ? "O app vai fechar e reabrir quando a troca terminar. Seus dados ficam como estão."
+                          : "The app will close and reopen when the swap finishes. Your data stays where it is.",
+                        buttons: ["Ok"],
+                      });
+                      setTimeout(() => {
+                        app.quit();
+                      }, 1500);
+                    } else {
+                      const { response: abrir } = await dialog.showMessageBox({
+                        type: "warning",
+                        message: pt
+                          ? "Não foi possível instalar automaticamente"
+                          : "Could not install automatically",
+                        detail: instalacao.reason ?? "",
+                        buttons: pt
+                          ? ["Abrir a página da release", "Fechar"]
+                          : ["Open the release page", "Close"],
+                        defaultId: 0,
+                        cancelId: 1,
+                      });
+                      if (abrir === 0 && result.releaseUrl) {
+                        void shell.openExternal(result.releaseUrl);
+                      }
+                    }
                   }
                 },
               },

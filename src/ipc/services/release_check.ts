@@ -164,7 +164,12 @@ interface GithubRelease {
   draft?: boolean;
   prerelease?: boolean;
   published_at?: string;
-  assets?: { name?: string }[];
+  assets?: {
+    name?: string;
+    browser_download_url?: string;
+    digest?: string | null;
+    size?: number;
+  }[];
 }
 
 /** Escolhe a release mais nova (inclui pré-lançamento) e o asset da plataforma. */
@@ -195,6 +200,47 @@ export function selectLatestRelease(
   };
 }
 
+/**
+ * Busca a lista de releases deste repositório.
+ *
+ * Regra da credencial, em um lugar só: o repositório de releases é público,
+ * então token expirado ou sem permissão não pode derrubar a consulta — se o
+ * pedido com token falhar, repete sem ele. Devolve erro em vez de lançar, para
+ * quem chama decidir a mensagem.
+ */
+export async function fetchReleases({
+  token = null,
+  fetchImpl = fetch,
+}: {
+  token?: string | null;
+  fetchImpl?: typeof fetch;
+} = {}): Promise<
+  { ok: true; releases: GithubRelease[] } | { ok: false; status: number }
+> {
+  const request = (useToken: boolean) =>
+    fetchImpl(
+      `https://api.github.com/repos/${RELEASE_REPO}/releases?per_page=20`,
+      {
+        headers: {
+          Accept: "application/vnd.github+json",
+          "User-Agent": "Samba-Builder-Update-Check",
+          ...(useToken && token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        signal: AbortSignal.timeout(10_000),
+      },
+    );
+
+  let response = await request(true);
+  if (!response.ok && token) {
+    response = await request(false);
+  }
+  if (!response.ok) {
+    return { ok: false, status: response.status };
+  }
+  const releases = (await response.json()) as GithubRelease[];
+  return { ok: true, releases: Array.isArray(releases) ? releases : [] };
+}
+
 export interface CheckForReleaseOptions {
   currentVersion: string;
   /** Token do GitHub do usuário, quando existir: o repositório é privado. */
@@ -223,39 +269,21 @@ export async function checkForRelease({
     assetName: null,
     reason: null,
   };
-  const request = (useToken: boolean) =>
-    fetchImpl(
-      `https://api.github.com/repos/${RELEASE_REPO}/releases?per_page=20`,
-      {
-        headers: {
-          Accept: "application/vnd.github+json",
-          "User-Agent": "Samba-Builder-Update-Check",
-          ...(useToken && token ? { Authorization: `Bearer ${token}` } : {}),
-        },
-        signal: AbortSignal.timeout(10_000),
-      },
-    );
   try {
-    let response = await request(true);
-    // O repositório de releases é público: credencial expirada ou sem permissão
-    // não pode derrubar a checagem — se falhou com token, tenta sem ele.
-    if (!response.ok && token) {
-      response = await request(false);
-    }
-    if (!response.ok) {
+    const fetched = await fetchReleases({ token, fetchImpl });
+    if (!fetched.ok) {
       return {
         ...base,
         reason:
-          response.status === 404
+          fetched.status === 404
             ? "no-access"
-            : response.status === 403
+            : fetched.status === 403
               ? "rate-limit"
-              : `http-${response.status}`,
+              : `http-${fetched.status}`,
       };
     }
-    const releases = (await response.json()) as GithubRelease[];
     const latest = selectLatestRelease(
-      Array.isArray(releases) ? releases : [],
+      Array.isArray(fetched.releases) ? fetched.releases : [],
       platform,
       arch,
     );
@@ -334,9 +362,11 @@ export function describeReleaseCheck(
         ? `A versão ${result.latestVersion} já está publicada.`
         : `Version ${result.latestVersion} is available.`,
       detail: pt
-        ? `Você está na ${result.currentVersion}. A instalação é manual — o botão abre a página de download.`
-        : `You are on ${result.currentVersion}. Installing is manual — the button opens the download page.`,
-      buttons: pt ? ["Baixar", "Depois"] : ["Download", "Later"],
+        ? `Você está na ${result.currentVersion}. O app baixa a nova versão, troca a si mesmo e reabre — seus dados ficam como estão.`
+        : `You are on ${result.currentVersion}. The app downloads the new version, replaces itself and reopens — your data stays where it is.`,
+      buttons: pt
+        ? ["Baixar e instalar", "Depois"]
+        : ["Download and install", "Later"],
       downloadButtonIndex: 0,
     };
   }

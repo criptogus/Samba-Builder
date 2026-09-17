@@ -36,6 +36,7 @@ import { type SessionDebugBundle } from "@/ipc/types";
 import { showError, showInfo } from "@/lib/toast";
 import { useTranslation } from "react-i18next";
 import { HelpBotDialog } from "./HelpBotDialog";
+import { UpdateInstallAction } from "./UpdateInstallAction";
 import { useSettings } from "@/hooks/useSettings";
 import {
   BugScreenshotDialog,
@@ -549,8 +550,8 @@ export function HelpDialog() {
             <span className="text-sm font-semibold">Version and updates</span>
           </div>
           <p className="text-sm text-muted-foreground">
-            Samba Builder never updates itself. Check here whether a newer
-            version is published — the download opens in your browser.
+            Check here whether a newer version is published. The app downloads
+            it, replaces itself and reopens — your data stays where it is.
           </p>
           <Button
             variant="outline"
@@ -573,16 +574,11 @@ export function HelpDialog() {
               <p className="text-sm font-medium">
                 New version available: {updateResult.latestVersion}
               </p>
-              <Button
+              <UpdateInstallAction
                 className="w-full"
-                onClick={() => {
-                  if (updateResult.releaseUrl) {
-                    void ipc.system.openExternalUrl(updateResult.releaseUrl);
-                  }
-                }}
-              >
-                Download {updateResult.latestVersion}
-              </Button>
+                version={updateResult.latestVersion}
+                releaseUrl={updateResult.releaseUrl}
+              />
             </div>
           )}
           {updateResult?.status === "up-to-date" && (
