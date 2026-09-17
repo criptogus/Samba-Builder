@@ -851,6 +851,11 @@
     "updated": "업데이트",
     "more": "프로젝트 더 보기",
     "localHint": "이 컴퓨터의 프로젝트 · 기존 컬렉션으로 정리됩니다.",
-    "intakeLabel": "새 프로젝트 · 고객 브리프"
+    "intakeLabel": "새 프로젝트 · 고객 브리프",
+    "intakeTitle": "무엇을 만들고 싶으신가요?",
+    "intakeSubtitle": "아이디어를 설명하세요. Samba Builder가 동작하는 앱으로 만들어 드립니다.",
+    "manageAiSetup": "AI 설정 관리",
+    "connectAiToBuild": "AI 연결하여 만들기 — 1분 소요",
+    "allAppsAndCollections": "모든 컬렉션 및 앱 보기"
   }
 }

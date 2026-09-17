@@ -19,6 +19,10 @@ export const queryKeys = {
     all: ["factory"] as const,
     gate: (appId: number) => ["factory", "gate", appId] as const,
   },
+  updates: {
+    all: ["updates"] as const,
+    status: () => ["updates", "status"] as const,
+  },
   nativeAgents: {
     status: ["native-agents", "status"] as const,
     run: (id?: string) => ["native-agents", "run", id] as const,
@@ -82,6 +86,14 @@ export const queryKeys = {
   // ─────────────────────────────────────────────────────────────────────────────
   appCollections: {
     all: ["appCollections"] as const,
+  },
+
+  // ─────────────────────────────────────────────────────────────────────────────
+  // Governance (project draft/in_review/approved cycle)
+  // ─────────────────────────────────────────────────────────────────────────────
+  governance: {
+    status: ({ appPath }: { appPath: string }) =>
+      ["governance", "status", appPath] as const,
   },
 
   // ─────────────────────────────────────────────────────────────────────────────
@@ -493,13 +505,6 @@ export const queryKeys = {
   // ─────────────────────────────────────────────────────────────────────────────
   media: {
     all: ["media"] as const,
-  },
-  // ─────────────────────────────────────────────────────────────────────────────
-  // Governance (project draft/in_review/approved cycle)
-  // ─────────────────────────────────────────────────────────────────────────────
-  governance: {
-    status: ({ appPath }: { appPath: string }) =>
-      ["governance", "status", appPath] as const,
   },
 } as const;
 

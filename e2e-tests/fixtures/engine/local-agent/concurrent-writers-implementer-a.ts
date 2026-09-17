@@ -1,7 +1,8 @@
 import type { LocalAgentFixture } from "../../../../testing/fake-llm-server/localAgentTypes";
 
 export const fixture: LocalAgentFixture = {
-  description: "Write as Implementer A while another tool remains cancellable",
+  description:
+    "Write as Implementer A, then stall until the turn is cancelled",
   turns: [
     {
       text: "I'll make the scoped Sidekick A edit.",
@@ -15,11 +16,14 @@ export const fixture: LocalAgentFixture = {
             description: "Record Sidekick A's concurrent edit",
           },
         },
-        {
-          name: "web_fetch",
-          args: { url: "https://hang.example.com" },
-        },
       ],
+    },
+    {
+      // Keep the Implementer's turn open so the owning root stays pending and
+      // the test can cancel this run mid-flight. (The former web_fetch engine
+      // tool no longer exists in the BYOK toolset.)
+      delayMs: 30_000,
+      text: "Sidekick A is still working...",
     },
   ],
 };

@@ -73,5 +73,19 @@
     "resumeSubscription": "Resume subscription",
     "openActionError": "Could not open Academy. Please try again.",
     "dismiss": "Dismiss billing notice"
+  },
+  "sidebar": {
+    "factory": "Factory",
+    "apps": "Apps",
+    "settings": "Settings",
+    "library": "Library",
+    "templates": "Templates",
+    "plugins": "Plugins",
+    "help": "Help",
+    "servicesHealth": "Samba Services Status",
+    "serviceOnline": "Online",
+    "serviceOffline": "Offline",
+    "cortexService": "Córtex RAG (:8899)",
+    "hermesService": "Hermes Gateway (:8642)"
   }
 }

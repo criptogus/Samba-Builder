@@ -943,3 +943,73 @@ export const projectQualityRuns = sqliteTable(
     index("project_quality_app_time").on(table.appId, table.createdAt),
   ],
 );
+
+/**
+ * RAG de aprendizado contínuo — knowledge units destiladas dos projetos.
+ * Cada unit é uma lição/padrão com fonte verificável, contexto de aplicação e
+ * força (nº de fontes/ocorrências). Nunca contém segredos nem PII (sanitizado
+ * na coleta). Ver samba/docs/rag-aprendizado.md.
+ */
+export const knowledgeUnits = sqliteTable(
+  "knowledge_units",
+  {
+    id: text("id").primaryKey(),
+    /** kind: episodio | erro_evitar | padrao_validado | skill_delta. */
+    kind: text("kind").notNull(),
+    appId: integer("app_id")
+      .notNull()
+      .references(() => apps.id, { onDelete: "cascade" }),
+    orgScope: text("org_scope").notNull().default("organization"),
+    /** força: nº de ocorrências/fontes independentes. */
+    force: integer("force").notNull().default(1),
+    title: text("title").notNull(),
+    body: text("body").notNull(),
+    /** Contexto de aplicação (perfil de risco, fase, área) — JSON. */
+    context: text("context").notNull().default("{}"),
+    /** Fonte verificável (commit, executionId, approval, gate) — JSON. */
+    source: text("source").notNull(),
+    status: text("status").notNull().default("active"),
+    createdAt: integer("created_at").notNull(),
+    /** Reavaliação: units contraditas perdem força/expiraram. */
+    expiresAt: integer("expires_at"),
+    /**
+     * Feedback de uso (RAG fase 3): quantas vezes a lição foi injetada no
+     * prompt e como os turnos terminaram. Uma lição que funciona ganha força;
+     * uma que erra repetidamente é contraditada em vez de continuar sendo
+     * sugerida.
+     */
+    usedCount: integer("used_count").notNull().default(0),
+    workedCount: integer("worked_count").notNull().default(0),
+    failedCount: integer("failed_count").notNull().default(0),
+    lastUsedAt: integer("last_used_at"),
+  },
+  (table) => [
+    index("knowledge_units_app_kind_idx").on(table.appId, table.kind),
+    index("knowledge_units_kind_status_idx").on(table.kind, table.status),
+  ],
+);
+
+/**
+ * Rastreabilidade do aprendizado: qual lição entrou em qual turno e como ele
+ * terminou. É o que permite dizer "esta lição ajudou 4 vezes e falhou 1" em vez
+ * de confiar em impressão.
+ */
+export const knowledgeUsage = sqliteTable(
+  "knowledge_usage",
+  {
+    id: integer("id").primaryKey({ autoIncrement: true }),
+    unitId: text("unit_id")
+      .notNull()
+      .references(() => knowledgeUnits.id, { onDelete: "cascade" }),
+    appId: integer("app_id").notNull(),
+    chatId: integer("chat_id").notNull(),
+    /** worked | failed — null enquanto o turno não terminou. */
+    outcome: text("outcome"),
+    createdAt: integer("created_at").notNull(),
+    resolvedAt: integer("resolved_at"),
+  },
+  (table) => [
+    index("knowledge_usage_chat_idx").on(table.chatId, table.outcome),
+    index("knowledge_usage_unit_idx").on(table.unitId),
+  ],
+);

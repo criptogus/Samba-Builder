@@ -130,6 +130,12 @@ export interface ParserState {
   pendingTagName: string;
   /** While in tag-attrs, raw chars between name and '>'. */
   pendingAttrs: string;
+  /**
+   * While in tag-attrs: the quote character currently open inside an attribute
+   * value, or null. A '>' inside quotes is content, not the end of the tag —
+   * e.g. prompt="node >=22 <26" used to truncate the tag at the first '>'.
+   */
+  attrsQuote: string | null;
   /** While in tag-close-name, raw chars after "</". */
   pendingCloseName: string;
   /** The currently-open custom tag, if mode is tag-content / tag-close-*. */
@@ -154,6 +160,7 @@ export function initialParserState(): ParserState {
     pending: "",
     pendingTagName: "",
     pendingAttrs: "",
+    attrsQuote: null,
     pendingCloseName: "",
     currentTag: null,
     tagStartOffset: 0,
@@ -236,6 +243,7 @@ export function advanceParser(prev: ParserState, content: string): ParserState {
       pending: prev.pending,
       pendingTagName: prev.pendingTagName,
       pendingAttrs: prev.pendingAttrs,
+      attrsQuote: prev.attrsQuote,
       pendingCloseName: prev.pendingCloseName,
       currentTag: prev.currentTag,
       tagStartOffset: prev.tagStartOffset,
@@ -318,13 +326,29 @@ export function advanceParser(prev: ParserState, content: string): ParserState {
         };
         state.pendingTagName = "";
         state.pendingAttrs = "";
+        state.attrsQuote = null;
         state.mode = "tag-content";
         i++;
         continue;
       }
-      // Fast-forward attribute bytes.
+      // Fast-forward attribute bytes, honouring quotes: a '>' inside an
+      // attribute value (prompt="node >=22 <26") is content, not a tag close.
       let j = i;
-      while (j < len && content[j] !== ">") j++;
+      while (j < len) {
+        const c = content[j];
+        if (state.attrsQuote) {
+          if (c === state.attrsQuote) state.attrsQuote = null;
+          j++;
+          continue;
+        }
+        if (c === '"' || c === "'") {
+          state.attrsQuote = c;
+          j++;
+          continue;
+        }
+        if (c === ">") break;
+        j++;
+      }
       state.pendingAttrs += content.slice(i, j);
       i = j;
       continue;

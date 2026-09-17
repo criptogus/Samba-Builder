@@ -9,7 +9,7 @@ vi.hoisted(() => {
   process.env.E2E_TEST_BUILD = "true";
 });
 
-import { act, fireEvent, screen, waitFor } from "@testing-library/react";
+import { act, screen, waitFor } from "@testing-library/react";
 import fs from "node:fs";
 import path from "node:path";
 
@@ -31,7 +31,19 @@ describe("supabase stale app details UI (integration)", () => {
       electronMock: h,
       engine: true,
       testBuild: true,
-      settings: { isTestMode: true },
+      settings: {
+        isTestMode: true,
+        // The connector now links projects through a Supabase Personal Access
+        // Token (no Samba OAuth proxy). Validating a token hits the live
+        // Management API, which this harness does not serve, so the org
+        // credentials are seeded here and the app-to-project link below stands
+        // in for the connect action.
+        supabase: {
+          organizations: {
+            "fake-org": { accessToken: { value: "sb_pat_fake" } },
+          },
+        },
+      },
     });
 
     const secondAppPath = path.join(path.dirname(harness.appDir), "second-app");
@@ -49,6 +61,17 @@ describe("supabase stale app details UI (integration)", () => {
   });
 
   it("does not show a previously connected Supabase project for another app", async () => {
+    // Link app A before mounting (the connect UI path needs the live Supabase
+    // Management API, absent here). This is the state the regression is about:
+    // app A is connected, app B is not.
+    await db
+      .update(apps)
+      .set({
+        supabaseProjectId: "fake-project-id",
+        supabaseOrganizationSlug: "fake-org",
+      })
+      .where(eq(apps.id, harness.appId));
+
     harness.mountSurface({
       route: "/app-details",
       search: { provider: "supabase" },
@@ -62,8 +85,6 @@ describe("supabase stale app details UI (integration)", () => {
       );
     });
     await harness.bridge.settleInFlight();
-
-    fireEvent.click(await screen.findByTestId("connect-supabase-button"));
 
     await waitFor(
       () => {

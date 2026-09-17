@@ -198,10 +198,14 @@ export async function performCompaction(
     const compactionModel = isSambaProEnabled(storedSettings)
       ? await resolveModelSelection({
           model: PRO_COMPACTION_MODEL,
+          // The pinned model's benchmark is at high effort, and the builtin
+          // catalog carries no effortSettings for it (so the global fallback
+          // would drop it to "medium"). Honour an explicit per-model user
+          // preference, otherwise use the benchmarked level.
           preferredEffortLevel:
             storedSettings.modelEffortPreferences?.[
               getModelPreferenceKey(PRO_COMPACTION_MODEL)
-            ],
+            ] ?? "high",
         })
       : selectedModel;
     const settings = { ...storedSettings, selectedModel: compactionModel };

@@ -261,11 +261,15 @@ export async function requireToolConsentOrThrow<T>(
   args: T,
   ctx: AgentContext,
 ): Promise<void> {
+  // Ação irreversível: pede aprovação mesmo quando o consentimento salvo da
+  // ferramenta é "always" — "sempre" cobre a categoria, não uma publicação.
+  const riskWarning = tool.getIrreversibleRisk?.(args) ?? null;
   const allowed = await ctx.requireConsent({
     toolName: tool.name,
     toolDescription: resolveToolDescription(tool, ctx),
     inputPreview: tool.getConsentPreview?.(args) ?? null,
     metadata: tool.getConsentMetadata?.(args) ?? null,
+    riskWarning,
   });
   if (!allowed) {
     throw new SambaError(

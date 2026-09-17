@@ -10,6 +10,7 @@ import {
 } from "react";
 import { Virtuoso } from "react-virtuoso";
 import ChatMessage from "./ChatMessage";
+import { RepoAuditActions } from "../RepoAuditActions";
 import { OpenRouterSetupBanner, SetupBanner } from "../SetupBanner";
 
 import { useStreamChat } from "@/hooks/useStreamChat";
@@ -31,6 +32,8 @@ import { useVersionPreview } from "@/hooks/useVersionPreview";
 import type { PreviewEvent } from "@/version_preview/state";
 import { ExtraCommitsRevertDialog } from "./ExtraCommitsRevertDialog";
 import { getExtraRevertedCommits } from "./revertImpact";
+import { SpecialistAvatarStack } from "@/components/SpecialistAvatar";
+import { specialistAgents } from "@/lib/specialist_agents";
 
 interface MessagesListProps {
   messages: Message[];
@@ -311,8 +314,11 @@ function FooterComponent({ context }: { context?: FooterContext }) {
           currentChatMessageId,
         });
       } else {
+        console.warn(
+          "undo: mensagem sem commit de origem (sem snapshot automático)",
+        );
         showWarning(
-          "No source commit hash found for message. Need to manually undo code changes",
+          "Não encontrei a versão de origem desta mensagem para desfazer automaticamente. Abra o histórico de versões e restaure a anterior.",
         );
       }
     } catch (error) {
@@ -563,8 +569,8 @@ function FooterComponent({ context }: { context?: FooterContext }) {
         >
           <div className="max-w-3xl w-full mx-auto">
             <div className="flex items-center gap-1.5 text-sm text-muted-foreground py-2">
-              <CheckCircle2 className="h-4 w-4 text-green-500" />
-              Answers submitted
+              <CheckCircle2 className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+              Respostas enviadas
             </div>
           </div>
         </div>
@@ -730,9 +736,31 @@ export const MessagesList = forwardRef<HTMLDivElement, MessagesListProps>(
           data-testid="messages-list"
         >
           <div className="flex flex-col items-center justify-center h-full max-w-2xl mx-auto">
-            <div className="flex flex-1 items-center justify-center text-gray-500">
-              No messages yet
-            </div>
+            {appId !== null && selectedChatId !== null ? (
+              <div className="flex flex-1 flex-col items-center justify-center gap-4 text-center">
+                <div className="space-y-2">
+                  <div className="flex justify-center">
+                    <SpecialistAvatarStack
+                      agents={specialistAgents}
+                      size="md"
+                      max={6}
+                    />
+                  </div>
+                  <p className="text-base font-medium text-foreground">
+                    Comece por uma auditoria do projeto
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    Neri, Kai, Luna e o resto do time de especialistas guiam o
+                    que fazer a seguir. Ou escreva sua primeira pergunta abaixo.
+                  </p>
+                </div>
+                <RepoAuditActions chatId={selectedChatId} appId={appId} />
+              </div>
+            ) : (
+              <div className="flex flex-1 items-center justify-center text-muted-foreground">
+                Sem mensagens ainda
+              </div>
+            )}
           </div>
         </div>
       );

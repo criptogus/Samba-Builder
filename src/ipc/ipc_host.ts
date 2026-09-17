@@ -7,6 +7,7 @@ import { registerAppHandlers } from "./handlers/app_handlers";
 import { registerChatHandlers } from "./handlers/chat_handlers";
 import { registerChatStreamHandlers } from "./handlers/chat_stream_handlers";
 import { registerSettingsHandlers } from "./handlers/settings_handlers";
+import { registerUpdateHandlers } from "./handlers/update_handlers";
 import { registerShellHandlers } from "./handlers/shell_handler";
 import { registerDependencyHandlers } from "./handlers/dependency_handlers";
 import { registerCustomAppsFolderHandlers } from "./handlers/custom_apps_folder_handlers";
@@ -77,6 +78,7 @@ export function registerIpcHandlers() {
   registerChatHandlers();
   registerChatStreamHandlers();
   registerSettingsHandlers();
+  registerUpdateHandlers();
   registerShellHandlers();
   registerDependencyHandlers();
   registerCustomAppsFolderHandlers();

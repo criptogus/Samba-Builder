@@ -40,6 +40,7 @@ export function DeleteConfirmationDialog({
           data-testid="delete-prompt-button"
           disabled={isDeleting}
           title={`${t("common:delete")} ${itemType.toLowerCase()}`}
+          aria-label={`${t("common:delete")} ${itemType.toLowerCase()}`}
         >
           <Trash2 className="h-4 w-4" />
         </AlertDialogTrigger>

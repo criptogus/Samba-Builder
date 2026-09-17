@@ -76,6 +76,15 @@ export const nativeSkills: readonly NativeSkill[] = [
     prerequisite: null,
   },
   {
+    slug: "samba-database",
+    title: "Banco de dados e migrations",
+    category: "Engenharia",
+    description:
+      "Modela esquemas relacionais, índices eficientes, RLS e migrations seguras sem perda de dados ou downtime.",
+    sources: ["drizzle-team/drizzle-orm", "supabase/supabase"],
+    prerequisite: null,
+  },
+  {
     slug: "samba-design",
     title: "Design de interfaces",
     category: "Design",
@@ -212,6 +221,24 @@ export const nativeSkills: readonly NativeSkill[] = [
     description:
       "Escopo com custo técnico explícito: impacto, segurança e manutenção registrados; feature creep vira decisão, não trabalho silencioso.",
     sources: ["github/spec-kit"],
+    prerequisite: null,
+  },
+  {
+    slug: "samba-ops",
+    title: "Operação pós-publicação",
+    category: "Integrações",
+    description:
+      "Verifica o app no ar, diagnostica regressão, decide rollback e documenta runbooks.",
+    sources: ["bregman-arie/devops-sre-skills", "NotHarshhaa/devops-skills"],
+    prerequisite: "App publicado com URL e ambiente verificáveis.",
+  },
+  {
+    slug: "samba-simplify",
+    title: "Simplificação de código",
+    category: "Engenharia",
+    description:
+      "Reduz complexidade e melhora clareza preservando o comportamento observável.",
+    sources: ["addyosmani/agent-skills"],
     prerequisite: null,
   },
 ];

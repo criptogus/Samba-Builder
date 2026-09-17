@@ -30,25 +30,40 @@ export function registerReleaseNoteHandlers() {
       logger.debug(`Checking for release note at: ${releaseNoteUrl}`);
 
       try {
-        const response = await fetch(releaseNoteUrl, { method: "HEAD" }); // Use HEAD to check existence without downloading content
-        if (response.ok) {
+        // O corpo da release, e nao so a existencia da pagina: release publicada
+        // sem notas (as do workflow nasciam assim) abria o "o que ha de novo" em
+        // branco. Melhor nao mostrar nada do que mostrar uma tela vazia.
+        const response = await fetch(
+          `https://api.github.com/repos/criptogus/Samba-Builder/releases/tags/v${encodeURIComponent(version)}`,
+          {
+            headers: {
+              Accept: "application/vnd.github+json",
+              "User-Agent": "Samba-Builder-Release-Notes",
+            },
+          },
+        );
+        if (!response.ok) {
           logger.debug(
-            `Release note found for version ${version} at ${releaseNoteUrl}`,
-          );
-          return { exists: true, url: releaseNoteUrl };
-        } else if (response.status === 404) {
-          logger.debug(
-            `Release note not found for version ${version} at ${releaseNoteUrl}`,
-          );
-          return { exists: false };
-        } else {
-          // Log other non-404 errors but still treat as "not found" for the client,
-          // as the primary goal is to check existence.
-          logger.warn(
-            `Unexpected status code ${response.status} when checking for release note: ${releaseNoteUrl}`,
+            `Release note not found for version ${version} (HTTP ${response.status})`,
           );
           return { exists: false };
         }
+        const release = (await response.json()) as {
+          body?: string | null;
+          draft?: boolean;
+        };
+        const hasNotes =
+          release.draft !== true && (release.body ?? "").trim().length > 0;
+        if (!hasNotes) {
+          logger.debug(
+            `Release ${version} has no notes body; not opening a blank dialog`,
+          );
+          return { exists: false };
+        }
+        logger.debug(
+          `Release note found for version ${version} at ${releaseNoteUrl}`,
+        );
+        return { exists: true, url: releaseNoteUrl };
       } catch (error) {
         logger.error(
           `Error fetching release note for version ${version} at ${releaseNoteUrl}:`,

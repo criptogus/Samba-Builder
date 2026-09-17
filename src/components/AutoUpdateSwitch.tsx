@@ -1,8 +1,6 @@
 import { useSettings } from "@/hooks/useSettings";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { toast } from "sonner";
-import { ipc } from "@/ipc/types";
 import { useTranslation } from "react-i18next";
 
 export function AutoUpdateSwitch() {
@@ -21,16 +19,6 @@ export function AutoUpdateSwitch() {
         checked={settings.enableAutoUpdate}
         onCheckedChange={(checked) => {
           updateSettings({ enableAutoUpdate: checked });
-          toast("Auto-update settings changed", {
-            description:
-              "You will need to restart Samba Builder for your settings to take effect.",
-            action: {
-              label: "Restart Samba Builder",
-              onClick: () => {
-                ipc.system.restartSamba();
-              },
-            },
-          });
         }}
       />
       <Label htmlFor="enable-auto-update">{t("general.autoUpdate")}</Label>

@@ -74,6 +74,12 @@ export function DeliveryWorkspace() {
       </div>
       <div className="mb-5 flex flex-wrap items-center gap-2 text-sm">
         <Link
+          to="/apps"
+          className="rounded-md border px-3 py-2 text-xs font-medium hover:bg-accent focus-visible:outline-2"
+        >
+          {t("delivery.allAppsAndCollections")}
+        </Link>
+        <Link
           to="/templates"
           className="rounded-md px-2 py-1.5 text-xs text-muted-foreground hover:bg-accent hover:text-foreground focus-visible:outline-2"
         >
@@ -81,7 +87,7 @@ export function DeliveryWorkspace() {
         </Link>
         <Link
           to="/library"
-          className="rounded-md border px-3 py-2 hover:bg-accent focus-visible:outline-2"
+          className="rounded-md px-2 py-1.5 text-xs text-muted-foreground hover:bg-accent hover:text-foreground focus-visible:outline-2"
         >
           {t("delivery.library")}
         </Link>

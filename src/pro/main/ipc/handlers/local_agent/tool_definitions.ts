@@ -290,6 +290,8 @@ export async function requireAgentToolConsent(
     toolDescription?: string | null;
     inputPreview?: string | null;
     metadata?: SqlConsentMetadata | null;
+    /** Não-nulo = ação irreversível; força o pedido mesmo com consent "always". */
+    riskWarning?: string | null;
     abortSignal?: AbortSignal;
     subagent?: {
       threadId: string;
@@ -300,7 +302,8 @@ export async function requireAgentToolConsent(
 ): Promise<boolean> {
   const current = getAgentToolConsent(params.toolName);
 
-  if (current === "always") return true;
+  // "always" não cobre o que não tem volta: pede aprovação da ocorrência.
+  if (current === "always" && !params.riskWarning) return true;
   if (current === "never")
     throw new SambaError(
       "Should not ask for consent for a tool marked as 'never'",

@@ -1,12 +1,12 @@
 .samba-factory {
-  --factory-accent: #a54325;
-  --factory-line: color-mix(in srgb, currentColor 13%, transparent);
+  --factory-accent: var(--primary);
+  --factory-line: var(--border);
   height: 100%;
   overflow: auto;
   background: var(--background);
   color: var(--foreground);
   padding: 36px 40px 64px;
-  font-family: Geist, Inter, system-ui, sans-serif;
+  font-family: var(--default-font-family, Geist, Inter, system-ui, sans-serif);
 }
 .factory-header {
   display: flex;
@@ -697,5 +697,6 @@
   }
 }
 .dark .samba-factory {
-  --factory-accent: #e19477;
+  --factory-accent: var(--primary);
+  --factory-line: var(--border);
 }

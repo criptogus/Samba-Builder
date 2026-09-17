@@ -860,7 +860,7 @@ Modern theme extracted from website for testing.
             headers: {
               "Content-Type": "application/json",
               Authorization: `Bearer ${apiKey}`,
-              "X-Samba Builder-Request-Id": `theme-crawl-${uuidv4()}`,
+              "X-Samba-Request-Id": `theme-crawl-${uuidv4()}`,
             },
             body: JSON.stringify({ url: params.url }),
             signal: controller.signal,

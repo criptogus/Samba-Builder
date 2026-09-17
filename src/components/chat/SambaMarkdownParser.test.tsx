@@ -34,6 +34,8 @@ const mockStreamState = vi.hoisted(() => ({
   current: { type: "idle" } as { type: string },
 }));
 
+const mockStreamMessage = vi.hoisted(() => vi.fn());
+
 // Track every render of the inner ReactMarkdown component keyed by the
 // content string it received. The SambaMarkdownParser wraps ReactMarkdown
 // inside a React.memo'd MemoMarkdown, so a call here means the memo did
@@ -61,7 +63,10 @@ vi.mock("./CodeHighlight", () => ({
 }));
 
 vi.mock("@/hooks/useStreamChat", () => ({
-  useStreamChat: () => ({ streamMessage: vi.fn() }),
+  useStreamChat: () => ({
+    streamMessage: mockStreamMessage,
+    isStreaming: false,
+  }),
 }));
 
 vi.mock("@/hooks/useChatStream", () => ({
@@ -155,6 +160,36 @@ describe("SambaMarkdownParser samba-command", () => {
       }),
     ).toBeTruthy();
     expect(screen.queryByText(/Unsupported:/)).toBeNull();
+  });
+
+  it("renders a specialist next-step with the agent's face and sends their prompt", () => {
+    const store = createStore();
+    store.set(selectedChatIdAtom, 7);
+    mockStreamMessage.mockReset();
+    render(
+      <Provider store={store}>
+        <SambaMarkdownParser
+          content={
+            '<samba-command type="next-step" specialist="cybersec" prompt="Audite autorização do novo endpoint"></samba-command>'
+          }
+        />
+      </Provider>,
+    );
+
+    expect(screen.getByText(/Kai recommends/)).toBeTruthy();
+    expect(screen.getByText(/Cyber Security/)).toBeTruthy();
+    expect(
+      screen.getByRole("img", { name: /Kai, Cyber Security/ }),
+    ).toBeTruthy();
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: /Kai recommends: Audite autorização do novo endpoint/,
+      }),
+    );
+    expect(mockStreamMessage).toHaveBeenCalledWith({
+      prompt: "/samba-security Audite autorização do novo endpoint",
+      chatId: 7,
+    });
   });
 });
 

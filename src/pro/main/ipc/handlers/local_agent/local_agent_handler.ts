@@ -1014,6 +1014,7 @@ export async function handleLocalAgentStream(
         toolDescription?: string | null;
         inputPreview?: string | null;
         metadata?: SqlConsentMetadata | null;
+        riskWarning?: string | null;
         abortSignal?: AbortSignal;
         subagent?: {
           threadId: string;
@@ -1027,6 +1028,7 @@ export async function handleLocalAgentStream(
           toolDescription: params.toolDescription,
           inputPreview: params.inputPreview,
           metadata: params.metadata,
+          riskWarning: params.riskWarning,
           subagent: params.subagent,
           abortSignal: params.abortSignal ?? abortController.signal,
         });

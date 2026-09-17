@@ -207,6 +207,7 @@ export function GithubCollaboratorManager({ appId }: CollaboratorManagerProps) {
                       className="text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
                       data-testid={`collaborator-remove-button-${collab.login}`}
                       onClick={() => setCollaboratorToDelete(collab.login)}
+                      aria-label={`Remove collaborator ${collab.login}`}
                     >
                       <Trash2 className="w-4 h-4" />
                     </Button>

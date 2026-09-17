@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 import { ipc } from "@/ipc/types";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { showError, showSuccess, showWarning } from "@/lib/toast";
-import { Folder, X, Loader2, Info } from "lucide-react";
+import { Folder, X, Loader2, Info, CheckCircle2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -26,6 +26,7 @@ import { useSelectChat } from "@/hooks/useSelectChat";
 import { selectedAppIdAtom } from "@/atoms/appAtoms";
 import { useSetAtom } from "jotai";
 import { useLoadApps } from "@/hooks/useLoadApps";
+import { RepoAuditActions } from "./RepoAuditActions";
 
 import {
   Accordion,
@@ -49,6 +50,13 @@ export function ImportAppDialog({ isOpen, onClose }: ImportAppDialogProps) {
   const { t } = useTranslation(["home", "common"]);
   const queryClient = useQueryClient();
   const [selectedPath, setSelectedPath] = useState<string | null>(null);
+  const [imported, setImported] = useState<{
+    chatId: number;
+    appId: number;
+  } | null>(null);
+  useEffect(() => {
+    if (isOpen) setImported(null);
+  }, [isOpen]);
   const [hasAiRules, setHasAiRules] = useState<boolean | null>(null);
   const [customAppName, setCustomAppName] = useState<string>("");
   const [nameExists, setNameExists] = useState<boolean>(false);
@@ -150,7 +158,7 @@ export function ImportAppDialog({ isOpen, onClose }: ImportAppDialogProps) {
         appId: result.app.id,
       });
     }
-    onClose();
+    setImported({ chatId, appId: result.app.id });
     return true;
   };
 
@@ -293,8 +301,6 @@ export function ImportAppDialog({ isOpen, onClose }: ImportAppDialogProps) {
       showSuccess(
         !hasAiRules ? t("home:appImportedWithRules") : t("home:appImported"),
       );
-      onClose();
-
       selectChat({ chatId: result.chatId, appId: result.appId });
       if (!hasAiRules) {
         streamMessage({
@@ -303,6 +309,7 @@ export function ImportAppDialog({ isOpen, onClose }: ImportAppDialogProps) {
           appId: result.appId,
         });
       }
+      setImported({ chatId: result.chatId, appId: result.appId });
       setSelectedAppId(result.appId);
       await refreshApps();
     },
@@ -343,326 +350,170 @@ export function ImportAppDialog({ isOpen, onClose }: ImportAppDialogProps) {
   const hasStartCommand = startCommand.trim().length > 0;
   const commandsValid = hasInstallCommand === hasStartCommand;
 
+  const closeAndReset = () => {
+    setImported(null);
+    onClose();
+  };
+
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <Dialog open={isOpen} onOpenChange={closeAndReset}>
       <DialogContent className="max-w-2xl w-[calc(100vw-2rem)] max-h-[98vh] overflow-y-auto flex flex-col p-0">
         <DialogHeader className="sticky top-0 bg-background border-b px-6 py-4">
-          <DialogTitle>{t("home:importApp")}</DialogTitle>
+          <DialogTitle>
+            {imported ? t("home:importedTitle") : t("home:importApp")}
+          </DialogTitle>
           <DialogDescription className="text-sm">
-            {t("home:importAppDescription")}
+            {imported
+              ? t("home:importedDescription")
+              : t("home:importAppDescription")}
           </DialogDescription>
         </DialogHeader>
-        <div className="px-6 pb-6 overflow-y-auto flex-1">
-          <Alert className="border-blue-500/20 text-blue-500 mb-2">
-            <Info className="h-4 w-4 flex-shrink-0" />
-            <AlertDescription className="text-xs sm:text-sm">
-              {t("home:importExperimental")}
-            </AlertDescription>
-          </Alert>
-          <Tabs defaultValue="local-folder" className="w-full">
-            <TabsList className="grid w-full grid-cols-3 h-auto">
-              <TabsTrigger
-                value="local-folder"
-                className="text-xs sm:text-sm px-2 py-2"
-              >
-                {t("home:localFolder")}
-              </TabsTrigger>
-              <TabsTrigger
-                value="github-repos"
-                className="text-xs sm:text-sm px-2 py-2"
-              >
-                {t("home:yourGithubRepos")}
-              </TabsTrigger>
-              <TabsTrigger
-                value="github-url"
-                className="text-xs sm:text-sm px-2 py-2"
-              >
-                {t("home:githubUrl")}
-              </TabsTrigger>
-            </TabsList>
-            <TabsContent value="local-folder" className="space-y-4">
-              <div className="py-4">
-                {!selectedPath ? (
-                  <Button
-                    onClick={handleSelectFolder}
-                    disabled={selectFolderMutation.isPending}
-                    className="w-full"
-                  >
-                    {selectFolderMutation.isPending ? (
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    ) : (
-                      <Folder className="mr-2 h-4 w-4" />
-                    )}
-                    {selectFolderMutation.isPending
-                      ? t("home:selectingFolder")
-                      : t("home:selectFolder")}
-                  </Button>
-                ) : (
-                  <div className="space-y-4">
-                    <div className="rounded-md border p-3 sm:p-4">
-                      <div className="flex items-start justify-between gap-2">
-                        <div className="min-w-0 flex-1 overflow-hidden">
-                          <p className="text-sm font-medium mb-1">
-                            {t("home:selectedFolder")}
-                          </p>
-                          <p className="text-xs sm:text-sm text-muted-foreground break-words">
-                            {selectedPath}
-                          </p>
-                        </div>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={handleClear}
-                          className="h-8 w-8 p-0 flex-shrink-0"
-                          disabled={importAppMutation.isPending}
-                        >
-                          <X className="h-4 w-4" />
-                          <span className="sr-only">
-                            {t("home:clearSelection")}
-                          </span>
-                        </Button>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center space-x-2">
-                      <Checkbox
-                        id="copy-to-samba-apps"
-                        aria-label="Copy to the samba-apps folder"
-                        checked={copyToSambaApps}
-                        onCheckedChange={(checked) =>
-                          setCopyToSambaApps(checked === true)
-                        }
-                        disabled={importAppMutation.isPending}
-                      />
-                      <label
-                        htmlFor="copy-to-samba-apps"
-                        className="text-xs sm:text-sm cursor-pointer"
-                      >
-                        {t("home:copyToSambaApps")}
-                      </label>
-                    </div>
-
-                    <div className="space-y-2">
-                      {nameExists && (
-                        <p className="text-xs sm:text-sm text-yellow-500">
-                          {t("home:appNameExists")}
-                        </p>
+        {imported ? (
+          <div className="px-6 py-8 flex flex-col items-center text-center gap-5">
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
+              <CheckCircle2 className="h-6 w-6 text-primary" />
+            </div>
+            <div className="space-y-1">
+              <p className="text-base font-semibold">
+                {t("home:importedNextStep")}
+              </p>
+              <p className="text-sm text-muted-foreground">
+                {t("home:importedNextStepDescription")}
+              </p>
+            </div>
+            <RepoAuditActions
+              chatId={imported.chatId}
+              appId={imported.appId}
+              onTriggered={closeAndReset}
+            />
+            <Button variant="ghost" size="sm" onClick={closeAndReset}>
+              Agora não
+            </Button>
+          </div>
+        ) : (
+          <>
+            <Alert className="border-blue-500/20 text-blue-500 mb-2">
+              <Info className="h-4 w-4 flex-shrink-0" />
+              <AlertDescription className="text-xs sm:text-sm">
+                {t("home:importExperimental")}
+              </AlertDescription>
+            </Alert>
+            <Tabs defaultValue="local-folder" className="w-full">
+              <TabsList className="grid w-full grid-cols-3 h-auto">
+                <TabsTrigger
+                  value="local-folder"
+                  className="text-xs sm:text-sm px-2 py-2"
+                >
+                  {t("home:localFolder")}
+                </TabsTrigger>
+                <TabsTrigger
+                  value="github-repos"
+                  className="text-xs sm:text-sm px-2 py-2"
+                >
+                  {t("home:yourGithubRepos")}
+                </TabsTrigger>
+                <TabsTrigger
+                  value="github-url"
+                  className="text-xs sm:text-sm px-2 py-2"
+                >
+                  {t("home:githubUrl")}
+                </TabsTrigger>
+              </TabsList>
+              <TabsContent value="local-folder" className="space-y-4">
+                <div className="py-4">
+                  {!selectedPath ? (
+                    <Button
+                      onClick={handleSelectFolder}
+                      disabled={selectFolderMutation.isPending}
+                      className="w-full"
+                    >
+                      {selectFolderMutation.isPending ? (
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      ) : (
+                        <Folder className="mr-2 h-4 w-4" />
                       )}
-                      <div className="relative">
-                        <Label className="text-xs sm:text-sm ml-2 mb-2">
-                          {t("home:appName")}
-                        </Label>
-                        <Input
-                          value={customAppName}
-                          onChange={handleAppNameChange}
-                          placeholder={t("home:enterNewAppName")}
-                          className="w-full pr-8 text-sm"
+                      {selectFolderMutation.isPending
+                        ? t("home:selectingFolder")
+                        : t("home:selectFolder")}
+                    </Button>
+                  ) : (
+                    <div className="space-y-4">
+                      <div className="rounded-md border p-3 sm:p-4">
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="min-w-0 flex-1 overflow-hidden">
+                            <p className="text-sm font-medium mb-1">
+                              {t("home:selectedFolder")}
+                            </p>
+                            <p className="text-xs sm:text-sm text-muted-foreground break-words">
+                              {selectedPath}
+                            </p>
+                          </div>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={handleClear}
+                            className="h-8 w-8 p-0 flex-shrink-0"
+                            disabled={importAppMutation.isPending}
+                          >
+                            <X className="h-4 w-4" />
+                            <span className="sr-only">
+                              {t("home:clearSelection")}
+                            </span>
+                          </Button>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center space-x-2">
+                        <Checkbox
+                          id="copy-to-samba-apps"
+                          aria-label="Copy to the samba-apps folder"
+                          checked={copyToSambaApps}
+                          onCheckedChange={(checked) =>
+                            setCopyToSambaApps(checked === true)
+                          }
                           disabled={importAppMutation.isPending}
                         />
-                        {isCheckingName && (
-                          <div className="absolute right-2 top-1/2 -translate-y-1/2">
-                            <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
-                          </div>
+                        <label
+                          htmlFor="copy-to-samba-apps"
+                          className="text-xs sm:text-sm cursor-pointer"
+                        >
+                          {t("home:copyToSambaApps")}
+                        </label>
+                      </div>
+
+                      <div className="space-y-2">
+                        {nameExists && (
+                          <p className="text-xs sm:text-sm text-yellow-500">
+                            {t("home:appNameExists")}
+                          </p>
                         )}
-                      </div>
-                    </div>
-
-                    <Accordion>
-                      <AccordionItem value="advanced-options">
-                        <AccordionTrigger className="text-xs sm:text-sm hover:no-underline">
-                          {t("home:advancedOptions")}
-                        </AccordionTrigger>
-                        <AccordionContent className="space-y-4">
-                          <div className="grid gap-2">
-                            <Label className="text-xs sm:text-sm ml-2 mb-2">
-                              {t("home:installCommand")}
-                            </Label>
-                            <Input
-                              value={installCommand}
-                              onChange={(e) =>
-                                setInstallCommand(e.target.value)
-                              }
-                              placeholder="pnpm install"
-                              className="text-sm"
-                              disabled={importAppMutation.isPending}
-                            />
-                          </div>
-                          <div className="grid gap-2">
-                            <Label className="text-xs sm:text-sm ml-2 mb-2">
-                              {t("home:startCommand")}
-                            </Label>
-                            <Input
-                              value={startCommand}
-                              onChange={(e) => setStartCommand(e.target.value)}
-                              placeholder="pnpm dev"
-                              className="text-sm"
-                              disabled={importAppMutation.isPending}
-                            />
-                          </div>
-                          {!commandsValid && (
-                            <p className="text-xs sm:text-sm text-red-500">
-                              {t("home:bothCommandsRequired")}
-                            </p>
+                        <div className="relative">
+                          <Label className="text-xs sm:text-sm ml-2 mb-2">
+                            {t("home:appName")}
+                          </Label>
+                          <Input
+                            value={customAppName}
+                            onChange={handleAppNameChange}
+                            placeholder={t("home:enterNewAppName")}
+                            className="w-full pr-8 text-sm"
+                            disabled={importAppMutation.isPending}
+                          />
+                          {isCheckingName && (
+                            <div className="absolute right-2 top-1/2 -translate-y-1/2">
+                              <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                            </div>
                           )}
-                        </AccordionContent>
-                      </AccordionItem>
-                    </Accordion>
-
-                    {hasAiRules === false && (
-                      <Alert className="border-yellow-500/20 text-yellow-500 flex items-start gap-2">
-                        <span
-                          title="AI_RULES.md lets Samba Builder know which tech stack to use for editing the app"
-                          className="flex-shrink-0 mt-1"
-                        >
-                          <Info className="h-4 w-4" />
-                        </span>
-                        <AlertDescription className="text-xs sm:text-sm">
-                          {t("home:noAiRulesFound")}
-                        </AlertDescription>
-                      </Alert>
-                    )}
-
-                    {importAppMutation.isPending && (
-                      <div className="flex items-center justify-center space-x-2 text-xs sm:text-sm text-muted-foreground animate-pulse">
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                        <span>{t("home:importingApp")}</span>
-                      </div>
-                    )}
-                  </div>
-                )}
-              </div>
-
-              <DialogFooter className="flex-col sm:flex-row gap-2">
-                <Button
-                  variant="outline"
-                  onClick={onClose}
-                  disabled={importAppMutation.isPending}
-                  className="w-full sm:w-auto"
-                >
-                  {t("common:cancel")}
-                </Button>
-                <Button
-                  onClick={handleImport}
-                  disabled={
-                    !selectedPath ||
-                    importAppMutation.isPending ||
-                    nameExists ||
-                    !commandsValid
-                  }
-                  className="w-full sm:w-auto min-w-[80px]"
-                >
-                  {importAppMutation.isPending ? (
-                    <>{t("common:importing")}</>
-                  ) : (
-                    t("home:import")
-                  )}
-                </Button>
-              </DialogFooter>
-            </TabsContent>
-            <TabsContent value="github-repos" className="space-y-4">
-              {!isAuthenticated ? (
-                <UnconnectedGitHubConnector
-                  appId={null}
-                  folderName=""
-                  settings={settings}
-                  refreshSettings={refreshSettings}
-                  expanded={false}
-                />
-              ) : (
-                <>
-                  {loading && (
-                    <div className="flex justify-center py-8">
-                      <Loader2 className="animate-spin h-6 w-6" />
-                    </div>
-                  )}
-
-                  <div className="space-y-2">
-                    <Label className="text-xs sm:text-sm ml-2 mb-2">
-                      {t("home:appNameOptional")}
-                    </Label>
-                    <Input
-                      value={githubAppName}
-                      onChange={handleGithubAppNameChange}
-                      placeholder={t("home:leaveEmptyForRepo")}
-                      className="w-full pr-8 text-sm"
-                      disabled={importing}
-                    />
-                    {isCheckingGithubName && (
-                      <div className="absolute right-2 top-1/2 -translate-y-1/2">
-                        <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
-                      </div>
-                    )}
-                    {githubNameExists && (
-                      <p className="text-xs sm:text-sm text-yellow-500">
-                        {t("home:appNameExists")}
-                      </p>
-                    )}
-                  </div>
-
-                  <div className="flex flex-col space-y-2 max-h-64 overflow-y-auto overflow-x-hidden">
-                    {!loading && repos.length === 0 && (
-                      <p className="text-xs sm:text-sm text-muted-foreground text-center py-4">
-                        {t("home:noRepositoriesFound")}
-                      </p>
-                    )}
-                    {repos.map((repo) => (
-                      <div
-                        key={repo.full_name}
-                        data-testid={`github-repo-row-${repo.full_name.replace(/[^a-zA-Z0-9_-]/g, "-")}`}
-                        className="flex items-center justify-between p-3 border rounded-lg hover:bg-accent/50 transition-colors min-w-0"
-                      >
-                        <div className="min-w-0 flex-1 overflow-hidden mr-2">
-                          <p className="font-semibold truncate text-sm">
-                            {repo.name}
-                          </p>
-                          <p className="text-xs text-muted-foreground truncate">
-                            {repo.full_name}
-                          </p>
                         </div>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleSelectRepo(repo)}
-                          disabled={importing}
-                          className="flex-shrink-0 text-xs"
-                        >
-                          {importing ? (
-                            <Loader2 className="animate-spin h-4 w-4" />
-                          ) : (
-                            t("home:import")
-                          )}
-                        </Button>
                       </div>
-                    ))}
-                  </div>
 
-                  {repos.length > 0 && (
-                    <>
                       <Accordion>
                         <AccordionItem value="advanced-options">
                           <AccordionTrigger className="text-xs sm:text-sm hover:no-underline">
                             {t("home:advancedOptions")}
                           </AccordionTrigger>
                           <AccordionContent className="space-y-4">
-                            <div className="flex items-center space-x-2 py-1">
-                              <Checkbox
-                                id="optimize-for-samba-repos"
-                                checked={optimizeForSamba}
-                                onCheckedChange={(checked) =>
-                                  setOptimizeForSamba(checked === true)
-                                }
-                                disabled={importing}
-                              />
-                              <Label
-                                htmlFor="optimize-for-samba-repos"
-                                className="text-xs sm:text-sm cursor-pointer"
-                              >
-                                {t("home:autoUpgradeAnnotator")} (
-                                {t("common:recommended")})
-                              </Label>
-                            </div>
                             <div className="grid gap-2">
-                              <Label className="text-xs sm:text-sm">
+                              <Label className="text-xs sm:text-sm ml-2 mb-2">
                                 {t("home:installCommand")}
                               </Label>
                               <Input
@@ -672,11 +523,11 @@ export function ImportAppDialog({ isOpen, onClose }: ImportAppDialogProps) {
                                 }
                                 placeholder="pnpm install"
                                 className="text-sm"
-                                disabled={importing}
+                                disabled={importAppMutation.isPending}
                               />
                             </div>
                             <div className="grid gap-2">
-                              <Label className="text-xs sm:text-sm">
+                              <Label className="text-xs sm:text-sm ml-2 mb-2">
                                 {t("home:startCommand")}
                               </Label>
                               <Input
@@ -686,7 +537,7 @@ export function ImportAppDialog({ isOpen, onClose }: ImportAppDialogProps) {
                                 }
                                 placeholder="pnpm dev"
                                 className="text-sm"
-                                disabled={importing}
+                                disabled={importAppMutation.isPending}
                               />
                             </div>
                             {!commandsValid && (
@@ -697,121 +548,312 @@ export function ImportAppDialog({ isOpen, onClose }: ImportAppDialogProps) {
                           </AccordionContent>
                         </AccordionItem>
                       </Accordion>
-                    </>
+
+                      {hasAiRules === false && (
+                        <Alert className="border-yellow-500/20 text-yellow-500 flex items-start gap-2">
+                          <span
+                            title="AI_RULES.md lets Samba Builder know which tech stack to use for editing the app"
+                            className="flex-shrink-0 mt-1"
+                          >
+                            <Info className="h-4 w-4" />
+                          </span>
+                          <AlertDescription className="text-xs sm:text-sm">
+                            {t("home:noAiRulesFound")}
+                          </AlertDescription>
+                        </Alert>
+                      )}
+
+                      {importAppMutation.isPending && (
+                        <div className="flex items-center justify-center space-x-2 text-xs sm:text-sm text-muted-foreground animate-pulse">
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                          <span>{t("home:importingApp")}</span>
+                        </div>
+                      )}
+                    </div>
                   )}
-                </>
-              )}
-            </TabsContent>
-            <TabsContent value="github-url" className="space-y-4">
-              <div className="space-y-2">
-                <Label className="text-xs sm:text-sm">
-                  {t("home:repositoryUrl")}
-                </Label>
-                <Input
-                  placeholder={t("home:repositoryUrlPlaceholder")}
-                  value={url}
-                  onChange={(e) => setUrl(e.target.value)}
-                  disabled={importing}
-                  onBlur={handleUrlBlur}
-                  className="text-sm break-all"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label className="text-xs sm:text-sm">
-                  {t("home:appNameOptional")}
-                </Label>
-                <Input
-                  value={githubAppName}
-                  onChange={handleGithubAppNameChange}
-                  placeholder={t("home:leaveEmptyForRepo")}
-                  disabled={importing}
-                  className="text-sm"
-                />
-                {isCheckingGithubName && (
-                  <div className="absolute right-2 top-1/2 -translate-y-1/2">
-                    <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
-                  </div>
-                )}
-                {githubNameExists && (
-                  <p className="text-xs sm:text-sm text-yellow-500">
-                    {t("home:appNameExists")}
-                  </p>
-                )}
-              </div>
+                </div>
 
-              <Accordion>
-                <AccordionItem value="advanced-options">
-                  <AccordionTrigger className="text-xs sm:text-sm hover:no-underline">
-                    {t("home:advancedOptions")}
-                  </AccordionTrigger>
-                  <AccordionContent className="space-y-4">
-                    <div className="flex items-center space-x-2 py-1">
-                      <Checkbox
-                        id="optimize-for-samba-url"
-                        checked={optimizeForSamba}
-                        onCheckedChange={(checked) =>
-                          setOptimizeForSamba(checked === true)
-                        }
-                        disabled={importing}
-                      />
-                      <Label
-                        htmlFor="optimize-for-samba-url"
-                        className="text-xs sm:text-sm cursor-pointer"
-                      >
-                        {t("home:autoUpgradeAnnotator")} (
-                        {t("common:recommended")})
-                      </Label>
-                    </div>
-                    <div className="grid gap-2">
-                      <Label className="text-xs sm:text-sm">
-                        {t("home:installCommand")}
-                      </Label>
-                      <Input
-                        value={installCommand}
-                        onChange={(e) => setInstallCommand(e.target.value)}
-                        placeholder="pnpm install"
-                        className="text-sm"
-                        disabled={importing}
-                      />
-                    </div>
-                    <div className="grid gap-2">
-                      <Label className="text-xs sm:text-sm">
-                        {t("home:startCommand")}
-                      </Label>
-                      <Input
-                        value={startCommand}
-                        onChange={(e) => setStartCommand(e.target.value)}
-                        placeholder="pnpm dev"
-                        className="text-sm"
-                        disabled={importing}
-                      />
-                    </div>
-                    {!commandsValid && (
-                      <p className="text-xs sm:text-sm text-red-500">
-                        {t("home:bothCommandsRequired")}
-                      </p>
+                <DialogFooter className="flex-col sm:flex-row gap-2">
+                  <Button
+                    variant="outline"
+                    onClick={onClose}
+                    disabled={importAppMutation.isPending}
+                    className="w-full sm:w-auto"
+                  >
+                    {t("common:cancel")}
+                  </Button>
+                  <Button
+                    onClick={handleImport}
+                    disabled={
+                      !selectedPath ||
+                      importAppMutation.isPending ||
+                      nameExists ||
+                      !commandsValid
+                    }
+                    className="w-full sm:w-auto min-w-[80px]"
+                  >
+                    {importAppMutation.isPending ? (
+                      <>{t("common:importing")}</>
+                    ) : (
+                      t("home:import")
                     )}
-                  </AccordionContent>
-                </AccordionItem>
-              </Accordion>
-
-              <Button
-                onClick={handleImportFromUrl}
-                disabled={importing || !url.trim() || !commandsValid}
-                className="w-full"
-              >
-                {importing ? (
-                  <>
-                    <Loader2 className="animate-spin mr-2 h-4 w-4" />
-                    {t("common:importing")}
-                  </>
+                  </Button>
+                </DialogFooter>
+              </TabsContent>
+              <TabsContent value="github-repos" className="space-y-4">
+                {!isAuthenticated ? (
+                  <UnconnectedGitHubConnector
+                    appId={null}
+                    folderName=""
+                    settings={settings}
+                    refreshSettings={refreshSettings}
+                    expanded={false}
+                  />
                 ) : (
-                  t("home:import")
+                  <>
+                    {loading && (
+                      <div className="flex justify-center py-8">
+                        <Loader2 className="animate-spin h-6 w-6" />
+                      </div>
+                    )}
+
+                    <div className="space-y-2">
+                      <Label className="text-xs sm:text-sm ml-2 mb-2">
+                        {t("home:appNameOptional")}
+                      </Label>
+                      <Input
+                        value={githubAppName}
+                        onChange={handleGithubAppNameChange}
+                        placeholder={t("home:leaveEmptyForRepo")}
+                        className="w-full pr-8 text-sm"
+                        disabled={importing}
+                      />
+                      {isCheckingGithubName && (
+                        <div className="absolute right-2 top-1/2 -translate-y-1/2">
+                          <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                        </div>
+                      )}
+                      {githubNameExists && (
+                        <p className="text-xs sm:text-sm text-yellow-500">
+                          {t("home:appNameExists")}
+                        </p>
+                      )}
+                    </div>
+
+                    <div className="flex flex-col space-y-2 max-h-64 overflow-y-auto overflow-x-hidden">
+                      {!loading && repos.length === 0 && (
+                        <p className="text-xs sm:text-sm text-muted-foreground text-center py-4">
+                          {t("home:noRepositoriesFound")}
+                        </p>
+                      )}
+                      {repos.map((repo) => (
+                        <div
+                          key={repo.full_name}
+                          data-testid={`github-repo-row-${repo.full_name.replace(/[^a-zA-Z0-9_-]/g, "-")}`}
+                          className="flex items-center justify-between p-3 border rounded-lg hover:bg-accent/50 transition-colors min-w-0"
+                        >
+                          <div className="min-w-0 flex-1 overflow-hidden mr-2">
+                            <p className="font-semibold truncate text-sm">
+                              {repo.name}
+                            </p>
+                            <p className="text-xs text-muted-foreground truncate">
+                              {repo.full_name}
+                            </p>
+                          </div>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleSelectRepo(repo)}
+                            disabled={importing}
+                            className="flex-shrink-0 text-xs"
+                          >
+                            {importing ? (
+                              <Loader2 className="animate-spin h-4 w-4" />
+                            ) : (
+                              t("home:import")
+                            )}
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+
+                    {repos.length > 0 && (
+                      <>
+                        <Accordion>
+                          <AccordionItem value="advanced-options">
+                            <AccordionTrigger className="text-xs sm:text-sm hover:no-underline">
+                              {t("home:advancedOptions")}
+                            </AccordionTrigger>
+                            <AccordionContent className="space-y-4">
+                              <div className="flex items-center space-x-2 py-1">
+                                <Checkbox
+                                  id="optimize-for-samba-repos"
+                                  checked={optimizeForSamba}
+                                  onCheckedChange={(checked) =>
+                                    setOptimizeForSamba(checked === true)
+                                  }
+                                  disabled={importing}
+                                />
+                                <Label
+                                  htmlFor="optimize-for-samba-repos"
+                                  className="text-xs sm:text-sm cursor-pointer"
+                                >
+                                  {t("home:autoUpgradeAnnotator")} (
+                                  {t("common:recommended")})
+                                </Label>
+                              </div>
+                              <div className="grid gap-2">
+                                <Label className="text-xs sm:text-sm">
+                                  {t("home:installCommand")}
+                                </Label>
+                                <Input
+                                  value={installCommand}
+                                  onChange={(e) =>
+                                    setInstallCommand(e.target.value)
+                                  }
+                                  placeholder="pnpm install"
+                                  className="text-sm"
+                                  disabled={importing}
+                                />
+                              </div>
+                              <div className="grid gap-2">
+                                <Label className="text-xs sm:text-sm">
+                                  {t("home:startCommand")}
+                                </Label>
+                                <Input
+                                  value={startCommand}
+                                  onChange={(e) =>
+                                    setStartCommand(e.target.value)
+                                  }
+                                  placeholder="pnpm dev"
+                                  className="text-sm"
+                                  disabled={importing}
+                                />
+                              </div>
+                              {!commandsValid && (
+                                <p className="text-xs sm:text-sm text-red-500">
+                                  {t("home:bothCommandsRequired")}
+                                </p>
+                              )}
+                            </AccordionContent>
+                          </AccordionItem>
+                        </Accordion>
+                      </>
+                    )}
+                  </>
                 )}
-              </Button>
-            </TabsContent>
-          </Tabs>
-        </div>
+              </TabsContent>
+              <TabsContent value="github-url" className="space-y-4">
+                <div className="space-y-2">
+                  <Label className="text-xs sm:text-sm">
+                    {t("home:repositoryUrl")}
+                  </Label>
+                  <Input
+                    placeholder={t("home:repositoryUrlPlaceholder")}
+                    value={url}
+                    onChange={(e) => setUrl(e.target.value)}
+                    disabled={importing}
+                    onBlur={handleUrlBlur}
+                    className="text-sm break-all"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-xs sm:text-sm">
+                    {t("home:appNameOptional")}
+                  </Label>
+                  <Input
+                    value={githubAppName}
+                    onChange={handleGithubAppNameChange}
+                    placeholder={t("home:leaveEmptyForRepo")}
+                    disabled={importing}
+                    className="text-sm"
+                  />
+                  {isCheckingGithubName && (
+                    <div className="absolute right-2 top-1/2 -translate-y-1/2">
+                      <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                    </div>
+                  )}
+                  {githubNameExists && (
+                    <p className="text-xs sm:text-sm text-yellow-500">
+                      {t("home:appNameExists")}
+                    </p>
+                  )}
+                </div>
+
+                <Accordion>
+                  <AccordionItem value="advanced-options">
+                    <AccordionTrigger className="text-xs sm:text-sm hover:no-underline">
+                      {t("home:advancedOptions")}
+                    </AccordionTrigger>
+                    <AccordionContent className="space-y-4">
+                      <div className="flex items-center space-x-2 py-1">
+                        <Checkbox
+                          id="optimize-for-samba-url"
+                          checked={optimizeForSamba}
+                          onCheckedChange={(checked) =>
+                            setOptimizeForSamba(checked === true)
+                          }
+                          disabled={importing}
+                        />
+                        <Label
+                          htmlFor="optimize-for-samba-url"
+                          className="text-xs sm:text-sm cursor-pointer"
+                        >
+                          {t("home:autoUpgradeAnnotator")} (
+                          {t("common:recommended")})
+                        </Label>
+                      </div>
+                      <div className="grid gap-2">
+                        <Label className="text-xs sm:text-sm">
+                          {t("home:installCommand")}
+                        </Label>
+                        <Input
+                          value={installCommand}
+                          onChange={(e) => setInstallCommand(e.target.value)}
+                          placeholder="pnpm install"
+                          className="text-sm"
+                          disabled={importing}
+                        />
+                      </div>
+                      <div className="grid gap-2">
+                        <Label className="text-xs sm:text-sm">
+                          {t("home:startCommand")}
+                        </Label>
+                        <Input
+                          value={startCommand}
+                          onChange={(e) => setStartCommand(e.target.value)}
+                          placeholder="pnpm dev"
+                          className="text-sm"
+                          disabled={importing}
+                        />
+                      </div>
+                      {!commandsValid && (
+                        <p className="text-xs sm:text-sm text-red-500">
+                          {t("home:bothCommandsRequired")}
+                        </p>
+                      )}
+                    </AccordionContent>
+                  </AccordionItem>
+                </Accordion>
+
+                <Button
+                  onClick={handleImportFromUrl}
+                  disabled={importing || !url.trim() || !commandsValid}
+                  className="w-full"
+                >
+                  {importing ? (
+                    <>
+                      <Loader2 className="animate-spin mr-2 h-4 w-4" />
+                      {t("common:importing")}
+                    </>
+                  ) : (
+                    t("home:import")
+                  )}
+                </Button>
+              </TabsContent>
+            </Tabs>
+          </>
+        )}
       </DialogContent>
     </Dialog>
   );

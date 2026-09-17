@@ -360,10 +360,13 @@ export function FirstPromptProvider({
     }
   }, [controller, pathname]);
 
+  const value = useMemo(
+    () => ({ controller, resumeAfterProviderConfigured }),
+    [controller, resumeAfterProviderConfigured],
+  );
+
   return (
-    <FirstPromptContext.Provider
-      value={{ controller, resumeAfterProviderConfigured }}
-    >
+    <FirstPromptContext.Provider value={value}>
       {children}
       <Dialog
         open={isSetupDialogOpen}

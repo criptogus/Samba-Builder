@@ -25,6 +25,7 @@ import { KeepPreviewsRunningSwitch } from "@/components/KeepPreviewsRunningSwitc
 import { ChatEventNotificationSwitch } from "@/components/ChatEventNotificationSwitch";
 import { AutoUpdateSwitch } from "@/components/AutoUpdateSwitch";
 import { AutoUpdateStatus } from "@/components/AutoUpdateStatus";
+import { UpdateNotice } from "@/components/UpdateNotice";
 import { ReleaseChannelSelector } from "@/components/ReleaseChannelSelector";
 import { NeonIntegration } from "@/components/NeonIntegration";
 import { RuntimeModeSelector } from "@/components/RuntimeModeSelector";
@@ -452,6 +453,7 @@ export function GeneralSettings({ appVersion }: { appVersion: string | null }) {
           available.
         </p>
         <AutoUpdateStatus />
+        <UpdateNotice />
       </div>
 
       <div id={SETTING_IDS.releaseChannel}>

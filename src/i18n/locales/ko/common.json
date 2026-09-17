@@ -59,5 +59,19 @@
   "builtIn": "내장",
   "advanced": "고급",
   "required": "필수",
-  "optional": "선택"
+  "optional": "선택",
+  "sidebar": {
+    "factory": "공장",
+    "apps": "앱",
+    "settings": "설정",
+    "library": "라이브러리",
+    "templates": "템플릿",
+    "plugins": "플러그인",
+    "help": "도움말",
+    "servicesHealth": "Samba 서비스 상태",
+    "serviceOnline": "온라인",
+    "serviceOffline": "오프라인",
+    "cortexService": "Córtex RAG (:8899)",
+    "hermesService": "Hermes Gateway (:8642)"
+  }
 }

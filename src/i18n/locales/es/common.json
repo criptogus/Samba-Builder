@@ -59,5 +59,19 @@
   "builtIn": "Integrado",
   "advanced": "Avanzado",
   "required": "Requerido",
-  "optional": "Opcional"
+  "optional": "Opcional",
+  "sidebar": {
+    "factory": "Fábrica",
+    "apps": "Apps",
+    "settings": "Ajustes",
+    "library": "Biblioteca",
+    "templates": "Plantillas",
+    "plugins": "Plugins",
+    "help": "Ayuda",
+    "servicesHealth": "Estado de Servicios Samba",
+    "serviceOnline": "En línea",
+    "serviceOffline": "Desconectado",
+    "cortexService": "Córtex RAG (:8899)",
+    "hermesService": "Hermes Gateway (:8642)"
+  }
 }

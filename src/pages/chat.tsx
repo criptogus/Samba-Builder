@@ -149,7 +149,7 @@ export default function ChatPage() {
         minSize={1}
         className={cn(!isResizing && "transition-all duration-100 ease-in-out")}
       >
-        <div className="h-full w-full">
+        <div className="h-full w-full bg-card border-r border-border">
           {!isChatPanelHidden && (
             <ChatPanel
               chatId={chatId}
@@ -186,7 +186,7 @@ export default function ChatPage() {
           }
         }}
         className={cn(
-          "relative bg-gray-200 hover:bg-gray-300 dark:bg-gray-800 dark:hover:bg-gray-700 transition-colors cursor-col-resize",
+          "relative bg-border hover:bg-primary/40 transition-colors cursor-col-resize",
           isChatPanelHidden ? "w-2" : "w-1",
         )}
       />

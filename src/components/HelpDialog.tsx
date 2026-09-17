@@ -18,6 +18,7 @@ import {
   MessageSquareIcon,
   CopyIcon,
   Loader2Icon,
+  DownloadIcon,
 } from "lucide-react";
 import { ipc } from "@/ipc/types";
 import {
@@ -35,6 +36,7 @@ import { type SessionDebugBundle } from "@/ipc/types";
 import { showError, showInfo } from "@/lib/toast";
 import { useTranslation } from "react-i18next";
 import { HelpBotDialog } from "./HelpBotDialog";
+import { UpdateInstallAction } from "./UpdateInstallAction";
 import { useSettings } from "@/hooks/useSettings";
 import {
   BugScreenshotDialog,
@@ -62,6 +64,19 @@ type DialogScreen = "main" | "review" | "upload-complete";
 
 const SCREEN_ORDER: DialogScreen[] = ["main", "review", "upload-complete"];
 
+/**
+ * Local reference shown for a session report. The upload path to Samba's
+ * servers was removed (no data leaves the machine), so this is generated
+ * client-side purely as a human-readable handle for the report the user files.
+ */
+function createLocalSessionId(): string {
+  const raw =
+    typeof globalThis.crypto?.randomUUID === "function"
+      ? globalThis.crypto.randomUUID()
+      : `${Date.now().toString(36)}${Math.random().toString(36).slice(2)}`;
+  return `local:${raw.replace(/-/g, "").slice(0, 12)}`;
+}
+
 const screenVariants = {
   enter: (direction: number) => ({
     x: direction > 0 ? 80 : -80,
@@ -83,7 +98,8 @@ const screenTransition = {
 // GitHub issue helpers (shared between Report a Bug & Upload Chat Session)
 // =============================================================================
 
-const GITHUB_ISSUES_BASE = "https://sambatech.com" as const;
+const GITHUB_ISSUES_BASE =
+  "https://github.com/criptogus/Samba-Builder/issues/new" as const;
 
 function openGitHubIssue(params: {
   title: string;
@@ -233,6 +249,25 @@ export function HelpDialog() {
   const [sessionId, setSessionId] = useState("");
   const [isHelpBotOpen, setIsHelpBotOpen] = useState(false);
   const [isScreenshotPromptOpen, setIsScreenshotPromptOpen] = useState(false);
+  // Checagem de versão dentro da ajuda: o app não se atualiza sozinho, então o
+  // resultado é informativo — avisa e leva ao download.
+  const [updateResult, setUpdateResult] = useState<Awaited<
+    ReturnType<typeof ipc.system.checkForUpdates>
+  > | null>(null);
+  const [isCheckingUpdates, setIsCheckingUpdates] = useState(false);
+
+  const handleCheckUpdates = async () => {
+    setIsCheckingUpdates(true);
+    try {
+      setUpdateResult(await ipc.system.checkForUpdates());
+    } catch (error) {
+      showError(
+        error instanceof Error ? error.message : "Could not check for updates",
+      );
+    } finally {
+      setIsCheckingUpdates(false);
+    }
+  };
   const [promptSource, setPromptSource] =
     useState<ScreenshotPromptSource>("report-bug");
   // What the screenshot prompt should file once the reporter answers it.
@@ -395,10 +430,13 @@ export function HelpDialog() {
   };
 
   const handleSubmitChatLogs = async () => {
-    // Samba Builder: sem backend próprio — os logs NÃO são enviados a servidor
-    // externo (o upload para o servidor do Samba foi removido). O suporte é
-    // acionado pelo contato da Samba.
-    ipc.system.openExternalUrl("https://sambatech.com");
+    // Samba Builder: sem backend próprio — o bundle da sessão NÃO é enviado a
+    // servidor externo (o upload para o servidor do Samba foi removido). O
+    // relatório é montado localmente e identificado por uma referência local;
+    // o suporte é acionado pelo contato da Samba no GitHub.
+    if (!debugBundle) return;
+    setSessionId(createLocalSessionId());
+    navigateTo("upload-complete");
   };
 
   const handleCancelReview = () => {
@@ -504,6 +542,66 @@ export function HelpDialog() {
         If you need help or want to report an issue, here are some options:
       </DialogDescription>
       <div className="flex flex-col w-full mt-4 space-y-5">
+        {/* Versão em destaque: é a primeira coisa útil que se procura aqui. O
+            app não se atualiza sozinho — avisa e leva ao download. */}
+        <div className="rounded-lg border border-primary/40 bg-primary/5 p-4 space-y-3">
+          <div className="flex items-center gap-2">
+            <DownloadIcon className="h-4 w-4 text-primary" />
+            <span className="text-sm font-semibold">Version and updates</span>
+          </div>
+          <p className="text-sm text-muted-foreground">
+            Check here whether a newer version is published. The app downloads
+            it, replaces itself and reopens — your data stays where it is.
+          </p>
+          <Button
+            variant="outline"
+            className="w-full"
+            disabled={isCheckingUpdates}
+            onClick={() => void handleCheckUpdates()}
+          >
+            {isCheckingUpdates ? (
+              <>
+                <Loader2Icon className="mr-2 h-4 w-4 animate-spin" /> Checking…
+              </>
+            ) : (
+              <>
+                <DownloadIcon className="mr-2 h-4 w-4" /> Check for updates
+              </>
+            )}
+          </Button>
+          {updateResult?.status === "update-available" && (
+            <div className="space-y-2">
+              <p className="text-sm font-medium">
+                New version available: {updateResult.latestVersion}
+              </p>
+              <UpdateInstallAction
+                className="w-full"
+                version={updateResult.latestVersion}
+                releaseUrl={updateResult.releaseUrl}
+              />
+            </div>
+          )}
+          {updateResult?.status === "up-to-date" && (
+            <p className="flex items-center gap-2 text-sm text-muted-foreground">
+              <CheckIcon className="h-4 w-4 text-green-500" />
+              You are on the latest published version
+              {updateResult.latestVersion
+                ? ` (${updateResult.latestVersion})`
+                : ""}
+              .
+            </p>
+          )}
+          {updateResult?.status === "unavailable" && (
+            <p className="flex items-center gap-2 text-sm text-muted-foreground">
+              <AlertCircleIcon className="h-4 w-4 text-amber-500" />
+              Could not check right now
+              {updateResult.reason === "no-access"
+                ? " — the releases repository needs your GitHub account connected."
+                : "."}
+            </p>
+          )}
+        </div>
+
         {/* Suporte — sem backend próprio: o chat de ajuda (que falava com o
             servidor do Samba) foi substituído pelo contato da Samba */}
         <Button

@@ -3,6 +3,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link, useNavigate } from "@tanstack/react-router";
 import {
   ArrowUpRight,
+  BookOpen,
   Check,
   ClipboardList,
   Download,
@@ -20,6 +21,9 @@ import { useLoadApps } from "@/hooks/useLoadApps";
 import { ipc } from "@/ipc/types";
 import { factoryClient, type FactoryAction } from "@/ipc/types/factory";
 import { queryKeys } from "@/lib/queryKeys";
+import { GovernancePanel } from "@/components/GovernancePanel";
+import { chatInputValuesByIdAtom } from "@/atoms/chatAtoms";
+import { useSetAtom } from "jotai";
 import {
   PlanSchema,
   type FactoryPlan,
@@ -242,6 +246,11 @@ function ProjectWorkspace({
 }) {
   const [tab, setTab] = useState<Tab>("Briefing");
   const navigate = useNavigate();
+  const { apps } = useLoadApps();
+  const currentApp = apps.find((app) => app.id === project.appId);
+  const appPath = currentApp?.path ?? "";
+  const setChatInputValues = useSetAtom(chatInputValuesByIdAtom);
+
   const update = useMutation({
     mutationFn: ({
       action,
@@ -266,10 +275,31 @@ function ProjectWorkspace({
         action: { type: "mode", mode },
       });
       await refresh();
-      return ipc.chat.createChat({
+      const chatId = await ipc.chat.createChat({
         appId: project.appId,
         initialChatMode: engineMode(mode),
       });
+
+      // Injeta contexto do briefing, cliente e modo no chat recém-criado
+      const skills = getSkills(mode)
+        .map((s) => `/${s.id.replace("skill-", "")}`)
+        .join(" ");
+      const initialPrompt =
+        [
+          `[Fábrica OS · ${MODE_LABELS[mode]}]`,
+          skills ? `Skills recomendadas: ${skills}` : "",
+          `Cliente: ${project.client}`,
+          `Projeto: ${project.name}`,
+          project.brief ? `Briefing: ${project.brief}` : "",
+          project.knowledge
+            ? `Conhecimento do projeto: ${project.knowledge}`
+            : "",
+        ]
+          .filter(Boolean)
+          .join("\n\n") + "\n\nComo posso ajudar nesta etapa?";
+
+      setChatInputValues((prev) => new Map(prev).set(chatId, initialPrompt));
+      return chatId;
     },
     onSuccess: (chatId) => navigate({ to: "/chat", search: { id: chatId } }),
     onError: errorToast,
@@ -361,9 +391,33 @@ function ProjectWorkspace({
           </>
         )}
         {tab === "Segurança" && (
-          <SecurityPanel project={project} refresh={refresh} />
+          <div className="space-y-6">
+            <SecurityPanel project={project} refresh={refresh} />
+            {appPath && (
+              <div className="border border-border rounded-xl p-5 bg-card mt-6">
+                <PanelHeading
+                  title="Governança e Portões de Segurança"
+                  description="Aprovações, vetações e papéis do projeto com registro de hash encadeado."
+                />
+                <GovernancePanel appPath={appPath} />
+              </div>
+            )}
+          </div>
         )}
-        {tab === "Entrega" && <ReleasePanel project={project} />}
+        {tab === "Entrega" && (
+          <div className="space-y-6">
+            <ReleasePanel project={project} />
+            {appPath && (
+              <div className="border border-border rounded-xl p-5 bg-card mt-6">
+                <PanelHeading
+                  title="Governança de Release"
+                  description="Verifique e aprove a etapa final do contrato antes de liberar a entrega."
+                />
+                <GovernancePanel appPath={appPath} />
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </>
   );
@@ -1124,6 +1178,22 @@ function ReleasePanel({ project }: { project: FactoryProject }) {
       <div className="factory-actions">
         <Button disabled={exported.isPending} onClick={() => exported.mutate()}>
           <Download /> Exportar / atualizar handoff
+        </Button>
+        <Button
+          variant="outline"
+          disabled={exported.isPending}
+          onClick={async () => {
+            try {
+              await exported.mutateAsync();
+              toast.success(
+                "Aprendizado do projeto compilado em samba/learning-report.md e pronto para absorção pelo Córtex!",
+              );
+            } catch (err) {
+              errorToast(err as Error);
+            }
+          }}
+        >
+          <BookOpen size={16} /> Registrar aprendizado no Córtex
         </Button>
         <Link to="/app-details" search={{ appId: project.appId }}>
           Abrir GitHub e deploy <ArrowUpRight size={16} />

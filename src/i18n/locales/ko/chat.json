@@ -100,6 +100,8 @@
   "refreshApp": "앱 새로고침",
   "refreshAppDescription": "애플리케이션 미리보기 새로고침",
   "keepGoing": "계속 진행",
+  "specialistRecommends": "{{name}}의 추천",
+  "specialistRecommendsPrompt": "{{name}}의 추천: {{prompt}}",
   "addTypeScript": "TypeScript 추가",
   "tipProposal": "팁 제안",
   "securityRisks": "보안 위험",

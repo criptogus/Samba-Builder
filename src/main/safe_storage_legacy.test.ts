@@ -87,6 +87,15 @@ function makeFakeReader(map: Record<string, string>): FakeReader {
   };
 }
 
+function isInProcessKeychainReaderAddonAvailable(): boolean {
+  try {
+    require("samba-keychain-reader");
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 function assertInProcessKeychainReaderAddonAvailable(): void {
   try {
     require("samba-keychain-reader");
@@ -810,6 +819,8 @@ describe.skipIf(process.platform !== "darwin")(
     afterAll(() => {
       try {
         execFileSync("security", ["delete-keychain", keychainPath]);
+      } catch {
+        // Keychain already gone (or never created): nothing to clean up.
       } finally {
         fs.rmSync(tmpDir, { recursive: true, force: true });
       }
@@ -891,142 +902,143 @@ describe.skipIf(process.platform !== "darwin")(
   },
 );
 
-describe.skipIf(process.platform !== "darwin")(
-  "InProcessKeychainPasswordReader (darwin integration)",
-  () => {
-    const tmpDir = fs.mkdtempSync(
-      path.join(os.tmpdir(), "samba-safe-storage-in-process-"),
+describe.skipIf(
+  process.platform !== "darwin" || !isInProcessKeychainReaderAddonAvailable(),
+)("InProcessKeychainPasswordReader (darwin integration)", () => {
+  const tmpDir = fs.mkdtempSync(
+    path.join(os.tmpdir(), "samba-safe-storage-in-process-"),
+  );
+  const keychainPath = path.join(tmpDir, "samba-recovery-test.keychain");
+  const keychainPassword = "testpass";
+  const storedPassword = "integration-test-password";
+  const promptService = "samba Prompt Test Safe Storage";
+
+  beforeAll(() => {
+    assertInProcessKeychainReaderAddonAvailable();
+
+    execFileSync("security", [
+      "create-keychain",
+      "-p",
+      keychainPassword,
+      keychainPath,
+    ]);
+    execFileSync("security", [
+      "unlock-keychain",
+      "-p",
+      keychainPassword,
+      keychainPath,
+    ]);
+    execFileSync("security", [
+      "add-generic-password",
+      "-A",
+      "-s",
+      "samba Safe Storage",
+      "-a",
+      "samba Key",
+      "-w",
+      storedPassword,
+      keychainPath,
+    ]);
+    execFileSync("security", [
+      "add-generic-password",
+      "-s",
+      promptService,
+      "-a",
+      "samba Key",
+      "-w",
+      "prompt-required-password",
+      keychainPath,
+    ]);
+  });
+
+  afterAll(() => {
+    try {
+      execFileSync("security", ["delete-keychain", keychainPath]);
+    } catch {
+      // Keychain already gone (or never created): nothing to clean up.
+    } finally {
+      fs.rmSync(tmpDir, { recursive: true, force: true });
+    }
+  });
+
+  beforeEach(() => {
+    clearRecoveryCacheForTesting();
+  });
+
+  it("reads a stored password from the temp keychain", () => {
+    const reader = new InProcessKeychainPasswordReader(keychainPath);
+    expect(reader.readPassword("samba Safe Storage", "samba Key")).toBe(
+      storedPassword,
     );
-    const keychainPath = path.join(tmpDir, "samba-recovery-test.keychain");
-    const keychainPassword = "testpass";
-    const storedPassword = "integration-test-password";
-    const promptService = "samba Prompt Test Safe Storage";
+  });
 
-    beforeAll(() => {
-      assertInProcessKeychainReaderAddonAvailable();
+  it("returns null for a missing item", () => {
+    const reader = new InProcessKeychainPasswordReader(keychainPath);
+    expect(
+      reader.readPassword("Nonexistent Safe Storage", "nobody"),
+    ).toBeNull();
+  });
 
-      execFileSync("security", [
-        "create-keychain",
-        "-p",
-        keychainPassword,
+  it("recovers an end-to-end encrypted secret from the temp keychain", () => {
+    const key = deriveLegacyOsCryptKey(storedPassword);
+    const ciphertext = encryptV10Base64("integration-secret", key);
+    const reader = new InProcessKeychainPasswordReader(keychainPath);
+    expect(recoverLegacySafeStorageSecret(ciphertext, reader)).toBe(
+      "integration-secret",
+    );
+  });
+
+  it("returns null promptly instead of prompting when Keychain UI would be required", () => {
+    const reader = new InProcessKeychainPasswordReader(keychainPath);
+    const startedAt = Date.now();
+
+    expect(reader.readPassword(promptService, "samba Key")).toBeNull();
+
+    expect(Date.now() - startedAt).toBeLessThan(2_000);
+  });
+
+  it("reports a locked keychain and surfaces a blocked status for silent reads", () => {
+    const binding = loadNativeKeychainReaderBinding();
+
+    execFileSync("security", ["lock-keychain", keychainPath]);
+    try {
+      expect(isDefaultKeychainLockedForSafeStorageRecovery(keychainPath)).toBe(
+        true,
+      );
+      const lockedRead = binding.readGenericPassword(
+        "samba Safe Storage",
+        "samba Key",
         keychainPath,
-      ]);
+        false,
+      );
+      // macOS may report errSecInteractionNotAllowed or errSecAuthFailed
+      // for a locked explicit test keychain with UI suppressed; both are
+      // no-UI null outcomes and the lock-state check distinguishes this
+      // from an unlocked ACL mismatch.
+      expect([-25308, -25293]).toContain(lockedRead.status);
+      expect(lockedRead.password).toBeNull();
+    } finally {
       execFileSync("security", [
         "unlock-keychain",
         "-p",
         keychainPassword,
         keychainPath,
       ]);
-      execFileSync("security", [
-        "add-generic-password",
-        "-A",
-        "-s",
+    }
+
+    expect(isDefaultKeychainLockedForSafeStorageRecovery(keychainPath)).toBe(
+      false,
+    );
+    expect(
+      binding.readGenericPassword(
         "samba Safe Storage",
-        "-a",
         "samba Key",
-        "-w",
-        storedPassword,
         keychainPath,
-      ]);
-      execFileSync("security", [
-        "add-generic-password",
-        "-s",
-        promptService,
-        "-a",
-        "samba Key",
-        "-w",
-        "prompt-required-password",
-        keychainPath,
-      ]);
-    });
-
-    afterAll(() => {
-      try {
-        execFileSync("security", ["delete-keychain", keychainPath]);
-      } finally {
-        fs.rmSync(tmpDir, { recursive: true, force: true });
-      }
-    });
-
-    beforeEach(() => {
-      clearRecoveryCacheForTesting();
-    });
-
-    it("reads a stored password from the temp keychain", () => {
-      const reader = new InProcessKeychainPasswordReader(keychainPath);
-      expect(reader.readPassword("samba Safe Storage", "samba Key")).toBe(
-        storedPassword,
-      );
-    });
-
-    it("returns null for a missing item", () => {
-      const reader = new InProcessKeychainPasswordReader(keychainPath);
-      expect(
-        reader.readPassword("Nonexistent Safe Storage", "nobody"),
-      ).toBeNull();
-    });
-
-    it("recovers an end-to-end encrypted secret from the temp keychain", () => {
-      const key = deriveLegacyOsCryptKey(storedPassword);
-      const ciphertext = encryptV10Base64("integration-secret", key);
-      const reader = new InProcessKeychainPasswordReader(keychainPath);
-      expect(recoverLegacySafeStorageSecret(ciphertext, reader)).toBe(
-        "integration-secret",
-      );
-    });
-
-    it("returns null promptly instead of prompting when Keychain UI would be required", () => {
-      const reader = new InProcessKeychainPasswordReader(keychainPath);
-      const startedAt = Date.now();
-
-      expect(reader.readPassword(promptService, "samba Key")).toBeNull();
-
-      expect(Date.now() - startedAt).toBeLessThan(2_000);
-    });
-
-    it("reports a locked keychain and surfaces a blocked status for silent reads", () => {
-      const binding = loadNativeKeychainReaderBinding();
-
-      execFileSync("security", ["lock-keychain", keychainPath]);
-      try {
-        expect(
-          isDefaultKeychainLockedForSafeStorageRecovery(keychainPath),
-        ).toBe(true);
-        const lockedRead = binding.readGenericPassword(
-          "samba Safe Storage",
-          "samba Key",
-          keychainPath,
-          false,
-        );
-        // macOS may report errSecInteractionNotAllowed or errSecAuthFailed
-        // for a locked explicit test keychain with UI suppressed; both are
-        // no-UI null outcomes and the lock-state check distinguishes this
-        // from an unlocked ACL mismatch.
-        expect([-25308, -25293]).toContain(lockedRead.status);
-        expect(lockedRead.password).toBeNull();
-      } finally {
-        execFileSync("security", [
-          "unlock-keychain",
-          "-p",
-          keychainPassword,
-          keychainPath,
-        ]);
-      }
-
-      expect(isDefaultKeychainLockedForSafeStorageRecovery(keychainPath)).toBe(
         false,
-      );
-      expect(
-        binding.readGenericPassword(
-          "samba Safe Storage",
-          "samba Key",
-          keychainPath,
-          false,
-        ),
-      ).toEqual({
-        status: 0,
-        password: storedPassword,
-      });
+      ),
+    ).toEqual({
+      status: 0,
+      password: storedPassword,
     });
-  },
-);
+  });
+});

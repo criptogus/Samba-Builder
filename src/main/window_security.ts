@@ -4,10 +4,7 @@ import type {
   WindowOpenHandlerResponse,
 } from "electron";
 
-const RELEASE_NOTES_ORIGINS = new Set([
-  "https://sambatech.com",
-  "https://sambatech.com",
-]);
+const RELEASE_NOTES_ORIGINS = new Set(["https://sambatech.com"]);
 const RESERVED_FRAME_NAMES = new Set([
   "_parent",
   "_self",

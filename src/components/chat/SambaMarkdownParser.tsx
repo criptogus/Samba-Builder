@@ -1042,7 +1042,12 @@ function renderCustomTag(
         const action = {
           id: attributes.type,
           ...(attributes.type === "next-step" && attributes.prompt
-            ? { prompt: attributes.prompt }
+            ? {
+                prompt: attributes.prompt,
+                ...(attributes.specialist
+                  ? { specialist: attributes.specialist }
+                  : {}),
+              }
             : {}),
         } as SuggestedAction;
         return <>{mapActionToButton(action)}</>;

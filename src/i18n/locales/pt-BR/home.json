@@ -12,6 +12,10 @@
   "releaseNotesTitle": "Notas de lançamento da v{{version}}",
   "importApp": "Importar App",
   "importAppDescription": "Importe um app existente de uma pasta local ou clone do Github.",
+  "importedTitle": "Projeto importado",
+  "importedDescription": "Repositório pronto no Samba Builder.",
+  "importedNextStep": "Comece com uma auditoria",
+  "importedNextStepDescription": "Análises guiadas pelos skills do Samba Builder — ou feche e faça sua primeira pergunta.",
   "importExperimental": "A importação de apps é um recurso experimental. Se encontrar algum problema, por favor reporte usando o botão Ajuda.",
   "localFolder": "Pasta Local",
   "githubRepos": "Repositórios do GitHub",
@@ -871,6 +875,11 @@
     "updated": "Atualizado",
     "more": "Mostrar mais projetos",
     "localHint": "Projetos neste computador · Organizados pelas suas coleções existentes.",
-    "intakeLabel": "Novo projeto · Briefing do cliente"
+    "intakeLabel": "Novo projeto · Briefing do cliente",
+    "intakeTitle": "O que você quer construir?",
+    "intakeSubtitle": "Descreva sua ideia. O Samba Builder transformará em um app funcional.",
+    "manageAiSetup": "Gerenciar configuração de IA",
+    "connectAiToBuild": "Conectar IA para construir — leva 1 minuto",
+    "allAppsAndCollections": "Ver todas as coleções e apps"
   }
 }

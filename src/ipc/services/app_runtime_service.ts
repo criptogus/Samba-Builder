@@ -55,6 +55,7 @@ import {
   type AppOperationRequest,
 } from "@/ipc/services/app_operation_coordinator";
 import { APP_RUN_INVOCATION_KIND } from "@/app_run/state";
+import { withProjectNodeEnv } from "@/ipc/utils/node_runtime";
 import {
   ensurePnpmAllowBuildsConfigured,
   getPackageManagerCommandEnv,
@@ -539,8 +540,12 @@ async function executeAppLocalNode({
   });
   let env = { ...process.env };
   if (!command.isCustom && command.packageManager === "pnpm") {
-    env = getPackageManagerCommandEnv();
+    env = getPackageManagerCommandEnv(env);
   }
+  // O Node compatível com o projeto precisa vir primeiro no PATH: o app herda
+  // o PATH do launchd/Finder, que pode começar por um Node antigo — e o projeto
+  // falha com EBADENGINE antes de qualquer coisa útil rodar.
+  env = withProjectNodeEnv(appPath, env);
 
   const spawnedProcess = spawn(command.command, [], {
     cwd: appPath,

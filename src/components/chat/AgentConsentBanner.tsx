@@ -89,17 +89,19 @@ export function AgentConsentBanner({
         <div className="flex items-center gap-2 mb-1">
           <Bot className="w-4 h-4 text-muted-foreground flex-shrink-0" />
           <span className="text-sm font-medium">
-            Allow <span className="font-mono">{toolName}</span>
+            {t("consentTitle", { tool: toolName })}
             {serverName && (
               <>
                 {" "}
-                from <span className="font-mono">{serverName}</span>
+                <span className="font-normal text-muted-foreground">
+                  {t("consentFromLabel")}{" "}
+                  <span className="font-medium">{serverName}</span>
+                </span>
               </>
-            )}{" "}
-            to run?
+            )}
             {queueTotal > 1 && (
               <span className="ml-1.5 text-xs text-muted-foreground font-normal">
-                (1 of {queueTotal})
+                {t("consentQueuePosition", { current: 1, total: queueTotal })}
               </span>
             )}
           </span>
@@ -118,14 +120,14 @@ export function AgentConsentBanner({
           <button
             onClick={onClose}
             className="ml-auto flex-shrink-0 p-1 text-muted-foreground hover:text-foreground transition-colors rounded hover:bg-muted"
-            aria-label="Close"
+            aria-label={t("consentClose")}
           >
             <X className="w-3.5 h-3.5" />
           </button>
         </div>
         {consent.subagent && (
           <p className="ml-6 mb-1.5 text-xs text-muted-foreground">
-            Requested by {consent.subagent.persona}{" "}
+            {t("consentRequestedBy", { persona: consent.subagent.persona })}{" "}
             <span className="font-medium text-foreground">
               {consent.subagent.taskName}
             </span>
@@ -188,41 +190,43 @@ export function AgentConsentBanner({
                 className="mt-0.5 text-xs text-muted-foreground hover:text-foreground hover:underline"
                 onClick={() => setIsInputExpanded((v) => !v)}
               >
-                {isInputExpanded ? "Show less" : "Show more"}
+                {isInputExpanded ? t("consentShowLess") : t("consentShowMore")}
               </button>
             )}
           </div>
         )}
-        <div className="flex items-center gap-2 ml-6">
-          <Button
-            onClick={() => onDecision("accept-always")}
-            size="sm"
-            variant="default"
-            className="h-8 px-3.5 text-xs font-semibold shadow-sm"
-            title="Permitir esta tool sempre que ela for usada (não perguntar de novo)"
-          >
-            <ShieldCheck className="w-4 h-4 mr-1.5" />
-            Always allow
-          </Button>
+        <div className="flex flex-wrap items-center gap-2 ml-6">
+          {/* Hierarquia: a ação reversível é a primária; a irreversível
+              ("sempre") fica discreta; bloquear é terciária. */}
           <Button
             onClick={() => onDecision("accept-once")}
             size="sm"
-            variant="secondary"
-            className="h-8 px-3.5 text-xs font-semibold"
-            title="Permitir esta tool apenas agora"
+            variant="default"
+            className="h-8 px-3.5 text-xs font-semibold shadow-sm"
+            title={t("consentAllowOnceHint")}
           >
             <Check className="w-4 h-4 mr-1.5" />
-            Allow once
+            {t("consentAllowOnce")}
+          </Button>
+          <Button
+            onClick={() => onDecision("accept-always")}
+            size="sm"
+            variant="outline"
+            className="h-8 px-3.5 text-xs font-medium"
+            title={t("consentAllowAlwaysHint")}
+          >
+            <ShieldCheck className="w-4 h-4 mr-1.5" />
+            {t("consentAllowAlways")}
           </Button>
           <Button
             onClick={() => onDecision("decline")}
             size="sm"
-            variant="outline"
-            className="h-8 px-3.5 text-xs font-semibold border-destructive/50 text-destructive hover:bg-destructive/10 hover:text-destructive dark:border-destructive/60 dark:hover:bg-destructive/15"
-            title="Bloquear esta tool desta vez"
+            variant="ghost"
+            className="h-8 px-3 text-xs font-medium text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
+            title={t("consentDeclineHint")}
           >
             <Ban className="w-4 h-4 mr-1.5" />
-            Decline
+            {t("consentDecline")}
           </Button>
         </div>
       </div>

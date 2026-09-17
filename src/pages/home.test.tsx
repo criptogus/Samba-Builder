@@ -107,6 +107,9 @@ vi.mock("@/components/ImportAppButton", () => ({
 vi.mock("@/components/FeaturedAppShowcase", () => ({
   FeaturedAppShowcase: () => null,
 }));
+vi.mock("@/components/DeliveryWorkspace", () => ({
+  DeliveryWorkspace: () => null,
+}));
 
 describe("HomePage first-prompt projection", () => {
   beforeEach(() => {

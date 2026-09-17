@@ -152,6 +152,8 @@ const isEndToEndTestBuild = process.env.E2E_TEST_BUILD === "true";
 const isLocalDesktopBuild =
   process.env.SAMBA_LOCAL_DESKTOP_BUILD === "true" && !isEndToEndTestBuild;
 const isWindowsSigningEnabled = process.env.WINDOWS_SIGN === "true";
+// Sem credencial Apple no fork, publica artefato sem assinatura em vez de quebrar o release.
+const shouldSkipCodeSigning = process.env.SKIP_CODE_SIGNING === "true";
 const shouldSkipNativeRebuild =
   process.env.SAMBA_SKIP_NATIVE_REBUILD === "true";
 const nativeRebuildModules = [
@@ -172,6 +174,9 @@ const config: ForgeConfig = {
   outDir: isLocalDesktopBuild ? "out/desktop" : undefined,
   packagerConfig: {
     name: "Samba Builder",
+    // O binário Linux/Windows precisa se chamar como o package.json (`samba-builder`):
+    // é o nome que o Forge e os makers procuram. O nome de exibição segue "Samba Builder".
+    executableName: "samba-builder",
     // Keep the existing application identity while correcting its display name.
     appBundleId: "com.sambatech.builder",
     // E2E test builds install local file: dependencies as links on Windows.
@@ -218,7 +223,7 @@ const config: ForgeConfig = {
     icon: "./assets/icon/logo",
 
     osxSign:
-      isEndToEndTestBuild || isLocalDesktopBuild
+      isEndToEndTestBuild || isLocalDesktopBuild || shouldSkipCodeSigning
         ? undefined
         : ({
             identity: process.env.APPLE_TEAM_ID,
@@ -230,7 +235,7 @@ const config: ForgeConfig = {
             preEmbedProvisioningProfile: false,
           } as Record<string, unknown>),
     osxNotarize:
-      isEndToEndTestBuild || isLocalDesktopBuild
+      isEndToEndTestBuild || isLocalDesktopBuild || shouldSkipCodeSigning
         ? undefined
         : {
             appleId: process.env.APPLE_ID!,
@@ -263,22 +268,28 @@ const config: ForgeConfig = {
       // @ts-expect-error - incorrect types exported by MakerSquirrel
       isWindowsSigningEnabled
         ? {
+            name: "samba-builder",
             windowsSign,
             setupIcon: "./assets/icon/logo.ico",
           }
         : {
+            name: "samba-builder",
             setupIcon: "./assets/icon/logo.ico",
           },
     ),
     new MakerZIP({}, ["darwin"]),
     new MakerRpm({
       options: {
+        name: "samba-builder",
+        productName: "Samba Builder",
         mimeType: ["x-scheme-handler/sambabuilder"],
         icon: "./assets/icon/logo.png",
       },
     }),
     new MakerDeb({
       options: {
+        name: "samba-builder",
+        productName: "Samba Builder",
         mimeType: ["x-scheme-handler/sambabuilder"],
         icon: "./assets/icon/logo.png",
       },

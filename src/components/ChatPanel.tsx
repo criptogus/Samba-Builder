@@ -24,6 +24,7 @@ import { VersionPane } from "./chat/VersionPane";
 import { FreeAgentQuotaBanner } from "./chat/FreeAgentQuotaBanner";
 import { NotificationBanner } from "./chat/NotificationBanner";
 import { SupabaseLegacyKeyBanner } from "./chat/SupabaseLegacyKeyBanner";
+import { SpecialistAgentsDialog } from "./SpecialistAgentsDialog";
 import { Button } from "@/components/ui/button";
 import {
   Tooltip,
@@ -31,6 +32,8 @@ import {
   TooltipContent,
 } from "@/components/ui/tooltip";
 import { ArrowDown } from "lucide-react";
+import { SpecialistAvatarStack } from "@/components/SpecialistAvatar";
+import { specialistAgents } from "@/lib/specialist_agents";
 import { useSettings } from "@/hooks/useSettings";
 import { useFreeAgentQuota } from "@/hooks/useFreeAgentQuota";
 import { useChatMode } from "@/hooks/useChatMode";
@@ -121,6 +124,7 @@ export function ChatPanel({
   // and state for the scroll button UI which needs re-renders.
   const isAtBottomRef = useRef(true);
   const [showScrollButton, setShowScrollButton] = useState(false);
+  const [showSpecialists, setShowSpecialists] = useState(false);
 
   const scrollToBottom = useCallback(
     (behavior: ScrollBehavior = "smooth"): boolean => {
@@ -446,6 +450,7 @@ export function ChatPanel({
                             render={
                               <Button
                                 onClick={handleScrollButtonClick}
+                                aria-label={t("scrollToBottom")}
                                 size="icon"
                                 className="rounded-full shadow-lg hover:shadow-xl transition-all border border-border/50 backdrop-blur-sm bg-background/95 hover:bg-accent"
                                 variant="outline"
@@ -468,8 +473,28 @@ export function ChatPanel({
                       }
                     />
                   )}
+                  {/* Um aviso por vez: o de ação necessária vence o informativo. */}
                   <SupabaseLegacyKeyBanner appId={selectedAppId} />
-                  <NotificationBanner />
+                  {!showFreeAgentQuotaBanner && <NotificationBanner />}
+                  {chatId !== null && selectedAppId !== null && (
+                    <div className="flex justify-start px-1">
+                      <Button
+                        type="button"
+                        variant="secondary"
+                        size="sm"
+                        onClick={() => setShowSpecialists(true)}
+                        title="Criar tarefa para um especialista (arquitetura, cybersec, UX/UI…)"
+                      >
+                        <SpecialistAvatarStack
+                          agents={specialistAgents}
+                          size="xs"
+                          max={4}
+                          className="mr-1.5"
+                        />
+                        Especialistas
+                      </Button>
+                    </div>
+                  )}
                   <ChatInput chatId={chatId} />
                 </motion.div>
               )}
@@ -511,6 +536,14 @@ export function ChatPanel({
           </motion.div>
         )}
       </AnimatePresence>
+      {chatId != null && selectedAppId != null && (
+        <SpecialistAgentsDialog
+          isOpen={showSpecialists}
+          onClose={() => setShowSpecialists(false)}
+          chatId={chatId}
+          appId={selectedAppId}
+        />
+      )}
     </div>
   );
 }

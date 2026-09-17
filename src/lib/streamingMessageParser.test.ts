@@ -98,6 +98,44 @@ describe("streamingMessageParser", () => {
     expect(tag.content).toBe("if (a < b) {}");
   });
 
+  it("does not close a tag at a '>' inside an attribute value", () => {
+    const content =
+      '<samba-command type="next-step" prompt="Reaplicar engines node >=22 <26 no package.json"></samba-command>';
+    const { blocks } = parseFullMessage(content);
+
+    expect(blocks).toHaveLength(1);
+    const tag = blocks[0];
+    if (tag.kind !== "custom-tag") throw new Error("expected custom-tag");
+    expect(tag.tag).toBe("samba-command");
+    expect(tag.attributes.type).toBe("next-step");
+    expect(tag.attributes.prompt).toBe(
+      "Reaplicar engines node >=22 <26 no package.json",
+    );
+  });
+
+  it("parses the specialist attribute on next-step commands", () => {
+    const content =
+      '<samba-command type="next-step" specialist="cybersec" prompt="Audite o endpoint"></samba-command>';
+    const { blocks } = parseFullMessage(content);
+    const tag = blocks[0];
+    if (tag.kind !== "custom-tag") throw new Error("expected custom-tag");
+    expect(tag.attributes.specialist).toBe("cybersec");
+    expect(tag.attributes.prompt).toBe("Audite o endpoint");
+  });
+
+  it("keeps the open-quote state across streaming chunks", () => {
+    const content =
+      '<samba-command type="next-step" prompt="subir para >=24 e <26"></samba-command>';
+    const at = content.indexOf(">=24");
+    // cortes: no meio do '>' do atributo e depois do '<'
+    const state = feedAll(content, [at + 3, at + 6, content.length - 12]);
+    const blocks = getParserBlocks(state);
+    const tag = blocks.find((b) => b.kind === "custom-tag");
+    if (!tag || tag.kind !== "custom-tag")
+      throw new Error("expected custom-tag");
+    expect(tag.attributes.prompt).toBe("subir para >=24 e <26");
+  });
+
   it("treats unclosed opening tag as in-progress", () => {
     const content = '<samba-write path="x.ts">partial';
     const { blocks } = parseFullMessage(content);

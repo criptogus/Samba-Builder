@@ -1,8 +1,6 @@
-import { ProductCoachButton } from "@/components/ProductCoachButton";
+import { CreateWithMenu } from "./CreateWithMenu";
 import { appendProductBrief } from "@/product_coach/model";
-import { NativeAgentsButton } from "@/components/NativeAgentsButton";
 import { appendMeetingBriefing } from "@/shared/meeting_briefing";
-import { MeetingBriefingButton } from "@/components/MeetingBriefingButton";
 import {
   StopCircleIcon,
   X,
@@ -23,8 +21,13 @@ import {
   Lock,
   Mic,
   MicOff,
-  Sparkles,
+  ArrowRight,
 } from "lucide-react";
+import { SpecialistAvatar } from "@/components/SpecialistAvatar";
+import {
+  composeSpecialistTaskPrompt,
+  getSpecialistAgent,
+} from "@/lib/specialist_agents";
 import type React from "react";
 import { useCallback, useEffect, useRef, useState, useMemo } from "react";
 import { useTranslation } from "react-i18next";
@@ -106,8 +109,10 @@ import {
 } from "@/components/ui/tooltip";
 import {
   ContextLimitBanner,
+  shouldAutoSummarize,
   shouldShowContextLimitBanner,
 } from "./ContextLimitBanner";
+import { showInfo } from "@/lib/toast";
 import { useCountTokens } from "@/hooks/useCountTokens";
 import { useChats } from "@/hooks/useChats";
 import { useRouter } from "@tanstack/react-router";
@@ -343,10 +348,68 @@ export function ChatInput({ chatId }: { chatId?: number }) {
     !isStreaming ? (chatId ?? null) : null,
     "",
   );
+  const { handleSummarize } = useSummarizeInNewChat();
+
+  // Contexto grande demais: resumo automatico em uma conversa nova, uma vez por
+  // conversa. Melhor avisar e resumir do que deixar o proximo turno estourar a
+  // janela e perder trabalho do usuario.
+  const [autoSummarizedChatId, setAutoSummarizedChatId] = useState<
+    number | null
+  >(null);
+  useEffect(() => {
+    // Em modo de teste o contexto e sintetico e o harness nao pode navegar
+    // sozinho no meio das assercoes; a decisao em si tem teste proprio
+    // (shouldAutoSummarize). E2E_TEST_BUILD nao serve aqui: ele so existe no
+    // app empacotado para E2E.
+    if (settings?.isTestMode) {
+      return;
+    }
+    if (!chatId || !tokenCountResult || isStreaming) {
+      return;
+    }
+    if (autoSummarizedChatId === chatId) {
+      return;
+    }
+    if (
+      !shouldAutoSummarize({
+        totalTokens: tokenCountResult.actualMaxTokens,
+        contextWindow: tokenCountResult.contextWindow,
+      })
+    ) {
+      return;
+    }
+    setAutoSummarizedChatId(chatId);
+    showInfo(t("contextLimitAutoSummarizing"));
+    void handleSummarize();
+  }, [
+    chatId,
+    tokenCountResult,
+    isStreaming,
+    autoSummarizedChatId,
+    handleSummarize,
+    t,
+    settings?.isTestMode,
+  ]);
+
+  // O aviso de contexto e dispensavel: fica escondido ate o consumo crescer de
+  // verdade (10k tokens a mais) e zera ao trocar de conversa.
+  const [dismissedContextWarningAt, setDismissedContextWarningAt] = useState<
+    number | null
+  >(null);
+  useEffect(() => {
+    setDismissedContextWarningAt(null);
+  }, [chatId]);
+  const contextWarningDismissed =
+    tokenCountResult &&
+    typeof tokenCountResult.actualMaxTokens === "number" &&
+    dismissedContextWarningAt !== null
+      ? tokenCountResult.actualMaxTokens <= dismissedContextWarningAt + 10_000
+      : false;
 
   const showBanner =
     !isStreaming &&
     tokenCountResult &&
+    !contextWarningDismissed &&
     shouldShowContextLimitBanner({
       totalTokens: tokenCountResult.actualMaxTokens,
       contextWindow: tokenCountResult.contextWindow,
@@ -871,6 +934,9 @@ export function ChatInput({ chatId }: { chatId?: number }) {
           <ContextLimitBanner
             totalTokens={tokenCountResult.actualMaxTokens}
             contextWindow={tokenCountResult.contextWindow}
+            onDismiss={() =>
+              setDismissedContextWarningAt(tokenCountResult.actualMaxTokens)
+            }
           />
         )}
         {/* Cancelling a turn can take a minute when the agent is mid-tool (a
@@ -881,11 +947,10 @@ export function ChatInput({ chatId }: { chatId?: number }) {
         )}
         <div
           className={cn(
-            "relative flex flex-col border border-border rounded-xl bg-card transition-colors duration-150 focus-within:ring-2 focus-within:ring-primary/15",
+            "relative flex flex-col border border-border rounded-xl bg-background shadow-sm transition-colors duration-150 focus-within:ring-2 focus-within:ring-primary/15",
             "focus-within:border-primary/30 focus-within:ring-1 focus-within:ring-primary/20",
             isDraggingOver && "ring-2 ring-blue-500 border-blue-500",
-            (showBanner || showPromo || isCancellationRequested) &&
-              "rounded-t-none border-t-0",
+            (showBanner || showPromo || isCancellationRequested) && "mt-1",
           )}
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
@@ -1017,20 +1082,17 @@ export function ChatInput({ chatId }: { chatId?: number }) {
           <div
             role="group"
             aria-label="Ferramentas de criação"
-            className="flex flex-wrap gap-0.5 border-b border-border/60 px-2 py-1.5 [&_button]:h-8 [&_button]:px-2 [&_button]:text-xs [&_svg]:size-3.5"
+            className="flex flex-wrap gap-0.5 border-b border-border/60 px-2 py-1 [&_button]:text-xs"
           >
-            <ProductCoachButton
-              key={chatId ?? "chat"}
+            <CreateWithMenu
               draftKey={`chat:${chatId ?? "new"}`}
               idea={inputValue}
+              appId={appId ?? undefined}
               disabled={isStreaming}
-              onPrepared={(brief) =>
+              onProductBrief={(brief) =>
                 setInputValue((current) => appendProductBrief(current, brief))
               }
-            />
-            {appId && <NativeAgentsButton appId={appId} />}
-            <MeetingBriefingButton
-              onPrepared={(prompt) =>
+              onMeetingBrief={(prompt) =>
                 setInputValue(appendMeetingBriefing(inputValue, prompt))
               }
             />
@@ -1382,23 +1444,63 @@ function KeepGoingButton() {
 // Sugestão de próximo passo emitida pelo agente ao finalizar uma tarefa —
 // texto clicável que envia o prompt sugerido e continua a evolução.
 export function NextStepButton({ action }: { action: NextStepAction }) {
-  const { streamMessage } = useStreamChat();
+  const { t } = useTranslation("chat");
+  const { streamMessage, isStreaming } = useStreamChat();
   const chatId = useAtomValue(selectedChatIdAtom);
+  const agent = getSpecialistAgent(action.specialist);
   const onClick = () => {
     if (!chatId) {
       console.error("No chat id found");
       return;
     }
     streamMessage({
-      prompt: action.prompt,
+      prompt: agent
+        ? composeSpecialistTaskPrompt(agent, action.prompt)
+        : action.prompt,
       chatId,
     });
   };
+  const accessibleName = agent
+    ? t("specialistRecommendsPrompt", {
+        name: agent.persona,
+        prompt: action.prompt,
+      })
+    : action.prompt;
+  // Cartão de próximo passo: a sugestão precisa ser vista, não garimpada no
+  // fim de uma mensagem longa. Um clique continua a partir daqui — e, se um
+  // especialista recomendou, o próximo turno já entra no papel dele.
   return (
-    <SuggestionButton onClick={onClick} tooltipText={action.prompt}>
-      <Sparkles className="w-3.5 h-3.5 mr-1.5 text-primary" />
-      {action.prompt}
-    </SuggestionButton>
+    <Tooltip>
+      <TooltipTrigger
+        render={
+          <button
+            type="button"
+            disabled={isStreaming}
+            onClick={onClick}
+            aria-label={accessibleName}
+            className="group my-1 flex w-full cursor-pointer items-center gap-2.5 rounded-lg border border-primary/25 bg-primary/5 px-3 py-2 text-left text-sm transition-colors hover:border-primary/50 hover:bg-primary/10 disabled:cursor-not-allowed disabled:opacity-60"
+          />
+        }
+      >
+        {agent ? (
+          <SpecialistAvatar agent={agent} size="sm" />
+        ) : (
+          <ArrowRight className="h-4 w-4 shrink-0 text-primary transition-transform group-hover:translate-x-0.5" />
+        )}
+        <span className="min-w-0 flex-1">
+          {agent && (
+            <span className="block text-[11px] font-medium text-muted-foreground">
+              {t("specialistRecommends", { name: agent.persona })}
+              <span className="font-normal"> · {agent.name}</span>
+            </span>
+          )}
+          <span className="block line-clamp-2">{action.prompt}</span>
+        </span>
+      </TooltipTrigger>
+      <TooltipContent>
+        {agent ? `${agent.persona} · ${agent.tagline}` : action.prompt}
+      </TooltipContent>
+    </Tooltip>
   );
 }
 
@@ -1551,7 +1653,7 @@ function ChatInputActions({
           <Button
             className="px-8"
             size="sm"
-            variant="outline"
+            variant="default"
             onClick={onApprove}
             disabled={!isApprovable || isApproving || isRejecting}
             data-testid="approve-proposal-button"
@@ -1564,9 +1666,9 @@ function ChatInputActions({
             {t("approve")}
           </Button>
           <Button
-            className="px-8"
             size="sm"
             variant="outline"
+            className="px-8 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
             onClick={onReject}
             disabled={!isApprovable || isApproving || isRejecting}
             data-testid="reject-proposal-button"
@@ -1627,20 +1729,22 @@ function ChatInputActions({
                 <h4 className="font-semibold mb-1">{t("packagesAdded")}</h4>
                 <ul className="space-y-1">
                   {proposal.packagesAdded.map((pkg, index) => (
-                    <li
-                      key={index}
-                      className="flex items-center space-x-2"
-                      onClick={() => {
-                        ipc.system.openExternalUrl(getNpmPackagePageUrl(pkg));
-                      }}
-                    >
-                      <Package
-                        size={16}
-                        className="text-muted-foreground flex-shrink-0"
-                      />
-                      <span className="cursor-pointer text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300">
-                        {pkg}
-                      </span>
+                    <li key={index}>
+                      <button
+                        type="button"
+                        className="flex items-center space-x-2 text-left hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                        onClick={() => {
+                          ipc.system.openExternalUrl(getNpmPackagePageUrl(pkg));
+                        }}
+                      >
+                        <Package
+                          size={16}
+                          className="text-muted-foreground flex-shrink-0"
+                        />
+                        <span className="cursor-pointer text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300">
+                          {pkg}
+                        </span>
+                      </button>
                     </li>
                   ))}
                 </ul>
@@ -1789,8 +1893,18 @@ function SqlQueryItem({ query }: { query: SqlQuery }) {
 
   return (
     <li
-      className="bg-(--background-lightest) hover:bg-(--background-lighter) rounded-lg px-3 py-2 border border-border cursor-pointer"
+      role="button"
+      tabIndex={0}
+      aria-expanded={isExpanded}
+      className="bg-(--background-lightest) hover:bg-(--background-lighter) rounded-lg px-3 py-2 border border-border cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
       onClick={() => setIsExpanded(!isExpanded)}
+      onKeyDown={(event) => {
+        const { key } = event;
+        if (key === "Enter" || key === " ") {
+          event.preventDefault();
+          setIsExpanded(!isExpanded);
+        }
+      }}
     >
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">

@@ -67,12 +67,22 @@ describe("context compaction (integration)", () => {
       (e) => e.channel === "chat:response:error",
     );
 
+  const providerEnvKeys = [
+    "ANTHROPIC_API_KEY",
+    "ANTHROPIC_BASE_URL",
+    "OPENAI_API_KEY",
+    "OPENAI_BASE_URL",
+  ] as const;
+  let previousProviderEnv: Map<string, string | undefined>;
+
   beforeAll(async () => {
     harness = await setupHybridChatHarness({
       electronMock: h,
       engine: true,
       // The e2e picks a non-OpenAI model for local agent mode (OpenAI models
       // go to the responses API); Claude Opus 4.5 comes from the fake catalog.
+      // Its request is routed to the harness fake server below (the engine
+      // routing this used to rely on is gone in the BYOK product).
       selectedModel: { provider: "anthropic", name: "claude-opus-4-5" },
       chatMode: "local-agent",
       settings: {
@@ -85,10 +95,29 @@ describe("context compaction (integration)", () => {
         },
       },
     });
+
+    // The local-agent turn uses the anthropic model, and compaction pins the
+    // benchmarked openai-provider model (gpt-5.6-luna). Both are routed to the
+    // in-process fake LLM server by pointing their provider SDKs at it via env
+    // (the engine routing this used to rely on is gone in the BYOK product).
+    previousProviderEnv = new Map(
+      providerEnvKeys.map((key) => [key, process.env[key]]),
+    );
+    process.env.ANTHROPIC_API_KEY = "testsambakey";
+    process.env.ANTHROPIC_BASE_URL = `${harness.fakeLlmUrl}/v1`;
+    process.env.OPENAI_API_KEY = "testsambakey";
+    process.env.OPENAI_BASE_URL = `${harness.fakeLlmUrl}/v1`;
   }, 60_000);
 
   afterAll(async () => {
     await harness?.dispose();
+    for (const [key, value] of previousProviderEnv ?? []) {
+      if (value === undefined) {
+        delete process.env[key];
+      } else {
+        process.env[key] = value;
+      }
+    }
   });
 
   const loadChatMessages = (chatId: number) =>

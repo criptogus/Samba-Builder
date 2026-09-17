@@ -8,6 +8,7 @@ import {
   net,
   nativeImage,
   crashReporter,
+  shell,
   type Event as ElectronEvent,
 } from "electron";
 import * as path from "node:path";
@@ -15,6 +16,11 @@ import { randomUUID } from "node:crypto";
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
 import { registerIpcHandlers } from "./ipc/ipc_host";
+import {
+  checkForRelease,
+  describeReleaseCheck,
+} from "./ipc/services/release_check";
+import { installLatestUpdate } from "./main/update_install_flow";
 import dotenv from "dotenv";
 // Samba Builder: o canal de atualização são as releases deste repositório no
 // GitHub (serviço público do Electron) — nenhum backend do Samba é consultado.
@@ -451,12 +457,12 @@ if (fs.existsSync(gitDir)) {
 // https://www.electronjs.org/docs/latest/tutorial/launch-app-from-url-in-another-app#main-process-mainjs
 if (process.defaultApp) {
   if (process.argv.length >= 2) {
-    app.setAsDefaultProtocolClient("samba", process.execPath, [
+    app.setAsDefaultProtocolClient("sambabuilder", process.execPath, [
       path.resolve(process.argv[1]),
     ]);
   }
 } else {
-  app.setAsDefaultProtocolClient("samba");
+  app.setAsDefaultProtocolClient("sambabuilder");
 }
 
 export async function onReady() {
@@ -1367,6 +1373,74 @@ const createApplicationMenu = () => {
             label: app.name,
             submenu: [
               { role: "about" as const },
+              { type: "separator" as const },
+              // Onde as pessoas procuram: sem este item, a checagem de versão
+              // existia só como uma linha em Configurações.
+              {
+                label: app.getLocale().toLowerCase().startsWith("pt")
+                  ? "Verificar atualizações…"
+                  : "Check for Updates…",
+                click: async () => {
+                  const token = readSettings().githubAccessToken?.value ?? null;
+                  const result = await checkForRelease({
+                    currentVersion: app.getVersion(),
+                    token,
+                  });
+                  logger.info(
+                    `Checagem de atualização: status=${result.status} atual=${result.currentVersion} publicada=${result.latestVersion ?? "-"} motivo=${result.reason ?? "-"} credencial=${token ? "sim" : "não"}`,
+                  );
+                  const content = describeReleaseCheck(result, app.getLocale());
+                  const { response } = await dialog.showMessageBox({
+                    type: content.type,
+                    title: content.title,
+                    message: content.message,
+                    detail: content.detail,
+                    buttons: content.buttons,
+                    defaultId: 0,
+                    cancelId: content.buttons.length - 1,
+                  });
+                  if (response === content.downloadButtonIndex) {
+                    const pt = app.getLocale().toLowerCase().startsWith("pt");
+                    const instalacao = await installLatestUpdate({
+                      logger: {
+                        info: (message) => logger.info(message),
+                        warn: (message, error) => logger.warn(message, error),
+                      },
+                    });
+                    if (instalacao.status === "scheduled") {
+                      await dialog.showMessageBox({
+                        type: "info",
+                        message: pt
+                          ? "Baixando a versão nova"
+                          : "Downloading the new version",
+                        detail: pt
+                          ? "O app vai fechar e reabrir quando a troca terminar. Seus dados ficam como estão."
+                          : "The app will close and reopen when the swap finishes. Your data stays where it is.",
+                        buttons: ["Ok"],
+                      });
+                      setTimeout(() => {
+                        app.quit();
+                      }, 1500);
+                    } else {
+                      const { response: abrir } = await dialog.showMessageBox({
+                        type: "warning",
+                        message: pt
+                          ? "Não foi possível instalar automaticamente"
+                          : "Could not install automatically",
+                        detail: instalacao.reason ?? "",
+                        buttons: pt
+                          ? ["Abrir a página da release", "Fechar"]
+                          : ["Open the release page", "Close"],
+                        defaultId: 0,
+                        cancelId: 1,
+                      });
+                      if (abrir === 0 && result.releaseUrl) {
+                        void shell.openExternal(result.releaseUrl);
+                      }
+                    }
+                  }
+                },
+              },
               { type: "separator" as const },
               { role: "services" as const },
               { type: "separator" as const },

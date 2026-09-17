@@ -228,6 +228,8 @@ export interface AgentContext {
     toolDescription?: string | null;
     inputPreview?: string | null;
     metadata?: SqlConsentMetadata | null;
+    /** Não-nulo = ação irreversível; força o pedido mesmo com consent "always". */
+    riskWarning?: string | null;
     abortSignal?: AbortSignal;
     subagent?: {
       threadId: string;
@@ -538,6 +540,15 @@ export interface ToolDefinition<T = any> {
    * renderer-safe; it is sent over IPC.
    */
   getConsentMetadata?: (args: T) => SqlConsentMetadata | null | undefined;
+
+  /**
+   * Returns a warning when THIS call is irreversible (publishes to a remote,
+   * destroys work, leaves the machine, elevates privilege, mutates deps).
+   * A non-null value forces a consent prompt even when the tool's stored
+   * consent is "always": the product rule is to ask exactly where there is no
+   * way back. Read-only verification calls must return null.
+   */
+  getIrreversibleRisk?: (args: T) => string | null;
 
   /**
    * For state-modifying tools, returns whether a successful execution actually

@@ -112,15 +112,25 @@ jobs:
           sudo apt-get install -y clang-18
           echo "CC=clang-18" >> "$GITHUB_ENV"
           echo "CXX=clang++-18" >> "$GITHUB_ENV"
+      - name: Detect signing credentials
+        id: signing
+        shell: bash
+        env:
+          PRESENT_APPLE_CERT: ${{ secrets.MACOS_CERT_P12 }}
+          PRESENT_AZURE_CLIENT: ${{ secrets.AZURE_CLIENT_ID }}
+        run: |
+          if [ -n "$PRESENT_APPLE_CERT" ]; then echo "apple=true" >> "$GITHUB_OUTPUT"; else echo "apple=false" >> "$GITHUB_OUTPUT"; fi
+          if [ -n "$PRESENT_AZURE_CLIENT" ]; then echo "azure=true" >> "$GITHUB_OUTPUT"; else echo "azure=false" >> "$GITHUB_OUTPUT"; fi
+
       - name: add macos cert
-        if: contains(matrix.os.name, 'macos')
+        if: contains(matrix.os.name, 'macos') && steps.signing.outputs.apple == 'true'
         env:
           MACOS_CERT_P12: ${{ secrets.MACOS_CERT_P12 }}
           MACOS_CERT_PASSWORD: ${{ secrets.MACOS_CERT_PASSWORD }}
         run: chmod +x tools/add-macos-cert.sh && . ./tools/add-macos-cert.sh
       # Windows only
       - name: Install Azure Trusted Signing
-        if: contains(matrix.os.name, 'windows')
+        if: contains(matrix.os.name, 'windows') && steps.signing.outputs.azure == 'true'
         shell: powershell
         run: |
           # Install via NuGet instead of winget (winget is slow/unreliable in CI)
@@ -140,7 +150,7 @@ jobs:
           }
 
       - name: Find Windows 11 SDK SignTool
-        if: contains(matrix.os.name, 'windows')
+        if: contains(matrix.os.name, 'windows') && steps.signing.outputs.azure == 'true'
         shell: powershell
         run: |
           $sdkPath = "C:\Program Files (x86)\Windows Kits\10\bin"
@@ -158,7 +168,7 @@ jobs:
           }
 
       - name: Create Azure signing metadata
-        if: contains(matrix.os.name, 'windows')
+        if: contains(matrix.os.name, 'windows') && steps.signing.outputs.azure == 'true'
         shell: pwsh
         run: |
           @'
@@ -173,7 +183,7 @@ jobs:
 
       # Build (dry-run) - does NOT publish
       - name: Build app (dry-run)
-        uses: nick-fields/retry@ce71cc2ab81d554ebbe88c79ab5975992d79ba08 # v3.0.2
+        uses: nick-fields/retry@ad984534de44a9489a53aefd81eb77f87c70dc60 # v4.0.0
         with:
           timeout_minutes: 30
           max_attempts: 3
@@ -188,7 +198,8 @@ jobs:
           AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
           AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
           AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
-          WINDOWS_SIGN: ${{ contains(matrix.os.name, 'windows') && 'true' || '' }}
+          WINDOWS_SIGN: ${{ steps.signing.outputs.azure == 'true' && 'true' || '' }}
+          SKIP_CODE_SIGNING: ${{ steps.signing.outputs.apple != 'true' && 'true' || '' }}
 
       - name: Generate release provenance manifest
         env:
@@ -197,6 +208,10 @@ jobs:
         run: node scripts/generate-release-provenance.js "out/release-provenance-${{ matrix.os.name }}.json" "${{ matrix.os.name }}" out/make
 
       - name: Attest release provenance manifest
+        # Attestations nao existem para repositorio privado de conta pessoal
+        # ("Feature not available for user-owned private repositories"): em repo
+        # publico o passo roda, em privado e pulado em vez de derrubar o build.
+        if: github.event.repository.private == false
         uses: actions/attest@f7c74d28b9d84cb8768d0b8ca14a4bac6ef463e6 # v4.2.0
         with:
           subject-path: out/release-provenance-${{ matrix.os.name }}.json
@@ -255,10 +270,41 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: node scripts/verify-release-assets.js
+      # A lista de commits entra primeiro, como reserva: o rascunho do preparo
+      # nasce sem corpo, e o app mostra "o que há de novo" lendo o corpo da
+      # release — sem nada ali, a tela abre em branco. A nota versionada do
+      # passo seguinte sobrepõe esta quando existe.
+      - name: Attach release notes from commits
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # RELEASE_TAG e definido por passo neste job (nao no nivel do job):
+          # sem isto o gh procura uma release sem nome e falha com
+          # "release not found", que parece problema de tag e nao de variavel.
+          RELEASE_TAG: ${{ needs.prepare-release.outputs.tag }}
+        run: |
+          if [ -z "$RELEASE_TAG" ]; then
+            echo "RELEASE_TAG vazio: o job de preparo nao devolveu a tag."
+            exit 1
+          fi
+          # Notas a partir dos commits: o app mostra "o que ha de novo" lendo o
+          # corpo da release, e o rascunho do preparo nasce sem corpo — sem isto
+          # a tela aparece em branco. A geracao pronta do GitHub depende de PRs,
+          # e aqui o trabalho entra direto na main; entao montamos a lista pelo
+          # compare entre a release anterior e esta.
+          PREV="$(gh api "repos/${{ github.repository }}/releases?per_page=50" \
+            --jq "[.[] | select(.draft == false and .tag_name != \"$RELEASE_TAG\")][0].tag_name" 2>/dev/null || true)"
+          if [ -n "$PREV" ] && [ "$PREV" != "null" ]; then
+            NOTES="$(gh api "repos/${{ github.repository }}/compare/$PREV...$RELEASE_TAG" \
+              --jq '.commits[] | "- " + (.commit.message | split("\n")[0])' | head -50)"
+            if [ -n "$NOTES" ]; then
+              gh release edit "$RELEASE_TAG" --notes "$NOTES"
+            fi
+          fi
       # A nota de versão vive no repositório (`docs/releases/v<versão>.md`):
       # versionada, revisável no pull request e publicada junto com a release —
-      # é o texto que o app abre em "novidades desta versão". Sem o arquivo, a
-      # release sai sem descrição (avisando no log) em vez de falhar.
+      # é o texto que o app abre em "novidades desta versão". Ela sobrepõe a
+      # lista de commits; sem o arquivo, a release fica com a lista (avisando no
+      # log) em vez de falhar.
       - name: Attach release notes
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -269,11 +315,12 @@ jobs:
           if [ -f "${NOTES_FILE}" ]; then
             gh release edit "${RELEASE_TAG}" --notes-file "${NOTES_FILE}"
           else
-            echo "::warning::Sem nota de versão em ${NOTES_FILE}; a release ficou sem descrição."
+            echo "::warning::Sem nota de versão em ${NOTES_FILE}; a release ficou com a lista de commits."
           fi
-      # Só no caminho da tag a release vira pública — depois de tudo verificado,
-      # para o feed de update nunca ver uma release incompleta. O disparo manual
-      # continua terminando em draft, como antes.
+      # No caminho da tag a release vira pública — depois de tudo verificado,
+      # para o feed de update nunca ver uma release incompleta. Publicar pelo
+      # workflow mantém o autor como github-actions[bot], que é o que o guard de
+      # releases não autorizadas aceita.
       - name: Publish the release (remove draft)
         if: github.event_name == 'push'
         env:

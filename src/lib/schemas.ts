@@ -842,6 +842,7 @@ export interface KeepGoingAction {
 export interface NextStepAction {
   id: "next-step";
   prompt: string;
+  specialist?: string;
 }
 
 export interface ActionProposal {

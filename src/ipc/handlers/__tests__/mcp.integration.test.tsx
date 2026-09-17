@@ -29,6 +29,20 @@ describe("MCP chat flows (integration)", () => {
         enableCodeExplorer: false,
       },
     });
+
+    // MCP auto-consent classification runs through the fixed
+    // openai/gpt-5.6-luna model. The fork sends LLM traffic straight to the
+    // connected provider (no managed engine), so in tests the OpenAI client
+    // must be pointed at the harness's fake LLM server; a dummy key satisfies
+    // the SDK's API-key check before the request is issued.
+    const engineUrl = process.env.SAMBA_ENGINE_URL;
+    if (engineUrl) {
+      process.env.OPENAI_BASE_URL = engineUrl.replace(
+        /\/engine\/v1\/?$/,
+        "/v1",
+      );
+    }
+    process.env.OPENAI_API_KEY = "test-openai-key";
   }, 60_000);
 
   beforeEach(async () => {

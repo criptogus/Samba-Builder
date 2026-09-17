@@ -121,6 +121,12 @@ describe("local_agent_prompt", () => {
       "selecting **Clear Cache** to clear cookies, local storage, service workers, and cached data",
     );
     expect(prompt).toContain("this may sign them out of other app previews");
+    expect(prompt).toContain('specialist="<id>"');
+    expect(prompt).toContain(
+      "a designer (ux-ui) must not recommend after a pure backend",
+    );
+    expect(prompt).toContain("- cybersec (");
+    expect(prompt).toContain("- ux-ui (");
   });
 
   it("agent mode system prompt with code explorer available", () => {

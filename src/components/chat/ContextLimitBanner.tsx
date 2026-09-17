@@ -1,4 +1,5 @@
-import { AlertTriangle, ArrowRight } from "lucide-react";
+import { AlertTriangle, ArrowRight, X } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import {
   Tooltip,
@@ -9,10 +10,14 @@ import { useSummarizeInNewChat } from "./SummarizeInNewChatButton";
 
 const CONTEXT_LIMIT_THRESHOLD = 40_000;
 const LONG_CONTEXT_THRESHOLD = 200_000;
+/** Abaixo disto o sistema resume sozinho: nao da para confiar em caber mais um turno. */
+const AUTO_SUMMARIZE_REMAINING_TOKENS = 20_000;
 
 interface ContextLimitBannerProps {
   totalTokens?: number | null;
   contextWindow?: number;
+  /** Dispensa o aviso. Sem isto, o banner nao oferece sair. */
+  onDismiss?: () => void;
 }
 
 /** Check if the context limit banner should be shown */
@@ -32,10 +37,29 @@ export function shouldShowContextLimitBanner({
   return tokensRemaining <= CONTEXT_LIMIT_THRESHOLD;
 }
 
+/**
+ * Decide se o resumo automatico deve disparar.
+ *
+ * Ligado quando resta menos de `AUTO_SUMMARIZE_REMAINING_TOKENS` de janela: o
+ * proximo turno pode nao caber, e um turno que estoura perde trabalho do
+ * usuario. Puro, para poder ser testado sem UI.
+ */
+export function shouldAutoSummarize({
+  totalTokens,
+  contextWindow,
+}: ContextLimitBannerProps): boolean {
+  if (!totalTokens || !contextWindow) {
+    return false;
+  }
+  return contextWindow - totalTokens <= AUTO_SUMMARIZE_REMAINING_TOKENS;
+}
+
 export function ContextLimitBanner({
   totalTokens,
   contextWindow,
+  onDismiss,
 }: ContextLimitBannerProps) {
+  const { t } = useTranslation("chat");
   const { handleSummarize } = useSummarizeInNewChat();
 
   if (!shouldShowContextLimitBanner({ totalTokens, contextWindow })) {
@@ -45,8 +69,8 @@ export function ContextLimitBanner({
   const tokensRemaining = contextWindow! - totalTokens!;
   const isNearLimit = tokensRemaining <= CONTEXT_LIMIT_THRESHOLD;
   const message = isNearLimit
-    ? "This chat context is running out"
-    : "Long chat context costs extra";
+    ? t("contextLimitRunningOut")
+    : t("contextLimitLongCostsExtra");
 
   return (
     <div
@@ -57,22 +81,35 @@ export function ContextLimitBanner({
         <AlertTriangle className="h-3.5 w-3.5 shrink-0" />
         <span>{message}</span>
       </span>
-      <Tooltip>
-        <TooltipTrigger
-          render={
-            <Button
-              onClick={handleSummarize}
-              variant="outline"
-              size="sm"
-              className="h-6 px-2 text-xs border-amber-500/40 bg-amber-500/5 text-amber-600 dark:text-amber-500 hover:bg-amber-500/20 hover:border-amber-500/60"
-            />
-          }
-        >
-          Summarize
-          <ArrowRight className="h-3 w-3 ml-1" />
-        </TooltipTrigger>
-        <TooltipContent>Summarize to new chat</TooltipContent>
-      </Tooltip>
+      <span className="flex items-center gap-1">
+        <Tooltip>
+          <TooltipTrigger
+            render={
+              <Button
+                onClick={handleSummarize}
+                variant="outline"
+                size="sm"
+                className="h-6 px-2 text-xs border-amber-500/40 bg-amber-500/5 text-amber-600 dark:text-amber-500 hover:bg-amber-500/20 hover:border-amber-500/60"
+              />
+            }
+          >
+            {t("contextLimitSummarize")}
+            <ArrowRight className="h-3 w-3 ml-1" />
+          </TooltipTrigger>
+          <TooltipContent>{t("contextLimitSummarizeTooltip")}</TooltipContent>
+        </Tooltip>
+        {onDismiss && (
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-6 w-6 p-0 text-amber-600 dark:text-amber-500 hover:bg-amber-500/20"
+            aria-label={t("contextLimitDismiss")}
+            onClick={onDismiss}
+          >
+            <X className="h-3.5 w-3.5" />
+          </Button>
+        )}
+      </span>
     </div>
   );
 }

@@ -444,7 +444,7 @@ describe("updatePnpmAllowBuildsConfigContent", () => {
     }
   });
 
-  it("writes a valid fetched remote list", async () => {
+  it("ignores the remote fetcher and writes the bundled local list", async () => {
     const tempDir = await mkdtemp(path.join(os.tmpdir(), "samba-pnpm-remote-"));
     const remoteAllowBuildsText = [
       "# samba-default-allow-builds-schema=v1",
@@ -454,26 +454,30 @@ describe("updatePnpmAllowBuildsConfigContent", () => {
       "@swc/core",
       "",
     ].join("\n");
+    const remoteAllowBuildsTextFetcher = vi.fn().mockResolvedValue({
+      ok: true,
+      text: () => Promise.resolve(remoteAllowBuildsText),
+    });
     try {
       await expect(
         ensurePnpmAllowBuildsConfigured({
           appPath: tempDir,
-          remoteAllowBuildsTextFetcher: vi.fn().mockResolvedValue({
-            ok: true,
-            text: () => Promise.resolve(remoteAllowBuildsText),
-          }),
+          remoteAllowBuildsTextFetcher,
         }),
       ).resolves.toEqual({ changed: true, promotedPackages: [] });
 
+      // Zero backend: sem URL remota configurada, o fetcher não é consultado
+      // e a allowlist local empacotada é aplicada.
+      expect(remoteAllowBuildsTextFetcher).not.toHaveBeenCalled();
       await expect(
         readFile(path.join(tempDir, "pnpm-workspace.yaml"), "utf8"),
-      ).resolves.toContain("  # samba-default-allow-builds-channel=remote");
+      ).resolves.toContain("  # samba-default-allow-builds-channel=local");
     } finally {
       await rm(tempDir, { recursive: true, force: true });
     }
   });
 
-  it("reuses a fetched remote list for one hour", async () => {
+  it("never consults the remote fetcher across repeated updates", async () => {
     const firstTempDir = await mkdtemp(
       path.join(os.tmpdir(), "samba-pnpm-remote-cache-"),
     );
@@ -506,47 +510,34 @@ describe("updatePnpmAllowBuildsConfigContent", () => {
         }),
       ).resolves.toEqual({ changed: true, promotedPackages: [] });
 
-      expect(remoteAllowBuildsTextFetcher).toHaveBeenCalledTimes(1);
+      expect(remoteAllowBuildsTextFetcher).not.toHaveBeenCalled();
       await expect(
         readFile(path.join(secondTempDir, "pnpm-workspace.yaml"), "utf8"),
-      ).resolves.toContain("  esbuild: true");
+      ).resolves.toContain("  # samba-default-allow-builds-channel=local");
     } finally {
       await rm(firstTempDir, { recursive: true, force: true });
       await rm(secondTempDir, { recursive: true, force: true });
     }
   });
 
-  it("refetches the remote list after the one-hour cache TTL", async () => {
+  it("never consults the remote fetcher even after the cache TTL window", async () => {
     const firstTempDir = await mkdtemp(
       path.join(os.tmpdir(), "samba-pnpm-remote-cache-expiry-"),
     );
     const secondTempDir = await mkdtemp(
       path.join(os.tmpdir(), "samba-pnpm-remote-cache-expiry-"),
     );
-    const firstRemoteAllowBuildsText = [
+    const remoteAllowBuildsText = [
       "# samba-default-allow-builds-schema=v1",
       "# samba-default-allow-builds-data-version=2026-05-21.2",
       "# samba-default-allow-builds-channel=remote",
       "esbuild",
       "",
     ].join("\n");
-    const secondRemoteAllowBuildsText = [
-      "# samba-default-allow-builds-schema=v1",
-      "# samba-default-allow-builds-data-version=2026-05-21.3",
-      "# samba-default-allow-builds-channel=remote",
-      "sharp",
-      "",
-    ].join("\n");
-    const remoteAllowBuildsTextFetcher = vi
-      .fn()
-      .mockResolvedValueOnce({
-        ok: true,
-        text: () => Promise.resolve(firstRemoteAllowBuildsText),
-      })
-      .mockResolvedValueOnce({
-        ok: true,
-        text: () => Promise.resolve(secondRemoteAllowBuildsText),
-      });
+    const remoteAllowBuildsTextFetcher = vi.fn().mockResolvedValue({
+      ok: true,
+      text: () => Promise.resolve(remoteAllowBuildsText),
+    });
     const startMs = 1_000;
     const dateNowSpy = vi.spyOn(Date, "now").mockReturnValue(startMs);
 
@@ -567,12 +558,10 @@ describe("updatePnpmAllowBuildsConfigContent", () => {
         }),
       ).resolves.toEqual({ changed: true, promotedPackages: [] });
 
-      expect(remoteAllowBuildsTextFetcher).toHaveBeenCalledTimes(2);
+      expect(remoteAllowBuildsTextFetcher).not.toHaveBeenCalled();
       await expect(
         readFile(path.join(secondTempDir, "pnpm-workspace.yaml"), "utf8"),
-      ).resolves.toContain(
-        "  # samba-default-allow-builds-data-version=2026-05-21.3",
-      );
+      ).resolves.toContain("  # samba-default-allow-builds-channel=local");
     } finally {
       dateNowSpy.mockRestore();
       await rm(firstTempDir, { recursive: true, force: true });

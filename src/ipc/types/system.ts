@@ -11,6 +11,37 @@ import { AppSizeTelemetrySchema } from "../../shared/app_size_telemetry";
 // System Schemas
 // =============================================================================
 
+/** Resultado da checagem de nova versão. Informativo: a instalação é manual. */
+export const ReleaseCheckResultSchema = z.object({
+  status: z.enum(["update-available", "up-to-date", "unavailable"]),
+  currentVersion: z.string(),
+  latestVersion: z.string().nullable(),
+  releaseUrl: z.string().nullable(),
+  assetName: z.string().nullable(),
+  reason: z.string().nullable(),
+});
+
+/** Progresso da instalação de uma atualização (etapas iguais às do Node gerenciado). */
+export const UpdateInstallProgressSchema = z.object({
+  phase: z.enum([
+    "downloading",
+    "verifying",
+    "extracting",
+    "installing",
+    "done",
+  ]),
+  percent: z.number().min(0).max(100),
+});
+
+export type UpdateInstallProgress = z.infer<typeof UpdateInstallProgressSchema>;
+
+export const InstallUpdateResultSchema = z.object({
+  status: z.enum(["scheduled", "unsupported", "failed"]),
+  reason: z.string().nullable(),
+});
+
+export type InstallUpdateResult = z.infer<typeof InstallUpdateResultSchema>;
+
 export const NodeSystemInfoSchema = z.object({
   nodeVersion: z.string().nullable(),
   pnpmVersion: z.string().nullable(),
@@ -434,6 +465,28 @@ export const systemContracts = {
     input: z.void(),
     output: z.void(),
   }),
+
+  /**
+   * Checa se há versão mais nova publicada neste repositório.
+   * Roda no processo principal (o token do GitHub do usuário não vai ao renderer)
+   * e é informativo: o app avisa e abre o download, não instala sozinho.
+   */
+  checkForUpdates: defineContract({
+    channel: "check-for-updates",
+    input: z.void(),
+    output: ReleaseCheckResultSchema,
+  }),
+
+  /**
+   * Baixa a versão nova, confere o digest publicado, extrai e troca o bundle:
+   * o app fecha e reabre sozinho. Só no macOS — fora dele responde
+   * `unsupported` com o motivo, e a UI oferece a página da release.
+   */
+  installUpdate: defineContract({
+    channel: "install-update",
+    input: z.void(),
+    output: InstallUpdateResultSchema,
+  }),
 } as const;
 
 // =============================================================================
@@ -465,6 +518,11 @@ export const systemEvents = {
   autoUpdateStatus: defineEvent({
     channel: "auto-update:status",
     payload: AutoUpdateStatusSchema,
+  }),
+
+  updateInstallProgress: defineEvent({
+    channel: "update:install-progress",
+    payload: UpdateInstallProgressSchema,
   }),
 } as const;
 

@@ -80,7 +80,7 @@ describe("createSambaEngine", () => {
     );
     expect(request.init?.headers).toMatchObject({
       authorization: "Bearer samba-pro-key",
-      "X-Samba Builder-Request-Id": "request-1:attempt-1",
+      "X-Samba-Request-Id": "request-1:attempt-1",
     });
 
     const body = JSON.parse(String(request.init?.body));
@@ -216,8 +216,8 @@ describe("createSambaEngine", () => {
       "https://engine.example.test/v1/free/chat/completions",
     );
     expect(requests[0].init?.headers).toMatchObject({
-      "X-Samba Builder-Request-Id": "visible-turn-1:attempt-1",
-      "X-Samba Builder-Free-Quota-Key": "visible-turn-1",
+      "X-Samba-Request-Id": "visible-turn-1:attempt-1",
+      "X-Samba-Free-Quota-Key": "visible-turn-1",
     });
   });
 });

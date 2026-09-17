@@ -1245,6 +1245,16 @@ export async function setupHybridChatHarness(
           "pressEnterInChat: no contenteditable found inside chat-input-container",
         );
       }
+      // Lexical mirrors the seeded input atom into its editor state on a later
+      // commit. Firing Enter before that lands submits the previous (or empty)
+      // editor contents, so the first keydown is silently dropped. Wait for the
+      // mirror to settle before dispatching the key.
+      await waitFor(() => {
+        const current = screen
+          .getByTestId("chat-input-container")
+          .querySelector('[contenteditable="true"]');
+        expect(current?.textContent ?? "").toContain(text);
+      });
       // Lexical's root keydown listener dispatches KEY_ENTER_COMMAND, which
       // EnterKeyPlugin routes to ChatInput.handleSubmit — send when idle,
       // queue while streaming.

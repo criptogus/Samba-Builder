@@ -1,6 +1,6 @@
 /**
  * Shared utility for making fetch requests to the Samba Builder engine API.
- * Handles common headers including Authorization and X-Samba Builder-Request-Id.
+ * Handles common headers including Authorization and X-Samba-Request-Id.
  */
 
 import { readSettings } from "@/main/settings";
@@ -47,7 +47,7 @@ function createCallerCancellationError(cause: unknown): SambaError {
 
 /**
  * Fetch wrapper for Samba Builder engine API calls.
- * Automatically adds Authorization and X-Samba Builder-Request-Id headers.
+ * Automatically adds Authorization and X-Samba-Request-Id headers.
  *
  * @param ctx - The agent context containing the request ID
  * @param endpoint - The API endpoint path (e.g., "/tools/web-search")
@@ -129,7 +129,7 @@ export async function engineFetch(
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${apiKey}`,
-        "X-Samba Builder-Request-Id": ctx.sambaRequestId,
+        "X-Samba-Request-Id": ctx.sambaRequestId,
         ...extraHeaders,
       },
     });

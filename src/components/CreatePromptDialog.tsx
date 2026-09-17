@@ -190,6 +190,7 @@ export function CreateOrEditPromptDialog({
           className={buttonVariants({ variant: "ghost", size: "icon" })}
           data-testid="edit-prompt-button"
           title="Edit prompt"
+          aria-label="Edit prompt"
         >
           <Edit2 className="h-4 w-4" />
         </DialogTrigger>

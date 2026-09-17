@@ -18,7 +18,7 @@ import { useLoadApps } from "@/hooks/useLoadApps";
 import { useOpenApp } from "@/hooks/useOpenApp";
 import { useAppCollections } from "@/hooks/useAppCollections";
 import { useSettings } from "@/hooks/useSettings";
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { AppSearchDialog } from "./AppSearchDialog";
 import { AppItem } from "./appItem";
 export function AppList({ show }: { show?: boolean }) {
@@ -81,10 +81,13 @@ export function AppList({ show }: { show?: boolean }) {
     return null;
   }
 
-  const handleAppClick = (id: number) => {
-    setIsSearchDialogOpen(false);
-    openApp(id);
-  };
+  const handleAppClick = useCallback(
+    (id: number) => {
+      setIsSearchDialogOpen(false);
+      openApp(id);
+    },
+    [openApp],
+  );
 
   const handleNewApp = () => {
     navigate({ to: "/" });
@@ -148,7 +151,7 @@ export function AppList({ show }: { show?: boolean }) {
                       key={app.id}
                       app={app}
                       handleAppClick={handleAppClick}
-                      selectedAppId={selectedAppId}
+                      isSelected={selectedAppId === app.id}
                       enableMultiWindow={enableMultiWindow}
                     />
                   ))
@@ -197,7 +200,7 @@ export function AppList({ show }: { show?: boolean }) {
                                     key={app.id}
                                     app={app}
                                     handleAppClick={handleAppClick}
-                                    selectedAppId={selectedAppId}
+                                    isSelected={selectedAppId === app.id}
                                     enableMultiWindow={enableMultiWindow}
                                   />
                                 ))
@@ -217,7 +220,7 @@ export function AppList({ show }: { show?: boolean }) {
                     key={app.id}
                     app={app}
                     handleAppClick={handleAppClick}
-                    selectedAppId={selectedAppId}
+                    isSelected={selectedAppId === app.id}
                     enableMultiWindow={enableMultiWindow}
                   />
                 ))}

@@ -22,7 +22,8 @@ describe("call-time model service URLs", () => {
 
   it("reads SAMBA_ENGINE_URL when called", () => {
     delete process.env.SAMBA_ENGINE_URL;
-    expect(getSambaEngineBaseUrl()).toBe("https://engine.samba.sh/v1");
+    // Zero backend do Samba: sem engine remoto, o default é vazio.
+    expect(getSambaEngineBaseUrl()).toBe("");
 
     process.env.SAMBA_ENGINE_URL = "http://127.0.0.1:4321/v1";
     expect(getSambaEngineBaseUrl()).toBe("http://127.0.0.1:4321/v1");

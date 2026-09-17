@@ -223,7 +223,7 @@ describe("GitHub connector actions (integration)", () => {
       within(connectedRepo)
         .getByRole("link", { name: "See troubleshooting guide" })
         .getAttribute("href"),
-    ).toBe("https://www.samba.sh/docs/integrations/github#troubleshooting");
+    ).toBe("https://sambatech.com");
     expect(
       within(connectedRepo).getByRole("button", { name: "Copy" }),
     ).toBeTruthy();

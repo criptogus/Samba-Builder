@@ -53,6 +53,7 @@ export const KeepGoingActionSchema = z.object({ id: z.literal("keep-going") });
 export const NextStepActionSchema = z.object({
   id: z.literal("next-step"),
   prompt: z.string(),
+  specialist: z.string().optional(),
 });
 
 export const SuggestedActionSchema = z.union([

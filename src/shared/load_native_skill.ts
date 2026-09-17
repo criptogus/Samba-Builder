@@ -12,8 +12,8 @@ const loaders = import.meta.glob<string>(
 );
 
 export const MAX_NATIVE_SKILLS = 3;
-export const MAX_NATIVE_SKILL_CHARS = 6000;
-export const MAX_NATIVE_CONTEXT_CHARS = 12000;
+export const MAX_NATIVE_SKILL_CHARS = 8000;
+export const MAX_NATIVE_CONTEXT_CHARS = 18000;
 
 export async function loadNativeSkill(slug: string): Promise<string> {
   if (!nativeSkills.some((skill) => skill.slug === slug)) {

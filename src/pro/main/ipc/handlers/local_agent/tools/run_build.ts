@@ -20,6 +20,7 @@ import { runningApps } from "@/ipc/utils/process_manager";
 import { runBufferedProcess } from "@/ipc/utils/buffered_process";
 import { getGitProcessEnvironment } from "@/ipc/utils/git_utils";
 import { spawnStreaming } from "@/ipc/utils/spawn_streaming";
+import { withProjectNodeEnv } from "@/ipc/utils/node_runtime";
 import {
   getPackageManagerCommandEnv,
   getPnpmMinimumReleaseAgeSupport,
@@ -1226,7 +1227,7 @@ async function runSnapshotInstallProcess({
     command: packageManager,
     args: getCleanInstallArgs({ packageManager, hasLockfile }),
     cwd,
-    env: getPackageManagerCommandEnv(),
+    env: withProjectNodeEnv(cwd, getPackageManagerCommandEnv()),
     signal,
     timeoutMs,
     onOutput,
@@ -1250,7 +1251,7 @@ async function runBuildProcess({
     command: packageManager,
     args: ["run", "build"],
     cwd,
-    env: getPackageManagerCommandEnv(),
+    env: withProjectNodeEnv(cwd, getPackageManagerCommandEnv()),
     signal,
     timeoutMs,
     onOutput,
