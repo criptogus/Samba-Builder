@@ -10,6 +10,7 @@ import { usePreviewNativeOverlay } from "./usePreviewNativeOverlay";
 import { useCheckProblems } from "@/hooks/useCheckProblems";
 import {
   AlertTriangle,
+  ClipboardList,
   Code,
   Diff,
   Eye,
@@ -45,11 +46,14 @@ import {
   type PreviewEvent,
   type PreviewState,
 } from "@/version_preview/state";
+import { SpecialistAvatar } from "@/components/SpecialistAvatar";
+import { getSpecialistAgent } from "@/lib/specialist_agents";
 import type { Version } from "@/ipc/types";
 
 type ToolbarMode = Exclude<PreviewMode, "plan">;
 
 const TAB_ORDER = [
+  "pm",
   "preview",
   "code",
   "publish",
@@ -264,10 +268,25 @@ export const PreviewToolbar = () => {
     }
   };
 
+  const pm = getSpecialistAgent("pm");
   const modeMeta: Record<
     ToolbarMode,
     { icon: React.ReactNode; label: string; testId: string }
   > = {
+    pm: {
+      icon: pm ? (
+        <SpecialistAvatar
+          agent={pm}
+          size="xs"
+          decorative
+          className="ring-1 ring-background"
+        />
+      ) : (
+        <ClipboardList size={16} />
+      ),
+      label: t("preview.pm"),
+      testId: "pm-mode-button",
+    },
     preview: {
       icon: <Eye size={16} />,
       label: t("preview.title"),
