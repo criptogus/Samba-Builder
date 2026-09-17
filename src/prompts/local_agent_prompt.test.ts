@@ -122,9 +122,9 @@ describe("local_agent_prompt", () => {
     );
     expect(prompt).toContain("this may sign them out of other app previews");
     expect(prompt).toContain('specialist="<id>"');
-    expect(prompt).toContain(
-      "a designer (ux-ui) must not recommend after a pure backend",
-    );
+    expect(prompt).toContain("cybersec SHOULD speak");
+    expect(prompt).toContain("ux-ui SHOULD speak");
+    expect(prompt).toContain("NEVER emit ux-ui or mobile");
     expect(prompt).toContain("- cybersec (");
     expect(prompt).toContain("- ux-ui (");
   });

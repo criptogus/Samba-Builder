@@ -102,6 +102,8 @@
   "keepGoing": "Keep going",
   "specialistRecommends": "{{name}} recommends",
   "specialistRecommendsPrompt": "{{name}} recommends: {{prompt}}",
+  "specialistHuddleTitle": "Your specialists looked at this",
+  "specialistHuddleHint": "Each expert recommends the next step in their own domain.",
   "addTypeScript": "Add TypeScript",
   "tipProposal": "Tip proposal",
   "securityRisks": "Security Risks",

@@ -113,13 +113,14 @@ describe("streamingMessageParser", () => {
     );
   });
 
-  it("parses the specialist attribute on next-step commands", () => {
+  it("parses specialist and why on next-step commands", () => {
     const content =
-      '<samba-command type="next-step" specialist="cybersec" prompt="Audite o endpoint"></samba-command>';
+      '<samba-command type="next-step" specialist="cybersec" why="endpoint novo sem checagem de papel" prompt="Audite o endpoint"></samba-command>';
     const { blocks } = parseFullMessage(content);
     const tag = blocks[0];
     if (tag.kind !== "custom-tag") throw new Error("expected custom-tag");
     expect(tag.attributes.specialist).toBe("cybersec");
+    expect(tag.attributes.why).toBe("endpoint novo sem checagem de papel");
     expect(tag.attributes.prompt).toBe("Audite o endpoint");
   });
 

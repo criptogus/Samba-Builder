@@ -102,6 +102,8 @@
   "keepGoing": "계속 진행",
   "specialistRecommends": "{{name}}의 추천",
   "specialistRecommendsPrompt": "{{name}}의 추천: {{prompt}}",
+  "specialistHuddleTitle": "전문가가 방금 한 일을 살펴봤습니다",
+  "specialistHuddleHint": "각 전문가가 자신의 영역에서 다음 단계를 제안합니다.",
   "addTypeScript": "TypeScript 추가",
   "tipProposal": "팁 제안",
   "securityRisks": "보안 위험",

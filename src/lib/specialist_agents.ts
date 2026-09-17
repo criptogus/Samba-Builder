@@ -427,12 +427,17 @@ export function getSpecialistAgent(
 export function composeSpecialistTaskPrompt(
   agent: SpecialistAgent,
   taskText: string,
+  why?: string,
 ): string {
   const text = taskText.trim();
+  const noticed = why?.trim();
+  const mission = noticed
+    ? `${agent.persona} notou: ${noticed}. ${text}`
+    : text;
   if (agent.skills.length > 0) {
-    return `${agent.skills.map((s) => `/${s}`).join(" ")} ${text}`;
+    return `${agent.skills.map((s) => `/${s}`).join(" ")} ${mission}`;
   }
-  return `Atue como especialista em ${agent.name} (${agent.tagline}). ${text}`;
+  return `Atue como especialista em ${agent.name} (${agent.tagline}). ${mission}`;
 }
 
 /**
@@ -446,7 +451,15 @@ export function specialistNextStepGuideline(): string {
         `- ${agent.id} (${agent.persona} · ${agent.name}): recommend when ${agent.recommendWhen}. Skip when ${agent.skipWhen}.`,
     )
     .join("\n");
-  return `- When you FINISH a substantial task — real code written, verified and committed, OR a deep analysis/review the user asked for (never a trivial question or a single Q&A turn) — close with suggested next steps from specialist agents who would actually have something useful to say about what was just done. Emit 2-4 <samba-command type="next-step" specialist="<id>" prompt="..."></samba-command> tags at the very end. Each tag MUST include specialist="<id>" from the catalog below — that is whose face and voice the user sees. Pick specialists by domain fit, not by rotation: a designer (ux-ui) must not recommend after a pure backend/API/schema/SQL/CI task; mobile must not speak unless the work touched mobile/native/small-viewport; cybersec MAY recommend after auth, input, secrets, permissions, or new endpoints; architect after modules/coupling/structure; devops after deploy/CI/env/infra; quality after new untested behavior; pm when the next move is a product/scope decision; reviewer after a non-trivial code change. Prefer 2-4 different specialists. Each prompt must evolve the work meaningfully (a concrete next capability, polish, or the natural continuation of what was just done — e.g. after an analysis, the top recommended package as an implementable instruction), start with a verb, stay under ~90 characters, and be written in pt-BR so the user can click it to continue directly. Never end a substantial task with an open question as the only call to action — the clickable next steps ARE the call to action. Never use <, >, & or double quotes inside the prompt value (write them as words: "maior ou igual a 22", "menor que 26") — those characters break the tag and the suggestion disappears for the user. Do not emit next steps for trivial changes.
+  return `- When you FINISH a substantial task — real code written, verified and committed, OR a deep analysis/review the user asked for (never a trivial question or a single Q&A turn) — close with suggested next steps from specialist helpers standing beside the developer. The user should feel they have a team, not a generic todo list. Emit 2-4 tags at the very end, one per helper:
+<samba-command type="next-step" specialist="<id>" why="..." prompt="..."></samba-command>
+Each tag MUST include specialist="<id>" from the catalog below (that is whose face and voice the user sees). why is a short first-person observation in pt-BR of what THIS specialist noticed in the work just done (under ~80 characters). prompt is the clickable next action in pt-BR, starts with a verb, stays under ~90 characters, and is implementable. Never use <, >, & or double quotes inside why or prompt (write them as words: "maior ou igual a 22", "menor que 26") — those characters break the tag and the suggestion disappears for the user.
+Pick helpers by what was JUST done, not by rotation. Concrete fit:
+- After UI/UX/visual/accessibility work: ux-ui SHOULD speak (a final visual or a11y pass on the screens just changed). quality MAY add journey tests. Do not bring devops, cybersec, or mobile unless auth/network/native also changed.
+- After backend/API/schema/SQL/new endpoint: cybersec SHOULD speak (audit the new code for authz, injection, secrets, tenancy). architect MAY speak about module boundaries. quality MAY speak about tests. NEVER emit ux-ui or mobile.
+- After deploy/CI/Docker/env/infra: devops SHOULD speak. enterprise MAY speak about rollback/observability.
+- After non-trivial code change: reviewer MAY ask to re-read the diff. After untested new behavior: quality SHOULD speak. After product/scope ambiguity: pm SHOULD speak.
+Prefer 2-4 different specialists. Never end a substantial task with an open question as the only call to action — the clickable next steps ARE the call to action. Do not emit next steps for trivial changes.
 Specialist catalog (use these ids exactly):
 ${catalog}`;
 }
