@@ -264,4 +264,11 @@ jobs:
             echo "RELEASE_TAG vazio: o job de preparo nao devolveu a tag."
             exit 1
           fi
+          # Notas a partir dos commits: o app mostra "o que ha de novo" lendo o
+          # corpo da release, e o rascunho do preparo nasce sem corpo — sem isto
+          # a tela aparece em branco.
+          NOTES="$(gh api -X POST "repos/${{ github.repository }}/releases/generate-notes" -f tag_name="$RELEASE_TAG" --jq .body)"
+          if [ -n "$NOTES" ]; then
+            gh release edit "$RELEASE_TAG" --notes "$NOTES"
+          fi
           gh release edit "$RELEASE_TAG" --draft=false
