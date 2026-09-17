@@ -7,8 +7,9 @@ Fluxo operacional do Samba Builder. Escrito para humano **e** para agente: siga 
 1. Suba a versão no `package.json` e commite.
 2. Garanta o environment `release` no repositório (uma vez só).
 3. Dispare o workflow **Release app** (`workflow_dispatch`).
-4. O workflow cria a tag a partir da versão, builda **4 alvos** em paralelo (macOS, macOS Intel, Windows, Linux) e publica um **rascunho**.
-5. Revise, verifique os assets e **publique** o rascunho.
+4. O workflow cria a tag a partir da versão, builda **4 alvos** em paralelo (macOS, macOS Intel, Windows, Linux) e monta a release como **rascunho**.
+5. Ainda no workflow: confere os assets contra a proveniência dos builds e **publica** a release (input `publish`, ligado por padrão). Desmarque `publish` para deixá-la em rascunho e revisar antes.
+6. **Nunca publique à mão**: release criada por humano é apagada pelo guard do repositório (seção 6).
 
 ## 1. Versão
 
@@ -42,7 +43,8 @@ gh api -X PUT repos/criptogus/Samba-Builder/environments/release
 ## 3. Disparar
 
 ```sh
-gh workflow run release.yml -R criptogus/Samba-Builder --ref main
+gh workflow run release.yml -R criptogus/Samba-Builder --ref main                     # publica ao final (padrão)
+gh workflow run release.yml -R criptogus/Samba-Builder --ref main -f publish=false    # fica em rascunho, para revisar
 gh run list -R criptogus/Samba-Builder --limit 1
 ```
 
@@ -52,7 +54,9 @@ gh run list -R criptogus/Samba-Builder --limit 1
 
 - **Prepare Release Tag** — `node scripts/prepare-release-tag.js prepare`: lê a versão do `package.json`, cria (ou reusa) a tag `v<versão>` e a release **não publicada**.
 - **build** (matriz, `fail-fast: false`) — `windows-2022`, `ubuntu-22.04`, `macos-15-intel`, `macos-latest`. Cada um roda `npm run publish -- --dry-run`, gera o manifesto de proveniência e sobe o `out/` como artefato.
-- **Publish Release** — baixa os artefatos, `electron-forge publish --from-dry-run` (cria o **rascunho**), anexa os manifestos, revalida a tag e checa os assets com `scripts/verify-release-assets.js`.
+- **Publish Release** — baixa os artefatos, `electron-forge publish --from-dry-run` (cria o **rascunho**), anexa os manifestos, revalida a tag, checa os assets com `scripts/verify-release-assets.js` e, com `publish` ligado, publica (`gh release edit --draft=false`).
+
+A verificação usa os **manifestos de proveniência** como contrato: os quatro precisam existir, e nome, digest e tamanho de cada arquivo são conferidos contra eles. O repositório consultado vem de `GITHUB_REPOSITORY`, nunca fixo no código — já esteve fixo no repositório do projeto original e o passo falhava sempre com 404, deixando a release presa em rascunho.
 
 Se um alvo falhar, os outros continuam — mas **nada é publicado** (o job de publish depende de todos).
 
@@ -68,23 +72,30 @@ Isso é proteção, não defeito: uma tag publicada é imutável. Para publicar 
 
 ## 6. Publicar e verificar
 
-O rascunho fica em `releases` (não aparece para quem não tem acesso). Revise e publique:
+Com `publish` ligado, o workflow publica sozinho depois da verificação. Sem ele, a release fica em rascunho — e **rascunho é invisível para a checagem de versão do app**, que responde "você está atualizado" enquanto isso. Foi essa a confusão que originou esta seção.
+
+Rascunho esperando revisão? Publique pelo `id` (o endpoint por tag responde 404 para rascunho):
 
 ```sh
-gh release edit v1.15.0-beta.1 -R criptogus/Samba-Builder --draft=false
-npm run verify-release        # checa os assets esperados contra a release
+ID=$(gh api 'repos/criptogus/Samba-Builder/releases?per_page=10' \
+  --jq '.[] | select(.draft) | select(.tag_name == "v<versão>") | .id')
+gh api -X PATCH "repos/criptogus/Samba-Builder/releases/$ID" -F draft=false
+GITHUB_REPOSITORY=criptogus/Samba-Builder npm run verify-release
 ```
 
-Nomes publicados (sem resquício de nome do upstream):
+**Não use `gh release create`.** O repositório tem um guard (`remove-unauthorized-release.yml`) que roda a cada release publicada e apaga tudo cujo autor não seja `github-actions[bot]` — inclusive dispara alerta por e-mail. Publicar o rascunho do bot preserva o autor. Release manual some em segundos, junto com o download que o app ofereceria.
+
+Nomes publicados pelo CI (o Electron Forge sanitiza o nome-base: espaço vira ponto):
 
 | Plataforma            | Arquivo                                  |
 | --------------------- | ---------------------------------------- |
-| macOS Apple Silicon   | `SambaBuilder-<versão>-arm64.zip`        |
-| macOS Intel           | `SambaBuilder-<versão>-x64.zip`          |
-| Windows 10/11         | `SambaBuilder-<versão>-Setup.exe`        |
-| Linux Debian/Ubuntu   | `samba-builder_<versão>_amd64.deb`       |
-| Linux Fedora/openSUSE | `samba-builder-<versão>-1.x86_64.rpm`    |
-| Linux portátil        | `samba-builder-<versão>-x86_64.AppImage` |
+| macOS Apple Silicon   | `Samba.Builder-darwin-arm64-<versão>.zip`    |
+| macOS Intel           | `Samba.Builder-darwin-x64-<versão>.zip`      |
+| Windows 10/11         | `Samba.Builder-<versão>.Setup.exe`           |
+| Windows (Squirrel)    | `samba-builder-<versão sem o ponto>beta-full.nupkg` + `RELEASES` |
+| Linux Debian/Ubuntu   | `samba-builder_<versão com .beta.>_amd64.deb` |
+| Linux Fedora/openSUSE | `samba-builder-<versão com .beta.>-1.x86_64.rpm` |
+| Linux portátil        | `Samba.Builder_<versão>_x86_64.AppImage`     |
 
 ### Quando o job de publicação não inicia (bloqueio de billing)
 
@@ -98,13 +109,14 @@ Os artefatos **já estão construídos** no run (retidos por 1 dia), então dá 
 # 1. baixe os quatro artefatos do run
 gh run download <run-id> -R criptogus/Samba-Builder --dir /tmp/sb-rel
 
-# 2. os instaladores ficam em */make/**; renomeie para o padrão publicado (sem espaços):
-#    "Samba Builder-<versão> Setup.exe"  ->  SambaBuilder-<versão>-Setup.exe
+# 2. os instaladores ficam em */make/**; suba para o rascunho do bot, com os
+#    nomes sanitizados (sem espaços) que o CI usa
+gh release upload v<versão> -R criptogus/Samba-Builder <arquivos...> --clobber
 
-# 3. a tag já existe (criada pelo prepare); crie a release com os arquivos
-gh release create v<versão> -R criptogus/Samba-Builder --prerelease \
-  --title "Samba Builder <versão> — macOS, Windows e Linux" \
-  --notes-file notas.md <arquivos...>
+# 3. publique o rascunho pelo id: o autor continua sendo o bot, e o guard aceita
+ID=$(gh api 'repos/criptogus/Samba-Builder/releases?per_page=10' \
+  --jq '.[] | select(.draft) | select(.tag_name == "v<versão>") | .id')
+gh api -X PATCH "repos/criptogus/Samba-Builder/releases/$ID" -F draft=false
 
 # 4. confirme baixando um arquivo de volta e comparando o SHA-256
 ```
@@ -138,5 +150,7 @@ O `SAMBA_LOCAL_DESKTOP_BUILD=true` também desliga a assinatura, então serve pa
 - **`npm run publish`/`make` no CI usam `npm run clean`** internamente; localmente, rode `clean` se o `out/` estiver velho.
 - **Attestation não existe em repositório privado de conta pessoal.** O passo `actions/attest` falha com _Feature not available for user-owned private repositories_ — por isso ele é condicional (`if: github.event.repository.private == false`). Em repositório público volta a rodar sozinho.
 - **Nome de exibição ≠ nome do binário.** O `packagerConfig.name` ("Samba Builder") é o nome que aparece para o usuário; os makers procuram o executável pelo nome do `package.json`. Sem `executableName: "samba-builder"` o Linux falha com `could not find the Electron app binary at out/Samba Builder-linux-x64/samba-builder`.
+- **Rascunho é invisível para a atualização.** A checagem de versão do app só enxerga release publicada: com rascunho pendente ela responde "você está atualizado" e parece defeito do app. Confira com `gh release view <tag> --json isDraft`.
+- **Guard de releases não autorizadas.** `remove-unauthorized-release.yml` apaga release publicada cujo autor não seja `github-actions[bot]` — as `beta.1`/`beta.2` sobreviveram só porque o Actions estava bloqueado por billing na época. Nunca crie release à mão.
 - **Minutos de CI:** macOS custa ~10× Linux. O release completo usa 4 runners, sendo 2 de macOS.
 - **Repositório privado:** o download exige conta com acesso.
