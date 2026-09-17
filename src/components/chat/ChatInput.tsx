@@ -109,8 +109,10 @@ import {
 } from "@/components/ui/tooltip";
 import {
   ContextLimitBanner,
+  shouldAutoSummarize,
   shouldShowContextLimitBanner,
 } from "./ContextLimitBanner";
+import { showInfo } from "@/lib/toast";
 import { useCountTokens } from "@/hooks/useCountTokens";
 import { useChats } from "@/hooks/useChats";
 import { useRouter } from "@tanstack/react-router";
@@ -346,10 +348,68 @@ export function ChatInput({ chatId }: { chatId?: number }) {
     !isStreaming ? (chatId ?? null) : null,
     "",
   );
+  const { handleSummarize } = useSummarizeInNewChat();
+
+  // Contexto grande demais: resumo automatico em uma conversa nova, uma vez por
+  // conversa. Melhor avisar e resumir do que deixar o proximo turno estourar a
+  // janela e perder trabalho do usuario.
+  const [autoSummarizedChatId, setAutoSummarizedChatId] = useState<
+    number | null
+  >(null);
+  useEffect(() => {
+    // Em modo de teste o contexto e sintetico e o harness nao pode navegar
+    // sozinho no meio das assercoes; a decisao em si tem teste proprio
+    // (shouldAutoSummarize). E2E_TEST_BUILD nao serve aqui: ele so existe no
+    // app empacotado para E2E.
+    if (settings?.isTestMode) {
+      return;
+    }
+    if (!chatId || !tokenCountResult || isStreaming) {
+      return;
+    }
+    if (autoSummarizedChatId === chatId) {
+      return;
+    }
+    if (
+      !shouldAutoSummarize({
+        totalTokens: tokenCountResult.actualMaxTokens,
+        contextWindow: tokenCountResult.contextWindow,
+      })
+    ) {
+      return;
+    }
+    setAutoSummarizedChatId(chatId);
+    showInfo(t("contextLimitAutoSummarizing"));
+    void handleSummarize();
+  }, [
+    chatId,
+    tokenCountResult,
+    isStreaming,
+    autoSummarizedChatId,
+    handleSummarize,
+    t,
+    settings?.isTestMode,
+  ]);
+
+  // O aviso de contexto e dispensavel: fica escondido ate o consumo crescer de
+  // verdade (10k tokens a mais) e zera ao trocar de conversa.
+  const [dismissedContextWarningAt, setDismissedContextWarningAt] = useState<
+    number | null
+  >(null);
+  useEffect(() => {
+    setDismissedContextWarningAt(null);
+  }, [chatId]);
+  const contextWarningDismissed =
+    tokenCountResult &&
+    typeof tokenCountResult.actualMaxTokens === "number" &&
+    dismissedContextWarningAt !== null
+      ? tokenCountResult.actualMaxTokens <= dismissedContextWarningAt + 10_000
+      : false;
 
   const showBanner =
     !isStreaming &&
     tokenCountResult &&
+    !contextWarningDismissed &&
     shouldShowContextLimitBanner({
       totalTokens: tokenCountResult.actualMaxTokens,
       contextWindow: tokenCountResult.contextWindow,
@@ -874,6 +934,9 @@ export function ChatInput({ chatId }: { chatId?: number }) {
           <ContextLimitBanner
             totalTokens={tokenCountResult.actualMaxTokens}
             contextWindow={tokenCountResult.contextWindow}
+            onDismiss={() =>
+              setDismissedContextWarningAt(tokenCountResult.actualMaxTokens)
+            }
           />
         )}
         {/* Cancelling a turn can take a minute when the agent is mid-tool (a
