@@ -255,4 +255,13 @@ jobs:
         if: inputs.publish
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh release edit "$RELEASE_TAG" --draft=false
+          # RELEASE_TAG e definido por passo neste job (nao no nivel do job):
+          # sem isto o gh procura uma release sem nome e falha com
+          # "release not found", que parece problema de tag e nao de variavel.
+          RELEASE_TAG: ${{ needs.prepare-release.outputs.tag }}
+        run: |
+          if [ -z "$RELEASE_TAG" ]; then
+            echo "RELEASE_TAG vazio: o job de preparo nao devolveu a tag."
+            exit 1
+          fi
+          gh release edit "$RELEASE_TAG" --draft=false
