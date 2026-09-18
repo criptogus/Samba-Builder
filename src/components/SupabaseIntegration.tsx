@@ -140,6 +140,9 @@ export function SupabaseIntegration() {
                     onClick={() =>
                       handleDeleteOrganization(org.organizationSlug)
                     }
+                    aria-label={t(
+                      "integrations.supabase.disconnectOrganization",
+                    )}
                   />
                 }
               >
