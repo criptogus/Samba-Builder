@@ -663,6 +663,7 @@ export default function AppDetailsPage() {
                             onClick={() => {
                               ipc.system.showItemInFolder(currentAppPath);
                             }}
+                            aria-label="Show in folder"
                           />
                         }
                       >
