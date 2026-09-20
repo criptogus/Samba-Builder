@@ -1,0 +1,3 @@
+## 2024-09-20 - Unmemoized Hook Callbacks Breaking React.memo
+**Learning:** Custom hooks that return unmemoized callbacks (like `useOpenApp` returning a new function on every render) silently break the shallow comparison in `React.memo` for list items downstream. When `AppList` relies on `useOpenApp` and passes the resulting function as a dependency to an event handler (which is then passed to `AppItem`), `AppItem` re-renders constantly even though it's wrapped in `React.memo`, leading to full list re-renders.
+**Action:** When creating or modifying custom hooks that return functions used as props or dependencies in mapped child components, always wrap the returned function in `useCallback` to preserve reference stability and allow `React.memo` to work effectively.
