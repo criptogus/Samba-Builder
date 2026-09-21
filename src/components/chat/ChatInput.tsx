@@ -1275,6 +1275,11 @@ function SuggestionButton({
             variant="outline"
             size="sm"
             onClick={onClick}
+            aria-label={
+              typeof tooltipText === "string"
+                ? tooltipText
+                : tooltipText.join(" ")
+            }
           />
         }
       >
