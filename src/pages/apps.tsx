@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useCallback } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import {
   CheckSquare,
@@ -110,7 +110,7 @@ export default function AppsPage() {
     setSelectedAppIds(new Set());
   };
 
-  const handleToggleSelect = (appId: number) => {
+  const handleToggleSelect = useCallback((appId: number) => {
     setSelectedAppIds((prev) => {
       const next = new Set(prev);
       if (next.has(appId)) {
@@ -120,7 +120,7 @@ export default function AppsPage() {
       }
       return next;
     });
-  };
+  }, []);
 
   const handleToggleSelectAllVisible = () => {
     setSelectedAppIds((prev) => {
