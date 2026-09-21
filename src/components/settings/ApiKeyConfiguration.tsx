@@ -209,6 +209,7 @@ export function ApiKeyConfiguration({
                 onChange={(e) => onApiKeyInputChange(e.target.value)}
                 placeholder={`Enter new ${providerDisplayName} API Key here`}
                 className={`flex-grow ${saveError ? "border-red-500" : ""}`}
+                type="password"
               />
               <Popover
                 open={highlightPasteButton}
