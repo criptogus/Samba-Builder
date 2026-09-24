@@ -67,6 +67,7 @@ export function SelectedComponentsDisplay() {
             render={
               <button
                 onClick={handleClearAll}
+                aria-label="Clear all selected components"
                 className="text-xs text-muted-foreground hover:text-foreground transition-colors"
               />
             }
