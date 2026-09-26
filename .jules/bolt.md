@@ -1,0 +1,3 @@
+## 2024-05-17 - Prevent list items from re-rendering due to inline callbacks and unstable hook returns
+**Learning:** In React, passing down inline functions or unstable function references returned from custom hooks to list item components breaks `React.memo`'s shallow comparison, causing full re-renders of the list when unrelated state changes.
+**Action:** When rendering lists, ensure item components are wrapped in `React.memo()`. For callbacks passed to these items, either define them within a `useCallback` or ensure that any custom hooks (like `useOpenApp`) internally wrap their returned functions in `useCallback`. This guarantees stable references and avoids unnecessary re-renders.
