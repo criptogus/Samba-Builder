@@ -1,0 +1,3 @@
+## 2024-05-14 - Icon Buttons in Tooltips Need Explicit ARIA Labels
+**Learning:** In this codebase, icon-only buttons used as `render` props inside `TooltipTrigger`s do not inherently inherit accessible names from their `TooltipContent`. Screen readers may ignore tooltip content on direct focus, so an explicit `aria-label` is required on the inner `<Button>` component to ensure accessibility.
+**Action:** When adding or auditing icon-only buttons wrapped in `TooltipTrigger`, always verify the inner `<Button>` has an explicit `aria-label`, reusing the exact translation key (e.g., `t('settings:ai.editProvider')`) or text string used in the `TooltipContent`.
