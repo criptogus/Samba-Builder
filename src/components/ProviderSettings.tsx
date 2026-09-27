@@ -130,6 +130,7 @@ export function ProviderSettingsGrid() {
                           render={
                             <Button
                               data-testid="edit-custom-provider"
+                              aria-label={t("settings:ai.editProvider")}
                               variant="ghost"
                               size="sm"
                               className="h-8 w-8 p-0 hover:bg-muted rounded-md"
@@ -148,6 +149,7 @@ export function ProviderSettingsGrid() {
                           render={
                             <Button
                               data-testid="delete-custom-provider"
+                              aria-label={t("settings:ai.deleteProvider")}
                               variant="ghost"
                               size="sm"
                               className="h-8 w-8 p-0 text-destructive hover:text-destructive hover:bg-destructive/10 rounded-md"
