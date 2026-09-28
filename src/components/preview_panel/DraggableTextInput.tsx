@@ -174,6 +174,7 @@ export const DraggableTextInput = ({
                   onRemove(input.id);
                 }}
                 type="button"
+                aria-label="Remove text input"
               />
             }
           >
