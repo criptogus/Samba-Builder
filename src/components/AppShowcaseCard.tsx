@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import type { ListedApp } from "@/ipc/types/app";
 import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
@@ -21,7 +21,7 @@ function getInitial(name: string): string {
     : trimmed[0].toUpperCase();
 }
 
-export function AppShowcaseCard({
+export const AppShowcaseCard = React.memo(function AppShowcaseCard({
   app,
   thumbnailUrl,
   onClick,
@@ -91,4 +91,4 @@ export function AppShowcaseCard({
       </div>
     </button>
   );
-}
+});
