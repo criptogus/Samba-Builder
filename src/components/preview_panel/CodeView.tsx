@@ -367,6 +367,7 @@ export const CodeView = ({ loading, app }: CodeViewProps) => {
               render={
                 <button
                   onClick={() => refreshApp()}
+                  aria-label={t("preview.refreshFiles")}
                   className="p-1 rounded hover:bg-gray-200 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
                   disabled={loading || !app.id}
                 />
@@ -441,6 +442,11 @@ export const CodeView = ({ loading, app }: CodeViewProps) => {
               render={
                 <button
                   onClick={() => setIsFullscreen((value) => !value)}
+                  aria-label={
+                    isFullscreen
+                      ? t("preview.exitFullScreen")
+                      : t("preview.enterFullScreen")
+                  }
                   className="p-1 rounded hover:bg-gray-200 dark:hover:bg-gray-700"
                 />
               }

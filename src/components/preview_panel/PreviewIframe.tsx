@@ -1313,6 +1313,7 @@ export const PreviewIframe = ({
                 render={
                   <PopoverTrigger
                     data-testid="device-mode-button"
+                    aria-label="Device Mode"
                     onClick={() => {
                       // Toggle popover open/close
                       if (isDevicePopoverOpen)
