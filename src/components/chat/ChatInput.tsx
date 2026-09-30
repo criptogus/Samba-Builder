@@ -1056,6 +1056,7 @@ export function ChatInput({ chatId }: { chatId?: number }) {
                           ipc.system.openExternalUrl("https://sambatech.com");
                         }}
                         className="flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors cursor-pointer"
+                        aria-label={t("visualEditorDescription")}
                       />
                     }
                   >
@@ -1275,6 +1276,11 @@ function SuggestionButton({
             variant="outline"
             size="sm"
             onClick={onClick}
+            aria-label={
+              Array.isArray(tooltipText)
+                ? tooltipText.join(" ")
+                : tooltipText
+            }
           />
         }
       >

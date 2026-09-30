@@ -134,6 +134,7 @@ export function ProviderSettingsGrid() {
                               size="sm"
                               className="h-8 w-8 p-0 hover:bg-muted rounded-md"
                               onClick={() => handleEditProvider(provider)}
+                              aria-label={t("settings:ai.editProvider")}
                             />
                           }
                         >
@@ -152,6 +153,7 @@ export function ProviderSettingsGrid() {
                               size="sm"
                               className="h-8 w-8 p-0 text-destructive hover:text-destructive hover:bg-destructive/10 rounded-md"
                               onClick={() => setProviderToDelete(provider.id)}
+                              aria-label={t("settings:ai.deleteProvider")}
                             />
                           }
                         >
