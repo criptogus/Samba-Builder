@@ -660,6 +660,7 @@ export default function AppDetailsPage() {
                             variant="ghost"
                             size="icon"
                             className="ml-[-8px] p-0.5 h-auto cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                            aria-label="Show in folder"
                             onClick={() => {
                               ipc.system.showItemInFolder(currentAppPath);
                             }}
