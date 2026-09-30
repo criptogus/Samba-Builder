@@ -1,0 +1,3 @@
+## 2024-05-15 - React.memo broken by unstable custom hook callbacks
+**Learning:** Custom hooks that return inline functions (like `useOpenApp` returning `(appId: number) => { ... }`) create a new function reference on every component render. When these functions are passed down to child list components (like `AppItem` wrapped in `React.memo`), they silently break the shallow comparison, causing full list re-renders even when data hasn't changed.
+**Action:** Always wrap callbacks returned from custom hooks in `useCallback`, especially if those callbacks are likely to be passed as props to memoized child components in lists.
