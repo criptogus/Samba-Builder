@@ -1,0 +1,3 @@
+## 2025-02-28 - TooltipTrigger requires explicit aria-label for icon wrappers
+**Learning:** In this design system, when using `@base-ui/react/tooltip`'s `<TooltipTrigger>` to wrap non-interactive elements (like SVG icons, `HelpCircle`, or generic `<div>`s for color pickers) without using a `render` prop containing a semantic interactive element, the trigger automatically renders an inaccessible `<button>` missing an accessible name. The tooltip content (`TooltipContent`) is not automatically announced on initial focus by all screen readers.
+**Action:** Always verify that `<TooltipTrigger>` elements wrapping raw icons or non-semantic elements explicitly include an `aria-label` attribute matching the tooltip's core intent.
