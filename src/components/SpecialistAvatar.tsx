@@ -19,10 +19,12 @@ export function SpecialistAvatar({
   agent,
   size = "md",
   className,
+  decorative = false,
 }: {
   agent: SpecialistAgent;
   size?: Size;
   className?: string;
+  decorative?: boolean;
 }) {
   const label = `${agent.persona}, ${agent.name}`;
   const src = specialistPortraitSrc(agent.portrait);
@@ -33,8 +35,9 @@ export function SpecialistAvatar({
         SIZE[size],
         className,
       )}
-      role="img"
-      aria-label={label}
+      role={decorative ? undefined : "img"}
+      aria-hidden={decorative ? true : undefined}
+      aria-label={decorative ? undefined : label}
       title={label}
     >
       {src ? (
@@ -70,7 +73,7 @@ export function SpecialistAvatarStack({
       aria-hidden="true"
     >
       {agents.slice(0, max).map((agent) => (
-        <SpecialistAvatar key={agent.id} agent={agent} size={size} />
+        <SpecialistAvatar key={agent.id} agent={agent} size={size} decorative />
       ))}
     </span>
   );

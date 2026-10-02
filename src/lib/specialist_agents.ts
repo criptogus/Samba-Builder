@@ -12,6 +12,8 @@
  * aquele especialista tem voz — um designer não recomenda em task de backend.
  */
 
+import { escapeXmlAttr } from "../../shared/xmlEscape";
+
 export type SpecialistTask = {
   id: string;
   label: string;
@@ -423,16 +425,57 @@ export function getSpecialistAgent(
   return specialistsById.get(id);
 }
 
+/** Markup do card de subagente no chat, com rosto quando o id do catálogo existe. */
+export function formatSambaSubagentTag(attrs: {
+  chatId: number | string;
+  threadId: string;
+  persona: string;
+  taskName: string;
+  specialist?: string;
+}): string {
+  const specialistId = attrs.specialist?.trim();
+  const specialistAttr =
+    specialistId && getSpecialistAgent(specialistId)
+      ? ` specialist="${escapeXmlAttr(specialistId)}"`
+      : "";
+  return `<samba-subagent chat-id="${escapeXmlAttr(String(attrs.chatId))}" thread-id="${escapeXmlAttr(attrs.threadId)}" persona="${escapeXmlAttr(attrs.persona)}" task-name="${escapeXmlAttr(attrs.taskName)}"${specialistAttr}></samba-subagent>`;
+}
+
 /** Prefixa o pedido com os skills do especialista (ou o papel, se não houver skill). */
 export function composeSpecialistTaskPrompt(
   agent: SpecialistAgent,
   taskText: string,
+  why?: string,
 ): string {
   const text = taskText.trim();
+  const noticed = why?.trim();
+  const mission = noticed
+    ? `${agent.persona} notou: ${noticed}. ${text}`
+    : text;
   if (agent.skills.length > 0) {
-    return `${agent.skills.map((s) => `/${s}`).join(" ")} ${text}`;
+    return `${agent.skills.map((s) => `/${s}`).join(" ")} ${mission}`;
   }
-  return `Atue como especialista em ${agent.name} (${agent.tagline}). ${text}`;
+  return `Atue como especialista em ${agent.name} (${agent.tagline}). ${mission}`;
+}
+
+/** Prompt quando um especialista chama outro para entrar na tarefa. */
+export function composeSpecialistInvitePrompt(
+  invitee: SpecialistAgent,
+  taskText: string,
+  why?: string,
+  from?: SpecialistAgent,
+): string {
+  const text = taskText.trim();
+  const noticed = why?.trim();
+  const caller = from?.persona;
+  const mission = caller
+    ? noticed
+      ? `${caller} chamou ${invitee.persona}: ${noticed}. ${text}`
+      : `${caller} chamou ${invitee.persona}. ${text}`
+    : noticed
+      ? `${invitee.persona} notou: ${noticed}. ${text}`
+      : text;
+  return composeSpecialistTaskPrompt(invitee, mission);
 }
 
 /**
@@ -446,7 +489,29 @@ export function specialistNextStepGuideline(): string {
         `- ${agent.id} (${agent.persona} · ${agent.name}): recommend when ${agent.recommendWhen}. Skip when ${agent.skipWhen}.`,
     )
     .join("\n");
-  return `- When you FINISH a substantial task — real code written, verified and committed, OR a deep analysis/review the user asked for (never a trivial question or a single Q&A turn) — close with suggested next steps from specialist agents who would actually have something useful to say about what was just done. Emit 2-4 <samba-command type="next-step" specialist="<id>" prompt="..."></samba-command> tags at the very end. Each tag MUST include specialist="<id>" from the catalog below — that is whose face and voice the user sees. Pick specialists by domain fit, not by rotation: a designer (ux-ui) must not recommend after a pure backend/API/schema/SQL/CI task; mobile must not speak unless the work touched mobile/native/small-viewport; cybersec MAY recommend after auth, input, secrets, permissions, or new endpoints; architect after modules/coupling/structure; devops after deploy/CI/env/infra; quality after new untested behavior; pm when the next move is a product/scope decision; reviewer after a non-trivial code change. Prefer 2-4 different specialists. Each prompt must evolve the work meaningfully (a concrete next capability, polish, or the natural continuation of what was just done — e.g. after an analysis, the top recommended package as an implementable instruction), start with a verb, stay under ~90 characters, and be written in pt-BR so the user can click it to continue directly. Never end a substantial task with an open question as the only call to action — the clickable next steps ARE the call to action. Never use <, >, & or double quotes inside the prompt value (write them as words: "maior ou igual a 22", "menor que 26") — those characters break the tag and the suggestion disappears for the user. Do not emit next steps for trivial changes.
+  return `- When you FINISH a substantial task — real code written, verified and committed, OR a deep analysis/review the user asked for (never a trivial question or a single Q&A turn) — close with suggested next steps from specialist helpers standing beside the developer. The user should feel they have a team, not a generic todo list. Emit 2-4 tags at the very end, one per helper:
+<samba-command type="next-step" specialist="<id>" why="..." prompt="..."></samba-command>
+Each tag MUST include specialist="<id>" from the catalog below (that is whose face and voice the user sees). why is a short first-person observation in pt-BR of what THIS specialist noticed in the work just done (under ~80 characters). prompt is the clickable next action in pt-BR, starts with a verb, stays under ~90 characters, and is implementable. Never use <, >, & or double quotes inside why or prompt (write them as words: "maior ou igual a 22", "menor que 26") — those characters break the tag and the suggestion disappears for the user.
+Pick helpers by what was JUST done, not by rotation. Concrete fit:
+- After UI/UX/visual/accessibility work: ux-ui SHOULD speak (a final visual or a11y pass on the screens just changed). quality MAY add journey tests. Do not bring devops, cybersec, or mobile unless auth/network/native also changed.
+- After backend/API/schema/SQL/new endpoint: cybersec SHOULD speak (audit the new code for authz, injection, secrets, tenancy). architect MAY speak about module boundaries. quality MAY speak about tests. NEVER emit ux-ui or mobile.
+- After deploy/CI/Docker/env/infra: devops SHOULD speak. enterprise MAY speak about rollback/observability.
+- After non-trivial code change: reviewer MAY ask to re-read the diff. After untested new behavior: quality SHOULD speak. After product/scope ambiguity: pm SHOULD speak.
+Prefer 2-4 different specialists. Never end a substantial task with an open question as the only call to action — the clickable next steps ARE the call to action. Do not emit next steps for trivial changes.
+${specialistChatVoiceGuideline()}
 Specialist catalog (use these ids exactly):
 ${catalog}`;
+}
+
+/**
+ * Fala no chat (rosto + primeira pessoa) e convite multi-agente.
+ * spawn_agent continua explorer|implementer; o convite é a cara humana do handoff.
+ */
+export function specialistChatVoiceGuideline(): string {
+  return `- Speak as the specialists, not as a generic assistant recap. After substantial work (and when a specialist has something concrete to say mid-task), emit first-person speech the user sees with that helper's face:
+<samba-say specialist="<id>" about="done">1-3 short sentences in pt-BR. What THIS specialist just did or noticed, and why it matters.</samba-say>
+about="done" = what was finished and why it matters. about="next" = what still needs doing and why (use this when the specialist is flagging a gap they will not execute in this turn). Body text is first person, warm, concrete, under ~280 characters. Never use <, >, & or double quotes inside the body or attributes (write them as words). Prefer 1-3 samba-say tags per substantial turn, different specialists, matching the same domain-fit rules as next-steps (designer does not recap backend; cybersec does speak after a new endpoint). Do not repeat the same recap as both plain markdown and a samba-say — the tag IS the recap the user reads.
+- One specialist can call another into the current task. When a different domain should join NOW (tests after UI, security after a new API, review after a risky change), emit:
+<samba-invite from="<id>" specialist="<id>" why="..." prompt="..."></samba-invite>
+from is who is calling; specialist is who should join. why is a short first-person observation in pt-BR (under ~80 characters). prompt is the clickable join action in pt-BR, starts with a verb, under ~90 characters. Same character-escaping rules as next-step. At most 1-2 invites per turn. Concrete fit: after UI/UX, ux-ui MAY invite quality; after a new endpoint, architect or the acting helper MAY invite cybersec; after untested behavior, anyone MAY invite quality. Never invite a specialist whose skipWhen matches the work.`;
 }

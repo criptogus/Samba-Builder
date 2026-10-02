@@ -69,7 +69,13 @@ import { SambaScript } from "./SambaScript";
 import { SambaGit } from "./SambaGit";
 import { SambaSubagent } from "./SambaSubagent";
 import { mapActionToButton } from "./ChatInput";
+import { SpecialistTalkHuddle } from "./SpecialistSpeech";
+import { SpecialistNextStepHuddle } from "./SpecialistNextSteps";
 import { SuggestedAction } from "@/lib/schemas";
+import {
+  nextStepActionFromAttributes,
+  segmentClosedBlocks,
+} from "@/lib/next_step_action";
 import { FixAllErrorsButton } from "./FixAllErrorsButton";
 import {
   advanceParser,
@@ -418,24 +424,45 @@ const MemoClosedBlocks = React.memo(function MemoClosedBlocks({
 }) {
   // Hoisted once per render rather than allocated per block in the map.
   const mcpCtx = { resultByCallId, callIds, isStreaming };
+  const segments = segmentClosedBlocks(blocks);
   return (
     <>
-      {blocks.map((block, index) => (
-        <React.Fragment key={block.id}>
-          {renderClosedBlock(block, mcpCtx)}
-          {showFixAll &&
-            index === lastErrorIndex &&
-            chatId !== null &&
-            chatId !== undefined && (
-              <div className="mt-3 w-full flex">
-                <FixAllErrorsButton
-                  errorMessages={errorMessages}
-                  chatId={chatId}
-                />
-              </div>
-            )}
-        </React.Fragment>
-      ))}
+      {segments.map((segment, segmentIndex) => {
+        if (segment.kind === "specialist-talk") {
+          return (
+            <SpecialistTalkHuddle
+              key={`talk-${segment.blocks[0]?.id ?? segmentIndex}`}
+              blocks={segment.blocks}
+            />
+          );
+        }
+        if (segment.kind === "next-steps") {
+          return (
+            <SpecialistNextStepHuddle
+              key={`huddle-${segment.blocks[0]?.id ?? segmentIndex}`}
+              blocks={segment.blocks}
+            />
+          );
+        }
+        const block = segment.block;
+        const index = blocks.indexOf(block);
+        return (
+          <React.Fragment key={block.id}>
+            {renderClosedBlock(block, mcpCtx)}
+            {showFixAll &&
+              index === lastErrorIndex &&
+              chatId !== null &&
+              chatId !== undefined && (
+                <div className="mt-3 w-full flex">
+                  <FixAllErrorsButton
+                    errorMessages={errorMessages}
+                    chatId={chatId}
+                  />
+                </div>
+              )}
+          </React.Fragment>
+        );
+      })}
     </>
   );
 });
@@ -528,6 +555,7 @@ function renderCustomTag(
           chatId={subagentChatId}
           threadId={attributes["thread-id"] || ""}
           persona={attributes.persona || "agent"}
+          specialist={attributes.specialist}
           taskName={attributes["task-name"] || "Sub-agent task"}
           renderActivity={(xml, activityId) => (
             <SambaMarkdownParser content={xml} messageId={activityId} />
@@ -535,6 +563,9 @@ function renderCustomTag(
         />
       );
     }
+    case "samba-say":
+    case "samba-invite":
+      return <SpecialistTalkHuddle blocks={[block]} />;
     case "samba-read":
       return (
         <SambaRead
@@ -1039,17 +1070,10 @@ function renderCustomTag(
 
     case "samba-command":
       if (attributes.type) {
-        const action = {
+        const nextStep = nextStepActionFromAttributes(attributes);
+        const action = (nextStep ?? {
           id: attributes.type,
-          ...(attributes.type === "next-step" && attributes.prompt
-            ? {
-                prompt: attributes.prompt,
-                ...(attributes.specialist
-                  ? { specialist: attributes.specialist }
-                  : {}),
-              }
-            : {}),
-        } as SuggestedAction;
+        }) as SuggestedAction;
         return <>{mapActionToButton(action)}</>;
       }
       return null;

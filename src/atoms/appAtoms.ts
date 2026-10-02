@@ -2,6 +2,7 @@ import { atom } from "jotai";
 
 export const selectedAppIdAtom = atom<number | null>(null);
 export type PreviewMode =
+  | "pm"
   | "preview"
   | "code"
   | "problems"
