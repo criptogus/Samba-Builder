@@ -174,10 +174,13 @@ Até lá: repo pode ser público; **posicionamento** = runtime da fábrica Samba
 
 ## 8. Referências
 
-- [docs/samba-factory/README.md](./README.md) — estado da implementação local  
-- [docs/samba-factory/PRD-original.md](./PRD-original.md) — PRD fornecido (contexto; este roadmap manda no ciclo)  
-- [PRODUCT.md](../../PRODUCT.md) — alinhar a §1/E4  
-- Releases: builds atuais não assinados — ver README raiz  
+- [docs/samba-factory/README.md](./README.md) — estado da implementação local
+- [PUBLISH-GATES.md](./PUBLISH-GATES.md) — matriz de publish
+- [PLAYBOOK-1-DAY-MVP.md](./PLAYBOOK-1-DAY-MVP.md) — cronômetro
+- [PLAYBOOK-S3-TO-APP.md](./PLAYBOOK-S3-TO-APP.md) — Assessment e Piloto
+- [docs/samba-factory/PRD-original.md](./PRD-original.md) — PRD fornecido (contexto; este roadmap manda no ciclo)
+- [PRODUCT.md](../../PRODUCT.md) — ICP da fábrica
+- Releases: trilha B (só consultores Samba) até assinar — ver README raiz  
 
 ## 9. Notas para o implementador (Cursor)
 

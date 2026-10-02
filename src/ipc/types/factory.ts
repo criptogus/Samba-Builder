@@ -73,5 +73,15 @@ export const factoryContracts = {
     input: z.object({ appId: identity.appId }),
     output: z.array(z.string()),
   }),
+  handoff: defineContract({
+    channel: "factory:handoff",
+    input: z.object(identity),
+    output: z.object({
+      url: z.string().url(),
+      number: z.number().int().positive(),
+      updated: z.boolean(),
+      files: z.array(z.string()),
+    }),
+  }),
 };
 export const factoryClient = createClient(factoryContracts);

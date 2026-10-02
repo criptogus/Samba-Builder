@@ -342,6 +342,11 @@ export function registerCoolifyHandlers() {
       );
     }
     coolifyDeployRegistry.requestDeploy(appId);
+    const moduleName = "../services/factory/store";
+    const store = (await import(moduleName)) as {
+      recordFactoryStaging: (appId: number) => Promise<void>;
+    };
+    await store.recordFactoryStaging(appId).catch(() => undefined);
   });
 
   createTypedHandler(coolifyContracts.getDeploySnapshot, async (_, { appId }) =>

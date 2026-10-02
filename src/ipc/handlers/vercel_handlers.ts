@@ -626,6 +626,7 @@ export function registerVercelHandlers() {
             SambaErrorKind.Precondition,
           );
         }
+        await assertFactoryRelease(appId);
         const approvedCommit =
           target === "production"
             ? await assertDeliveryReadyForPublish(
@@ -633,7 +634,7 @@ export function registerVercelHandlers() {
                 getSambaAppPath(app.path),
               )
             : undefined;
-        return submitVercelDeployment(
+        const deployment = await submitVercelDeployment(
           token,
           {
             id: app.vercelProjectId,
@@ -646,6 +647,14 @@ export function registerVercelHandlers() {
           },
           target,
         );
+        const moduleName = "../services/factory/store";
+        const store = (await import(moduleName)) as {
+          recordFactoryStaging: (appId: number) => Promise<void>;
+        };
+        await store.recordFactoryStaging(appId).catch((error) => {
+          logger.warn("Relógio de staging não gravado:", error);
+        });
+        return deployment;
       },
     ),
   );

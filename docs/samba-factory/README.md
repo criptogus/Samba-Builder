@@ -17,8 +17,8 @@ O [Roadmap 90 dias — Caminho 1](./ROADMAP-90D-INTERNAL-FACTORY.md) é o doc ca
 5. Em Design, escolha e personalize os tokens. Confirme com o nome do responsável. São três presets de tokens, não um canvas de telas geradas.
 6. Abra Build/Fix no Studio para implementar. Os demais modos usam leitura. Novos pedidos devem ser registrados e classificados no Scope Guard.
 7. Marque tarefas concluídas após verificar o aceite. Configure scripts `typecheck` (ou `ts`) e `test:smoke` reais e não interativos no app cliente.
-8. Exporte o handoff, execute a verificação e revise os bloqueios em Entrega. O scan executa scripts do projeto na máquina local e consulta o registry npm. Código alterado depois do scan exige nova execução. Exportar documentos pela primeira vez também pode alterar o digest: exporte antes da verificação final.
-9. Use as integrações existentes de GitHub e deploy. O Builder revalida o gate no Git push nativo, na criação de projeto Vercel e na solicitação de deploy Coolify. Esta integração não controla deploys executados fora do Builder ou por ferramentas externas/MCP.
+8. Execute a verificação e revise os bloqueios em Entrega. O scan executa scripts do projeto na máquina local e consulta o registry npm. Código alterado depois do scan exige nova execução. Os recibos gerados (`docs/*.md` de fábrica e `samba/*`) não entram no digest.
+9. Em Entrega, use **Gerar handoff** para commitar os artefatos, publicar a branch e abrir ou atualizar o pull request com checklist de aceite. O gate é revalidado em Git push, Vercel (criar e deploy), Coolify, AWS, função Supabase, comando de publish do agente e ferramenta MCP de publish. A matriz está em [PUBLISH-GATES.md](./PUBLISH-GATES.md). O terminal interativo não é caminho de publicação.
 
 ## Comportamentos implementados
 
@@ -43,7 +43,7 @@ O [Roadmap 90 dias — Caminho 1](./ROADMAP-90D-INTERNAL-FACTORY.md) é o doc ca
 | Canvas e marca                                        | Presets e edição de tokens; Figma/logo ingest, variantes de telas e QA visual automático ainda pendentes               |
 | Security Agent                                        | Prompt de revisão + scan básico; Semgrep, deep scan, validação do banco remoto, LGPD e waiver autenticado pendentes    |
 | RBAC/isolamento de equipe                             | Identidade declarada pelo operador local; sem SSO/RBAC, cofre por cliente, sync ou auditoria inviolável                |
-| Publicação protegida                                  | Gate nas entradas descritas; não cobre comandos externos, MCP ou todos os possíveis provedores de deploy               |
+| Publicação protegida                                  | Gate nas entradas nativas, no agente e em ferramenta MCP de publish. Terminal interativo fica de fora, de propósito. Ver [PUBLISH-GATES.md](./PUBLISH-GATES.md). |
 | Client preview                                        | Integrações de deploy herdadas; magic link, comentários pinados e proteção do staging ainda pendentes                  |
 | Scaffold portal B2B e catálogo de capabilities        | Pendente; o agente utiliza o template/stack existente do aplicativo                                                    |
 | Orquestração e custos                                 | Recursos já existentes do runtime; não há novo roteamento de modelos, orçamento ou paralelismo independente de src/pro |

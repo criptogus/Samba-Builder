@@ -10,6 +10,7 @@ export function applyFactoryAction(
   now: string,
 ): FactoryProject {
   const next = structuredClone(project);
+  next.stages = { ...(next.stages ?? {}) };
   next.revision++;
   const actor = "actor" in action ? action.actor : "Operador local";
   const approval = { actor, at: now, revision: next.revision };
@@ -20,6 +21,9 @@ export function applyFactoryAction(
       next.approval = null;
       next.scan = null;
       next.mode = "discover";
+      next.stages.briefAt ??= now;
+      next.stages.planApprovedAt = undefined;
+      next.stages.stagingAt = undefined;
       break;
     case "plan":
       if (
@@ -34,6 +38,8 @@ export function applyFactoryAction(
       next.approval = null;
       next.scan = null;
       next.mode = "plan";
+      next.stages.planApprovedAt = undefined;
+      next.stages.stagingAt = undefined;
       break;
     case "approve-plan":
       if (!next.plan || !next.brief.trim())
@@ -43,11 +49,14 @@ export function applyFactoryAction(
         );
       next.approval = approval;
       next.mode = next.brandApproval ? "build" : "design";
+      next.stages.planApprovedAt = now;
+      next.stages.stagingAt = undefined;
       break;
     case "brand":
       next.brand = action.brand;
       next.brandApproval = approval;
       next.scan = null;
+      next.stages.brandApprovedAt ??= now;
       break;
     case "mode":
       if (action.mode === "build" || action.mode === "fix") {

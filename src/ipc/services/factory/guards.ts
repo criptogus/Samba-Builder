@@ -10,7 +10,7 @@ import {
   engineMode,
 } from "../../../../packages/samba-factory/src/policy";
 import { factoryPrompt } from "../../../../packages/samba-factory/src/skills";
-import { getFactoryProject } from "./store";
+import { getFactoryProject, readFactoryStore } from "./store";
 import { readFactorySources } from "./files";
 
 export async function assertFactoryChat(
@@ -70,14 +70,28 @@ export async function assertFactoryRelease(appId: number): Promise<void> {
     );
 }
 
+/** Projeto da Fábrica no caminho do app: o gate vale; app comum segue sem fábrica. */
+export async function assertFactoryReleaseForAppPath(
+  appPath: string,
+): Promise<void> {
+  const { projects } = await readFactoryStore();
+  if (projects.length === 0) return;
+  const candidates = db.select().from(apps).all();
+  const { resolve } = await import("node:path");
+  const app = candidates.find(
+    (entry) => resolve(getSambaAppPath(entry.path)) === resolve(appPath),
+  );
+  if (app && projects.some((project) => project.appId === app.id)) {
+    await assertFactoryRelease(app.id);
+  }
+}
+
 // Covers native Git pushes, including agent-triggered pushes, before remote hooks can publish.
 export async function assertFactoryReleaseForPath(
   appPath: string,
   branch: string,
 ): Promise<void> {
-  const { projects } = await import("./store").then((store) =>
-    store.readFactoryStore(),
-  );
+  const { projects } = await readFactoryStore();
   if (projects.length === 0) return;
   const candidates = db.select().from(apps).all();
   const { resolve } = await import("node:path");

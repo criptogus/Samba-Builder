@@ -1,4 +1,6 @@
 import { assertDeliveryReadyForPublish } from "../services/delivery_readiness";
+import { assertFactoryRelease } from "../services/factory/guards";
+import { recordFactoryStaging } from "../services/factory/store";
 import { eq } from "drizzle-orm";
 import { db } from "@/db";
 import { apps } from "@/db/schema";
@@ -56,8 +58,17 @@ export function registerAwsHandlers() {
         },
         async () => {
           const root = await rootFor(appId);
+          await assertFactoryRelease(appId);
           await assertDeliveryReadyForPublish(appId, root);
-          return deployAws(appId, config, root, accountId, sourceDigest);
+          const deployed = await deployAws(
+            appId,
+            config,
+            root,
+            accountId,
+            sourceDigest,
+          );
+          await recordFactoryStaging(appId).catch(() => undefined);
+          return deployed;
         },
       ),
   );

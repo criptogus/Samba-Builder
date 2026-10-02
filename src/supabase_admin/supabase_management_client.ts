@@ -947,6 +947,13 @@ export async function deploySupabaseFunction({
   bundleOnly?: boolean;
   organizationSlug: string | null;
 }): Promise<DeployedFunctionResponse> {
+  if (!bundleOnly) {
+    const moduleName = "@/ipc/services/factory/guards";
+    const guards = (await import(moduleName)) as {
+      assertFactoryReleaseForAppPath: (appPath: string) => Promise<void>;
+    };
+    await guards.assertFactoryReleaseForAppPath(appPath);
+  }
   return enqueueSupabaseDeploy(supabaseProjectId, bundleOnly, () =>
     deploySupabaseFunctionUnqueued({
       supabaseProjectId,

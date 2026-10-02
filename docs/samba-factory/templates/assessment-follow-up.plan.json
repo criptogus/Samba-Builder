@@ -1,0 +1,44 @@
+{
+  "problem": "O Assessment apontou um processo manual que o Piloto precisa tornar operável em um app com CRUD, autenticação e uma integração.",
+  "users": "Time do cliente que executa o processo hoje e o consultor Samba que opera o handoff.",
+  "stack": "Stack já escolhida no app do Builder. Não inventar plataforma nova no plano.",
+  "outOfScope": "Dados de board, seats fiduciários e qualquer informação S7. Escopo fora do Must do Piloto.",
+  "risks": "Publicar sem gate, misturar dados de outro cliente, ou tratar Should como Must sem aceite.",
+  "tasks": [
+    {
+      "id": "6f1c0a2e-1b7d-4c3a-9e8f-0a1b2c3d4e5f",
+      "title": "CRUD do processo descrito no Assessment",
+      "priority": "must",
+      "acceptance": "Um operador do cliente cria, lê, atualiza e arquiva o registro principal sem planilha paralela.",
+      "status": "todo"
+    },
+    {
+      "id": "7a2d1b3f-2c8e-4d4b-8f90-1b2c3d4e5f60",
+      "title": "Autenticação do time do cliente",
+      "priority": "must",
+      "acceptance": "Somente contas previstas no Piloto entram, e um usuário não vê o registro de outro.",
+      "status": "todo"
+    },
+    {
+      "id": "8b3e2c40-3d9f-4e5c-9012-2c3d4e5f6071",
+      "title": "Uma integração nomeada no Assessment",
+      "priority": "must",
+      "acceptance": "A integração combinada no Piloto troca dados reais de teste e o falha visível quando a credencial falta.",
+      "status": "todo"
+    },
+    {
+      "id": "9c4f3d51-4e0a-4f6d-a123-3d4e5f607182",
+      "title": "Staging com gate verde",
+      "priority": "must",
+      "acceptance": "A URL de staging só existe depois do plano aprovado e do Security Gate verde.",
+      "status": "todo"
+    },
+    {
+      "id": "ad504e62-5f1b-407e-b234-4e5f60718293",
+      "title": "Melhorias pedidas fora do Piloto",
+      "priority": "should",
+      "acceptance": "Ficam registradas e não entram no Must sem aceite explícito.",
+      "status": "todo"
+    }
+  ]
+}

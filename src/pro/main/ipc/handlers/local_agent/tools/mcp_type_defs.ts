@@ -184,6 +184,16 @@ export function buildMcpCapabilityMap(params: {
         );
       }
 
+      const { isExternalPublishTool } =
+        await import("../../../../../../../packages/samba-factory/src/publish_paths");
+      if (isExternalPublishTool(def.toolName)) {
+        const moduleName = "@/ipc/services/factory/guards";
+        const guards = (await import(moduleName)) as {
+          assertFactoryRelease: (appId: number) => Promise<void>;
+        };
+        await guards.assertFactoryRelease(params.ctx.appId);
+      }
+
       const client = await mcpManager.getClient(def.serverId);
       const toolSet = await client.tools();
       const mcpTool = toolSet[def.toolName];

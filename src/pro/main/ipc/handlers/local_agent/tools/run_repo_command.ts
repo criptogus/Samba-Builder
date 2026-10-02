@@ -50,6 +50,13 @@ export const runRepoCommandTool: ToolDefinition<
   },
 
   execute: async ({ command }, ctx: AgentContext) => {
+    if (classifyRepoCommand(command)?.kind === "publish") {
+      const moduleName = "@/ipc/services/factory/guards";
+      const guards = (await import(moduleName)) as {
+        assertFactoryRelease: (appId: number) => Promise<void>;
+      };
+      await guards.assertFactoryRelease(ctx.appId);
+    }
     ctx.onXmlStream(
       `<samba-status title="${escapeXmlAttr(`Running: ${command}`)}"></samba-status>`,
     );

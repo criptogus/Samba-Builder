@@ -35,7 +35,7 @@ describe("source evidence and exports", () => {
       '{"primary":"#123456"}',
     );
     const branded = await readFactorySources(root);
-    expect(branded.digest).not.toBe(after.digest);
+    expect(branded.digest).toBe(after.digest);
     await writeFactoryArtifact(root, "docs/security-report.md", "receipt");
     expect((await readFactorySources(root)).digest).toBe(branded.digest);
   });

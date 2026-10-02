@@ -36,6 +36,7 @@ import {
   MODE_LABELS,
   releaseBlockers,
 } from "../../../packages/samba-factory/src/policy";
+import { planToStagingMs } from "../../../packages/samba-factory/src/handoff";
 import { getSkills } from "../../../packages/samba-factory/src/skills";
 import "./factory.css";
 
@@ -1131,6 +1132,21 @@ function ReleasePanel({ project }: { project: FactoryProject }) {
     queryFn: () => factoryClient.gate({ appId: project.appId }),
     refetchInterval: 5000,
   });
+  const handoff = useMutation({
+    mutationFn: () =>
+      factoryClient.handoff({
+        appId: project.appId,
+        revision: project.revision,
+      }),
+    onSuccess: (result) =>
+      toast.success(
+        result.updated
+          ? `Pull request #${result.number} atualizado.`
+          : `Pull request #${result.number} aberto.`,
+      ),
+    onError: errorToast,
+  });
+  const clock = planToStagingMs(project);
   const exported = useMutation({
     mutationFn: () =>
       factoryClient.export({
@@ -1166,7 +1182,7 @@ function ReleasePanel({ project }: { project: FactoryProject }) {
           <p>
             {gate.isError
               ? gate.error.message
-              : "Git push, criação Vercel e deploy Coolify consultam o gate para projetos da Fábrica."}
+              : "Git push, Vercel, Coolify, AWS, função Supabase, comando do agente e ferramenta MCP de publish consultam o gate. O terminal interativo não é caminho de publicação."}
           </p>
         </div>
       </div>
@@ -1175,7 +1191,20 @@ function ReleasePanel({ project }: { project: FactoryProject }) {
           {reason}
         </p>
       ))}
+      {project.stages?.planApprovedAt && (
+        <p className="factory-muted">
+          {clock === null
+            ? "Cronômetro: plano aprovado, staging ainda não registrado."
+            : `Cronômetro plan → staging: ${Math.round(clock / 60000)} min.`}
+        </p>
+      )}
       <div className="factory-actions">
+        <Button
+          disabled={handoff.isPending || exported.isPending}
+          onClick={() => handoff.mutate()}
+        >
+          <ClipboardList /> Gerar handoff
+        </Button>
         <Button disabled={exported.isPending} onClick={() => exported.mutate()}>
           <Download /> Exportar / atualizar handoff
         </Button>

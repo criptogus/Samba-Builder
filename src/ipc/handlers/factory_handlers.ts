@@ -15,6 +15,7 @@ import {
 import { applyFactoryAction } from "../services/factory/project";
 import { runFactoryScan } from "../services/factory/scan";
 import { factoryReleaseBlockers } from "../services/factory/guards";
+import { generateFactoryHandoff } from "../services/factory/handoff_flow";
 import { writeFactoryArtifact } from "../services/factory/files";
 import { factoryArtifacts } from "../../../packages/samba-factory/src/artifacts";
 import type { FactoryProject } from "../../../packages/samba-factory/src/schema";
@@ -140,6 +141,7 @@ export function registerFactoryHandlers() {
         return mutateFactoryProject(appId, revision, (current) => ({
           ...current,
           scan,
+          stages: { ...current.stages, scanAt: scan.at },
           revision: current.revision + 1,
           audit: [
             ...current.audit,
@@ -156,6 +158,17 @@ export function registerFactoryHandlers() {
   );
   createTypedHandler(factoryContracts.gate, async (_, { appId }) =>
     factoryReleaseBlockers(appId),
+  );
+  createTypedHandler(factoryContracts.handoff, async (_, { appId, revision }) =>
+    appOperationCoordinator.run(
+      {
+        appId,
+        operation: "factory-handoff",
+        resources: ["metadata", "app-path", "repository", "provider"],
+        refuseWhenRecording: "gerar o handoff",
+      },
+      () => generateFactoryHandoff(appId, revision),
+    ),
   );
   createTypedHandler(factoryContracts.export, async (_, { appId, revision }) =>
     appOperationCoordinator.run(

@@ -1554,6 +1554,62 @@ export async function ensurePullRequestAfterPush(
   return normalizePullRequest(response.payload);
 }
 
+/** Cria ou atualiza o PR da branch atual. Usado pelo handoff da Fábrica. */
+export async function upsertPullRequest(params: {
+  appId: number;
+  title: string;
+  body: string;
+}): Promise<PullRequestSummary & { updated: boolean }> {
+  const { appPath, owner, repo, accessToken } = await requireGithubRepoAccess(
+    params.appId,
+  );
+  const head = await gitCurrentBranch({ path: appPath });
+  if (!head) {
+    throw new SambaError(
+      "Não foi possível identificar a branch atual.",
+      SambaErrorKind.Precondition,
+    );
+  }
+  const existing = await findOpenPullRequest({
+    owner,
+    repo,
+    branch: head,
+    accessToken,
+  });
+  if (existing) {
+    const response = await githubApi(
+      `/repos/${owner}/${repo}/pulls/${existing.number}`,
+      accessToken,
+      { method: "PATCH", body: { title: params.title, body: params.body } },
+    );
+    if (!response.ok) {
+      throw new Error(
+        `Failed to update the pull request: ${githubErrorMessage(response.payload, response.status)}`,
+      );
+    }
+    return { ...normalizePullRequest(response.payload), updated: true };
+  }
+  const base = await readDefaultBranch(owner, repo, accessToken);
+  const response = await githubApi(
+    `/repos/${owner}/${repo}/pulls`,
+    accessToken,
+    {
+      method: "POST",
+      body: buildCreatePullRequestBody({
+        title: params.title,
+        body: params.body,
+        head,
+        base,
+      }),
+    },
+  );
+  if (!response.ok) {
+    const message = githubErrorMessage(response.payload, response.status);
+    throw new Error(`Failed to create the pull request: ${message}`);
+  }
+  return { ...normalizePullRequest(response.payload), updated: false };
+}
+
 async function handleCreatePullRequest(
   _event: IpcMainInvokeEvent,
   params: {
