@@ -4,12 +4,14 @@ Este produto **não se atualiza sozinho**: os builds não são assinados, então
 
 Leia esta regra quando mexer em **aviso de versão**, **pacote de debug / relato de bug**, ou no **caminho de publicação e proveniência**.
 
-> **No fork Samba Builder o canal é outro.** O feed descrito abaixo (`api.samba.sh` + `samba-sh/samba` + o
-> verificador de proveniência no `samba-cloud`) é o do upstream. Aqui não há backend: o canal são as **releases
-> deste repositório no GitHub**, pelo serviço público do Electron. A decisão vive em `src/main/auto_update.ts`
-> (`AUTO_UPDATE_REPO`) e é aplicada em `src/main.ts`. O que continua valendo deste arquivo: registrar erro do
-> updater em **nível de erro** (senão o coletor de bug report descarta e sobra só cauda de stack) e manter o
-> entry point do Squirrel restrito a Electron/logging/`electron-squirrel-startup`.
+> **Neste produto o canal é a API de releases do GitHub** (`criptogus/Samba-Builder`), consultada no processo
+> principal por `checkForRelease`. O serviço `update.electronjs.org` **não** serve: ele descarta toda release
+> `prerelease`, e aqui só publicamos beta — o feed responde "no updates" mesmo com o zip darwin no ar. O app
+> não se instala sozinho (build sem assinatura). A decisão vive em `src/main/auto_update.ts` e o agendamento
+> em `src/main.ts`. O que continua valendo deste arquivo: registrar falha da checagem em **nível de erro**
+> (senão o coletor de bug report descarta e sobra só cauda de stack) e manter o entry point do Squirrel
+> restrito a Electron/logging/`electron-squirrel-startup`. O parágrafo do feed `api.samba.sh` abaixo é o
+> canal do projeto original; não apontar este app para ele.
 
 - The update feed URL shape is `https://api.samba.sh/v1/update/{stable|beta}/samba-sh/samba/<platform>-<arch>/<version>/RELEASES` (built by `update-electron-app` from the `host` set in `src/main.ts`). To check server health, curl that exact shape — a malformed path (e.g. missing the `samba-sh/samba/...` segments) gets a 307 redirect to the repo homepage, which looks "up" but is not a valid feed response.
 - Windows `Squirrel.FileDownloader.DownloadUrl` stack traces that start at `--- End of stack trace ---` are missing the head line with the real exception (`System.Net.WebException: ...`). Cause: `update-electron-app` logs updater errors at info level, and the warn-filtered bug-report logs drop `[info]`-prefixed lines while keeping unprefixed stack-trace continuation lines. Fixed by an error-level `autoUpdater.on("error")` handler in `src/main.ts`; old reports still show only tails.

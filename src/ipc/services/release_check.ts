@@ -201,6 +201,25 @@ export function selectLatestRelease(
 }
 
 /**
+ * Tag da release publicada imediatamente anterior a `currentTag`.
+ *
+ * A API do GitHub não devolve as releases em ordem semver (uma beta antiga
+ * pode vir na primeira posição). Quem monta as notas de fallback precisa da
+ * predecessora de verdade, senão o compare de commits sai contra a tag errada.
+ */
+export function selectPreviousReleaseTag(
+  releases: readonly { tag_name?: string; draft?: boolean }[],
+  currentTag: string,
+): string | null {
+  const latest = selectLatestRelease(
+    releases.filter((release) => release.tag_name !== currentTag),
+    "linux",
+    "x64",
+  );
+  return latest ? `v${latest.version}` : null;
+}
+
+/**
  * Busca a lista de releases deste repositório.
  *
  * Regra da credencial, em um lugar só: o repositório de releases é público,

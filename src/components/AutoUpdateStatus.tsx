@@ -16,7 +16,8 @@ const PHASE_LABEL: Record<AutoUpdateStatusSnapshot["phase"], string> = {
   disabled: "Atualização automática desligada.",
   checking: "Verificando atualizações…",
   "up-to-date": "Nenhuma atualização disponível.",
-  "update-available": "Atualização encontrada; baixando…",
+  "update-available":
+    "Nova versão publicada. Abra Verificar atualizações para instalar.",
   downloading: "Baixando atualização…",
   downloaded: "Atualização baixada. Reinicie para aplicar.",
   error: "A última verificação falhou.",

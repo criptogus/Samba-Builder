@@ -41,16 +41,18 @@ npm run desktop:install    # copia o app para ~/Applications
 4. Confira em **Configurações → auto-update**: a linha "Versão instalada" tem de mostrar a versão nova e o estado
    da última verificação.
 
-## Por que a atualização automática ainda pode não acontecer
+## Por que o feed do Electron não atualiza este app
 
-Mesmo com o app novo (que já contém o updater), o OTA depende de três coisas fora do código:
+O repositório é público e a API de releases responde 200 sem token. O que não funciona é
+`https://update.electronjs.org`: o servidor **pula release marcada como pré-lançamento**, e todas as versões
+publicadas daqui são `1.14.0-beta.N`. O corpo do 404 é "no updates found", não falta de zip.
 
-1. o repositório do canal precisa ser público/alcançável (hoje `api.github.com/repos/criptogus/Samba-Builder`
-   responde 404) — o serviço público do Electron só atende repo público;
-2. precisa existir **release publicada** (não-draft) mais nova que a versão instalada; hoje o workflow de release
-   é manual (`workflow_dispatch`) e o publisher cria a release como draft;
-3. no macOS, o **Squirrel exige assinatura válida** e correspondente entre a versão instalada e a nova: build
-   assinado diferente (ou ad-hoc/ausente) não aplica a atualização.
+O caminho que funciona é a checagem da API (`system.checkForUpdates` / menu Verificar atualizações):
+
+1. inclui beta e escolhe a mais nova por semver — a lista do GitHub não vem ordenada;
+2. rascunho continua invisível; só a release publicada (caminho da tag) aparece;
+3. no macOS o botão baixa o zip, confere o sha256 e troca o bundle. Em outra plataforma, ou se a troca falhar,
+   abre a página da release. Instalação silenciosa via Squirrel não existe enquanto o build não for assinado.
 
 ## Publicar pela tag (caminho normal, depois que o OTA estiver de pé)
 

@@ -1,20 +1,57 @@
 /**
- * Política de auto-update do Samba Builder.
+ * Política de atualização do Samba Builder.
  *
- * O fork é standalone (sem backend próprio), então o canal de atualização são as
- * **releases deste repositório no GitHub**, servidas pelo serviço público do
- * Electron (`https://update.electronjs.org`). Nada aqui consulta o backend do
- * Samba — foi por isso que o updater original tinha sido removido, e removê-lo
- * deixou o switch "Auto-update" da interface prometendo algo que o app não faz.
+ * O canal são as releases deste repositório na API do GitHub
+ * (`src/ipc/services/release_check.ts`). O serviço público do Electron
+ * (`update.electronjs.org`) descarta toda release marcada como pré-lançamento,
+ * e este produto só publica beta — por isso aquele feed responde "no updates"
+ * mesmo com um zip darwin publicado. A checagem da API inclui beta, ordena por
+ * semver (a lista do GitHub não vem ordenada) e não instala sozinha: o build
+ * não é assinado.
  *
  * A decisão é pura para poder ser testada sem Electron, janela ou rede.
  */
 
+import type { ReleaseCheckResult } from "../ipc/services/release_check";
+
 /** Repositório cujas releases são o canal de atualização. */
 export const AUTO_UPDATE_REPO = "criptogus/Samba-Builder";
 
-/** O mínimo aceito pelo update-electron-app é 5 minutos. */
+/** Intervalo da checagem periódica no processo principal. */
 export const AUTO_UPDATE_INTERVAL = "1 hour";
+
+export const RELEASE_CHECK_INTERVAL_MS = 60 * 60 * 1000;
+
+export interface ReleaseCheckStatusPatch {
+  phase: "up-to-date" | "update-available" | "error";
+  version: string | null;
+  message: string | null;
+}
+
+/** Traduz o resultado da API de releases para o retrato das Configurações. */
+export function statusFromReleaseCheck(
+  result: ReleaseCheckResult,
+): ReleaseCheckStatusPatch {
+  if (result.status === "update-available") {
+    return {
+      phase: "update-available",
+      version: result.latestVersion,
+      message: null,
+    };
+  }
+  if (result.status === "up-to-date") {
+    return {
+      phase: "up-to-date",
+      version: result.latestVersion,
+      message: null,
+    };
+  }
+  return {
+    phase: "error",
+    version: null,
+    message: result.reason ?? "unavailable",
+  };
+}
 
 export interface AutoUpdatePolicyInput {
   /** Opção do usuário ("Auto-update" em Configurações). */
