@@ -1,0 +1,3 @@
+## 2024-05-19 - Unmemoized Custom Hook Callbacks Break React.memo
+**Learning:** Custom hooks that return unmemoized callbacks (e.g., `(id) => navigate(...)`) create new function references on every render. When these callbacks are passed as props to memoized child components, such as list items (`AppItem`, etc.), they silently break shallow comparison, causing full re-renders of the entire list.
+**Action:** Always wrap callbacks returned from custom hooks (like `useOpenApp` or `useSelectChat`) in `useCallback`. When returning objects containing these callbacks, wrap the object in `useMemo`. Ensure proper memoization boundaries are maintained, especially when the hooks are consumed in high-frequency rendering contexts like lists.
