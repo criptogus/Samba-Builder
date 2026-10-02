@@ -7,6 +7,8 @@ import {
 import {
   handoffPullRequest,
   planToStagingMs,
+  summarizeFactoryCycle,
+  withinOneBusinessDay,
 } from "../../../packages/samba-factory/src/handoff";
 import {
   isExternalPublishTool,
@@ -70,6 +72,19 @@ describe("handoff pull request", () => {
     expect(document.body).toContain("docs/security-report.md");
     expect(document.body).toContain("abc");
     expect(planToStagingMs(project)).toBe(6 * 60 * 60 * 1000);
+    expect(withinOneBusinessDay(project)).toBe(true);
+    const late = {
+      ...project,
+      stages: {
+        planApprovedAt: "2026-10-02T12:00:00.000Z",
+        stagingAt: "2026-10-04T12:00:00.000Z",
+      },
+    };
+    expect(summarizeFactoryCycle([project, late])).toEqual({
+      active: 2,
+      staged: 2,
+      withinOneBusinessDay: 1,
+    });
   });
 });
 

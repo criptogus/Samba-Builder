@@ -36,7 +36,10 @@ import {
   MODE_LABELS,
   releaseBlockers,
 } from "../../../packages/samba-factory/src/policy";
-import { planToStagingMs } from "../../../packages/samba-factory/src/handoff";
+import {
+  ONE_BUSINESS_DAY_MS,
+  planToStagingMs,
+} from "../../../packages/samba-factory/src/handoff";
 import { getSkills } from "../../../packages/samba-factory/src/skills";
 import "./factory.css";
 
@@ -1195,7 +1198,11 @@ function ReleasePanel({ project }: { project: FactoryProject }) {
         <p className="factory-muted">
           {clock === null
             ? "Cronômetro: plano aprovado, staging ainda não registrado."
-            : `Cronômetro plan → staging: ${Math.round(clock / 60000)} min.`}
+            : `Cronômetro plan → staging: ${Math.round(clock / 60000)} min${
+                clock <= ONE_BUSINESS_DAY_MS
+                  ? " (dentro de 1 dia)."
+                  : " (passou de 1 dia)."
+              }`}
         </p>
       )}
       <div className="factory-actions">

@@ -81,3 +81,32 @@ export function planToStagingMs(project: FactoryProject): number | null {
   const duration = Date.parse(end) - Date.parse(start);
   return Number.isFinite(duration) && duration >= 0 ? duration : null;
 }
+
+/**
+ * Os marcos são instantes. Um dia útil, aqui, são 24 h de relógio entre a
+ * aprovação do plano e o primeiro staging — não hora comercial.
+ */
+export const ONE_BUSINESS_DAY_MS = 24 * 60 * 60 * 1000;
+
+export function withinOneBusinessDay(project: FactoryProject): boolean | null {
+  const duration = planToStagingMs(project);
+  if (duration === null) return null;
+  return duration <= ONE_BUSINESS_DAY_MS;
+}
+
+/** Contagem local do ciclo. Não chama rede e não conta template. */
+export function summarizeFactoryCycle(projects: readonly FactoryProject[]): {
+  active: number;
+  staged: number;
+  withinOneBusinessDay: number;
+} {
+  let staged = 0;
+  let within = 0;
+  for (const project of projects) {
+    const hit = withinOneBusinessDay(project);
+    if (hit === null) continue;
+    staged += 1;
+    if (hit) within += 1;
+  }
+  return { active: projects.length, staged, withinOneBusinessDay: within };
+}

@@ -152,6 +152,16 @@ export function buildMcpCapabilityMap(params: {
             ? args.join(" ")
             : JSON.stringify(args).slice(0, 500);
 
+      const { isExternalPublishTool } =
+        await import("../../../../../../../packages/samba-factory/src/publish_paths");
+      if (isExternalPublishTool(def.toolName)) {
+        const moduleName = "@/ipc/services/factory/guards";
+        const guards = (await import(moduleName)) as {
+          assertFactoryRelease: (appId: number) => Promise<void>;
+        };
+        await guards.assertFactoryRelease(params.ctx.appId);
+      }
+
       const autoApprove = buildMcpAutoApprove({
         settings: readSettings(),
         isSambaPro: params.ctx.isSambaPro,
@@ -182,16 +192,6 @@ export function buildMcpCapabilityMap(params: {
           `User declined running tool ${def.toolKey}`,
           SambaErrorKind.UserCancelled,
         );
-      }
-
-      const { isExternalPublishTool } =
-        await import("../../../../../../../packages/samba-factory/src/publish_paths");
-      if (isExternalPublishTool(def.toolName)) {
-        const moduleName = "@/ipc/services/factory/guards";
-        const guards = (await import(moduleName)) as {
-          assertFactoryRelease: (appId: number) => Promise<void>;
-        };
-        await guards.assertFactoryRelease(params.ctx.appId);
       }
 
       const client = await mcpManager.getClient(def.serverId);
