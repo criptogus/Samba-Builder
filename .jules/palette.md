@@ -1,0 +1,3 @@
+## 2024-06-15 - TooltipTrigger aria-label
+**Learning:** When using `@base-ui/react/tooltip`'s `<TooltipTrigger>` to wrap non-interactive elements (like SVG icons or `<div>`s) without using `asChild` or a `render` prop, it defaults to rendering a `<button>`. You must provide an `aria-label` directly on the `<TooltipTrigger>` element to prevent it from becoming an inaccessible empty button to screen readers.
+**Action:** Always check the `render` prop of `<TooltipTrigger>`. If it's empty, and the child is not an accessible interactive element like a correctly labeled `button` or `a`, verify that the `<TooltipTrigger>` has an `aria-label`.
