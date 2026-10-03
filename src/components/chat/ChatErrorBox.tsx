@@ -134,6 +134,7 @@ function ChatErrorContainer({
       <button
         onClick={onDismiss}
         className="absolute top-2.5 left-2 p-1 hover:bg-red-100 rounded"
+        aria-label="Dismiss error"
       >
         <X size={14} className="text-red-500" />
       </button>

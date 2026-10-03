@@ -275,6 +275,10 @@ export function ChatHeader({
             data-testid="toggle-preview-panel-button"
             onClick={onTogglePreview}
             className="cursor-pointer p-2 hover:bg-(--background-lightest) rounded-md"
+            aria-label={
+              isPreviewOpen ? "Close preview panel" : "Open preview panel"
+            }
+            aria-pressed={isPreviewOpen}
           >
             {isPreviewOpen ? (
               <PanelRightClose size={20} />
