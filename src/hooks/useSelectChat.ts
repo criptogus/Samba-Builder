@@ -1,3 +1,4 @@
+import { useCallback, useMemo } from "react";
 import { useSetAtom } from "jotai";
 import {
   selectedChatIdAtom,
@@ -20,8 +21,9 @@ export function useSelectChat() {
   );
   const navigate = useNavigate();
 
-  return {
-    selectChat: ({
+  // ⚡ Bolt Optimization: Wrap callback in useCallback and return object in useMemo to prevent breaking React.memo in list items
+  const selectChat = useCallback(
+    ({
       chatId,
       appId,
       preserveTabOrder = false,
@@ -63,5 +65,16 @@ export function useSelectChat() {
           });
       }
     },
-  };
+    [
+      addSessionOpenedChatId,
+      navigate,
+      pushRecentViewedChatId,
+      setChatInputValue,
+      setScrollToBottomRequestedChatIds,
+      setSelectedAppId,
+      setSelectedChatId,
+    ],
+  );
+
+  return useMemo(() => ({ selectChat }), [selectChat]);
 }
