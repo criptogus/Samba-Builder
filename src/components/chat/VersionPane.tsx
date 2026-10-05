@@ -229,7 +229,7 @@ function VersionRow({
                     Date.now() - timestampMs > 24 * 60 * 60 * 1000;
                   return (
                     <Tooltip>
-                      <TooltipTrigger>
+                      <TooltipTrigger aria-label={isExpired ? "DB snapshot may have expired (older than 24 hours)" : `Database snapshot available at timestamp ${version.dbTimestamp}`}>
                         <div
                           className={cn(
                             "inline-flex items-center gap-1 px-1.5 py-0.5 text-[10px] font-medium rounded-md",
