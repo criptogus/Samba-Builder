@@ -1,3 +1,4 @@
+import { useCallback } from "react";
 import { useSetAtom } from "jotai";
 import { useNavigate } from "@tanstack/react-router";
 import { selectedAppIdAtom } from "@/atoms/appAtoms";
@@ -8,9 +9,12 @@ export function useOpenApp() {
   const setSelectedChatId = useSetAtom(selectedChatIdAtom);
   const navigate = useNavigate();
 
-  return (appId: number) => {
-    setSelectedAppId(appId);
-    setSelectedChatId(null);
-    navigate({ to: "/app-details", search: { appId } });
-  };
+  return useCallback(
+    (appId: number) => {
+      setSelectedAppId(appId);
+      setSelectedChatId(null);
+      navigate({ to: "/app-details", search: { appId } });
+    },
+    [navigate, setSelectedAppId, setSelectedChatId],
+  );
 }
