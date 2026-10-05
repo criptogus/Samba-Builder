@@ -18,7 +18,7 @@ export const SambaTokenSavings: React.FC<SambaTokenSavingsProps> = ({
 
   return (
     <Tooltip>
-      <TooltipTrigger>
+      <TooltipTrigger aria-label={`Saved ${Math.round(tokensSaved).toLocaleString()} tokens`}>
         <SambaCard accentColor="green">
           <SambaCardHeader icon={<Zap size={15} />} accentColor="green">
             <span className="text-xs font-medium text-green-700 dark:text-green-300">

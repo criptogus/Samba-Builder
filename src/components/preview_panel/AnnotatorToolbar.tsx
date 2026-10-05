@@ -112,7 +112,7 @@ export const AnnotatorToolbar = ({
         </Tooltip>
 
         <Tooltip>
-          <TooltipTrigger>
+          <TooltipTrigger aria-label="Color">
             <div className="p-1 rounded transition-colors duration-200 hover:bg-purple-200 dark:hover:bg-purple-900">
               <ToolbarColorPicker color={color} onChange={onColorChange} />
             </div>
