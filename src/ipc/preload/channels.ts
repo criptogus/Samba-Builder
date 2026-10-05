@@ -1,3 +1,4 @@
+import { extensionContracts } from "../types/extensions";
 import { managementContracts } from "../types/management";
 import { deliveryContracts } from "../types/delivery";
 import { governanceContracts } from "../types/governance";
@@ -164,6 +165,7 @@ export const VALID_INVOKE_CHANNELS = [
   ...getInvokeChannels(terminalContracts),
   ...getInvokeChannels(testsContracts),
   ...getInvokeChannels(designSystemContracts),
+  ...getInvokeChannels(extensionContracts),
   ...getInvokeChannels(recordingContracts),
   ...getInvokeChannels(userInputContracts),
   ...getInvokeChannels(windowInfrastructureContracts),

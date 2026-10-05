@@ -1,3 +1,4 @@
+import { ensureBundledGameSkills } from "@/ipc/services/game_studio/bundled_skills";
 import { buildExtensionCatalog } from "./catalog";
 import { listExtensions } from "./load";
 import { resolveExtensionRoots } from "./roots";
@@ -14,6 +15,7 @@ export const MAX_SKILLS_IN_PROMPT = 20;
 export async function buildSkillCatalogBlock(
   projectDirectory: string | null,
 ): Promise<string> {
+  await ensureBundledGameSkills();
   const skills = await listExtensions(
     resolveExtensionRoots(projectDirectory),
     "skill",
