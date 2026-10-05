@@ -15,6 +15,6 @@ export function useOpenApp() {
       setSelectedChatId(null);
       navigate({ to: "/app-details", search: { appId } });
     },
-    [navigate, setSelectedAppId, setSelectedChatId],
+    [setSelectedAppId, setSelectedChatId, navigate],
   );
 }

@@ -65,15 +65,20 @@ export function useSelectChat() {
       }
     },
     [
-      addSessionOpenedChatId,
-      navigate,
-      pushRecentViewedChatId,
-      setChatInputValue,
-      setScrollToBottomRequestedChatIds,
-      setSelectedAppId,
       setSelectedChatId,
+      setSelectedAppId,
+      addSessionOpenedChatId,
+      pushRecentViewedChatId,
+      setScrollToBottomRequestedChatIds,
+      navigate,
+      setChatInputValue,
     ],
   );
 
-  return useMemo(() => ({ selectChat }), [selectChat]);
+  return useMemo(
+    () => ({
+      selectChat,
+    }),
+    [selectChat],
+  );
 }

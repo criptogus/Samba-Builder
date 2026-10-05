@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, memo } from "react";
 import type { ListedApp } from "@/ipc/types/app";
 import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
@@ -21,7 +21,8 @@ function getInitial(name: string): string {
     : trimmed[0].toUpperCase();
 }
 
-export function AppShowcaseCard({
+// ⚡ Bolt Optimization: Wrapped in React.memo to prevent full list re-renders when globally tracked list flags change.
+export const AppShowcaseCard = memo(function AppShowcaseCard({
   app,
   thumbnailUrl,
   onClick,
@@ -91,4 +92,4 @@ export function AppShowcaseCard({
       </div>
     </button>
   );
-}
+});

@@ -191,7 +191,7 @@ export function AICreditStatus({
     : null;
   return (
     <Tooltip>
-      <TooltipTrigger>
+      <TooltipTrigger aria-label={`${remaining.toLocaleString()} of ${total.toLocaleString()} credits remaining`}>
         <div className="text-xs pl-1 mt-0.5 opacity-90">· {remaining}</div>
       </TooltipTrigger>
       <TooltipContent>

@@ -142,7 +142,7 @@ export function ChatHeader({
                 <>
                   <TooltipProvider>
                     <Tooltip>
-                      <TooltipTrigger>
+                      <TooltipTrigger aria-label={isCheckingOutVersion ? t("header.checkoutInProgress") : t("header.checkoutMainBranch")}>
                         <span className="flex items-center  gap-1">
                           {isCheckingOutVersion ? (
                             <>

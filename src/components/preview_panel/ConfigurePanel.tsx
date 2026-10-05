@@ -38,7 +38,7 @@ const AppCommandsTitle = () => (
     <Terminal size={18} className="text-muted-foreground" />
     <span className="text-lg font-semibold">App Commands</span>
     <Tooltip>
-      <TooltipTrigger>
+      <TooltipTrigger aria-label="Configure custom install and start commands for your app. Leave empty to use the default pnpm commands.">
         <HelpCircle size={16} className="text-muted-foreground cursor-help" />
       </TooltipTrigger>
       <TooltipContent>
@@ -290,7 +290,7 @@ const EnvironmentVariablesTitle = () => (
     <span className="text-lg font-semibold">Environment Variables</span>
     <span className="text-sm text-muted-foreground font-normal">Local</span>
     <Tooltip>
-      <TooltipTrigger>
+      <TooltipTrigger aria-label="To modify environment variables for Supabase or production, access your hosting provider's console and update them there.">
         <HelpCircle size={16} className="text-muted-foreground cursor-help" />
       </TooltipTrigger>
       <TooltipContent>
