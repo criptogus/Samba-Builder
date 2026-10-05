@@ -8,7 +8,7 @@ import crypto from "crypto";
 import path from "path";
 import fs from "fs";
 import type { LocalAgentFixture, ToolCall, Turn } from "./localAgentTypes";
-import { resolveFixturesDir } from "./paths";
+import { resolveFixtureFile, resolveFixturesDir } from "./paths";
 import { fakeLlmLog } from "./log";
 
 // Register ts-node to allow loading .ts fixture files directly
@@ -146,20 +146,18 @@ export function convertLegacyFixtureToLocalAgent(
 }
 
 function findLegacyFixturePath(fixtureName: string): string | undefined {
-  for (const fixturePath of [
-    path.join(resolveFixturesDir(), `${fixtureName}.md`),
-    path.join(resolveFixturesDir(), "engine", `${fixtureName}.md`),
-  ]) {
-    if (fs.existsSync(fixturePath)) return fixturePath;
-  }
-  return undefined;
+  const fixturesDir = resolveFixturesDir();
+  return (
+    resolveFixtureFile(fixturesDir, `${fixtureName}.md`) ??
+    resolveFixtureFile(path.join(fixturesDir, "engine"), `${fixtureName}.md`)
+  );
 }
 
 function hasLocalAgentFixture(fixtureName: string): boolean {
   const fixtureDir = path.join(resolveFixturesDir(), "engine", "local-agent");
   return (
-    fs.existsSync(path.join(fixtureDir, `${fixtureName}.ts`)) ||
-    fs.existsSync(path.join(fixtureDir, `${fixtureName}.js`)) ||
+    resolveFixtureFile(fixtureDir, `${fixtureName}.ts`) !== undefined ||
+    resolveFixtureFile(fixtureDir, `${fixtureName}.js`) !== undefined ||
     Boolean(findLegacyFixturePath(fixtureName))
   );
 }
@@ -316,13 +314,12 @@ export async function loadLocalAgentFixture(
 
   const fixtureDir = path.join(resolveFixturesDir(), "engine", "local-agent");
 
-  // Try .ts first, then .js
-  let fixturePath = path.join(fixtureDir, `${fixtureName}.ts`);
-  if (!fs.existsSync(fixturePath)) {
-    fixturePath = path.join(fixtureDir, `${fixtureName}.js`);
-  }
+  // Try .ts first, then .js. Names that differ only by case still resolve.
+  const fixturePath =
+    resolveFixtureFile(fixtureDir, `${fixtureName}.ts`) ??
+    resolveFixtureFile(fixtureDir, `${fixtureName}.js`);
 
-  if (!fs.existsSync(fixturePath)) {
+  if (!fixturePath) {
     const legacyFixturePath = findLegacyFixturePath(fixtureName);
     if (!legacyFixturePath) {
       throw new Error(`Local agent fixture not found: ${fixtureName}`);

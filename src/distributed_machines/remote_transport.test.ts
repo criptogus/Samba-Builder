@@ -99,8 +99,12 @@ function createHarness(
     maxAddressEnvelopeBytes: options.maxAddressEnvelopeBytes,
     maxDispatchEnvelopeBytes: options.maxDispatchEnvelopeBytes,
     maxSnapshotEnvelopeBytes: options.maxSnapshotEnvelopeBytes,
-    onProtocolMismatch: options.protocolMismatch,
-    onError: options.onError,
+    onProtocolMismatch: options.protocolMismatch as ConstructorParameters<
+      typeof RemoteMachineTransport
+    >[0]["onProtocolMismatch"],
+    onError: options.onError as ConstructorParameters<
+      typeof RemoteMachineTransport
+    >[0]["onError"],
   });
   const duplex = new FakeDuplexRemoteTransport(transport, manifest, windows);
   return { clock, errors, host, machine, manifest, transport, duplex, windows };

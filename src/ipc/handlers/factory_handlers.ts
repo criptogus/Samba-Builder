@@ -75,6 +75,7 @@ export function registerFactoryHandlers() {
             knowledge: "",
             revision: 0,
             mode: "ask",
+            stages: {},
             plan: null,
             approval: null,
             brand: null,

@@ -4,16 +4,16 @@ Ambiente local da Samba para construir aplicações de clientes com IA. Uma cama
 
 ## Baixar o app
 
-Última versão: **[v1.14.0-beta.14](https://github.com/criptogus/Samba-Builder/releases/tag/v1.14.0-beta.14)** · [todas as versões](https://github.com/criptogus/Samba-Builder/releases). Os arquivos aparecem quando o workflow de release publica a tag. O instalador não assinado é só para consultores Samba.
+Última versão: **[v1.14.0-beta.15](https://github.com/criptogus/Samba-Builder/releases/tag/v1.14.0-beta.15)** · [todas as versões](https://github.com/criptogus/Samba-Builder/releases). Os arquivos aparecem quando o workflow de release publica a tag. O instalador não assinado é só para consultores Samba.
 
-| Plataforma                  | Download                                                                                                                                                               |
-| --------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| macOS — Apple Silicon (M1+) | [Samba.Builder-darwin-arm64-1.14.0-beta.14.zip](https://github.com/criptogus/Samba-Builder/releases/download/v1.14.0-beta.14/Samba.Builder-darwin-arm64-1.14.0-beta.14.zip) |
-| macOS — Intel               | [Samba.Builder-darwin-x64-1.14.0-beta.14.zip](https://github.com/criptogus/Samba-Builder/releases/download/v1.14.0-beta.14/Samba.Builder-darwin-x64-1.14.0-beta.14.zip)       |
-| Windows 10/11 (x64)         | [Samba.Builder-1.14.0-beta.14.Setup.exe](https://github.com/criptogus/Samba-Builder/releases/download/v1.14.0-beta.14/Samba.Builder-1.14.0-beta.14.Setup.exe)                   |
-| Linux — Debian/Ubuntu       | [samba-builder_1.14.0.beta.14_amd64.deb](https://github.com/criptogus/Samba-Builder/releases/download/v1.14.0-beta.14/samba-builder_1.14.0.beta.14_amd64.deb)                 |
-| Linux — Fedora/openSUSE     | [samba-builder-1.14.0.beta.14-1.x86_64.rpm](https://github.com/criptogus/Samba-Builder/releases/download/v1.14.0-beta.14/samba-builder-1.14.0.beta.14-1.x86_64.rpm)           |
-| Linux — portátil            | [Samba.Builder_1.14.0-beta.14_x86_64.AppImage](https://github.com/criptogus/Samba-Builder/releases/download/v1.14.0-beta.14/Samba.Builder_1.14.0-beta.14_x86_64.AppImage)     |
+| Plataforma                  | Download                                                                                                                                                                    |
+| --------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| macOS — Apple Silicon (M1+) | [Samba.Builder-darwin-arm64-1.14.0-beta.15.zip](https://github.com/criptogus/Samba-Builder/releases/download/v1.14.0-beta.15/Samba.Builder-darwin-arm64-1.14.0-beta.15.zip) |
+| macOS — Intel               | [Samba.Builder-darwin-x64-1.14.0-beta.15.zip](https://github.com/criptogus/Samba-Builder/releases/download/v1.14.0-beta.15/Samba.Builder-darwin-x64-1.14.0-beta.15.zip)     |
+| Windows 10/11 (x64)         | [Samba.Builder-1.14.0-beta.15.Setup.exe](https://github.com/criptogus/Samba-Builder/releases/download/v1.14.0-beta.15/Samba.Builder-1.14.0-beta.15.Setup.exe)               |
+| Linux — Debian/Ubuntu       | [samba-builder_1.14.0.beta.15_amd64.deb](https://github.com/criptogus/Samba-Builder/releases/download/v1.14.0-beta.15/samba-builder_1.14.0.beta.15_amd64.deb)               |
+| Linux — Fedora/openSUSE     | [samba-builder-1.14.0.beta.15-1.x86_64.rpm](https://github.com/criptogus/Samba-Builder/releases/download/v1.14.0-beta.15/samba-builder-1.14.0.beta.15-1.x86_64.rpm)         |
+| Linux — portátil            | [Samba.Builder_1.14.0-beta.15_x86_64.AppImage](https://github.com/criptogus/Samba-Builder/releases/download/v1.14.0-beta.15/Samba.Builder_1.14.0-beta.15_x86_64.AppImage)   |
 
 ## Quem pode instalar
 

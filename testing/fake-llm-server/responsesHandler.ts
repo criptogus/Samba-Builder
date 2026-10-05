@@ -8,7 +8,11 @@ import fs from "fs";
 import path from "path";
 import { CANNED_MESSAGE } from "./index";
 import { fakeLlmLog } from "./log";
-import { resolveDumpDir, resolveFixturesDir } from "./paths";
+import {
+  resolveDumpDir,
+  resolveFixtureFile,
+  resolveFixturesDir,
+} from "./paths";
 import {
   matchConsentClassifierPayload,
   SLOW_CONSENT_TOOL,
@@ -307,12 +311,14 @@ export const createResponsesHandler =
         : extractTestCaseName(lastUserText);
     const localAgentTurn = await responsesFixtureTurn(testCaseName, input);
     if (testCaseName && !testCaseName.startsWith("local-agent/")) {
-      const testFilePath = path.join(
-        resolveFixturesDir(),
-        prefix,
+      const testFilePath = resolveFixtureFile(
+        path.join(resolveFixturesDir(), prefix),
         `${testCaseName}.md`,
       );
       try {
+        if (!testFilePath) {
+          throw new Error(`Test file not found: ${testCaseName}`);
+        }
         messageContent = fs
           .readFileSync(testFilePath, "utf-8")
           .replace(/\r\n/g, "\n");

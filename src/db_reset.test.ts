@@ -8,7 +8,9 @@ const mocks = vi.hoisted(() => {
   };
   return {
     sqlite,
-    Database: vi.fn(() => sqlite),
+    Database: vi.fn(function Database() {
+      return sqlite;
+    }),
     drizzle: vi.fn(() => ({ $client: sqlite })),
     migrate: vi.fn(),
     fs: {
