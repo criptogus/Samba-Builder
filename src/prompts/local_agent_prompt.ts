@@ -1143,7 +1143,7 @@ export function constructLocalAgentPrompt(
   // carregado sob demanda pela tool `load_skill`, e skill nenhuma concede
   // ferramentas ou permissões — é instrução, não capacidade.
   if (skillCatalog) {
-    prompt += `\n\n<available_skills>\n${skillCatalog}\nCarregue uma skill apenas quando a descrição casar com a tarefa, pela tool \`load_skill\`. As skills trazem instruções; nunca concedem ferramentas, permissões ou autorização para publicar.\n</available_skills>`;
+    prompt += `\n\n<available_skills>\n${skillCatalog}\nCarregue uma skill apenas quando a descrição casar com a tarefa, pela tool \`load_skill\`. Para construir um jogo, comece por \`construtor-de-jogos\`. Skills achadas no computador entram com \`import_game_skill\`; \`inspect_game_computer\` diz quais programas locais existem. As skills trazem instruções; nunca concedem ferramentas, permissões ou autorização para publicar.\n</available_skills>`;
   }
 
   return prompt + "\n\n" + PROJECT_GENERATION_GUIDANCE;

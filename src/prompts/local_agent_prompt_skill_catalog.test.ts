@@ -19,6 +19,8 @@ describe("constructLocalAgentPrompt — catálogo de skills (REQ-03)", () => {
       "- revisar-login (skill · project): Revisa o fluxo de login",
     );
     expect(prompt).toContain("load_skill");
+    expect(prompt).toContain("import_game_skill");
+    expect(prompt).toContain("construtor-de-jogos");
     expect(prompt).toContain("nunca concedem ferramentas");
   });
 
