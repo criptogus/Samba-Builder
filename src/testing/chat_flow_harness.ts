@@ -232,7 +232,19 @@ export interface ChatFlowHarness {
 function git(appDir: string, ...args: string[]): string {
   return execFileSync(
     "git",
-    ["-c", "user.email=test@example.com", "-c", "user.name=Test User", ...args],
+    [
+      "-c",
+      "user.email=test@example.com",
+      "-c",
+      "user.name=Test User",
+      "-c",
+      "commit.gpgsign=false",
+      "-c",
+      "core.autocrlf=false",
+      "-c",
+      "core.fsmonitor=false",
+      ...args,
+    ],
     { cwd: appDir, stdio: "pipe" },
   ).toString();
 }
@@ -360,7 +372,7 @@ export async function setupChatFlowHarness(
     // 5. Real app checkout of the fixture + a real git repo.
     const appDir = path.join(tmpRootPath, "app");
     fs.cpSync(fixtureAppDir, appDir, { recursive: true });
-    git(appDir, "init");
+    git(appDir, "init", "-b", "main");
     git(appDir, "add", "-A");
     git(appDir, "commit", "-m", "init");
 

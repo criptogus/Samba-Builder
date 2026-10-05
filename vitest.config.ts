@@ -48,6 +48,17 @@ export default defineConfig({
       }
       // Allow all other console output (including errors) for debugging
     },
+    // happy-dom rejects Animation.finished on cancel, and motion does not
+    // catch that promise. Vitest 4 fails the run on the resulting AbortError
+    // even when every assertion passed.
+    onUnhandledError(error) {
+      if (
+        error.name === "AbortError" &&
+        error.message === "The animation was canceled."
+      ) {
+        return false;
+      }
+    },
     projects: [
       {
         extends: true,

@@ -125,45 +125,58 @@ function matchesRegisteredRedirect(requested, registeredList) {
   return false;
 }
 
-// --- MCP server (one shared instance; auth gates the /mcp HTTP route) ---
-const mcp = new McpServer({ name: "fake-oauth-mcp", version: "0.1.0" });
-
-mcp.registerTool(
-  "calculator_add",
-  {
-    title: "Calculator Add",
-    description: "Add two numbers and return the sum",
-    inputSchema: { a: z.number(), b: z.number() },
-  },
-  async ({ a, b }) => ({
-    content: [{ type: "text", text: String(a + b) }],
-  }),
-);
-
 // AsyncLocalStorage scopes the authenticated client_id to the current
 // request so concurrent `/mcp` calls can't see each other's identity.
 const requestContext = new AsyncLocalStorage();
 
-mcp.registerTool(
-  "whoami",
-  {
-    title: "Who Am I",
-    description:
-      "Returns the bearer-token client_id this request authenticated as",
-    inputSchema: {},
-  },
-  async (_args, _extra) => {
-    const ctx = requestContext.getStore();
-    return {
-      content: [{ type: "text", text: ctx?.clientId ?? "anonymous" }],
-    };
-  },
-);
+// Stateless Streamable HTTP requires a fresh server and transport per
+// request. Reusing one transport throws and the route answers HTTP 500.
+function createStatelessMcp() {
+  const mcp = new McpServer({ name: "fake-oauth-mcp", version: "0.1.0" });
 
-const transport = new StreamableHTTPServerTransport({
-  sessionIdGenerator: undefined,
-});
-await mcp.connect(transport);
+  mcp.registerTool(
+    "calculator_add",
+    {
+      title: "Calculator Add",
+      description: "Add two numbers and return the sum",
+      inputSchema: { a: z.number(), b: z.number() },
+    },
+    async ({ a, b }) => ({
+      content: [{ type: "text", text: String(a + b) }],
+    }),
+  );
+
+  mcp.registerTool(
+    "whoami",
+    {
+      title: "Who Am I",
+      description:
+        "Returns the bearer-token client_id this request authenticated as",
+      inputSchema: {},
+    },
+    async () => {
+      const ctx = requestContext.getStore();
+      return {
+        content: [{ type: "text", text: ctx?.clientId ?? "anonymous" }],
+      };
+    },
+  );
+
+  return mcp;
+}
+
+async function handleStatelessMcp(req, res) {
+  const mcp = createStatelessMcp();
+  const transport = new StreamableHTTPServerTransport({
+    sessionIdGenerator: undefined,
+  });
+  res.on("close", () => {
+    void transport.close();
+    void mcp.close();
+  });
+  await mcp.connect(transport);
+  await transport.handleRequest(req, res);
+}
 
 const httpServer = createServer(async (req, res) => {
   const url = new URL(req.url ?? "/", BASE);
@@ -197,7 +210,7 @@ const httpServer = createServer(async (req, res) => {
       }
       if (url.pathname === "/mcp") {
         await requestContext.run({ clientId: "anonymous" }, async () => {
-          await transport.handleRequest(req, res);
+          await handleStatelessMcp(req, res);
         });
         return;
       }
@@ -478,7 +491,7 @@ const httpServer = createServer(async (req, res) => {
         return;
       }
       await requestContext.run({ clientId: tokenInfo.client_id }, async () => {
-        await transport.handleRequest(req, res);
+        await handleStatelessMcp(req, res);
       });
       return;
     }

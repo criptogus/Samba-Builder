@@ -588,11 +588,14 @@ export function ChatInput({ chatId }: { chatId?: number }) {
   );
 
   const handleSubmit = async () => {
+    // The acceptance latch blocks a second send of the same draft before the
+    // actor reports a stream. Once a stream is visible, Enter must queue the
+    // new draft instead of waiting for that acknowledgement.
     if (
       !hasComposerPayload ||
       !chatId ||
       pendingFiles ||
-      isAwaitingTurnAcceptanceRef.current
+      (isAwaitingTurnAcceptanceRef.current && !isStreaming)
     ) {
       return;
     }
