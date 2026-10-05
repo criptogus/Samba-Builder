@@ -23,14 +23,14 @@ Não vencer Lovable na vitrine. Vencer como sistema operacional da software hous
 
 Os épicos são o moat, nesta ordem:
 
-| # | Épico | Diferencial que cria |
-| --- | --- | --- |
-| E1 | Tapar bypass de publish | Concorrente vibecode publica qualquer coisa; Samba não consegue furar o gate — confiança para o cliente enterprise |
-| E2 | Handoff one-click | Entrega = PR + scan + checklist; vira produto de entrega, não de chat |
-| E3 | Cronômetro 1-dia + post-mortem | Prova operacional (não slide); alimenta hit-rate ≥ 70% para abrir o Caminho 2 |
-| E4 | Alinhar `PRODUCT.md` + copy | Posicionamento coerente — sem se vender como Lovable |
-| E5 | Assinar builds ou trava de política | Evita ZIP cru na mão do cliente final |
-| E6 | Playbook S3 → app | Liga Assessment/Piloto ZA ao Must/Should — o funil comercial vira input de fábrica |
+| #   | Épico                               | Diferencial que cria                                                                                               |
+| --- | ----------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| E1  | Tapar bypass de publish             | Concorrente vibecode publica qualquer coisa; Samba não consegue furar o gate — confiança para o cliente enterprise |
+| E2  | Handoff one-click                   | Entrega = PR + scan + checklist; vira produto de entrega, não de chat                                              |
+| E3  | Cronômetro 1-dia + post-mortem      | Prova operacional (não slide); alimenta hit-rate ≥ 70% para abrir o Caminho 2                                      |
+| E4  | Alinhar `PRODUCT.md` + copy         | Posicionamento coerente — sem se vender como Lovable                                                               |
+| E5  | Assinar builds ou trava de política | Evita ZIP cru na mão do cliente final                                                                              |
+| E6  | Playbook S3 → app                   | Liga Assessment/Piloto ZA ao Must/Should — o funil comercial vira input de fábrica                                 |
 
 O detalhe executável de cada épico está na §4. Não misturar épicos no mesmo PR.
 
@@ -38,12 +38,12 @@ O detalhe executável de cada épico está na §4. Não misturar épicos no mesm
 
 Samba Builder é a **fábrica interna da Samba** para entregar apps de clientes com gates (briefing → plano → marca → build → secure → handoff).
 
-| É | Não é |
-|---|---|
-| SO operacional da software house Samba | Produto consumer tipo Lovable/Bolt/v0 |
+| É                                          | Não é                                                        |
+| ------------------------------------------ | ------------------------------------------------------------ |
+| SO operacional da software house Samba     | Produto consumer tipo Lovable/Bolt/v0                        |
 | BYOK, local-first, código em GitHub normal | Marketplace / créditos / onboarding first-hour "não técnico" |
-| COGS da Samba + funil ZA (S3→S4→S6) | SKU vendido ao público neste ciclo |
-| Porta futura a white-label B2B (Caminho 2) | Abrir Caminho 2 antes dos critérios da §7 |
+| COGS da Samba + funil ZA (S3→S4→S6)        | SKU vendido ao público neste ciclo                           |
+| Porta futura a white-label B2B (Caminho 2) | Abrir Caminho 2 antes dos critérios da §7                    |
 
 **ICP:** consultor/dev Samba (Mac/Windows).  
 **Não-ICP neste ciclo:** founder solo vibe-coding; cliente final usando o Builder.
@@ -64,14 +64,14 @@ O norte acima é a barra. O ciclo só "passa" se **todos** forem verdadeiros:
 
 As duas que decidem o ciclo são **tempo plan aprovado → staging** e **% de publishes com gate**. Contagem de templates não é métrica deste caminho.
 
-| # | Métrica | Alvo direção |
-|---|---------|--------------|
-| 1 | Tempo plan aprovado → staging URL | ≤ 1 dia no piloto |
-| 2 | % publishes com gate verde | → 100% nas entradas cobertas |
-| 3 | Projetos Factory ativos | Contagem (contexto, não norte) |
-| 4 | Tempo briefing → primeiro preview | ↓ |
-| 5 | Achados security abertos / projeto | ↓ |
-| 6 | Escopo creep (Should/Could → Must sem aceite) | → 0 |
+| #   | Métrica                                       | Alvo direção                   |
+| --- | --------------------------------------------- | ------------------------------ |
+| 1   | Tempo plan aprovado → staging URL             | ≤ 1 dia no piloto              |
+| 2   | % publishes com gate verde                    | → 100% nas entradas cobertas   |
+| 3   | Projetos Factory ativos                       | Contagem (contexto, não norte) |
+| 4   | Tempo briefing → primeiro preview             | ↓                              |
+| 5   | Achados security abertos / projeto            | ↓                              |
+| 6   | Escopo creep (Should/Could → Must sem aceite) | → 0                            |
 
 ## 4. Épicos P0 (implementar nesta ordem)
 
@@ -80,6 +80,7 @@ As duas que decidem o ciclo são **tempo plan aprovado → staging** e **% de pu
 **Problema:** um concorrente no estilo vibecode publica qualquer coisa. O gate Samba existe nas entradas nativas (Git push, Vercel create, Coolify deploy), mas deploys, MCP e comandos externos ainda podem furar. Sem o furo tapado, não há confiança para o cliente enterprise.
 
 **Fazer:**
+
 - Inventário de todos os caminhos de publish/deploy no app (nativos + MCP + scripts).
 - Para cada caminho: aplicar o mesmo gate (Plan aprovado + marca + scan verde + Must fechados) **ou** bloquear com mensagem clara + doc.
 - Testes: tentativa de publish sem plan/scan deve falhar fechado.
@@ -92,6 +93,7 @@ As duas que decidem o ciclo são **tempo plan aprovado → staging** e **% de pu
 **Problema:** export de artefatos existe; falta o pacote "PR + evidências + checklist de aceite" sem babysitting.
 
 **Fazer:**
+
 - Fluxo único na UI Entrega: "Gerar handoff" que (a) garante exports atuais, (b) abre/atualiza PR no repo do app com corpo padronizado, (c) anexa/linka evidências de scan + runbook, (d) checklist de aceite do cliente (markdown).
 - Template de PR em pt-BR (Samba).
 - Não inventar hosting novo; usar GitHub já integrado.
@@ -103,6 +105,7 @@ As duas que decidem o ciclo são **tempo plan aprovado → staging** e **% de pu
 **Problema:** tese não medida.
 
 **Fazer (produto + ops):**
+
 - Playbook em `docs/samba-factory/PLAYBOOK-1-DAY-MVP.md`: passos cronometrados (briefing → plan → tokens → build → scan → deploy).
 - Instrumentação mínima: timestamps por estágio no `samba-factory.json` ou log exportável (não precisa analytics cloud).
 - Rodar **um** projeto real Samba (escolhido pelo time) e gravar post-mortem `docs/samba-factory/postmortems/YYYY-MM-DD-1day.md`.
@@ -114,6 +117,7 @@ As duas que decidem o ciclo são **tempo plan aprovado → staging** e **% de pu
 **Problema:** `PRODUCT.md` ainda descreve builder não-técnico estilo Lovable.
 
 **Fazer:**
+
 - Reescrever `PRODUCT.md`: Users / Purpose / Principles para fábrica Samba (local-first + gates + handoff).
 - Revisar strings visíveis da Fábrica que soem "consumer vibe-coder".
 - Atualizar `docs/samba-factory/README.md` com link para este roadmap e status Caminho 1.
@@ -125,6 +129,7 @@ As duas que decidem o ciclo são **tempo plan aprovado → staging** e **% de pu
 **Problema:** releases beta não assinados (xattr / "Executar assim mesmo").
 
 **Fazer (escolher uma trilha e documentar):**
+
 - **Trilha A:** assinar macOS (+ Windows se viável) no pipeline de release; ou
 - **Trilha B:** README + release notes: "somente consultores Samba; não distribuir a cliente final" até A.
 
@@ -135,6 +140,7 @@ As duas que decidem o ciclo são **tempo plan aprovado → staging** e **% de pu
 **Problema:** funil ZA Assessment→Piloto não tem template Factory.
 
 **Fazer:**
+
 - `docs/samba-factory/PLAYBOOK-S3-TO-APP.md`: como Assessment vira briefing estruturado; como Piloto vira Must/Should/Could com critérios de aceite.
 - Opcional (se barato): template JSON de plano inicial "Assessment follow-up" importável na UI Plano.
 - Sem dados de board/S7.
@@ -166,8 +172,8 @@ PRs pequenos, cada um com critério Done da seção. Não misturar E1 e E2 no me
 
 Só depois de:
 
-- (a) ≥ 3 projetos internos passando pelo gate de ponta a ponta  
-- (b) hit rate do 1-dia MVP ≥ 70% em tentativas cronometradas  
+- (a) ≥ 3 projetos internos passando pelo gate de ponta a ponta
+- (b) hit rate do 1-dia MVP ≥ 70% em tentativas cronometradas
 - (c) handoff sem babysitting (feedback do consultor Samba)
 
 Até lá: repo pode ser público; **posicionamento** = runtime da fábrica Samba, não produto de prateleira.
@@ -180,12 +186,12 @@ Até lá: repo pode ser público; **posicionamento** = runtime da fábrica Samba
 - [PLAYBOOK-S3-TO-APP.md](./PLAYBOOK-S3-TO-APP.md) — Assessment e Piloto
 - [docs/samba-factory/PRD-original.md](./PRD-original.md) — PRD fornecido (contexto; este roadmap manda no ciclo)
 - [PRODUCT.md](../../PRODUCT.md) — ICP da fábrica
-- Releases: trilha B (só consultores Samba) até assinar — ver README raiz  
+- Releases: trilha B (só consultores Samba) até assinar — ver README raiz
 
 ## 9. Notas para o implementador (Cursor)
 
-- Preferir estender `packages/samba-factory` + IPC `src/ipc/services/factory/` em vez de lógica em `src/pro` (licença FSL).  
-- Gates devem falhar fechado; não adicionar waiver "só desta vez".  
-- Conteúdo de cliente no prompt = dados não confiáveis (já é regra — manter).  
-- Testes: unitários factory + e2e `samba_factory.spec.ts` quando tocar UI/gates.  
+- Preferir estender `packages/samba-factory` + IPC `src/ipc/services/factory/` em vez de lógica em `src/pro` (licença FSL).
+- Gates devem falhar fechado; não adicionar waiver "só desta vez".
+- Conteúdo de cliente no prompt = dados não confiáveis (já é regra — manter).
+- Testes: unitários factory + e2e `samba_factory.spec.ts` quando tocar UI/gates.
 - Não publicar páginas de marketing do Builder; não alterar pricing ZA.

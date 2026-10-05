@@ -452,8 +452,6 @@ jobs:
         uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
         with:
           version: 10.33.2
-      - name: Clone nextjs-template
-        run: git clone --depth 1 https://github.com/samba-sh/nextjs-template.git nextjs-template
       - name: Get pnpm store directory
         id: pnpm-cache
         shell: bash
@@ -469,8 +467,6 @@ jobs:
       # Not strictly needed but makes the e2e tests faster (and less flaky)
       - name: Install scaffold dependencies
         run: cd scaffold && pnpm install
-      - name: Install nextjs-template dependencies
-        run: cd nextjs-template && pnpm install
       - name: Download build artifacts
         uses: actions/download-artifact@v7
         with:

@@ -35,19 +35,19 @@ O [Roadmap 90 dias — Caminho 1](./ROADMAP-90D-INTERNAL-FACTORY.md) é o doc ca
 
 ## Fronteiras e trabalho restante
 
-| Requisito do PRD                                      | Estado nesta entrega                                                                                                   |
-| ----------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
-| Pipeline local, planos, marca, skills, scan e handoff | Implementado e conectado ao Electron                                                                                   |
-| Planejamento com IA                                   | Conversa com skill + importação de JSON pelo operador; não há captura automática da resposta                           |
-| Scope Guard                                           | Registro e classificação explícitos; não classifica semanticamente cada prompt de forma automática                     |
-| Canvas e marca                                        | Presets e edição de tokens; Figma/logo ingest, variantes de telas e QA visual automático ainda pendentes               |
-| Security Agent                                        | Prompt de revisão + scan básico; Semgrep, deep scan, validação do banco remoto, LGPD e waiver autenticado pendentes    |
-| RBAC/isolamento de equipe                             | Identidade declarada pelo operador local; sem SSO/RBAC, cofre por cliente, sync ou auditoria inviolável                |
+| Requisito do PRD                                      | Estado nesta entrega                                                                                                                                             |
+| ----------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Pipeline local, planos, marca, skills, scan e handoff | Implementado e conectado ao Electron                                                                                                                             |
+| Planejamento com IA                                   | Conversa com skill + importação de JSON pelo operador; não há captura automática da resposta                                                                     |
+| Scope Guard                                           | Registro e classificação explícitos; não classifica semanticamente cada prompt de forma automática                                                               |
+| Canvas e marca                                        | Presets e edição de tokens; Figma/logo ingest, variantes de telas e QA visual automático ainda pendentes                                                         |
+| Security Agent                                        | Prompt de revisão + scan básico; Semgrep, deep scan, validação do banco remoto, LGPD e waiver autenticado pendentes                                              |
+| RBAC/isolamento de equipe                             | Identidade declarada pelo operador local; sem SSO/RBAC, cofre por cliente, sync ou auditoria inviolável                                                          |
 | Publicação protegida                                  | Gate nas entradas nativas, no agente e em ferramenta MCP de publish. Terminal interativo fica de fora, de propósito. Ver [PUBLISH-GATES.md](./PUBLISH-GATES.md). |
-| Client preview                                        | Integrações de deploy herdadas; magic link, comentários pinados e proteção do staging ainda pendentes                  |
-| Scaffold portal B2B e catálogo de capabilities        | Pendente; o agente utiliza o template/stack existente do aplicativo                                                    |
-| Orquestração e custos                                 | Recursos já existentes do runtime; não há novo roteamento de modelos, orçamento ou paralelismo independente de src/pro |
-| PR e handoff                                          | Documentos exportáveis e Git herdado; criação automática de PR com screenshots/owners ainda pendente                   |
+| Client preview                                        | Integrações de deploy herdadas; magic link, comentários pinados e proteção do staging ainda pendentes                                                            |
+| Scaffold portal B2B e catálogo de capabilities        | Pendente; o agente utiliza o template/stack existente do aplicativo                                                                                              |
+| Orquestração e custos                                 | Recursos já existentes do runtime; não há novo roteamento de modelos, orçamento ou paralelismo independente de src/pro                                           |
+| PR e handoff                                          | Documentos exportáveis e Git herdado; criação automática de PR com screenshots/owners ainda pendente                                                             |
 
 O scan local não comprova que um banco remoto está protegido, que um teste é relevante ou que uma aplicação não tem vulnerabilidades. Em especial, o nome do aprovador é uma declaração local, não autenticação AppSec. O arquivo autoritativo protege contra edição acidental pelo agente no projeto, não contra um operador com acesso ao sistema operacional.
 

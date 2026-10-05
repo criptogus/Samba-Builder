@@ -20,7 +20,10 @@ import { SambaError, SambaErrorKind } from "@/errors/samba_error";
 describe("engineFetch", () => {
   beforeEach(() => {
     vi.useFakeTimers();
+    // Vitest 4: restoreAllMocks não zera o histórico de vi.fn(). Sem o clear,
+    // readSettings acumula as chamadas dos testes anteriores.
     vi.restoreAllMocks();
+    vi.clearAllMocks();
     mocks.readSettings.mockReturnValue({
       providerSettings: { auto: { apiKey: { value: "test-key" } } },
     });

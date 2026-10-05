@@ -56,14 +56,8 @@ jobs:
         with:
           version: 10.33.2
 
-      - name: Clone nextjs-template
-        run: git clone --depth 1 https://github.com/samba-sh/nextjs-template.git nextjs-template
-
       - name: Install scaffold dependencies
         run: cd scaffold && pnpm install
-
-      - name: Install nextjs-template dependencies
-        run: cd nextjs-template && pnpm install
 
       - name: Build fake LLM server
         run: cd testing/fake-llm-server && npm install && npm run build

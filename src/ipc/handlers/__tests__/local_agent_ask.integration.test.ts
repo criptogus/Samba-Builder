@@ -191,6 +191,7 @@ describe("local-agent ask mode (integration)", () => {
       "git_status",
       "grep",
       "list_files",
+      "load_skill",
       "read_chat",
       "read_file",
       "read_guide",
