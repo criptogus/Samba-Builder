@@ -1,3 +1,7 @@
 ## 2024-05-18 - Memoizing hooks and list items to prevent re-renders
 **Learning:** List items that rely on callbacks from custom hooks (e.g., `useOpenApp`, `useSelectChat`) or inline event handlers (e.g., `handleToggleSelect`) can cause full list re-renders when globally tracked IDs change, even if boolean list flags (e.g., `isSelected`) are correctly derived. Returning un-memoized object references from custom hooks silently breaks `React.memo` shallow equality comparisons.
 **Action:** When implementing or optimizing list items, ensure that custom hook return values (especially objects containing callbacks) are wrapped in `useMemo`, and the internal hook functions are wrapped in `useCallback`. Ensure local callback props passed to list items are also wrapped in `useCallback`, and the list items themselves are wrapped in `React.memo` to prevent unnecessary render cycles.
+
+## 2024-05-19 - useSettings invalidates React.memo
+**Learning:** Consuming global state hooks like `useSettings` directly inside a component causes it to re-render whenever *any* part of that global state changes, completely bypassing the `React.memo` shallow prop comparison.
+**Action:** To correctly optimize list items with `React.memo`, decouple them from global state hooks. Extract the required specific values from the global state in the parent component and pass them down as individual primitive props to the list item.
