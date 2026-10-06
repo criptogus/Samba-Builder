@@ -1,5 +1,5 @@
 import { TeamTemplatesRepository } from "@/components/TeamTemplatesRepository";
-import React, { useState } from "react";
+import React, { useState, useCallback, useMemo } from "react";
 import { BackButton } from "@/components/ui/back-button";
 import { useSettings } from "@/hooks/useSettings";
 import { useTemplates } from "@/hooks/useTemplates";
@@ -12,21 +12,40 @@ const TemplatesPage: React.FC = () => {
   const { settings, updateSettings } = useSettings();
   const selectedTemplateId = settings?.selectedTemplateId;
 
-  const handleTemplateSelect = (templateId: string) => {
-    updateSettings({ selectedTemplateId: templateId });
-  };
+  // ⚡ Bolt Optimization: Wrapped in useCallback to prevent child components (TemplateCard) from re-rendering due to inline function references breaking React.memo shallow equality.
+  const handleTemplateSelect = useCallback(
+    (templateId: string) => {
+      updateSettings({ selectedTemplateId: templateId });
+    },
+    [updateSettings],
+  );
 
-  const handleCreateApp = () => {
+  // ⚡ Bolt Optimization: Wrapped in useCallback to prevent child component re-renders.
+  const handleCreateApp = useCallback(() => {
     setIsCreateDialogOpen(true);
-  };
-  // Separate templates into official and community
-  const officialTemplates =
-    templates?.filter((template) => template.isOfficial) || [];
-  const communityTemplates =
-    templates?.filter((template) => !template.isOfficial && !template.isTeam) ||
-    [];
+  }, []);
 
-  const teamTemplates = templates?.filter((template) => template.isTeam) || [];
+  const handleAcceptCommunityCode = useCallback(() => {
+    updateSettings({ acceptedCommunityCode: true });
+  }, [updateSettings]);
+
+  // ⚡ Bolt Optimization: Wrapped filtered template lists in useMemo to avoid filtering on every re-render.
+  const officialTemplates = useMemo(
+    () => templates?.filter((template) => template.isOfficial) || [],
+    [templates],
+  );
+  const communityTemplates = useMemo(
+    () =>
+      templates?.filter(
+        (template) => !template.isOfficial && !template.isTeam,
+      ) || [],
+    [templates],
+  );
+
+  const teamTemplates = useMemo(
+    () => templates?.filter((template) => template.isTeam) || [],
+    [templates],
+  );
 
   return (
     <div className="min-h-screen px-8 py-4">
@@ -52,8 +71,11 @@ const TemplatesPage: React.FC = () => {
                   key={template.id}
                   template={template}
                   isSelected={template.id === selectedTemplateId}
+                  hasAcceptedCommunityCode={!!settings?.acceptedCommunityCode}
+                  hasNeonToken={!!settings?.neon?.accessToken}
                   onSelect={handleTemplateSelect}
                   onCreateApp={handleCreateApp}
+                  onAcceptCommunityCode={handleAcceptCommunityCode}
                 />
               ))}
             </div>
@@ -71,8 +93,11 @@ const TemplatesPage: React.FC = () => {
                   key={template.id}
                   template={template}
                   isSelected={template.id === selectedTemplateId}
+                  hasAcceptedCommunityCode={!!settings?.acceptedCommunityCode}
+                  hasNeonToken={!!settings?.neon?.accessToken}
                   onSelect={handleTemplateSelect}
                   onCreateApp={handleCreateApp}
+                  onAcceptCommunityCode={handleAcceptCommunityCode}
                 />
               ))}
             </div>
@@ -91,8 +116,11 @@ const TemplatesPage: React.FC = () => {
                   key={template.id}
                   template={template}
                   isSelected={template.id === selectedTemplateId}
+                  hasAcceptedCommunityCode={!!settings?.acceptedCommunityCode}
+                  hasNeonToken={!!settings?.neon?.accessToken}
                   onSelect={handleTemplateSelect}
                   onCreateApp={handleCreateApp}
+                  onAcceptCommunityCode={handleAcceptCommunityCode}
                 />
               ))}
             </div>
