@@ -68,6 +68,7 @@ export function SelectedComponentsDisplay() {
               <button
                 onClick={handleClearAll}
                 className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+                aria-label="Clear all selected components"
               />
             }
           >

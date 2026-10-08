@@ -1008,6 +1008,9 @@ export function SupabaseConnector({ appId }: { appId: number }) {
                               onClick={() =>
                                 handleDeleteOrganization(org.organizationSlug)
                               }
+                              aria-label={t(
+                                "integrations.supabase.disconnectOrganization",
+                              )}
                             />
                           }
                         >
