@@ -34,6 +34,7 @@ export const CopyErrorMessage = ({
         render={
           <button
             onClick={handleCopy}
+            aria-label={isCopied ? "Copied!" : "Copy error message"}
             className={`flex items-center gap-1 px-2 py-1 rounded text-xs transition-colors ${
               isCopied
                 ? "bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300"

@@ -51,7 +51,7 @@ export function TokenBar({ chatId }: TokenBarProps) {
     <div className="px-4 pb-2 text-xs" data-testid="token-bar">
       <TooltipProvider>
         <Tooltip>
-          <TooltipTrigger className="w-full">
+          <TooltipTrigger className="w-full" aria-label="Token Usage Breakdown">
             <div className="w-full">
               <div className="flex gap-3 mb-1 text-xs text-muted-foreground">
                 <span>Tokens: {totalTokens.toLocaleString()}</span>
