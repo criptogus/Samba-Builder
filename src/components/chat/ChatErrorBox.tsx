@@ -79,6 +79,7 @@ export function ChatErrorBox({
           <Tooltip>
             <TooltipTrigger
               onClick={onStartNewChat}
+              aria-label="Start new chat"
               className="cursor-pointer inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium shadow-sm focus:outline-none focus:ring-2 bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500"
             >
               <span>Start new chat</span>
