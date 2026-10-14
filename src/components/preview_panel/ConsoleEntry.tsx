@@ -146,6 +146,7 @@ export const ConsoleEntryComponent = (props: ConsoleEntryProps) => {
         <TooltipTrigger
           render={
             <button
+              aria-label={t("home:preview.sendToChat")}
               onClick={handleSendToChat}
               aria-label={t("home:preview.sendToChat")}
               className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-gray-200 dark:hover:bg-gray-700 rounded"
