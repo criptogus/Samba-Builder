@@ -167,6 +167,7 @@ export const DraggableTextInput = ({
           <TooltipTrigger
             render={
               <button
+                aria-label="Remove text input"
                 className="absolute right-2 top-1/2 -translate-y-1/2 p-1 hover:bg-red-100 dark:hover:bg-red-900/30 rounded transition-colors z-10 group"
                 onClick={(e) => {
                   e.preventDefault();
