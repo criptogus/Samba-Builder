@@ -77,7 +77,7 @@ function TooltipHarness() {
         close
       </button>
       <Tooltip open={open}>
-        <TooltipTrigger>trigger</TooltipTrigger>
+        <TooltipTrigger aria-label="trigger">trigger</TooltipTrigger>
         <TooltipContent>tip body</TooltipContent>
       </Tooltip>
     </>

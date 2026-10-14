@@ -232,6 +232,7 @@ function SidebarTrigger({
   return (
     <Tooltip>
       <TooltipTrigger
+        aria-label="Toggle Menu"
         data-sidebar="trigger"
         data-slot="sidebar-trigger"
         className={cn(
