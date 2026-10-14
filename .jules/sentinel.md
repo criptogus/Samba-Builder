@@ -1,4 +1,4 @@
-## 2024-05-16 - XSS vulnerability via dangerouslySetInnerHTML
-**Vulnerability:** Found `dangerouslySetInnerHTML` being used in `src/pro/main/ipc/handlers/local_agent/subagents/review_ruleset.ts` and `scaffold/src/components/ui/chart.tsx` but the project rules prohibit this (see project memory memory memory memory memory memory memory memory memory memory memory).
-**Learning:** `dangerouslySetInnerHTML` is prohibited in `src/` by project rules.
-**Prevention:** Avoid using `dangerouslySetInnerHTML` in the project. Use other methods for rendering HTML.
+## 2024-10-06 - XSS vulnerability via dangerouslySetInnerHTML in React <style>
+**Vulnerability:** Found `dangerouslySetInnerHTML` being used to inject dynamically generated CSS strings into a `<style>` tag in `scaffold/src/components/ui/chart.tsx`. If `config.color` values were ever derived from user-controlled inputs, this could lead to a Server-Side Rendering (SSR) Cross-Site Scripting (XSS) vulnerability.
+**Learning:** `dangerouslySetInnerHTML` is prohibited in `src/` by project rules. React securely escapes HTML characters (like `<`, `>`, `&`, `"`) for strings passed as children during SSR, which effectively mitigates XSS vectors. Since standard CSS hex codes, HSL functions, and theme classes do not contain these HTML special characters, React's string escaping won't mutate valid CSS syntax, making it perfectly safe to pass CSS strings as standard React children.
+**Prevention:** Avoid using `dangerouslySetInnerHTML` for `<style>` tags. Always pass dynamically generated CSS strings directly as children (e.g., `<style>{cssString}</style>`) to leverage React's built-in escaping mechanisms.
