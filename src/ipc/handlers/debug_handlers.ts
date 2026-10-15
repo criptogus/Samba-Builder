@@ -89,13 +89,23 @@ async function getSystemDebugInfo({
   }
 
   try {
-    pnpmVersion = await runShellCommand(
-      platform() === "win32" ? "pnpm.cmd" : "pnpm",
-      [PNPM_PM_ON_FAIL_IGNORE_ARG, "--version"],
-      {
-        env: getPackageManagerCommandEnv(),
-      },
-    );
+    if (platform() === "win32") {
+      pnpmVersion = await runShellCommand(
+        "cmd.exe",
+        ["/d", "/s", "/c", "pnpm", PNPM_PM_ON_FAIL_IGNORE_ARG, "--version"],
+        {
+          env: getPackageManagerCommandEnv(),
+        },
+      );
+    } else {
+      pnpmVersion = await runShellCommand(
+        "pnpm",
+        [PNPM_PM_ON_FAIL_IGNORE_ARG, "--version"],
+        {
+          env: getPackageManagerCommandEnv(),
+        },
+      );
+    }
   } catch (err) {
     console.error("Failed to get pnpm version:", err);
   }
@@ -104,7 +114,7 @@ async function getSystemDebugInfo({
     if (platform() === "win32") {
       nodePath = await runShellCommand("where.exe", ["node"]);
     } else {
-      nodePath = await runShellCommand("which", ["node"]);
+      nodePath = await runShellCommand("/bin/sh", ["-c", "command -v node"]);
     }
   } catch (err) {
     console.error("Failed to get node path:", err);
@@ -345,16 +355,21 @@ export function registerDebugHandlers() {
       const [nodeVersion, pnpmVersion, nodePathResult, memoryDiagnostics] =
         await Promise.all([
           runShellCommand("node", ["--version"]).catch(() => null),
-          runShellCommand(
-            platform() === "win32" ? "pnpm.cmd" : "pnpm",
-            [PNPM_PM_ON_FAIL_IGNORE_ARG, "--version"],
-            {
-              env: getPackageManagerCommandEnv(),
-            },
+          (platform() === "win32"
+            ? runShellCommand(
+                "cmd.exe",
+                ["/d", "/s", "/c", "pnpm", PNPM_PM_ON_FAIL_IGNORE_ARG, "--version"],
+                { env: getPackageManagerCommandEnv() },
+              )
+            : runShellCommand(
+                "pnpm",
+                [PNPM_PM_ON_FAIL_IGNORE_ARG, "--version"],
+                { env: getPackageManagerCommandEnv() },
+              )
           ).catch(() => null),
           (platform() === "win32"
             ? runShellCommand("where.exe", ["node"])
-            : runShellCommand("which", ["node"])
+            : runShellCommand("/bin/sh", ["-c", "command -v node"])
           ).catch(() => null),
           // Best-effort: never throws, but guard anyway — diagnostics must
           // not be able to break the session export.

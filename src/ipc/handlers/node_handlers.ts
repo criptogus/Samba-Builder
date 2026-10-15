@@ -254,7 +254,7 @@ async function getSystemNodePath(
     });
     return output?.split(/\r?\n/u)[0]?.trim() || null;
   }
-  return runShellCommand("which", ["node"], {
+  return runShellCommand("/bin/sh", ["-c", "command -v node"], {
     env,
   });
 }
