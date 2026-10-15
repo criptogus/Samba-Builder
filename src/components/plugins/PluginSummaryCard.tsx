@@ -4,10 +4,12 @@ import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import type { McpServer } from "@/ipc/types";
+import React from "react";
 import { CatalogBadge } from "./CatalogBadge";
 import type { ConnectFeedback } from "./usePluginConnect";
 
-export function PluginSummaryCard({
+// ⚡ Bolt Optimization: Wrapped in React.memo to prevent unnecessary list re-renders
+export const PluginSummaryCard = React.memo(function PluginSummaryCard({
   server: s,
   needsSetup,
   setupLocked,
@@ -131,4 +133,4 @@ export function PluginSummaryCard({
       </CardHeader>
     </Card>
   );
-}
+});
