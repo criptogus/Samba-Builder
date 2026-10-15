@@ -833,6 +833,7 @@ export function ModelPicker() {
           {shouldShowDataSharingDisclosure && (
             <Tooltip>
               <TooltipTrigger
+                aria-label="Data sharing"
                 render={
                   <span
                     className={cn(
