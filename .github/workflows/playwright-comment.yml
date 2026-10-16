@@ -17,7 +17,7 @@ jobs:
     steps:
       - name: Find PR number for this CI run (works for forks)
         id: pr
-        uses: actions/github-script@v8
+        uses: actions/github-script@v9
         with:
           script: |
             const { owner, repo } = context.repo;
@@ -98,7 +98,7 @@ jobs:
 
       - name: Generate Playwright summary comment
         if: ${{ steps.pr.outputs.number != '' }}
-        uses: actions/github-script@v8
+        uses: actions/github-script@v9
         env:
           PR_NUMBER: ${{ steps.pr.outputs.number }}
           PLAYWRIGHT_RUN_ID: ${{ github.event.workflow_run.id }}
