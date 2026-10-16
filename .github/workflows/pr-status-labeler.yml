@@ -72,7 +72,7 @@ jobs:
 
       - name: Checkout repository (default branch for trusted scripts)
         if: steps.pr-info.outputs.should_continue == 'true'
-        uses: actions/checkout@v5
+        uses: actions/checkout@v7
 
       - name: Apply status label
         if: steps.pr-info.outputs.should_continue == 'true'

@@ -37,7 +37,7 @@ jobs:
       CODEX_HOME: tmp/pr-review/codex-home
     steps:
       - name: Checkout trusted workflow repo
-        uses: actions/checkout@v5
+        uses: actions/checkout@v7
         with:
           repository: ${{ github.repository }}
           ref: ${{ github.sha }}
@@ -113,7 +113,7 @@ jobs:
           path: tmp/pr-review
 
       - name: Refresh trusted post-agent helpers
-        uses: actions/checkout@v5
+        uses: actions/checkout@v7
         with:
           repository: ${{ github.repository }}
           ref: ${{ github.sha }}

@@ -18,7 +18,7 @@ jobs:
       TRIAGE_CONTEXT_PATH: tmp/issue-triage-context/context.json
     steps:
       - name: Checkout trusted workflow repo
-        uses: actions/checkout@v5
+        uses: actions/checkout@v7
         with:
           repository: ${{ github.repository }}
           ref: ${{ github.sha }}
@@ -126,7 +126,7 @@ jobs:
           path: tmp/issue-triage
 
       - name: Checkout trusted workflow repo
-        uses: actions/checkout@v5
+        uses: actions/checkout@v7
         with:
           repository: ${{ github.repository }}
           ref: ${{ github.sha }}
