@@ -279,7 +279,7 @@ jobs:
         run: tar -cvf out-macos.tar out/
       - name: Upload build artifacts (macOS)
         if: contains(matrix.os.name, 'macos')
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: build-${{ matrix.os.name }}
           path: |
@@ -289,7 +289,7 @@ jobs:
           retention-days: 1
       - name: Upload build artifacts (Windows)
         if: contains(matrix.os.name, 'windows')
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: build-${{ matrix.os.name }}
           path: |
@@ -409,7 +409,7 @@ jobs:
         # In CI the reporter is "blob" (blob-report/) and traces/screenshots are
         # retained under test-results/ on failure; there is no playwright-report/.
         if: ${{ failure() }}
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: safe-storage-e2e-report
           path: |
@@ -500,7 +500,7 @@ jobs:
           }
           EOF
       - name: Upload shard results
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         if: ${{ !cancelled() }}
         with:
           name: blob-report-${{ matrix.os.name }}-shard-${{ matrix.shard }}
@@ -562,7 +562,7 @@ jobs:
           ls -la
 
       - name: Upload HTML report
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: html-report
           path: playwright-report

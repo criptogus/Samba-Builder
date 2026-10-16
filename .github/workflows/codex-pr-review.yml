@@ -83,7 +83,7 @@ jobs:
         run: bash scripts/codex-commit-review/run-codex.sh
 
       - name: Upload Codex review artifact
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: codex-pr-review
           path: |
