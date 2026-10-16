@@ -31,6 +31,7 @@ export const queryKeys = {
     all: ["extensions"] as const,
     list: ({ appId }: { appId?: number }) =>
       ["extensions", "list", appId ?? null] as const,
+    gameStudio: ["extensions", "game-studio"] as const,
   },
   subagents: {
     all: ["subagents"] as const,

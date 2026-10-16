@@ -61,6 +61,10 @@ import { exitPlanTool } from "./tools/exit_plan";
 import { readGuideTool } from "./tools/read_guide";
 import { loadSkillTool } from "./tools/load_skill";
 import {
+  importGameSkillTool,
+  inspectGameComputerTool,
+} from "./tools/game_studio";
+import {
   repeatedToolCallReminder,
   repeatedToolCallsFor,
   runToolWithTimeout,
@@ -188,6 +192,8 @@ export const TOOL_DEFINITIONS: readonly ToolDefinition[] = [
   reinstallAndRestartAppTool,
   readGuideTool,
   loadSkillTool,
+  importGameSkillTool,
+  inspectGameComputerTool,
   executeSandboxScriptTool,
   searchMcpToolsTool,
   getMcpToolSchemaTool,

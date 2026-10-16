@@ -1,9 +1,22 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { cleanup, render, screen } from "@testing-library/react";
-import { afterEach, expect, it, vi } from "vitest";
+import {
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from "@testing-library/react";
+import { afterEach, beforeEach, expect, it, vi } from "vitest";
 
 const list = vi.hoisted(() => vi.fn());
-vi.mock("@/ipc/types", () => ({ ipc: { extensions: { list } } }));
+const gameStudio = vi.hoisted(() => vi.fn());
+const importMachineSkill = vi.hoisted(() => vi.fn());
+const installGameSkill = vi.hoisted(() => vi.fn());
+vi.mock("@/ipc/types", () => ({
+  ipc: {
+    extensions: { list, gameStudio, importMachineSkill, installGameSkill },
+  },
+}));
 
 import { ProjectExtensions } from "./ProjectExtensions";
 
@@ -18,6 +31,39 @@ function renderComponent() {
     </QueryClientProvider>,
   );
 }
+
+const studioSnapshot = {
+  bundled: [
+    {
+      slug: "construtor-de-jogos",
+      title: "Construtor de jogos",
+      description: "Fatia jogável com um verbo.",
+      installed: true,
+    },
+  ],
+  discovered: [
+    {
+      id: "abc12345abc12345abc12345",
+      slug: "pulo-extra",
+      title: "pulo-extra",
+      description: "Ensina um pulo mais alto.",
+      origin: "Claude",
+      installed: false,
+      importable: true,
+      blockedReason: null,
+    },
+  ],
+  computer: [{ id: "blender", label: "Blender", available: false }],
+};
+
+beforeEach(() => {
+  gameStudio.mockResolvedValue(studioSnapshot);
+  importMachineSkill.mockResolvedValue({
+    slug: "pulo-extra",
+    status: "installed",
+    relativePath: "skills/pulo-extra/SKILL.md",
+  });
+});
 
 afterEach(() => {
   cleanup();
@@ -99,4 +145,21 @@ it("mostra falha de leitura em vez de fingir que não há extensões", async () 
 
   await screen.findByText(/Não foi possível ler as extensões agora/);
   expect(screen.queryByText(/Nenhuma extensão encontrada/)).toBeNull();
+});
+
+it("importa uma skill encontrada no computador sem pedir terminal", async () => {
+  list.mockResolvedValue({ entries: [], warnings: [] });
+
+  renderComponent();
+
+  await screen.findByText("pulo-extra");
+  expect(screen.getByText("Ensina um pulo mais alto.")).toBeTruthy();
+  expect(screen.getByText(/Blender:\s*ausente/)).toBeTruthy();
+  fireEvent.click(screen.getByRole("button", { name: "Importar" }));
+
+  await waitFor(() =>
+    expect(importMachineSkill).toHaveBeenCalledWith({
+      discoveryId: "abc12345abc12345abc12345",
+    }),
+  );
 });

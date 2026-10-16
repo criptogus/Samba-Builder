@@ -7,7 +7,7 @@ Regenerar: `npm run gen:tool-catalog`. Conferir sem escrever (CI): `npm run gen:
 Fonte: `src/pro/main/ipc/handlers/local_agent/tool_definitions.ts` (ordem de exposição) e os
 arquivos em `src/pro/main/ipc/handlers/local_agent/tools/`. Extração estática.
 
-Total: **51 tools**.
+Total: **53 tools**.
 
 | Tool | Consentimento padrão | Descrição dinâmica | Arquivo | Resumo |
 | --- | --- | --- | --- | --- |
@@ -35,6 +35,8 @@ Total: **51 tools**.
 | `git_show_file` | `always` | — | `src/pro/main/ipc/handlers/local_agent/tools/git.ts` | Read a UTF-8 file as it existed at a Git revision in the current app. |
 | `git_status` | `always` | — | `src/pro/main/ipc/handlers/local_agent/tools/git.ts` | Inspect the current app's Git working tree. |
 | `grep` | `always` | — | `src/pro/main/ipc/handlers/local_agent/tools/grep.ts` | Search for a regex pattern or exact literal text in the codebase using ripgrep. |
+| `import_game_skill` | `ask` | — | `src/pro/main/ipc/handlers/local_agent/tools/game_studio.ts` | Copy a skill found on this computer into Samba, or restore a bundled game skill. |
+| `inspect_game_computer` | `always` | — | `src/pro/main/ipc/handlers/local_agent/tools/game_studio.ts` | See which local game programs are installed and which skills were found on this computer but are not imported into Samba yet. |
 | `list_agents` | `always` | — | `src/pro/main/ipc/handlers/local_agent/tools/subagent_tools.ts` | List durable sub-agent threads and their current status for this chat. |
 | `list_files` | `always` | — | `src/pro/main/ipc/handlers/local_agent/tools/list_files.ts` | List files in the application directory. |
 | `load_skill` | `always` | — | `src/pro/main/ipc/handlers/local_agent/tools/load_skill.ts` | Read the full instructions of a skill available in this project or on the user's machine. |

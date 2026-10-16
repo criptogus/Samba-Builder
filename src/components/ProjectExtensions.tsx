@@ -1,10 +1,11 @@
 import { useAtomValue } from "jotai";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { selectedAppIdAtom } from "@/atoms/appAtoms";
 import { ipc } from "@/ipc/types";
 import { queryKeys } from "@/lib/queryKeys";
 import type { ExtensionEntry, ExtensionKind } from "@/shared/extensions";
+import type { DiscoveredMachineSkill } from "@/shared/game_studio";
 
 const KIND_LABELS: Record<ExtensionKind, string> = {
   skill: "Skills",
@@ -40,14 +41,153 @@ function ExtensionCard({ entry }: { entry: ExtensionEntry }) {
   );
 }
 
+function GameStudioPanel() {
+  const queryClient = useQueryClient();
+  const studio = useQuery({
+    queryKey: queryKeys.extensions.gameStudio,
+    queryFn: () => ipc.extensions.gameStudio({}),
+    meta: { showErrorToast: true },
+  });
+  const invalidate = () =>
+    queryClient.invalidateQueries({ queryKey: queryKeys.extensions.all });
+  const importSkill = useMutation({
+    mutationFn: (discoveryId: string) =>
+      ipc.extensions.importMachineSkill({ discoveryId }),
+    onSuccess: invalidate,
+    meta: { showErrorToast: true },
+  });
+  const restoreSkill = useMutation({
+    mutationFn: (slug: string) => ipc.extensions.installGameSkill({ slug }),
+    onSuccess: invalidate,
+    meta: { showErrorToast: true },
+  });
+
+  const snapshot = studio.data;
+  return (
+    <div className="space-y-4 rounded-lg border p-4">
+      <div>
+        <h3 className="text-sm font-medium">Construtor de jogos</h3>
+        <p className="text-sm text-muted-foreground">
+          As skills de jogo já entram no Samba. As que o computador já tem
+          (Claude, Codex, Cursor ou a pasta skills) são importadas aqui, sem
+          terminal.
+        </p>
+      </div>
+      {studio.isLoading && (
+        <p className="text-sm text-muted-foreground">
+          Preparando skills e lendo o computador...
+        </p>
+      )}
+      {studio.isError && (
+        <p className="text-sm">
+          Não foi possível preparar o construtor agora. Clique em Atualizar.
+        </p>
+      )}
+      {snapshot && (
+        <>
+          <ul className="flex flex-wrap gap-2 text-xs">
+            {snapshot.computer.map((program) => (
+              <li
+                key={program.id}
+                className="rounded-full border px-2 py-1 text-muted-foreground"
+              >
+                {program.label}: {program.available ? "disponível" : "ausente"}
+              </li>
+            ))}
+          </ul>
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            {snapshot.bundled.map((skill) => (
+              <article
+                key={skill.slug}
+                className="space-y-2 rounded-lg border p-3"
+              >
+                <h4 className="text-sm font-semibold">{skill.title}</h4>
+                <p className="text-sm">{skill.description}</p>
+                {skill.installed ? (
+                  <p className="text-xs text-muted-foreground">
+                    Pronta para o agente
+                  </p>
+                ) : (
+                  <Button
+                    variant="outline"
+                    onClick={() => restoreSkill.mutate(skill.slug)}
+                    disabled={restoreSkill.isPending}
+                  >
+                    Restaurar
+                  </Button>
+                )}
+              </article>
+            ))}
+          </div>
+          {snapshot.discovered.length === 0 ? (
+            <p className="text-sm text-muted-foreground">
+              Nenhuma skill extra nessas pastas. O agente segue com as skills de
+              jogo que já estão prontas.
+            </p>
+          ) : (
+            <ul className="space-y-2">
+              {snapshot.discovered.map((skill) => (
+                <MachineSkillRow
+                  key={skill.id}
+                  skill={skill}
+                  pending={
+                    importSkill.isPending && importSkill.variables === skill.id
+                  }
+                  onImport={() => importSkill.mutate(skill.id)}
+                />
+              ))}
+            </ul>
+          )}
+        </>
+      )}
+    </div>
+  );
+}
+
+function MachineSkillRow({
+  skill,
+  pending,
+  onImport,
+}: {
+  skill: DiscoveredMachineSkill;
+  pending: boolean;
+  onImport: () => void;
+}) {
+  return (
+    <li className="flex flex-wrap items-start justify-between gap-3 rounded-lg border p-3">
+      <div>
+        <p className="text-sm font-semibold">
+          {skill.slug}{" "}
+          <span className="font-normal text-muted-foreground">
+            · {skill.origin}
+          </span>
+        </p>
+        <p className="text-sm">{skill.description}</p>
+      </div>
+      {skill.installed ? (
+        <p className="text-xs text-muted-foreground">Já no Samba</p>
+      ) : (
+        <Button
+          variant="outline"
+          onClick={onImport}
+          disabled={pending || !skill.importable}
+        >
+          {pending ? "Importando..." : "Importar"}
+        </Button>
+      )}
+    </li>
+  );
+}
+
 /**
  * Lista as extensões declarativas que o Samba descobre no projeto e no
  * computador do usuário (`plans/kilocode-parity-plan.md`, REQ-01).
  */
 export function ProjectExtensions() {
+  const queryClient = useQueryClient();
   const selectedAppId = useAtomValue(selectedAppIdAtom);
   const appId = selectedAppId ?? undefined;
-  const { data, isLoading, isError, isFetching, refetch } = useQuery({
+  const { data, isLoading, isError, isFetching } = useQuery({
     queryKey: queryKeys.extensions.list({ appId }),
     queryFn: () => ipc.extensions.list({ appId }),
     meta: { showErrorToast: true },
@@ -70,12 +210,18 @@ export function ProjectExtensions() {
         </div>
         <Button
           variant="outline"
-          onClick={() => void refetch()}
+          onClick={() =>
+            void queryClient.invalidateQueries({
+              queryKey: queryKeys.extensions.all,
+            })
+          }
           disabled={isFetching}
         >
           {isFetching ? "Atualizando..." : "Atualizar"}
         </Button>
       </div>
+
+      <GameStudioPanel />
 
       {isLoading && (
         <p className="text-sm text-muted-foreground">Procurando extensões...</p>
