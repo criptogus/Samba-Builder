@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, memo } from "react";
 import { Folder, Image } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
@@ -55,7 +55,8 @@ interface SambaAppMediaFolderProps {
   searchQuery?: string;
 }
 
-export function SambaAppMediaFolder({
+// ⚡ Bolt Optimization: Wrapped in React.memo to prevent unnecessary re-renders
+export const SambaAppMediaFolder = memo(function SambaAppMediaFolder({
   appName,
   appId,
   appPath,
@@ -401,4 +402,4 @@ export function SambaAppMediaFolder({
       </div>
     </div>
   );
-}
+});
