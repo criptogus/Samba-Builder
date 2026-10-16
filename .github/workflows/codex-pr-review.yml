@@ -107,7 +107,7 @@ jobs:
       REVIEW_FINDINGS_PATH: tmp/pr-review/codex-findings.json
     steps:
       - name: Download Codex review artifact
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8.0.2
         with:
           name: codex-pr-review
           path: tmp/pr-review

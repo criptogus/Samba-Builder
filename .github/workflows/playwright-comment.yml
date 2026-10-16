@@ -77,7 +77,7 @@ jobs:
 
       - name: Download Playwright HTML report
         if: ${{ steps.pr.outputs.number != '' }}
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8.0.2
         with:
           name: html-report
           path: playwright-report
@@ -87,7 +87,7 @@ jobs:
 
       - name: Download blob reports
         if: ${{ steps.pr.outputs.number != '' }}
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8.0.2
         with:
           path: all-blob-reports
           pattern: blob-report-*
