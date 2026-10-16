@@ -206,7 +206,7 @@ jobs:
 
       - name: Post Claude review comment
         if: ${{ always() && steps.post-token.outcome == 'success' }}
-        uses: actions/github-script@v8
+        uses: actions/github-script@v9
         env:
           REVIEW_PATH: ${{ env.REVIEW_OUTPUT_PATH }}
         with:

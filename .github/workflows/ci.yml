@@ -570,7 +570,7 @@ jobs:
           overwrite: true
 
       - name: Generate Playwright summary
-        uses: actions/github-script@v8
+        uses: actions/github-script@v9
         env:
           PLAYWRIGHT_RUN_ID: ${{ github.run_id }}
         with:
