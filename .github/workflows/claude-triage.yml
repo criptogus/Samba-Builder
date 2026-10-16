@@ -33,7 +33,7 @@ jobs:
         run: rm -f .claude/settings.json .claude/settings.local.json
 
       - name: Setup Node
-        uses: actions/setup-node@v5
+        uses: actions/setup-node@v7
         with:
           node-version: v24.13.1
 
