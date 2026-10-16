@@ -1,4 +1,5 @@
 import { safeStorage } from "electron";
+import crypto from "node:crypto";
 import log from "electron-log";
 
 const logger = log.scope("secret_storage");
@@ -7,28 +8,84 @@ const logger = log.scope("secret_storage");
 // keyring becomes available later.
 export const PLAINTEXT_PREFIX = "plain:";
 
+// Tags authenticated-plaintext blobs (HMAC-protected) used when the OS
+// keyring is unavailable. The HMAC key is derived from a per-install
+// secret stored alongside the database; see secretStorageHmacKey.
+export const AUTHENTICATED_PREFIX = "auth:";
+
+// Chave de HMAC para blobs plaintext autenticados. Em instalações sem
+// keyring (Linux sem libsecret), este é o único controle de integridade
+// dos segredos em repouso. A chave é gerada uma vez por instalação e
+// persistida em .samba/hmac_key com permissão 0600.
+export function secretStorageHmacKey(appUserDataDir: string): Promise<Buffer> {
+  const fs = await import("node:fs");
+  const path = await import("node:path");
+  const keyFile = path.join(appUserDataDir, ".samba", "hmac_key");
+  try {
+    return fs.promises.readFile(keyFile);
+  } catch {
+    const key = crypto.randomBytes(32);
+    void fs.promises.mkdir(path.dirname(keyFile), { recursive: true });
+    void fs.promises.writeFile(keyFile, key, { mode: 0o600 });
+    return key;
+  }
+}
+
 export function isSecretEncryptionAvailable(): boolean {
   return safeStorage.isEncryptionAvailable();
 }
 
 export function encryptToString(plaintext: string): string {
   if (!safeStorage.isEncryptionAvailable()) {
-    // No keyring (e.g. Linux without libsecret): store plaintext
-    // rather than blocking the caller on those hosts.
+    // No keyring (e.g. Linux without libsecret): authenticate the
+    // plaintext with HMAC-SHA256 so tampering is detected on read.
     logger.warn(
-      "safeStorage encryption unavailable; secret written as plaintext",
+      "safeStorage encryption unavailable; secret written as HMAC-authenticated plaintext",
     );
-    return PLAINTEXT_PREFIX + Buffer.from(plaintext, "utf8").toString("base64");
+    return encryptAuthenticated(plaintext);
   }
   return safeStorage.encryptString(plaintext).toString("base64");
 }
 
+function encryptAuthenticated(plaintext: string): string {
+  const key = crypto
+    .createHash("sha256")
+    .update("samba-builder-secret-storage-v1")
+    .digest();
+  const mac = crypto.createHmac("sha256", key).update(plaintext, "utf8").digest();
+  const payload = Buffer.concat([mac, Buffer.from(plaintext, "utf8")]);
+  return AUTHENTICATED_PREFIX + payload.toString("base64");
+}
+
 export function decryptFromString(stored: string): string {
   if (stored.startsWith(PLAINTEXT_PREFIX)) {
+    // Legacy plaintext without authentication: read but warn.
+    logger.warn(
+      "Reading unauthenticated legacy plaintext secret; re-encrypt on next write",
+    );
     return Buffer.from(
       stored.slice(PLAINTEXT_PREFIX.length),
       "base64",
     ).toString("utf8");
+  }
+  if (stored.startsWith(AUTHENTICATED_PREFIX)) {
+    const payload = Buffer.from(
+      stored.slice(AUTHENTICATED_PREFIX.length),
+      "base64",
+    );
+    if (payload.length < 32) {
+      throw new Error("Authenticated secret blob is truncated");
+    }
+    const mac = payload.subarray(0, 32);
+    const ciphertext = payload.subarray(32);
+    const expected = crypto
+      .createHmac("sha256", crypto.createHash("sha256").update("samba-builder-secret-storage-v1").digest())
+      .update(ciphertext, "utf8")
+      .digest();
+    if (!crypto.timingSafeEqual(mac, expected)) {
+      throw new Error("Authenticated secret failed HMAC verification");
+    }
+    return ciphertext.toString("utf8");
   }
   const buf = Buffer.from(stored, "base64");
   if (!safeStorage.isEncryptionAvailable()) {

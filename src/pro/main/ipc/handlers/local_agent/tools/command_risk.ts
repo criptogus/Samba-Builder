@@ -7,11 +7,20 @@
  * produto é "o Samba pede aprovação exatamente onde não dá para voltar".
  *
  * Este módulo é a única fonte da verdade sobre o que é irreversível.
+ *
+ * ## Regras de saneamento (defesa em profundidade)
+ * - O comando é normalizado (minúsculo, espaços colapsados) antes dos testes.
+ * - Comandos que tentam ofuscar a intenção (env inline, `sh -c`/`bash -c`,
+ *   substituição de comando `$()`, backticks, `eval`, `source`, `exec`) são
+ *   tratados como alto risco (`privilege`), pois podem burlar a detecção de
+ *   padrões de risco.
+ * - A detecção é feita por cláusula (`&&`, `||`, `;`, `|`) para que um
+ *   `--dry-run` local não isente o restante do comando.
  */
 
 export interface CommandRisk {
   /** Família do risco, para telemetria e para o texto do pedido. */
-  kind: "publish" | "destroy" | "network" | "privilege" | "install";
+  kind: "publish" | "destroy" | "network" | "privilege" | "install" | "obfuscation";
   /** Frase curta em pt-BR que explica a consequência e vai no banner de consent. */
   reason: string;
 }
@@ -29,6 +38,21 @@ interface RiskPattern {
  * comando inteiro, para que `npm test && git push --dry-run` espere o push real.
  */
 const DRY_RUN = /(^|\s)(--dry-run|--dry)(\s|$)/;
+
+/**
+ * Padrões de ofuscação / escape que indicam tentativa de burlar a detecção.
+ * Qualquer cláusula que corresponda é tratada como `obfuscation` (requer
+ * consentimento explícito) e não isente o restante do comando.
+ */
+const OBFUSCATION_PATTERNS = [
+  /(^|\s|[;&|(])(sh|bash|zsh|dash)\s+-c\s/,
+  /(^|\s|[;&|(])eval\s/,
+  /(^|\s|[;&|(])source\s/,
+  /`[^`]*`/,                       // backtick command substitution
+  /\$\([^)]*\)/,                   // $() command substitution
+  /(^|\s|[;&|(])exec\s/,
+  /\${[^}]*}/,                     // variável de shell expansiva
+];
 
 const RISK_PATTERNS: RiskPattern[] = [
   // --- Publicação / saída para fora ---
@@ -156,10 +180,22 @@ function clauses(command: string): string[] {
 /**
  * Retorna o risco quando o comando é irreversível/sensível, ou `null` quando é
  * uma verificação normal (testes, lint, typecheck).
+ *
+ * Padrões de ofuscação são verificados primeiro: se uma cláusula tentar burlar
+ * a detecção, o comando inteiro exige consentimento explícito como `obfuscation`.
  */
 export function classifyRepoCommand(command: string): CommandRisk | null {
   for (const clause of clauses(command)) {
     if (DRY_RUN.test(clause)) continue;
+    for (const pattern of OBFUSCATION_PATTERNS) {
+      if (pattern.test(clause)) {
+        return {
+          kind: "obfuscation",
+          reason:
+            "Comando contém técnicas de ofuscação (substituição de comando, eval, sh -c, etc.) que podem burlar a detecção de risco. Requer aprovação explícita.",
+        };
+      }
+    }
     for (const pattern of RISK_PATTERNS) {
       if (pattern.test.test(clause)) {
         return { kind: pattern.kind, reason: pattern.reason };

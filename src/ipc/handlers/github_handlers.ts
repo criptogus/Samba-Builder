@@ -87,8 +87,14 @@ export function normalizeGitHubRepoName(repoName: string): string {
 }
 
 // --- GitHub Device Flow Constants ---
-// TODO: Fetch this securely, e.g., from environment variables or a config file
-const GITHUB_CLIENT_ID = process.env.GITHUB_CLIENT_ID || "Ov23liWV2HdC0RBLecWx";
+// O client ID deve ser fornecido via variável de ambiente GITHUB_CLIENT_ID.
+// Não há fallback hardcoded: se ausente, o fluxo de device flow falha fechado.
+const GITHUB_CLIENT_ID = process.env.GITHUB_CLIENT_ID;
+if (!GITHUB_CLIENT_ID) {
+  throw new Error(
+    "GITHUB_CLIENT_ID não configurado. Defina a variável de ambiente antes de iniciar o app.",
+  );
+}
 
 function isGitHubTestBuild() {
   return IS_TEST_BUILD || process.env.E2E_TEST_BUILD === "true";
