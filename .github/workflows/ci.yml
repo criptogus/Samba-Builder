@@ -398,7 +398,7 @@ jobs:
           # Required for @vscode/ripgrep to download binaries without hitting GitHub API rate limits
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Download build artifacts
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8.0.2
         with:
           name: build-macos
       - name: Extract macOS app bundle
@@ -468,7 +468,7 @@ jobs:
       - name: Install scaffold dependencies
         run: cd scaffold && pnpm install
       - name: Download build artifacts
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8.0.2
         with:
           name: build-${{ matrix.os.name }}
       # macOS: Extract tar archive to restore app bundle with preserved metadata
@@ -538,7 +538,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Download blob reports from GitHub Actions Artifacts
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8.0.2
         with:
           path: all-blob-reports
           pattern: blob-report-*

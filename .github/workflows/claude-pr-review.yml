@@ -139,7 +139,7 @@ jobs:
       REVIEW_FINDINGS_PATH: tmp/pr-review/claude-findings.json
     steps:
       - name: Download Claude review artifact
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8.0.2
         with:
           name: claude-pr-review
           path: tmp/pr-review
