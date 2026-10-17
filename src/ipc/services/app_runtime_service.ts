@@ -547,10 +547,15 @@ async function executeAppLocalNode({
   // falha com EBADENGINE antes de qualquer coisa útil rodar.
   env = withProjectNodeEnv(appPath, env);
 
-  const spawnedProcess = spawn(command.command, [], {
+  // 🛡️ Sentinel: Avoid shell: true to prevent command injection, using explicit shell arrays.
+  const isWin = process.platform === "win32";
+  const cmdExecutable = isWin ? (process.env.ComSpec ?? "cmd.exe") : "/bin/sh";
+  const cmdArgs = isWin ? ["/d", "/s", "/c", command.command] : ["-c", command.command];
+
+  const spawnedProcess = spawn(cmdExecutable, cmdArgs, {
     cwd: appPath,
     env,
-    shell: true,
+    shell: false,
     stdio: "pipe",
     detached: false,
   });
