@@ -366,8 +366,8 @@ describe("executeApp", () => {
     });
 
     expect(spawnMock).toHaveBeenCalledWith(
-      "pnpm --config.pm-on-fail=ignore --minimum-release-age=1440 install && pnpm --config.pm-on-fail=ignore run dev --port 32101",
-      [],
+      process.platform === "win32" ? (process.env.ComSpec ?? "cmd.exe") : "/bin/sh",
+      process.platform === "win32" ? ["/d", "/s", "/c", "pnpm --config.pm-on-fail=ignore --minimum-release-age=1440 install && pnpm --config.pm-on-fail=ignore run dev --port 32101"] : ["-c", "pnpm --config.pm-on-fail=ignore --minimum-release-age=1440 install && pnpm --config.pm-on-fail=ignore run dev --port 32101"],
       expect.objectContaining({
         cwd: "/tmp/app",
         env: expect.objectContaining({
@@ -376,7 +376,7 @@ describe("executeApp", () => {
           npm_config_package_manager_strict: "false",
           npm_config_pm_on_fail: "ignore",
         }),
-        shell: true,
+        shell: false,
       }),
     );
     expect(ensurePnpmAllowBuildsConfiguredMock).toHaveBeenCalledWith({
@@ -412,11 +412,11 @@ describe("executeApp", () => {
     });
 
     expect(spawnMock).toHaveBeenCalledWith(
-      "pnpm --config.pm-on-fail=ignore --minimum-release-age=1440 install && (pnpm rebuild core-js @scope/native || echo pnpm rebuild skipped) && pnpm --config.pm-on-fail=ignore run dev --port 32101",
-      [],
+      process.platform === "win32" ? (process.env.ComSpec ?? "cmd.exe") : "/bin/sh",
+      process.platform === "win32" ? ["/d", "/s", "/c", "pnpm --config.pm-on-fail=ignore --minimum-release-age=1440 install && (pnpm rebuild core-js @scope/native || echo pnpm rebuild skipped) && pnpm --config.pm-on-fail=ignore run dev --port 32101"] : ["-c", "pnpm --config.pm-on-fail=ignore --minimum-release-age=1440 install && (pnpm rebuild core-js @scope/native || echo pnpm rebuild skipped) && pnpm --config.pm-on-fail=ignore run dev --port 32101"],
       expect.objectContaining({
         cwd: "/tmp/app",
-        shell: true,
+        shell: false,
       }),
     );
   });
@@ -812,16 +812,16 @@ describe("executeApp", () => {
       });
 
       expect(spawnMock).toHaveBeenCalledWith(
-        "(npm install --legacy-peer-deps && npm run dev -- --port 32101)",
-        [],
-        expect.objectContaining({
+      process.platform === "win32" ? (process.env.ComSpec ?? "cmd.exe") : "/bin/sh",
+      process.platform === "win32" ? ["/d", "/s", "/c", "(npm install --legacy-peer-deps && npm run dev -- --port 32101)"] : ["-c", "(npm install --legacy-peer-deps && npm run dev -- --port 32101)"],
+      expect.objectContaining({
           cwd: "/tmp/app",
           env: expect.objectContaining({
             COREPACK_ENABLE_PROJECT_SPEC: "1",
           }),
-          shell: true,
+          shell: false,
         }),
-      );
+    );
       expect(ensurePnpmAllowBuildsConfiguredMock).not.toHaveBeenCalled();
     });
   });
@@ -841,16 +841,16 @@ describe("executeApp", () => {
       });
 
       expect(spawnMock).toHaveBeenCalledWith(
-        "pnpm install --frozen-lockfile && pnpm run preview -- --port 32101",
-        [],
-        expect.objectContaining({
+      process.platform === "win32" ? (process.env.ComSpec ?? "cmd.exe") : "/bin/sh",
+      process.platform === "win32" ? ["/d", "/s", "/c", "pnpm install --frozen-lockfile && pnpm run preview -- --port 32101"] : ["-c", "pnpm install --frozen-lockfile && pnpm run preview -- --port 32101"],
+      expect.objectContaining({
           cwd: "/tmp/app",
           env: expect.objectContaining({
             COREPACK_ENABLE_PROJECT_SPEC: "1",
           }),
-          shell: true,
+          shell: false,
         }),
-      );
+    );
       expect(getPnpmMinimumReleaseAgeSupportMock).not.toHaveBeenCalled();
       expect(ensurePnpmAllowBuildsConfiguredMock).not.toHaveBeenCalled();
     });
