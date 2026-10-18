@@ -5,6 +5,9 @@ import type { AppCollectionDto } from "@/ipc/types/app_collections";
 
 export type AppCollection = AppCollectionDto;
 
+// ⚡ Bolt Optimization: Use stable reference for empty array to prevent unnecessary re-renders
+const EMPTY_ARRAY: AppCollection[] = [];
+
 export function useAppCollections() {
   const queryClient = useQueryClient();
 
@@ -64,7 +67,7 @@ export function useAppCollections() {
   });
 
   return {
-    collections: listQuery.data ?? [],
+    collections: listQuery.data ?? EMPTY_ARRAY,
     isLoading: listQuery.isLoading,
     error: listQuery.error,
     refetch: listQuery.refetch,
