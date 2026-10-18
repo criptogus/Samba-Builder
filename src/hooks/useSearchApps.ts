@@ -3,6 +3,9 @@ import { AppSearchResult } from "@/lib/schemas";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { queryKeys } from "@/lib/queryKeys";
 
+// ⚡ Bolt Optimization: Use stable reference for empty array to prevent unnecessary re-renders
+const EMPTY_ARRAY: AppSearchResult[] = [];
+
 export function useSearchApps(query: string) {
   const enabled = Boolean(query && query.trim().length > 0);
 
@@ -17,7 +20,7 @@ export function useSearchApps(query: string) {
   });
 
   return {
-    apps: data ?? [],
+    apps: data ?? EMPTY_ARRAY,
     loading: enabled ? isFetching || isLoading : false,
   };
 }
