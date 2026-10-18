@@ -648,6 +648,7 @@ export const ConfigurePanel = () => {
                           onClick={handleSaveEdit}
                           size="sm"
                           variant="outline"
+                          aria-label="Save edited environment variable"
                           disabled={saveEnvVarsMutation.isPending}
                         >
                           <Save size={14} />
@@ -657,6 +658,7 @@ export const ConfigurePanel = () => {
                           onClick={handleCancelEdit}
                           size="sm"
                           variant="outline"
+                          aria-label="Cancel editing environment variable"
                         >
                           <X size={14} />
                         </Button>
@@ -679,6 +681,7 @@ export const ConfigurePanel = () => {
                           size="sm"
                           variant="ghost"
                           className="h-8 w-8 p-0"
+                          aria-label={`Edit environment variable ${envVar.key}`}
                         >
                           <Edit2 size={14} />
                         </Button>
@@ -688,6 +691,7 @@ export const ConfigurePanel = () => {
                           size="sm"
                           variant="ghost"
                           className="h-8 w-8 p-0 text-destructive hover:text-destructive"
+                          aria-label={`Delete environment variable ${envVar.key}`}
                           disabled={saveEnvVarsMutation.isPending}
                         >
                           <Trash2 size={14} />
