@@ -3,6 +3,9 @@ import type { AppFileSearchResult } from "@/ipc/types";
 import { useQuery } from "@tanstack/react-query";
 import { queryKeys } from "@/lib/queryKeys";
 
+// ⚡ Bolt Optimization: Use stable reference for empty array to prevent unnecessary re-renders
+const EMPTY_ARRAY: AppFileSearchResult[] = [];
+
 export function useSearchAppFiles(appId: number | null, query: string) {
   const trimmedQuery = query.trim();
   const enabled = Boolean(appId != null && trimmedQuery.length > 0);
@@ -16,7 +19,7 @@ export function useSearchAppFiles(appId: number | null, query: string) {
   });
 
   return {
-    results: data ?? [],
+    results: data ?? EMPTY_ARRAY,
     loading: enabled ? isFetching || isLoading : false,
     error: enabled ? error : null,
   };
