@@ -241,6 +241,7 @@ export function KeyValueEditor({
                       size="sm"
                       variant="outline"
                       disabled={disabled || isSaving}
+                      aria-label="Save"
                     >
                       <Save size={14} />
                     </Button>
@@ -248,6 +249,7 @@ export function KeyValueEditor({
                       onClick={handleCancelEdit}
                       size="sm"
                       variant="outline"
+                      aria-label="Cancel"
                     >
                       <X size={14} />
                     </Button>
@@ -268,6 +270,7 @@ export function KeyValueEditor({
                       variant="ghost"
                       className="h-8 w-8 p-0"
                       disabled={disabled}
+                      aria-label="Edit"
                     >
                       <Edit2 size={14} />
                     </Button>
@@ -277,6 +280,7 @@ export function KeyValueEditor({
                       variant="ghost"
                       className="h-8 w-8 p-0 text-destructive hover:text-destructive"
                       disabled={disabled || isSaving}
+                      aria-label="Delete"
                     >
                       <Trash2 size={14} />
                     </Button>

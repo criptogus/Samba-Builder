@@ -686,6 +686,7 @@ export function HelpDialog() {
               variant="ghost"
               className="mr-2 p-0 h-8 w-8"
               onClick={handleCancelReview}
+              aria-label="Go back"
             >
               <ChevronLeftIcon className="h-4 w-4" />
             </Button>
