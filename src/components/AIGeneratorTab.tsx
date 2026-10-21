@@ -394,8 +394,16 @@ export function AIGeneratorTab({
         <div className="space-y-2">
           <Label>Reference Images</Label>
           <div
+            role="button"
+            tabIndex={0}
             className={`border-2 border-dashed border-muted-foreground/25 rounded-lg p-4 text-center cursor-pointer hover:border-muted-foreground/50 transition-colors ${isUploading ? "opacity-50 pointer-events-none" : ""}`}
             onClick={() => fileInputRef.current?.click()}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                fileInputRef.current?.click();
+              }
+            }}
           >
             <input
               ref={fileInputRef}
@@ -439,6 +447,7 @@ export function AIGeneratorTab({
                   />
                   <button
                     onClick={() => handleRemoveImage(index)}
+                    aria-label={`Remove image ${index + 1}`}
                     className="absolute -top-2 -right-2 bg-destructive text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
                   >
                     <X className="h-3 w-3" />
