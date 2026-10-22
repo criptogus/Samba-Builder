@@ -3,6 +3,9 @@ import { ipc, type Version } from "@/ipc/types";
 import { queryKeys } from "@/lib/queryKeys";
 import { SambaError, SambaErrorKind } from "@/errors/samba_error";
 
+// ⚡ Bolt Optimization: Use stable reference for empty array to prevent unnecessary re-renders
+const EMPTY_VERSIONS: Version[] = [];
+
 export function useVersions(appId: number | null) {
   const queryClient = useQueryClient();
 
@@ -28,9 +31,9 @@ export function useVersions(appId: number | null) {
   } = useQuery<Version[], Error>({
     queryKey: queryKeys.versions.list({ appId }),
     queryFn: async () =>
-      appId === null ? [] : ipc.version.listVersions({ appId }),
+      appId === null ? EMPTY_VERSIONS : ipc.version.listVersions({ appId }),
     enabled: appId !== null,
-    placeholderData: [],
+    placeholderData: EMPTY_VERSIONS,
     meta: { showErrorToast: true },
   });
 
@@ -87,7 +90,7 @@ export function useVersions(appId: number | null) {
   });
 
   return {
-    versions: versions || [],
+    versions: versions || EMPTY_VERSIONS,
     loading,
     error,
     refreshVersions,
