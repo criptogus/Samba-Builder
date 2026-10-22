@@ -52,6 +52,7 @@ export function TodoList({ todos }: TodoListProps) {
     <div className="border-b border-border bg-muted/30">
       <button
         type="button"
+        aria-expanded={isExpanded}
         onClick={() => setIsExpanded(!isExpanded)}
         className="w-full flex items-center justify-between px-3 py-2 hover:bg-muted/50 transition-colors"
       >
