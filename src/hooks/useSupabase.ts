@@ -27,6 +27,9 @@ import { useAppRunRemoteManager } from "@/app_run/AppRunRemoteProvider";
 
 const EDGE_LOGS_POLL_INTERVAL_MS = 5_000;
 
+// ⚡ Bolt Optimization: Use stable reference for empty array to prevent unnecessary re-renders
+const EMPTY_ARRAY = Object.freeze([]) as never[];
+
 /**
  * Did a create fail *after* the project was created? Matched on the code the
  * handler sets, which survives IPC. Not on the kind: `Internal` is the
@@ -308,9 +311,9 @@ export function useSupabase(options: UseSupabaseOptions = {}) {
 
   return {
     // Data
-    organizations: organizationsQuery.data ?? [],
-    projects: projectsQuery.data ?? [],
-    branches: branchesQuery.data ?? [],
+    organizations: organizationsQuery.data ?? EMPTY_ARRAY,
+    projects: projectsQuery.data ?? EMPTY_ARRAY,
+    branches: branchesQuery.data ?? EMPTY_ARRAY,
 
     // Organizations query state
     isLoadingOrganizations: organizationsQuery.isLoading,
