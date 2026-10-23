@@ -395,6 +395,7 @@ export function AIGeneratorTab({
           <Label>Reference Images</Label>
           <div
             role="button"
+            aria-label="Upload reference images"
             tabIndex={0}
             className={`border-2 border-dashed border-muted-foreground/25 rounded-lg p-4 text-center cursor-pointer hover:border-muted-foreground/50 transition-colors ${isUploading ? "opacity-50 pointer-events-none" : ""}`}
             onClick={() => fileInputRef.current?.click()}
