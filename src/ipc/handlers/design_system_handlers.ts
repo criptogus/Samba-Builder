@@ -2,6 +2,7 @@ import log from "electron-log";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import crypto from "node:crypto";
 import { db } from "../../db";
 import { apps } from "../../db/schema";
 import { eq } from "drizzle-orm";
@@ -46,7 +47,7 @@ export function registerDesignSystemHandlers() {
       // template under the requested name.
       const tmpJson = path.join(
         os.tmpdir(),
-        `samba-design-system-${Date.now()}-${Math.random().toString(36).slice(2)}.json`,
+        `samba-design-system-${Date.now()}-${crypto.randomUUID()}.json`,
       );
       try {
         await runDesignToolkit(scriptPath, [
