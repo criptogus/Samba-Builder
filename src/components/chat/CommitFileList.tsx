@@ -52,6 +52,7 @@ export function CommitFileList({
                   onClick={() => onSelectFile(file.path)}
                   disabled={disabled}
                   data-testid="commit-file-item"
+                  aria-label={`View changes in ${file.path}`}
                   className="flex w-full items-center gap-2 text-sm py-1 px-2 rounded text-left cursor-pointer hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-default disabled:hover:bg-transparent"
                 />
               }
