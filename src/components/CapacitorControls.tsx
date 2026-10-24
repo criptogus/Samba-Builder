@@ -220,6 +220,7 @@ export function CapacitorControls({ appId }: CapacitorControlsProps) {
                 }}
                 variant="ghost"
                 size="sm"
+                aria-label="Copy error details to clipboard"
                 className="absolute top-2 right-2 h-8 w-8 p-0"
               >
                 <Copy className="h-4 w-4" />
