@@ -70,10 +70,7 @@ const SCREEN_ORDER: DialogScreen[] = ["main", "review", "upload-complete"];
  * client-side purely as a human-readable handle for the report the user files.
  */
 function createLocalSessionId(): string {
-  const raw =
-    typeof globalThis.crypto?.randomUUID === "function"
-      ? globalThis.crypto.randomUUID()
-      : `${Date.now().toString(36)}${Math.random().toString(36).slice(2)}`;
+  const raw = globalThis.crypto.randomUUID();
   return `local:${raw.replace(/-/g, "").slice(0, 12)}`;
 }
 
