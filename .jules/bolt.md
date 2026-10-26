@@ -5,3 +5,7 @@
 ## 2024-05-19 - Mutating shared constants used for memoization
 **Learning:** When replacing inline empty array fallbacks (e.g., `data ?? []`) with a stable constant (like `EMPTY_ARRAY`) to prevent unnecessary React re-renders, ensure the array is not subsequently mutated (e.g., using `.push()`) in the hook's logic. Mutating a shared constant array will cause dangerous side effects globally.
 **Action:** When extracting fallbacks to `EMPTY_ARRAY`, explicitly declare it as `const EMPTY_ARRAY = Object.freeze([]) as never[];` to guarantee immutability and catch accidental mutations during development.
+
+## 2024-05-24 - Centralizing immutable shared array constants
+**Learning:** Defining local `const EMPTY_ARRAY` within individual hooks leads to duplicate references across the application. Creating a centralized, globally accessible constant (`src/lib/constants.ts`) standardizes the optimization and reduces bundle size by providing a single shared immutable reference across all consumers.
+**Action:** Always import `EMPTY_ARRAY` from a global `constants.ts` file instead of defining it locally per hook, reducing duplication and standardizing the referential equality pattern globally.
