@@ -72,7 +72,7 @@ jobs:
         run: node scripts/issue-agent/render-template.mjs
 
       - name: PR Review
-        uses: anthropics/claude-code-action@374f254f5efaf968abfe15d399fd90972e8138b9 # v1.0.182
+        uses: anthropics/claude-code-action@16f9f71ab9c490faf367f94dd294897edc25be33 # v1.0.182
         env:
           # Default is 32,000 which Claude willl sometimes hit.
           # https://code.claude.com/docs/en/settings
