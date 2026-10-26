@@ -20,7 +20,8 @@ import { convertFileAttachmentsToChatAttachments } from "@/lib/chatAttachmentCon
 import { chatAttachmentToFileAttachment } from "@/lib/attachment_conversion";
 
 export function getRandomNumberId() {
-  return Math.floor(Math.random() * 1_000_000_000_000_000);
+  // Parse the first 13 hex characters of a UUID to stay safely within Number.MAX_SAFE_INTEGER
+  return parseInt(globalThis.crypto.randomUUID().replace(/-/g, "").slice(0, 13), 16);
 }
 
 /**
