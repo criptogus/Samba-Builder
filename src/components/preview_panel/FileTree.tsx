@@ -614,6 +614,14 @@ const SearchResultItem = ({
       <div
         className="group flex items-center rounded px-1.5 py-1 text-sm hover:bg-(--sidebar) cursor-pointer"
         onClick={handleFileClick}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            handleFileClick();
+          }
+        }}
+        role="button"
+        tabIndex={0}
         data-testid="file-tree-file"
         data-path={path}
         data-marker={marker ?? undefined}
@@ -666,6 +674,15 @@ const SearchResultItem = ({
               e.stopPropagation();
               handleSnippetClick(snippet.line);
             }}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                e.stopPropagation();
+                handleSnippetClick(snippet.line);
+              }
+            }}
+            role="button"
+            tabIndex={0}
           >
             <div className="font-mono text-[11px] leading-tight text-foreground truncate">
               <span className="text-muted-foreground">{snippet.before}</span>
@@ -772,6 +789,18 @@ const TreeNode = ({
                 line: snippet.line,
               });
             }}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                e.stopPropagation();
+                setSelectedFile({
+                  path: node.path,
+                  line: snippet.line,
+                });
+              }
+            }}
+            role="button"
+            tabIndex={0}
           >
             <div className="font-mono text-[11px] leading-tight text-foreground truncate">
               <span className="text-muted-foreground">{snippet.before}</span>
