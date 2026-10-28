@@ -31,7 +31,7 @@ export async function submitVercelDeployment(
         },
       },
     );
-    if (!result.url || !result.id)
+    if (!("url" in result) || !result.url || !result.id)
       throw new Error("Invalid deployment response");
     const url = new URL(`https://${result.url}`);
     if (

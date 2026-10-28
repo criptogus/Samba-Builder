@@ -466,7 +466,9 @@ export function ChatList({
       <ChatSearchDialog
         open={isSearchDialogOpen}
         onOpenChange={setIsSearchDialogOpen}
-        onSelectChat={handleChatClick}
+        onSelectChat={({ chatId, appId }) =>
+          handleChatClickMemoized(chatId, appId)
+        }
         appId={selectedAppId}
         allChats={chats}
       />

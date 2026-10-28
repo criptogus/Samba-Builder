@@ -108,7 +108,10 @@ export function AgentConsentBanner({
           {toolDescription && (
             <TooltipProvider>
               <Tooltip>
-                <TooltipTrigger className="cursor-help" aria-label="Tool information">
+                <TooltipTrigger
+                  className="cursor-help"
+                  aria-label="Tool information"
+                >
                   <Info className="w-3.5 h-3.5 text-muted-foreground" />
                 </TooltipTrigger>
                 <TooltipContent side="top" className="max-w-xs">

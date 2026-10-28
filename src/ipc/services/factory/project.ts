@@ -10,7 +10,7 @@ export function applyFactoryAction(
   now: string,
 ): FactoryProject {
   const next = structuredClone(project);
-  next.stages = { ...(next.stages ?? {}) };
+  next.stages = { ...next.stages };
   next.revision++;
   const actor = "actor" in action ? action.actor : "Operador local";
   const approval = { actor, at: now, revision: next.revision };

@@ -423,9 +423,10 @@ function createErrorDedupeSourceId(): string {
   } catch {
     // Fallback if crypto is unavailable or fails. The main try block might fail
     // due to hashTelemetryFingerprint throwing, not crypto, so we re-try crypto.
-    const fallbackId = typeof globalThis.crypto?.randomUUID === "function"
-      ? globalThis.crypto.randomUUID()
-      : `${Date.now()}|${Math.random()}`;
+    const fallbackId =
+      typeof globalThis.crypto?.randomUUID === "function"
+        ? globalThis.crypto.randomUUID()
+        : `${Date.now()}|${Math.random()}`;
     return hashTelemetryFingerprint(fallbackId);
   }
 }

@@ -256,7 +256,7 @@ describe("OAuth integration: DCR mode against fake server", () => {
 
     const result = await runOAuthFlow({ serverId, callbackPort });
 
-    expect(result.success).toBe(true);
+    expect(result.success, result.error ?? undefined).toBe(true);
     expect(result.error).toBeNull();
     // oauthStateHasTokens flipping to true is what drives the
     // "OAuth: connected" UI badge -- the bug we fixed earlier.
@@ -353,7 +353,7 @@ describe("OAuth integration: static client_id mode against fake server", () => {
         serverId,
         callbackPort: await getAvailableCallbackPort(),
       });
-      expect(result.success).toBe(true);
+      expect(result.success, result.error ?? undefined).toBe(true);
       expect(rowIsConnected(serverId)).toBe(true);
       // Pre-registered path must skip DCR entirely. If the SDK
       // attempted /register against the fake's DCR-disabled server,
@@ -459,7 +459,7 @@ describe("OAuth integration: confidential client (client_secret) against fake se
     // rejects with `invalid_client` unless client_secret matches
     // exactly, so tokens landing means our wiring passed the secret
     // through correctly end-to-end.
-    expect(result.success).toBe(true);
+    expect(result.success, result.error ?? undefined).toBe(true);
     expect(result.error).toBeNull();
     expect(rowIsConnected(serverId)).toBe(true);
   });
@@ -510,7 +510,7 @@ describe("OAuth integration: scope passthrough against fake server", () => {
     // Success here is load-bearing: the fake's /authorize 400s when
     // the required scope is missing, so reaching tokens means we
     // actually sent `scope=read` in the URL.
-    expect(result.success).toBe(true);
+    expect(result.success, result.error ?? undefined).toBe(true);
     expect(rowIsConnected(serverId)).toBe(true);
     const authorizeCall = vi.mocked(shell.openExternal).mock.calls[0]?.[0];
     expect(authorizeCall).toContain(`scope=${REQUIRED_SCOPE}`);

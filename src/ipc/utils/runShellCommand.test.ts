@@ -4,8 +4,10 @@ import * as child_process from "child_process";
 import { EventEmitter } from "events";
 
 vi.mock("child_process", () => {
+  const spawn = vi.fn();
   return {
-    spawn: vi.fn(),
+    spawn,
+    default: { spawn },
   };
 });
 

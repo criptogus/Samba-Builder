@@ -8,7 +8,7 @@ on:
 
 permissions:
   contents: read
-  id-token: write   # necessário para SLSA provenance (OIDC)
+  id-token: write # necessário para SLSA provenance (OIDC)
   attestations: write
 
 concurrency:

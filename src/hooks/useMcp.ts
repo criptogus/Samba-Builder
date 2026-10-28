@@ -34,7 +34,8 @@ export function useMcp() {
   });
 
   const serverIds = useMemo(
-    () => (serversQuery.data || EMPTY_ARRAY).map((s) => s.id).sort((a, b) => a - b),
+    () =>
+      (serversQuery.data || EMPTY_ARRAY).map((s) => s.id).sort((a, b) => a - b),
     [serversQuery.data],
   );
 

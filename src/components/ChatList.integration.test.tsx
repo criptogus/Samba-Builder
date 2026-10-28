@@ -45,6 +45,15 @@ describe("ChatList favorites (integration)", () => {
 
     const listContainer = await screen.findByTestId("chat-list-container");
     expect(listContainer.className).toContain("overflow-x-hidden");
+    fireEvent.click(screen.getByTestId("search-chats-button"));
+    const searchDialog = await screen.findByRole("dialog");
+    fireEvent.click(
+      within(searchDialog).getByRole("option", { name: "Selected chat" }),
+    );
+    await waitFor(() => {
+      expect(screen.queryByRole("dialog")).toBeNull();
+      expect(Number(harness.currentLocation().search.id)).toBe(harness.chatId);
+    });
     listContainer.scrollTop = 120;
     const olderFavoriteButton = await screen.findByRole("button", {
       name: "Add Older chat to favorites",

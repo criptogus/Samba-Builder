@@ -52,6 +52,7 @@ export async function launchElectronApp({
   process.env.SAMBA_DEFAULT_APPROVE_BUILDS_URL = `http://localhost:${fakeLlmPort}/api/default-approve-builds.txt`;
   process.env.SAMBA_TEST_PNPM_VERSION ??= "11.1.2";
   process.env.E2E_TEST_BUILD = "true";
+  process.env.GITHUB_CLIENT_ID ??= "samba-test-client";
   if (showSetupScreen) delete process.env.OPENAI_API_KEY;
   else process.env.OPENAI_API_KEY = "sk-test";
 
@@ -159,6 +160,9 @@ export const test = base.extend<{
   po: [
     async ({ electronApp, electronConfig }, use, testInfo) => {
       const page = await electronApp.firstWindow();
+      await page.waitForFunction(() =>
+        Boolean((window as any).electron?.ipcRenderer),
+      );
 
       const po = new PageObject(electronApp, page, {
         userDataDir: (electronApp as any).$sambaUserDataDir,
@@ -172,6 +176,7 @@ export const test = base.extend<{
             {
               enablePnpmMinimumReleaseAgeWarning: true,
               hidePnpmMinimumReleaseAgeWarning: false,
+              language: "en",
             },
           );
         });
@@ -182,6 +187,7 @@ export const test = base.extend<{
             {
               enablePnpmMinimumReleaseAgeWarning: false,
               hidePnpmMinimumReleaseAgeWarning: true,
+              language: "en",
             },
           );
         });

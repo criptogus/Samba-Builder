@@ -50,7 +50,7 @@ describe("Plugins page (integration)", () => {
     });
     fireEvent.change(
       within(dialog).getByPlaceholderText("path/to/mcp-server.js --flag"),
-      { target: { value: harness.mcp.fakeStdioServerPath } },
+      { target: { value: JSON.stringify([harness.mcp.fakeStdioServerPath]) } },
     );
     fireEvent.click(within(dialog).getByRole("button", { name: "Add Plugin" }));
 

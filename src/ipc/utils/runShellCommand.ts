@@ -28,7 +28,10 @@ export function runShellCommand(
     });
 
     process.on("error", (error) => {
-      logger.error(`Error executing command "${commandString}":`, error.message);
+      logger.error(
+        `Error executing command "${commandString}":`,
+        error.message,
+      );
       resolve(null); // Command execution failed
     });
 

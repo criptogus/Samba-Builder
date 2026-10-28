@@ -379,7 +379,7 @@ async function deleteBranchBestEffort(
   try {
     const neonClient = await getNeonClient();
     await retryOnLocked(
-      () => neonClient.deleteProjectBranch(projectId, branchId),
+      () => neonClient.deleteProjectBranch({ projectId, branchId }),
       `Delete test branch ${branchId}`,
     );
     logger.info(`Deleted test branch ${branchId} for project ${projectId}`);

@@ -38,6 +38,7 @@ export default defineConfig({
   plugins: [react()],
   test: {
     globals: true,
+    env: { GITHUB_CLIENT_ID: "samba-test-client" },
     maxWorkers: maxTestWorkers,
     onConsoleLog(log, _type) {
       // Suppress known noisy logs while allowing useful debugging output

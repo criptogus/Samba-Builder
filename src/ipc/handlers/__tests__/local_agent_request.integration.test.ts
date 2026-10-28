@@ -105,6 +105,8 @@ describe("local-agent default request (integration)", () => {
       "git_show_file",
       "git_status",
       "grep",
+      "import_game_skill",
+      "inspect_game_computer",
       "list_files",
       "load_skill",
       "planning_questionnaire",

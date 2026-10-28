@@ -29,6 +29,7 @@ vi.mock("electron-log", () => ({
 import { setDatabaseForTesting } from "@/db";
 import { mcpServers } from "@/db/schema";
 import { createInMemoryTestDb, type TestDb } from "@/testing/test_db";
+import { decryptSecretMap } from "./secret_storage";
 import { encryptStoredMcpSecrets } from "./mcp_secret_encryption";
 
 let db: TestDb;
@@ -160,7 +161,7 @@ describe("encryptStoredMcpSecrets", () => {
     );
   });
 
-  it("upgrades a plain: blob once a keyring is available", async () => {
+  it("upgrades an authenticated fallback blob once a keyring is available", async () => {
     isEncryptionAvailable.mockReturnValue(false);
     await db.insert(mcpServers).values({
       id: 1,
@@ -176,14 +177,14 @@ describe("encryptStoredMcpSecrets", () => {
       .update(mcpServers)
       .set({ headersJson: null })
       .where(eq(mcpServers.id, 1));
-    expect((await readRow(1)).headersEncrypted).toMatch(/^plain:/);
+    expect((await readRow(1)).headersEncrypted).toMatch(/^auth:/);
 
     isEncryptionAvailable.mockReturnValue(true);
     expect(await encryptStoredMcpSecrets()).toBe(1);
     expect(decode((await readRow(1)).headersEncrypted)).toBe(`enc:{"A":"1"}`);
   });
 
-  it("upgrades a plain: blob even when the plaintext column still matches", async () => {
+  it("upgrades an authenticated fallback blob even when the plaintext column still matches", async () => {
     isEncryptionAvailable.mockReturnValue(false);
     await db.insert(mcpServers).values({
       id: 1,
@@ -193,7 +194,7 @@ describe("encryptStoredMcpSecrets", () => {
       headersJson: { A: "1" },
     });
     await encryptStoredMcpSecrets();
-    expect((await readRow(1)).headersEncrypted).toMatch(/^plain:/);
+    expect((await readRow(1)).headersEncrypted).toMatch(/^auth:/);
 
     isEncryptionAvailable.mockReturnValue(true);
     expect(await encryptStoredMcpSecrets()).toBe(1);
@@ -216,10 +217,8 @@ describe("encryptStoredMcpSecrets", () => {
 
     expect(await encryptStoredMcpSecrets()).toBe(1);
     const stored = (await readRow(1)).headersEncrypted!;
-    expect(stored.startsWith("plain:")).toBe(true);
-    expect(
-      Buffer.from(stored.slice("plain:".length), "base64").toString("utf8"),
-    ).toBe(`{"A":"rotated"}`);
+    expect(stored.startsWith("auth:")).toBe(true);
+    expect(decryptSecretMap(stored)).toEqual({ A: "rotated" });
     expect(await encryptStoredMcpSecrets()).toBe(0);
   });
 
@@ -309,7 +308,7 @@ describe("encryptStoredMcpSecrets", () => {
     });
 
     expect(await encryptStoredMcpSecrets()).toBe(1);
-    expect((await readRow(1)).headersEncrypted).toMatch(/^plain:/);
+    expect((await readRow(1)).headersEncrypted).toMatch(/^auth:/);
   });
 
   it("returns 0 instead of throwing when the query fails", async () => {

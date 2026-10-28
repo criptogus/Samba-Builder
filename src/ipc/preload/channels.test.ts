@@ -1,3 +1,4 @@
+import { extensionContracts } from "../types/extensions";
 import { deliveryContracts } from "../types/delivery";
 import { nativeAgentContracts } from "../types/native_agents";
 import { meetingsContracts } from "../types/meetings";
@@ -99,6 +100,11 @@ it("exposes the project template workflow channels", () => {
 
 it("allows native agent lifecycle contracts", () => {
   for (const contract of Object.values(nativeAgentContracts))
+    expect(VALID_INVOKE_CHANNELS).toContain(contract.channel);
+});
+
+it("allows extension and game studio contracts through preload", () => {
+  for (const contract of Object.values(extensionContracts))
     expect(VALID_INVOKE_CHANNELS).toContain(contract.channel);
 });
 

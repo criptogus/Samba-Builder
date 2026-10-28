@@ -358,7 +358,14 @@ export function registerDebugHandlers() {
           (platform() === "win32"
             ? runShellCommand(
                 "cmd.exe",
-                ["/d", "/s", "/c", "pnpm", PNPM_PM_ON_FAIL_IGNORE_ARG, "--version"],
+                [
+                  "/d",
+                  "/s",
+                  "/c",
+                  "pnpm",
+                  PNPM_PM_ON_FAIL_IGNORE_ARG,
+                  "--version",
+                ],
                 { env: getPackageManagerCommandEnv() },
               )
             : runShellCommand(

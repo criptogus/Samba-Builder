@@ -11,7 +11,6 @@ import log from "electron-log";
 import { createVercelClient, VERCEL_API_BASE } from "../utils/vercel_utils";
 import * as fs from "fs";
 import * as path from "path";
-import { CreateProjectFramework } from "@vercel/sdk/models/createprojectop.js";
 import { getSambaAppPath } from "@/paths/paths";
 import { slugifyAppPath } from "@/shared/slugify";
 import { createTypedHandler } from "./base";
@@ -37,6 +36,13 @@ import { SambaError, SambaErrorKind } from "@/errors/samba_error";
 import { assertFactoryRelease } from "../services/factory/guards";
 
 const logger = log.scope("vercel_handlers");
+type CreateProjectFramework = NonNullable<
+  NonNullable<
+    Parameters<
+      ReturnType<typeof createVercelClient>["projects"]["createProject"]
+    >[0]["requestBody"]
+  >["framework"]
+>;
 
 // --- Helper Functions ---
 
@@ -422,7 +428,7 @@ async function handleCreateProject(
         },
       });
 
-      if (deploymentData.url) {
+      if ("url" in deploymentData && deploymentData.url) {
         logger.info(`First deployment successful: ${deploymentData.url}`);
       } else {
         logger.warn("First deployment failed: No deployment URL returned");

@@ -1273,9 +1273,7 @@ function SuggestionButton({
             variant="outline"
             size="sm"
             aria-label={
-              Array.isArray(tooltipText)
-                ? tooltipText.join(" ")
-                : tooltipText
+              Array.isArray(tooltipText) ? tooltipText.join(" ") : tooltipText
             }
             onClick={onClick}
           />

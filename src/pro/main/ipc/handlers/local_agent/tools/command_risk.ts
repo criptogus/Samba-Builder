@@ -20,7 +20,13 @@
 
 export interface CommandRisk {
   /** Família do risco, para telemetria e para o texto do pedido. */
-  kind: "publish" | "destroy" | "network" | "privilege" | "install" | "obfuscation";
+  kind:
+    | "publish"
+    | "destroy"
+    | "network"
+    | "privilege"
+    | "install"
+    | "obfuscation";
   /** Frase curta em pt-BR que explica a consequência e vai no banner de consent. */
   reason: string;
 }
@@ -48,10 +54,10 @@ const OBFUSCATION_PATTERNS = [
   /(^|\s|[;&|(])(sh|bash|zsh|dash)\s+-c\s/,
   /(^|\s|[;&|(])eval\s/,
   /(^|\s|[;&|(])source\s/,
-  /`[^`]*`/,                       // backtick command substitution
-  /\$\([^)]*\)/,                   // $() command substitution
+  /`[^`]*`/, // backtick command substitution
+  /\$\([^)]*\)/, // $() command substitution
   /(^|\s|[;&|(])exec\s/,
-  /\${[^}]*}/,                     // variável de shell expansiva
+  /\${[^}]*}/, // variável de shell expansiva
 ];
 
 const RISK_PATTERNS: RiskPattern[] = [

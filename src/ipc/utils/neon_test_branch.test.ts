@@ -207,10 +207,10 @@ describe("createTempTestBranch", () => {
       projectId: "proj-1",
       branchId: "test-new-branch-id",
     });
-    expect(mocks.deleteProjectBranch).toHaveBeenCalledWith(
-      "proj-1",
-      "test-new-branch-id",
-    );
+    expect(mocks.deleteProjectBranch).toHaveBeenCalledWith({
+      projectId: "proj-1",
+      branchId: "test-new-branch-id",
+    });
   });
 
   it("dead-ends when the app uses Neon Auth but provisioning fails", async () => {
@@ -222,10 +222,10 @@ describe("createTempTestBranch", () => {
     ).rejects.toThrow(/Neon Auth/);
     // The just-created branch is deleted and the column cleared so we don't
     // orphan it or run the app against real auth with an isolated DB branch.
-    expect(mocks.deleteProjectBranch).toHaveBeenCalledWith(
-      "proj-1",
-      "test-new-branch-id",
-    );
+    expect(mocks.deleteProjectBranch).toHaveBeenCalledWith({
+      projectId: "proj-1",
+      branchId: "test-new-branch-id",
+    });
     expect(mocks.set).toHaveBeenCalledWith({ neonTestBranchId: null });
   });
 
@@ -251,10 +251,10 @@ describe("createTempTestBranch", () => {
     await expect(createTempTestBranch(makeApp())).rejects.toThrow(
       /connection string/,
     );
-    expect(mocks.deleteProjectBranch).toHaveBeenCalledWith(
-      "proj-1",
-      "partial-br",
-    );
+    expect(mocks.deleteProjectBranch).toHaveBeenCalledWith({
+      projectId: "proj-1",
+      branchId: "partial-br",
+    });
   });
 
   it("does not overwrite the column when the prior branch cleanup fails", async () => {
@@ -274,7 +274,10 @@ describe("createTempTestBranch", () => {
 describe("deleteTempTestBranch", () => {
   it("deletes the branch and clears the column", async () => {
     await deleteTempTestBranch(makeApp({ neonTestBranchId: "test-br" }));
-    expect(mocks.deleteProjectBranch).toHaveBeenCalledWith("proj-1", "test-br");
+    expect(mocks.deleteProjectBranch).toHaveBeenCalledWith({
+      projectId: "proj-1",
+      branchId: "test-br",
+    });
     expect(mocks.set).toHaveBeenCalledWith({ neonTestBranchId: null });
   });
 
@@ -282,7 +285,10 @@ describe("deleteTempTestBranch", () => {
     await deleteTempTestBranch(
       makeApp({ neonTestBranchId: "samba-cleanup-only:v1:test-br" }),
     );
-    expect(mocks.deleteProjectBranch).toHaveBeenCalledWith("proj-1", "test-br");
+    expect(mocks.deleteProjectBranch).toHaveBeenCalledWith({
+      projectId: "proj-1",
+      branchId: "test-br",
+    });
     expect(mocks.set).toHaveBeenCalledWith({ neonTestBranchId: null });
   });
 
@@ -358,7 +364,10 @@ describe("markAndDeleteTempTestBranch", () => {
     expect(mocks.set).toHaveBeenCalledWith({
       neonTestBranchId: "samba-cleanup-only:v1:test-br",
     });
-    expect(mocks.deleteProjectBranch).toHaveBeenCalledWith("proj-1", "test-br");
+    expect(mocks.deleteProjectBranch).toHaveBeenCalledWith({
+      projectId: "proj-1",
+      branchId: "test-br",
+    });
     const markedAt = mocks.set.mock.invocationCallOrder[0];
     const deletedAt = mocks.deleteProjectBranch.mock.invocationCallOrder[0];
     expect(markedAt).toBeLessThan(deletedAt);
@@ -372,7 +381,10 @@ describe("markAndDeleteTempTestBranch", () => {
       makeApp({ neonTestBranchId: "test-br" }),
       "test-br",
     );
-    expect(mocks.deleteProjectBranch).toHaveBeenCalledWith("proj-1", "test-br");
+    expect(mocks.deleteProjectBranch).toHaveBeenCalledWith({
+      projectId: "proj-1",
+      branchId: "test-br",
+    });
   });
 
   it("does not throw when the remote delete fails", async () => {
@@ -412,10 +424,10 @@ describe("restoreAppFromTestBranch", () => {
     expect(mocks.updateNeonEnvVars).toHaveBeenCalledWith(
       expect.objectContaining({ appPath: "/apps/moved" }),
     );
-    expect(mocks.deleteProjectBranch).toHaveBeenCalledWith(
-      "current-project",
-      "current-test-branch",
-    );
+    expect(mocks.deleteProjectBranch).toHaveBeenCalledWith({
+      projectId: "current-project",
+      branchId: "current-test-branch",
+    });
   });
 
   it("persists cleanup-only state before a fallible branch delete", async () => {
@@ -450,10 +462,10 @@ describe("restoreAppFromTestBranch", () => {
     ).resolves.toBe(true);
 
     expect(mocks.updateNeonEnvVars).not.toHaveBeenCalled();
-    expect(mocks.deleteProjectBranch).toHaveBeenCalledWith(
-      "proj-1",
-      "leaked-br",
-    );
+    expect(mocks.deleteProjectBranch).toHaveBeenCalledWith({
+      projectId: "proj-1",
+      branchId: "leaked-br",
+    });
   });
 
   it("reports the env restored when branch cleanup persistence fails", async () => {
@@ -471,10 +483,10 @@ describe("restoreAppFromTestBranch", () => {
     ).resolves.toBe(true);
 
     expect(mocks.updateNeonEnvVars).toHaveBeenCalled();
-    expect(mocks.deleteProjectBranch).toHaveBeenCalledWith(
-      "proj-1",
-      "leaked-br",
-    );
+    expect(mocks.deleteProjectBranch).toHaveBeenCalledWith({
+      projectId: "proj-1",
+      branchId: "leaked-br",
+    });
     expect(mocks.set).toHaveBeenCalledWith({ neonTestBranchId: null });
   });
 });
@@ -500,10 +512,10 @@ describe("reconcileOrphanTestBranches", () => {
         preserveExistingAuth: false,
       }),
     );
-    expect(mocks.deleteProjectBranch).toHaveBeenCalledWith(
-      "proj-1",
-      "leaked-br",
-    );
+    expect(mocks.deleteProjectBranch).toHaveBeenCalledWith({
+      projectId: "proj-1",
+      branchId: "leaked-br",
+    });
     expect(mocks.updateNeonEnvVars.mock.invocationCallOrder[0]).toBeLessThan(
       mocks.deleteProjectBranch.mock.invocationCallOrder[0],
     );
@@ -539,9 +551,9 @@ describe("reconcileOrphanTestBranches", () => {
     }
 
     expect(mocks.deleteProjectBranch).toHaveBeenCalledTimes(1);
-    expect(mocks.deleteProjectBranch).toHaveBeenCalledWith(
-      "proj-1",
-      "next-branch",
-    );
+    expect(mocks.deleteProjectBranch).toHaveBeenCalledWith({
+      projectId: "proj-1",
+      branchId: "next-branch",
+    });
   });
 });

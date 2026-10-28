@@ -1,6 +1,7 @@
 import { safeStorage } from "electron";
 import crypto from "node:crypto";
 import log from "electron-log";
+import { withLock } from "./lock_utils";
 
 const logger = log.scope("secret_storage");
 
@@ -17,18 +18,23 @@ export const AUTHENTICATED_PREFIX = "auth:";
 // keyring (Linux sem libsecret), este é o único controle de integridade
 // dos segredos em repouso. A chave é gerada uma vez por instalação e
 // persistida em .samba/hmac_key com permissão 0600.
-export function secretStorageHmacKey(appUserDataDir: string): Promise<Buffer> {
+export async function secretStorageHmacKey(
+  appUserDataDir: string,
+): Promise<Buffer> {
   const fs = await import("node:fs");
   const path = await import("node:path");
   const keyFile = path.join(appUserDataDir, ".samba", "hmac_key");
-  try {
-    return fs.promises.readFile(keyFile);
-  } catch {
-    const key = crypto.randomBytes(32);
-    void fs.promises.mkdir(path.dirname(keyFile), { recursive: true });
-    void fs.promises.writeFile(keyFile, key, { mode: 0o600 });
-    return key;
-  }
+  return withLock(`secret-hmac-key:${path.resolve(keyFile)}`, async () => {
+    try {
+      return await fs.promises.readFile(keyFile);
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException).code !== "ENOENT") throw error;
+      const key = crypto.randomBytes(32);
+      await fs.promises.mkdir(path.dirname(keyFile), { recursive: true });
+      await fs.promises.writeFile(keyFile, key, { mode: 0o600, flag: "wx" });
+      return key;
+    }
+  });
 }
 
 export function isSecretEncryptionAvailable(): boolean {
@@ -52,7 +58,10 @@ function encryptAuthenticated(plaintext: string): string {
     .createHash("sha256")
     .update("samba-builder-secret-storage-v1")
     .digest();
-  const mac = crypto.createHmac("sha256", key).update(plaintext, "utf8").digest();
+  const mac = crypto
+    .createHmac("sha256", key)
+    .update(plaintext, "utf8")
+    .digest();
   const payload = Buffer.concat([mac, Buffer.from(plaintext, "utf8")]);
   return AUTHENTICATED_PREFIX + payload.toString("base64");
 }
@@ -79,8 +88,14 @@ export function decryptFromString(stored: string): string {
     const mac = payload.subarray(0, 32);
     const ciphertext = payload.subarray(32);
     const expected = crypto
-      .createHmac("sha256", crypto.createHash("sha256").update("samba-builder-secret-storage-v1").digest())
-      .update(ciphertext, "utf8")
+      .createHmac(
+        "sha256",
+        crypto
+          .createHash("sha256")
+          .update("samba-builder-secret-storage-v1")
+          .digest(),
+      )
+      .update(ciphertext)
       .digest();
     if (!crypto.timingSafeEqual(mac, expected)) {
       throw new Error("Authenticated secret failed HMAC verification");
