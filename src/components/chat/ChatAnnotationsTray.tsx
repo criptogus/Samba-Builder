@@ -13,6 +13,7 @@ import {
   useChatMessages,
   useChatMessagesLoaded,
 } from "@/hooks/useChatMessages";
+import { EMPTY_ARRAY } from "@/lib/constants";
 
 export function ChatAnnotationsTray({ chatId }: { chatId: number }) {
   const { t } = useTranslation("chat");
@@ -21,8 +22,9 @@ export function ChatAnnotationsTray({ chatId }: { chatId: number }) {
   const listId = useId();
   const messages = useChatMessages(chatId);
   const messagesLoaded = useChatMessagesLoaded(chatId);
+  // ⚡ Bolt Optimization: Use stable reference for empty array to prevent unnecessary re-renders
   const annotations = useMemo(
-    () => allAnnotations.get(chatId) ?? [],
+    () => allAnnotations.get(chatId) ?? (EMPTY_ARRAY as typeof allAnnotations extends Map<number, infer V> ? V : never),
     [allAnnotations, chatId],
   );
 
