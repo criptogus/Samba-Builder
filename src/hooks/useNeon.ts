@@ -8,9 +8,7 @@ import { useSettings } from "@/hooks/useSettings";
 import { useLoadApp } from "@/hooks/useLoadApp";
 import { useQuery } from "@tanstack/react-query";
 import { queryKeys } from "@/lib/queryKeys";
-
-// ⚡ Bolt Optimization: Use stable reference for empty array to prevent unnecessary re-renders
-const EMPTY_ARRAY = Object.freeze([]) as never[];
+import { EMPTY_ARRAY } from "@/lib/constants";
 
 export function useNeon(appId: number | null) {
   const { settings } = useSettings();

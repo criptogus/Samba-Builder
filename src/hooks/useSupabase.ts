@@ -24,11 +24,9 @@ import { useSettings } from "./useSettings";
 import { isSupabaseConnected } from "@/lib/schemas";
 import { queryKeys } from "@/lib/queryKeys";
 import { useAppRunRemoteManager } from "@/app_run/AppRunRemoteProvider";
+import { EMPTY_ARRAY } from "@/lib/constants";
 
 const EDGE_LOGS_POLL_INTERVAL_MS = 5_000;
-
-// ⚡ Bolt Optimization: Use stable reference for empty array to prevent unnecessary re-renders
-const EMPTY_ARRAY = Object.freeze([]) as never[];
 
 /**
  * Did a create fail *after* the project was created? Matched on the code the
