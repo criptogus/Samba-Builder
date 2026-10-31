@@ -2,9 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ipc, type Version } from "@/ipc/types";
 import { queryKeys } from "@/lib/queryKeys";
 import { SambaError, SambaErrorKind } from "@/errors/samba_error";
-
-// ⚡ Bolt Optimization: Use stable reference for empty array to prevent unnecessary re-renders
-const EMPTY_VERSIONS: Version[] = [];
+import { EMPTY_ARRAY } from "@/lib/constants";
 
 export function useVersions(appId: number | null) {
   const queryClient = useQueryClient();
@@ -31,9 +29,9 @@ export function useVersions(appId: number | null) {
   } = useQuery<Version[], Error>({
     queryKey: queryKeys.versions.list({ appId }),
     queryFn: async () =>
-      appId === null ? EMPTY_VERSIONS : ipc.version.listVersions({ appId }),
+      appId === null ? EMPTY_ARRAY : ipc.version.listVersions({ appId }),
     enabled: appId !== null,
-    placeholderData: EMPTY_VERSIONS,
+    placeholderData: EMPTY_ARRAY,
     meta: { showErrorToast: true },
   });
 
@@ -90,7 +88,7 @@ export function useVersions(appId: number | null) {
   });
 
   return {
-    versions: versions || EMPTY_VERSIONS,
+    versions: versions || EMPTY_ARRAY,
     loading,
     error,
     refreshVersions,
