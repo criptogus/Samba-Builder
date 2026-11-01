@@ -96,6 +96,15 @@ const ConsoleHeader = ({
   return (
     <div
       onClick={onToggle}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          if (e.target !== e.currentTarget) return;
+          e.preventDefault();
+          onToggle();
+        }
+      }}
+      role="button"
+      tabIndex={0}
       className="flex items-start gap-2 px-4 py-1.5 border-t border-border cursor-pointer hover:bg-[var(--background-darkest)] transition-colors"
     >
       <Logs size={16} className="mt-0.5" />
