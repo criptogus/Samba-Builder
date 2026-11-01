@@ -1,0 +1,6 @@
+🎨 Palette: Add keyboard accessibility to clickable components
+
+💡 What: Added keyboard accessibility to non-interactive elements like `<div>` that have `onClick` handlers.
+🎯 Why: To ensure keyboard users can trigger these components via Enter and Space keys.
+📸 Before/After: None (no visual change).
+♿ Accessibility: Improved keyboard navigation and interaction for non-interactive elements used as clickable targets.

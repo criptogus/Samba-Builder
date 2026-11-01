@@ -41,6 +41,13 @@ const ProblemItem = ({
       role="checkbox"
       aria-checked={checked}
       onClick={onToggle}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          onToggle();
+        }
+      }}
+      tabIndex={0}
       className="cursor-pointer flex items-start gap-3 p-3 border-b border-border hover:bg-[var(--background-darker)] dark:hover:bg-[var(--background-lightest)] transition-colors"
       data-testid="problem-row"
     >

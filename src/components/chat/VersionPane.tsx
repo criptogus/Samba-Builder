@@ -155,6 +155,16 @@ function VersionRow({
           onVersionClick(version);
         }
       }}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          if (canSelectVersion) {
+            onVersionClick(version);
+          }
+        }
+      }}
+      role="button"
+      tabIndex={0}
     >
       <div data-testid="version-list-item" className="flex gap-3 w-full">
         <div
