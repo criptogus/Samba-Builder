@@ -1,3 +1,4 @@
+import { EMPTY_ARRAY } from "@/lib/constants";
 import { atom } from "jotai";
 
 export interface ChatAnnotation {
@@ -21,7 +22,7 @@ export function addChatAnnotation(
 ): ChatAnnotationsMap {
   const next = new Map(previous);
   next.set(annotation.chatId, [
-    ...(next.get(annotation.chatId) ?? []),
+    ...(next.get(annotation.chatId) ?? EMPTY_ARRAY),
     // Trim here as well as in `updateChatAnnotation` so both reducers store
     // the same normalized text, whatever a caller hands them.
     { ...annotation, comment: annotation.comment.trim() },
@@ -38,7 +39,7 @@ export function updateChatAnnotation(
   const next = new Map(previous);
   next.set(
     chatId,
-    (next.get(chatId) ?? []).map((annotation) =>
+    (next.get(chatId) ?? EMPTY_ARRAY).map((annotation) =>
       annotation.id === annotationId
         ? { ...annotation, comment: comment.trim() }
         : annotation,
@@ -53,7 +54,7 @@ export function removeChatAnnotation(
   annotationId: string,
 ): ChatAnnotationsMap {
   const next = new Map(previous);
-  const remaining = (next.get(chatId) ?? []).filter(
+  const remaining = (next.get(chatId) ?? EMPTY_ARRAY).filter(
     (annotation) => annotation.id !== annotationId,
   );
   if (remaining.length === 0) next.delete(chatId);

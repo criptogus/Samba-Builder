@@ -1,3 +1,4 @@
+import { EMPTY_ARRAY } from "@/lib/constants";
 import { atom } from "jotai";
 import { selectedAppIdAtom } from "@/atoms/appAtoms";
 import type { RecordingAuth, TestIsolation } from "@/ipc/types";
@@ -95,7 +96,7 @@ export const currentRecordedEntriesAtom = atom((get) => {
   const appId = get(selectedAppIdAtom);
   return appId === null
     ? []
-    : (get(recordedEntriesByAppIdAtom).get(appId) ?? []);
+    : (get(recordedEntriesByAppIdAtom).get(appId) ?? EMPTY_ARRAY);
 });
 
 /**
@@ -178,7 +179,7 @@ export const appendRecordedEntryAtom = atom(
       return;
     }
     set(recordedEntriesByAppIdAtom, (prev) => {
-      const current = prev.get(appId) ?? [];
+      const current = prev.get(appId) ?? EMPTY_ARRAY;
       const next = new Map(prev);
       next.set(appId, [...current, entry]);
       return next;
