@@ -1,3 +1,4 @@
+import { EMPTY_ARRAY } from "@/lib/constants";
 import { atom } from "jotai";
 import { selectedAppIdAtom } from "@/atoms/appAtoms";
 import type { TestSpec, TestResult, TestIsolation } from "@/ipc/types";
@@ -131,7 +132,9 @@ export const testRunStateByAppIdAtom = atom<Map<number, TestRunState>>(
 
 export const currentTestSpecsAtom = atom((get) => {
   const appId = get(selectedAppIdAtom);
-  return appId === null ? [] : (get(testSpecsByAppIdAtom).get(appId) ?? []);
+  return appId === null
+    ? []
+    : (get(testSpecsByAppIdAtom).get(appId) ?? EMPTY_ARRAY);
 });
 
 export const currentTestRunStateAtom = atom((get) => {
@@ -208,7 +211,7 @@ function grepMatchedTestKeys(
   } catch {
     return null;
   }
-  const cases = specs.find((s) => s.file === testFile)?.tests ?? [];
+  const cases = specs.find((s) => s.file === testFile)?.tests ?? EMPTY_ARRAY;
   const matched = cases
     .filter((c) => regex.test(c.title))
     .map((c) => testKey(testFile, c.line));
@@ -239,7 +242,7 @@ export const applyTestRunStartedAtom = atom(
     },
   ) => {
     const isPartialRun = testFile != null && (testLine != null || !!grep);
-    const specs = get(testSpecsByAppIdAtom).get(appId) ?? [];
+    const specs = get(testSpecsByAppIdAtom).get(appId) ?? EMPTY_ARRAY;
     const targetFiles = testFile ? [testFile] : specs.map((s) => s.file);
     const grepMatchedTests =
       testFile != null && testLine == null && grep
@@ -261,7 +264,7 @@ export const applyTestRunStartedAtom = atom(
         runningTests:
           testFile != null && testLine != null
             ? [testKey(testFile, testLine)]
-            : (grepMatchedTests ?? []),
+            : (grepMatchedTests ?? EMPTY_ARRAY),
         // For a single-test run, keep the file's existing results (siblings
         // keep their status; we merge the one test back in afterward). Grep
         // runs are also partial because they return only the matched tests.
@@ -308,7 +311,7 @@ export const applyTestRunFinishedAtom = atom(
     // may not match the glob-relative paths in our spec list (e.g. missing
     // the "e2e-tests/" prefix). Reconcile each result back onto a known spec
     // key so rows actually pick up their status.
-    const appSpecs = get(testSpecsByAppIdAtom).get(appId) ?? [];
+    const appSpecs = get(testSpecsByAppIdAtom).get(appId) ?? EMPTY_ARRAY;
     const specFiles = appSpecs.map((s) => s.file);
     const specsByFile = new Map(appSpecs.map((s) => [s.file, s]));
     set(setTestRunStateForAppAtom, {
@@ -328,7 +331,7 @@ export const applyTestRunFinishedAtom = atom(
           if (isPartialRun) {
             nextResults[key] = buildSingleTestFileResult({
               file: key,
-              knownTests: specsByFile.get(key)?.tests ?? [],
+              knownTests: specsByFile.get(key)?.tests ?? EMPTY_ARRAY,
               previous: prev.results[key],
               incoming: mapped,
             });
