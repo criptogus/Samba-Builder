@@ -4,3 +4,6 @@
 ## 2025-02-14 - Keyboard Accessibility on Non-Interactive Click Targets
 **Learning:** In React/JSX, attaching `onClick` handlers to non-interactive semantics (e.g., `<div>` used as file dropzones or `<span>` used for custom triggers) renders them inaccessible to keyboard users, preventing activation via Tab and Enter/Space keys. Wrapping them around existing buttons causes nested interactive elements.
 **Action:** Before converting a non-interactive element to a button, ensure it does not wrap another button. To make a pure `<div>` or `<span>` accessible, strictly add `role="button"`, `tabIndex={0}`, and an `onKeyDown` handler listening for `Enter` and ` ` (Space) to proxy the click event.
+## 2026-11-02 - Base UI Tooltip Accessible Names
+**Learning:** When adding `aria-label` to elements inside a `TooltipTrigger` or to standard elements with visible text, never overwrite existing visible text using `aria-label`. An `aria-label` replaces visible text as the accessible name, causing WCAG 2.5.3 violations and breaking voice control tools. Base UI Tooltips correctly manage `aria-describedby` to link `TooltipContent` to the trigger automatically.
+**Action:** Use Base UI `Tooltip` and `TooltipContent` instead of native `title` attributes. Apply `aria-label` only if the trigger is completely missing visible text.

@@ -345,22 +345,40 @@ export const PreviewWebContentsView = ({ loading }: { loading: boolean }) => {
           >
             {currentPath}
           </span>
-          <span
-            className="shrink-0 rounded bg-amber-100 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-amber-700 dark:bg-amber-900/40 dark:text-amber-300"
-            title="Shown while tests drive your app. Component selection and the visual editor are unavailable here."
-          >
-            Test view
-          </span>
-          {isTestRunActive && (
-            <button
-              onClick={() => setPreviewMode("tests")}
-              title="Show the Tests panel. The run keeps going."
-              data-testid="preview-native-tests-running-chip"
-              className="flex shrink-0 items-center gap-1.5 rounded bg-purple-100 px-1.5 py-0.5 text-[10px] font-medium text-purple-700 hover:bg-purple-200 dark:bg-purple-900/40 dark:text-purple-300 dark:hover:bg-purple-900/60"
+          <Tooltip>
+            <TooltipTrigger
+              render={
+                <span
+                  tabIndex={0}
+                  className="shrink-0 cursor-help rounded bg-amber-100 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-amber-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 dark:bg-amber-900/40 dark:text-amber-300"
+                />
+              }
             >
-              <span className="size-1.5 animate-pulse rounded-full bg-current" />
-              Tests running…
-            </button>
+              Test view
+            </TooltipTrigger>
+            <TooltipContent>
+              Shown while tests drive your app. Component selection and the
+              visual editor are unavailable here.
+            </TooltipContent>
+          </Tooltip>
+          {isTestRunActive && (
+            <Tooltip>
+              <TooltipTrigger
+                render={
+                  <button
+                    onClick={() => setPreviewMode("tests")}
+                    data-testid="preview-native-tests-running-chip"
+                    className="flex shrink-0 items-center gap-1.5 rounded bg-purple-100 px-1.5 py-0.5 text-[10px] font-medium text-purple-700 hover:bg-purple-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-500 dark:bg-purple-900/40 dark:text-purple-300 dark:hover:bg-purple-900/60"
+                  />
+                }
+              >
+                <span className="size-1.5 animate-pulse rounded-full bg-current" />
+                Tests running…
+              </TooltipTrigger>
+              <TooltipContent>
+                Show the Tests panel. The run keeps going.
+              </TooltipContent>
+            </Tooltip>
           )}
         </div>
 
