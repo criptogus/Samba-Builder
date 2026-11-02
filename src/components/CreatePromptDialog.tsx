@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import {
   Dialog,
@@ -207,20 +208,32 @@ export function CreateOrEditPromptDialog({
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-4">
-          <Input
-            placeholder="Title"
-            value={draft.title}
-            onChange={(e) => setDraft((d) => ({ ...d, title: e.target.value }))}
-          />
-          <Input
-            placeholder="Description (optional)"
-            value={draft.description}
-            onChange={(e) =>
-              setDraft((d) => ({ ...d, description: e.target.value }))
-            }
-          />
-          <div>
+          <div className="space-y-2">
+            <Label htmlFor="prompt-title">Title</Label>
             <Input
+              id="prompt-title"
+              placeholder="Title"
+              value={draft.title}
+              onChange={(e) =>
+                setDraft((d) => ({ ...d, title: e.target.value }))
+              }
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="prompt-description">Description (optional)</Label>
+            <Input
+              id="prompt-description"
+              placeholder="Description (optional)"
+              value={draft.description}
+              onChange={(e) =>
+                setDraft((d) => ({ ...d, description: e.target.value }))
+              }
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="prompt-slug">Slash command (optional)</Label>
+            <Input
+              id="prompt-slug"
               placeholder="Slash command (optional)"
               value={draft.slug}
               onChange={(e) => {
@@ -236,18 +249,22 @@ export function CreateOrEditPromptDialog({
                 : "Used as /command in chat."}
             </p>
           </div>
-          <Textarea
-            ref={textareaRef}
-            placeholder="Content"
-            value={draft.content}
-            onChange={(e) => {
-              setDraft((d) => ({ ...d, content: e.target.value }));
-              // Use requestAnimationFrame for smoother updates
-              requestAnimationFrame(adjustTextareaHeight);
-            }}
-            className="resize-none overflow-y-auto"
-            style={{ minHeight: "150px" }}
-          />
+          <div className="space-y-2">
+            <Label htmlFor="prompt-content">Content</Label>
+            <Textarea
+              id="prompt-content"
+              ref={textareaRef}
+              placeholder="Content"
+              value={draft.content}
+              onChange={(e) => {
+                setDraft((d) => ({ ...d, content: e.target.value }));
+                // Use requestAnimationFrame for smoother updates
+                requestAnimationFrame(adjustTextareaHeight);
+              }}
+              className="resize-none overflow-y-auto"
+              style={{ minHeight: "150px" }}
+            />
+          </div>
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={handleCancel}>

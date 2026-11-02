@@ -118,7 +118,15 @@ export function ProviderSettingsGrid() {
               >
                 <CardHeader
                   className="p-4 cursor-pointer"
+                  role="button"
+                  tabIndex={0}
                   onClick={() => handleProviderClick(provider.id)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      handleProviderClick(provider.id);
+                    }
+                  }}
                 >
                   {isCustom && (
                     <div
