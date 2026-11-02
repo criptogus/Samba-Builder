@@ -136,7 +136,11 @@ export default function MeetingBriefingDialog({
               {servers.isError && (
                 <p role="alert">
                   Não foi possível consultar os conectores.{" "}
-                  <button onClick={() => void servers.refetch()}>
+                  <button
+                    type="button"
+                    className="underline hover:no-underline focus-visible:outline-2 focus-visible:outline-offset-2"
+                    onClick={() => void servers.refetch()}
+                  >
                     Tentar novamente
                   </button>
                 </p>
