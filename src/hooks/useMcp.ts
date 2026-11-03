@@ -15,11 +15,9 @@ import type {
   McpListToolsResult,
 } from "@/ipc/types";
 import { queryKeys } from "@/lib/queryKeys";
+import { EMPTY_ARRAY } from "@/lib/constants";
 
 export type Transport = "stdio" | "http";
-
-// ⚡ Bolt Optimization: Use stable reference for empty array to prevent unnecessary re-renders
-const EMPTY_ARRAY = Object.freeze([]) as never[];
 
 export function useMcp() {
   const queryClient = useQueryClient();

@@ -266,6 +266,11 @@ export function HomeChatInput({
                           if (!disabled) setAppSearchOpen(true);
                         }}
                         disabled={disabled}
+                        aria-label={
+                          selectedApp
+                            ? "Change selected app"
+                            : "Select an existing app"
+                        }
                         className={cn(
                           "cursor-pointer px-2 py-1 ml-1.5 text-xs font-medium rounded-lg transition-colors flex items-center gap-1",
                           selectedApp
