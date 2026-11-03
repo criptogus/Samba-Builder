@@ -122,7 +122,10 @@ export function ProviderSettingsGrid() {
                   tabIndex={0}
                   onClick={() => handleProviderClick(provider.id)}
                   onKeyDown={(e) => {
-                    if (e.key === "Enter" || e.key === " ") {
+                    if (
+                      e.target === e.currentTarget &&
+                      (e.key === "Enter" || e.key === " ")
+                    ) {
                       e.preventDefault();
                       handleProviderClick(provider.id);
                     }
