@@ -94,9 +94,10 @@ const ConsoleHeader = ({
 }: ConsoleHeaderProps) => {
   const { t } = useTranslation("home");
   return (
-    <div
+    <button
+      type="button"
       onClick={onToggle}
-      className="flex items-start gap-2 px-4 py-1.5 border-t border-border cursor-pointer hover:bg-[var(--background-darkest)] transition-colors"
+      className="flex w-full text-left items-start gap-2 px-4 py-1.5 border-t border-border cursor-pointer hover:bg-[var(--background-darkest)] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:bg-[var(--background-darkest)]"
     >
       <Logs size={16} className="mt-0.5" />
       <div className="flex flex-col">
@@ -111,7 +112,7 @@ const ConsoleHeader = ({
       </div>
       <div className="flex-1" />
       {isOpen ? <ChevronDown size={16} /> : <ChevronUp size={16} />}
-    </div>
+    </button>
   );
 };
 
