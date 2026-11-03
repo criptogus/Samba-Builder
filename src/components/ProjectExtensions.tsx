@@ -1,6 +1,7 @@
 import { useAtomValue } from "jotai";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
+import { EMPTY_ARRAY } from "@/lib/constants";
 import { selectedAppIdAtom } from "@/atoms/appAtoms";
 import { ipc } from "@/ipc/types";
 import { queryKeys } from "@/lib/queryKeys";
@@ -193,8 +194,8 @@ export function ProjectExtensions() {
     meta: { showErrorToast: true },
   });
 
-  const entries = data?.entries ?? [];
-  const warnings = data?.warnings ?? [];
+  const entries = data?.entries ?? EMPTY_ARRAY;
+  const warnings = data?.warnings ?? EMPTY_ARRAY;
 
   return (
     <section aria-label="Extensões declarativas" className="mb-8 space-y-4">
