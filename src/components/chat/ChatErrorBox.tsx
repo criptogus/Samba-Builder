@@ -78,12 +78,18 @@ export function ChatErrorBox({
         <div className="mt-2 flex flex-wrap gap-2">
           <Tooltip>
             <TooltipTrigger
-              onClick={onStartNewChat}
-              className="cursor-pointer inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium shadow-sm focus:outline-none focus:ring-2 bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500"
-            >
-              <span>Start new chat</span>
-              <MessageSquarePlus size={18} />
-            </TooltipTrigger>
+              aria-label="Start new chat"
+              render={
+                <button
+                  type="button"
+                  onClick={onStartNewChat}
+                  className="cursor-pointer inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium shadow-sm focus:outline-none focus:ring-2 bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500"
+                >
+                  <span>Start new chat</span>
+                  <MessageSquarePlus size={18} />
+                </button>
+              }
+            />
             <TooltipContent>
               Starting a new chat can fix some issues
             </TooltipContent>
