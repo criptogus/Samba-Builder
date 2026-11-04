@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { ipc } from "@/ipc/types";
 import type { ChatSummary } from "@/lib/schemas";
+import { EMPTY_ARRAY } from "@/lib/constants";
 import { queryKeys } from "@/lib/queryKeys";
 
 type SetChatFavoriteVariables = {
@@ -53,7 +54,7 @@ export function useSetChatFavorite() {
       return { snapshots };
     },
     onError: (_error, _variables, context) => {
-      for (const [queryKey, snapshot] of context?.snapshots ?? []) {
+      for (const [queryKey, snapshot] of context?.snapshots ?? EMPTY_ARRAY) {
         queryClient.setQueryData(queryKey, snapshot);
       }
     },
