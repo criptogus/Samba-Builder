@@ -5,6 +5,7 @@ import {
   type DeleteMediaFileParams,
   type MoveMediaFileParams,
 } from "@/ipc/types";
+import { EMPTY_ARRAY } from "@/lib/constants";
 import { queryKeys } from "@/lib/queryKeys";
 import { showError, showSuccess } from "@/lib/toast";
 import { useSettings } from "./useSettings";
@@ -61,7 +62,7 @@ export function useAppMediaFiles() {
   });
 
   return {
-    mediaApps: query.data?.apps ?? [],
+    mediaApps: query.data?.apps ?? EMPTY_ARRAY,
     isLoading: query.isLoading,
     renameMediaFile: renameMutation.mutateAsync,
     deleteMediaFile: deleteMutation.mutateAsync,
