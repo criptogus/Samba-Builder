@@ -69,7 +69,18 @@ export const TemplateCard: React.FC<TemplateCardProps> = React.memo(
     return (
       <>
         <div
+          role="button"
+          tabIndex={0}
           onClick={handleCardClick}
+          onKeyDown={(e) => {
+            if (
+              e.target === e.currentTarget &&
+              (e.key === "Enter" || e.key === " ")
+            ) {
+              e.preventDefault();
+              handleCardClick(e as any);
+            }
+          }}
           className={`
             bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden
             transform transition-all duration-300 ease-in-out
