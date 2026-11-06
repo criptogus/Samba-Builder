@@ -10,6 +10,7 @@ import {
   type UserSettings,
 } from "@/lib/schemas";
 import { getFreeProCompatibleChatMode } from "@/lib/freeProModel";
+import { EMPTY_ARRAY } from "@/lib/constants";
 import { queryKeys } from "@/lib/queryKeys";
 import { useSettings } from "./useSettings";
 
@@ -105,7 +106,7 @@ export function useChatMode(chatId: number | null | undefined) {
           context.previousChat,
         );
       }
-      for (const [queryKey, data] of context?.previousLists ?? []) {
+      for (const [queryKey, data] of context?.previousLists ?? EMPTY_ARRAY) {
         queryClient.setQueryData(queryKey, data);
       }
     },

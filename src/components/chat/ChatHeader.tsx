@@ -148,22 +148,23 @@ export function ChatHeader({
                             ? t("header.checkoutInProgress")
                             : t("header.checkoutMainBranch")
                         }
+                        render={
+                          <span className="flex items-center gap-1 cursor-help" />
+                        }
                       >
-                        <span className="flex items-center  gap-1">
-                          {isCheckingOutVersion ? (
-                            <>
-                              <span>{t("header.switchingToLatest")}</span>
-                            </>
-                          ) : (
-                            <>
-                              <strong>
-                                {t("header.warningNotOnBranch").split(":")[0]}:
-                              </strong>
-                              <span>{t("header.notOnBranch")}</span>
-                              <Info size={14} />
-                            </>
-                          )}
-                        </span>
+                        {isCheckingOutVersion ? (
+                          <>
+                            <span>{t("header.switchingToLatest")}</span>
+                          </>
+                        ) : (
+                          <>
+                            <strong>
+                              {t("header.warningNotOnBranch").split(":")[0]}:
+                            </strong>
+                            <span>{t("header.notOnBranch")}</span>
+                            <Info size={14} />
+                          </>
+                        )}
                       </TooltipTrigger>
                       <TooltipContent>
                         <p>

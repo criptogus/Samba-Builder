@@ -222,6 +222,11 @@ export function VisualEditingToolbar({
 
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
+      // Only handle messages from our iframe
+      if (event.source !== iframeRef?.current?.contentWindow) {
+        return;
+      }
+
       if (event.data?.type === "samba-component-styles") {
         const { margin, padding, border, backgroundColor, text } =
           event.data.data;

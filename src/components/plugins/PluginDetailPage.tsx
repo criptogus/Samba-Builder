@@ -3,6 +3,7 @@ import { useNavigate } from "@tanstack/react-router";
 import { ArrowLeft } from "lucide-react";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
+import { EMPTY_ARRAY } from "@/lib/constants";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import {
   Select,
@@ -115,13 +116,13 @@ export function PluginDetailPage({ serverId }: { serverId: number }) {
   // Only successful discovery lands in toolsByServer, so an absent
   // entry means pending or failed, not an empty server.
   const discoveredTools = toolsByServer[s.id];
-  const tools = discoveredTools ?? [];
+  const tools = discoveredTools ?? EMPTY_ARRAY;
   const feedback = feedbackFor(s);
 
   const catalogEntry = s.catalogSlug
     ? catalogQuery.data?.entries.find((e) => e.slug === s.catalogSlug)
     : undefined;
-  const setupInputs = catalogEntry?.inputs ?? [];
+  const setupInputs = catalogEntry?.inputs ?? EMPTY_ARRAY;
   // Show the guided setup until every declared field has a saved value.
   const needsSetup = serverNeedsSetup(s, setupInputs);
   // A disabled catalog server might still need setup while its catalog is

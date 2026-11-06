@@ -235,6 +235,7 @@ function VersionRow({
                             ? "DB snapshot may have expired (older than 24 hours)"
                             : `Database snapshot available at timestamp ${version.dbTimestamp}`
                         }
+                        render={<span className="inline-flex cursor-help" />}
                       >
                         <div
                           className={cn(

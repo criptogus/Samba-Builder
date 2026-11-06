@@ -77,7 +77,12 @@ function TooltipHarness() {
         close
       </button>
       <Tooltip open={open}>
-        <TooltipTrigger aria-label="trigger">trigger</TooltipTrigger>
+        <TooltipTrigger
+          aria-label="trigger"
+          render={<span className="inline-flex cursor-help" />}
+        >
+          trigger
+        </TooltipTrigger>
         <TooltipContent>tip body</TooltipContent>
       </Tooltip>
     </>

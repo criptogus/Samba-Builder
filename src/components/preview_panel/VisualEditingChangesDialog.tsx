@@ -43,6 +43,11 @@ export function VisualEditingChangesDialog({
   // Listen for text content responses
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
+      // Only handle messages from our iframe
+      if (event.source !== iframeRef?.current?.contentWindow) {
+        return;
+      }
+
       if (event.data?.type === "samba-text-content-response") {
         const { componentId, text } = event.data;
         if (text !== null) {

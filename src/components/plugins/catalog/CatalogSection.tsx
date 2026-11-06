@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { Star } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { EMPTY_ARRAY } from "@/lib/constants";
 import { useMcp } from "@/hooks/useMcp";
 import { useMcpCatalog } from "@/hooks/useMcpCatalog";
 import { CatalogCard } from "./CatalogCard";
@@ -23,7 +24,7 @@ export function CatalogSection() {
 
   const { servers } = useMcp();
 
-  const entries = catalogQuery.data?.entries ?? [];
+  const entries = catalogQuery.data?.entries ?? EMPTY_ARRAY;
   const addedSlugs = useMemo(
     () => new Set(catalogQuery.data?.addedSlugs ?? []),
     [catalogQuery.data?.addedSlugs],
