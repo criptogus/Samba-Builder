@@ -11,7 +11,6 @@ import log from "electron-log";
 import { createVercelClient, VERCEL_API_BASE } from "../utils/vercel_utils";
 import * as fs from "fs";
 import * as path from "path";
-import { CreateProjectFramework } from "@vercel/sdk/models/createprojectop.js";
 import { getSambaAppPath } from "@/paths/paths";
 import { slugifyAppPath } from "@/shared/slugify";
 import { createTypedHandler } from "./base";
@@ -37,6 +36,13 @@ import { SambaError, SambaErrorKind } from "@/errors/samba_error";
 import { assertFactoryRelease } from "../services/factory/guards";
 
 const logger = log.scope("vercel_handlers");
+type CreateProjectFramework = NonNullable<
+  NonNullable<
+    Parameters<
+      ReturnType<typeof createVercelClient>["projects"]["createProject"]
+    >[0]["requestBody"]
+  >["framework"]
+>;
 
 // --- Helper Functions ---
 
@@ -422,7 +428,7 @@ async function handleCreateProject(
         },
       });
 
-      if (deploymentData.url) {
+      if ("url" in deploymentData && deploymentData.url) {
         logger.info(`First deployment successful: ${deploymentData.url}`);
       } else {
         logger.warn("First deployment failed: No deployment URL returned");
@@ -626,6 +632,7 @@ export function registerVercelHandlers() {
             SambaErrorKind.Precondition,
           );
         }
+        await assertFactoryRelease(appId);
         const approvedCommit =
           target === "production"
             ? await assertDeliveryReadyForPublish(
@@ -633,7 +640,7 @@ export function registerVercelHandlers() {
                 getSambaAppPath(app.path),
               )
             : undefined;
-        return submitVercelDeployment(
+        const deployment = await submitVercelDeployment(
           token,
           {
             id: app.vercelProjectId,
@@ -646,6 +653,14 @@ export function registerVercelHandlers() {
           },
           target,
         );
+        const moduleName = "../services/factory/store";
+        const store = (await import(moduleName)) as {
+          recordFactoryStaging: (appId: number) => Promise<void>;
+        };
+        await store.recordFactoryStaging(appId).catch((error) => {
+          logger.warn("Relógio de staging não gravado:", error);
+        });
+        return deployment;
       },
     ),
   );

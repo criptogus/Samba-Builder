@@ -1,3 +1,4 @@
+import { EMPTY_ARRAY } from "@/lib/constants";
 import { atom } from "jotai";
 
 export interface PlanData {
@@ -51,7 +52,7 @@ export function addPlanAnnotation(
   annotation: PlanAnnotation,
 ): AnnotationsMap {
   const next = new Map(prev);
-  const list = next.get(chatId) ?? [];
+  const list = next.get(chatId) ?? EMPTY_ARRAY;
   next.set(chatId, [...list, annotation]);
   return next;
 }
@@ -63,7 +64,7 @@ export function updatePlanAnnotation(
   comment: string,
 ): AnnotationsMap {
   const next = new Map(prev);
-  const list = (next.get(chatId) ?? []).map((a) =>
+  const list = (next.get(chatId) ?? EMPTY_ARRAY).map((a) =>
     a.id === annotationId ? { ...a, comment } : a,
   );
   next.set(chatId, list);
@@ -76,7 +77,7 @@ export function removePlanAnnotation(
   annotationId: string,
 ): AnnotationsMap {
   const next = new Map(prev);
-  const list = next.get(chatId) ?? [];
+  const list = next.get(chatId) ?? EMPTY_ARRAY;
   next.set(
     chatId,
     list.filter((a) => a.id !== annotationId),

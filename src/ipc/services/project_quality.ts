@@ -102,13 +102,20 @@ export async function installQualityTools() {
 }
 export async function listQualityRuns(appId: number) {
   return db
-    .select()
+    .select({
+      id: projectQualityRuns.id,
+      kind: projectQualityRuns.kind,
+      commit: projectQualityRuns.commit,
+      createdAt: projectQualityRuns.createdAt,
+      report: projectQualityRuns.report,
+      toolVersion: projectQualityRuns.toolVersion,
+    })
     .from(projectQualityRuns)
     .where(eq(projectQualityRuns.appId, appId))
     .orderBy(desc(projectQualityRuns.createdAt))
     .limit(30)
     .all()
-    .map(({ appId: _, report, ...row }) => ({
+    .map(({ report, ...row }) => ({
       ...row,
       report: QualityReportSchema.parse(JSON.parse(report)),
     }));

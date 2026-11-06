@@ -118,7 +118,18 @@ export function ProviderSettingsGrid() {
               >
                 <CardHeader
                   className="p-4 cursor-pointer"
+                  role="button"
+                  tabIndex={0}
                   onClick={() => handleProviderClick(provider.id)}
+                  onKeyDown={(e) => {
+                    if (
+                      e.target === e.currentTarget &&
+                      (e.key === "Enter" || e.key === " ")
+                    ) {
+                      e.preventDefault();
+                      handleProviderClick(provider.id);
+                    }
+                  }}
                 >
                   {isCustom && (
                     <div
@@ -132,6 +143,7 @@ export function ProviderSettingsGrid() {
                               data-testid="edit-custom-provider"
                               variant="ghost"
                               size="sm"
+                              aria-label={t("settings:ai.editProvider")}
                               className="h-8 w-8 p-0 hover:bg-muted rounded-md"
                               onClick={() => handleEditProvider(provider)}
                             />
@@ -150,6 +162,7 @@ export function ProviderSettingsGrid() {
                               data-testid="delete-custom-provider"
                               variant="ghost"
                               size="sm"
+                              aria-label={t("settings:ai.deleteProvider")}
                               className="h-8 w-8 p-0 text-destructive hover:text-destructive hover:bg-destructive/10 rounded-md"
                               onClick={() => setProviderToDelete(provider.id)}
                             />

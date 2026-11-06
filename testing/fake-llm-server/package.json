@@ -14,7 +14,7 @@
   },
   "dependencies": {
     "cors": "^2.8.5",
-    "express": "^4.18.2",
+    "express": "^4.22.3",
     "stream": "0.0.2"
   },
   "devDependencies": {
@@ -24,5 +24,15 @@
     "git-http-mock-server": "^2.0.0",
     "ts-node": "^10.9.2",
     "typescript": "^5.8.3"
+  },
+  "overrides": {
+    "underscore": "^1.13.8",
+    "ssh2": "^1.17.0",
+    "brace-expansion": "^1.1.21 || ^2.1.7 || ^5.0.12",
+    "minimatch": "^3.1.5",
+    "diff": "^4.0.4",
+    "qs": "^6.16.0",
+    "body-parser": "^1.20.8",
+    "path-to-regexp": "^0.1.13"
   }
 }

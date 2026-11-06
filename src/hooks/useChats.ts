@@ -3,6 +3,9 @@ import type { ChatSummary } from "@/lib/schemas";
 import { queryKeys } from "@/lib/queryKeys";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 
+// ⚡ Bolt Optimization: Use stable reference for empty array to prevent unnecessary re-renders
+const EMPTY_ARRAY: ChatSummary[] = [];
+
 export function useChats(appId: number | null) {
   const queryClient = useQueryClient();
 
@@ -20,7 +23,7 @@ export function useChats(appId: number | null) {
   };
 
   return {
-    chats: data ?? [],
+    chats: data ?? EMPTY_ARRAY,
     loading: isLoading,
     invalidateChats,
   };

@@ -38,7 +38,10 @@ const AppCommandsTitle = () => (
     <Terminal size={18} className="text-muted-foreground" />
     <span className="text-lg font-semibold">App Commands</span>
     <Tooltip>
-      <TooltipTrigger>
+      <TooltipTrigger
+        aria-label="Configure custom install and start commands for your app. Leave empty to use the default pnpm commands."
+        render={<span className="inline-flex cursor-help" />}
+      >
         <HelpCircle size={16} className="text-muted-foreground cursor-help" />
       </TooltipTrigger>
       <TooltipContent>
@@ -290,7 +293,10 @@ const EnvironmentVariablesTitle = () => (
     <span className="text-lg font-semibold">Environment Variables</span>
     <span className="text-sm text-muted-foreground font-normal">Local</span>
     <Tooltip>
-      <TooltipTrigger>
+      <TooltipTrigger
+        aria-label="To modify environment variables for Supabase or production, access your hosting provider's console and update them there."
+        render={<span className="inline-flex cursor-help" />}
+      >
         <HelpCircle size={16} className="text-muted-foreground cursor-help" />
       </TooltipTrigger>
       <TooltipContent>
@@ -648,6 +654,7 @@ export const ConfigurePanel = () => {
                           onClick={handleSaveEdit}
                           size="sm"
                           variant="outline"
+                          aria-label="Save edited environment variable"
                           disabled={saveEnvVarsMutation.isPending}
                         >
                           <Save size={14} />
@@ -657,6 +664,7 @@ export const ConfigurePanel = () => {
                           onClick={handleCancelEdit}
                           size="sm"
                           variant="outline"
+                          aria-label="Cancel editing environment variable"
                         >
                           <X size={14} />
                         </Button>
@@ -679,6 +687,7 @@ export const ConfigurePanel = () => {
                           size="sm"
                           variant="ghost"
                           className="h-8 w-8 p-0"
+                          aria-label={`Edit environment variable ${envVar.key}`}
                         >
                           <Edit2 size={14} />
                         </Button>
@@ -688,6 +697,7 @@ export const ConfigurePanel = () => {
                           size="sm"
                           variant="ghost"
                           className="h-8 w-8 p-0 text-destructive hover:text-destructive"
+                          aria-label={`Delete environment variable ${envVar.key}`}
                           disabled={saveEnvVarsMutation.isPending}
                         >
                           <Trash2 size={14} />

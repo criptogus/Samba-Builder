@@ -23,7 +23,7 @@ export async function loadNativeSkill(slug: string): Promise<string> {
     loaders[`./native-skills/${slug}.md`] ??
     loaders[`./native-skills/${slug}/SKILL.md`];
   if (!loader) throw new Error(`Conteúdo indisponível: /${slug}`);
-  const body = await loader();
+  const body = (await loader()).replace(/\r\n/g, "\n");
   if (!body.trim() || body.length > MAX_NATIVE_SKILL_CHARS) {
     throw new Error(`Conteúdo inválido: /${slug}`);
   }

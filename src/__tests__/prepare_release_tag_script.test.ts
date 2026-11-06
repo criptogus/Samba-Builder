@@ -9,6 +9,7 @@ const {
   findReleaseByTag,
   getRepoParts,
   getRemoteTagShaFromOutput,
+  remoteTagLsRemotePattern,
   writeGithubOutputs,
 } = require("../../scripts/prepare-release-tag.js");
 
@@ -114,6 +115,26 @@ describe("prepare release tag script", () => {
         token: "token",
       }),
     ).rejects.toMatchObject({ status: 500 });
+  });
+
+  it("queries a tag glob so annotated tags include the peeled commit", () => {
+    expect(remoteTagLsRemotePattern("v1.14.0-beta.17")).toBe(
+      "refs/tags/v1.14.0-beta.17*",
+    );
+  });
+
+  it("prefers the exact tag when a longer tag shares the prefix", () => {
+    expect(
+      getRemoteTagShaFromOutput({
+        output: [
+          "other-object\trefs/tags/v1.3.0-rc.1",
+          "other-commit\trefs/tags/v1.3.0-rc.1^{}",
+          "tag-object-sha\trefs/tags/v1.3.0",
+          "commit-sha\trefs/tags/v1.3.0^{}",
+        ].join("\n"),
+        tagName: "v1.3.0",
+      }),
+    ).toBe("commit-sha");
   });
 
   it("prefers dereferenced SHAs for annotated remote tags", () => {

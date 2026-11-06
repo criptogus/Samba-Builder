@@ -1313,6 +1313,7 @@ export const PreviewIframe = ({
                 render={
                   <PopoverTrigger
                     data-testid="device-mode-button"
+                    aria-label="Device Mode"
                     onClick={() => {
                       // Toggle popover open/close
                       if (isDevicePopoverOpen)
@@ -1346,6 +1347,7 @@ export const PreviewIframe = ({
               >
                 <Tooltip>
                   <TooltipTrigger
+                    aria-label="Desktop view"
                     render={
                       <ToggleGroupItem
                         value="desktop"
@@ -1359,6 +1361,7 @@ export const PreviewIframe = ({
                 </Tooltip>
                 <Tooltip>
                   <TooltipTrigger
+                    aria-label="Tablet view"
                     render={
                       <ToggleGroupItem
                         value="tablet"
@@ -1372,6 +1375,7 @@ export const PreviewIframe = ({
                 </Tooltip>
                 <Tooltip>
                   <TooltipTrigger
+                    aria-label="Mobile view"
                     render={
                       <ToggleGroupItem
                         value="mobile"

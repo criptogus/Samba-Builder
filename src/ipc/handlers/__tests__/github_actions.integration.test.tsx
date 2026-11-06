@@ -225,7 +225,7 @@ describe("GitHub connector actions (integration)", () => {
         .getAttribute("href"),
     ).toBe("https://sambatech.com");
     expect(
-      within(connectedRepo).getByRole("button", { name: "Copy" }),
+      within(connectedRepo).getByRole("button", { name: "Copy error message" }),
     ).toBeTruthy();
 
     runSpy.mockRejectedValueOnce(

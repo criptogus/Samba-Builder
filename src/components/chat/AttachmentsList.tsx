@@ -27,7 +27,7 @@ function ImageAttachmentThumbnail({ file }: { file: File }) {
 
   return (
     <Tooltip>
-      <TooltipTrigger render={<div className="flex" />}>
+      <TooltipTrigger aria-label={file.name} render={<div className="flex" />}>
         <img
           src={objectUrl}
           alt={file.name}

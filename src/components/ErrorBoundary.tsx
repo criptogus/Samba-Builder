@@ -37,13 +37,15 @@ export function ErrorBoundary({ error }: ErrorComponentProps) {
 
         <p className="text-sm mb-3">There was an error loading the app...</p>
 
-        {error && (
+        {error != null && (
           <div className="bg-slate-100 dark:bg-slate-800 p-4 rounded-md mb-6">
             <p className="text-sm mb-1">
-              <strong>Error name:</strong> {error.name}
+              <strong>Error name:</strong>{" "}
+              {error instanceof Error ? error.name : "Error"}
             </p>
             <p className="text-sm">
-              <strong>Error message:</strong> {error.message}
+              <strong>Error message:</strong>{" "}
+              {error instanceof Error ? error.message : String(error)}
             </p>
           </div>
         )}

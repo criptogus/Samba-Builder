@@ -162,7 +162,7 @@ describe("SambaMarkdownParser samba-command", () => {
     expect(screen.queryByText(/Unsupported:/)).toBeNull();
   });
 
-  it("renders a specialist next-step with the agent's face and sends their prompt", () => {
+  it("renders a specialist next-step huddle with the agent's face and sends their prompt", () => {
     const store = createStore();
     store.set(selectedChatIdAtom, 7);
     mockStreamMessage.mockReset();
@@ -170,14 +170,18 @@ describe("SambaMarkdownParser samba-command", () => {
       <Provider store={store}>
         <SambaMarkdownParser
           content={
-            '<samba-command type="next-step" specialist="cybersec" prompt="Audite autorização do novo endpoint"></samba-command>'
+            '<samba-command type="next-step" specialist="cybersec" why="endpoint novo sem checagem de papel" prompt="Audite autorização do novo endpoint"></samba-command>'
           }
         />
       </Provider>,
     );
 
+    expect(screen.getByText(/Your specialists looked at this/)).toBeTruthy();
     expect(screen.getByText(/Kai recommends/)).toBeTruthy();
     expect(screen.getByText(/Cyber Security/)).toBeTruthy();
+    expect(
+      screen.getByText(/endpoint novo sem checagem de papel/),
+    ).toBeTruthy();
     expect(
       screen.getByRole("img", { name: /Kai, Cyber Security/ }),
     ).toBeTruthy();
@@ -187,9 +191,95 @@ describe("SambaMarkdownParser samba-command", () => {
       }),
     );
     expect(mockStreamMessage).toHaveBeenCalledWith({
-      prompt: "/samba-security Audite autorização do novo endpoint",
+      prompt:
+        "/samba-security Kai notou: endpoint novo sem checagem de papel. Audite autorização do novo endpoint",
       chatId: 7,
     });
+  });
+
+  it("groups consecutive specialist next-steps into one huddle", () => {
+    render(
+      <SambaMarkdownParser
+        content={
+          '<samba-command type="next-step" specialist="ux-ui" why="hierarquia visual ainda irregular" prompt="Faça a revisão final das telas"></samba-command>\n<samba-command type="next-step" specialist="quality" prompt="Cubra a jornada com testes"></samba-command>'
+        }
+      />,
+    );
+
+    expect(screen.getAllByText(/Your specialists looked at this/)).toHaveLength(
+      1,
+    );
+    expect(screen.getByText(/Luna recommends/)).toBeTruthy();
+    expect(screen.getByText(/Tess recommends/)).toBeTruthy();
+  });
+});
+
+describe("SambaMarkdownParser specialist talk", () => {
+  afterEach(() => {
+    cleanup();
+  });
+
+  it("renders a specialist saying what was done with their face", () => {
+    render(
+      <SambaMarkdownParser
+        content={
+          '<samba-say specialist="cybersec" about="done">Olhei o endpoint novo: a rota existe, mas ainda nao checa papel.</samba-say>'
+        }
+      />,
+    );
+
+    expect(screen.getByText(/Your specialists are here/)).toBeTruthy();
+    expect(screen.getByText(/Kai on what was done/)).toBeTruthy();
+    expect(
+      screen.getByText(/Olhei o endpoint novo: a rota existe/),
+    ).toBeTruthy();
+    expect(
+      screen.getByRole("img", { name: /Kai, Cyber Security/ }),
+    ).toBeTruthy();
+  });
+
+  it("renders an invite and sends the invited specialist's prompt", () => {
+    const store = createStore();
+    store.set(selectedChatIdAtom, 7);
+    mockStreamMessage.mockReset();
+    render(
+      <Provider store={store}>
+        <SambaMarkdownParser
+          content={
+            '<samba-invite from="ux-ui" specialist="quality" why="as telas mudaram e a jornada ainda nao tem e2e" prompt="Cubra a jornada de onboarding com testes"></samba-invite>'
+          }
+        />
+      </Provider>,
+    );
+
+    expect(screen.getByText(/Luna called Tess/)).toBeTruthy();
+    expect(
+      screen.getByText(/as telas mudaram e a jornada ainda nao tem e2e/),
+    ).toBeTruthy();
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: /Bring Tess in: Cubra a jornada de onboarding com testes/,
+      }),
+    );
+    expect(mockStreamMessage).toHaveBeenCalledWith({
+      prompt:
+        "/samba-quality-engineering /samba-tdd Luna chamou Tess: as telas mudaram e a jornada ainda nao tem e2e. Cubra a jornada de onboarding com testes",
+      chatId: 7,
+    });
+  });
+
+  it("groups consecutive say and invite into one huddle", () => {
+    render(
+      <SambaMarkdownParser
+        content={
+          '<samba-say specialist="ux-ui" about="done">Ajustei a hierarquia da home.</samba-say>\n<samba-invite from="ux-ui" specialist="quality" prompt="Cubra a jornada com testes"></samba-invite>'
+        }
+      />,
+    );
+
+    expect(screen.getAllByText(/Your specialists are here/)).toHaveLength(1);
+    expect(screen.getByText(/Luna on what was done/)).toBeTruthy();
+    expect(screen.getByText(/Luna called Tess/)).toBeTruthy();
   });
 });
 

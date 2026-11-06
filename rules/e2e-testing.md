@@ -179,7 +179,7 @@ For app features that fetch `api.samba.sh` directly, add a test-only env overrid
 
 ## CI scaffold dependency installs
 
-If an E2E CI shard fails before Playwright starts with `[ERR_PNPM_IGNORED_BUILDS]` during `cd scaffold && pnpm install` or `cd nextjs-template && pnpm install`, check the workflow pnpm version first. `pnpm@latest` can change build-script policy between major versions; pin the workflow pnpm version or explicitly update the build-script policy instead of debugging test code.
+If an E2E CI shard fails before Playwright starts with `[ERR_PNPM_IGNORED_BUILDS]` during `cd scaffold && pnpm install`, check the workflow pnpm version first. `pnpm@latest` can change build-script policy between major versions; pin the workflow pnpm version or explicitly update the build-script policy instead of debugging test code. The workflow does not clone `nextjs-template`: that upstream repository is gone, and no spec reads a local checkout of it.
 
 Cross-platform E2E helpers must not pass POSIX-quoted scripts such as
 `node -e '...'` through `execSync`; Windows `cmd.exe` treats the single quotes

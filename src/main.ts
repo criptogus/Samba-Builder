@@ -1,6 +1,5 @@
 import {
   app,
-  autoUpdater,
   BrowserWindow,
   dialog,
   Menu,
@@ -22,13 +21,13 @@ import {
 } from "./ipc/services/release_check";
 import { installLatestUpdate } from "./main/update_install_flow";
 import dotenv from "dotenv";
-// Samba Builder: o canal de atualização são as releases deste repositório no
-// GitHub (serviço público do Electron) — nenhum backend do Samba é consultado.
-import { makeUserNotifier, updateElectronApp } from "update-electron-app";
+// Samba Builder: o canal de atualização é a API de releases deste repositório.
+// O feed público do Electron ignora pré-lançamento, então não entra aqui.
 import {
-  AUTO_UPDATE_INTERVAL,
   AUTO_UPDATE_REPO,
+  RELEASE_CHECK_INTERVAL_MS,
   shouldEnableAutoUpdate,
+  statusFromReleaseCheck,
 } from "./main/auto_update";
 import log from "electron-log";
 import {
@@ -683,57 +682,40 @@ export async function onReady() {
   // dizer "atualização automática desligada" em vez de "nunca verificado".
   recordAutoUpdateStatus({ enabled: autoUpdateEnabled });
   if (autoUpdateEnabled) {
-    // Cada estado do updater vira um retrato que a interface mostra, e toda
+    // Cada estado da checagem vira um retrato que a interface mostra, e toda
     // mudança é transmitida para a janela aberta.
     onAutoUpdateStatusChange((status) => {
       broadcastToAllWindows(systemEvents.autoUpdateStatus.channel, status);
     });
-    autoUpdater.on("checking-for-update", () =>
+    const checkPublishedRelease = async () => {
       recordAutoUpdateStatus({
         enabled: true,
         phase: "checking",
         message: null,
-      }),
-    );
-    autoUpdater.on("update-available", () =>
-      recordAutoUpdateCheck({ enabled: true, phase: "update-available" }),
-    );
-    autoUpdater.on("update-not-available", () =>
-      recordAutoUpdateCheck({ enabled: true, phase: "up-to-date" }),
-    );
-    autoUpdater.on("update-downloaded", (_event, _notes, releaseName) =>
-      recordAutoUpdateCheck({
-        enabled: true,
-        phase: "downloaded",
-        version:
-          typeof releaseName === "string" && releaseName ? releaseName : null,
-      }),
-    );
-    // Falha de update tem de aparecer em nível de erro: o coletor de bug report
-    // descarta linhas [info] e sobrariam só caudas de stack (rules/auto-update.md).
-    autoUpdater.on("error", (error) => {
-      logger.error("Auto-update error:", error);
-      recordAutoUpdateCheck({
-        enabled: true,
-        phase: "error",
-        message: error instanceof Error ? error.message : String(error),
       });
-    });
-    updateElectronApp({
-      repo: AUTO_UPDATE_REPO,
-      updateInterval: AUTO_UPDATE_INTERVAL,
-      logger,
-      notifyUser: true,
-      onNotifyUser: makeUserNotifier({
-        title: "Atualização do Samba Builder",
-        detail:
-          "Uma nova versão foi baixada. Reinicie para aplicar a atualização.",
-        restartButtonText: "Reiniciar agora",
-        laterButtonText: "Depois",
-      }),
-    });
+      const token = readSettings().githubAccessToken?.value ?? null;
+      const result = await checkForRelease({
+        currentVersion: app.getVersion(),
+        token,
+      });
+      const patch = statusFromReleaseCheck(result);
+      // Falha tem de aparecer em nível de erro: o coletor de bug report
+      // descarta linhas [info] e sobraria só cauda de stack.
+      if (patch.phase === "error") {
+        logger.error("Checagem de versão falhou:", patch.message);
+      } else {
+        logger.info(
+          `Checagem de versão: ${patch.phase} publicada=${patch.version ?? "-"}`,
+        );
+      }
+      recordAutoUpdateCheck({ enabled: true, ...patch });
+    };
+    void checkPublishedRelease();
+    setInterval(() => {
+      void checkPublishedRelease();
+    }, RELEASE_CHECK_INTERVAL_MS);
     logger.info(
-      `Auto-update ativo pelas releases de ${AUTO_UPDATE_REPO} (a cada ${AUTO_UPDATE_INTERVAL}).`,
+      `Checagem de versão ativa pelas releases de ${AUTO_UPDATE_REPO} (a cada ${RELEASE_CHECK_INTERVAL_MS} ms).`,
     );
   }
 }

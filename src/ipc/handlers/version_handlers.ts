@@ -757,10 +757,10 @@ async function revertCodebaseToVersion({
         // promise rejection and it would surface as an unhandled rejection.
         retryOnLocked(
           () =>
-            neonClient.deleteProjectBranch(
-              app.neonProjectId!,
-              preserveBranchId,
-            ),
+            neonClient.deleteProjectBranch({
+              projectId: app.neonProjectId!,
+              branchId: preserveBranchId,
+            }),
           `Delete preserve branch ${preserveBranchId} for app ${appId}`,
           { retryBranchWithChildError: true },
         ).catch((error) => {

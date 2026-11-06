@@ -12,6 +12,9 @@ export interface PromptItem {
   updatedAt: Date;
 }
 
+// ⚡ Bolt Optimization: Use stable reference for empty array to prevent unnecessary re-renders
+const EMPTY_ARRAY: PromptItem[] = [];
+
 export function usePrompts() {
   const queryClient = useQueryClient();
   const listQuery = useQuery({
@@ -81,7 +84,7 @@ export function usePrompts() {
   });
 
   return {
-    prompts: listQuery.data ?? [],
+    prompts: listQuery.data ?? EMPTY_ARRAY,
     isLoading: listQuery.isLoading,
     error: listQuery.error,
     refetch: listQuery.refetch,

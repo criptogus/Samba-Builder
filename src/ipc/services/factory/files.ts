@@ -24,6 +24,8 @@ const generated = new Set([
   "docs/handoff.md",
   "samba/pipeline-status.json",
   "samba/skills.lock",
+  "samba/learning-report.md",
+  "samba/learn-record.json",
 ]);
 /** Hash all regular source assets, including binaries; never follow symlinks. */
 export async function readFactorySources(root: string) {
@@ -40,15 +42,9 @@ export async function readFactorySources(root: string) {
       if (excluded.has(entry.name)) continue;
       const absolute = path.join(directory, entry.name);
       const relative = path.relative(root, absolute).split(path.sep).join("/");
-      // Evidence includes its own digest, so only non-executable receipts are excluded.
-      if (
-        [
-          "docs/security-report.md",
-          "samba/pipeline-status.json",
-          "samba/skills.lock",
-        ].includes(relative)
-      )
-        continue;
+      // Recibos gerados pela fábrica não entram no digest: exportar o handoff
+      // não pode invalidar o scan do código que acabou de ser aprovado.
+      if (generated.has(relative)) continue;
       if (entry.isSymbolicLink()) {
         limitations.push(`Link simbólico não inspecionado: ${relative}`);
         hash.update(`symlink:${relative}`);

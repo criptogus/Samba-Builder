@@ -57,7 +57,7 @@ describe("useVoiceToText", () => {
       configurable: true,
     });
 
-    const MediaRecorderConstructor = vi.fn(() => {
+    const MediaRecorderConstructor = vi.fn(function MediaRecorder() {
       const instance = new MockMediaRecorder();
       mediaRecorderInstances.push(instance);
       return instance;

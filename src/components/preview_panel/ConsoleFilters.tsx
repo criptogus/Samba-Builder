@@ -127,6 +127,7 @@ export const ConsoleFilters = ({
               onClick={onClearLogs}
               className="p-1 border border-border rounded bg-transparent hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
               data-testid="clear-logs-button"
+              aria-label={t("preview.consoleFilters.clearLogs")}
             />
           }
         >

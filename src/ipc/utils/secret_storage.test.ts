@@ -1,4 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
+import * as fs from "node:fs/promises";
+import os from "node:os";
+import path from "node:path";
 
 const isEncryptionAvailable = vi.fn(() => true);
 const encryptString = vi.fn((s: string) => Buffer.from(`enc:${s}`, "utf8"));
@@ -31,6 +34,7 @@ import {
   decryptSecretMap,
   encryptSecretMap,
   readServerSecretMap,
+  secretStorageHmacKey,
 } from "./secret_storage";
 
 describe("encryptSecretMap / decryptSecretMap", () => {
@@ -61,15 +65,42 @@ describe("encryptSecretMap / decryptSecretMap", () => {
   it("round-trips through the no-keyring fallback", () => {
     isEncryptionAvailable.mockReturnValue(false);
     const stored = encryptSecretMap({ A: "1" })!;
-    expect(stored.startsWith("plain:")).toBe(true);
+    expect(stored.startsWith("auth:")).toBe(true);
     expect(decryptSecretMap(stored)).toEqual({ A: "1" });
   });
 
   it("reads a plain: blob written without a keyring after one appears", () => {
-    isEncryptionAvailable.mockReturnValue(false);
-    const stored = encryptSecretMap({ A: "1" })!;
+    const stored =
+      "plain:" + Buffer.from(JSON.stringify({ A: "1" })).toString("base64");
     isEncryptionAvailable.mockReturnValue(true);
     expect(decryptSecretMap(stored)).toEqual({ A: "1" });
+  });
+
+  it("rejects tampered authenticated fallback blobs", () => {
+    isEncryptionAvailable.mockReturnValue(false);
+    const stored = encryptSecretMap({ A: "1" })!;
+    const bytes = Buffer.from(stored.slice("auth:".length), "base64");
+    bytes[bytes.length - 1] ^= 1;
+    expect(() => decryptSecretMap("auth:" + bytes.toString("base64"))).toThrow(
+      "HMAC",
+    );
+  });
+
+  it("persists one HMAC key before concurrent callers resolve", async () => {
+    const directory = await fs.mkdtemp(path.join(os.tmpdir(), "hmac-key-"));
+    try {
+      const keys = await Promise.all(
+        Array.from({ length: 8 }, () => secretStorageHmacKey(directory)),
+      );
+      const persisted = await fs.readFile(
+        path.join(directory, ".samba", "hmac_key"),
+      );
+      expect(persisted).toHaveLength(32);
+      for (const key of keys) expect(key).toEqual(persisted);
+      expect(await secretStorageHmacKey(directory)).toEqual(persisted);
+    } finally {
+      await fs.rm(directory, { recursive: true, force: true });
+    }
   });
 
   it("returns null for absent, undecryptable and non-JSON blobs", () => {

@@ -33,12 +33,12 @@ jobs:
           permission-pull-requests: write
 
       - name: Checkout repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
       - name: Initialize environment
-        uses: actions/setup-node@v5
+        uses: actions/setup-node@v7
         with:
           node-version: v24.13.1
           cache: npm
@@ -52,24 +52,18 @@ jobs:
           GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
+        uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
         with:
           version: 10.33.2
 
-      - name: Clone nextjs-template
-        run: git clone --depth 1 https://github.com/samba-sh/nextjs-template.git nextjs-template
-
       - name: Install scaffold dependencies
         run: cd scaffold && pnpm install
-
-      - name: Install nextjs-template dependencies
-        run: cd nextjs-template && pnpm install
 
       - name: Build fake LLM server
         run: cd testing/fake-llm-server && npm install && npm run build
 
       - name: Deflake E2E tests
-        uses: anthropics/claude-code-action@80c86e6b3cc02993f6c493655003f711315c83d7 # v1.0.182
+        uses: anthropics/claude-code-action@16f9f71ab9c490faf367f94dd294897edc25be33 # v1.0.261
         env:
           GH_TOKEN: ${{ steps.app-token.outputs.token }}
           CLAUDE_CODE_MAX_OUTPUT_TOKENS: 48000

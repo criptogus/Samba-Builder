@@ -24,6 +24,7 @@ import { useSettings } from "./useSettings";
 import { isSupabaseConnected } from "@/lib/schemas";
 import { queryKeys } from "@/lib/queryKeys";
 import { useAppRunRemoteManager } from "@/app_run/AppRunRemoteProvider";
+import { EMPTY_ARRAY } from "@/lib/constants";
 
 const EDGE_LOGS_POLL_INTERVAL_MS = 5_000;
 
@@ -308,9 +309,9 @@ export function useSupabase(options: UseSupabaseOptions = {}) {
 
   return {
     // Data
-    organizations: organizationsQuery.data ?? [],
-    projects: projectsQuery.data ?? [],
-    branches: branchesQuery.data ?? [],
+    organizations: organizationsQuery.data ?? EMPTY_ARRAY,
+    projects: projectsQuery.data ?? EMPTY_ARRAY,
+    branches: branchesQuery.data ?? EMPTY_ARRAY,
 
     // Organizations query state
     isLoadingOrganizations: organizationsQuery.isLoading,

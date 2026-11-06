@@ -232,21 +232,27 @@ function SidebarTrigger({
   return (
     <Tooltip>
       <TooltipTrigger
-        data-sidebar="trigger"
-        data-slot="sidebar-trigger"
-        className={cn(
-          "flex items-center justify-center w-10 h-10 rounded-xl text-sidebar-foreground cursor-pointer transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring",
-          className,
-        )}
-        onClick={(event) => {
-          onClick?.(event as React.MouseEvent<HTMLButtonElement>);
-          toggleSidebar();
-        }}
-        {...props}
-      >
-        <Menu className="size-5" />
-        <span className="sr-only">Toggle Menu</span>
-      </TooltipTrigger>
+        aria-label="Toggle Menu"
+        render={
+          <button
+            type="button"
+            data-sidebar="trigger"
+            data-slot="sidebar-trigger"
+            className={cn(
+              "flex items-center justify-center w-10 h-10 rounded-xl text-sidebar-foreground cursor-pointer transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring",
+              className,
+            )}
+            onClick={(event) => {
+              onClick?.(event as React.MouseEvent<HTMLButtonElement>);
+              toggleSidebar();
+            }}
+            {...props}
+          >
+            <Menu className="size-5" />
+            <span className="sr-only">Toggle Menu</span>
+          </button>
+        }
+      />
       <TooltipContent side="right" align="center">
         Toggle Menu
       </TooltipContent>

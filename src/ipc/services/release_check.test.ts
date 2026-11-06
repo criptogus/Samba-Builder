@@ -6,6 +6,7 @@ import {
   describeReleaseCheck,
   pickReleaseAsset,
   selectLatestRelease,
+  selectPreviousReleaseTag,
 } from "./release_check";
 
 describe("describeReleaseCheck", () => {
@@ -149,6 +150,21 @@ describe("selectLatestRelease", () => {
     );
     expect(latest?.version).toBe("1.14.0-beta.3");
     expect(latest?.url).toBe("u3");
+  });
+
+  it("ignora a ordem da API e a release atual ao achar a predecessora", () => {
+    const releases = [
+      { tag_name: "v1.14.0-beta.8", draft: false },
+      { tag_name: "v1.14.0-beta.7", draft: false },
+      { tag_name: "v1.14.0-beta.13", draft: false },
+      { tag_name: "v1.14.0-beta.12", draft: false },
+    ];
+    expect(selectPreviousReleaseTag(releases, "v1.14.0-beta.14")).toBe(
+      "v1.14.0-beta.13",
+    );
+    expect(selectPreviousReleaseTag(releases, "v1.14.0-beta.13")).toBe(
+      "v1.14.0-beta.12",
+    );
   });
 
   it("devolve null sem releases válidas", () => {

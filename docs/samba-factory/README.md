@@ -4,6 +4,10 @@ A Fábrica adiciona ao Samba Builder um fluxo de cliente → briefing → plano 
 
 Esta entrega implementa a fundação funcional do PRD; não representa a conclusão de todos os itens de 90/180 dias. O [PRD original](./PRD-original.md) é o material fornecido pelo solicitante, não uma validação independente das afirmações sobre concorrentes.
 
+## Roadmap / Caminho 1
+
+O [Roadmap 90 dias — Caminho 1](./ROADMAP-90D-INTERNAL-FACTORY.md) é o doc canônico deste ciclo. A tese: não vencer Lovable na vitrine; vencer como sistema operacional da software house Samba (plano aceito, gate verde, handoff sem babysitting). Quem compra o resultado é o funil ZA (Assessment → Piloto → BaaS); o Builder é COGS + qualidade. A productização white-label B2B (Caminho 2) só abre após os critérios do roadmap. Os épicos E1–E6 saem em mudanças separadas, nessa ordem.
+
 ## Usar
 
 1. Execute o Builder com Node 24: `npm ci`, `npm run init-precommit`, `npm start`.
@@ -13,8 +17,8 @@ Esta entrega implementa a fundação funcional do PRD; não representa a conclus
 5. Em Design, escolha e personalize os tokens. Confirme com o nome do responsável. São três presets de tokens, não um canvas de telas geradas.
 6. Abra Build/Fix no Studio para implementar. Os demais modos usam leitura. Novos pedidos devem ser registrados e classificados no Scope Guard.
 7. Marque tarefas concluídas após verificar o aceite. Configure scripts `typecheck` (ou `ts`) e `test:smoke` reais e não interativos no app cliente.
-8. Exporte o handoff, execute a verificação e revise os bloqueios em Entrega. O scan executa scripts do projeto na máquina local e consulta o registry npm. Código alterado depois do scan exige nova execução. Exportar documentos pela primeira vez também pode alterar o digest: exporte antes da verificação final.
-9. Use as integrações existentes de GitHub e deploy. O Builder revalida o gate no Git push nativo, na criação de projeto Vercel e na solicitação de deploy Coolify. Esta integração não controla deploys executados fora do Builder ou por ferramentas externas/MCP.
+8. Execute a verificação e revise os bloqueios em Entrega. O scan executa scripts do projeto na máquina local e consulta o registry npm. Código alterado depois do scan exige nova execução. Os recibos gerados (`docs/*.md` de fábrica e `samba/*`) não entram no digest.
+9. Em Entrega, use **Gerar handoff** para commitar os artefatos, publicar a branch e abrir ou atualizar o pull request com checklist de aceite. O gate é revalidado em Git push, Vercel (criar e deploy), Coolify, AWS, função Supabase, comando de publish do agente e ferramenta MCP de publish. A matriz está em [PUBLISH-GATES.md](./PUBLISH-GATES.md). O terminal interativo não é caminho de publicação.
 
 ## Comportamentos implementados
 
@@ -31,19 +35,19 @@ Esta entrega implementa a fundação funcional do PRD; não representa a conclus
 
 ## Fronteiras e trabalho restante
 
-| Requisito do PRD                                      | Estado nesta entrega                                                                                                   |
-| ----------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
-| Pipeline local, planos, marca, skills, scan e handoff | Implementado e conectado ao Electron                                                                                   |
-| Planejamento com IA                                   | Conversa com skill + importação de JSON pelo operador; não há captura automática da resposta                           |
-| Scope Guard                                           | Registro e classificação explícitos; não classifica semanticamente cada prompt de forma automática                     |
-| Canvas e marca                                        | Presets e edição de tokens; Figma/logo ingest, variantes de telas e QA visual automático ainda pendentes               |
-| Security Agent                                        | Prompt de revisão + scan básico; Semgrep, deep scan, validação do banco remoto, LGPD e waiver autenticado pendentes    |
-| RBAC/isolamento de equipe                             | Identidade declarada pelo operador local; sem SSO/RBAC, cofre por cliente, sync ou auditoria inviolável                |
-| Publicação protegida                                  | Gate nas entradas descritas; não cobre comandos externos, MCP ou todos os possíveis provedores de deploy               |
-| Client preview                                        | Integrações de deploy herdadas; magic link, comentários pinados e proteção do staging ainda pendentes                  |
-| Scaffold portal B2B e catálogo de capabilities        | Pendente; o agente utiliza o template/stack existente do aplicativo                                                    |
-| Orquestração e custos                                 | Recursos já existentes do runtime; não há novo roteamento de modelos, orçamento ou paralelismo independente de src/pro |
-| PR e handoff                                          | Documentos exportáveis e Git herdado; criação automática de PR com screenshots/owners ainda pendente                   |
+| Requisito do PRD                                      | Estado nesta entrega                                                                                                                                             |
+| ----------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Pipeline local, planos, marca, skills, scan e handoff | Implementado e conectado ao Electron                                                                                                                             |
+| Planejamento com IA                                   | Conversa com skill + importação de JSON pelo operador; não há captura automática da resposta                                                                     |
+| Scope Guard                                           | Registro e classificação explícitos; não classifica semanticamente cada prompt de forma automática                                                               |
+| Canvas e marca                                        | Presets e edição de tokens; Figma/logo ingest, variantes de telas e QA visual automático ainda pendentes                                                         |
+| Security Agent                                        | Prompt de revisão + scan básico; Semgrep, deep scan, validação do banco remoto, LGPD e waiver autenticado pendentes                                              |
+| RBAC/isolamento de equipe                             | Identidade declarada pelo operador local; sem SSO/RBAC, cofre por cliente, sync ou auditoria inviolável                                                          |
+| Publicação protegida                                  | Gate nas entradas nativas, no agente e em ferramenta MCP de publish. Terminal interativo fica de fora, de propósito. Ver [PUBLISH-GATES.md](./PUBLISH-GATES.md). |
+| Client preview                                        | Integrações de deploy herdadas; magic link, comentários pinados e proteção do staging ainda pendentes                                                            |
+| Scaffold portal B2B e catálogo de capabilities        | Pendente; o agente utiliza o template/stack existente do aplicativo                                                                                              |
+| Orquestração e custos                                 | Recursos já existentes do runtime; não há novo roteamento de modelos, orçamento ou paralelismo independente de src/pro                                           |
+| PR e handoff                                          | Documentos exportáveis e Git herdado; criação automática de PR com screenshots/owners ainda pendente                                                             |
 
 O scan local não comprova que um banco remoto está protegido, que um teste é relevante ou que uma aplicação não tem vulnerabilidades. Em especial, o nome do aprovador é uma declaração local, não autenticação AppSec. O arquivo autoritativo protege contra edição acidental pelo agente no projeto, não contra um operador com acesso ao sistema operacional.
 

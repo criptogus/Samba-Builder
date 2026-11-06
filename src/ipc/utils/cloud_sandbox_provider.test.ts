@@ -118,7 +118,9 @@ describe("cloud_sandbox_provider incremental sync", () => {
         },
       );
     });
-    fetchSpy = vi.spyOn(globalThis, "fetch").mockImplementation(fetchMock);
+    fetchSpy = vi
+      .spyOn(globalThis, "fetch")
+      .mockImplementation(fetchMock as typeof fetch);
     registerRunningCloudSandbox({
       appId: 1,
       appPath,
@@ -533,7 +535,9 @@ describe("cloud_sandbox_provider sandbox creation", () => {
         },
       );
     });
-    fetchSpy = vi.spyOn(globalThis, "fetch").mockImplementation(fetchMock);
+    fetchSpy = vi
+      .spyOn(globalThis, "fetch")
+      .mockImplementation(fetchMock as typeof fetch);
   });
 
   afterEach(() => {
@@ -652,7 +656,9 @@ describe("cloud_sandbox_provider response validation", () => {
 
   beforeEach(() => {
     fetchMock = vi.fn();
-    fetchSpy = vi.spyOn(globalThis, "fetch").mockImplementation(fetchMock);
+    fetchSpy = vi
+      .spyOn(globalThis, "fetch")
+      .mockImplementation(fetchMock as typeof fetch);
   });
 
   afterEach(() => {

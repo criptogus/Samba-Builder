@@ -38,7 +38,9 @@ gh api -X PUT repos/criptogus/Samba-Builder/environments/release
 | `MACOS_CERT_P12` + `MACOS_CERT_PASSWORD` + `APPLE_*`          | assina e notariza o macOS                |
 | `AZURE_CLIENT_ID` + `AZURE_CLIENT_SECRET` + `AZURE_TENANT_ID` | assina o Windows (Azure Trusted Signing) |
 
-**Sem eles o release não quebra:** o passo de detecção marca a credencial ausente, `SKIP_CODE_SIGNING` desliga `osxSign`/`osxNotarize` no `forge.config.ts` e o `WINDOWS_SIGN` não é ativado. O resultado é artefato **não assinado** — instalável, mas com aviso do sistema na primeira abertura.
+**Sem eles o release não quebra:** o passo de detecção marca a credencial ausente, `SKIP_CODE_SIGNING` desliga `osxSign`/`osxNotarize` no `forge.config.ts` e o `WINDOWS_SIGN` não é ativado. O resultado é artefato **não assinado**.
+
+**Trilha B, enquanto a assinatura não existe.** O instalador não assinado é só para consultores Samba. Não distribuir ao cliente final. O cliente recebe o aplicativo entregue (repositório e staging), não este Builder. Checklist de quem pode instalar está no README raiz. A trilha A (assinar macOS e Windows) continua o caminho quando as credenciais existirem; até lá o release notes não diz "signed".
 
 ## 3. Disparar
 

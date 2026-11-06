@@ -1549,6 +1549,7 @@ export function ChatTabs({ selectedChatId }: ChatTabsProps) {
                 <ContextMenuTrigger>
                   <Tooltip>
                     <TooltipTrigger
+                      aria-label={`${appName} ${titleExcerpt}`}
                       render={
                         <div
                           draggable

@@ -46,6 +46,10 @@ function git(appDir: string, ...args: string[]): string {
       "user.name=Test User",
       "-c",
       "commit.gpgsign=false",
+      "-c",
+      "core.autocrlf=false",
+      "-c",
+      "core.fsmonitor=false",
       ...args,
     ],
     { cwd: appDir, stdio: "pipe" },
@@ -62,6 +66,10 @@ async function gitNetwork(appDir: string, ...args: string[]): Promise<string> {
       "user.name=Test User",
       "-c",
       "commit.gpgsign=false",
+      "-c",
+      "core.autocrlf=false",
+      "-c",
+      "core.fsmonitor=false",
       ...args,
     ],
     {
@@ -107,7 +115,7 @@ describe("Git collaboration actions (integration)", () => {
     const name = `${baseName}-${appCounter}`;
     const appDir = path.join(appsRoot, slug(name));
     fs.cpSync(fixtureAppDir, appDir, { recursive: true });
-    git(appDir, "init");
+    git(appDir, "init", "-b", "main");
     git(appDir, "add", "-A");
     git(appDir, "commit", "-m", "init");
 

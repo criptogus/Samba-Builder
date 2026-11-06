@@ -12,7 +12,11 @@ import {
   isExploreCodeSubagentPrompt,
 } from "./exploreCodeFixtures";
 import { fakeLlmLog } from "./log";
-import { resolveDumpDir, resolveFixturesDir } from "./paths";
+import {
+  resolveDumpDir,
+  resolveFixtureFile,
+  resolveFixturesDir,
+} from "./paths";
 import {
   matchConsentClassifierPayload,
   SLOW_CONSENT_TOOL,
@@ -596,14 +600,13 @@ export default Index;
     ) {
       const testCaseName = userTextContent.slice(3).split("[")[0].trim(); // Remove "tc=" prefix
       fakeLlmLog(`* Loading test case: ${testCaseName}`);
-      const testFilePath = path.join(
-        resolveFixturesDir(),
-        prefix,
+      const testFilePath = resolveFixtureFile(
+        path.join(resolveFixturesDir(), prefix),
         `${testCaseName}.md`,
       );
 
       try {
-        if (fs.existsSync(testFilePath)) {
+        if (testFilePath && fs.existsSync(testFilePath)) {
           messageContent = fs
             .readFileSync(testFilePath, "utf-8")
             .replace(/\r\n/g, "\n");

@@ -122,9 +122,11 @@ describe("local_agent_prompt", () => {
     );
     expect(prompt).toContain("this may sign them out of other app previews");
     expect(prompt).toContain('specialist="<id>"');
-    expect(prompt).toContain(
-      "a designer (ux-ui) must not recommend after a pure backend",
-    );
+    expect(prompt).toContain("cybersec SHOULD speak");
+    expect(prompt).toContain("ux-ui SHOULD speak");
+    expect(prompt).toContain("NEVER emit ux-ui or mobile");
+    expect(prompt).toContain("<samba-say");
+    expect(prompt).toContain("<samba-invite");
     expect(prompt).toContain("- cybersec (");
     expect(prompt).toContain("- ux-ui (");
   });
@@ -145,6 +147,7 @@ describe("local_agent_prompt", () => {
     expect(prompt).toContain(
       "Do not spawn duplicate Explorers for the same investigation",
     );
+    expect(prompt).toContain('pass specialist="<id>" on spawn_agent');
     expect(prompt).toContain(
       "Validate an Explorer report's exact edit targets",
     );
@@ -177,6 +180,7 @@ describe("local_agent_prompt", () => {
       "Implementation is the Implementer's job by default",
     );
     expect(enabled).toContain("MUST HOLD:");
+    expect(enabled).toContain('pass specialist="<id>" on spawn_agent');
     expect(enabled).toContain("Its report must address each MUST HOLD item");
     expect(enabled).toContain("These are advisory");
     expect(enabled).toContain("inspect the complete actual diff");

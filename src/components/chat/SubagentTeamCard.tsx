@@ -30,6 +30,7 @@ import { queryKeys } from "@/lib/queryKeys";
 import { isSambaProEnabled } from "@/lib/schemas";
 import { showError } from "@/lib/toast";
 import { setPendingReviewContinuation } from "@/hooks/subagentReviewContinuation";
+import { EMPTY_ARRAY } from "@/lib/constants";
 
 const MAX_RENDERED_REPORT_CHARS = 100_000;
 
@@ -65,7 +66,8 @@ export function SubagentTeamCard({
     queryFn: () => ipc.agent.listSubagents({ chatId }),
     enabled: isPro,
   });
-  const threads = query.data ?? [];
+  // ⚡ Bolt Optimization: Use stable reference for empty array to prevent unnecessary re-renders
+  const threads = query.data ?? EMPTY_ARRAY;
   const visibleThreads = useMemo(
     () =>
       threads.filter(

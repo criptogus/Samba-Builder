@@ -31,7 +31,7 @@ jobs:
           permission-issues: write
 
       - name: Checkout repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v7
         with:
           fetch-depth: 200
 
@@ -42,7 +42,7 @@ jobs:
         run: rm -f .claude/settings.json .claude/settings.local.json
 
       - name: Review AGENTS.md and rules/
-        uses: anthropics/claude-code-action@80c86e6b3cc02993f6c493655003f711315c83d7 # v1.0.182
+        uses: anthropics/claude-code-action@16f9f71ab9c490faf367f94dd294897edc25be33 # v1.0.261
         env:
           CLAUDE_CODE_MAX_OUTPUT_TOKENS: 48000
         with:

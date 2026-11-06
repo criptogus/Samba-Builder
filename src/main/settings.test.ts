@@ -1,6 +1,4 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import fs from "node:fs";
-import path from "node:path";
 import { app, safeStorage } from "electron";
 import {
   readSettings,
@@ -39,9 +37,35 @@ const mockWindow = {
   webContents: mockWebContents,
 };
 
-// Mock dependencies
-vi.mock("node:fs");
-vi.mock("node:path");
+const { mockJoin, mockFs } = vi.hoisted(() => {
+  const mockFs = {
+    existsSync: vi.fn(),
+    readFileSync: vi.fn(),
+    writeFileSync: vi.fn(),
+    copyFileSync: vi.fn(),
+    renameSync: vi.fn(),
+    unlinkSync: vi.fn(),
+  };
+  return {
+    mockJoin: vi.fn((...args: string[]) => args.join("/")),
+    mockFs,
+  };
+});
+
+// Vitest 4 no longer turns node builtin automocks into vi.fn().
+vi.mock("node:fs", () => ({
+  default: mockFs,
+  existsSync: mockFs.existsSync,
+  readFileSync: mockFs.readFileSync,
+  writeFileSync: mockFs.writeFileSync,
+  copyFileSync: mockFs.copyFileSync,
+  renameSync: mockFs.renameSync,
+  unlinkSync: mockFs.unlinkSync,
+}));
+vi.mock("node:path", () => ({
+  default: { join: mockJoin },
+  join: mockJoin,
+}));
 vi.mock("electron", () => ({
   app: {
     on: vi.fn(),
@@ -72,9 +96,14 @@ vi.mock("@/main/safe_storage_legacy", () => ({
   recoverLegacySafeStorageSecret: vi.fn(() => null),
 }));
 
-const mockFs = vi.mocked(fs);
-const mockPath = vi.mocked(path);
+const mockPath = { join: mockJoin };
 const mockSafeStorage = vi.mocked(safeStorage);
+
+// Vitest 4 keeps vi.fn() implementations across clear/restore. Reset before
+// every test so a mockImplementation from one case cannot leak into the next.
+beforeEach(() => {
+  vi.resetAllMocks();
+});
 const mockGetUserDataPath = vi.mocked(getUserDataPath);
 const mockGetRemoteDesktopConfig = vi.mocked(getRemoteDesktopConfig);
 

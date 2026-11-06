@@ -3,6 +3,7 @@ import log from "electron-log";
 import path from "path";
 import os from "os";
 import fs from "fs";
+import crypto from "node:crypto";
 import { readFile, writeFile, unlink, mkdir } from "fs/promises";
 import { themesData, type Theme } from "../../../../shared/themes";
 import { db } from "../../../../db";
@@ -542,7 +543,7 @@ export function registerThemesHandlers() {
       }
 
       // Generate unique filename
-      const uniqueFilename = `${Date.now()}-${Math.random().toString(36).slice(2, 11)}${ext}`;
+      const uniqueFilename = `${Date.now()}-${crypto.randomUUID()}${ext}`;
       const filePath = path.join(THEME_IMAGES_TEMP_DIR, uniqueFilename);
 
       // Validate size (base64 to bytes approximation)

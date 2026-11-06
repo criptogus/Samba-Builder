@@ -40,6 +40,16 @@ it("sets production only when explicitly requested", async () => {
   await submitVercelDeployment("token", project, "production");
   expect(call.mock.calls[0][0].requestBody.target).toBe("production");
 });
+it("rejects the reduced anonymous response that has no deployment URL", async () => {
+  call.mockResolvedValue({
+    id: "dep1",
+    readyState: "QUEUED",
+    aliasAssigned: false,
+  });
+  await expect(
+    submitVercelDeployment("token", project, "preview"),
+  ).rejects.toThrow("Confira o token");
+});
 it("does not project provider errors or misleading URLs", async () => {
   call.mockRejectedValue(new Error("Authorization Bearer private-token"));
   await expect(

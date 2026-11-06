@@ -2,6 +2,7 @@ import { ipc } from "@/ipc/types";
 import { AppSearchResult } from "@/lib/schemas";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { queryKeys } from "@/lib/queryKeys";
+import { EMPTY_ARRAY } from "@/lib/constants";
 
 export function useSearchApps(query: string) {
   const enabled = Boolean(query && query.trim().length > 0);
@@ -17,7 +18,7 @@ export function useSearchApps(query: string) {
   });
 
   return {
-    apps: data ?? [],
+    apps: data ?? EMPTY_ARRAY,
     loading: enabled ? isFetching || isLoading : false,
   };
 }

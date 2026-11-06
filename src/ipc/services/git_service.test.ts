@@ -57,13 +57,16 @@ describe("GitService", () => {
     callOrder.length = 0;
     for (const [name, fn] of Object.entries(mocks)) {
       if (typeof fn !== "function") continue;
+      const mock = fn as {
+        mockImplementation: (impl: (...args: any[]) => unknown) => unknown;
+      };
       if (name === "GitStateError") {
-        fn.mockImplementation((message: string, code: string) =>
+        mock.mockImplementation((message: string, code: string) =>
           Object.assign(new Error(message), { code }),
         );
         continue;
       }
-      fn.mockImplementation(async () => {
+      mock.mockImplementation(async () => {
         callOrder.push(name);
         if (name === "gitCommit") return "commit-hash";
         if (name === "hasStagedChanges") return true;

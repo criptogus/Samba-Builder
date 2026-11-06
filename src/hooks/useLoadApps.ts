@@ -1,6 +1,10 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { ipc } from "@/ipc/types";
 import { queryKeys } from "@/lib/queryKeys";
+import type { ListedApp } from "@/ipc/types/app";
+
+// ⚡ Bolt Optimization: Use stable reference for empty array to prevent unnecessary re-renders
+const EMPTY_ARRAY: ListedApp[] = [];
 
 export function useLoadApps() {
   const queryClient = useQueryClient();
@@ -19,7 +23,7 @@ export function useLoadApps() {
   };
 
   return {
-    apps: data ?? [],
+    apps: data ?? EMPTY_ARRAY,
     loading: isLoading,
     error: error ?? null,
     refreshApps,

@@ -190,6 +190,26 @@ describe("SambaSubagent", () => {
     expect(screen.queryByRole("button", { name: /Stop explorer/ })).toBeNull();
   });
 
+  it("shows the specialist face when a catalog id is attached", async () => {
+    mocks.listSubagents.mockResolvedValue([makeThread("running")]);
+    mocks.getSubagentActivities.mockResolvedValue([]);
+
+    const { container } = render(
+      <SambaSubagent
+        chatId={7}
+        threadId="explorer-1"
+        persona="explorer"
+        specialist="cybersec"
+        taskName="Trace authentication"
+        renderActivity={() => null}
+      />,
+      { wrapper: makeWrapper() },
+    );
+
+    expect(await screen.findByText(/Kai · Cyber Security/)).toBeTruthy();
+    expect(container.querySelector("img")).toBeTruthy();
+  });
+
   it("shows a failed thread error and its latest activity error", async () => {
     mocks.listSubagents.mockResolvedValue([
       { ...makeThread("failed"), error: "Model request failed." },

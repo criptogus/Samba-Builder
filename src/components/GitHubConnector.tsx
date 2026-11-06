@@ -224,6 +224,7 @@ function ConnectedGitHubConnector({
   const isSyncConflict =
     githubOpsState.type === "conflicted" &&
     (githubOpsState.origin.type === "push" ||
+      githubOpsState.origin.type === "sync" ||
       githubOpsState.origin.type === "rebase" ||
       githubOpsState.origin.type === "rebase-continue");
   const showErrorBanner =

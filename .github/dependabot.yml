@@ -1,0 +1,45 @@
+version: 2
+updates:
+  # Dependências do pacote principal (Node.js)
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+    open-pull-requests-limit: 10
+    labels:
+      - "dependencies"
+      - "security"
+    groups:
+      production-dependencies:
+        patterns:
+          - "*"
+      dev-dependencies:
+        dependency-type: "development"
+        patterns:
+          - "*"
+
+  # Dependências nativas da keychain-reader (macOS)
+  - package-ecosystem: "npm"
+    directory: "/native/keychain-reader"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "native"
+
+  # GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+    open-pull-requests-limit: 10
+    labels:
+      - "ci"
+      - "dependencies"

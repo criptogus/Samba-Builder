@@ -64,6 +64,7 @@ export function SelectedComponentsDisplay() {
         </span>
         <Tooltip>
           <TooltipTrigger
+            aria-label="Clear all selected components"
             render={
               <button
                 onClick={handleClearAll}
@@ -102,6 +103,7 @@ export function SelectedComponentsDisplay() {
             </div>
             <Tooltip>
               <TooltipTrigger
+                aria-label="Deselect component"
                 render={
                   <button
                     onClick={() => handleRemoveComponent(index)}

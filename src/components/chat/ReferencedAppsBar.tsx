@@ -5,6 +5,7 @@ import { ipc } from "@/ipc/types";
 import { queryKeys } from "@/lib/queryKeys";
 import { cn } from "@/lib/utils";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
+import { EMPTY_ARRAY } from "@/lib/constants";
 
 interface ReferencedAppsBarProps {
   chatId: number | null | undefined;
@@ -57,7 +58,8 @@ export function ReferencedAppsBar({
     meta: { showErrorToast: true },
   });
 
-  const referencedApps = chatQuery.data?.referencedApps ?? [];
+  // ⚡ Bolt Optimization: Use stable reference for empty array to prevent unnecessary re-renders
+  const referencedApps = chatQuery.data?.referencedApps ?? EMPTY_ARRAY;
   const isDetachDisabled = isStreaming || removeMutation.isPending;
 
   if (!isEnabled || activeChatId === null || referencedApps.length === 0) {

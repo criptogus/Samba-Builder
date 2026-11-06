@@ -659,6 +659,7 @@ export default function AppDetailsPage() {
                           <Button
                             variant="ghost"
                             size="icon"
+                            aria-label="Show in folder"
                             className="ml-[-8px] p-0.5 h-auto cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
                             onClick={() => {
                               ipc.system.showItemInFolder(currentAppPath);
@@ -691,6 +692,11 @@ export default function AppDetailsPage() {
                       className="ml-1 h-auto text-muted-foreground cursor-pointer hover:bg-transparent hover:text-foreground transition-colors"
                       onClick={() => setIsAssignCollectionDialogOpen(true)}
                       data-testid="app-details-edit-collection-button"
+                      aria-label={
+                        selectedApp.collectionId == null
+                          ? "Assign to collection"
+                          : "Edit collection"
+                      }
                     >
                       {selectedApp.collectionId == null ? (
                         <Plus className="h-3.5 w-3.5" />

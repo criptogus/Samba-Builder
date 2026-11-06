@@ -59,7 +59,7 @@ describe("packaged renderer route coverage", () => {
   it("trusts every static route registered with TanStack Router", () => {
     configureTrustedRenderer({ packagedRendererUrl: PACKAGED_RENDERER_URL });
 
-    const staticRoutePaths = router.flatRoutes
+    const staticRoutePaths = Object.values(router.routesById)
       .map((route) => route.fullPath)
       .filter((routePath) => !routePath.includes("$"));
 

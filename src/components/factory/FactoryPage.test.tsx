@@ -17,6 +17,7 @@ const api = vi.hoisted(() => ({
   scan: vi.fn(),
   gate: vi.fn(),
   export: vi.fn(),
+  handoff: vi.fn(),
 }));
 vi.mock("@/ipc/types/factory", () => ({ factoryClient: api }));
 vi.mock("@/ipc/types", () => ({ ipc: { chat: { createChat: vi.fn() } } }));

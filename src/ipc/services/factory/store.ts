@@ -49,6 +49,33 @@ export async function writeFactoryStore(
     return next;
   });
 }
+/** Primeiro staging depois da aprovação atual. Não mexe em app fora da Fábrica. */
+export async function recordFactoryStaging(appId: number): Promise<void> {
+  const project = await getFactoryProject(appId);
+  if (
+    !project ||
+    project.stages?.stagingAt ||
+    !project.stages?.planApprovedAt
+  ) {
+    return;
+  }
+  const at = new Date().toISOString();
+  await mutateFactoryProject(appId, project.revision, (current) => ({
+    ...current,
+    revision: current.revision + 1,
+    stages: { ...current.stages, stagingAt: at },
+    audit: [
+      ...current.audit,
+      {
+        at,
+        actor: "Fábrica",
+        action: "stage:staging",
+        revision: current.revision + 1,
+      },
+    ],
+  }));
+}
+
 export async function getFactoryProject(
   appId: number,
 ): Promise<FactoryProject | undefined> {

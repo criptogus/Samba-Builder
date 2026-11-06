@@ -10,6 +10,7 @@ import type {
   ThemeGenerationModelOption,
 } from "@/ipc/types";
 import { queryKeys } from "@/lib/queryKeys";
+import { EMPTY_ARRAY } from "@/lib/constants";
 
 /**
  * Hook to fetch all custom themes.
@@ -25,8 +26,9 @@ export function useCustomThemes() {
     },
   });
 
+  // ⚡ Bolt Optimization: Use shared EMPTY_ARRAY to prevent re-renders when returning fallback arrays
   return {
-    customThemes: query.data ?? [],
+    customThemes: query.data ?? EMPTY_ARRAY,
     isLoading: query.isLoading,
     error: query.error,
     refetch: query.refetch,
@@ -116,8 +118,9 @@ export function useThemeGenerationModelOptions() {
     },
   });
 
+  // ⚡ Bolt Optimization: Use shared EMPTY_ARRAY to prevent re-renders when returning fallback arrays
   return {
-    themeGenerationModelOptions: query.data ?? [],
+    themeGenerationModelOptions: query.data ?? EMPTY_ARRAY,
     isLoadingThemeGenerationModelOptions: query.isLoading,
   };
 }

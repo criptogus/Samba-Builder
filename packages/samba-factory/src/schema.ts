@@ -62,6 +62,18 @@ export const ApprovalSchema = z.object({
   at: z.string(),
   revision: z.number().int(),
 });
+/** Relógio operacional do ciclo de 1 dia. Ausente em registros antigos. */
+export const StageClockSchema = z
+  .object({
+    briefAt: z.string().optional(),
+    planApprovedAt: z.string().optional(),
+    brandApprovedAt: z.string().optional(),
+    scanAt: z.string().optional(),
+    stagingAt: z.string().optional(),
+  })
+  .default({});
+export type StageClock = z.infer<typeof StageClockSchema>;
+
 export const ProjectSchema = z.object({
   appId: z.number().int().positive(),
   client: text,
@@ -70,6 +82,7 @@ export const ProjectSchema = z.object({
   knowledge: z.string().max(20000).default(""),
   revision: z.number().int().nonnegative(),
   mode: ModeSchema,
+  stages: StageClockSchema,
   plan: PlanSchema.nullable(),
   approval: ApprovalSchema.nullable(),
   brand: BrandSchema.nullable(),

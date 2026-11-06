@@ -136,6 +136,9 @@ export function SupabaseIntegration() {
                   <Button
                     variant="ghost"
                     size="sm"
+                    aria-label={t(
+                      "integrations.supabase.disconnectOrganization",
+                    )}
                     className="h-7 px-2 text-muted-foreground hover:text-destructive shrink-0"
                     onClick={() =>
                       handleDeleteOrganization(org.organizationSlug)

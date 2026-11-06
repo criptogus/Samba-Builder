@@ -38,7 +38,19 @@ const fixtureAppDir = path.join(
 function git(appDir: string, ...args: string[]): string {
   return execFileSync(
     "git",
-    ["-c", "user.email=test@example.com", "-c", "user.name=Test User", ...args],
+    [
+      "-c",
+      "user.email=test@example.com",
+      "-c",
+      "user.name=Test User",
+      "-c",
+      "commit.gpgsign=false",
+      "-c",
+      "core.autocrlf=false",
+      "-c",
+      "core.fsmonitor=false",
+      ...args,
+    ],
     { cwd: appDir, stdio: "pipe" },
   ).toString();
 }
@@ -82,7 +94,7 @@ describe("app details actions (integration)", () => {
     const dbPath = slug(name);
     const appDir = path.join(appsRoot, dbPath);
     fs.cpSync(fixtureAppDir, appDir, { recursive: true });
-    git(appDir, "init");
+    git(appDir, "init", "-b", "main");
     git(appDir, "add", "-A");
     git(appDir, "commit", "-m", "init");
 
@@ -379,11 +391,13 @@ describe("app details actions (integration)", () => {
       withAppList: true,
     });
     await screen.findByTestId("app-list-container");
-    expect(
-      screen
-        .getByTestId("title-bar-app-name-button")
-        .getAttribute("data-app-name"),
-    ).toBe(first.name);
+    await waitFor(() => {
+      expect(
+        screen
+          .getByTestId("title-bar-app-name-button")
+          .getAttribute("data-app-name"),
+      ).toBe(first.name);
+    });
 
     fireEvent.click(await screen.findByTestId(`app-list-item-${second.name}`));
 

@@ -38,6 +38,28 @@ export function resolveFixturesDir(): string {
   return path.join(__dirname, "..", "..", "..", "e2e-tests", "fixtures");
 }
 
+/**
+ * Resolve a fixture file inside `directory`. Exact names win. When the
+ * requested name differs only by letter case (macOS checkouts vs Linux CI),
+ * the matching directory entry is used.
+ */
+export function resolveFixtureFile(
+  directory: string,
+  fileName: string,
+): string | undefined {
+  const exact = path.join(directory, fileName);
+  if (fs.existsSync(exact)) return exact;
+  let entries: string[];
+  try {
+    entries = fs.readdirSync(directory);
+  } catch {
+    return undefined;
+  }
+  const wanted = fileName.toLowerCase();
+  const match = entries.find((entry) => entry.toLowerCase() === wanted);
+  return match ? path.join(directory, match) : undefined;
+}
+
 /** Directory the fake server writes `[dump]` request bodies into. */
 export function resolveDumpDir(): string {
   return process.env.FAKE_LLM_DUMP_DIR || path.join(__dirname, "generated");

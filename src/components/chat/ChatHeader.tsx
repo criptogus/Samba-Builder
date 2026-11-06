@@ -142,22 +142,29 @@ export function ChatHeader({
                 <>
                   <TooltipProvider>
                     <Tooltip>
-                      <TooltipTrigger>
-                        <span className="flex items-center  gap-1">
-                          {isCheckingOutVersion ? (
-                            <>
-                              <span>{t("header.switchingToLatest")}</span>
-                            </>
-                          ) : (
-                            <>
-                              <strong>
-                                {t("header.warningNotOnBranch").split(":")[0]}:
-                              </strong>
-                              <span>{t("header.notOnBranch")}</span>
-                              <Info size={14} />
-                            </>
-                          )}
-                        </span>
+                      <TooltipTrigger
+                        aria-label={
+                          isCheckingOutVersion
+                            ? t("header.checkoutInProgress")
+                            : t("header.checkoutMainBranch")
+                        }
+                        render={
+                          <span className="flex items-center gap-1 cursor-help" />
+                        }
+                      >
+                        {isCheckingOutVersion ? (
+                          <>
+                            <span>{t("header.switchingToLatest")}</span>
+                          </>
+                        ) : (
+                          <>
+                            <strong>
+                              {t("header.warningNotOnBranch").split(":")[0]}:
+                            </strong>
+                            <span>{t("header.notOnBranch")}</span>
+                            <Info size={14} />
+                          </>
+                        )}
                       </TooltipTrigger>
                       <TooltipContent>
                         <p>
@@ -275,6 +282,10 @@ export function ChatHeader({
             data-testid="toggle-preview-panel-button"
             onClick={onTogglePreview}
             className="cursor-pointer p-2 hover:bg-(--background-lightest) rounded-md"
+            aria-label={
+              isPreviewOpen ? "Close preview panel" : "Open preview panel"
+            }
+            aria-pressed={isPreviewOpen}
           >
             {isPreviewOpen ? (
               <PanelRightClose size={20} />

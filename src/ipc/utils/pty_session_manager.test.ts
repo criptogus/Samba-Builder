@@ -36,9 +36,9 @@ function createMockPtyController(): MockPtyController {
     },
     pty: {
       pid: undefined,
-      kill: vi.fn(),
-      write: vi.fn(),
-      resize: vi.fn(),
+      kill: vi.fn<(signal?: string) => void>(),
+      write: vi.fn<(data: string) => void>(),
+      resize: vi.fn<(cols: number, rows: number) => void>(),
       onData: vi.fn((listener: (data: string) => void) => {
         dataListeners.add(listener);
         return { dispose: () => dataListeners.delete(listener) };

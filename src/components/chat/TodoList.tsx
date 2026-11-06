@@ -39,7 +39,8 @@ function getStatusIcon(status: AgentTodo["status"], size: "sm" | "md" = "sm") {
   }
 }
 
-export function TodoList({ todos }: TodoListProps) {
+// ⚡ Bolt Optimization: Wrapped in React.memo to prevent unnecessary re-renders when chat state changes
+export const TodoList = React.memo(function TodoList({ todos }: TodoListProps) {
   const [isExpanded, setIsExpanded] = useState(false);
 
   if (!todos.length) return null;
@@ -52,6 +53,7 @@ export function TodoList({ todos }: TodoListProps) {
     <div className="border-b border-border bg-muted/30">
       <button
         type="button"
+        aria-expanded={isExpanded}
         onClick={() => setIsExpanded(!isExpanded)}
         className="w-full flex items-center justify-between px-3 py-2 hover:bg-muted/50 transition-colors"
       >
@@ -120,4 +122,4 @@ export function TodoList({ todos }: TodoListProps) {
       )}
     </div>
   );
-}
+});

@@ -68,6 +68,8 @@ export function AgentToolsSettings() {
           type="button"
           onClick={() => setShowAutoApproved(!showAutoApproved)}
           className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+          aria-expanded={showAutoApproved}
+          aria-controls="auto-approved-tools"
         >
           <ChevronRight
             className={`size-4 transition-transform ${showAutoApproved ? "rotate-90" : ""}`}
@@ -79,7 +81,7 @@ export function AgentToolsSettings() {
           </span>
         </button>
         {showAutoApproved && (
-          <div className="space-y-2 pl-6">
+          <div id="auto-approved-tools" className="space-y-2 pl-6">
             {autoApprovedTools.map((tool: AgentTool) => (
               <ToolConsentRow
                 key={tool.name}

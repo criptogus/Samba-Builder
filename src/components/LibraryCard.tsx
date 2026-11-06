@@ -1,3 +1,4 @@
+import { memo } from "react";
 import {
   useUpdateCustomTheme,
   useDeleteCustomTheme,
@@ -31,7 +32,8 @@ const CARD_TYPE_CONFIG = {
   },
 } as const;
 
-export function LibraryCard({
+// ⚡ Bolt Optimization: Wrapped in React.memo to prevent unnecessary re-renders
+export const LibraryCard = memo(function LibraryCard({
   item,
   onUpdatePrompt,
   onDeletePrompt,
@@ -104,7 +106,7 @@ export function LibraryCard({
       </div>
     </div>
   );
-}
+});
 
 function ThemeActions({ theme }: { theme: CustomTheme }) {
   const updateThemeMutation = useUpdateCustomTheme();

@@ -237,7 +237,7 @@ describe("HelpDialog screenshot prompt", () => {
   });
 
   it("reports progress outside the prompt once it is answered", async () => {
-    let releaseDebugInfo = (_: unknown) => {};
+    let releaseDebugInfo: (value: unknown) => void = () => {};
     mocks.getSystemDebugInfo.mockReturnValue(
       new Promise((resolve) => {
         releaseDebugInfo = resolve;
@@ -263,7 +263,7 @@ describe("HelpDialog screenshot prompt", () => {
   });
 
   it("leaves the reporter's dialogs alone while a report is prepared", async () => {
-    let releaseDebugInfo = (_: unknown) => {};
+    let releaseDebugInfo: (value: unknown) => void = () => {};
     mocks.getSystemDebugInfo.mockReturnValue(
       new Promise((resolve) => {
         releaseDebugInfo = resolve;

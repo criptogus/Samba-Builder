@@ -69,7 +69,7 @@ import * as eph from "electron-playwright-helpers";
 import fs from "fs";
 import os from "os";
 import path from "path";
-import { ElectronApplication, _electron as electron } from "playwright";
+import { ElectronApplication, Page, _electron as electron } from "playwright";
 
 const ENABLED =
   process.platform === "darwin" && process.env.SAMBA_E2E_SAFE_STORAGE === "1";
@@ -239,10 +239,34 @@ function decryptViaApp(
   }, ciphertextBase64);
 }
 
+async function appWindow(electronApp: ElectronApplication): Promise<Page> {
+  const deadline = Date.now() + 30_000;
+  let lastError: unknown;
+  while (Date.now() < deadline) {
+    for (const page of electronApp.windows()) {
+      try {
+        const ready = await page.evaluate(() =>
+          Boolean(
+            (window as { electron?: { ipcRenderer?: unknown } }).electron
+              ?.ipcRenderer,
+          ),
+        );
+        if (ready) return page;
+      } catch (error) {
+        lastError = error;
+      }
+    }
+    await new Promise((resolve) => setTimeout(resolve, 250));
+  }
+  throw new Error(
+    `Nenhuma janela expôs electron.ipcRenderer${lastError ? `: ${lastError}` : ""}`,
+  );
+}
+
 async function readSettingsViaIpc(
   electronApp: ElectronApplication,
 ): Promise<any> {
-  const page = await electronApp.firstWindow();
+  const page = await appWindow(electronApp);
   return page.evaluate(() =>
     (window as any).electron.ipcRenderer.invoke("get-user-settings"),
   );
@@ -252,7 +276,7 @@ async function writeSettingsViaIpc(
   electronApp: ElectronApplication,
   partial: Record<string, unknown>,
 ): Promise<any> {
-  const page = await electronApp.firstWindow();
+  const page = await appWindow(electronApp);
   return page.evaluate(
     (p) => (window as any).electron.ipcRenderer.invoke("set-user-settings", p),
     partial,

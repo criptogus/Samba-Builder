@@ -21,6 +21,31 @@ function isSambaOAuthUrl(url: string): boolean {
   }
 }
 
+// Domínios permitidos para abertura externa via shell.openExternal.
+// Qualquer URL fora desta lista exige confirmação explícita do usuário
+// (tratada pelo renderer antes de invocar o canal open-external-url).
+const ALLOWED_EXTERNAL_DOMAINS = new Set([
+  "github.com",
+  "api.github.com",
+  "vercel.com",
+  "api.vercel.com",
+  "supabase.com",
+  "api.supabase.com",
+  "neon.tech",
+  "console.neon.tech",
+  "samba.sh",
+  "sambatech.com",
+]);
+
+function isAllowedExternalDomain(url: string): boolean {
+  try {
+    const host = new URL(url).hostname;
+    return ALLOWED_EXTERNAL_DOMAINS.has(host) || host.endsWith(".samba.sh");
+  } catch {
+    return false;
+  }
+}
+
 // Only allow opening files with known safe media extensions via shell.openPath.
 // This prevents execution of arbitrary executables even if they reside under a
 // .samba/media directory.
@@ -53,6 +78,15 @@ export function registerShellHandlers() {
     }
     if (!url.startsWith("http://") && !url.startsWith("https://")) {
       throw new Error("Attempted to open invalid or non-http URL: " + url);
+    }
+    // Allowlist de domínios: domínios fora da lista são rejeitados para evitar
+    // phishing/exfiltração. O renderer deve confirmar com o usuário antes de
+    // invocar este canal para qualquer domínio não-listado.
+    if (!isAllowedExternalDomain(url)) {
+      throw new SambaError(
+        `Domínio não permitido para abertura externa: ${new URL(url).hostname}.`,
+        SambaErrorKind.External,
+      );
     }
     // In E2E test mode, skip actually opening external URLs to avoid browser windows
     if (IS_TEST_BUILD) {

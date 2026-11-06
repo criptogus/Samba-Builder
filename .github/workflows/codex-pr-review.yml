@@ -37,7 +37,7 @@ jobs:
       CODEX_HOME: tmp/pr-review/codex-home
     steps:
       - name: Checkout trusted workflow repo
-        uses: actions/checkout@v5
+        uses: actions/checkout@v7
         with:
           repository: ${{ github.repository }}
           ref: ${{ github.sha }}
@@ -45,7 +45,7 @@ jobs:
           persist-credentials: false
 
       - name: Setup Node
-        uses: actions/setup-node@v5
+        uses: actions/setup-node@v7
         with:
           node-version: v24.13.1
 
@@ -83,7 +83,7 @@ jobs:
         run: bash scripts/codex-commit-review/run-codex.sh
 
       - name: Upload Codex review artifact
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: codex-pr-review
           path: |
@@ -107,13 +107,13 @@ jobs:
       REVIEW_FINDINGS_PATH: tmp/pr-review/codex-findings.json
     steps:
       - name: Download Codex review artifact
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8.0.2
         with:
           name: codex-pr-review
           path: tmp/pr-review
 
       - name: Refresh trusted post-agent helpers
-        uses: actions/checkout@v5
+        uses: actions/checkout@v7
         with:
           repository: ${{ github.repository }}
           ref: ${{ github.sha }}
@@ -173,7 +173,7 @@ jobs:
 
       - name: Post Codex review comment
         if: ${{ always() && steps.post-token.outcome == 'success' }}
-        uses: actions/github-script@v8
+        uses: actions/github-script@v9
         env:
           REVIEW_PATH: ${{ env.REVIEW_OUTPUT_PATH }}
         with:

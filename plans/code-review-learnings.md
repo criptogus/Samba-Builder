@@ -13,8 +13,8 @@
 - **OpenCodeReview (OCR)** — CLI de code review com IA, Go, Apache-2.0, ~31k estrelas, criado em 2026-05 e com
   commits no mesmo dia desta análise. Nasceu como assistente interno de review da Alibaba ("tens of thousands of
   developers", "millions of code defects") e foi aberto.
-- **Arquitetura híbrida, declarada no próprio resumo do repo**: *"deterministic pipelines + LLM Agent, precise
-  line-level comments, built-in multi-language ruleset (NPE, thread-safety, XSS, SQL injection)"*.
+- **Arquitetura híbrida, declarada no próprio resumo do repo**: _"deterministic pipelines + LLM Agent, precise
+  line-level comments, built-in multi-language ruleset (NPE, thread-safety, XSS, SQL injection)"_.
 - **Como funciona**: lê o diff do Git, envia os arquivos alterados para um LLM com **tool-use** (ler arquivo
   completo, buscar no código, inspecionar outros arquivos do mesmo changeset) e produz comentários estruturados
   **ancorados por linha**. Além do diff, `ocr scan` revisa **arquivos inteiros** (sem diff) para auditar bases
@@ -36,13 +36,13 @@
 
 O nosso Reviewer é um **subagente do agente local**, embutido no app:
 
-| Peça | Onde | O que faz |
-|---|---|---|
-| Alvo do review | `src/pro/main/ipc/handlers/local_agent/subagents/review_target.ts` | Monta o diff do Git entre commits, com **orçamento por arquivo (96 KiB) e total (192 KiB)** e **lista de exclusões com motivo** (binário, limite por arquivo, limite agregado), além de um hash do conjunto |
-| Saída estruturada | `.../subagents/review_result.ts` | Zod: `status: findings \| no_findings \| partial`, findings com `severity/path/line?/title/impact/remediation` (máx. 100), `summary` |
-| Confiança na saída | `.../review_result.ts` | A saída do modelo é tratada como **não confiável**: JSON inválido ou `path` fora dos arquivos revisados vira `status: "partial"` — nunca "review limpo" |
-| Persona e modelo | `subagent_manager.ts` | `reviewer` com modelo próprio e prompt "Samba Builder Reviewer. Be independent, concise, evidence-based, and read-only." |
-| Regras de segurança já escritas | `src/prompts/supabase_prompt.ts`, `neon_prompt_rules.ts` | `SUPABASE_SERVICE_ROLE_BROWSER_RULE`, `SUPABASE_GRANTS_AND_RLS_RULE`, `NEON_NO_BROWSER_DATABASE_URL_RULE`… |
+| Peça                            | Onde                                                               | O que faz                                                                                                                                                                                                   |
+| ------------------------------- | ------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Alvo do review                  | `src/pro/main/ipc/handlers/local_agent/subagents/review_target.ts` | Monta o diff do Git entre commits, com **orçamento por arquivo (96 KiB) e total (192 KiB)** e **lista de exclusões com motivo** (binário, limite por arquivo, limite agregado), além de um hash do conjunto |
+| Saída estruturada               | `.../subagents/review_result.ts`                                   | Zod: `status: findings \| no_findings \| partial`, findings com `severity/path/line?/title/impact/remediation` (máx. 100), `summary`                                                                        |
+| Confiança na saída              | `.../review_result.ts`                                             | A saída do modelo é tratada como **não confiável**: JSON inválido ou `path` fora dos arquivos revisados vira `status: "partial"` — nunca "review limpo"                                                     |
+| Persona e modelo                | `subagent_manager.ts`                                              | `reviewer` com modelo próprio e prompt "Samba Builder Reviewer. Be independent, concise, evidence-based, and read-only."                                                                                    |
+| Regras de segurança já escritas | `src/prompts/supabase_prompt.ts`, `neon_prompt_rules.ts`           | `SUPABASE_SERVICE_ROLE_BROWSER_RULE`, `SUPABASE_GRANTS_AND_RLS_RULE`, `NEON_NO_BROWSER_DATABASE_URL_RULE`…                                                                                                  |
 
 Ou seja: **temos a metade "LLM" da arquitetura híbrida e boa parte do rigor de formato**. Falta a metade
 determinística e a medição.
@@ -52,14 +52,14 @@ determinística e a medição.
 ### A. Pré-passe determinístico — `REQ-25` (P1, ~3–5 dias)
 
 Eles rodam um conjunto de regras **antes/acima** do LLM; nós jogamos tudo no modelo, inclusive coisas que são
-verificação mecânica. E as regras que importam para os nossos apps já estão escritas como *instruções* de prompt
-(o que depende do modelo lembrar) em vez de *checagens* (o que não depende).
+verificação mecânica. E as regras que importam para os nossos apps já estão escritas como _instruções_ de prompt
+(o que depende do modelo lembrar) em vez de _checagens_ (o que não depende).
 
 - Candidatas, todas verificáveis por análise do diff: `dangerouslySetInnerHTML`/`innerHTML` (XSS), concatenação
   em SQL, **service role do Supabase no browser**, **variável sensível exposta ao cliente**
   (`VITE_*`/`NEXT_PUBLIC_*`), **tabela nova sem RLS**, segredo em arquivo versionado.
 - Entregável: `src/ipc/services/review/ruleset/` produzindo findings no **mesmo schema** (`severity/path/line/
-  title/impact/remediation`) e mesclados aos do modelo, com origem marcada (`rule:<id>` vs `model`).
+title/impact/remediation`) e mesclados aos do modelo, com origem marcada (`rule:<id>` vs `model`).
 - **Aceite:** Given um diff que introduz `service_role` em código de browser, Then o finding aparece mesmo com o
   modelo falhando ou devolvendo JSON inválido. Given um diff limpo, Then nenhuma regra produz ruído.
 
@@ -112,7 +112,7 @@ técnica — fica registrada para o humano decidir.
 ## 4. O que **não** copiar
 
 - **Reescrever em Go / virar CLI-first.** Nosso Reviewer vive onde o usuário está (dentro do app, sobre o que o
-  agente acabou de mudar). O valor a importar é a *arquitetura híbrida* e o rigor de medição, não a linguagem.
+  agente acabou de mudar). O valor a importar é a _arquitetura híbrida_ e o rigor de medição, não a linguagem.
 - **Baixar recall sem medir.** Eles podem trocar recall por precisão porque sabem quanto perderam. Sem placar
   interno (item E), a mesma escolha vira só "revisar menos".
 - **Regras sem contexto de projeto.** Um ruleset fixo multi-linguagem gera ruído em quem não usa aquela stack; as

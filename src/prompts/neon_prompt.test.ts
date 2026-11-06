@@ -75,7 +75,7 @@ describe("getNeonAvailableSystemPrompt", () => {
 
     it("orders and constrains preview cookie normalization", () => {
       const guide = filterGuideByFramework(
-        addAuthenticationGuide,
+        addAuthenticationGuide.replace(/\r\n/g, "\n"),
         "vite-nitro",
       );
       const allowlistIndex = guide.indexOf(

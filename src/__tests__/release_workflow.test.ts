@@ -90,7 +90,13 @@ describe("release workflow", () => {
     const parsed = parseYaml(readWorkflow()) as {
       jobs: Record<
         string,
-        { steps: Array<{ name?: string; run?: string; env?: Record<string, string> }> }
+        {
+          steps: Array<{
+            name?: string;
+            run?: string;
+            env?: Record<string, string>;
+          }>;
+        }
       >;
     };
     const steps = parsed.jobs.publish.steps;
@@ -98,13 +104,21 @@ describe("release workflow", () => {
 
     const notesIndex = names.indexOf("Attach release notes");
     expect(notesIndex).toBeGreaterThan(-1);
-    expect(notesIndex).toBeLessThan(names.indexOf("Publish the release (remove draft)"));
+    expect(notesIndex).toBeLessThan(
+      names.indexOf("Publish the release (remove draft)"),
+    );
 
     const notesStep = steps[notesIndex];
     expect(notesStep.run).toContain("--notes-file");
     expect(notesStep.run).toContain("docs/releases/v${RELEASE_VERSION}.md");
     // Sem arquivo, avisa no log em vez de derrubar o release.
     expect(notesStep.run).toContain("::warning::");
+  });
+
+  it("escolhe a release anterior por semver, não pela ordem da API", () => {
+    const workflow = readWorkflow().replace(/\r?\n/g, "\n");
+    expect(workflow).toContain("scripts/select-previous-release-tag.mjs");
+    expect(workflow).not.toContain("select(.draft == false and .tag_name");
   });
 
   it("existe uma nota de versão para a versão atual do package.json", () => {
@@ -119,7 +133,9 @@ describe("release workflow", () => {
     );
 
     expect(fs.existsSync(notesPath)).toBe(true);
-    expect(fs.readFileSync(notesPath, "utf8")).toContain(`# Samba Builder ${pkg.version}`);
+    expect(fs.readFileSync(notesPath, "utf8")).toContain(
+      `# Samba Builder ${pkg.version}`,
+    );
   });
 
   it("recusa build quando a tag não corresponde à versão do package.json", () => {

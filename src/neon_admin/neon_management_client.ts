@@ -192,7 +192,13 @@ export async function getNeonClient(): Promise<Api<unknown>> {
           ],
         },
       }),
-      deleteProjectBranch: async (projectId: string, branchId: string) => ({
+      deleteProjectBranch: async ({
+        projectId,
+        branchId,
+      }: {
+        projectId: string;
+        branchId: string;
+      }) => ({
         data: {
           branch: {
             id: branchId,

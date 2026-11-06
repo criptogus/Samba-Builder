@@ -36,8 +36,11 @@ describe("buildSkillCatalogBlock", () => {
     userData.directory = "";
   });
 
-  it("devolve vazio quando o app não tem skills", async () => {
-    await expect(buildSkillCatalogBlock(appDir)).resolves.toBe("");
+  it("instala as skills de jogo quando o app ainda não tem nenhuma", async () => {
+    const block = await buildSkillCatalogBlock(appDir);
+    expect(block).toContain("construtor-de-jogos");
+    expect(block).toContain("computador-do-estudio");
+    expect(block).toContain("user");
   });
 
   it("publica só metadados, nunca o corpo da skill", async () => {
@@ -80,7 +83,7 @@ describe("buildSkillCatalogBlock", () => {
 
     const block = await buildSkillCatalogBlock(appDir);
 
-    expect(block).toContain("…and 1 more");
+    expect(block).toContain("…and 7 more");
     expect(block.match(/^- /gm)?.length).toBe(MAX_SKILLS_IN_PROMPT);
   });
 });

@@ -1,5 +1,5 @@
 import { TeamTemplatesRepository } from "@/components/TeamTemplatesRepository";
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
 import { BackButton } from "@/components/ui/back-button";
 import { useSettings } from "@/hooks/useSettings";
 import { useTemplates } from "@/hooks/useTemplates";
@@ -11,14 +11,28 @@ const TemplatesPage: React.FC = () => {
   const { templates, isLoading } = useTemplates();
   const { settings, updateSettings } = useSettings();
   const selectedTemplateId = settings?.selectedTemplateId;
+  const acceptedCommunityCode = !!settings?.acceptedCommunityCode;
+  const hasNeonToken = !!settings?.neon?.accessToken;
 
-  const handleTemplateSelect = (templateId: string) => {
-    updateSettings({ selectedTemplateId: templateId });
-  };
+  const handleTemplateSelect = useCallback(
+    (templateId: string) => {
+      updateSettings({ selectedTemplateId: templateId });
+    },
+    [updateSettings],
+  );
 
-  const handleCreateApp = () => {
+  const handleCreateApp = useCallback(() => {
     setIsCreateDialogOpen(true);
-  };
+  }, []);
+
+  const handleAcceptCommunityCode = useCallback(
+    (templateId: string) => {
+      updateSettings({ acceptedCommunityCode: true });
+      handleTemplateSelect(templateId);
+    },
+    [updateSettings, handleTemplateSelect],
+  );
+
   // Separate templates into official and community
   const officialTemplates =
     templates?.filter((template) => template.isOfficial) || [];
@@ -54,6 +68,9 @@ const TemplatesPage: React.FC = () => {
                   isSelected={template.id === selectedTemplateId}
                   onSelect={handleTemplateSelect}
                   onCreateApp={handleCreateApp}
+                  acceptedCommunityCode={acceptedCommunityCode}
+                  hasNeonToken={hasNeonToken}
+                  onAcceptCommunityCode={handleAcceptCommunityCode}
                 />
               ))}
             </div>
@@ -73,6 +90,9 @@ const TemplatesPage: React.FC = () => {
                   isSelected={template.id === selectedTemplateId}
                   onSelect={handleTemplateSelect}
                   onCreateApp={handleCreateApp}
+                  acceptedCommunityCode={acceptedCommunityCode}
+                  hasNeonToken={hasNeonToken}
+                  onAcceptCommunityCode={handleAcceptCommunityCode}
                 />
               ))}
             </div>
@@ -93,6 +113,9 @@ const TemplatesPage: React.FC = () => {
                   isSelected={template.id === selectedTemplateId}
                   onSelect={handleTemplateSelect}
                   onCreateApp={handleCreateApp}
+                  acceptedCommunityCode={acceptedCommunityCode}
+                  hasNeonToken={hasNeonToken}
+                  onAcceptCommunityCode={handleAcceptCommunityCode}
                 />
               ))}
             </div>

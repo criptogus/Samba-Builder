@@ -15,6 +15,7 @@ import type {
   McpListToolsResult,
 } from "@/ipc/types";
 import { queryKeys } from "@/lib/queryKeys";
+import { EMPTY_ARRAY } from "@/lib/constants";
 
 export type Transport = "stdio" | "http";
 
@@ -25,13 +26,14 @@ export function useMcp() {
     queryKey: queryKeys.mcp.servers,
     queryFn: async () => {
       const list = await ipc.mcp.listServers();
-      return (list || []) as McpServer[];
+      return (list || EMPTY_ARRAY) as McpServer[];
     },
     meta: { showErrorToast: true },
   });
 
   const serverIds = useMemo(
-    () => (serversQuery.data || []).map((s) => s.id).sort((a, b) => a - b),
+    () =>
+      (serversQuery.data || EMPTY_ARRAY).map((s) => s.id).sort((a, b) => a - b),
     [serversQuery.data],
   );
 
@@ -70,7 +72,7 @@ export function useMcp() {
     queryKey: queryKeys.mcp.consents,
     queryFn: async () => {
       const list = await ipc.mcp.getToolConsents();
-      return (list || []) as McpToolConsent[];
+      return (list || EMPTY_ARRAY) as McpToolConsent[];
     },
     meta: { showErrorToast: true },
   });
@@ -100,7 +102,7 @@ export function useMcp() {
 
   const consentsMap = useMemo(() => {
     const map: Record<string, McpToolConsent["consent"]> = {};
-    for (const c of consentsQuery.data || []) {
+    for (const c of consentsQuery.data || EMPTY_ARRAY) {
       map[`${c.serverId}:${c.toolName}`] = c.consent;
     }
     return map;
@@ -249,10 +251,10 @@ export function useMcp() {
   };
 
   return {
-    servers: serversQuery.data || [],
+    servers: serversQuery.data || EMPTY_ARRAY,
     toolsByServer,
     statusByServer,
-    consentsList: consentsQuery.data || [],
+    consentsList: consentsQuery.data || EMPTY_ARRAY,
     consentsMap,
     isLoading:
       serversQuery.isLoading ||

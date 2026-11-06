@@ -5,6 +5,9 @@ import { SambaError, SambaErrorKind } from "@/errors/samba_error";
 
 export type { UncommittedFile };
 
+// ⚡ Bolt Optimization: Use stable reference for empty array to prevent unnecessary re-renders
+const EMPTY_ARRAY: UncommittedFile[] = [];
+
 export function useUncommittedFiles(appId: number | null) {
   const {
     data: uncommittedFiles,
@@ -27,7 +30,7 @@ export function useUncommittedFiles(appId: number | null) {
   });
 
   return {
-    uncommittedFiles: uncommittedFiles ?? [],
+    uncommittedFiles: uncommittedFiles ?? EMPTY_ARRAY,
     hasUncommittedFiles: (uncommittedFiles?.length ?? 0) > 0,
     isLoading,
     refetchUncommittedFiles,

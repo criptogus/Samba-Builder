@@ -155,7 +155,7 @@ describe("HomePage first-prompt projection", () => {
   it("arms the setup detour with the same captured payload", () => {
     render(<HomePage />);
     fireEvent.click(
-      screen.getByRole("button", { name: /Connect AI to build/ }),
+      screen.getByRole("button", { name: "delivery.connectAiToBuild" }),
     );
 
     expect(mocks.send).toHaveBeenCalledWith({

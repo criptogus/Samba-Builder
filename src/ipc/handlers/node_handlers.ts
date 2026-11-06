@@ -249,12 +249,12 @@ async function getSystemNodePath(
   env: NodeJS.ProcessEnv = sanitizePathEnv(process.env),
 ): Promise<string | null> {
   if (platform() === "win32") {
-    const output = await runShellCommand("where node", {
+    const output = await runShellCommand("where.exe", ["node"], {
       env,
     });
     return output?.split(/\r?\n/u)[0]?.trim() || null;
   }
-  return runShellCommand("command -v node", {
+  return runShellCommand("/bin/sh", ["-c", "command -v node"], {
     env,
   });
 }
@@ -353,7 +353,7 @@ async function getResolvedNodeStatus(nodeDownloadUrl: string) {
       );
     }
     const systemEnv = getSystemNodeProbeEnv(settings.customNodePath);
-    const systemNodeVersion = await runShellCommand("node --version", {
+    const systemNodeVersion = await runShellCommand("node", ["--version"], {
       env: systemEnv,
     });
     const systemNodePath = await getSystemNodePath(systemEnv);

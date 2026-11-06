@@ -8,6 +8,7 @@ import { useSettings } from "@/hooks/useSettings";
 import { useLoadApp } from "@/hooks/useLoadApp";
 import { useQuery } from "@tanstack/react-query";
 import { queryKeys } from "@/lib/queryKeys";
+import { EMPTY_ARRAY } from "@/lib/constants";
 
 export function useNeon(appId: number | null) {
   const { settings } = useSettings();
@@ -28,7 +29,7 @@ export function useNeon(appId: number | null) {
     enabled: isConnected,
   });
 
-  const projects: NeonProjectListItem[] = projectsData?.projects ?? [];
+  const projects: NeonProjectListItem[] = projectsData?.projects ?? EMPTY_ARRAY;
 
   // Fetch branches for the connected project
   const {
@@ -41,7 +42,7 @@ export function useNeon(appId: number | null) {
     enabled: !!appId && !!app?.neonProjectId,
   });
 
-  const branches: NeonBranch[] = projectInfo?.branches ?? [];
+  const branches: NeonBranch[] = projectInfo?.branches ?? EMPTY_ARRAY;
 
   // Fetch email and password config for the active branch
   const { data: emailPasswordConfig, isLoading: isLoadingEmailConfig } =

@@ -8,6 +8,7 @@ import {
   encryptSecretMap,
   isSecretEncryptionAvailable,
   PLAINTEXT_PREFIX,
+  AUTHENTICATED_PREFIX,
 } from "./secret_storage";
 
 const logger = log.scope("mcp_secret_encryption");
@@ -52,7 +53,10 @@ function encryptedStateOf(encrypted: string | null): {
 } {
   if (!encrypted) return { state: "absent", decoded: null };
   const decoded = decryptSecretMap(encrypted);
-  if (encrypted.startsWith(PLAINTEXT_PREFIX)) {
+  if (
+    encrypted.startsWith(PLAINTEXT_PREFIX) ||
+    encrypted.startsWith(AUTHENTICATED_PREFIX)
+  ) {
     return { state: "plainTagged", decoded };
   }
   return { state: decoded ? "readable" : "unreadable", decoded };
@@ -170,6 +174,8 @@ export async function encryptStoredMcpSecrets(): Promise<number> {
           isNotNull(mcpServers.headersJson),
           like(mcpServers.envEncrypted, PLAINTEXT_BLOB_PATTERN),
           like(mcpServers.headersEncrypted, PLAINTEXT_BLOB_PATTERN),
+          like(mcpServers.envEncrypted, `${AUTHENTICATED_PREFIX}%`),
+          like(mcpServers.headersEncrypted, `${AUTHENTICATED_PREFIX}%`),
         ),
       );
 

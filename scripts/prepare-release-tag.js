@@ -121,12 +121,19 @@ function getRemoteTagShaFromOutput({ output, tagName }) {
   return sha || null;
 }
 
+function remoteTagLsRemotePattern(tagName) {
+  // Um ref exato (`refs/tags/<tag>`) omite a linha `^{}` das tags anotadas, e
+  // o SHA devolvido é o do objeto da tag, não o do commit. O glob inclui as
+  // duas linhas; getRemoteTagShaFromOutput prefere o commit descascado.
+  return `refs/tags/${tagName}*`;
+}
+
 function getRemoteTagSha(tagName) {
   const output = runGit([
     "ls-remote",
     "--tags",
     "origin",
-    `refs/tags/${tagName}`,
+    remoteTagLsRemotePattern(tagName),
   ]);
   if (!output) {
     return null;
@@ -274,6 +281,7 @@ module.exports = {
   getRepoParts,
   getRemoteTagSha,
   getRemoteTagShaFromOutput,
+  remoteTagLsRemotePattern,
   GithubRequestError,
   prepareReleaseTag,
   readPackageVersion,

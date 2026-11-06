@@ -185,33 +185,26 @@ const config: ForgeConfig = {
     // packaged app contains loadable runtime files.
     derefSymlinks: true,
     windowsSign: isWindowsSigningEnabled ? windowsSign : undefined,
+    // @electron/packager 20 (Forge 8) chama o hook com um objeto e espera
+    // uma Promise. O quinto argumento não é mais um callback.
     afterCopy: [
-      (buildPath, _electronVersion, platform, arch, callback) => {
-        const prepare = async () => {
-          await removeUnusedAppPackageFiles(buildPath, platform, arch);
-          // Local desktop packages keep the existing development profile when
-          // opened from Finder/Explorer. Release packages never contain this path.
-          if (isLocalDesktopBuild) {
-            const packagePath = path.join(buildPath, "package.json");
-            const metadata = JSON.parse(await readFile(packagePath, "utf8"));
-            metadata.sambaLocalUserDataPath = path.resolve(
-              process.env.SAMBA_DEV_USER_DATA_DIR?.trim() || "userData",
-            );
-            await writeFile(packagePath, JSON.stringify(metadata, null, 2));
-          }
-        };
-        prepare().then(
-          () => callback(),
-          (error) => callback(error as Error),
-        );
+      async ({ buildPath, platform, arch }) => {
+        await removeUnusedAppPackageFiles(buildPath, platform, arch);
+        // Local desktop packages keep the existing development profile when
+        // opened from Finder/Explorer. Release packages never contain this path.
+        if (isLocalDesktopBuild) {
+          const packagePath = path.join(buildPath, "package.json");
+          const metadata = JSON.parse(await readFile(packagePath, "utf8"));
+          metadata.sambaLocalUserDataPath = path.resolve(
+            process.env.SAMBA_DEV_USER_DATA_DIR?.trim() || "userData",
+          );
+          await writeFile(packagePath, JSON.stringify(metadata, null, 2));
+        }
       },
     ],
     afterCopyExtraResources: [
-      (buildPath, _electronVersion, platform, _arch, callback) => {
-        removeUnusedCopiedResources(buildPath, platform).then(
-          () => callback(),
-          (error) => callback(error as Error),
-        );
+      async ({ buildPath, platform }) => {
+        await removeUnusedCopiedResources(buildPath, platform);
       },
     ],
     protocols: [

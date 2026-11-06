@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useCallback } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { Card, CardHeader } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -20,6 +20,16 @@ export function PluginsList({
   onAddDialogOpenChange: (open: boolean) => void;
 }) {
   const navigate = useNavigate();
+  const handleOpen = useCallback(
+    (serverId: number) => {
+      navigate({
+        to: "/plugins/$serverId",
+        params: { serverId },
+      });
+    },
+    [navigate],
+  );
+
   // Gate on the servers query alone: tool discovery can take seconds,
   // and the cards already render a placeholder count until it lands.
   const {
@@ -125,12 +135,7 @@ export function PluginsList({
                 connectDisabled={connectingServerId !== null}
                 onConnect={onConnect}
                 onToggleEnabled={toggleEnabled}
-                onOpen={(serverId) =>
-                  navigate({
-                    to: "/plugins/$serverId",
-                    params: { serverId },
-                  })
-                }
+                onOpen={handleOpen}
               />
             );
           })}

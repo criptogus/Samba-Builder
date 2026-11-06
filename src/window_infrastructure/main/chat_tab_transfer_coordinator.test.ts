@@ -12,14 +12,14 @@ const session = (suffix: number) =>
 const tab = (suffix: number) =>
   `10000000-0000-4000-8000-${String(suffix).padStart(12, "0")}` as TabInstanceId;
 
-function endpoint(
-  id: number,
-): WindowEndpoint & { send: ReturnType<typeof vi.fn> } {
+function endpoint(id: number): WindowEndpoint & {
+  send: ReturnType<typeof vi.fn<(channel: string, ...args: unknown[]) => void>>;
+} {
   return {
     id,
     isDestroyed: () => false,
     once: () => undefined,
-    send: vi.fn(),
+    send: vi.fn<(channel: string, ...args: unknown[]) => void>(),
   };
 }
 

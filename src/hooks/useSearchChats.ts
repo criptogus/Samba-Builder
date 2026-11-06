@@ -2,6 +2,7 @@ import { ipc } from "@/ipc/types";
 import type { ChatSearchResult } from "@/lib/schemas";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { queryKeys } from "@/lib/queryKeys";
+import { EMPTY_ARRAY } from "@/lib/constants";
 
 export function useSearchChats(appId: number | null, query: string) {
   const enabled = Boolean(appId && query && query.trim().length > 0);
@@ -18,7 +19,7 @@ export function useSearchChats(appId: number | null, query: string) {
   });
 
   return {
-    chats: data ?? [],
+    chats: data ?? EMPTY_ARRAY,
     loading: enabled ? isFetching || isLoading : false,
   };
 }
