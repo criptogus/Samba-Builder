@@ -1,0 +1,103 @@
+name: main-build
+
+# Rolling nightly: every push to main produces an unsigned arm64 macOS build
+# published as a prerelease. The in-app update check
+# (src/ipc/services/release_check.ts) polls the GitHub releases API, treats
+# prereleases as candidates, and shows the "new version" notice with a link
+# to the release page — install stays manual (builds are unsigned by design,
+# see rules/auto-update.md).
+#
+# Version scheme: <core>-nightly.<run_number>. While package.json carries a
+# prerelease (1.14.0-beta.N) the nightly reuses that core, so
+# "1.14.0-nightly.N" sorts newer than every beta but older than the eventual
+# stable 1.14.0 — the notice then correctly resolves to the real release.
+# run_number is monotonic per workflow, so each push is always newer than the
+# previously installed nightly.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: main-build
+  cancel-in-progress: true
+
+jobs:
+  nightly-macos:
+    runs-on: macos-15
+    timeout-minutes: 90
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v5
+
+      - name: Use Node.js
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: v24.13.1
+          package-manager-cache: false
+
+      - name: Install npm 11.8.0
+        run: npm install -g npm@11.8.0
+
+      - run: npm ci
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Compute nightly version
+        id: version
+        run: |
+          BASE="$(node -p "require('./package.json').version")"
+          CORE="${BASE%%-*}"
+          if [[ "$BASE" != *-* ]]; then
+            # stable base: nightly must still sort newer — bump patch
+            CORE="$(node -p "const v='$BASE'.split('.'); v[2]=String(Number(v[2])+1); v.join('.')")"
+          fi
+          NIGHTLY="${CORE}-nightly.${GITHUB_RUN_NUMBER}"
+          npm version "$NIGHTLY" --no-git-tag-version
+          echo "nightly=${NIGHTLY}" >> "$GITHUB_OUTPUT"
+          echo "core=${CORE}" >> "$GITHUB_OUTPUT"
+
+      - name: Build unsigned macOS package
+        env:
+          SKIP_CODE_SIGNING: "true"
+          NODE_OPTIONS: "--max-old-space-size=4096"
+        run: npm run make
+
+      - name: Publish nightly prerelease
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NIGHTLY: ${{ steps.version.outputs.nightly }}
+          CORE: ${{ steps.version.outputs.core }}
+        run: |
+          set -euo pipefail
+          ZIP=$(find out/make -name '*.zip' | head -1)
+          test -n "$ZIP"
+          cp "$ZIP" Samba-Builder-nightly-mac-arm64.zip
+          TAG="v${NIGHTLY}"
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release upload "$TAG" Samba-Builder-nightly-mac-arm64.zip --clobber
+          else
+            gh release create "$TAG" --prerelease --target "${{ github.sha }}" \
+              --title "Samba Builder nightly (main)" \
+              --notes "Auto-built from main @ ${GITHUB_SHA:0:7} as ${NIGHTLY}. Rebuilt on every push to main; the in-app update check offers it automatically. Unsigned build — download manually from this page."
+            gh release upload "$TAG" Samba-Builder-nightly-mac-arm64.zip
+          fi
+          # keep only the newest nightly: older ones are superseded and each
+          # carries a ~200MB asset
+          gh api "repos/${{ github.repository }}/releases?per_page=100" \
+            | node -e '
+                const rels = JSON.parse(require("fs").readFileSync(0, "utf8"));
+                const keep = process.env.NIGHTLY;
+                for (const r of rels) {
+                  const t = r.tag_name || "";
+                  if (t !== `v${keep}` && new RegExp(`^v${process.env.CORE.replace(/\./g, "\\.")}-nightly\\.\\d+$`).test(t)) {
+                    console.log(t);
+                  }
+                }
+              ' | while read -r OLD; do
+                gh release delete "$OLD" --yes --cleanup-tag || true
+              done

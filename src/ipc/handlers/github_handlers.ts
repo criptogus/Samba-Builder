@@ -89,11 +89,16 @@ export function normalizeGitHubRepoName(repoName: string): string {
 // --- GitHub Device Flow Constants ---
 // O client ID deve ser fornecido via variável de ambiente GITHUB_CLIENT_ID.
 // Não há fallback hardcoded: se ausente, o fluxo de device flow falha fechado.
-const GITHUB_CLIENT_ID = process.env.GITHUB_CLIENT_ID;
-if (!GITHUB_CLIENT_ID) {
-  throw new Error(
-    "GITHUB_CLIENT_ID não configurado. Defina a variável de ambiente antes de iniciar o app.",
-  );
+// A checagem é lazy (só quando o fluxo é usado): um throw em nível de módulo
+// derrubaria o boot inteiro do app para quem nunca usa o GitHub device flow.
+function getGitHubClientId(): string {
+  const clientId = process.env.GITHUB_CLIENT_ID;
+  if (!clientId) {
+    throw new Error(
+      "GITHUB_CLIENT_ID não configurado. Defina a variável de ambiente antes de iniciar o app.",
+    );
+  }
+  return clientId;
 }
 
 function isGitHubTestBuild() {
@@ -335,7 +340,7 @@ async function pollForAccessToken(invocationRef: ConnectionFlowInvocationRef) {
         Accept: "application/json",
       },
       body: JSON.stringify({
-        client_id: GITHUB_CLIENT_ID,
+        client_id: getGitHubClientId(),
         device_code: record.deviceCode,
         grant_type: "urn:ietf:params:oauth:grant-type:device_code",
       }),
@@ -491,7 +496,7 @@ async function startGithubDeviceFlow({
         Accept: "application/json",
       },
       body: JSON.stringify({
-        client_id: GITHUB_CLIENT_ID,
+        client_id: getGitHubClientId(),
         scope: GITHUB_SCOPES,
       }),
     });
