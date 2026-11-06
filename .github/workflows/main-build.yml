@@ -7,10 +7,11 @@ name: main-build
 # to the release page — install stays manual (builds are unsigned by design,
 # see rules/auto-update.md).
 #
-# Version scheme: <core>-nightly.<run_number>. While package.json carries a
-# prerelease (1.14.0-beta.N) the nightly reuses that core, so
-# "1.14.0-nightly.N" sorts newer than every beta but older than the eventual
-# stable 1.14.0 — the notice then correctly resolves to the real release.
+# Version scheme: <core>-nightly.<run_number>, where <core> is the version in
+# package.json with any prerelease suffix stripped. package.json on main
+# carries the upcoming release version, so "1.14.0-nightly.N" sorts newer
+# than every 1.14.0-beta.N but older than the eventual stable 1.14.0 — the
+# notice then correctly resolves to the real release.
 # run_number is monotonic per workflow, so each push is always newer than the
 # previously installed nightly.
 
@@ -51,11 +52,11 @@ jobs:
         id: version
         run: |
           BASE="$(node -p "require('./package.json').version")"
+          # package.json on main carries the UPCOMING release version, so the
+          # nightly reuses its core untouched: "1.14.0-nightly.N" sorts after
+          # every 1.14.0-beta.N and before the eventual stable 1.14.0, letting
+          # the stable release supersede the nightly naturally.
           CORE="${BASE%%-*}"
-          if [[ "$BASE" != *-* ]]; then
-            # stable base: nightly must still sort newer — bump patch
-            CORE="$(node -p "const v='$BASE'.split('.'); v[2]=String(Number(v[2])+1); v.join('.')")"
-          fi
           NIGHTLY="${CORE}-nightly.${GITHUB_RUN_NUMBER}"
           npm version "$NIGHTLY" --no-git-tag-version
           echo "nightly=${NIGHTLY}" >> "$GITHUB_OUTPUT"
