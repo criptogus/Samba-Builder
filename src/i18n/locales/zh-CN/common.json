@@ -87,5 +87,6 @@
     "serviceOffline": "离线",
     "cortexService": "Córtex RAG (:8899)",
     "hermesService": "Hermes Gateway (:8642)"
-  }
+  },
+  "poweredByZeroAgency": "Powered by ZeroAgency.ai"
 }
