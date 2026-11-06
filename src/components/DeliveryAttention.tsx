@@ -1,8 +1,10 @@
+import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { ipc } from "@/ipc/types";
 import { deliveryAttention } from "@/delivery/model";
 import { useOpenApp } from "@/hooks/useOpenApp";
 import { Button } from "@/components/ui/button";
+import { EMPTY_ARRAY } from "@/lib/constants";
 export function DeliveryAttention({
   apps,
 }: {
@@ -16,14 +18,20 @@ export function DeliveryAttention({
   const openApp = useOpenApp();
   const date = new Date();
   const today = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
-  const pending =
-    query.data?.flatMap((record) => {
-      const app = apps.find((a) => a.id === record.appId);
-      const reasons = deliveryAttention(record.plan, today);
-      return app && reasons.length
-        ? [{ ...record, name: app.name, reasons }]
-        : [];
-    }) ?? [];
+  // Memoize `pending` using `useMemo` and fallback to `EMPTY_ARRAY`
+  // to avoid recalculating and creating new array references on every render,
+  // which prevents unnecessary downstream updates.
+  const pending = useMemo(() => {
+    return (
+      query.data?.flatMap((record) => {
+        const app = apps.find((a) => a.id === record.appId);
+        const reasons = deliveryAttention(record.plan, today);
+        return app && reasons.length
+          ? [{ ...record, name: app.name, reasons }]
+          : [];
+      }) ?? EMPTY_ARRAY
+    );
+  }, [query.data, apps, today]);
   if (query.error)
     return (
       <div role="alert" className="mb-5 rounded-xl border p-4 text-sm">
