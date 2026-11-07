@@ -28,6 +28,8 @@ import {
 import { PlanHandoffProvider } from "@/plan_handoff/PlanHandoffProvider";
 import i18n from "@/i18n";
 import { LanguageSchema } from "@/lib/schemas";
+import { useTranslation } from "react-i18next";
+import { ipc } from "@/ipc/types";
 import { useShortcut } from "@/hooks/useShortcut";
 import { useIsMac } from "@/hooks/useChatModeToggle";
 import { ReleaseNotesDialog } from "@/components/ReleaseNotesDialog";
@@ -90,6 +92,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
 }
 
 function RootLayoutContent({ children }: { children: ReactNode }) {
+  const { t } = useTranslation("common");
   const appRunManager = useAppRunRemoteManager();
   const previewErrors = usePreviewErrorFacade();
   const screenshotManager = useScreenshotManager();
@@ -203,6 +206,17 @@ function RootLayoutContent({ children }: { children: ReactNode }) {
                   >
                     {children}
                   </div>
+                  <footer className="flex h-7 shrink-0 items-center justify-center border-t border-border/60 bg-background text-[11px] text-muted-foreground">
+                    <button
+                      type="button"
+                      className="rounded px-1.5 py-0.5 transition-colors hover:bg-accent hover:text-foreground"
+                      onClick={() =>
+                        void ipc.system.openExternalUrl("https://zeroagency.ai")
+                      }
+                    >
+                      {t("poweredByZeroAgency")}
+                    </button>
+                  </footer>
                 </div>
                 <Toaster
                   richColors

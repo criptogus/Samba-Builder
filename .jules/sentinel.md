@@ -9,4 +9,4 @@
 ## 2025-03-01 - Missing origin validation on window message event listeners
 **Vulnerability:** `window.addEventListener("message", ...)` handlers in `VisualEditingChangesDialog.tsx` and `VisualEditingToolbar.tsx` were processing postMessage events without validating the source or origin.
 **Learning:** When a generic `message` listener does not check `event.source` or `event.origin`, any iframe or window can send messages triggering internal UI logic.
-**Prevention:** Always validate `event.source` matches the expected `iframe.contentWindow`, or that `event.origin` matches the trusted application origin.
+**Prevention:** Always validate `event.source` matches the expected `iframe.contentWindow`, or that `event.origin` matches the trusted application origin. When adding these checks inside a `useEffect` hook, ensure the `iframeRef` is included in the dependency array to avoid stale closures causing the check to fail (e.g. throwing an error or resolving to `null`).
