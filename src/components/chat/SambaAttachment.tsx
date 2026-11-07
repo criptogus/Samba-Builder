@@ -53,7 +53,10 @@ export const SambaAttachment: React.FC<SambaAttachmentProps> = ({
           className={`relative ${SIZE_CLASSES[size]} rounded-lg overflow-hidden border border-border/60 cursor-pointer hover:brightness-90 transition-all`}
           onClick={() => setIsLightboxOpen(true)}
           onKeyDown={(e) => {
-            if (e.key === "Enter" || e.key === " ") {
+            if (
+              e.target === e.currentTarget &&
+              (e.key === "Enter" || e.key === " ")
+            ) {
               e.preventDefault();
               setIsLightboxOpen(true);
             }
