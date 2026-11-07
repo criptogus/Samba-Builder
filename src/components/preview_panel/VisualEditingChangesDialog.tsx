@@ -43,6 +43,9 @@ export function VisualEditingChangesDialog({
   // Listen for text content responses
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
+      if (event.source !== iframeRef?.current?.contentWindow) {
+        return;
+      }
       if (event.data?.type === "samba-text-content-response") {
         const { componentId, text } = event.data;
         if (text !== null) {
@@ -64,7 +67,7 @@ export function VisualEditingChangesDialog({
 
     window.addEventListener("message", handleMessage);
     return () => window.removeEventListener("message", handleMessage);
-  }, []);
+  }, [iframeRef]);
 
   // Execute when all responses are received
   useEffect(() => {
