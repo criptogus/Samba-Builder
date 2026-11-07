@@ -222,6 +222,9 @@ export function VisualEditingToolbar({
 
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
+      if (event.source !== iframeRef?.current?.contentWindow) {
+        return;
+      }
       if (event.data?.type === "samba-component-styles") {
         const { margin, padding, border, backgroundColor, text } =
           event.data.data;
@@ -250,7 +253,7 @@ export function VisualEditingToolbar({
 
     window.addEventListener("message", handleMessage);
     return () => window.removeEventListener("message", handleMessage);
-  }, []);
+  }, [iframeRef]);
 
   const handleSpacingChange = (
     type: "margin" | "padding",
