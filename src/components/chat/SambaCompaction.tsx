@@ -41,18 +41,11 @@ export const SambaCompaction: React.FC<SambaCompactionProps> = ({
       }`}
     >
       {/* Header */}
-      <div
-        className="flex items-center justify-between px-4 py-2.5 cursor-pointer hover:bg-blue-50/30 dark:hover:bg-blue-950/20 transition-colors"
+      <button
+        type="button"
+        className="flex w-full items-center justify-between px-4 py-2.5 cursor-pointer hover:bg-blue-50/30 dark:hover:bg-blue-950/20 transition-colors"
         onClick={() => setIsExpanded(!isExpanded)}
-        role="button"
         aria-expanded={isExpanded}
-        tabIndex={0}
-        onKeyDown={(e) => {
-          if (e.key === "Enter" || e.key === " ") {
-            e.preventDefault();
-            setIsExpanded(!isExpanded);
-          }
-        }}
       >
         <div className="flex items-center gap-2">
           {inProgress ? (
@@ -73,7 +66,7 @@ export const SambaCompaction: React.FC<SambaCompactionProps> = ({
         <div className="text-gray-400 dark:text-gray-500">
           {isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
         </div>
-      </div>
+      </button>
 
       {/* Content area with smooth transition */}
       <div
