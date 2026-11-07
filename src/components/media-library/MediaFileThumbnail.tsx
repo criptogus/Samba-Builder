@@ -50,12 +50,13 @@ export function MediaFileThumbnail({
     <div
       data-testid="media-thumbnail"
       data-media-file-name={file.fileName}
-      className="w-[120px] border rounded-md overflow-hidden bg-secondary/30"
+      className="w-[120px] border rounded-md overflow-hidden bg-secondary/30 relative"
     >
       <div
         role="button"
         tabIndex={0}
-        className="group w-[120px] h-[120px] relative cursor-pointer"
+        aria-label={`Preview ${file.fileName}`}
+        className="group w-[120px] h-[120px] relative cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-inset"
         onClick={() => onPreviewImage(file)}
         onKeyDown={(e) => {
           if (
@@ -67,64 +68,6 @@ export function MediaFileThumbnail({
           }
         }}
       >
-        <DropdownMenu modal={false}>
-          <DropdownMenuTrigger
-            data-testid="media-file-actions-trigger"
-            aria-label={`Media actions for ${file.fileName}`}
-            className={cn(
-              buttonVariants({
-                variant: "secondary",
-                size: "icon",
-              }),
-              "absolute right-1 top-1 size-7",
-            )}
-            onClick={(event) => event.stopPropagation()}
-          >
-            <MoreVertical className="h-4 w-4" />
-          </DropdownMenuTrigger>
-          <DropdownMenuContent
-            align="end"
-            className="w-52"
-            onClick={(event) => event.stopPropagation()}
-          >
-            <DropdownMenuItem
-              data-testid="media-start-chat-with-image"
-              onClick={() => {
-                void onStartNewChatWithImage(file);
-              }}
-              disabled={isBusy}
-            >
-              <MessageSquarePlus className="mr-2 h-4 w-4" />
-              Start New Chat With Image
-            </DropdownMenuItem>
-            <DropdownMenuItem
-              data-testid="media-rename-image"
-              onClick={() => onRenameImage(file)}
-              disabled={isBusy}
-            >
-              <Pencil className="mr-2 h-4 w-4" />
-              Rename Image
-            </DropdownMenuItem>
-            <DropdownMenuItem
-              data-testid="media-move-to-submenu"
-              onClick={() => onMoveImage(file)}
-              disabled={isBusy}
-            >
-              <MoveRight className="mr-2 h-4 w-4" />
-              Move To
-            </DropdownMenuItem>
-            <DropdownMenuItem
-              data-testid="media-delete-image"
-              variant="destructive"
-              onClick={() => onDeleteImage(file)}
-              disabled={isBusy}
-            >
-              <Trash2 className="mr-2 h-4 w-4" />
-              Delete Image
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-
         {imgError ? (
           <div className="w-full h-full flex items-center justify-center text-muted-foreground">
             <Image className="h-6 w-6" />
@@ -145,6 +88,64 @@ export function MediaFileThumbnail({
           </>
         )}
       </div>
+
+      <DropdownMenu modal={false}>
+        <DropdownMenuTrigger
+          data-testid="media-file-actions-trigger"
+          aria-label={`Media actions for ${file.fileName}`}
+          className={cn(
+            buttonVariants({
+              variant: "secondary",
+              size: "icon",
+            }),
+            "absolute right-1 top-1 size-7",
+          )}
+          onClick={(event) => event.stopPropagation()}
+        >
+          <MoreVertical className="h-4 w-4" />
+        </DropdownMenuTrigger>
+        <DropdownMenuContent
+          align="end"
+          className="w-52"
+          onClick={(event) => event.stopPropagation()}
+        >
+          <DropdownMenuItem
+            data-testid="media-start-chat-with-image"
+            onClick={() => {
+              void onStartNewChatWithImage(file);
+            }}
+            disabled={isBusy}
+          >
+            <MessageSquarePlus className="mr-2 h-4 w-4" />
+            Start New Chat With Image
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            data-testid="media-rename-image"
+            onClick={() => onRenameImage(file)}
+            disabled={isBusy}
+          >
+            <Pencil className="mr-2 h-4 w-4" />
+            Rename Image
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            data-testid="media-move-to-submenu"
+            onClick={() => onMoveImage(file)}
+            disabled={isBusy}
+          >
+            <MoveRight className="mr-2 h-4 w-4" />
+            Move To
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            data-testid="media-delete-image"
+            variant="destructive"
+            onClick={() => onDeleteImage(file)}
+            disabled={isBusy}
+          >
+            <Trash2 className="mr-2 h-4 w-4" />
+            Delete Image
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
       <div className="p-1.5">
         <p
           className="text-xs truncate text-muted-foreground"
