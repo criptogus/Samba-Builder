@@ -205,7 +205,18 @@ export function ProviderSettingsGrid() {
         {/* Add custom provider button */}
         <Card
           className="cursor-pointer border-border border-dashed shadow-none transition-colors hover:border-primary/70 hover:bg-muted/30"
+          role="button"
+          tabIndex={0}
           onClick={() => setIsDialogOpen(true)}
+          onKeyDown={(e) => {
+            if (
+              e.target === e.currentTarget &&
+              (e.key === "Enter" || e.key === " ")
+            ) {
+              e.preventDefault();
+              setIsDialogOpen(true);
+            }
+          }}
         >
           <CardHeader className="p-4 flex flex-col items-center justify-center h-full">
             <PlusIcon className="h-8 w-8 text-muted-foreground mb-2" />
