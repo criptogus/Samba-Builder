@@ -9,3 +9,7 @@
 ## 2024-05-24 - Centralizing immutable shared array constants
 **Learning:** Defining local `const EMPTY_ARRAY` within individual hooks leads to duplicate references across the application. Creating a centralized, globally accessible constant (`src/lib/constants.ts`) standardizes the optimization and reduces bundle size by providing a single shared immutable reference across all consumers.
 **Action:** Always import `EMPTY_ARRAY` from a global `constants.ts` file instead of defining it locally per hook, reducing duplication and standardizing the referential equality pattern globally.
+
+## 2024-05-30 - Preventing unnecessary array allocations with findLast
+**Learning:** Creating a shallow copy of an array just to reverse it and find the last matching element (e.g., `[...messages].reverse().find(...)`) causes an O(n) memory allocation and an O(n) traversal during renders. This pattern is particularly harmful for large arrays like chat histories.
+**Action:** Use the native `.findLast()` array method instead of copying and reversing the array. This operates in O(1) memory and stops traversing as soon as the element is found, without mutating the original array.
