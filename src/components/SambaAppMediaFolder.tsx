@@ -373,7 +373,10 @@ export const SambaAppMediaFolder = memo(function SambaAppMediaFolder({
       tabIndex={0}
       onClick={() => setIsOpen(true)}
       onKeyDown={(e) => {
-        if (e.key === "Enter" || e.key === " ") {
+        if (
+          e.target === e.currentTarget &&
+          (e.key === "Enter" || e.key === " ")
+        ) {
           e.preventDefault();
           setIsOpen(true);
         }
