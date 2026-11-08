@@ -48,7 +48,10 @@ export const SambaCompaction: React.FC<SambaCompactionProps> = ({
         aria-expanded={isExpanded}
         tabIndex={0}
         onKeyDown={(e) => {
-          if (e.key === "Enter" || e.key === " ") {
+          if (
+            (e.key === "Enter" || e.key === " ") &&
+            e.target === e.currentTarget
+          ) {
             e.preventDefault();
             setIsExpanded(!isExpanded);
           }
