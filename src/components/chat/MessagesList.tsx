@@ -344,9 +344,15 @@ function FooterComponent({ context }: { context?: FooterContext }) {
       const freshVersions = restoreTargetBranch
         ? await ipc.version.listVersions({ appId, ref: restoreTargetBranch })
         : ((await refreshVersions()).data ?? []);
-      const lastUserMessage = [...messages]
-        .reverse()
-        .find((message) => message.role === "user");
+
+      let lastUserMessage: Message | undefined;
+      for (let i = messages.length - 1; i >= 0; i--) {
+        if (messages[i].role === "user") {
+          lastUserMessage = messages[i];
+          break;
+        }
+      }
+
       if (!lastUserMessage) {
         console.error("No user message found");
         return;
