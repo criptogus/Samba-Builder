@@ -60,7 +60,7 @@ jobs:
         run: node scripts/issue-agent/render-template.mjs
 
       - name: Triage issue
-        uses: anthropics/claude-code-base-action@c301760f1412f3e4caac6476445385252700a500 # Claude Code 2.1.310
+        uses: anthropics/claude-code-base-action@1ba86a1578bc4350db6af753284bc09734ca18bf # Claude Code 2.1.310
         env:
           GITHUB_TOKEN: ${{ github.token }}
           ISSUE_NUMBER: ${{ github.event.issue.number }}
