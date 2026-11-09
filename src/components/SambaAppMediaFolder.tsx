@@ -363,21 +363,14 @@ export const SambaAppMediaFolder = memo(function SambaAppMediaFolder({
   }
 
   return (
-    <div
+    <button
+      type="button"
       data-testid={`media-folder-${appId}`}
       className={cn(
         "border rounded-lg p-4 bg-[--background-lightest] relative cursor-pointer",
-        "hover:border-primary/30 transition-colors",
+        "hover:border-primary/30 transition-colors w-full text-left",
       )}
-      role="button"
-      tabIndex={0}
       onClick={() => setIsOpen(true)}
-      onKeyDown={(e) => {
-        if (e.key === "Enter" || e.key === " ") {
-          e.preventDefault();
-          setIsOpen(true);
-        }
-      }}
     >
       <Badge
         variant="outline"
@@ -400,6 +393,6 @@ export const SambaAppMediaFolder = memo(function SambaAppMediaFolder({
           </p>
         </div>
       </div>
-    </div>
+    </button>
   );
 });
