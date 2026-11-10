@@ -1,4 +1,5 @@
 import log from "electron-log";
+import crypto from "node:crypto";
 import { getMeetingAwareMcpCatalog } from "@/ipc/shared/meeting_mcp_catalog";
 import { GRANOLA_CATALOG_ENTRY, GRANOLA_URL } from "@/shared/meeting_briefing";
 import { db } from "../../db";
@@ -577,7 +578,7 @@ export function registerMcpHandlers() {
     const MIN = 49152;
     const MAX = 65535;
     for (let i = 0; i < 8; i++) {
-      const candidate = Math.floor(Math.random() * (MAX - MIN + 1)) + MIN;
+      const candidate = crypto.randomInt(MIN, MAX + 1);
       if (await isPortFreeOnBothLoopbacks(candidate)) {
         return { port: candidate };
       }
