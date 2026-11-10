@@ -1160,9 +1160,9 @@ export async function handleLocalAgentStream(
     // (pre-compaction messages are preserved in DB for the user but not sent to LLM)
     const messageHistory: ModelMessage[] =
       messageOverride ?? buildChatMessageHistory(chat.messages);
-    const latestUserMessage = [...messageHistory]
-      .reverse()
-      .find((message) => message.role === "user");
+    const latestUserMessage = messageHistory.findLast(
+      (message) => message.role === "user",
+    );
     const shouldWarnIfAttachmentUnread =
       currentTurnHasOnDiskAttachment ??
       (latestUserMessage != null &&
