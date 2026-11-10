@@ -5,7 +5,7 @@
     "useDefineForClassFields": true,
     // ES2022 exposes ErrorOptions/Error.cause types used by ts-pg-schema-diff;
     // the Electron runtime supports these APIs while emitted JS still targets ES2020.
-    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "lib": ["ES2023", "DOM", "DOM.Iterable"],
     "module": "ESNext",
     "skipLibCheck": true,
 
