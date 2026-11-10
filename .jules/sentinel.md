@@ -10,3 +10,8 @@
 **Vulnerability:** Found `window.addEventListener("message", ...)` in `src/components/preview_panel/VisualEditingToolbar.tsx` and `src/components/preview_panel/VisualEditingChangesDialog.tsx` without any validation of `event.source` or `event.origin`.
 **Learning:** When communicating with a specific iframe (like a preview panel), any `message` event listener on the global `window` object will receive messages from all origins, including potentially malicious other windows or tabs. If the sender is not validated, attackers can spoof messages (e.g., forging a `samba-component-styles` or `samba-text-content-response` event) to manipulate the UI or inject malicious states.
 **Prevention:** Always validate the sender of a `message` event. When expecting messages from a specific iframe, verify that `event.source === iframeRef.current?.contentWindow`. When expecting messages from a specific origin, verify `event.origin`. When using `iframeRef` in a `useEffect` hook, ensure it is in the dependency array so the closure always has the latest reference.
+
+## 2024-11-20 - Weak Randomness for Predictable Port Selection
+**Vulnerability:** The codebase was using `Math.random()` to generate random candidate ports.
+**Learning:** While port selection isn't typically a cryptographic operation, predictable ports could lead to local port squatting attacks. Generating weak randomness is a poor security practice.
+**Prevention:** When insecure `Math.random()` calls are used for generating random integers in a Node.js environment, use `crypto.randomInt(min, max)` from the `node:crypto` module. Since `randomInt` uses an exclusive upper bound, ensure you add 1 to your maximum value to maintain the identical range (e.g., `crypto.randomInt(MIN, MAX + 1)`).

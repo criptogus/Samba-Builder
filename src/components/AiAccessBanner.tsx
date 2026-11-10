@@ -73,8 +73,9 @@ export function SetupSambaProButton() {
 export function AiAccessBanner() {
   const { t } = useTranslation("home");
   return (
-    <div
-      className="w-full py-2 sm:py-2.5 md:py-3 rounded-lg bg-gradient-to-br from-white via-indigo-50 to-sky-100 dark:from-indigo-700 dark:via-indigo-700 dark:to-indigo-900 flex items-center justify-center relative overflow-hidden ring-1 ring-inset ring-black/5 dark:ring-white/10 shadow-sm cursor-pointer transition-all duration-200 hover:shadow-md hover:-translate-y-[1px]"
+    <button
+      type="button"
+      className="w-full py-2 sm:py-2.5 md:py-3 rounded-lg bg-gradient-to-br from-white via-indigo-50 to-sky-100 dark:from-indigo-700 dark:via-indigo-700 dark:to-indigo-900 flex items-center justify-center relative overflow-hidden ring-1 ring-inset ring-black/5 dark:ring-white/10 shadow-sm cursor-pointer transition-all duration-200 hover:shadow-md hover:-translate-y-[1px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-900"
       onClick={() => {
         ipc.system.openExternalUrl("https://sambatech.com");
       }}
@@ -92,13 +93,12 @@ export function AiAccessBanner() {
           <div className="text-xl font-semibold tracking-tight text-indigo-900 dark:text-indigo-100">
             {t("proBanner.accessLeadingModels")}
           </div>
-          <button
-            type="button"
-            aria-label="Subscribe to Samba Builder"
+          <div
+            aria-hidden="true"
             className="inline-flex items-center rounded-md bg-white/90 text-indigo-800 hover:bg-white shadow px-3 py-1.5 text-xs sm:text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-white/50"
           >
             {t("proBanner.getSambaPro")}
-          </button>
+          </div>
         </div>
 
         <div className="mt-1.5 sm:mt-2 grid grid-cols-3 gap-6 md:gap-8 items-center justify-items-center opacity-90">
@@ -131,15 +131,16 @@ export function AiAccessBanner() {
           </div>
         </div>
       </div>
-    </div>
+    </button>
   );
 }
 
 export function SmartContextBanner() {
   const { t } = useTranslation("home");
   return (
-    <div
-      className="w-full py-2 sm:py-2.5 md:py-3 rounded-lg bg-gradient-to-br from-emerald-50 via-emerald-100 to-emerald-200 dark:from-emerald-700 dark:via-emerald-700 dark:to-emerald-900 flex items-center justify-center relative overflow-hidden ring-1 ring-inset ring-emerald-900/10 dark:ring-white/10 shadow-sm cursor-pointer transition-all duration-200 hover:shadow-md hover:-translate-y-[1px]"
+    <button
+      type="button"
+      className="w-full py-2 sm:py-2.5 md:py-3 rounded-lg bg-gradient-to-br from-emerald-50 via-emerald-100 to-emerald-200 dark:from-emerald-700 dark:via-emerald-700 dark:to-emerald-900 flex items-center justify-center relative overflow-hidden ring-1 ring-inset ring-emerald-900/10 dark:ring-white/10 shadow-sm cursor-pointer transition-all duration-200 hover:shadow-md hover:-translate-y-[1px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-900"
       onClick={() => {
         ipc.system.openExternalUrl("https://sambatech.com");
       }}
@@ -162,15 +163,14 @@ export function SmartContextBanner() {
               {t("proBanner.byUsingSmartContext")}
             </div>
           </div>
-          <button
-            type="button"
-            aria-label="Get Samba Builder"
+          <div
+            aria-hidden="true"
             className="inline-flex items-center rounded-md bg-white/90 text-emerald-800 hover:bg-white shadow px-3 py-1.5 text-xs sm:text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-white/50"
           >
             {t("proBanner.getSambaPro")}
-          </button>
+          </div>
         </div>
       </div>
-    </div>
+    </button>
   );
 }
