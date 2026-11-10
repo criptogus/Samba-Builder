@@ -1,4 +1,5 @@
 import net from "net";
+import { randomInt } from "node:crypto";
 
 export function findAvailablePort(
   minPort: number,
@@ -19,8 +20,7 @@ export function findAvailablePort(
       }
 
       attempts++;
-      const port =
-        Math.floor(Math.random() * (maxPort - minPort + 1)) + minPort;
+      const port = randomInt(minPort, maxPort + 1);
       const server = net.createServer();
 
       server.once("error", (err: any) => {

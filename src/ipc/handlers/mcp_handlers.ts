@@ -28,6 +28,7 @@ import {
   type McpConsentValue,
 } from "../types/mcp";
 import { findAvailablePort } from "../utils/port_utils";
+import { randomInt } from "node:crypto";
 import net from "node:net";
 import { safeStorage } from "electron";
 import {
@@ -577,7 +578,7 @@ export function registerMcpHandlers() {
     const MIN = 49152;
     const MAX = 65535;
     for (let i = 0; i < 8; i++) {
-      const candidate = Math.floor(Math.random() * (MAX - MIN + 1)) + MIN;
+      const candidate = randomInt(MIN, MAX + 1);
       if (await isPortFreeOnBothLoopbacks(candidate)) {
         return { port: candidate };
       }
