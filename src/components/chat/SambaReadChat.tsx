@@ -76,7 +76,11 @@ export const SambaReadChat: React.FC<SambaReadChatProps> = ({
         </div>
       </SambaCardHeader>
       <SambaCardContent isExpanded={isContentVisible}>
-        <div className="text-xs" onClick={(e) => e.stopPropagation()}>
+        <div
+          className="text-xs"
+          onClick={(e) => e.stopPropagation()}
+          onKeyDown={(e) => e.stopPropagation()}
+        >
           <CodeHighlight className="language-log">{children}</CodeHighlight>
         </div>
       </SambaCardContent>
