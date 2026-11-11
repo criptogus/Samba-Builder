@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { EMPTY_ARRAY } from "@/lib/constants";
 import { Link, useNavigate } from "@tanstack/react-router";
 import {
   ArrowUpRight,
@@ -66,7 +67,9 @@ export function FactoryPage() {
     queryFn: () => factoryClient.list(),
     refetchInterval: 5000,
   });
-  const projects = query.data ?? [];
+  // Optimization: Use stable EMPTY_ARRAY instead of inline [] to prevent unnecessary re-renders
+  // of child components that depend on this projects array before data loads.
+  const projects = query.data ?? EMPTY_ARRAY;
   const refresh = () =>
     queryClient.invalidateQueries({ queryKey: queryKeys.factory.all });
   const enroll = useMutation({
