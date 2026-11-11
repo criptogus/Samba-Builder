@@ -1,3 +1,4 @@
+import { randomUUID } from "node:crypto";
 import { db } from "./db";
 import { logger } from "./logger";
 
@@ -258,7 +259,7 @@ export function requestEmailVerification(id: string): Promise<void> {
         "INSERT INTO email_verifications (user_id, token, expires_at) VALUES (?, ?, ?)",
         [
           id,
-          Math.random().toString(36).slice(2),
+          randomUUID(),
           new Date(Date.now() + 24 * 3600 * 1000).toISOString(),
         ],
       );
@@ -313,7 +314,7 @@ export function requestPasswordReset(email: string): Promise<void> {
           "INSERT INTO password_resets (user_id, token, expires_at) VALUES (?, ?, ?)",
           [
             userId,
-            Math.random().toString(36).slice(2),
+            randomUUID(),
             new Date(Date.now() + 3600 * 1000).toISOString(),
           ],
         )

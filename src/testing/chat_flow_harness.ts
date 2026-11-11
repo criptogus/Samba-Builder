@@ -1,3 +1,4 @@
+import { randomUUID } from "node:crypto";
 /**
  * setupChatFlowHarness — a fast, parallel-safe vitest integration harness that
  * exercises the REAL samba chat flow without launching Electron.
@@ -304,7 +305,7 @@ export async function setupChatFlowHarness(
     // Unique, collision-proof temp root (pid + randomness), parallel-safe.
     tmpRoot = path.join(
       os.tmpdir(),
-      `samba-chat-flow-${process.pid}-${Math.random().toString(36).slice(2, 10)}`,
+      `samba-chat-flow-${process.pid}-${randomUUID().replace(/-/g, "").slice(0, 8)}`,
     );
     const userDataDir = path.join(tmpRoot, "userData");
     const dumpDir = path.join(tmpRoot, "fake-llm-dumps");

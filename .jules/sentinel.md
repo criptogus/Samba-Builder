@@ -14,3 +14,8 @@
 **Vulnerability:** Weak random number generation using Math.random() was used for ephemeral port assignment in the IPC handlers, making port assignment theoretically predictable.
 **Learning:** Using predictable pseudorandom number generators (PRNG) like Math.random() for system-level resource allocations (e.g. ports, tokens) can create side-channels or predictability in multi-user/local environments.
 **Prevention:** Always use Node.js's native crypto module functions (e.g., `crypto.randomInt()`) when randomly allocating resources, ports, or IDs in backend/IPC code to ensure cryptographic unpredictability.
+
+## 2025-02-12 - Weak Math.random() replaced with crypto.randomUUID()
+**Vulnerability:** Weak random number generation using Math.random() was used for generating secure verification tokens in user services and temporary test harness IDs, making them predictable.
+**Learning:** Using predictable pseudorandom number generators (PRNG) like Math.random() for secure tokens or system-level resource allocations (e.g., IDs, secrets) can lead to vulnerabilities such as token prediction or collision in multi-user/local environments.
+**Prevention:** Always use Node.js's native crypto module functions (e.g., `randomUUID()`) when randomly generating secure tokens, identifiers, or secrets in backend/IPC code to ensure cryptographic unpredictability.
