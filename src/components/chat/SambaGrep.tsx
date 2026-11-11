@@ -93,7 +93,11 @@ export const SambaGrep: React.FC<SambaGrepProps> = ({ children, node }) => {
         </div>
       </SambaCardHeader>
       <SambaCardContent isExpanded={isContentVisible}>
-        <div className="text-xs" onClick={(e) => e.stopPropagation()}>
+        <div
+          className="text-xs"
+          onClick={(e) => e.stopPropagation()}
+          onKeyDown={(e) => e.stopPropagation()}
+        >
           <CodeHighlight className="language-log">{children}</CodeHighlight>
         </div>
       </SambaCardContent>

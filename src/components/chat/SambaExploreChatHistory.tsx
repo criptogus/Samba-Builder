@@ -107,7 +107,11 @@ export const SambaExploreChatHistory: React.FC<
         </div>
       </SambaCardHeader>
       <SambaCardContent isExpanded={isContentVisible}>
-        <div className="text-xs" onClick={(e) => e.stopPropagation()}>
+        <div
+          className="text-xs"
+          onClick={(e) => e.stopPropagation()}
+          onKeyDown={(e) => e.stopPropagation()}
+        >
           <CodeHighlight className="language-markdown">
             {children}
           </CodeHighlight>

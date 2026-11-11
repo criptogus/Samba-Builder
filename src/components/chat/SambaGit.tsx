@@ -308,7 +308,10 @@ export const SambaGit = ({ children, node }: SambaGitProps) => {
           {statusDetails ? (
             <StatusDetails details={statusDetails} />
           ) : (
-            <div onClick={(event) => event.stopPropagation()}>
+            <div
+              onClick={(event) => event.stopPropagation()}
+              onKeyDown={(event) => event.stopPropagation()}
+            >
               <CodeHighlight
                 className={detailLanguage(path, properties.detail_format)}
               >
