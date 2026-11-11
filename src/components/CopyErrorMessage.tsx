@@ -33,6 +33,7 @@ export const CopyErrorMessage = ({
       <TooltipTrigger
         render={
           <button
+            type="button"
             onClick={handleCopy}
             aria-label={isCopied ? "Copied!" : "Copy error message"}
             className={`flex items-center gap-1 px-2 py-1 rounded text-xs transition-colors ${
