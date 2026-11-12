@@ -27,6 +27,7 @@ import {
 import { SelectionCommentButton } from "./plan/SelectionCommentButton";
 import { CommentsFloatingButton } from "./plan/CommentsFloatingButton";
 import { CommentPopover } from "./plan/CommentPopover";
+import { EMPTY_ARRAY } from "@/lib/constants";
 import {
   applyPlanAnnotationHighlights,
   clearPlanAnnotationHighlights,
@@ -99,8 +100,10 @@ export const PlanPanel: React.FC = () => {
     }
   }, [handoffFailure]);
 
+  // PERF: Use EMPTY_ARRAY constant to maintain referential equality across renders
+  // and prevent downstream components/hooks from re-evaluating unnecessarily.
   const chatAnnotations = useMemo(
-    () => (chatId ? (annotations.get(chatId) ?? []) : []),
+    () => (chatId ? (annotations.get(chatId) ?? EMPTY_ARRAY) : EMPTY_ARRAY),
     [chatId, annotations],
   );
 
