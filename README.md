@@ -1,33 +1,27 @@
 # Samba Builder
 
-Ambiente local da Samba para construir aplicações de clientes com IA. Uma camada de fábrica em volta do loop de geração: **briefing → plano aprovado → marca → execução → segurança → handoff**, com as chaves de IA do próprio usuário (BYOK) e o código do cliente em repositórios normais.
+**An open-source, Lovable-style platform for secure code development in corporate environments.** Describe the app, approve the plan and let AI build it on your own machine, with your own AI keys (BYOK), the code in normal Git repositories, and security checks built into the flow: **briefing → approved plan → brand → execution → security → handoff**.
 
-## Baixar o app
+## Download
 
-Última versão: **[v1.14.0-beta.17](https://github.com/criptogus/Samba-Builder/releases/tag/v1.14.0-beta.17)** · [todas as versões](https://github.com/criptogus/Samba-Builder/releases). Os arquivos aparecem quando o workflow de release publica a tag. O instalador não assinado é só para consultores Samba.
+Latest builds for every platform: **[zeroagency.ai/downloads](https://zeroagency.ai/downloads)** (always the newest release) · [all releases](https://github.com/criptogus/Samba-Builder/releases).
 
-| Plataforma                  | Download                                                                                                                                                                    |
-| --------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| macOS — Apple Silicon (M1+) | [Samba.Builder-darwin-arm64-1.14.0-beta.17.zip](https://github.com/criptogus/Samba-Builder/releases/download/v1.14.0-beta.17/Samba.Builder-darwin-arm64-1.14.0-beta.17.zip) |
-| macOS — Intel               | [Samba.Builder-darwin-x64-1.14.0-beta.17.zip](https://github.com/criptogus/Samba-Builder/releases/download/v1.14.0-beta.17/Samba.Builder-darwin-x64-1.14.0-beta.17.zip)     |
-| Windows 10/11 (x64)         | [Samba.Builder-1.14.0-beta.17.Setup.exe](https://github.com/criptogus/Samba-Builder/releases/download/v1.14.0-beta.17/Samba.Builder-1.14.0-beta.17.Setup.exe)               |
-| Linux — Debian/Ubuntu       | [samba-builder_1.14.0.beta.17_amd64.deb](https://github.com/criptogus/Samba-Builder/releases/download/v1.14.0-beta.17/samba-builder_1.14.0.beta.17_amd64.deb)               |
-| Linux — Fedora/openSUSE     | [samba-builder-1.14.0.beta.17-1.x86_64.rpm](https://github.com/criptogus/Samba-Builder/releases/download/v1.14.0-beta.17/samba-builder-1.14.0.beta.17-1.x86_64.rpm)         |
-| Linux — portátil            | [Samba.Builder_1.14.0-beta.17_x86_64.AppImage](https://github.com/criptogus/Samba-Builder/releases/download/v1.14.0-beta.17/Samba.Builder_1.14.0-beta.17_x86_64.AppImage)   |
+Permanent links that always start the newest installer:
 
-## Quem pode instalar
+| Platform                    | Download                                                                                   |
+| --------------------------- | ------------------------------------------------------------------------------------------ |
+| macOS — Apple Silicon (M1+) | [zeroagency.ai/download/samba-builder/mac-arm64](https://zeroagency.ai/download/samba-builder/mac-arm64)           |
+| macOS — Intel               | [zeroagency.ai/download/samba-builder/mac-x64](https://zeroagency.ai/download/samba-builder/mac-x64)               |
+| Windows 10/11 (x64)         | [zeroagency.ai/download/samba-builder/windows](https://zeroagency.ai/download/samba-builder/windows)               |
+| Linux — Debian/Ubuntu       | [zeroagency.ai/download/samba-builder/linux-deb](https://zeroagency.ai/download/samba-builder/linux-deb)           |
+| Linux — Fedora/openSUSE     | [zeroagency.ai/download/samba-builder/linux-rpm](https://zeroagency.ai/download/samba-builder/linux-rpm)           |
+| Linux — portable            | [zeroagency.ai/download/samba-builder/linux-appimage](https://zeroagency.ai/download/samba-builder/linux-appimage) |
 
-Até os builds serem assinados, o instalador é **somente para consultores Samba**. Não entregue o ZIP, o `.exe` ou o `.dmg` ao cliente final. O cliente recebe o app dele (repositório, staging e handoff), não o Builder.
+### Install note
 
-Os builds deste ciclo **não são assinados** (sem certificado Apple nem Azure). No Mac de um consultor: botão direito → Abrir, ou `xattr -cr "/Applications/Samba Builder.app"`. No Windows: _Mais informações → Executar assim mesmo_.
+Current builds are **not yet code-signed** (no Apple or Windows certificate), so your OS will warn on first launch. On macOS: right-click the app → Open, or run `xattr -cr "/Applications/Samba Builder.app"`. On Windows: _More info → Run anyway_. Always download from this repository's releases or zeroagency.ai, never from a loose ZIP.
 
-Checklist antes de passar um instalador:
-
-- [ ] A pessoa é consultor ou dev Samba
-- [ ] O arquivo não vai para o cliente final
-- [ ] A versão veio do release deste repositório, não de um ZIP solto
-
-Para publicar uma versão: [docs/RELEASING.md](docs/RELEASING.md).
+To publish a version: [docs/RELEASING.md](docs/RELEASING.md).
 
 ## Fábrica
 
