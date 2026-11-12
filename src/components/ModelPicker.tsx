@@ -929,7 +929,7 @@ export function ModelPicker() {
 
     const itemWithTooltip = model.description ? (
       <Tooltip key={modelKey}>
-        <TooltipTrigger render={item} />
+        <TooltipTrigger render={item} aria-label={model.displayName} />
         <TooltipContent side="left" align="start">
           <span className="max-w-64">{model.description}</span>
         </TooltipContent>

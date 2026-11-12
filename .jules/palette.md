@@ -8,3 +8,6 @@
 
 **Learning:** Unlabeled forms using generic UI components (like `Input`, `Textarea` from `shadcn/ui`) without associated `<Label>`s or explicitly matching `htmlFor` and `id` tags can easily creep into complex dialogs like `CreatePromptDialog.tsx`.
 **Action:** When adding or auditing complex form dialogs with multiple inputs, explicitly check for and add a surrounding structure containing `<Label htmlFor="matching-id">` coupled with `<Input id="matching-id">`.
+## 2025-02-14 - TooltipTrigger aria-label Fallback Logic
+**Learning:** When using `@base-ui/react/tooltip`'s `<TooltipTrigger>` component with `render={button}` and dynamic `aria-label` assignment from a `children` prop, blindly calling `tooltip.children?.toString()` is an anti-pattern. If `children` is a React element, this will render `aria-label="[object Object]"`, destroying screen reader accessibility.
+**Action:** Always strictly verify the type (e.g., `typeof tooltip.children === "string"`) before using `children` as an `aria-label` string, and safely fallback to `undefined` or a constant if it's a complex React Node.
