@@ -517,7 +517,16 @@ function SidebarMenuButton<T extends React.ElementType = "button">({
 
   return (
     <Tooltip>
-      <TooltipTrigger render={button} />
+      <TooltipTrigger
+        render={button}
+        aria-label={
+          typeof tooltip === "string"
+            ? tooltip
+            : typeof tooltip.children === "string"
+              ? tooltip.children
+              : undefined
+        }
+      />
       <TooltipContent side="right" align="center" {...tooltip} />
     </Tooltip>
   );
