@@ -52,8 +52,12 @@ export function TokenBar({ chatId }: TokenBarProps) {
       <TooltipProvider>
         <Tooltip>
           <TooltipTrigger
-            aria-label="Token usage breakdown"
-            render={<div className="w-full cursor-help" />}
+            render={
+              <div
+                className="w-full cursor-help"
+                aria-label="Token usage breakdown"
+              />
+            }
           >
             <div className="w-full">
               <div className="flex gap-3 mb-1 text-xs text-muted-foreground">
