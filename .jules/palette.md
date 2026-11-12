@@ -8,3 +8,6 @@
 
 **Learning:** Unlabeled forms using generic UI components (like `Input`, `Textarea` from `shadcn/ui`) without associated `<Label>`s or explicitly matching `htmlFor` and `id` tags can easily creep into complex dialogs like `CreatePromptDialog.tsx`.
 **Action:** When adding or auditing complex form dialogs with multiple inputs, explicitly check for and add a surrounding structure containing `<Label htmlFor="matching-id">` coupled with `<Input id="matching-id">`.
+## 2025-02-14 - TooltipTrigger Render Prop Accessibility
+**Learning:** The `@base-ui/react/tooltip`'s `<TooltipTrigger>` expects to wrap or render a natively focusable element to support keyboard hover. Using the `render={<div />}` prop override turns the trigger into a non-interactive element, severing keyboard accessibility.
+**Action:** When using the `render` prop on `<TooltipTrigger>`, ensure you supply a `<button type="button">` or another inherently focusable semantic element rather than a standard `<div>` or `<span>`.
