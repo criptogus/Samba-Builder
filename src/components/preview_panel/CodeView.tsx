@@ -39,6 +39,7 @@ import {
   getDisplayedVersionDiffPath,
 } from "./diffSelection";
 import { showWarning } from "@/lib/toast";
+import { EMPTY_ARRAY } from "@/lib/constants";
 
 interface App {
   id?: number;
@@ -491,7 +492,11 @@ export const CodeView = ({ loading, app }: CodeViewProps) => {
           >
             <Panel defaultSize={33} minSize={15}>
               <div className="h-full overflow-hidden flex flex-col min-h-0">
-                <FileTree appId={app.id ?? null} files={app.files ?? []} />
+                {/* PERF: Use EMPTY_ARRAY constant to maintain referential equality and prevent FileTree re-renders */}
+                <FileTree
+                  appId={app.id ?? null}
+                  files={app.files ?? EMPTY_ARRAY}
+                />
               </div>
             </Panel>
             <PanelResizeHandle
