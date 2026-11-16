@@ -63,7 +63,7 @@ jobs:
         run: cd testing/fake-llm-server && npm install && npm run build
 
       - name: Deflake E2E tests
-        uses: anthropics/claude-code-action@16f9f71ab9c490faf367f94dd294897edc25be33 # v1.0.261
+        uses: anthropics/claude-code-action@4d75e5f390ee76b2e09c1980ecc99ff3a2e088c8 # v1.0.275
         env:
           GH_TOKEN: ${{ steps.app-token.outputs.token }}
           CLAUDE_CODE_MAX_OUTPUT_TOKENS: 48000
